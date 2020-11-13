@@ -1,0 +1,22 @@
+{
+  "0": ["digit0", null, null, "numpad0"],
+  "1": ["digit1", null, null, "numpad1"],
+  "2": ["digit2", null, null, "numpad2"],
+  "3": ["digit3", null, null, "numpad3"],
+  "4": ["digit4", null, null, "numpad4"],
+  "5": ["digit5", null, null, "numpad5"],
+  "6": ["digit6", null, null, "numpad6"],
+  "7": ["digit7", null, null, "numpad7"],
+  "8": ["digit8", null, null, "numpad8"],
+  "9": ["digit9", null, null, "numpad9"],
+  "/": ["slash", null, null, "numpadDivide"],
+  "*": ["asterisk", null, null, "numpadMultiply"],
+  "-": ["minus", null, null, "numpadMinus"],
+  "+": ["add", null, null, "numpadAdd"],
+  "Enter": ["enter", null, null, "numpadEnter"],
+  ".": ["period", null, null, "numpadDecimal"],
+  "Shift": [null, "shiftLeft", "shiftRight", null],
+  "Control": [null, "controlLeft", "controlRight", null],
+  "Alt": [null, "altLeft", "altRight", null],
+  "Meta": [null, "metaLeft", "metaRight", null]
+}

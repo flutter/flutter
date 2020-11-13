@@ -303,6 +303,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// HID Usage codes.
   static const int hidPlane = 0x00100000000;
 
+  /// Represents the logical "Unidentified" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey unidentified = LogicalKeyboardKey(0x00000000001, debugName: kReleaseMode ? null : 'Unidentified');
+
   /// Represents the logical "Backspace" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -322,11 +327,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x0000000001b, debugName: kReleaseMode ? null : 'Escape');
-
-  /// Represents the logical "Delete" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey delete = LogicalKeyboardKey(0x0000000007f, debugName: kReleaseMode ? null : 'Delete');
 
   /// Represents the logical "Space" key on the keyboard.
   ///
@@ -383,10 +383,10 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey asterisk = LogicalKeyboardKey(0x0000000002a, debugName: kReleaseMode ? null : 'Asterisk');
 
-  /// Represents the logical "Plus" key on the keyboard.
+  /// Represents the logical "Add" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey plus = LogicalKeyboardKey(0x0000000002b, debugName: kReleaseMode ? null : 'Plus');
+  static const LogicalKeyboardKey add = LogicalKeyboardKey(0x0000000002b, debugName: kReleaseMode ? null : 'Add');
 
   /// Represents the logical "Comma" key on the keyboard.
   ///
@@ -493,136 +493,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey at = LogicalKeyboardKey(0x00000000040, debugName: kReleaseMode ? null : 'At');
 
-  /// Represents the logical "Upper A" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperA = LogicalKeyboardKey(0x00000000041, debugName: kReleaseMode ? null : 'Upper A');
-
-  /// Represents the logical "Upper B" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperB = LogicalKeyboardKey(0x00000000042, debugName: kReleaseMode ? null : 'Upper B');
-
-  /// Represents the logical "Upper C" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperC = LogicalKeyboardKey(0x00000000043, debugName: kReleaseMode ? null : 'Upper C');
-
-  /// Represents the logical "Upper D" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperD = LogicalKeyboardKey(0x00000000044, debugName: kReleaseMode ? null : 'Upper D');
-
-  /// Represents the logical "Upper E" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperE = LogicalKeyboardKey(0x00000000045, debugName: kReleaseMode ? null : 'Upper E');
-
-  /// Represents the logical "Upper F" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperF = LogicalKeyboardKey(0x00000000046, debugName: kReleaseMode ? null : 'Upper F');
-
-  /// Represents the logical "Upper G" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperG = LogicalKeyboardKey(0x00000000047, debugName: kReleaseMode ? null : 'Upper G');
-
-  /// Represents the logical "Upper H" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperH = LogicalKeyboardKey(0x00000000048, debugName: kReleaseMode ? null : 'Upper H');
-
-  /// Represents the logical "Upper I" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperI = LogicalKeyboardKey(0x00000000049, debugName: kReleaseMode ? null : 'Upper I');
-
-  /// Represents the logical "Upper J" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperJ = LogicalKeyboardKey(0x0000000004a, debugName: kReleaseMode ? null : 'Upper J');
-
-  /// Represents the logical "Upper K" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperK = LogicalKeyboardKey(0x0000000004b, debugName: kReleaseMode ? null : 'Upper K');
-
-  /// Represents the logical "Upper L" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperL = LogicalKeyboardKey(0x0000000004c, debugName: kReleaseMode ? null : 'Upper L');
-
-  /// Represents the logical "Upper M" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperM = LogicalKeyboardKey(0x0000000004d, debugName: kReleaseMode ? null : 'Upper M');
-
-  /// Represents the logical "Upper N" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperN = LogicalKeyboardKey(0x0000000004e, debugName: kReleaseMode ? null : 'Upper N');
-
-  /// Represents the logical "Upper O" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperO = LogicalKeyboardKey(0x0000000004f, debugName: kReleaseMode ? null : 'Upper O');
-
-  /// Represents the logical "Upper P" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperP = LogicalKeyboardKey(0x00000000050, debugName: kReleaseMode ? null : 'Upper P');
-
-  /// Represents the logical "Upper Q" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperQ = LogicalKeyboardKey(0x00000000051, debugName: kReleaseMode ? null : 'Upper Q');
-
-  /// Represents the logical "Upper R" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperR = LogicalKeyboardKey(0x00000000052, debugName: kReleaseMode ? null : 'Upper R');
-
-  /// Represents the logical "Upper S" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperS = LogicalKeyboardKey(0x00000000053, debugName: kReleaseMode ? null : 'Upper S');
-
-  /// Represents the logical "Upper T" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperT = LogicalKeyboardKey(0x00000000054, debugName: kReleaseMode ? null : 'Upper T');
-
-  /// Represents the logical "Upper U" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperU = LogicalKeyboardKey(0x00000000055, debugName: kReleaseMode ? null : 'Upper U');
-
-  /// Represents the logical "Upper V" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperV = LogicalKeyboardKey(0x00000000056, debugName: kReleaseMode ? null : 'Upper V');
-
-  /// Represents the logical "Upper W" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperW = LogicalKeyboardKey(0x00000000057, debugName: kReleaseMode ? null : 'Upper W');
-
-  /// Represents the logical "Upper X" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperX = LogicalKeyboardKey(0x00000000058, debugName: kReleaseMode ? null : 'Upper X');
-
-  /// Represents the logical "Upper Y" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperY = LogicalKeyboardKey(0x00000000059, debugName: kReleaseMode ? null : 'Upper Y');
-
-  /// Represents the logical "Upper Z" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey upperZ = LogicalKeyboardKey(0x0000000005a, debugName: kReleaseMode ? null : 'Upper Z');
-
   /// Represents the logical "Bracket Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -643,150 +513,155 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey caret = LogicalKeyboardKey(0x0000000005e, debugName: kReleaseMode ? null : 'Caret');
 
-  /// Represents the logical "Backquote" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey backquote = LogicalKeyboardKey(0x00000000060, debugName: kReleaseMode ? null : 'Backquote');
-
   /// Represents the logical "Underscore" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey underscore = LogicalKeyboardKey(0x0000000005f, debugName: kReleaseMode ? null : 'Underscore');
 
-  /// Represents the logical "Lower A" key on the keyboard.
+  /// Represents the logical "Backquote" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerA = LogicalKeyboardKey(0x00000000061, debugName: kReleaseMode ? null : 'Lower A');
+  static const LogicalKeyboardKey backquote = LogicalKeyboardKey(0x00000000060, debugName: kReleaseMode ? null : 'Backquote');
 
-  /// Represents the logical "Lower B" key on the keyboard.
+  /// Represents the logical "Key A" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerB = LogicalKeyboardKey(0x00000000062, debugName: kReleaseMode ? null : 'Lower B');
+  static const LogicalKeyboardKey keyA = LogicalKeyboardKey(0x00000000061, debugName: kReleaseMode ? null : 'Key A');
 
-  /// Represents the logical "Lower C" key on the keyboard.
+  /// Represents the logical "Key B" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerC = LogicalKeyboardKey(0x00000000063, debugName: kReleaseMode ? null : 'Lower C');
+  static const LogicalKeyboardKey keyB = LogicalKeyboardKey(0x00000000062, debugName: kReleaseMode ? null : 'Key B');
 
-  /// Represents the logical "Lower D" key on the keyboard.
+  /// Represents the logical "Key C" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerD = LogicalKeyboardKey(0x00000000064, debugName: kReleaseMode ? null : 'Lower D');
+  static const LogicalKeyboardKey keyC = LogicalKeyboardKey(0x00000000063, debugName: kReleaseMode ? null : 'Key C');
 
-  /// Represents the logical "Lower E" key on the keyboard.
+  /// Represents the logical "Key D" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerE = LogicalKeyboardKey(0x00000000065, debugName: kReleaseMode ? null : 'Lower E');
+  static const LogicalKeyboardKey keyD = LogicalKeyboardKey(0x00000000064, debugName: kReleaseMode ? null : 'Key D');
 
-  /// Represents the logical "Lower F" key on the keyboard.
+  /// Represents the logical "Key E" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerF = LogicalKeyboardKey(0x00000000066, debugName: kReleaseMode ? null : 'Lower F');
+  static const LogicalKeyboardKey keyE = LogicalKeyboardKey(0x00000000065, debugName: kReleaseMode ? null : 'Key E');
 
-  /// Represents the logical "Lower G" key on the keyboard.
+  /// Represents the logical "Key F" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerG = LogicalKeyboardKey(0x00000000067, debugName: kReleaseMode ? null : 'Lower G');
+  static const LogicalKeyboardKey keyF = LogicalKeyboardKey(0x00000000066, debugName: kReleaseMode ? null : 'Key F');
 
-  /// Represents the logical "Lower H" key on the keyboard.
+  /// Represents the logical "Key G" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerH = LogicalKeyboardKey(0x00000000068, debugName: kReleaseMode ? null : 'Lower H');
+  static const LogicalKeyboardKey keyG = LogicalKeyboardKey(0x00000000067, debugName: kReleaseMode ? null : 'Key G');
 
-  /// Represents the logical "Lower I" key on the keyboard.
+  /// Represents the logical "Key H" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerI = LogicalKeyboardKey(0x00000000069, debugName: kReleaseMode ? null : 'Lower I');
+  static const LogicalKeyboardKey keyH = LogicalKeyboardKey(0x00000000068, debugName: kReleaseMode ? null : 'Key H');
 
-  /// Represents the logical "Lower J" key on the keyboard.
+  /// Represents the logical "Key I" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerJ = LogicalKeyboardKey(0x0000000006a, debugName: kReleaseMode ? null : 'Lower J');
+  static const LogicalKeyboardKey keyI = LogicalKeyboardKey(0x00000000069, debugName: kReleaseMode ? null : 'Key I');
 
-  /// Represents the logical "Lower K" key on the keyboard.
+  /// Represents the logical "Key J" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerK = LogicalKeyboardKey(0x0000000006b, debugName: kReleaseMode ? null : 'Lower K');
+  static const LogicalKeyboardKey keyJ = LogicalKeyboardKey(0x0000000006a, debugName: kReleaseMode ? null : 'Key J');
 
-  /// Represents the logical "Lower L" key on the keyboard.
+  /// Represents the logical "Key K" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerL = LogicalKeyboardKey(0x0000000006c, debugName: kReleaseMode ? null : 'Lower L');
+  static const LogicalKeyboardKey keyK = LogicalKeyboardKey(0x0000000006b, debugName: kReleaseMode ? null : 'Key K');
 
-  /// Represents the logical "Lower M" key on the keyboard.
+  /// Represents the logical "Key L" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerM = LogicalKeyboardKey(0x0000000006d, debugName: kReleaseMode ? null : 'Lower M');
+  static const LogicalKeyboardKey keyL = LogicalKeyboardKey(0x0000000006c, debugName: kReleaseMode ? null : 'Key L');
 
-  /// Represents the logical "Lower N" key on the keyboard.
+  /// Represents the logical "Key M" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerN = LogicalKeyboardKey(0x0000000006e, debugName: kReleaseMode ? null : 'Lower N');
+  static const LogicalKeyboardKey keyM = LogicalKeyboardKey(0x0000000006d, debugName: kReleaseMode ? null : 'Key M');
 
-  /// Represents the logical "Lower O" key on the keyboard.
+  /// Represents the logical "Key N" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerO = LogicalKeyboardKey(0x0000000006f, debugName: kReleaseMode ? null : 'Lower O');
+  static const LogicalKeyboardKey keyN = LogicalKeyboardKey(0x0000000006e, debugName: kReleaseMode ? null : 'Key N');
 
-  /// Represents the logical "Lower P" key on the keyboard.
+  /// Represents the logical "Key O" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerP = LogicalKeyboardKey(0x00000000070, debugName: kReleaseMode ? null : 'Lower P');
+  static const LogicalKeyboardKey keyO = LogicalKeyboardKey(0x0000000006f, debugName: kReleaseMode ? null : 'Key O');
 
-  /// Represents the logical "Lower Q" key on the keyboard.
+  /// Represents the logical "Key P" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerQ = LogicalKeyboardKey(0x00000000071, debugName: kReleaseMode ? null : 'Lower Q');
+  static const LogicalKeyboardKey keyP = LogicalKeyboardKey(0x00000000070, debugName: kReleaseMode ? null : 'Key P');
 
-  /// Represents the logical "Lower R" key on the keyboard.
+  /// Represents the logical "Key Q" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerR = LogicalKeyboardKey(0x00000000072, debugName: kReleaseMode ? null : 'Lower R');
+  static const LogicalKeyboardKey keyQ = LogicalKeyboardKey(0x00000000071, debugName: kReleaseMode ? null : 'Key Q');
 
-  /// Represents the logical "Lower S" key on the keyboard.
+  /// Represents the logical "Key R" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerS = LogicalKeyboardKey(0x00000000073, debugName: kReleaseMode ? null : 'Lower S');
+  static const LogicalKeyboardKey keyR = LogicalKeyboardKey(0x00000000072, debugName: kReleaseMode ? null : 'Key R');
 
-  /// Represents the logical "Lower T" key on the keyboard.
+  /// Represents the logical "Key S" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerT = LogicalKeyboardKey(0x00000000074, debugName: kReleaseMode ? null : 'Lower T');
+  static const LogicalKeyboardKey keyS = LogicalKeyboardKey(0x00000000073, debugName: kReleaseMode ? null : 'Key S');
 
-  /// Represents the logical "Lower U" key on the keyboard.
+  /// Represents the logical "Key T" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerU = LogicalKeyboardKey(0x00000000075, debugName: kReleaseMode ? null : 'Lower U');
+  static const LogicalKeyboardKey keyT = LogicalKeyboardKey(0x00000000074, debugName: kReleaseMode ? null : 'Key T');
 
-  /// Represents the logical "Lower V" key on the keyboard.
+  /// Represents the logical "Key U" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerV = LogicalKeyboardKey(0x00000000076, debugName: kReleaseMode ? null : 'Lower V');
+  static const LogicalKeyboardKey keyU = LogicalKeyboardKey(0x00000000075, debugName: kReleaseMode ? null : 'Key U');
 
-  /// Represents the logical "Lower W" key on the keyboard.
+  /// Represents the logical "Key V" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerW = LogicalKeyboardKey(0x00000000077, debugName: kReleaseMode ? null : 'Lower W');
+  static const LogicalKeyboardKey keyV = LogicalKeyboardKey(0x00000000076, debugName: kReleaseMode ? null : 'Key V');
 
-  /// Represents the logical "Lower X" key on the keyboard.
+  /// Represents the logical "Key W" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerX = LogicalKeyboardKey(0x00000000078, debugName: kReleaseMode ? null : 'Lower X');
+  static const LogicalKeyboardKey keyW = LogicalKeyboardKey(0x00000000077, debugName: kReleaseMode ? null : 'Key W');
 
-  /// Represents the logical "Lower Y" key on the keyboard.
+  /// Represents the logical "Key X" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerY = LogicalKeyboardKey(0x00000000079, debugName: kReleaseMode ? null : 'Lower Y');
+  static const LogicalKeyboardKey keyX = LogicalKeyboardKey(0x00000000078, debugName: kReleaseMode ? null : 'Key X');
 
-  /// Represents the logical "Lower Z" key on the keyboard.
+  /// Represents the logical "Key Y" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lowerZ = LogicalKeyboardKey(0x0000000007a, debugName: kReleaseMode ? null : 'Lower Z');
+  static const LogicalKeyboardKey keyY = LogicalKeyboardKey(0x00000000079, debugName: kReleaseMode ? null : 'Key Y');
+
+  /// Represents the logical "Key Z" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey keyZ = LogicalKeyboardKey(0x0000000007a, debugName: kReleaseMode ? null : 'Key Z');
 
   /// Represents the logical "Brace Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey braceLeft = LogicalKeyboardKey(0x0000000007b, debugName: kReleaseMode ? null : 'Brace Left');
+
+  /// Represents the logical "Bar" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey bar = LogicalKeyboardKey(0x0000000007c, debugName: kReleaseMode ? null : 'Bar');
 
   /// Represents the logical "Brace Right" key on the keyboard.
   ///
@@ -798,25 +673,15 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey tilde = LogicalKeyboardKey(0x0000000007e, debugName: kReleaseMode ? null : 'Tilde');
 
-  /// Represents the logical "Bar" key on the keyboard.
+  /// Represents the logical "Delete" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey bar = LogicalKeyboardKey(0x0000000007c, debugName: kReleaseMode ? null : 'Bar');
-
-  /// Represents the logical "Unidentified" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey unidentified = LogicalKeyboardKey(0x00000000001, debugName: kReleaseMode ? null : 'Unidentified');
+  static const LogicalKeyboardKey delete = LogicalKeyboardKey(0x0000000007f, debugName: kReleaseMode ? null : 'Delete');
 
   /// Represents the logical "Accel" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey accel = LogicalKeyboardKey(0x00000000101, debugName: kReleaseMode ? null : 'Accel');
-
-  /// Represents the logical "Alt" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x00000000102, debugName: kReleaseMode ? null : 'Alt');
 
   /// Represents the logical "Alt Graph" key on the keyboard.
   ///
@@ -827,11 +692,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey capsLock = LogicalKeyboardKey(0x00000000104, debugName: kReleaseMode ? null : 'Caps Lock');
-
-  /// Represents the logical "Control" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x00000000105, debugName: kReleaseMode ? null : 'Control');
 
   /// Represents the logical "Fn" key on the keyboard.
   ///
@@ -848,11 +708,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey hyper = LogicalKeyboardKey(0x00000000108, debugName: kReleaseMode ? null : 'Hyper');
 
-  /// Represents the logical "Meta" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x00000000109, debugName: kReleaseMode ? null : 'Meta');
-
   /// Represents the logical "Num Lock" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -862,11 +717,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey scrollLock = LogicalKeyboardKey(0x0000000010c, debugName: kReleaseMode ? null : 'Scroll Lock');
-
-  /// Represents the logical "Shift" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x0000000010d, debugName: kReleaseMode ? null : 'Shift');
 
   /// Represents the logical "Super" key on the keyboard.
   ///
@@ -1062,6 +912,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey brightnessUp = LogicalKeyboardKey(0x00000000602, debugName: kReleaseMode ? null : 'Brightness Up');
+
+  /// Represents the logical "Camera" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey camera = LogicalKeyboardKey(0x00000000603, debugName: kReleaseMode ? null : 'Camera');
 
   /// Represents the logical "Eject" key on the keyboard.
   ///
@@ -1408,16 +1263,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey soft8 = LogicalKeyboardKey(0x00000000908, debugName: kReleaseMode ? null : 'Soft 8');
 
-  /// Represents the logical "Channel Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey channelDown = LogicalKeyboardKey(0x00000000d0a, debugName: kReleaseMode ? null : 'Channel Down');
-
-  /// Represents the logical "Channel Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey channelUp = LogicalKeyboardKey(0x00000000d0b, debugName: kReleaseMode ? null : 'Channel Up');
-
   /// Represents the logical "Close" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1438,40 +1283,10 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mailSend = LogicalKeyboardKey(0x00000000a04, debugName: kReleaseMode ? null : 'Mail Send');
 
-  /// Represents the logical "Media Close" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaClose = LogicalKeyboardKey(0x00000000d5b, debugName: kReleaseMode ? null : 'Media Close');
-
-  /// Represents the logical "Media Fast Forward" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaFastForward = LogicalKeyboardKey(0x00000000d2c, debugName: kReleaseMode ? null : 'Media Fast Forward');
-
-  /// Represents the logical "Media Pause" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaPause = LogicalKeyboardKey(0x00000000d2e, debugName: kReleaseMode ? null : 'Media Pause');
-
-  /// Represents the logical "Media Play" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaPlay = LogicalKeyboardKey(0x00000000d2f, debugName: kReleaseMode ? null : 'Media Play');
-
   /// Represents the logical "Media Play Pause" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mediaPlayPause = LogicalKeyboardKey(0x00000000a05, debugName: kReleaseMode ? null : 'Media Play Pause');
-
-  /// Represents the logical "Media Record" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaRecord = LogicalKeyboardKey(0x00000000d30, debugName: kReleaseMode ? null : 'Media Record');
-
-  /// Represents the logical "Media Rewind" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaRewind = LogicalKeyboardKey(0x00000000d31, debugName: kReleaseMode ? null : 'Media Rewind');
 
   /// Represents the logical "Media Stop" key on the keyboard.
   ///
@@ -1513,66 +1328,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey spellCheck = LogicalKeyboardKey(0x00000000a0e, debugName: kReleaseMode ? null : 'Spell Check');
 
-  /// Represents the logical "Key 11" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey key11 = LogicalKeyboardKey(0x00000001201, debugName: kReleaseMode ? null : 'Key 11');
-
-  /// Represents the logical "Key 12" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey key12 = LogicalKeyboardKey(0x00000001202, debugName: kReleaseMode ? null : 'Key 12');
-
-  /// Represents the logical "Audio Balance Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioBalanceLeft = LogicalKeyboardKey(0x00000000d01, debugName: kReleaseMode ? null : 'Audio Balance Left');
-
-  /// Represents the logical "Audio Balance Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioBalanceRight = LogicalKeyboardKey(0x00000000d02, debugName: kReleaseMode ? null : 'Audio Balance Right');
-
-  /// Represents the logical "Audio Bass Boost Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioBassBoostDown = LogicalKeyboardKey(0x00000000d03, debugName: kReleaseMode ? null : 'Audio Bass Boost Down');
-
-  /// Represents the logical "Audio Bass Boost Toggle" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioBassBoostToggle = LogicalKeyboardKey(0x00000000e02, debugName: kReleaseMode ? null : 'Audio Bass Boost Toggle');
-
-  /// Represents the logical "Audio Bass Boost Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioBassBoostUp = LogicalKeyboardKey(0x00000000d04, debugName: kReleaseMode ? null : 'Audio Bass Boost Up');
-
-  /// Represents the logical "Audio Fader Front" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioFaderFront = LogicalKeyboardKey(0x00000000d05, debugName: kReleaseMode ? null : 'Audio Fader Front');
-
-  /// Represents the logical "Audio Fader Rear" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioFaderRear = LogicalKeyboardKey(0x00000000d06, debugName: kReleaseMode ? null : 'Audio Fader Rear');
-
-  /// Represents the logical "Audio Surround Mode Next" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioSurroundModeNext = LogicalKeyboardKey(0x00000000d07, debugName: kReleaseMode ? null : 'Audio Surround Mode Next');
-
-  /// Represents the logical "Audio Treble Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioTrebleDown = LogicalKeyboardKey(0x00000000e04, debugName: kReleaseMode ? null : 'Audio Treble Down');
-
-  /// Represents the logical "Audio Treble Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey audioTrebleUp = LogicalKeyboardKey(0x00000000e05, debugName: kReleaseMode ? null : 'Audio Treble Up');
-
   /// Represents the logical "Audio Volume Down" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1588,41 +1343,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey audioVolumeMute = LogicalKeyboardKey(0x00000000a11, debugName: kReleaseMode ? null : 'Audio Volume Mute');
 
-  /// Represents the logical "Microphone Toggle" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey microphoneToggle = LogicalKeyboardKey(0x00000000e06, debugName: kReleaseMode ? null : 'Microphone Toggle');
-
-  /// Represents the logical "Microphone Volume Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey microphoneVolumeDown = LogicalKeyboardKey(0x00000000e07, debugName: kReleaseMode ? null : 'Microphone Volume Down');
-
-  /// Represents the logical "Microphone Volume Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey microphoneVolumeUp = LogicalKeyboardKey(0x00000000e08, debugName: kReleaseMode ? null : 'Microphone Volume Up');
-
-  /// Represents the logical "Microphone Volume Mute" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey microphoneVolumeMute = LogicalKeyboardKey(0x00000000e09, debugName: kReleaseMode ? null : 'Microphone Volume Mute');
-
-  /// Represents the logical "Speech Correction List" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey speechCorrectionList = LogicalKeyboardKey(0x00000000f01, debugName: kReleaseMode ? null : 'Speech Correction List');
-
-  /// Represents the logical "Speech Input Toggle" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey speechInputToggle = LogicalKeyboardKey(0x00000000f02, debugName: kReleaseMode ? null : 'Speech Input Toggle');
-
-  /// Represents the logical "Launch Application 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchApplication1 = LogicalKeyboardKey(0x00000000b06, debugName: kReleaseMode ? null : 'Launch Application 1');
-
   /// Represents the logical "Launch Application 2" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1632,11 +1352,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey launchCalendar = LogicalKeyboardKey(0x00000000b02, debugName: kReleaseMode ? null : 'Launch Calendar');
-
-  /// Represents the logical "Launch Contacts" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchContacts = LogicalKeyboardKey(0x00000000b0c, debugName: kReleaseMode ? null : 'Launch Contacts');
 
   /// Represents the logical "Launch Mail" key on the keyboard.
   ///
@@ -1653,10 +1368,10 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey launchMusicPlayer = LogicalKeyboardKey(0x00000000b05, debugName: kReleaseMode ? null : 'Launch Music Player');
 
-  /// Represents the logical "Launch Phone" key on the keyboard.
+  /// Represents the logical "Launch Application 1" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchPhone = LogicalKeyboardKey(0x00000000b0d, debugName: kReleaseMode ? null : 'Launch Phone');
+  static const LogicalKeyboardKey launchApplication1 = LogicalKeyboardKey(0x00000000b06, debugName: kReleaseMode ? null : 'Launch Application 1');
 
   /// Represents the logical "Launch Screen Saver" key on the keyboard.
   ///
@@ -1682,6 +1397,16 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey launchWordProcessor = LogicalKeyboardKey(0x00000000b0b, debugName: kReleaseMode ? null : 'Launch Word Processor');
+
+  /// Represents the logical "Launch Contacts" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchContacts = LogicalKeyboardKey(0x00000000b0c, debugName: kReleaseMode ? null : 'Launch Contacts');
+
+  /// Represents the logical "Launch Phone" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchPhone = LogicalKeyboardKey(0x00000000b0d, debugName: kReleaseMode ? null : 'Launch Phone');
 
   /// Represents the logical "Launch Assistant" key on the keyboard.
   ///
@@ -1728,216 +1453,40 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey browserStop = LogicalKeyboardKey(0x00000000c07, debugName: kReleaseMode ? null : 'Browser Stop');
 
-  /// Represents the logical "App Switch" key on the keyboard.
+  /// Represents the logical "Audio Balance Left" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey appSwitch = LogicalKeyboardKey(0x00000001001, debugName: kReleaseMode ? null : 'App Switch');
+  static const LogicalKeyboardKey audioBalanceLeft = LogicalKeyboardKey(0x00000000d01, debugName: kReleaseMode ? null : 'Audio Balance Left');
 
-  /// Represents the logical "Call" key on the keyboard.
+  /// Represents the logical "Audio Balance Right" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey call = LogicalKeyboardKey(0x00000001002, debugName: kReleaseMode ? null : 'Call');
+  static const LogicalKeyboardKey audioBalanceRight = LogicalKeyboardKey(0x00000000d02, debugName: kReleaseMode ? null : 'Audio Balance Right');
 
-  /// Represents the logical "Camera" key on the keyboard.
+  /// Represents the logical "Audio Bass Boost Down" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey camera = LogicalKeyboardKey(0x00000000603, debugName: kReleaseMode ? null : 'Camera');
+  static const LogicalKeyboardKey audioBassBoostDown = LogicalKeyboardKey(0x00000000d03, debugName: kReleaseMode ? null : 'Audio Bass Boost Down');
 
-  /// Represents the logical "Camera Focus" key on the keyboard.
+  /// Represents the logical "Audio Bass Boost Up" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey cameraFocus = LogicalKeyboardKey(0x00000001003, debugName: kReleaseMode ? null : 'Camera Focus');
+  static const LogicalKeyboardKey audioBassBoostUp = LogicalKeyboardKey(0x00000000d04, debugName: kReleaseMode ? null : 'Audio Bass Boost Up');
 
-  /// Represents the logical "End Call" key on the keyboard.
+  /// Represents the logical "Audio Fader Front" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey endCall = LogicalKeyboardKey(0x00000001004, debugName: kReleaseMode ? null : 'End Call');
+  static const LogicalKeyboardKey audioFaderFront = LogicalKeyboardKey(0x00000000d05, debugName: kReleaseMode ? null : 'Audio Fader Front');
 
-  /// Represents the logical "Go Back" key on the keyboard.
+  /// Represents the logical "Audio Fader Rear" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey goBack = LogicalKeyboardKey(0x00000001005, debugName: kReleaseMode ? null : 'Go Back');
+  static const LogicalKeyboardKey audioFaderRear = LogicalKeyboardKey(0x00000000d06, debugName: kReleaseMode ? null : 'Audio Fader Rear');
 
-  /// Represents the logical "Go Home" key on the keyboard.
+  /// Represents the logical "Audio Surround Mode Next" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey goHome = LogicalKeyboardKey(0x00000001006, debugName: kReleaseMode ? null : 'Go Home');
-
-  /// Represents the logical "Headset Hook" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey headsetHook = LogicalKeyboardKey(0x00000001007, debugName: kReleaseMode ? null : 'Headset Hook');
-
-  /// Represents the logical "Last Number Redial" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey lastNumberRedial = LogicalKeyboardKey(0x00000001008, debugName: kReleaseMode ? null : 'Last Number Redial');
-
-  /// Represents the logical "Notification" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey notification = LogicalKeyboardKey(0x00000001009, debugName: kReleaseMode ? null : 'Notification');
-
-  /// Represents the logical "Manner Mode" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mannerMode = LogicalKeyboardKey(0x0000000100a, debugName: kReleaseMode ? null : 'Manner Mode');
-
-  /// Represents the logical "Voice Dial" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey voiceDial = LogicalKeyboardKey(0x0000000100b, debugName: kReleaseMode ? null : 'Voice Dial');
-
-  /// Represents the logical "TV" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tv = LogicalKeyboardKey(0x00000000d49, debugName: kReleaseMode ? null : 'TV');
-
-  /// Represents the logical "TV 3 D Mode" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tV3DMode = LogicalKeyboardKey(0x00000001101, debugName: kReleaseMode ? null : 'TV 3 D Mode');
-
-  /// Represents the logical "TV Antenna Cable" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvAntennaCable = LogicalKeyboardKey(0x00000001102, debugName: kReleaseMode ? null : 'TV Antenna Cable');
-
-  /// Represents the logical "TV Audio Description" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvAudioDescription = LogicalKeyboardKey(0x00000001103, debugName: kReleaseMode ? null : 'TV Audio Description');
-
-  /// Represents the logical "TV Audio Description Mix Down" key on the
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvAudioDescriptionMixDown = LogicalKeyboardKey(0x00000001104, debugName: kReleaseMode ? null : 'TV Audio Description Mix Down');
-
-  /// Represents the logical "TV Audio Description Mix Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvAudioDescriptionMixUp = LogicalKeyboardKey(0x00000001105, debugName: kReleaseMode ? null : 'TV Audio Description Mix Up');
-
-  /// Represents the logical "TV Contents Menu" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvContentsMenu = LogicalKeyboardKey(0x00000001106, debugName: kReleaseMode ? null : 'TV Contents Menu');
-
-  /// Represents the logical "TV Data Service" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvDataService = LogicalKeyboardKey(0x00000001107, debugName: kReleaseMode ? null : 'TV Data Service');
-
-  /// Represents the logical "TV Input" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInput = LogicalKeyboardKey(0x00000000d4a, debugName: kReleaseMode ? null : 'TV Input');
-
-  /// Represents the logical "TV Input Component 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputComponent1 = LogicalKeyboardKey(0x00000001108, debugName: kReleaseMode ? null : 'TV Input Component 1');
-
-  /// Represents the logical "TV Input Component 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputComponent2 = LogicalKeyboardKey(0x00000001109, debugName: kReleaseMode ? null : 'TV Input Component 2');
-
-  /// Represents the logical "TV Input Composite 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputComposite1 = LogicalKeyboardKey(0x0000000110a, debugName: kReleaseMode ? null : 'TV Input Composite 1');
-
-  /// Represents the logical "TV Input Composite 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputComposite2 = LogicalKeyboardKey(0x0000000110b, debugName: kReleaseMode ? null : 'TV Input Composite 2');
-
-  /// Represents the logical "TV Input HDMI 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputHDMI1 = LogicalKeyboardKey(0x0000000110c, debugName: kReleaseMode ? null : 'TV Input HDMI 1');
-
-  /// Represents the logical "TV Input HDMI 2" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputHDMI2 = LogicalKeyboardKey(0x0000000110d, debugName: kReleaseMode ? null : 'TV Input HDMI 2');
-
-  /// Represents the logical "TV Input HDMI 3" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputHDMI3 = LogicalKeyboardKey(0x0000000110e, debugName: kReleaseMode ? null : 'TV Input HDMI 3');
-
-  /// Represents the logical "TV Input HDMI 4" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputHDMI4 = LogicalKeyboardKey(0x0000000110f, debugName: kReleaseMode ? null : 'TV Input HDMI 4');
-
-  /// Represents the logical "TV Input VGA 1" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvInputVGA1 = LogicalKeyboardKey(0x00000001110, debugName: kReleaseMode ? null : 'TV Input VGA 1');
-
-  /// Represents the logical "TV Media Context" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvMediaContext = LogicalKeyboardKey(0x00000001111, debugName: kReleaseMode ? null : 'TV Media Context');
-
-  /// Represents the logical "TV Network" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvNetwork = LogicalKeyboardKey(0x00000001112, debugName: kReleaseMode ? null : 'TV Network');
-
-  /// Represents the logical "TV Number Entry" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvNumberEntry = LogicalKeyboardKey(0x00000001113, debugName: kReleaseMode ? null : 'TV Number Entry');
-
-  /// Represents the logical "TV Power" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvPower = LogicalKeyboardKey(0x00000000d4b, debugName: kReleaseMode ? null : 'TV Power');
-
-  /// Represents the logical "TV Radio Service" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvRadioService = LogicalKeyboardKey(0x00000001114, debugName: kReleaseMode ? null : 'TV Radio Service');
-
-  /// Represents the logical "TV Satellite" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvSatellite = LogicalKeyboardKey(0x00000001115, debugName: kReleaseMode ? null : 'TV Satellite');
-
-  /// Represents the logical "TV Satellite BS" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvSatelliteBS = LogicalKeyboardKey(0x00000001116, debugName: kReleaseMode ? null : 'TV Satellite BS');
-
-  /// Represents the logical "TV Satellite CS" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvSatelliteCS = LogicalKeyboardKey(0x00000001117, debugName: kReleaseMode ? null : 'TV Satellite CS');
-
-  /// Represents the logical "TV Satellite Toggle" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvSatelliteToggle = LogicalKeyboardKey(0x00000001118, debugName: kReleaseMode ? null : 'TV Satellite Toggle');
-
-  /// Represents the logical "TV Terrestrial Analog" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvTerrestrialAnalog = LogicalKeyboardKey(0x00000001119, debugName: kReleaseMode ? null : 'TV Terrestrial Analog');
-
-  /// Represents the logical "TV Terrestrial Digital" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvTerrestrialDigital = LogicalKeyboardKey(0x0000000111a, debugName: kReleaseMode ? null : 'TV Terrestrial Digital');
-
-  /// Represents the logical "TV Timer" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey tvTimer = LogicalKeyboardKey(0x0000000111b, debugName: kReleaseMode ? null : 'TV Timer');
+  static const LogicalKeyboardKey audioSurroundModeNext = LogicalKeyboardKey(0x00000000d07, debugName: kReleaseMode ? null : 'Audio Surround Mode Next');
 
   /// Represents the logical "AVR Input" key on the keyboard.
   ///
@@ -1948,6 +1497,16 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey avrPower = LogicalKeyboardKey(0x00000000d09, debugName: kReleaseMode ? null : 'AVR Power');
+
+  /// Represents the logical "Channel Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey channelDown = LogicalKeyboardKey(0x00000000d0a, debugName: kReleaseMode ? null : 'Channel Down');
+
+  /// Represents the logical "Channel Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey channelUp = LogicalKeyboardKey(0x00000000d0b, debugName: kReleaseMode ? null : 'Channel Up');
 
   /// Represents the logical "Color F0 Red" key on the keyboard.
   ///
@@ -1993,11 +1552,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey displaySwap = LogicalKeyboardKey(0x00000000d14, debugName: kReleaseMode ? null : 'Display Swap');
-
-  /// Represents the logical "DVR" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey dvr = LogicalKeyboardKey(0x00000000d4f, debugName: kReleaseMode ? null : 'DVR');
 
   /// Represents the logical "Exit" key on the keyboard.
   ///
@@ -2114,65 +1668,40 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mediaApps = LogicalKeyboardKey(0x00000000d2b, debugName: kReleaseMode ? null : 'Media Apps');
 
-  /// Represents the logical "Media Audio Track" key on the keyboard.
+  /// Represents the logical "Media Fast Forward" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaAudioTrack = LogicalKeyboardKey(0x00000000d50, debugName: kReleaseMode ? null : 'Media Audio Track');
+  static const LogicalKeyboardKey mediaFastForward = LogicalKeyboardKey(0x00000000d2c, debugName: kReleaseMode ? null : 'Media Fast Forward');
 
   /// Represents the logical "Media Last" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mediaLast = LogicalKeyboardKey(0x00000000d2d, debugName: kReleaseMode ? null : 'Media Last');
 
-  /// Represents the logical "Media Skip Backward" key on the keyboard.
+  /// Represents the logical "Media Pause" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaSkipBackward = LogicalKeyboardKey(0x00000000d51, debugName: kReleaseMode ? null : 'Media Skip Backward');
+  static const LogicalKeyboardKey mediaPause = LogicalKeyboardKey(0x00000000d2e, debugName: kReleaseMode ? null : 'Media Pause');
 
-  /// Represents the logical "Media Skip Forward" key on the keyboard.
+  /// Represents the logical "Media Play" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaSkipForward = LogicalKeyboardKey(0x00000000d52, debugName: kReleaseMode ? null : 'Media Skip Forward');
+  static const LogicalKeyboardKey mediaPlay = LogicalKeyboardKey(0x00000000d2f, debugName: kReleaseMode ? null : 'Media Play');
+
+  /// Represents the logical "Media Record" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaRecord = LogicalKeyboardKey(0x00000000d30, debugName: kReleaseMode ? null : 'Media Record');
+
+  /// Represents the logical "Media Rewind" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaRewind = LogicalKeyboardKey(0x00000000d31, debugName: kReleaseMode ? null : 'Media Rewind');
 
   /// Represents the logical "Media Skip" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mediaSkip = LogicalKeyboardKey(0x00000000d32, debugName: kReleaseMode ? null : 'Media Skip');
-
-  /// Represents the logical "Media Step Backward" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaStepBackward = LogicalKeyboardKey(0x00000000d53, debugName: kReleaseMode ? null : 'Media Step Backward');
-
-  /// Represents the logical "Media Step Forward" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaStepForward = LogicalKeyboardKey(0x00000000d54, debugName: kReleaseMode ? null : 'Media Step Forward');
-
-  /// Represents the logical "Media Top Menu" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey mediaTopMenu = LogicalKeyboardKey(0x00000000d55, debugName: kReleaseMode ? null : 'Media Top Menu');
-
-  /// Represents the logical "Navigate In" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey navigateIn = LogicalKeyboardKey(0x00000000d56, debugName: kReleaseMode ? null : 'Navigate In');
-
-  /// Represents the logical "Navigate Next" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey navigateNext = LogicalKeyboardKey(0x00000000d57, debugName: kReleaseMode ? null : 'Navigate Next');
-
-  /// Represents the logical "Navigate Out" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey navigateOut = LogicalKeyboardKey(0x00000000d58, debugName: kReleaseMode ? null : 'Navigate Out');
-
-  /// Represents the logical "Navigate Previous" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey navigatePrevious = LogicalKeyboardKey(0x00000000d59, debugName: kReleaseMode ? null : 'Navigate Previous');
 
   /// Represents the logical "Next Favorite Channel" key on the keyboard.
   ///
@@ -2188,11 +1717,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey onDemand = LogicalKeyboardKey(0x00000000d35, debugName: kReleaseMode ? null : 'On Demand');
-
-  /// Represents the logical "Pairing" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey pairing = LogicalKeyboardKey(0x00000000d5a, debugName: kReleaseMode ? null : 'Pairing');
 
   /// Represents the logical "P In P Down" key on the keyboard.
   ///
@@ -2289,6 +1813,21 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey teletext = LogicalKeyboardKey(0x00000000d48, debugName: kReleaseMode ? null : 'Teletext');
 
+  /// Represents the logical "TV" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tv = LogicalKeyboardKey(0x00000000d49, debugName: kReleaseMode ? null : 'TV');
+
+  /// Represents the logical "TV Input" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInput = LogicalKeyboardKey(0x00000000d4a, debugName: kReleaseMode ? null : 'TV Input');
+
+  /// Represents the logical "TV Power" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvPower = LogicalKeyboardKey(0x00000000d4b, debugName: kReleaseMode ? null : 'TV Power');
+
   /// Represents the logical "Video Mode Next" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -2304,14 +1843,465 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey zoomToggle = LogicalKeyboardKey(0x00000000d4e, debugName: kReleaseMode ? null : 'Zoom Toggle');
 
+  /// Represents the logical "DVR" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey dvr = LogicalKeyboardKey(0x00000000d4f, debugName: kReleaseMode ? null : 'DVR');
+
+  /// Represents the logical "Media Audio Track" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaAudioTrack = LogicalKeyboardKey(0x00000000d50, debugName: kReleaseMode ? null : 'Media Audio Track');
+
+  /// Represents the logical "Media Skip Backward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaSkipBackward = LogicalKeyboardKey(0x00000000d51, debugName: kReleaseMode ? null : 'Media Skip Backward');
+
+  /// Represents the logical "Media Skip Forward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaSkipForward = LogicalKeyboardKey(0x00000000d52, debugName: kReleaseMode ? null : 'Media Skip Forward');
+
+  /// Represents the logical "Media Step Backward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaStepBackward = LogicalKeyboardKey(0x00000000d53, debugName: kReleaseMode ? null : 'Media Step Backward');
+
+  /// Represents the logical "Media Step Forward" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaStepForward = LogicalKeyboardKey(0x00000000d54, debugName: kReleaseMode ? null : 'Media Step Forward');
+
+  /// Represents the logical "Media Top Menu" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaTopMenu = LogicalKeyboardKey(0x00000000d55, debugName: kReleaseMode ? null : 'Media Top Menu');
+
+  /// Represents the logical "Navigate In" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey navigateIn = LogicalKeyboardKey(0x00000000d56, debugName: kReleaseMode ? null : 'Navigate In');
+
+  /// Represents the logical "Navigate Next" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey navigateNext = LogicalKeyboardKey(0x00000000d57, debugName: kReleaseMode ? null : 'Navigate Next');
+
+  /// Represents the logical "Navigate Out" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey navigateOut = LogicalKeyboardKey(0x00000000d58, debugName: kReleaseMode ? null : 'Navigate Out');
+
+  /// Represents the logical "Navigate Previous" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey navigatePrevious = LogicalKeyboardKey(0x00000000d59, debugName: kReleaseMode ? null : 'Navigate Previous');
+
+  /// Represents the logical "Pairing" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey pairing = LogicalKeyboardKey(0x00000000d5a, debugName: kReleaseMode ? null : 'Pairing');
+
+  /// Represents the logical "Media Close" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaClose = LogicalKeyboardKey(0x00000000d5b, debugName: kReleaseMode ? null : 'Media Close');
+
+  /// Represents the logical "Audio Bass Boost Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioBassBoostToggle = LogicalKeyboardKey(0x00000000e02, debugName: kReleaseMode ? null : 'Audio Bass Boost Toggle');
+
+  /// Represents the logical "Audio Treble Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioTrebleDown = LogicalKeyboardKey(0x00000000e04, debugName: kReleaseMode ? null : 'Audio Treble Down');
+
+  /// Represents the logical "Audio Treble Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey audioTrebleUp = LogicalKeyboardKey(0x00000000e05, debugName: kReleaseMode ? null : 'Audio Treble Up');
+
+  /// Represents the logical "Microphone Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey microphoneToggle = LogicalKeyboardKey(0x00000000e06, debugName: kReleaseMode ? null : 'Microphone Toggle');
+
+  /// Represents the logical "Microphone Volume Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey microphoneVolumeDown = LogicalKeyboardKey(0x00000000e07, debugName: kReleaseMode ? null : 'Microphone Volume Down');
+
+  /// Represents the logical "Microphone Volume Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey microphoneVolumeUp = LogicalKeyboardKey(0x00000000e08, debugName: kReleaseMode ? null : 'Microphone Volume Up');
+
+  /// Represents the logical "Microphone Volume Mute" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey microphoneVolumeMute = LogicalKeyboardKey(0x00000000e09, debugName: kReleaseMode ? null : 'Microphone Volume Mute');
+
+  /// Represents the logical "Speech Correction List" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey speechCorrectionList = LogicalKeyboardKey(0x00000000f01, debugName: kReleaseMode ? null : 'Speech Correction List');
+
+  /// Represents the logical "Speech Input Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey speechInputToggle = LogicalKeyboardKey(0x00000000f02, debugName: kReleaseMode ? null : 'Speech Input Toggle');
+
+  /// Represents the logical "App Switch" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey appSwitch = LogicalKeyboardKey(0x00000001001, debugName: kReleaseMode ? null : 'App Switch');
+
+  /// Represents the logical "Call" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey call = LogicalKeyboardKey(0x00000001002, debugName: kReleaseMode ? null : 'Call');
+
+  /// Represents the logical "Camera Focus" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey cameraFocus = LogicalKeyboardKey(0x00000001003, debugName: kReleaseMode ? null : 'Camera Focus');
+
+  /// Represents the logical "End Call" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey endCall = LogicalKeyboardKey(0x00000001004, debugName: kReleaseMode ? null : 'End Call');
+
+  /// Represents the logical "Go Back" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey goBack = LogicalKeyboardKey(0x00000001005, debugName: kReleaseMode ? null : 'Go Back');
+
+  /// Represents the logical "Go Home" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey goHome = LogicalKeyboardKey(0x00000001006, debugName: kReleaseMode ? null : 'Go Home');
+
+  /// Represents the logical "Headset Hook" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey headsetHook = LogicalKeyboardKey(0x00000001007, debugName: kReleaseMode ? null : 'Headset Hook');
+
+  /// Represents the logical "Last Number Redial" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lastNumberRedial = LogicalKeyboardKey(0x00000001008, debugName: kReleaseMode ? null : 'Last Number Redial');
+
+  /// Represents the logical "Notification" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey notification = LogicalKeyboardKey(0x00000001009, debugName: kReleaseMode ? null : 'Notification');
+
+  /// Represents the logical "Manner Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mannerMode = LogicalKeyboardKey(0x0000000100a, debugName: kReleaseMode ? null : 'Manner Mode');
+
+  /// Represents the logical "Voice Dial" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey voiceDial = LogicalKeyboardKey(0x0000000100b, debugName: kReleaseMode ? null : 'Voice Dial');
+
+  /// Represents the logical "TV 3 D Mode" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tV3DMode = LogicalKeyboardKey(0x00000001101, debugName: kReleaseMode ? null : 'TV 3 D Mode');
+
+  /// Represents the logical "TV Antenna Cable" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvAntennaCable = LogicalKeyboardKey(0x00000001102, debugName: kReleaseMode ? null : 'TV Antenna Cable');
+
+  /// Represents the logical "TV Audio Description" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvAudioDescription = LogicalKeyboardKey(0x00000001103, debugName: kReleaseMode ? null : 'TV Audio Description');
+
+  /// Represents the logical "TV Audio Description Mix Down" key on the
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvAudioDescriptionMixDown = LogicalKeyboardKey(0x00000001104, debugName: kReleaseMode ? null : 'TV Audio Description Mix Down');
+
+  /// Represents the logical "TV Audio Description Mix Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvAudioDescriptionMixUp = LogicalKeyboardKey(0x00000001105, debugName: kReleaseMode ? null : 'TV Audio Description Mix Up');
+
+  /// Represents the logical "TV Contents Menu" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvContentsMenu = LogicalKeyboardKey(0x00000001106, debugName: kReleaseMode ? null : 'TV Contents Menu');
+
+  /// Represents the logical "TV Data Service" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvDataService = LogicalKeyboardKey(0x00000001107, debugName: kReleaseMode ? null : 'TV Data Service');
+
+  /// Represents the logical "TV Input Component 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputComponent1 = LogicalKeyboardKey(0x00000001108, debugName: kReleaseMode ? null : 'TV Input Component 1');
+
+  /// Represents the logical "TV Input Component 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputComponent2 = LogicalKeyboardKey(0x00000001109, debugName: kReleaseMode ? null : 'TV Input Component 2');
+
+  /// Represents the logical "TV Input Composite 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputComposite1 = LogicalKeyboardKey(0x0000000110a, debugName: kReleaseMode ? null : 'TV Input Composite 1');
+
+  /// Represents the logical "TV Input Composite 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputComposite2 = LogicalKeyboardKey(0x0000000110b, debugName: kReleaseMode ? null : 'TV Input Composite 2');
+
+  /// Represents the logical "TV Input HDMI 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputHDMI1 = LogicalKeyboardKey(0x0000000110c, debugName: kReleaseMode ? null : 'TV Input HDMI 1');
+
+  /// Represents the logical "TV Input HDMI 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputHDMI2 = LogicalKeyboardKey(0x0000000110d, debugName: kReleaseMode ? null : 'TV Input HDMI 2');
+
+  /// Represents the logical "TV Input HDMI 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputHDMI3 = LogicalKeyboardKey(0x0000000110e, debugName: kReleaseMode ? null : 'TV Input HDMI 3');
+
+  /// Represents the logical "TV Input HDMI 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputHDMI4 = LogicalKeyboardKey(0x0000000110f, debugName: kReleaseMode ? null : 'TV Input HDMI 4');
+
+  /// Represents the logical "TV Input VGA 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvInputVGA1 = LogicalKeyboardKey(0x00000001110, debugName: kReleaseMode ? null : 'TV Input VGA 1');
+
+  /// Represents the logical "TV Media Context" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvMediaContext = LogicalKeyboardKey(0x00000001111, debugName: kReleaseMode ? null : 'TV Media Context');
+
+  /// Represents the logical "TV Network" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvNetwork = LogicalKeyboardKey(0x00000001112, debugName: kReleaseMode ? null : 'TV Network');
+
+  /// Represents the logical "TV Number Entry" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvNumberEntry = LogicalKeyboardKey(0x00000001113, debugName: kReleaseMode ? null : 'TV Number Entry');
+
+  /// Represents the logical "TV Radio Service" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvRadioService = LogicalKeyboardKey(0x00000001114, debugName: kReleaseMode ? null : 'TV Radio Service');
+
+  /// Represents the logical "TV Satellite" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvSatellite = LogicalKeyboardKey(0x00000001115, debugName: kReleaseMode ? null : 'TV Satellite');
+
+  /// Represents the logical "TV Satellite BS" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvSatelliteBS = LogicalKeyboardKey(0x00000001116, debugName: kReleaseMode ? null : 'TV Satellite BS');
+
+  /// Represents the logical "TV Satellite CS" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvSatelliteCS = LogicalKeyboardKey(0x00000001117, debugName: kReleaseMode ? null : 'TV Satellite CS');
+
+  /// Represents the logical "TV Satellite Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvSatelliteToggle = LogicalKeyboardKey(0x00000001118, debugName: kReleaseMode ? null : 'TV Satellite Toggle');
+
+  /// Represents the logical "TV Terrestrial Analog" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvTerrestrialAnalog = LogicalKeyboardKey(0x00000001119, debugName: kReleaseMode ? null : 'TV Terrestrial Analog');
+
+  /// Represents the logical "TV Terrestrial Digital" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvTerrestrialDigital = LogicalKeyboardKey(0x0000000111a, debugName: kReleaseMode ? null : 'TV Terrestrial Digital');
+
+  /// Represents the logical "TV Timer" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey tvTimer = LogicalKeyboardKey(0x0000000111b, debugName: kReleaseMode ? null : 'TV Timer');
+
+  /// Represents the logical "Key 11" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey key11 = LogicalKeyboardKey(0x00000001201, debugName: kReleaseMode ? null : 'Key 11');
+
+  /// Represents the logical "Key 12" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey key12 = LogicalKeyboardKey(0x00000001202, debugName: kReleaseMode ? null : 'Key 12');
+
+  /// Represents the logical "Numpad Enter" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadEnter = LogicalKeyboardKey(0x0020000000d, debugName: kReleaseMode ? null : 'Numpad Enter');
+
+  /// Represents the logical "Numpad Paren Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadParenLeft = LogicalKeyboardKey(0x00200000028, debugName: kReleaseMode ? null : 'Numpad Paren Left');
+
+  /// Represents the logical "Numpad Paren Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadParenRight = LogicalKeyboardKey(0x00200000029, debugName: kReleaseMode ? null : 'Numpad Paren Right');
+
+  /// Represents the logical "Numpad Multiply" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadMultiply = LogicalKeyboardKey(0x0020000002a, debugName: kReleaseMode ? null : 'Numpad Multiply');
+
+  /// Represents the logical "Numpad Add" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadAdd = LogicalKeyboardKey(0x0020000002b, debugName: kReleaseMode ? null : 'Numpad Add');
+
+  /// Represents the logical "Numpad Comma" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadComma = LogicalKeyboardKey(0x0020000002c, debugName: kReleaseMode ? null : 'Numpad Comma');
+
+  /// Represents the logical "Numpad Subtract" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadSubtract = LogicalKeyboardKey(0x0020000002d, debugName: kReleaseMode ? null : 'Numpad Subtract');
+
+  /// Represents the logical "Numpad Decimal" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadDecimal = LogicalKeyboardKey(0x0020000002e, debugName: kReleaseMode ? null : 'Numpad Decimal');
+
+  /// Represents the logical "Numpad Divide" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadDivide = LogicalKeyboardKey(0x0020000002f, debugName: kReleaseMode ? null : 'Numpad Divide');
+
+  /// Represents the logical "Numpad 0" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad0 = LogicalKeyboardKey(0x00200000030, debugName: kReleaseMode ? null : 'Numpad 0');
+
+  /// Represents the logical "Numpad 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad1 = LogicalKeyboardKey(0x00200000031, debugName: kReleaseMode ? null : 'Numpad 1');
+
+  /// Represents the logical "Numpad 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad2 = LogicalKeyboardKey(0x00200000032, debugName: kReleaseMode ? null : 'Numpad 2');
+
+  /// Represents the logical "Numpad 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad3 = LogicalKeyboardKey(0x00200000033, debugName: kReleaseMode ? null : 'Numpad 3');
+
+  /// Represents the logical "Numpad 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad4 = LogicalKeyboardKey(0x00200000034, debugName: kReleaseMode ? null : 'Numpad 4');
+
+  /// Represents the logical "Numpad 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad5 = LogicalKeyboardKey(0x00200000035, debugName: kReleaseMode ? null : 'Numpad 5');
+
+  /// Represents the logical "Numpad 6" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad6 = LogicalKeyboardKey(0x00200000036, debugName: kReleaseMode ? null : 'Numpad 6');
+
+  /// Represents the logical "Numpad 7" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad7 = LogicalKeyboardKey(0x00200000037, debugName: kReleaseMode ? null : 'Numpad 7');
+
+  /// Represents the logical "Numpad 8" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad8 = LogicalKeyboardKey(0x00200000038, debugName: kReleaseMode ? null : 'Numpad 8');
+
+  /// Represents the logical "Numpad 9" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpad9 = LogicalKeyboardKey(0x00200000039, debugName: kReleaseMode ? null : 'Numpad 9');
+
+  /// Represents the logical "Numpad Equal" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey numpadEqual = LogicalKeyboardKey(0x0020000003d, debugName: kReleaseMode ? null : 'Numpad Equal');
+
+  /// Represents the logical "Alt Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey altLeft = LogicalKeyboardKey(0x00300000102, debugName: kReleaseMode ? null : 'Alt Left');
+
+  /// Represents the logical "Control Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey controlLeft = LogicalKeyboardKey(0x00300000105, debugName: kReleaseMode ? null : 'Control Left');
+
+  /// Represents the logical "Meta Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey metaLeft = LogicalKeyboardKey(0x00300000109, debugName: kReleaseMode ? null : 'Meta Left');
+
+  /// Represents the logical "Shift Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey shiftLeft = LogicalKeyboardKey(0x0030000010d, debugName: kReleaseMode ? null : 'Shift Left');
+
+  /// Represents the logical "Alt Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey altRight = LogicalKeyboardKey(0x00400000102, debugName: kReleaseMode ? null : 'Alt Right');
+
+  /// Represents the logical "Control Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey controlRight = LogicalKeyboardKey(0x00400000105, debugName: kReleaseMode ? null : 'Control Right');
+
+  /// Represents the logical "Meta Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey metaRight = LogicalKeyboardKey(0x00400000109, debugName: kReleaseMode ? null : 'Meta Right');
+
+  /// Represents the logical "Shift Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey shiftRight = LogicalKeyboardKey(0x0040000010d, debugName: kReleaseMode ? null : 'Shift Right');
+
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
+    0x0000000001: unidentified,
     0x0000000008: backspace,
     0x0000000009: tab,
     0x000000000d: enter,
     0x000000001b: escape,
-    0x000000007f: delete,
     0x0000000020: space,
     0x0000000021: exclamation,
     0x0000000022: quoteDouble,
@@ -2323,7 +2313,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000028: parenthesisLeft,
     0x0000000029: parenthesisRight,
     0x000000002a: asterisk,
-    0x000000002b: plus,
+    0x000000002b: add,
     0x000000002c: comma,
     0x000000002d: minus,
     0x000000002e: period,
@@ -2345,81 +2335,51 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x000000003e: greater,
     0x000000003f: question,
     0x0000000040: at,
-    0x0000000041: upperA,
-    0x0000000042: upperB,
-    0x0000000043: upperC,
-    0x0000000044: upperD,
-    0x0000000045: upperE,
-    0x0000000046: upperF,
-    0x0000000047: upperG,
-    0x0000000048: upperH,
-    0x0000000049: upperI,
-    0x000000004a: upperJ,
-    0x000000004b: upperK,
-    0x000000004c: upperL,
-    0x000000004d: upperM,
-    0x000000004e: upperN,
-    0x000000004f: upperO,
-    0x0000000050: upperP,
-    0x0000000051: upperQ,
-    0x0000000052: upperR,
-    0x0000000053: upperS,
-    0x0000000054: upperT,
-    0x0000000055: upperU,
-    0x0000000056: upperV,
-    0x0000000057: upperW,
-    0x0000000058: upperX,
-    0x0000000059: upperY,
-    0x000000005a: upperZ,
     0x000000005b: bracketLeft,
     0x000000005c: backslash,
     0x000000005d: bracketRight,
     0x000000005e: caret,
-    0x0000000060: backquote,
     0x000000005f: underscore,
-    0x0000000061: lowerA,
-    0x0000000062: lowerB,
-    0x0000000063: lowerC,
-    0x0000000064: lowerD,
-    0x0000000065: lowerE,
-    0x0000000066: lowerF,
-    0x0000000067: lowerG,
-    0x0000000068: lowerH,
-    0x0000000069: lowerI,
-    0x000000006a: lowerJ,
-    0x000000006b: lowerK,
-    0x000000006c: lowerL,
-    0x000000006d: lowerM,
-    0x000000006e: lowerN,
-    0x000000006f: lowerO,
-    0x0000000070: lowerP,
-    0x0000000071: lowerQ,
-    0x0000000072: lowerR,
-    0x0000000073: lowerS,
-    0x0000000074: lowerT,
-    0x0000000075: lowerU,
-    0x0000000076: lowerV,
-    0x0000000077: lowerW,
-    0x0000000078: lowerX,
-    0x0000000079: lowerY,
-    0x000000007a: lowerZ,
+    0x0000000060: backquote,
+    0x0000000061: keyA,
+    0x0000000062: keyB,
+    0x0000000063: keyC,
+    0x0000000064: keyD,
+    0x0000000065: keyE,
+    0x0000000066: keyF,
+    0x0000000067: keyG,
+    0x0000000068: keyH,
+    0x0000000069: keyI,
+    0x000000006a: keyJ,
+    0x000000006b: keyK,
+    0x000000006c: keyL,
+    0x000000006d: keyM,
+    0x000000006e: keyN,
+    0x000000006f: keyO,
+    0x0000000070: keyP,
+    0x0000000071: keyQ,
+    0x0000000072: keyR,
+    0x0000000073: keyS,
+    0x0000000074: keyT,
+    0x0000000075: keyU,
+    0x0000000076: keyV,
+    0x0000000077: keyW,
+    0x0000000078: keyX,
+    0x0000000079: keyY,
+    0x000000007a: keyZ,
     0x000000007b: braceLeft,
+    0x000000007c: bar,
     0x000000007d: braceRight,
     0x000000007e: tilde,
-    0x000000007c: bar,
-    0x0000000001: unidentified,
+    0x000000007f: delete,
     0x0000000101: accel,
-    0x0000000102: alt,
     0x0000000103: altGraph,
     0x0000000104: capsLock,
-    0x0000000105: control,
     0x0000000106: fn,
     0x0000000107: fnLock,
     0x0000000108: hyper,
-    0x0000000109: meta,
     0x000000010a: numLock,
     0x000000010c: scrollLock,
-    0x000000010d: shift,
     0x000000010e: superKey,
     0x000000010f: symbol,
     0x0000000110: symbolLock,
@@ -2459,6 +2419,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x000000050e: zoomOut,
     0x0000000601: brightnessDown,
     0x0000000602: brightnessUp,
+    0x0000000603: camera,
     0x0000000604: eject,
     0x0000000605: logOff,
     0x0000000606: power,
@@ -2528,19 +2489,11 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000906: soft6,
     0x0000000907: soft7,
     0x0000000908: soft8,
-    0x0000000d0a: channelDown,
-    0x0000000d0b: channelUp,
     0x0000000a01: close,
     0x0000000a02: mailForward,
     0x0000000a03: mailReply,
     0x0000000a04: mailSend,
-    0x0000000d5b: mediaClose,
-    0x0000000d2c: mediaFastForward,
-    0x0000000d2e: mediaPause,
-    0x0000000d2f: mediaPlay,
     0x0000000a05: mediaPlayPause,
-    0x0000000d30: mediaRecord,
-    0x0000000d31: mediaRewind,
     0x0000000a07: mediaStop,
     0x0000000a08: mediaTrackNext,
     0x0000000a09: mediaTrackPrevious,
@@ -2549,40 +2502,22 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000a0c: print,
     0x0000000a0d: save,
     0x0000000a0e: spellCheck,
-    0x0000001201: key11,
-    0x0000001202: key12,
-    0x0000000d01: audioBalanceLeft,
-    0x0000000d02: audioBalanceRight,
-    0x0000000d03: audioBassBoostDown,
-    0x0000000e02: audioBassBoostToggle,
-    0x0000000d04: audioBassBoostUp,
-    0x0000000d05: audioFaderFront,
-    0x0000000d06: audioFaderRear,
-    0x0000000d07: audioSurroundModeNext,
-    0x0000000e04: audioTrebleDown,
-    0x0000000e05: audioTrebleUp,
     0x0000000a0f: audioVolumeDown,
     0x0000000a10: audioVolumeUp,
     0x0000000a11: audioVolumeMute,
-    0x0000000e06: microphoneToggle,
-    0x0000000e07: microphoneVolumeDown,
-    0x0000000e08: microphoneVolumeUp,
-    0x0000000e09: microphoneVolumeMute,
-    0x0000000f01: speechCorrectionList,
-    0x0000000f02: speechInputToggle,
-    0x0000000b06: launchApplication1,
     0x0000000b01: launchApplication2,
     0x0000000b02: launchCalendar,
-    0x0000000b0c: launchContacts,
     0x0000000b03: launchMail,
     0x0000000b04: launchMediaPlayer,
     0x0000000b05: launchMusicPlayer,
-    0x0000000b0d: launchPhone,
+    0x0000000b06: launchApplication1,
     0x0000000b07: launchScreenSaver,
     0x0000000b08: launchSpreadsheet,
     0x0000000b09: launchWebBrowser,
     0x0000000b0a: launchWebCam,
     0x0000000b0b: launchWordProcessor,
+    0x0000000b0c: launchContacts,
+    0x0000000b0d: launchPhone,
     0x0000000b0e: launchAssistant,
     0x0000000b0f: launchControlPanel,
     0x0000000c01: browserBack,
@@ -2592,50 +2527,17 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000c05: browserRefresh,
     0x0000000c06: browserSearch,
     0x0000000c07: browserStop,
-    0x0000001001: appSwitch,
-    0x0000001002: call,
-    0x0000000603: camera,
-    0x0000001003: cameraFocus,
-    0x0000001004: endCall,
-    0x0000001005: goBack,
-    0x0000001006: goHome,
-    0x0000001007: headsetHook,
-    0x0000001008: lastNumberRedial,
-    0x0000001009: notification,
-    0x000000100a: mannerMode,
-    0x000000100b: voiceDial,
-    0x0000000d49: tv,
-    0x0000001101: tV3DMode,
-    0x0000001102: tvAntennaCable,
-    0x0000001103: tvAudioDescription,
-    0x0000001104: tvAudioDescriptionMixDown,
-    0x0000001105: tvAudioDescriptionMixUp,
-    0x0000001106: tvContentsMenu,
-    0x0000001107: tvDataService,
-    0x0000000d4a: tvInput,
-    0x0000001108: tvInputComponent1,
-    0x0000001109: tvInputComponent2,
-    0x000000110a: tvInputComposite1,
-    0x000000110b: tvInputComposite2,
-    0x000000110c: tvInputHDMI1,
-    0x000000110d: tvInputHDMI2,
-    0x000000110e: tvInputHDMI3,
-    0x000000110f: tvInputHDMI4,
-    0x0000001110: tvInputVGA1,
-    0x0000001111: tvMediaContext,
-    0x0000001112: tvNetwork,
-    0x0000001113: tvNumberEntry,
-    0x0000000d4b: tvPower,
-    0x0000001114: tvRadioService,
-    0x0000001115: tvSatellite,
-    0x0000001116: tvSatelliteBS,
-    0x0000001117: tvSatelliteCS,
-    0x0000001118: tvSatelliteToggle,
-    0x0000001119: tvTerrestrialAnalog,
-    0x000000111a: tvTerrestrialDigital,
-    0x000000111b: tvTimer,
+    0x0000000d01: audioBalanceLeft,
+    0x0000000d02: audioBalanceRight,
+    0x0000000d03: audioBassBoostDown,
+    0x0000000d04: audioBassBoostUp,
+    0x0000000d05: audioFaderFront,
+    0x0000000d06: audioFaderRear,
+    0x0000000d07: audioSurroundModeNext,
     0x0000000d08: avrInput,
     0x0000000d09: avrPower,
+    0x0000000d0a: channelDown,
+    0x0000000d0b: channelUp,
     0x0000000d0c: colorF0Red,
     0x0000000d0d: colorF1Green,
     0x0000000d0e: colorF2Yellow,
@@ -2645,7 +2547,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000d12: closedCaptionToggle,
     0x0000000d13: dimmer,
     0x0000000d14: displaySwap,
-    0x0000000d4f: dvr,
     0x0000000d15: exit,
     0x0000000d16: favoriteClear0,
     0x0000000d17: favoriteClear1,
@@ -2669,22 +2570,16 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000d29: liveContent,
     0x0000000d2a: lock,
     0x0000000d2b: mediaApps,
-    0x0000000d50: mediaAudioTrack,
+    0x0000000d2c: mediaFastForward,
     0x0000000d2d: mediaLast,
-    0x0000000d51: mediaSkipBackward,
-    0x0000000d52: mediaSkipForward,
+    0x0000000d2e: mediaPause,
+    0x0000000d2f: mediaPlay,
+    0x0000000d30: mediaRecord,
+    0x0000000d31: mediaRewind,
     0x0000000d32: mediaSkip,
-    0x0000000d53: mediaStepBackward,
-    0x0000000d54: mediaStepForward,
-    0x0000000d55: mediaTopMenu,
-    0x0000000d56: navigateIn,
-    0x0000000d57: navigateNext,
-    0x0000000d58: navigateOut,
-    0x0000000d59: navigatePrevious,
     0x0000000d33: nextFavoriteChannel,
     0x0000000d34: nextUserProfile,
     0x0000000d35: onDemand,
-    0x0000000d5a: pairing,
     0x0000000d36: pInPDown,
     0x0000000d37: pInPMove,
     0x0000000d38: pInPToggle,
@@ -2704,9 +2599,102 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0000000d46: stbPower,
     0x0000000d47: subtitle,
     0x0000000d48: teletext,
+    0x0000000d49: tv,
+    0x0000000d4a: tvInput,
+    0x0000000d4b: tvPower,
     0x0000000d4c: videoModeNext,
     0x0000000d4d: wink,
     0x0000000d4e: zoomToggle,
+    0x0000000d4f: dvr,
+    0x0000000d50: mediaAudioTrack,
+    0x0000000d51: mediaSkipBackward,
+    0x0000000d52: mediaSkipForward,
+    0x0000000d53: mediaStepBackward,
+    0x0000000d54: mediaStepForward,
+    0x0000000d55: mediaTopMenu,
+    0x0000000d56: navigateIn,
+    0x0000000d57: navigateNext,
+    0x0000000d58: navigateOut,
+    0x0000000d59: navigatePrevious,
+    0x0000000d5a: pairing,
+    0x0000000d5b: mediaClose,
+    0x0000000e02: audioBassBoostToggle,
+    0x0000000e04: audioTrebleDown,
+    0x0000000e05: audioTrebleUp,
+    0x0000000e06: microphoneToggle,
+    0x0000000e07: microphoneVolumeDown,
+    0x0000000e08: microphoneVolumeUp,
+    0x0000000e09: microphoneVolumeMute,
+    0x0000000f01: speechCorrectionList,
+    0x0000000f02: speechInputToggle,
+    0x0000001001: appSwitch,
+    0x0000001002: call,
+    0x0000001003: cameraFocus,
+    0x0000001004: endCall,
+    0x0000001005: goBack,
+    0x0000001006: goHome,
+    0x0000001007: headsetHook,
+    0x0000001008: lastNumberRedial,
+    0x0000001009: notification,
+    0x000000100a: mannerMode,
+    0x000000100b: voiceDial,
+    0x0000001101: tV3DMode,
+    0x0000001102: tvAntennaCable,
+    0x0000001103: tvAudioDescription,
+    0x0000001104: tvAudioDescriptionMixDown,
+    0x0000001105: tvAudioDescriptionMixUp,
+    0x0000001106: tvContentsMenu,
+    0x0000001107: tvDataService,
+    0x0000001108: tvInputComponent1,
+    0x0000001109: tvInputComponent2,
+    0x000000110a: tvInputComposite1,
+    0x000000110b: tvInputComposite2,
+    0x000000110c: tvInputHDMI1,
+    0x000000110d: tvInputHDMI2,
+    0x000000110e: tvInputHDMI3,
+    0x000000110f: tvInputHDMI4,
+    0x0000001110: tvInputVGA1,
+    0x0000001111: tvMediaContext,
+    0x0000001112: tvNetwork,
+    0x0000001113: tvNumberEntry,
+    0x0000001114: tvRadioService,
+    0x0000001115: tvSatellite,
+    0x0000001116: tvSatelliteBS,
+    0x0000001117: tvSatelliteCS,
+    0x0000001118: tvSatelliteToggle,
+    0x0000001119: tvTerrestrialAnalog,
+    0x000000111a: tvTerrestrialDigital,
+    0x000000111b: tvTimer,
+    0x0000001201: key11,
+    0x0000001202: key12,
+    0x020000000d: numpadEnter,
+    0x0200000028: numpadParenLeft,
+    0x0200000029: numpadParenRight,
+    0x020000002a: numpadMultiply,
+    0x020000002b: numpadAdd,
+    0x020000002c: numpadComma,
+    0x020000002d: numpadSubtract,
+    0x020000002e: numpadDecimal,
+    0x020000002f: numpadDivide,
+    0x0200000030: numpad0,
+    0x0200000031: numpad1,
+    0x0200000032: numpad2,
+    0x0200000033: numpad3,
+    0x0200000034: numpad4,
+    0x0200000035: numpad5,
+    0x0200000036: numpad6,
+    0x0200000037: numpad7,
+    0x0200000038: numpad8,
+    0x0200000039: numpad9,
+    0x020000003d: numpadEqual,
+    0x0300000102: altLeft,
+    0x0300000105: controlLeft,
+    0x0300000109: metaLeft,
+    0x030000010d: shiftLeft,
+    0x0400000102: altRight,
+    0x0400000105: controlRight,
+    0x0400000109: metaRight,
+    0x040000010d: shiftRight,
   };
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.

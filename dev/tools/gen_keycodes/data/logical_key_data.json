@@ -1,4 +1,21 @@
 {
+  "unidentified": {
+    "constant": "unidentified",
+    "english": "Unidentified",
+    "value": 1,
+    "names": {
+      "web": [
+        "Unidentified"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        1
+      ],
+      "gtk": []
+    }
+  },
   "backspace": {
     "constant": "backspace",
     "english": "Backspace",
@@ -45,7 +62,6 @@
       "web": [],
       "gtk": [
         "Return",
-        "KP_Enter",
         "ISO_Enter",
         "3270_Enter"
       ]
@@ -54,7 +70,6 @@
       "web": [],
       "gtk": [
         65293,
-        65421,
         65076,
         64798
       ]
@@ -74,25 +89,6 @@
       "web": [],
       "gtk": [
         65307
-      ]
-    }
-  },
-  "delete": {
-    "constant": "delete",
-    "english": "Delete",
-    "value": 127,
-    "names": {
-      "web": [],
-      "gtk": [
-        "Delete",
-        "KP_Delete"
-      ]
-    },
-    "values": {
-      "web": [],
-      "gtk": [
-        65535,
-        65439
       ]
     }
   },
@@ -236,32 +232,24 @@
     "value": 42,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_Multiply"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65450
-      ]
+      "gtk": []
     }
   },
-  "plus": {
-    "constant": "plus",
-    "english": "Plus",
+  "add": {
+    "constant": "add",
+    "english": "Add",
     "value": 43,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_Add"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65451
-      ]
+      "gtk": []
     }
   },
   "comma": {
@@ -283,15 +271,11 @@
     "value": 45,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_Subtract"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65453
-      ]
+      "gtk": []
     }
   },
   "period": {
@@ -317,15 +301,11 @@
     "value": 47,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_Divide"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65455
-      ]
+      "gtk": []
     }
   },
   "digit0": {
@@ -334,15 +314,11 @@
     "value": 48,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_0"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65456
-      ]
+      "gtk": []
     }
   },
   "digit1": {
@@ -351,15 +327,11 @@
     "value": 49,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_1"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65457
-      ]
+      "gtk": []
     }
   },
   "digit2": {
@@ -368,15 +340,11 @@
     "value": 50,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_2"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65458
-      ]
+      "gtk": []
     }
   },
   "digit3": {
@@ -385,15 +353,11 @@
     "value": 51,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_3"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65459
-      ]
+      "gtk": []
     }
   },
   "digit4": {
@@ -402,15 +366,11 @@
     "value": 52,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_4"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65460
-      ]
+      "gtk": []
     }
   },
   "digit5": {
@@ -419,15 +379,11 @@
     "value": 53,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_5"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65461
-      ]
+      "gtk": []
     }
   },
   "digit6": {
@@ -436,15 +392,11 @@
     "value": 54,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_6"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65462
-      ]
+      "gtk": []
     }
   },
   "digit7": {
@@ -453,15 +405,11 @@
     "value": 55,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_7"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65463
-      ]
+      "gtk": []
     }
   },
   "digit8": {
@@ -470,15 +418,11 @@
     "value": 56,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_8"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65464
-      ]
+      "gtk": []
     }
   },
   "digit9": {
@@ -487,15 +431,11 @@
     "value": 57,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_9"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65465
-      ]
+      "gtk": []
     }
   },
   "colon": {
@@ -543,15 +483,11 @@
     "value": 61,
     "names": {
       "web": [],
-      "gtk": [
-        "KP_Equal"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [],
-      "gtk": [
-        65469
-      ]
+      "gtk": []
     }
   },
   "greater": {
@@ -584,344 +520,6 @@
     "constant": "at",
     "english": "At",
     "value": 64,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperA": {
-    "constant": "upperA",
-    "english": "Upper A",
-    "value": 65,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperB": {
-    "constant": "upperB",
-    "english": "Upper B",
-    "value": 66,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperC": {
-    "constant": "upperC",
-    "english": "Upper C",
-    "value": 67,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperD": {
-    "constant": "upperD",
-    "english": "Upper D",
-    "value": 68,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperE": {
-    "constant": "upperE",
-    "english": "Upper E",
-    "value": 69,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperF": {
-    "constant": "upperF",
-    "english": "Upper F",
-    "value": 70,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperG": {
-    "constant": "upperG",
-    "english": "Upper G",
-    "value": 71,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperH": {
-    "constant": "upperH",
-    "english": "Upper H",
-    "value": 72,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperI": {
-    "constant": "upperI",
-    "english": "Upper I",
-    "value": 73,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperJ": {
-    "constant": "upperJ",
-    "english": "Upper J",
-    "value": 74,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperK": {
-    "constant": "upperK",
-    "english": "Upper K",
-    "value": 75,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperL": {
-    "constant": "upperL",
-    "english": "Upper L",
-    "value": 76,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperM": {
-    "constant": "upperM",
-    "english": "Upper M",
-    "value": 77,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperN": {
-    "constant": "upperN",
-    "english": "Upper N",
-    "value": 78,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperO": {
-    "constant": "upperO",
-    "english": "Upper O",
-    "value": 79,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperP": {
-    "constant": "upperP",
-    "english": "Upper P",
-    "value": 80,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperQ": {
-    "constant": "upperQ",
-    "english": "Upper Q",
-    "value": 81,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperR": {
-    "constant": "upperR",
-    "english": "Upper R",
-    "value": 82,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperS": {
-    "constant": "upperS",
-    "english": "Upper S",
-    "value": 83,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperT": {
-    "constant": "upperT",
-    "english": "Upper T",
-    "value": 84,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperU": {
-    "constant": "upperU",
-    "english": "Upper U",
-    "value": 85,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperV": {
-    "constant": "upperV",
-    "english": "Upper V",
-    "value": 86,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperW": {
-    "constant": "upperW",
-    "english": "Upper W",
-    "value": 87,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperX": {
-    "constant": "upperX",
-    "english": "Upper X",
-    "value": 88,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperY": {
-    "constant": "upperY",
-    "english": "Upper Y",
-    "value": 89,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
-  "upperZ": {
-    "constant": "upperZ",
-    "english": "Upper Z",
-    "value": 90,
     "names": {
       "web": [],
       "gtk": []
@@ -983,19 +581,6 @@
       "gtk": []
     }
   },
-  "backquote": {
-    "constant": "backquote",
-    "english": "Backquote",
-    "value": 96,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
-  },
   "underscore": {
     "constant": "underscore",
     "english": "Underscore",
@@ -1009,9 +594,22 @@
       "gtk": []
     }
   },
-  "lowerA": {
-    "constant": "lowerA",
-    "english": "Lower A",
+  "backquote": {
+    "constant": "backquote",
+    "english": "Backquote",
+    "value": 96,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "keyA": {
+    "constant": "keyA",
+    "english": "Key A",
     "value": 97,
     "names": {
       "web": [],
@@ -1022,9 +620,9 @@
       "gtk": []
     }
   },
-  "lowerB": {
-    "constant": "lowerB",
-    "english": "Lower B",
+  "keyB": {
+    "constant": "keyB",
+    "english": "Key B",
     "value": 98,
     "names": {
       "web": [],
@@ -1035,9 +633,9 @@
       "gtk": []
     }
   },
-  "lowerC": {
-    "constant": "lowerC",
-    "english": "Lower C",
+  "keyC": {
+    "constant": "keyC",
+    "english": "Key C",
     "value": 99,
     "names": {
       "web": [],
@@ -1048,9 +646,9 @@
       "gtk": []
     }
   },
-  "lowerD": {
-    "constant": "lowerD",
-    "english": "Lower D",
+  "keyD": {
+    "constant": "keyD",
+    "english": "Key D",
     "value": 100,
     "names": {
       "web": [],
@@ -1061,9 +659,9 @@
       "gtk": []
     }
   },
-  "lowerE": {
-    "constant": "lowerE",
-    "english": "Lower E",
+  "keyE": {
+    "constant": "keyE",
+    "english": "Key E",
     "value": 101,
     "names": {
       "web": [],
@@ -1074,9 +672,9 @@
       "gtk": []
     }
   },
-  "lowerF": {
-    "constant": "lowerF",
-    "english": "Lower F",
+  "keyF": {
+    "constant": "keyF",
+    "english": "Key F",
     "value": 102,
     "names": {
       "web": [],
@@ -1087,9 +685,9 @@
       "gtk": []
     }
   },
-  "lowerG": {
-    "constant": "lowerG",
-    "english": "Lower G",
+  "keyG": {
+    "constant": "keyG",
+    "english": "Key G",
     "value": 103,
     "names": {
       "web": [],
@@ -1100,9 +698,9 @@
       "gtk": []
     }
   },
-  "lowerH": {
-    "constant": "lowerH",
-    "english": "Lower H",
+  "keyH": {
+    "constant": "keyH",
+    "english": "Key H",
     "value": 104,
     "names": {
       "web": [],
@@ -1113,9 +711,9 @@
       "gtk": []
     }
   },
-  "lowerI": {
-    "constant": "lowerI",
-    "english": "Lower I",
+  "keyI": {
+    "constant": "keyI",
+    "english": "Key I",
     "value": 105,
     "names": {
       "web": [],
@@ -1126,9 +724,9 @@
       "gtk": []
     }
   },
-  "lowerJ": {
-    "constant": "lowerJ",
-    "english": "Lower J",
+  "keyJ": {
+    "constant": "keyJ",
+    "english": "Key J",
     "value": 106,
     "names": {
       "web": [],
@@ -1139,9 +737,9 @@
       "gtk": []
     }
   },
-  "lowerK": {
-    "constant": "lowerK",
-    "english": "Lower K",
+  "keyK": {
+    "constant": "keyK",
+    "english": "Key K",
     "value": 107,
     "names": {
       "web": [],
@@ -1152,9 +750,9 @@
       "gtk": []
     }
   },
-  "lowerL": {
-    "constant": "lowerL",
-    "english": "Lower L",
+  "keyL": {
+    "constant": "keyL",
+    "english": "Key L",
     "value": 108,
     "names": {
       "web": [],
@@ -1165,9 +763,9 @@
       "gtk": []
     }
   },
-  "lowerM": {
-    "constant": "lowerM",
-    "english": "Lower M",
+  "keyM": {
+    "constant": "keyM",
+    "english": "Key M",
     "value": 109,
     "names": {
       "web": [],
@@ -1178,9 +776,9 @@
       "gtk": []
     }
   },
-  "lowerN": {
-    "constant": "lowerN",
-    "english": "Lower N",
+  "keyN": {
+    "constant": "keyN",
+    "english": "Key N",
     "value": 110,
     "names": {
       "web": [],
@@ -1191,9 +789,9 @@
       "gtk": []
     }
   },
-  "lowerO": {
-    "constant": "lowerO",
-    "english": "Lower O",
+  "keyO": {
+    "constant": "keyO",
+    "english": "Key O",
     "value": 111,
     "names": {
       "web": [],
@@ -1204,9 +802,9 @@
       "gtk": []
     }
   },
-  "lowerP": {
-    "constant": "lowerP",
-    "english": "Lower P",
+  "keyP": {
+    "constant": "keyP",
+    "english": "Key P",
     "value": 112,
     "names": {
       "web": [],
@@ -1217,9 +815,9 @@
       "gtk": []
     }
   },
-  "lowerQ": {
-    "constant": "lowerQ",
-    "english": "Lower Q",
+  "keyQ": {
+    "constant": "keyQ",
+    "english": "Key Q",
     "value": 113,
     "names": {
       "web": [],
@@ -1230,9 +828,9 @@
       "gtk": []
     }
   },
-  "lowerR": {
-    "constant": "lowerR",
-    "english": "Lower R",
+  "keyR": {
+    "constant": "keyR",
+    "english": "Key R",
     "value": 114,
     "names": {
       "web": [],
@@ -1243,9 +841,9 @@
       "gtk": []
     }
   },
-  "lowerS": {
-    "constant": "lowerS",
-    "english": "Lower S",
+  "keyS": {
+    "constant": "keyS",
+    "english": "Key S",
     "value": 115,
     "names": {
       "web": [],
@@ -1256,9 +854,9 @@
       "gtk": []
     }
   },
-  "lowerT": {
-    "constant": "lowerT",
-    "english": "Lower T",
+  "keyT": {
+    "constant": "keyT",
+    "english": "Key T",
     "value": 116,
     "names": {
       "web": [],
@@ -1269,9 +867,9 @@
       "gtk": []
     }
   },
-  "lowerU": {
-    "constant": "lowerU",
-    "english": "Lower U",
+  "keyU": {
+    "constant": "keyU",
+    "english": "Key U",
     "value": 117,
     "names": {
       "web": [],
@@ -1282,9 +880,9 @@
       "gtk": []
     }
   },
-  "lowerV": {
-    "constant": "lowerV",
-    "english": "Lower V",
+  "keyV": {
+    "constant": "keyV",
+    "english": "Key V",
     "value": 118,
     "names": {
       "web": [],
@@ -1295,9 +893,9 @@
       "gtk": []
     }
   },
-  "lowerW": {
-    "constant": "lowerW",
-    "english": "Lower W",
+  "keyW": {
+    "constant": "keyW",
+    "english": "Key W",
     "value": 119,
     "names": {
       "web": [],
@@ -1308,9 +906,9 @@
       "gtk": []
     }
   },
-  "lowerX": {
-    "constant": "lowerX",
-    "english": "Lower X",
+  "keyX": {
+    "constant": "keyX",
+    "english": "Key X",
     "value": 120,
     "names": {
       "web": [],
@@ -1321,9 +919,9 @@
       "gtk": []
     }
   },
-  "lowerY": {
-    "constant": "lowerY",
-    "english": "Lower Y",
+  "keyY": {
+    "constant": "keyY",
+    "english": "Key Y",
     "value": 121,
     "names": {
       "web": [],
@@ -1334,9 +932,9 @@
       "gtk": []
     }
   },
-  "lowerZ": {
-    "constant": "lowerZ",
-    "english": "Lower Z",
+  "keyZ": {
+    "constant": "keyZ",
+    "english": "Key Z",
     "value": 122,
     "names": {
       "web": [],
@@ -1351,6 +949,19 @@
     "constant": "braceLeft",
     "english": "Brace Left",
     "value": 123,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "bar": {
+    "constant": "bar",
+    "english": "Bar",
+    "value": 124,
     "names": {
       "web": [],
       "gtk": []
@@ -1386,34 +997,21 @@
       "gtk": []
     }
   },
-  "bar": {
-    "constant": "bar",
-    "english": "Bar",
-    "value": 124,
+  "delete": {
+    "constant": "delete",
+    "english": "Delete",
+    "value": 127,
     "names": {
       "web": [],
-      "gtk": []
+      "gtk": [
+        "Delete"
+      ]
     },
     "values": {
       "web": [],
-      "gtk": []
-    }
-  },
-  "unidentified": {
-    "constant": "unidentified",
-    "english": "Unidentified",
-    "value": 1,
-    "names": {
-      "web": [
-        "Unidentified"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        1
-      ],
-      "gtk": []
+      "gtk": [
+        65535
+      ]
     }
   },
   "accel": {
@@ -1431,29 +1029,6 @@
         257
       ],
       "gtk": []
-    }
-  },
-  "alt": {
-    "constant": "alt",
-    "english": "Alt",
-    "value": 258,
-    "names": {
-      "web": [
-        "Alt"
-      ],
-      "gtk": [
-        "Alt_L",
-        "Alt_R"
-      ]
-    },
-    "values": {
-      "web": [
-        258
-      ],
-      "gtk": [
-        65513,
-        65514
-      ]
     }
   },
   "altGraph": {
@@ -1491,29 +1066,6 @@
       ],
       "gtk": [
         65509
-      ]
-    }
-  },
-  "control": {
-    "constant": "control",
-    "english": "Control",
-    "value": 261,
-    "names": {
-      "web": [
-        "Control"
-      ],
-      "gtk": [
-        "Control_L",
-        "Control_R"
-      ]
-    },
-    "values": {
-      "web": [
-        261
-      ],
-      "gtk": [
-        65507,
-        65508
       ]
     }
   },
@@ -1574,29 +1126,6 @@
       ]
     }
   },
-  "meta": {
-    "constant": "meta",
-    "english": "Meta",
-    "value": 265,
-    "names": {
-      "web": [
-        "Meta"
-      ],
-      "gtk": [
-        "Meta_L",
-        "Meta_R"
-      ]
-    },
-    "values": {
-      "web": [
-        265
-      ],
-      "gtk": [
-        65511,
-        65512
-      ]
-    }
-  },
   "numLock": {
     "constant": "numLock",
     "english": "Num Lock",
@@ -1636,29 +1165,6 @@
       ],
       "gtk": [
         65300
-      ]
-    }
-  },
-  "shift": {
-    "constant": "shift",
-    "english": "Shift",
-    "value": 269,
-    "names": {
-      "web": [
-        "Shift"
-      ],
-      "gtk": [
-        "Shift_L",
-        "Shift_R"
-      ]
-    },
-    "values": {
-      "web": [
-        269
-      ],
-      "gtk": [
-        65505,
-        65506
       ]
     }
   },
@@ -1762,8 +1268,7 @@
         "ArrowDown"
       ],
       "gtk": [
-        "Down",
-        "KP_Down"
+        "Down"
       ]
     },
     "values": {
@@ -1771,8 +1276,7 @@
         769
       ],
       "gtk": [
-        65364,
-        65433
+        65364
       ]
     }
   },
@@ -1785,8 +1289,7 @@
         "ArrowLeft"
       ],
       "gtk": [
-        "Left",
-        "KP_Left"
+        "Left"
       ]
     },
     "values": {
@@ -1794,8 +1297,7 @@
         770
       ],
       "gtk": [
-        65361,
-        65430
+        65361
       ]
     }
   },
@@ -1808,8 +1310,7 @@
         "ArrowRight"
       ],
       "gtk": [
-        "Right",
-        "KP_Right"
+        "Right"
       ]
     },
     "values": {
@@ -1817,8 +1318,7 @@
         771
       ],
       "gtk": [
-        65363,
-        65432
+        65363
       ]
     }
   },
@@ -1831,8 +1331,7 @@
         "ArrowUp"
       ],
       "gtk": [
-        "Up",
-        "KP_Up"
+        "Up"
       ]
     },
     "values": {
@@ -1840,8 +1339,7 @@
         772
       ],
       "gtk": [
-        65362,
-        65431
+        65362
       ]
     }
   },
@@ -1854,8 +1352,7 @@
         "End"
       ],
       "gtk": [
-        "End",
-        "KP_End"
+        "End"
       ]
     },
     "values": {
@@ -1863,8 +1360,7 @@
         773
       ],
       "gtk": [
-        65367,
-        65436
+        65367
       ]
     }
   },
@@ -1877,8 +1373,7 @@
         "Home"
       ],
       "gtk": [
-        "Home",
-        "KP_Home"
+        "Home"
       ]
     },
     "values": {
@@ -1886,8 +1381,7 @@
         774
       ],
       "gtk": [
-        65360,
-        65429
+        65360
       ]
     }
   },
@@ -1900,8 +1394,7 @@
         "PageDown"
       ],
       "gtk": [
-        "Page_Down",
-        "KP_Page_Down"
+        "Page_Down"
       ]
     },
     "values": {
@@ -1909,8 +1402,7 @@
         775
       ],
       "gtk": [
-        65366,
-        65435
+        65366
       ]
     }
   },
@@ -1923,8 +1415,7 @@
         "PageUp"
       ],
       "gtk": [
-        "Page_Up",
-        "KP_Page_Up"
+        "Page_Up"
       ]
     },
     "values": {
@@ -1932,8 +1423,7 @@
         776
       ],
       "gtk": [
-        65365,
-        65434
+        65365
       ]
     }
   },
@@ -2070,8 +1560,7 @@
         "Insert"
       ],
       "gtk": [
-        "Insert",
-        "KP_Insert"
+        "Insert"
       ]
     },
     "values": {
@@ -2079,8 +1568,7 @@
         1031
       ],
       "gtk": [
-        65379,
-        65438
+        65379
       ]
     }
   },
@@ -2465,6 +1953,23 @@
       "gtk": [
         269025026
       ]
+    }
+  },
+  "camera": {
+    "constant": "camera",
+    "english": "Camera",
+    "value": 1539,
+    "names": {
+      "web": [
+        "Camera"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        1539
+      ],
+      "gtk": []
     }
   },
   "eject": {
@@ -3848,40 +3353,6 @@
       "gtk": []
     }
   },
-  "channelDown": {
-    "constant": "channelDown",
-    "english": "Channel Down",
-    "value": 3338,
-    "names": {
-      "web": [
-        "ChannelDown"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3338
-      ],
-      "gtk": []
-    }
-  },
-  "channelUp": {
-    "constant": "channelUp",
-    "english": "Channel Up",
-    "value": 3339,
-    "names": {
-      "web": [
-        "ChannelUp"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3339
-      ],
-      "gtk": []
-    }
-  },
   "close": {
     "constant": "close",
     "english": "Close",
@@ -3966,88 +3437,6 @@
       ]
     }
   },
-  "mediaClose": {
-    "constant": "mediaClose",
-    "english": "Media Close",
-    "value": 3419,
-    "names": {
-      "web": [
-        "MediaClose"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3419
-      ],
-      "gtk": []
-    }
-  },
-  "mediaFastForward": {
-    "constant": "mediaFastForward",
-    "english": "Media Fast Forward",
-    "value": 3372,
-    "names": {
-      "web": [
-        "MediaFastForward"
-      ],
-      "gtk": [
-        "AudioForward"
-      ]
-    },
-    "values": {
-      "web": [
-        3372
-      ],
-      "gtk": [
-        269025175
-      ]
-    }
-  },
-  "mediaPause": {
-    "constant": "mediaPause",
-    "english": "Media Pause",
-    "value": 3374,
-    "names": {
-      "web": [
-        "MediaPause"
-      ],
-      "gtk": [
-        "AudioPause"
-      ]
-    },
-    "values": {
-      "web": [
-        3374
-      ],
-      "gtk": [
-        269025073
-      ]
-    }
-  },
-  "mediaPlay": {
-    "constant": "mediaPlay",
-    "english": "Media Play",
-    "value": 3375,
-    "names": {
-      "web": [
-        "MediaPlay"
-      ],
-      "gtk": [
-        "3270_Play",
-        "AudioPlay"
-      ]
-    },
-    "values": {
-      "web": [
-        3375
-      ],
-      "gtk": [
-        64790,
-        269025044
-      ]
-    }
-  },
   "mediaPlayPause": {
     "constant": "mediaPlayPause",
     "english": "Media Play Pause",
@@ -4063,48 +3452,6 @@
         2565
       ],
       "gtk": []
-    }
-  },
-  "mediaRecord": {
-    "constant": "mediaRecord",
-    "english": "Media Record",
-    "value": 3376,
-    "names": {
-      "web": [
-        "MediaRecord"
-      ],
-      "gtk": [
-        "AudioRecord"
-      ]
-    },
-    "values": {
-      "web": [
-        3376
-      ],
-      "gtk": [
-        269025052
-      ]
-    }
-  },
-  "mediaRewind": {
-    "constant": "mediaRewind",
-    "english": "Media Rewind",
-    "value": 3377,
-    "names": {
-      "web": [
-        "MediaRewind"
-      ],
-      "gtk": [
-        "AudioRewind"
-      ]
-    },
-    "values": {
-      "web": [
-        3377
-      ],
-      "gtk": [
-        269025086
-      ]
     }
   },
   "mediaStop": {
@@ -4275,210 +3622,6 @@
       ]
     }
   },
-  "key11": {
-    "constant": "key11",
-    "english": "Key 11",
-    "value": 4609,
-    "names": {
-      "web": [
-        "Key11"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4609
-      ],
-      "gtk": []
-    }
-  },
-  "key12": {
-    "constant": "key12",
-    "english": "Key 12",
-    "value": 4610,
-    "names": {
-      "web": [
-        "Key12"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4610
-      ],
-      "gtk": []
-    }
-  },
-  "audioBalanceLeft": {
-    "constant": "audioBalanceLeft",
-    "english": "Audio Balance Left",
-    "value": 3329,
-    "names": {
-      "web": [
-        "AudioBalanceLeft"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3329
-      ],
-      "gtk": []
-    }
-  },
-  "audioBalanceRight": {
-    "constant": "audioBalanceRight",
-    "english": "Audio Balance Right",
-    "value": 3330,
-    "names": {
-      "web": [
-        "AudioBalanceRight"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3330
-      ],
-      "gtk": []
-    }
-  },
-  "audioBassBoostDown": {
-    "constant": "audioBassBoostDown",
-    "english": "Audio Bass Boost Down",
-    "value": 3331,
-    "names": {
-      "web": [
-        "AudioBassBoostDown"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3331
-      ],
-      "gtk": []
-    }
-  },
-  "audioBassBoostToggle": {
-    "constant": "audioBassBoostToggle",
-    "english": "Audio Bass Boost Toggle",
-    "value": 3586,
-    "names": {
-      "web": [
-        "AudioBassBoostToggle"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3586
-      ],
-      "gtk": []
-    }
-  },
-  "audioBassBoostUp": {
-    "constant": "audioBassBoostUp",
-    "english": "Audio Bass Boost Up",
-    "value": 3332,
-    "names": {
-      "web": [
-        "AudioBassBoostUp"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3332
-      ],
-      "gtk": []
-    }
-  },
-  "audioFaderFront": {
-    "constant": "audioFaderFront",
-    "english": "Audio Fader Front",
-    "value": 3333,
-    "names": {
-      "web": [
-        "AudioFaderFront"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3333
-      ],
-      "gtk": []
-    }
-  },
-  "audioFaderRear": {
-    "constant": "audioFaderRear",
-    "english": "Audio Fader Rear",
-    "value": 3334,
-    "names": {
-      "web": [
-        "AudioFaderRear"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3334
-      ],
-      "gtk": []
-    }
-  },
-  "audioSurroundModeNext": {
-    "constant": "audioSurroundModeNext",
-    "english": "Audio Surround Mode Next",
-    "value": 3335,
-    "names": {
-      "web": [
-        "AudioSurroundModeNext"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3335
-      ],
-      "gtk": []
-    }
-  },
-  "audioTrebleDown": {
-    "constant": "audioTrebleDown",
-    "english": "Audio Treble Down",
-    "value": 3588,
-    "names": {
-      "web": [
-        "AudioTrebleDown"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3588
-      ],
-      "gtk": []
-    }
-  },
-  "audioTrebleUp": {
-    "constant": "audioTrebleUp",
-    "english": "Audio Treble Up",
-    "value": 3589,
-    "names": {
-      "web": [
-        "AudioTrebleUp"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3589
-      ],
-      "gtk": []
-    }
-  },
   "audioVolumeDown": {
     "constant": "audioVolumeDown",
     "english": "Audio Volume Down",
@@ -4542,125 +3685,6 @@
       ]
     }
   },
-  "microphoneToggle": {
-    "constant": "microphoneToggle",
-    "english": "Microphone Toggle",
-    "value": 3590,
-    "names": {
-      "web": [
-        "MicrophoneToggle"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3590
-      ],
-      "gtk": []
-    }
-  },
-  "microphoneVolumeDown": {
-    "constant": "microphoneVolumeDown",
-    "english": "Microphone Volume Down",
-    "value": 3591,
-    "names": {
-      "web": [
-        "MicrophoneVolumeDown"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3591
-      ],
-      "gtk": []
-    }
-  },
-  "microphoneVolumeUp": {
-    "constant": "microphoneVolumeUp",
-    "english": "Microphone Volume Up",
-    "value": 3592,
-    "names": {
-      "web": [
-        "MicrophoneVolumeUp"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3592
-      ],
-      "gtk": []
-    }
-  },
-  "microphoneVolumeMute": {
-    "constant": "microphoneVolumeMute",
-    "english": "Microphone Volume Mute",
-    "value": 3593,
-    "names": {
-      "web": [
-        "MicrophoneVolumeMute"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3593
-      ],
-      "gtk": []
-    }
-  },
-  "speechCorrectionList": {
-    "constant": "speechCorrectionList",
-    "english": "Speech Correction List",
-    "value": 3841,
-    "names": {
-      "web": [
-        "SpeechCorrectionList"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3841
-      ],
-      "gtk": []
-    }
-  },
-  "speechInputToggle": {
-    "constant": "speechInputToggle",
-    "english": "Speech Input Toggle",
-    "value": 3842,
-    "names": {
-      "web": [
-        "SpeechInputToggle"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3842
-      ],
-      "gtk": []
-    }
-  },
-  "launchApplication1": {
-    "constant": "launchApplication1",
-    "english": "Launch Application 1",
-    "value": 2822,
-    "names": {
-      "web": [
-        "LaunchApplication1"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        2822
-      ],
-      "gtk": []
-    }
-  },
   "launchApplication2": {
     "constant": "launchApplication2",
     "english": "Launch Application 2",
@@ -4697,23 +3721,6 @@
       "gtk": [
         269025056
       ]
-    }
-  },
-  "launchContacts": {
-    "constant": "launchContacts",
-    "english": "Launch Contacts",
-    "value": 2828,
-    "names": {
-      "web": [
-        "LaunchContacts"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        2828
-      ],
-      "gtk": []
     }
   },
   "launchMail": {
@@ -4771,25 +3778,21 @@
       "gtk": []
     }
   },
-  "launchPhone": {
-    "constant": "launchPhone",
-    "english": "Launch Phone",
-    "value": 2829,
+  "launchApplication1": {
+    "constant": "launchApplication1",
+    "english": "Launch Application 1",
+    "value": 2822,
     "names": {
       "web": [
-        "LaunchPhone"
+        "LaunchApplication1"
       ],
-      "gtk": [
-        "Phone"
-      ]
+      "gtk": []
     },
     "values": {
       "web": [
-        2829
+        2822
       ],
-      "gtk": [
-        269025134
-      ]
+      "gtk": []
     }
   },
   "launchScreenSaver": {
@@ -4879,6 +3882,44 @@
         2827
       ],
       "gtk": []
+    }
+  },
+  "launchContacts": {
+    "constant": "launchContacts",
+    "english": "Launch Contacts",
+    "value": 2828,
+    "names": {
+      "web": [
+        "LaunchContacts"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        2828
+      ],
+      "gtk": []
+    }
+  },
+  "launchPhone": {
+    "constant": "launchPhone",
+    "english": "Launch Phone",
+    "value": 2829,
+    "names": {
+      "web": [
+        "LaunchPhone"
+      ],
+      "gtk": [
+        "Phone"
+      ]
+    },
+    "values": {
+      "web": [
+        2829
+      ],
+      "gtk": [
+        269025134
+      ]
     }
   },
   "launchAssistant": {
@@ -5062,716 +4103,121 @@
       ]
     }
   },
-  "appSwitch": {
-    "constant": "appSwitch",
-    "english": "App Switch",
-    "value": 4097,
+  "audioBalanceLeft": {
+    "constant": "audioBalanceLeft",
+    "english": "Audio Balance Left",
+    "value": 3329,
     "names": {
       "web": [
-        "AppSwitch"
+        "AudioBalanceLeft"
       ],
       "gtk": []
     },
     "values": {
       "web": [
-        4097
+        3329
       ],
       "gtk": []
     }
   },
-  "call": {
-    "constant": "call",
-    "english": "Call",
-    "value": 4098,
+  "audioBalanceRight": {
+    "constant": "audioBalanceRight",
+    "english": "Audio Balance Right",
+    "value": 3330,
     "names": {
       "web": [
-        "Call"
+        "AudioBalanceRight"
       ],
       "gtk": []
     },
     "values": {
       "web": [
-        4098
+        3330
       ],
       "gtk": []
     }
   },
-  "camera": {
-    "constant": "camera",
-    "english": "Camera",
-    "value": 1539,
+  "audioBassBoostDown": {
+    "constant": "audioBassBoostDown",
+    "english": "Audio Bass Boost Down",
+    "value": 3331,
     "names": {
       "web": [
-        "Camera"
+        "AudioBassBoostDown"
       ],
       "gtk": []
     },
     "values": {
       "web": [
-        1539
+        3331
       ],
       "gtk": []
     }
   },
-  "cameraFocus": {
-    "constant": "cameraFocus",
-    "english": "Camera Focus",
-    "value": 4099,
+  "audioBassBoostUp": {
+    "constant": "audioBassBoostUp",
+    "english": "Audio Bass Boost Up",
+    "value": 3332,
     "names": {
       "web": [
-        "CameraFocus"
+        "AudioBassBoostUp"
       ],
       "gtk": []
     },
     "values": {
       "web": [
-        4099
+        3332
       ],
       "gtk": []
     }
   },
-  "endCall": {
-    "constant": "endCall",
-    "english": "End Call",
-    "value": 4100,
+  "audioFaderFront": {
+    "constant": "audioFaderFront",
+    "english": "Audio Fader Front",
+    "value": 3333,
     "names": {
       "web": [
-        "EndCall"
+        "AudioFaderFront"
       ],
       "gtk": []
     },
     "values": {
       "web": [
-        4100
+        3333
       ],
       "gtk": []
     }
   },
-  "goBack": {
-    "constant": "goBack",
-    "english": "Go Back",
-    "value": 4101,
+  "audioFaderRear": {
+    "constant": "audioFaderRear",
+    "english": "Audio Fader Rear",
+    "value": 3334,
     "names": {
       "web": [
-        "GoBack"
+        "AudioFaderRear"
       ],
       "gtk": []
     },
     "values": {
       "web": [
-        4101
+        3334
       ],
       "gtk": []
     }
   },
-  "goHome": {
-    "constant": "goHome",
-    "english": "Go Home",
-    "value": 4102,
+  "audioSurroundModeNext": {
+    "constant": "audioSurroundModeNext",
+    "english": "Audio Surround Mode Next",
+    "value": 3335,
     "names": {
       "web": [
-        "GoHome"
+        "AudioSurroundModeNext"
       ],
       "gtk": []
     },
     "values": {
       "web": [
-        4102
-      ],
-      "gtk": []
-    }
-  },
-  "headsetHook": {
-    "constant": "headsetHook",
-    "english": "Headset Hook",
-    "value": 4103,
-    "names": {
-      "web": [
-        "HeadsetHook"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4103
-      ],
-      "gtk": []
-    }
-  },
-  "lastNumberRedial": {
-    "constant": "lastNumberRedial",
-    "english": "Last Number Redial",
-    "value": 4104,
-    "names": {
-      "web": [
-        "LastNumberRedial"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4104
-      ],
-      "gtk": []
-    }
-  },
-  "notification": {
-    "constant": "notification",
-    "english": "Notification",
-    "value": 4105,
-    "names": {
-      "web": [
-        "Notification"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4105
-      ],
-      "gtk": []
-    }
-  },
-  "mannerMode": {
-    "constant": "mannerMode",
-    "english": "Manner Mode",
-    "value": 4106,
-    "names": {
-      "web": [
-        "MannerMode"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4106
-      ],
-      "gtk": []
-    }
-  },
-  "voiceDial": {
-    "constant": "voiceDial",
-    "english": "Voice Dial",
-    "value": 4107,
-    "names": {
-      "web": [
-        "VoiceDial"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4107
-      ],
-      "gtk": []
-    }
-  },
-  "tv": {
-    "constant": "tv",
-    "english": "TV",
-    "value": 3401,
-    "names": {
-      "web": [
-        "TV"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3401
-      ],
-      "gtk": []
-    }
-  },
-  "tV3DMode": {
-    "constant": "tV3DMode",
-    "english": "TV 3 D Mode",
-    "value": 4353,
-    "names": {
-      "web": [
-        "TV3DMode"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4353
-      ],
-      "gtk": []
-    }
-  },
-  "tvAntennaCable": {
-    "constant": "tvAntennaCable",
-    "english": "TV Antenna Cable",
-    "value": 4354,
-    "names": {
-      "web": [
-        "TVAntennaCable"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4354
-      ],
-      "gtk": []
-    }
-  },
-  "tvAudioDescription": {
-    "constant": "tvAudioDescription",
-    "english": "TV Audio Description",
-    "value": 4355,
-    "names": {
-      "web": [
-        "TVAudioDescription"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4355
-      ],
-      "gtk": []
-    }
-  },
-  "tvAudioDescriptionMixDown": {
-    "constant": "tvAudioDescriptionMixDown",
-    "english": "TV Audio Description Mix Down",
-    "value": 4356,
-    "names": {
-      "web": [
-        "TVAudioDescriptionMixDown"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4356
-      ],
-      "gtk": []
-    }
-  },
-  "tvAudioDescriptionMixUp": {
-    "constant": "tvAudioDescriptionMixUp",
-    "english": "TV Audio Description Mix Up",
-    "value": 4357,
-    "names": {
-      "web": [
-        "TVAudioDescriptionMixUp"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4357
-      ],
-      "gtk": []
-    }
-  },
-  "tvContentsMenu": {
-    "constant": "tvContentsMenu",
-    "english": "TV Contents Menu",
-    "value": 4358,
-    "names": {
-      "web": [
-        "TVContentsMenu"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4358
-      ],
-      "gtk": []
-    }
-  },
-  "tvDataService": {
-    "constant": "tvDataService",
-    "english": "TV Data Service",
-    "value": 4359,
-    "names": {
-      "web": [
-        "TVDataService"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4359
-      ],
-      "gtk": []
-    }
-  },
-  "tvInput": {
-    "constant": "tvInput",
-    "english": "TV Input",
-    "value": 3402,
-    "names": {
-      "web": [
-        "TVInput"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3402
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputComponent1": {
-    "constant": "tvInputComponent1",
-    "english": "TV Input Component 1",
-    "value": 4360,
-    "names": {
-      "web": [
-        "TVInputComponent1"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4360
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputComponent2": {
-    "constant": "tvInputComponent2",
-    "english": "TV Input Component 2",
-    "value": 4361,
-    "names": {
-      "web": [
-        "TVInputComponent2"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4361
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputComposite1": {
-    "constant": "tvInputComposite1",
-    "english": "TV Input Composite 1",
-    "value": 4362,
-    "names": {
-      "web": [
-        "TVInputComposite1"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4362
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputComposite2": {
-    "constant": "tvInputComposite2",
-    "english": "TV Input Composite 2",
-    "value": 4363,
-    "names": {
-      "web": [
-        "TVInputComposite2"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4363
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputHDMI1": {
-    "constant": "tvInputHDMI1",
-    "english": "TV Input HDMI 1",
-    "value": 4364,
-    "names": {
-      "web": [
-        "TVInputHDMI1"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4364
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputHDMI2": {
-    "constant": "tvInputHDMI2",
-    "english": "TV Input HDMI 2",
-    "value": 4365,
-    "names": {
-      "web": [
-        "TVInputHDMI2"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4365
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputHDMI3": {
-    "constant": "tvInputHDMI3",
-    "english": "TV Input HDMI 3",
-    "value": 4366,
-    "names": {
-      "web": [
-        "TVInputHDMI3"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4366
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputHDMI4": {
-    "constant": "tvInputHDMI4",
-    "english": "TV Input HDMI 4",
-    "value": 4367,
-    "names": {
-      "web": [
-        "TVInputHDMI4"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4367
-      ],
-      "gtk": []
-    }
-  },
-  "tvInputVGA1": {
-    "constant": "tvInputVGA1",
-    "english": "TV Input VGA 1",
-    "value": 4368,
-    "names": {
-      "web": [
-        "TVInputVGA1"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4368
-      ],
-      "gtk": []
-    }
-  },
-  "tvMediaContext": {
-    "constant": "tvMediaContext",
-    "english": "TV Media Context",
-    "value": 4369,
-    "names": {
-      "web": [
-        "TVMediaContext"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4369
-      ],
-      "gtk": []
-    }
-  },
-  "tvNetwork": {
-    "constant": "tvNetwork",
-    "english": "TV Network",
-    "value": 4370,
-    "names": {
-      "web": [
-        "TVNetwork"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4370
-      ],
-      "gtk": []
-    }
-  },
-  "tvNumberEntry": {
-    "constant": "tvNumberEntry",
-    "english": "TV Number Entry",
-    "value": 4371,
-    "names": {
-      "web": [
-        "TVNumberEntry"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4371
-      ],
-      "gtk": []
-    }
-  },
-  "tvPower": {
-    "constant": "tvPower",
-    "english": "TV Power",
-    "value": 3403,
-    "names": {
-      "web": [
-        "TVPower"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3403
-      ],
-      "gtk": []
-    }
-  },
-  "tvRadioService": {
-    "constant": "tvRadioService",
-    "english": "TV Radio Service",
-    "value": 4372,
-    "names": {
-      "web": [
-        "TVRadioService"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4372
-      ],
-      "gtk": []
-    }
-  },
-  "tvSatellite": {
-    "constant": "tvSatellite",
-    "english": "TV Satellite",
-    "value": 4373,
-    "names": {
-      "web": [
-        "TVSatellite"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4373
-      ],
-      "gtk": []
-    }
-  },
-  "tvSatelliteBS": {
-    "constant": "tvSatelliteBS",
-    "english": "TV Satellite BS",
-    "value": 4374,
-    "names": {
-      "web": [
-        "TVSatelliteBS"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4374
-      ],
-      "gtk": []
-    }
-  },
-  "tvSatelliteCS": {
-    "constant": "tvSatelliteCS",
-    "english": "TV Satellite CS",
-    "value": 4375,
-    "names": {
-      "web": [
-        "TVSatelliteCS"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4375
-      ],
-      "gtk": []
-    }
-  },
-  "tvSatelliteToggle": {
-    "constant": "tvSatelliteToggle",
-    "english": "TV Satellite Toggle",
-    "value": 4376,
-    "names": {
-      "web": [
-        "TVSatelliteToggle"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4376
-      ],
-      "gtk": []
-    }
-  },
-  "tvTerrestrialAnalog": {
-    "constant": "tvTerrestrialAnalog",
-    "english": "TV Terrestrial Analog",
-    "value": 4377,
-    "names": {
-      "web": [
-        "TVTerrestrialAnalog"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4377
-      ],
-      "gtk": []
-    }
-  },
-  "tvTerrestrialDigital": {
-    "constant": "tvTerrestrialDigital",
-    "english": "TV Terrestrial Digital",
-    "value": 4378,
-    "names": {
-      "web": [
-        "TVTerrestrialDigital"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4378
-      ],
-      "gtk": []
-    }
-  },
-  "tvTimer": {
-    "constant": "tvTimer",
-    "english": "TV Timer",
-    "value": 4379,
-    "names": {
-      "web": [
-        "TVTimer"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        4379
+        3335
       ],
       "gtk": []
     }
@@ -5806,6 +4252,40 @@
     "values": {
       "web": [
         3337
+      ],
+      "gtk": []
+    }
+  },
+  "channelDown": {
+    "constant": "channelDown",
+    "english": "Channel Down",
+    "value": 3338,
+    "names": {
+      "web": [
+        "ChannelDown"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3338
+      ],
+      "gtk": []
+    }
+  },
+  "channelUp": {
+    "constant": "channelUp",
+    "english": "Channel Up",
+    "value": 3339,
+    "names": {
+      "web": [
+        "ChannelUp"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3339
       ],
       "gtk": []
     }
@@ -5959,23 +4439,6 @@
     "values": {
       "web": [
         3348
-      ],
-      "gtk": []
-    }
-  },
-  "dvr": {
-    "constant": "dvr",
-    "english": "DVR",
-    "value": 3407,
-    "names": {
-      "web": [
-        "DVR"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3407
       ],
       "gtk": []
     }
@@ -6371,21 +4834,25 @@
       "gtk": []
     }
   },
-  "mediaAudioTrack": {
-    "constant": "mediaAudioTrack",
-    "english": "Media Audio Track",
-    "value": 3408,
+  "mediaFastForward": {
+    "constant": "mediaFastForward",
+    "english": "Media Fast Forward",
+    "value": 3372,
     "names": {
       "web": [
-        "MediaAudioTrack"
+        "MediaFastForward"
       ],
-      "gtk": []
+      "gtk": [
+        "AudioForward"
+      ]
     },
     "values": {
       "web": [
-        3408
+        3372
       ],
-      "gtk": []
+      "gtk": [
+        269025175
+      ]
     }
   },
   "mediaLast": {
@@ -6405,38 +4872,90 @@
       "gtk": []
     }
   },
-  "mediaSkipBackward": {
-    "constant": "mediaSkipBackward",
-    "english": "Media Skip Backward",
-    "value": 3409,
+  "mediaPause": {
+    "constant": "mediaPause",
+    "english": "Media Pause",
+    "value": 3374,
     "names": {
       "web": [
-        "MediaSkipBackward"
+        "MediaPause"
       ],
-      "gtk": []
+      "gtk": [
+        "AudioPause"
+      ]
     },
     "values": {
       "web": [
-        3409
+        3374
       ],
-      "gtk": []
+      "gtk": [
+        269025073
+      ]
     }
   },
-  "mediaSkipForward": {
-    "constant": "mediaSkipForward",
-    "english": "Media Skip Forward",
-    "value": 3410,
+  "mediaPlay": {
+    "constant": "mediaPlay",
+    "english": "Media Play",
+    "value": 3375,
     "names": {
       "web": [
-        "MediaSkipForward"
+        "MediaPlay"
       ],
-      "gtk": []
+      "gtk": [
+        "3270_Play",
+        "AudioPlay"
+      ]
     },
     "values": {
       "web": [
-        3410
+        3375
       ],
-      "gtk": []
+      "gtk": [
+        64790,
+        269025044
+      ]
+    }
+  },
+  "mediaRecord": {
+    "constant": "mediaRecord",
+    "english": "Media Record",
+    "value": 3376,
+    "names": {
+      "web": [
+        "MediaRecord"
+      ],
+      "gtk": [
+        "AudioRecord"
+      ]
+    },
+    "values": {
+      "web": [
+        3376
+      ],
+      "gtk": [
+        269025052
+      ]
+    }
+  },
+  "mediaRewind": {
+    "constant": "mediaRewind",
+    "english": "Media Rewind",
+    "value": 3377,
+    "names": {
+      "web": [
+        "MediaRewind"
+      ],
+      "gtk": [
+        "AudioRewind"
+      ]
+    },
+    "values": {
+      "web": [
+        3377
+      ],
+      "gtk": [
+        269025086
+      ]
     }
   },
   "mediaSkip": {
@@ -6452,125 +4971,6 @@
     "values": {
       "web": [
         3378
-      ],
-      "gtk": []
-    }
-  },
-  "mediaStepBackward": {
-    "constant": "mediaStepBackward",
-    "english": "Media Step Backward",
-    "value": 3411,
-    "names": {
-      "web": [
-        "MediaStepBackward"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3411
-      ],
-      "gtk": []
-    }
-  },
-  "mediaStepForward": {
-    "constant": "mediaStepForward",
-    "english": "Media Step Forward",
-    "value": 3412,
-    "names": {
-      "web": [
-        "MediaStepForward"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3412
-      ],
-      "gtk": []
-    }
-  },
-  "mediaTopMenu": {
-    "constant": "mediaTopMenu",
-    "english": "Media Top Menu",
-    "value": 3413,
-    "names": {
-      "web": [
-        "MediaTopMenu"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3413
-      ],
-      "gtk": []
-    }
-  },
-  "navigateIn": {
-    "constant": "navigateIn",
-    "english": "Navigate In",
-    "value": 3414,
-    "names": {
-      "web": [
-        "NavigateIn"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3414
-      ],
-      "gtk": []
-    }
-  },
-  "navigateNext": {
-    "constant": "navigateNext",
-    "english": "Navigate Next",
-    "value": 3415,
-    "names": {
-      "web": [
-        "NavigateNext"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3415
-      ],
-      "gtk": []
-    }
-  },
-  "navigateOut": {
-    "constant": "navigateOut",
-    "english": "Navigate Out",
-    "value": 3416,
-    "names": {
-      "web": [
-        "NavigateOut"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3416
-      ],
-      "gtk": []
-    }
-  },
-  "navigatePrevious": {
-    "constant": "navigatePrevious",
-    "english": "Navigate Previous",
-    "value": 3417,
-    "names": {
-      "web": [
-        "NavigatePrevious"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3417
       ],
       "gtk": []
     }
@@ -6622,23 +5022,6 @@
     "values": {
       "web": [
         3381
-      ],
-      "gtk": []
-    }
-  },
-  "pairing": {
-    "constant": "pairing",
-    "english": "Pairing",
-    "value": 3418,
-    "names": {
-      "web": [
-        "Pairing"
-      ],
-      "gtk": []
-    },
-    "values": {
-      "web": [
-        3418
       ],
       "gtk": []
     }
@@ -6966,6 +5349,57 @@
       "gtk": []
     }
   },
+  "tv": {
+    "constant": "tv",
+    "english": "TV",
+    "value": 3401,
+    "names": {
+      "web": [
+        "TV"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3401
+      ],
+      "gtk": []
+    }
+  },
+  "tvInput": {
+    "constant": "tvInput",
+    "english": "TV Input",
+    "value": 3402,
+    "names": {
+      "web": [
+        "TVInput"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3402
+      ],
+      "gtk": []
+    }
+  },
+  "tvPower": {
+    "constant": "tvPower",
+    "english": "TV Power",
+    "value": 3403,
+    "names": {
+      "web": [
+        "TVPower"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3403
+      ],
+      "gtk": []
+    }
+  },
   "videoModeNext": {
     "constant": "videoModeNext",
     "english": "Video Mode Next",
@@ -7015,6 +5449,1542 @@
         3406
       ],
       "gtk": []
+    }
+  },
+  "dvr": {
+    "constant": "dvr",
+    "english": "DVR",
+    "value": 3407,
+    "names": {
+      "web": [
+        "DVR"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3407
+      ],
+      "gtk": []
+    }
+  },
+  "mediaAudioTrack": {
+    "constant": "mediaAudioTrack",
+    "english": "Media Audio Track",
+    "value": 3408,
+    "names": {
+      "web": [
+        "MediaAudioTrack"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3408
+      ],
+      "gtk": []
+    }
+  },
+  "mediaSkipBackward": {
+    "constant": "mediaSkipBackward",
+    "english": "Media Skip Backward",
+    "value": 3409,
+    "names": {
+      "web": [
+        "MediaSkipBackward"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3409
+      ],
+      "gtk": []
+    }
+  },
+  "mediaSkipForward": {
+    "constant": "mediaSkipForward",
+    "english": "Media Skip Forward",
+    "value": 3410,
+    "names": {
+      "web": [
+        "MediaSkipForward"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3410
+      ],
+      "gtk": []
+    }
+  },
+  "mediaStepBackward": {
+    "constant": "mediaStepBackward",
+    "english": "Media Step Backward",
+    "value": 3411,
+    "names": {
+      "web": [
+        "MediaStepBackward"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3411
+      ],
+      "gtk": []
+    }
+  },
+  "mediaStepForward": {
+    "constant": "mediaStepForward",
+    "english": "Media Step Forward",
+    "value": 3412,
+    "names": {
+      "web": [
+        "MediaStepForward"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3412
+      ],
+      "gtk": []
+    }
+  },
+  "mediaTopMenu": {
+    "constant": "mediaTopMenu",
+    "english": "Media Top Menu",
+    "value": 3413,
+    "names": {
+      "web": [
+        "MediaTopMenu"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3413
+      ],
+      "gtk": []
+    }
+  },
+  "navigateIn": {
+    "constant": "navigateIn",
+    "english": "Navigate In",
+    "value": 3414,
+    "names": {
+      "web": [
+        "NavigateIn"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3414
+      ],
+      "gtk": []
+    }
+  },
+  "navigateNext": {
+    "constant": "navigateNext",
+    "english": "Navigate Next",
+    "value": 3415,
+    "names": {
+      "web": [
+        "NavigateNext"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3415
+      ],
+      "gtk": []
+    }
+  },
+  "navigateOut": {
+    "constant": "navigateOut",
+    "english": "Navigate Out",
+    "value": 3416,
+    "names": {
+      "web": [
+        "NavigateOut"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3416
+      ],
+      "gtk": []
+    }
+  },
+  "navigatePrevious": {
+    "constant": "navigatePrevious",
+    "english": "Navigate Previous",
+    "value": 3417,
+    "names": {
+      "web": [
+        "NavigatePrevious"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3417
+      ],
+      "gtk": []
+    }
+  },
+  "pairing": {
+    "constant": "pairing",
+    "english": "Pairing",
+    "value": 3418,
+    "names": {
+      "web": [
+        "Pairing"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3418
+      ],
+      "gtk": []
+    }
+  },
+  "mediaClose": {
+    "constant": "mediaClose",
+    "english": "Media Close",
+    "value": 3419,
+    "names": {
+      "web": [
+        "MediaClose"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3419
+      ],
+      "gtk": []
+    }
+  },
+  "audioBassBoostToggle": {
+    "constant": "audioBassBoostToggle",
+    "english": "Audio Bass Boost Toggle",
+    "value": 3586,
+    "names": {
+      "web": [
+        "AudioBassBoostToggle"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3586
+      ],
+      "gtk": []
+    }
+  },
+  "audioTrebleDown": {
+    "constant": "audioTrebleDown",
+    "english": "Audio Treble Down",
+    "value": 3588,
+    "names": {
+      "web": [
+        "AudioTrebleDown"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3588
+      ],
+      "gtk": []
+    }
+  },
+  "audioTrebleUp": {
+    "constant": "audioTrebleUp",
+    "english": "Audio Treble Up",
+    "value": 3589,
+    "names": {
+      "web": [
+        "AudioTrebleUp"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3589
+      ],
+      "gtk": []
+    }
+  },
+  "microphoneToggle": {
+    "constant": "microphoneToggle",
+    "english": "Microphone Toggle",
+    "value": 3590,
+    "names": {
+      "web": [
+        "MicrophoneToggle"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3590
+      ],
+      "gtk": []
+    }
+  },
+  "microphoneVolumeDown": {
+    "constant": "microphoneVolumeDown",
+    "english": "Microphone Volume Down",
+    "value": 3591,
+    "names": {
+      "web": [
+        "MicrophoneVolumeDown"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3591
+      ],
+      "gtk": []
+    }
+  },
+  "microphoneVolumeUp": {
+    "constant": "microphoneVolumeUp",
+    "english": "Microphone Volume Up",
+    "value": 3592,
+    "names": {
+      "web": [
+        "MicrophoneVolumeUp"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3592
+      ],
+      "gtk": []
+    }
+  },
+  "microphoneVolumeMute": {
+    "constant": "microphoneVolumeMute",
+    "english": "Microphone Volume Mute",
+    "value": 3593,
+    "names": {
+      "web": [
+        "MicrophoneVolumeMute"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3593
+      ],
+      "gtk": []
+    }
+  },
+  "speechCorrectionList": {
+    "constant": "speechCorrectionList",
+    "english": "Speech Correction List",
+    "value": 3841,
+    "names": {
+      "web": [
+        "SpeechCorrectionList"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3841
+      ],
+      "gtk": []
+    }
+  },
+  "speechInputToggle": {
+    "constant": "speechInputToggle",
+    "english": "Speech Input Toggle",
+    "value": 3842,
+    "names": {
+      "web": [
+        "SpeechInputToggle"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        3842
+      ],
+      "gtk": []
+    }
+  },
+  "appSwitch": {
+    "constant": "appSwitch",
+    "english": "App Switch",
+    "value": 4097,
+    "names": {
+      "web": [
+        "AppSwitch"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4097
+      ],
+      "gtk": []
+    }
+  },
+  "call": {
+    "constant": "call",
+    "english": "Call",
+    "value": 4098,
+    "names": {
+      "web": [
+        "Call"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4098
+      ],
+      "gtk": []
+    }
+  },
+  "cameraFocus": {
+    "constant": "cameraFocus",
+    "english": "Camera Focus",
+    "value": 4099,
+    "names": {
+      "web": [
+        "CameraFocus"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4099
+      ],
+      "gtk": []
+    }
+  },
+  "endCall": {
+    "constant": "endCall",
+    "english": "End Call",
+    "value": 4100,
+    "names": {
+      "web": [
+        "EndCall"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4100
+      ],
+      "gtk": []
+    }
+  },
+  "goBack": {
+    "constant": "goBack",
+    "english": "Go Back",
+    "value": 4101,
+    "names": {
+      "web": [
+        "GoBack"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4101
+      ],
+      "gtk": []
+    }
+  },
+  "goHome": {
+    "constant": "goHome",
+    "english": "Go Home",
+    "value": 4102,
+    "names": {
+      "web": [
+        "GoHome"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4102
+      ],
+      "gtk": []
+    }
+  },
+  "headsetHook": {
+    "constant": "headsetHook",
+    "english": "Headset Hook",
+    "value": 4103,
+    "names": {
+      "web": [
+        "HeadsetHook"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4103
+      ],
+      "gtk": []
+    }
+  },
+  "lastNumberRedial": {
+    "constant": "lastNumberRedial",
+    "english": "Last Number Redial",
+    "value": 4104,
+    "names": {
+      "web": [
+        "LastNumberRedial"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4104
+      ],
+      "gtk": []
+    }
+  },
+  "notification": {
+    "constant": "notification",
+    "english": "Notification",
+    "value": 4105,
+    "names": {
+      "web": [
+        "Notification"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4105
+      ],
+      "gtk": []
+    }
+  },
+  "mannerMode": {
+    "constant": "mannerMode",
+    "english": "Manner Mode",
+    "value": 4106,
+    "names": {
+      "web": [
+        "MannerMode"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4106
+      ],
+      "gtk": []
+    }
+  },
+  "voiceDial": {
+    "constant": "voiceDial",
+    "english": "Voice Dial",
+    "value": 4107,
+    "names": {
+      "web": [
+        "VoiceDial"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4107
+      ],
+      "gtk": []
+    }
+  },
+  "tV3DMode": {
+    "constant": "tV3DMode",
+    "english": "TV 3 D Mode",
+    "value": 4353,
+    "names": {
+      "web": [
+        "TV3DMode"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4353
+      ],
+      "gtk": []
+    }
+  },
+  "tvAntennaCable": {
+    "constant": "tvAntennaCable",
+    "english": "TV Antenna Cable",
+    "value": 4354,
+    "names": {
+      "web": [
+        "TVAntennaCable"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4354
+      ],
+      "gtk": []
+    }
+  },
+  "tvAudioDescription": {
+    "constant": "tvAudioDescription",
+    "english": "TV Audio Description",
+    "value": 4355,
+    "names": {
+      "web": [
+        "TVAudioDescription"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4355
+      ],
+      "gtk": []
+    }
+  },
+  "tvAudioDescriptionMixDown": {
+    "constant": "tvAudioDescriptionMixDown",
+    "english": "TV Audio Description Mix Down",
+    "value": 4356,
+    "names": {
+      "web": [
+        "TVAudioDescriptionMixDown"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4356
+      ],
+      "gtk": []
+    }
+  },
+  "tvAudioDescriptionMixUp": {
+    "constant": "tvAudioDescriptionMixUp",
+    "english": "TV Audio Description Mix Up",
+    "value": 4357,
+    "names": {
+      "web": [
+        "TVAudioDescriptionMixUp"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4357
+      ],
+      "gtk": []
+    }
+  },
+  "tvContentsMenu": {
+    "constant": "tvContentsMenu",
+    "english": "TV Contents Menu",
+    "value": 4358,
+    "names": {
+      "web": [
+        "TVContentsMenu"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4358
+      ],
+      "gtk": []
+    }
+  },
+  "tvDataService": {
+    "constant": "tvDataService",
+    "english": "TV Data Service",
+    "value": 4359,
+    "names": {
+      "web": [
+        "TVDataService"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4359
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputComponent1": {
+    "constant": "tvInputComponent1",
+    "english": "TV Input Component 1",
+    "value": 4360,
+    "names": {
+      "web": [
+        "TVInputComponent1"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4360
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputComponent2": {
+    "constant": "tvInputComponent2",
+    "english": "TV Input Component 2",
+    "value": 4361,
+    "names": {
+      "web": [
+        "TVInputComponent2"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4361
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputComposite1": {
+    "constant": "tvInputComposite1",
+    "english": "TV Input Composite 1",
+    "value": 4362,
+    "names": {
+      "web": [
+        "TVInputComposite1"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4362
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputComposite2": {
+    "constant": "tvInputComposite2",
+    "english": "TV Input Composite 2",
+    "value": 4363,
+    "names": {
+      "web": [
+        "TVInputComposite2"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4363
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputHDMI1": {
+    "constant": "tvInputHDMI1",
+    "english": "TV Input HDMI 1",
+    "value": 4364,
+    "names": {
+      "web": [
+        "TVInputHDMI1"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4364
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputHDMI2": {
+    "constant": "tvInputHDMI2",
+    "english": "TV Input HDMI 2",
+    "value": 4365,
+    "names": {
+      "web": [
+        "TVInputHDMI2"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4365
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputHDMI3": {
+    "constant": "tvInputHDMI3",
+    "english": "TV Input HDMI 3",
+    "value": 4366,
+    "names": {
+      "web": [
+        "TVInputHDMI3"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4366
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputHDMI4": {
+    "constant": "tvInputHDMI4",
+    "english": "TV Input HDMI 4",
+    "value": 4367,
+    "names": {
+      "web": [
+        "TVInputHDMI4"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4367
+      ],
+      "gtk": []
+    }
+  },
+  "tvInputVGA1": {
+    "constant": "tvInputVGA1",
+    "english": "TV Input VGA 1",
+    "value": 4368,
+    "names": {
+      "web": [
+        "TVInputVGA1"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4368
+      ],
+      "gtk": []
+    }
+  },
+  "tvMediaContext": {
+    "constant": "tvMediaContext",
+    "english": "TV Media Context",
+    "value": 4369,
+    "names": {
+      "web": [
+        "TVMediaContext"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4369
+      ],
+      "gtk": []
+    }
+  },
+  "tvNetwork": {
+    "constant": "tvNetwork",
+    "english": "TV Network",
+    "value": 4370,
+    "names": {
+      "web": [
+        "TVNetwork"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4370
+      ],
+      "gtk": []
+    }
+  },
+  "tvNumberEntry": {
+    "constant": "tvNumberEntry",
+    "english": "TV Number Entry",
+    "value": 4371,
+    "names": {
+      "web": [
+        "TVNumberEntry"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4371
+      ],
+      "gtk": []
+    }
+  },
+  "tvRadioService": {
+    "constant": "tvRadioService",
+    "english": "TV Radio Service",
+    "value": 4372,
+    "names": {
+      "web": [
+        "TVRadioService"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4372
+      ],
+      "gtk": []
+    }
+  },
+  "tvSatellite": {
+    "constant": "tvSatellite",
+    "english": "TV Satellite",
+    "value": 4373,
+    "names": {
+      "web": [
+        "TVSatellite"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4373
+      ],
+      "gtk": []
+    }
+  },
+  "tvSatelliteBS": {
+    "constant": "tvSatelliteBS",
+    "english": "TV Satellite BS",
+    "value": 4374,
+    "names": {
+      "web": [
+        "TVSatelliteBS"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4374
+      ],
+      "gtk": []
+    }
+  },
+  "tvSatelliteCS": {
+    "constant": "tvSatelliteCS",
+    "english": "TV Satellite CS",
+    "value": 4375,
+    "names": {
+      "web": [
+        "TVSatelliteCS"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4375
+      ],
+      "gtk": []
+    }
+  },
+  "tvSatelliteToggle": {
+    "constant": "tvSatelliteToggle",
+    "english": "TV Satellite Toggle",
+    "value": 4376,
+    "names": {
+      "web": [
+        "TVSatelliteToggle"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4376
+      ],
+      "gtk": []
+    }
+  },
+  "tvTerrestrialAnalog": {
+    "constant": "tvTerrestrialAnalog",
+    "english": "TV Terrestrial Analog",
+    "value": 4377,
+    "names": {
+      "web": [
+        "TVTerrestrialAnalog"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4377
+      ],
+      "gtk": []
+    }
+  },
+  "tvTerrestrialDigital": {
+    "constant": "tvTerrestrialDigital",
+    "english": "TV Terrestrial Digital",
+    "value": 4378,
+    "names": {
+      "web": [
+        "TVTerrestrialDigital"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4378
+      ],
+      "gtk": []
+    }
+  },
+  "tvTimer": {
+    "constant": "tvTimer",
+    "english": "TV Timer",
+    "value": 4379,
+    "names": {
+      "web": [
+        "TVTimer"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4379
+      ],
+      "gtk": []
+    }
+  },
+  "key11": {
+    "constant": "key11",
+    "english": "Key 11",
+    "value": 4609,
+    "names": {
+      "web": [
+        "Key11"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4609
+      ],
+      "gtk": []
+    }
+  },
+  "key12": {
+    "constant": "key12",
+    "english": "Key 12",
+    "value": 4610,
+    "names": {
+      "web": [
+        "Key12"
+      ],
+      "gtk": []
+    },
+    "values": {
+      "web": [
+        4610
+      ],
+      "gtk": []
+    }
+  },
+  "numpadEnter": {
+    "constant": "numpadEnter",
+    "english": "Numpad Enter",
+    "value": 8589934605,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Enter"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65421
+      ]
+    }
+  },
+  "numpadParenLeft": {
+    "constant": "numpadParenLeft",
+    "english": "Numpad Paren Left",
+    "value": 8589934632,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "numpadParenRight": {
+    "constant": "numpadParenRight",
+    "english": "Numpad Paren Right",
+    "value": 8589934633,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "numpadMultiply": {
+    "constant": "numpadMultiply",
+    "english": "Numpad Multiply",
+    "value": 8589934634,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Multiply"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65450
+      ]
+    }
+  },
+  "numpadAdd": {
+    "constant": "numpadAdd",
+    "english": "Numpad Add",
+    "value": 8589934635,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Add"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65451
+      ]
+    }
+  },
+  "numpadComma": {
+    "constant": "numpadComma",
+    "english": "Numpad Comma",
+    "value": 8589934636,
+    "names": {
+      "web": [],
+      "gtk": []
+    },
+    "values": {
+      "web": [],
+      "gtk": []
+    }
+  },
+  "numpadSubtract": {
+    "constant": "numpadSubtract",
+    "english": "Numpad Subtract",
+    "value": 8589934637,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Subtract"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65453
+      ]
+    }
+  },
+  "numpadDecimal": {
+    "constant": "numpadDecimal",
+    "english": "Numpad Decimal",
+    "value": 8589934638,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Delete"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65439
+      ]
+    }
+  },
+  "numpadDivide": {
+    "constant": "numpadDivide",
+    "english": "Numpad Divide",
+    "value": 8589934639,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Divide"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65455
+      ]
+    }
+  },
+  "numpad0": {
+    "constant": "numpad0",
+    "english": "Numpad 0",
+    "value": 8589934640,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Insert",
+        "KP_0"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65438,
+        65456
+      ]
+    }
+  },
+  "numpad1": {
+    "constant": "numpad1",
+    "english": "Numpad 1",
+    "value": 8589934641,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_End",
+        "KP_1"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65436,
+        65457
+      ]
+    }
+  },
+  "numpad2": {
+    "constant": "numpad2",
+    "english": "Numpad 2",
+    "value": 8589934642,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Down",
+        "KP_2"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65433,
+        65458
+      ]
+    }
+  },
+  "numpad3": {
+    "constant": "numpad3",
+    "english": "Numpad 3",
+    "value": 8589934643,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Page_Down",
+        "KP_3"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65435,
+        65459
+      ]
+    }
+  },
+  "numpad4": {
+    "constant": "numpad4",
+    "english": "Numpad 4",
+    "value": 8589934644,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Left",
+        "KP_4"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65430,
+        65460
+      ]
+    }
+  },
+  "numpad5": {
+    "constant": "numpad5",
+    "english": "Numpad 5",
+    "value": 8589934645,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_5"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65461
+      ]
+    }
+  },
+  "numpad6": {
+    "constant": "numpad6",
+    "english": "Numpad 6",
+    "value": 8589934646,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Right",
+        "KP_6"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65432,
+        65462
+      ]
+    }
+  },
+  "numpad7": {
+    "constant": "numpad7",
+    "english": "Numpad 7",
+    "value": 8589934647,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Home",
+        "KP_7"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65429,
+        65463
+      ]
+    }
+  },
+  "numpad8": {
+    "constant": "numpad8",
+    "english": "Numpad 8",
+    "value": 8589934648,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Up",
+        "KP_8"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65431,
+        65464
+      ]
+    }
+  },
+  "numpad9": {
+    "constant": "numpad9",
+    "english": "Numpad 9",
+    "value": 8589934649,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Page_Up",
+        "KP_9"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65434,
+        65465
+      ]
+    }
+  },
+  "numpadEqual": {
+    "constant": "numpadEqual",
+    "english": "Numpad Equal",
+    "value": 8589934653,
+    "names": {
+      "web": [],
+      "gtk": [
+        "KP_Equal"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65469
+      ]
+    }
+  },
+  "altLeft": {
+    "constant": "altLeft",
+    "english": "Alt Left",
+    "value": 12884902146,
+    "names": {
+      "web": [],
+      "gtk": [
+        "Alt_L"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65513
+      ]
+    }
+  },
+  "controlLeft": {
+    "constant": "controlLeft",
+    "english": "Control Left",
+    "value": 12884902149,
+    "names": {
+      "web": [],
+      "gtk": [
+        "Control_L"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65507
+      ]
+    }
+  },
+  "metaLeft": {
+    "constant": "metaLeft",
+    "english": "Meta Left",
+    "value": 12884902153,
+    "names": {
+      "web": [],
+      "gtk": [
+        "Meta_L"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65511
+      ]
+    }
+  },
+  "shiftLeft": {
+    "constant": "shiftLeft",
+    "english": "Shift Left",
+    "value": 12884902157,
+    "names": {
+      "web": [],
+      "gtk": [
+        "Shift_L"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65505
+      ]
+    }
+  },
+  "altRight": {
+    "constant": "altRight",
+    "english": "Alt Right",
+    "value": 17179869442,
+    "names": {
+      "web": [],
+      "gtk": [
+        "Alt_R"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65514
+      ]
+    }
+  },
+  "controlRight": {
+    "constant": "controlRight",
+    "english": "Control Right",
+    "value": 17179869445,
+    "names": {
+      "web": [],
+      "gtk": [
+        "Control_R"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65508
+      ]
+    }
+  },
+  "metaRight": {
+    "constant": "metaRight",
+    "english": "Meta Right",
+    "value": 17179869449,
+    "names": {
+      "web": [],
+      "gtk": [
+        "Meta_R"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65512
+      ]
+    }
+  },
+  "shiftRight": {
+    "constant": "shiftRight",
+    "english": "Shift Right",
+    "value": 17179869453,
+    "names": {
+      "web": [],
+      "gtk": [
+        "Shift_R"
+      ]
+    },
+    "values": {
+      "web": [],
+      "gtk": [
+        65506
+      ]
     }
   }
 }

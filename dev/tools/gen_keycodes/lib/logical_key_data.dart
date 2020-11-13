@@ -10,6 +10,17 @@ import 'package:meta/meta.dart';
 
 import 'package:gen_keycodes/utils.dart';
 
+const int kNumpadPlane = 0x00200000000;
+const int kLeftModifierPlane = 0x00300000000;
+const int kRightModifierPlane = 0x00400000000;
+
+class _ModifierPair {
+  const _ModifierPair(this.left, this.right);
+
+  final String left;
+  final String right;
+}
+
 /// The data structure used to manage keyboard key entries.
 ///
 /// The main constructor parses the given input data into the data structure.
@@ -28,7 +39,7 @@ class LogicalKeyData {
   )   : assert(chromiumKeys != null),
         assert(gtkKeyCodeHeader != null),
         assert(gtkNameMap != null) {
-    data = _readPrintables();
+    _readPrintables(data);
     _readHidEntries(data, chromiumKeys);
     // Cast GTK dom map
     final Map<String, List<dynamic>> dynamicGtkNames = (json.decode(gtkNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
@@ -36,16 +47,21 @@ class LogicalKeyData {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
     _readGtkKeyCodes(data, gtkKeyCodeHeader, nameToGtkName);
+    // Sort entries by value
+    final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
+      (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) => a.value.value.compareTo(b.value.value)
+    );
+    data
+      ..clear()
+      ..addEntries(sortedEntries);
   }
 
   /// Parses the given JSON data and populates the data structure from it.
   LogicalKeyData.fromJson(Map<String, dynamic> contentMap) {
-    data = Map<String, LogicalKeyEntry>.fromEntries(
-      contentMap.values.map((dynamic value) {
-        final LogicalKeyEntry entry = LogicalKeyEntry.fromJsonMapEntry(value as Map<String, dynamic>);
-        return MapEntry<String, LogicalKeyEntry>(entry.constantName, entry);
-      }),
-    );
+    data.addEntries(contentMap.values.map((dynamic value) {
+      final LogicalKeyEntry entry = LogicalKeyEntry.fromJsonMapEntry(value as Map<String, dynamic>);
+      return MapEntry<String, LogicalKeyEntry>(entry.constantName, entry);
+    }));
   }
 
   /// Converts the data structure into a JSON structure that can be parsed by
@@ -59,22 +75,34 @@ class LogicalKeyData {
   }
 
   /// Keys mapped from their constant names.
-  Map<String, LogicalKeyEntry> data;
+  final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
 
-  Map<String, LogicalKeyEntry> _readPrintables() {
-    return Map<String, LogicalKeyEntry>.fromEntries(printable.entries.map(
-      (MapEntry<String, String> entry) {
-        final String constantName = LogicalKeyEntry.computeConstantName(entry.key);
-        return MapEntry<String, LogicalKeyEntry>(
-          constantName,
-          LogicalKeyEntry(
-            value: entry.value.codeUnitAt(0),
-            commentName: LogicalKeyEntry.computeCommentName(entry.key),
-            constantName: constantName,
-          ),
+  Map<String, LogicalKeyEntry> _readPrintables(Map<String, LogicalKeyEntry> data) {
+    final Map<String, String> unusedNumpad = Map<String, String>.from(printableToNumpads);
+
+    printable.forEach((String name, String char) {
+
+      // If it has a numpad counterpart, also add the numpad key.
+      if (printableToNumpads.containsKey(char)) {
+        final String numpadName = printableToNumpads[char];
+        data[LogicalKeyEntry.computeConstantName(numpadName)] = LogicalKeyEntry(
+          value: char.codeUnitAt(0) + kNumpadPlane,
+          commentName: LogicalKeyEntry.computeCommentName(numpadName),
+          constantName: LogicalKeyEntry.computeConstantName(numpadName),
         );
+        unusedNumpad.remove(char);
       }
-    ));
+
+      data[LogicalKeyEntry.computeConstantName(name)] = LogicalKeyEntry(
+        value: char.codeUnitAt(0),
+        commentName: LogicalKeyEntry.computeCommentName(name),
+        constantName: LogicalKeyEntry.computeConstantName(name),
+      );
+    });
+
+    unusedNumpad.forEach((String key, String value) {
+      print('Unuadded numpad key $value');
+    });
   }
 
   /// Parses entries from Chromium's key mapping header file.
@@ -93,19 +121,35 @@ class LogicalKeyData {
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
     input.replaceAllMapped(domKeyRegExp, (Match match) {
-      if (match != null) {
-        final String name = match.group(1).replaceAll(RegExp('[^A-Za-z0-9]'), '');
-        final int value = getHex(match.group(3));
-        final String constantName = LogicalKeyEntry.computeConstantName(name);
-        final LogicalKeyEntry entry = data.putIfAbsent(constantName, () => LogicalKeyEntry(
-          value: value,
-          commentName: LogicalKeyEntry.computeCommentName(name),
-          constantName: constantName,
-        ));
-        entry
-          ..webNames.add(name)
-          ..webValues.add(value);
+      if (match == null) {
+        return match.group(0);
       }
+      final String name = match.group(1).replaceAll(RegExp('[^A-Za-z0-9]'), '');
+      final int value = getHex(match.group(3));
+      // If it's a modifier key, add left and right keys instead.
+      if (webModifiers.containsKey(name)) {
+        final _ModifierPair pair = webModifiers[name];
+        data[LogicalKeyEntry.computeConstantName(pair.left)] = LogicalKeyEntry(
+          value: value + kLeftModifierPlane,
+          commentName: LogicalKeyEntry.computeCommentName(pair.left),
+          constantName: LogicalKeyEntry.computeConstantName(pair.left),
+        );
+        data[LogicalKeyEntry.computeConstantName(pair.right)] = LogicalKeyEntry(
+          value: value + kRightModifierPlane,
+          commentName: LogicalKeyEntry.computeCommentName(pair.right),
+          constantName: LogicalKeyEntry.computeConstantName(pair.right),
+        );
+        return match.group(0);
+      }
+
+      final LogicalKeyEntry entry = data.putIfAbsent(LogicalKeyEntry.computeConstantName(name), () => LogicalKeyEntry(
+        value: value,
+        commentName: LogicalKeyEntry.computeCommentName(name),
+        constantName: LogicalKeyEntry.computeConstantName(name),
+      ));
+      entry
+        ..webNames.add(name)
+        ..webValues.add(value);
       return match.group(0);
     });
   }
@@ -160,6 +204,29 @@ class LogicalKeyData {
     return _printable;
   }
   static Map<String, String> _printable;
+
+  // Map Web key to the pair of key names
+  static Map<String, _ModifierPair> get webModifiers {
+    return _webModifiers ??= () {
+      final String rawJson = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_modifiers.json',)).readAsStringSync();
+      return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
+        final List<dynamic> pair = value as List<dynamic>;
+        return MapEntry<String, _ModifierPair>(key, _ModifierPair(pair[0] as String, pair[1] as String));
+      });
+    }();
+  }
+  static Map<String, _ModifierPair> _webModifiers;
+
+  // Map printable to corresponding numpad key name
+  static Map<String, String> get printableToNumpads {
+    return _printableToNumpads ??= () {
+      final String rawJson = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'printable_to_numpads.json',)).readAsStringSync();
+      return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
+        return MapEntry<String, String>(key, value as String);
+      });
+    }();
+  }
+  static Map<String, String> _printableToNumpads;
 }
 
 /// A single entry in the key data structure.
