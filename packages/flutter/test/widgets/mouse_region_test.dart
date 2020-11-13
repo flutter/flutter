@@ -1695,6 +1695,7 @@ void main() {
       onExit: (PointerExitEvent event) {},
       onHover: (PointerHoverEvent event) {},
       cursor: SystemMouseCursors.click,
+      validForMouseTracker: false,
       child: RenderErrorBox(),
     ).debugFillProperties(builder);
 
@@ -1706,6 +1707,7 @@ void main() {
       'size: MISSING',
       'listeners: enter, hover, exit',
       'cursor: SystemMouseCursor(click)',
+      'invalid for MouseTracker',
     ]);
   });
 

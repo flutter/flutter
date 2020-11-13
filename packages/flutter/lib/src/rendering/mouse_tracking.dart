@@ -51,15 +51,15 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// Creates an immutable [MouseTrackerAnnotation].
   ///
   /// All arguments are optional. The [cursor] must not be null.
-  MouseTrackerAnnotation({
+  const MouseTrackerAnnotation({
     this.onEnter,
     this.onExit,
     this.cursor = MouseCursor.defer,
-    this.valid = true,
+    this.validForMouseTracker = true,
   }) : assert(cursor != null);
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// entered the region and [valid] is true.
+  /// entered the region and [validForMouseTracker] is true.
   ///
   /// This callback is triggered when the pointer has started to be contained by
   /// the region, either due to a pointer event, or due to the movement or
@@ -73,7 +73,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   final PointerEnterEventListener? onEnter;
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// exited the region and [valid] is true.
+  /// exited the region and [validForMouseTracker] is true.
   ///
   /// This callback is triggered when the pointer has stopped being contained
   /// by the region, either due to a pointer event, or due to the movement or
@@ -101,8 +101,14 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///  * [MouseRegion.cursor], which provide values to this field.
   final MouseCursor cursor;
 
-  /// Indicates that this annotation is valid for use when dispatching the mouse events.
-  bool valid;
+  /// Whether this is included when [MouseTracker] collects the list of annotations.
+  ///
+  /// If [validForMouseTracker] is false, this object is excluded from the current annotation list
+  /// even if it's included in the hit test, affecting mouse-related behavior such as enter events,
+  /// exit events, and mouse cursors. The [validForMouseTracker] does not affect hit testing.
+  ///
+  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]'s built by the constructor.
+  final bool validForMouseTracker;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -116,7 +122,6 @@ class MouseTrackerAnnotation with Diagnosticable {
       ifEmpty: '<none>',
     ));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: MouseCursor.defer));
-    properties.add(DiagnosticsProperty<bool>('valid', valid, defaultValue: true));
   }
 }
 
@@ -492,7 +497,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
       if (!nextAnnotations.containsKey(annotation))
-        if (annotation.valid && annotation.onExit != null)
+        if (annotation.validForMouseTracker && annotation.onExit != null)
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
     });
 
@@ -503,7 +508,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     ).toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
-      if (annotation.valid && annotation.onEnter != null)
+      if (annotation.validForMouseTracker && annotation.onEnter != null)
         annotation.onEnter!(baseEnterEvent.transformed(nextAnnotations[annotation]));
     }
   }
