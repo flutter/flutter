@@ -24,11 +24,12 @@ void main() {
 
   tearDown(() async {
     await flutter?.stop();
+    await flutter?.done;
     tryToDelete(tempDir);
   });
 
   testWithoutContext('hot restart works without error', () async {
-    await flutter.run(chrome: true);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     await flutter.hotRestart();
   });
 
@@ -40,7 +41,7 @@ void main() {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -58,7 +59,8 @@ void main() {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--dart-define=FLUTTER_WEB_USE_SKIA=true']);
+    await flutter.run(chrome: true,
+      additionalCommandArgs: <String>['--dart-define=FLUTTER_WEB_USE_SKIA=true', '--verbose']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -66,5 +68,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/70486
 }

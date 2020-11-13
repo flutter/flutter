@@ -508,6 +508,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
+          nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -632,7 +633,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
-        nullSafety: usageNullSafety,
         fastReassemble: null,
       ).send();
     }
@@ -669,12 +669,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
           path: '/' + mainUri.pathSegments.last,
         );
       }
+      final LanguageVersion languageVersion =  determineLanguageVersion(
+        globals.fs.file(mainUri),
+        packageConfig[flutterProject.manifest.appName],
+      );
 
       final String entrypoint = <String>[
-        determineLanguageVersion(
-          globals.fs.file(mainUri),
-          packageConfig[flutterProject.manifest.appName],
-        ),
+        '// @dart=${languageVersion.major}.${languageVersion.minor}',
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",
@@ -690,7 +691,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
         if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistry);',
+          '  registerPlugins(webPluginRegistrar);',
         '  await ui.webOnlyInitializePlatform();',
         '  if (entrypoint.main is _UnaryFunction) {',
         '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
@@ -718,7 +719,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
       lastCompiled: device.devFS.lastCompiled,
       urisToMonitor: device.devFS.sources,
       packagesPath: packagesFilePath,
-      packageConfig: device.devFS.lastPackageConfig,
+      packageConfig: device.devFS.lastPackageConfig
+        ?? debuggingOptions.buildInfo.packageConfig,
     );
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.device.name}...',

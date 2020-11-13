@@ -710,9 +710,6 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  bool get isMaster => true;
-
-  @override
   String get repositoryUrl => null;
 
   @override

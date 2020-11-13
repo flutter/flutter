@@ -217,15 +217,16 @@ abstract class SceneBuilderRecorder extends Recorder {
   Profile get profile => _profile;
   Profile _profile;
 
-  /// Called from [Window.onBeginFrame].
+  /// Called from [dart:ui.PlatformDispatcher.onBeginFrame].
   @mustCallSuper
   void onBeginFrame() {}
 
   /// Called on every frame.
   ///
   /// An implementation should exercise the [sceneBuilder] to build a frame.
-  /// However, it must not call [SceneBuilder.build] or [Window.render].
-  /// Instead the benchmark harness will call them and time them appropriately.
+  /// However, it must not call [SceneBuilder.build] or
+  /// [dart:ui.FlutterView.render]. Instead the benchmark harness will call them
+  /// and time them appropriately.
   void onDrawFrame(SceneBuilder sceneBuilder);
 
   @override

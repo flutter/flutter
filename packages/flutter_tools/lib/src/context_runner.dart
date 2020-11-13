@@ -114,6 +114,7 @@ Future<T> runInContext<T>(
         return AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          platform: globals.platform,
         );
       },
       BuildSystem: () => FlutterBuildSystem(
@@ -185,7 +186,7 @@ Future<T> runInContext<T>(
         androidWorkflow: androidWorkflow,
       ),
       FeatureFlags: () => const FlutterFeatureFlags(),
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
@@ -228,7 +229,10 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
+      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
+      ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
         logger: globals.logger,

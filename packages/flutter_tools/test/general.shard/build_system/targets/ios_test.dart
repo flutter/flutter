@@ -24,6 +24,7 @@ final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment:
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
   '-fembed-bitcode-marker',
+  '-miphoneos-version-min=8.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',

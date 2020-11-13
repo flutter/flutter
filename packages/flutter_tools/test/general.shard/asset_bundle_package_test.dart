@@ -10,12 +10,10 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/pubspec_schema.dart';
 
 void main() {
   String fixPath(String path) {
@@ -54,10 +52,6 @@ dependencies:
     sdk: flutter
 $assetsSection
 ''');
-  }
-
-  void establishFlutterRoot() {
-    Cache.flutterRoot = getFlutterRoot();
   }
 
   void writePackagesFile(String packages) {
@@ -120,9 +114,6 @@ $assetsSection
 
   group('AssetBundle assets from packages', () {
     testUsingContext('No assets are bundled when the package has no assets', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
@@ -145,9 +136,6 @@ $assetsSection
     });
 
     testUsingContext('No assets are bundled when the package has an asset that is not listed', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
@@ -174,9 +162,6 @@ $assetsSection
 
     testUsingContext('One asset is bundled when the package has and lists one '
       'asset its pubspec', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -203,9 +188,6 @@ $assetsSection
 
     testUsingContext('One asset is bundled when the package has one asset, '
       "listed in the app's pubspec", () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       final List<String> assetEntries = <String>['packages/test_package/a/foo'];
       writePubspecFile(
         'pubspec.yaml',
@@ -232,9 +214,6 @@ $assetsSection
 
     testUsingContext('One asset and its variant are bundled when the package '
       'has an asset and a variant, and lists the asset in its pubspec', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile(
@@ -261,9 +240,6 @@ $assetsSection
 
     testUsingContext('One asset and its variant are bundled when the package '
       'has an asset and a variant, and the app lists the asset in its pubspec', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile(
         'pubspec.yaml',
         'test',
@@ -293,9 +269,6 @@ $assetsSection
 
     testUsingContext('Two assets are bundled when the package has and lists '
       'two assets in its pubspec', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -322,9 +295,6 @@ $assetsSection
     });
 
     testUsingContext("Two assets are bundled when the package has two assets, listed in the app's pubspec", () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       final List<String> assetEntries = <String>[
         'packages/test_package/a/foo',
         'packages/test_package/a/bar',
@@ -358,9 +328,6 @@ $assetsSection
     });
 
     testUsingContext('Two assets are bundled when two packages each have and list an asset their pubspec', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile(
         'pubspec.yaml',
         'test',
@@ -398,9 +365,6 @@ $assetsSection
     });
 
     testUsingContext("Two assets are bundled when two packages each have an asset, listed in the app's pubspec", () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       final List<String> assetEntries = <String>[
         'packages/test_package/a/foo',
         'packages/test_package2/a/foo',
@@ -442,8 +406,6 @@ $assetsSection
 
     testUsingContext('One asset is bundled when the app depends on a package, '
       'listing in its pubspec an asset from another package', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
       writePubspecFile(
         'pubspec.yaml',
         'test',
@@ -478,9 +440,6 @@ $assetsSection
   });
 
   testUsingContext('Asset paths can contain URL reserved characters', () async {
-    establishFlutterRoot();
-    writeEmptySchemaFile(globals.fs);
-
     writePubspecFile('pubspec.yaml', 'test');
     writePackagesFile('test_package:p/p/lib/');
 
@@ -508,9 +467,6 @@ $assetsSection
 
   group('AssetBundle assets from scanned paths', () {
     testUsingContext('Two assets are bundled when scanning their directory', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -539,9 +495,6 @@ $assetsSection
     });
 
     testUsingContext('Two assets are bundled when listing one and scanning second directory', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -556,8 +509,8 @@ $assetsSection
 
       writeAssets('p/p/', assetsOnDisk);
       const String expectedAssetManifest =
-          '{"packages/test_package/abc/bar":["packages/test_package/abc/bar"],'
-          '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+          '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
+          '"packages/test_package/abc/bar":["packages/test_package/abc/bar"]}';
 
       await buildAndVerifyAssets(
         assetsOnDisk,
@@ -570,9 +523,6 @@ $assetsSection
     });
 
     testUsingContext('One asset is bundled with variant, scanning wrong directory', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -600,9 +550,6 @@ $assetsSection
 
   group('AssetBundle assets from scanned paths with MemoryFileSystem', () {
     testUsingContext('One asset is bundled with variant, scanning directory', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -630,9 +577,6 @@ $assetsSection
     });
 
     testUsingContext('No asset is bundled with variant, no assets or directories are listed', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
@@ -659,9 +603,6 @@ $assetsSection
     });
 
     testUsingContext('Expect error generating manifest, wrong non-existing directory is listed', () async {
-      establishFlutterRoot();
-      writeEmptySchemaFile(globals.fs);
-
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 

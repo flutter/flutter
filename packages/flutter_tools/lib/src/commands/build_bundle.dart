@@ -113,7 +113,7 @@ class BuildBundleCommand extends BuildSubCommand {
         break;
     }
 
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
 
     await bundleBuilder.build(
       platform: platform,
@@ -121,7 +121,6 @@ class BuildBundleCommand extends BuildSubCommand {
       mainPath: targetFile,
       manifestPath: stringArg('manifest'),
       depfilePath: stringArg('depfile'),
-      privateKeyPath: stringArg('private-key'),
       assetDirPath: stringArg('asset-dir'),
       precompiledSnapshot: boolArg('precompiled'),
       reportLicensedPackages: boolArg('report-licensed-packages'),

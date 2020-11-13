@@ -54,7 +54,7 @@
   "remainingTextFieldCharacterCountOther": "Atlikušas $remainingCount rakstzīmes.",
   "refreshIndicatorSemanticLabel": "Atsvaidzināt",
   "moreButtonTooltip": "Vairāk",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "dd/mm/gggg",
   "selectYearSemanticsLabel": "Atlasiet gadu",
   "unspecifiedDate": "Datums",

@@ -382,15 +382,20 @@ $factoryDeclaration
 ///
 /// Used by [generateGetter] below.
 String generateType(Map<String, dynamic> attributes) {
+  bool optional = false;
+  String type = 'String';
   if (attributes != null) {
+    optional = attributes.containsKey('optional');
     switch (attributes['x-flutter-type'] as String) {
       case 'icuShortTimePattern':
-        return 'TimeOfDayFormat';
+        type = 'TimeOfDayFormat';
+        break;
       case 'scriptCategory':
-        return 'ScriptCategory';
+        type = 'ScriptCategory';
+        break;
     }
   }
-  return 'String';
+  return type + (optional ? '?' : '');
 }
 
 /// Returns the appropriate name for getters with the given attributes.

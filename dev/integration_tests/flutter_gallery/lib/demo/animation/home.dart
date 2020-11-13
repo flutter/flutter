@@ -32,10 +32,10 @@ const double _kAppBarMidHeight = 256.0;
 // TODO(hansmuller): it would be worth adding something like this to the framework.
 class _RenderStatusBarPaddingSliver extends RenderSliver {
   _RenderStatusBarPaddingSliver({
-    @required double maxHeight,
-    @required double scrollFactor,
-  }) : assert(maxHeight != null && maxHeight >= 0.0),
-       assert(scrollFactor != null && scrollFactor >= 1.0),
+    required double maxHeight,
+    required double scrollFactor,
+  }) : assert(maxHeight >= 0.0),
+       assert(scrollFactor >= 1.0),
        _maxHeight = maxHeight,
        _scrollFactor = scrollFactor;
 
@@ -43,7 +43,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   double get maxHeight => _maxHeight;
   double _maxHeight;
   set maxHeight(double value) {
-    assert(maxHeight != null && maxHeight >= 0.0);
+    assert(maxHeight >= 0.0);
     if (_maxHeight == value)
       return;
     _maxHeight = value;
@@ -55,7 +55,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   double get scrollFactor => _scrollFactor;
   double _scrollFactor;
   set scrollFactor(double value) {
-    assert(scrollFactor != null && scrollFactor >= 1.0);
+    assert(scrollFactor >= 1.0);
     if (_scrollFactor == value)
       return;
     _scrollFactor = value;
@@ -64,7 +64,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
 
   @override
   void performLayout() {
-    final double height = (maxHeight - constraints.scrollOffset / scrollFactor).clamp(0.0, maxHeight) as double;
+    final double height = (maxHeight - constraints.scrollOffset / scrollFactor).clamp(0.0, maxHeight);
     geometry = SliverGeometry(
       paintExtent: math.min(height, constraints.remainingPaintExtent),
       scrollExtent: maxHeight,
@@ -75,11 +75,11 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
 
 class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
   const _StatusBarPaddingSliver({
-    Key key,
-    @required this.maxHeight,
+    Key? key,
+    required this.maxHeight,
     this.scrollFactor = 5.0,
-  }) : assert(maxHeight != null && maxHeight >= 0.0),
-       assert(scrollFactor != null && scrollFactor >= 1.0),
+  }) : assert(maxHeight >= 0.0),
+       assert(scrollFactor >= 1.0),
        super(key: key);
 
   final double maxHeight;
@@ -110,9 +110,9 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate({
-    @required this.minHeight,
-    @required this.maxHeight,
-    @required this.child,
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
   });
 
   final double minHeight;
@@ -170,51 +170,51 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     this.selectedIndex,
   });
 
-  final Alignment translation;
-  final double tColumnToRow;
-  final double tCollapsed;
-  final int cardCount;
-  final double selectedIndex;
+  final Alignment? translation;
+  final double? tColumnToRow;
+  final double? tCollapsed;
+  final int? cardCount;
+  final double? selectedIndex;
 
-  Rect _interpolateRect(Rect begin, Rect end) {
-    return Rect.lerp(begin, end, tColumnToRow);
+  Rect? _interpolateRect(Rect begin, Rect end) {
+    return Rect.lerp(begin, end, tColumnToRow!);
   }
 
-  Offset _interpolatePoint(Offset begin, Offset end) {
-    return Offset.lerp(begin, end, tColumnToRow);
+  Offset? _interpolatePoint(Offset begin, Offset end) {
+    return Offset.lerp(begin, end, tColumnToRow!);
   }
 
   @override
   void performLayout(Size size) {
     final double columnCardX = size.width / 5.0;
     final double columnCardWidth = size.width - columnCardX;
-    final double columnCardHeight = size.height / cardCount;
+    final double columnCardHeight = size.height / cardCount!;
     final double rowCardWidth = size.width;
-    final Offset offset = translation.alongSize(size);
+    final Offset offset = translation!.alongSize(size);
     double columnCardY = 0.0;
-    double rowCardX = -(selectedIndex * rowCardWidth);
+    double rowCardX = -(selectedIndex! * rowCardWidth);
 
     // When tCollapsed > 0 the titles spread apart
     final double columnTitleX = size.width / 10.0;
-    final double rowTitleWidth = size.width * ((1 + tCollapsed) / 2.25);
-    double rowTitleX = (size.width - rowTitleWidth) / 2.0 - selectedIndex * rowTitleWidth;
+    final double rowTitleWidth = size.width * ((1 + tCollapsed!) / 2.25);
+    double rowTitleX = (size.width - rowTitleWidth) / 2.0 - selectedIndex! * rowTitleWidth;
 
     // When tCollapsed > 0, the indicators move closer together
     //final double rowIndicatorWidth = 48.0 + (1.0 - tCollapsed) * (rowTitleWidth - 48.0);
     const double paddedSectionIndicatorWidth = kSectionIndicatorWidth + 8.0;
     final double rowIndicatorWidth = paddedSectionIndicatorWidth +
-      (1.0 - tCollapsed) * (rowTitleWidth - paddedSectionIndicatorWidth);
-    double rowIndicatorX = (size.width - rowIndicatorWidth) / 2.0 - selectedIndex * rowIndicatorWidth;
+      (1.0 - tCollapsed!) * (rowTitleWidth - paddedSectionIndicatorWidth);
+    double rowIndicatorX = (size.width - rowIndicatorWidth) / 2.0 - selectedIndex! * rowIndicatorWidth;
 
     // Compute the size and origin of each card, title, and indicator for the maxHeight
     // "column" layout, and the midHeight "row" layout. The actual layout is just the
     // interpolated value between the column and row layouts for t.
-    for (int index = 0; index < cardCount; index++) {
+    for (int index = 0; index < cardCount!; index++) {
 
       // Layout the card for index.
       final Rect columnCardRect = Rect.fromLTWH(columnCardX, columnCardY, columnCardWidth, columnCardHeight);
       final Rect rowCardRect = Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
-      final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect).shift(offset);
+      final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect)!.shift(offset);
       final String cardId = 'card$index';
       if (hasChild(cardId)) {
         layoutChild(cardId, BoxConstraints.tight(cardRect.size));
@@ -228,7 +228,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final double centeredRowTitleX = rowTitleX + (rowTitleWidth - titleSize.width) / 2.0;
       final Offset columnTitleOrigin = Offset(columnTitleX, columnTitleY);
       final Offset rowTitleOrigin = Offset(centeredRowTitleX, rowTitleY);
-      final Offset titleOrigin = _interpolatePoint(columnTitleOrigin, rowTitleOrigin);
+      final Offset titleOrigin = _interpolatePoint(columnTitleOrigin, rowTitleOrigin)!;
       positionChild('title$index', titleOrigin + offset);
 
       // Layout the selection indicator for index.
@@ -240,7 +240,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final double centeredRowIndicatorX = rowIndicatorX + (rowIndicatorWidth - indicatorSize.width) / 2.0;
       final double rowIndicatorY = titleRect.bottomCenter.dy + 16.0;
       final Offset rowIndicatorOrigin = Offset(centeredRowIndicatorX, rowIndicatorY);
-      final Offset indicatorOrigin = _interpolatePoint(columnIndicatorOrigin, rowIndicatorOrigin);
+      final Offset indicatorOrigin = _interpolatePoint(columnIndicatorOrigin, rowIndicatorOrigin)!;
       positionChild('indicator$index', indicatorOrigin + offset);
 
       columnCardY += columnCardHeight;
@@ -260,32 +260,29 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
 class _AllSectionsView extends AnimatedWidget {
   _AllSectionsView({
-    Key key,
-    this.sectionIndex,
-    @required this.sections,
-    @required this.selectedIndex,
+    Key? key,
+    required this.sectionIndex,
+    required this.sections,
+    required this.selectedIndex,
     this.minHeight,
     this.midHeight,
     this.maxHeight,
     this.sectionCards = const <Widget>[],
-  }) : assert(sections != null),
-       assert(sectionCards != null),
-       assert(sectionCards.length == sections.length),
+  }) : assert(sectionCards.length == sections.length),
        assert(sectionIndex >= 0 && sectionIndex < sections.length),
-       assert(selectedIndex != null),
-       assert(selectedIndex.value >= 0.0 && selectedIndex.value < sections.length.toDouble()),
+       assert(selectedIndex.value! >= 0.0 && selectedIndex.value! < sections.length.toDouble()),
        super(key: key, listenable: selectedIndex);
 
   final int sectionIndex;
   final List<Section> sections;
-  final ValueNotifier<double> selectedIndex;
-  final double minHeight;
-  final double midHeight;
-  final double maxHeight;
+  final ValueNotifier<double?> selectedIndex;
+  final double? minHeight;
+  final double? midHeight;
+  final double? maxHeight;
   final List<Widget> sectionCards;
 
   double _selectedIndexDelta(int index) {
-    return (index.toDouble() - selectedIndex.value).abs().clamp(0.0, 1.0) as double;
+    return (index.toDouble() - selectedIndex.value!).abs().clamp(0.0, 1.0);
   }
 
   Widget _build(BuildContext context, BoxConstraints constraints) {
@@ -295,16 +292,16 @@ class _AllSectionsView extends AnimatedWidget {
     // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
     // equals the midHeight.
     final double tColumnToRow =
-      1.0 - ((size.height - midHeight) /
-             (maxHeight - midHeight)).clamp(0.0, 1.0);
+      1.0 - ((size.height - midHeight!) /
+             (maxHeight! - midHeight!)).clamp(0.0, 1.0);
 
 
     // The layout's progress from from the midHeight row layout to
     // a minHeight row layout. Its value is 0.0 when size.height equals
     // midHeight and 1.0 when size.height equals minHeight.
     final double tCollapsed =
-      1.0 - ((size.height - minHeight) /
-             (midHeight - minHeight)).clamp(0.0, 1.0);
+      1.0 - ((size.height - minHeight!) /
+             (midHeight! - minHeight!)).clamp(0.0, 1.0);
 
     double _indicatorOpacity(int index) {
       return 1.0 - _selectedIndexDelta(index) * 0.5;
@@ -343,7 +340,7 @@ class _AllSectionsView extends AnimatedWidget {
 
     return CustomMultiChildLayout(
       delegate: _AllSectionsLayout(
-        translation: Alignment((selectedIndex.value - sectionIndex) * 2.0 - 1.0, -1.0),
+        translation: Alignment((selectedIndex.value! - sectionIndex) * 2.0 - 1.0, -1.0),
         tColumnToRow: tColumnToRow,
         tCollapsed: tCollapsed,
         cardCount: sections.length,
@@ -364,15 +361,14 @@ class _AllSectionsView extends AnimatedWidget {
 // visible.
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
   const _SnappingScrollPhysics({
-    ScrollPhysics parent,
-    @required this.midScrollOffset,
-  }) : assert(midScrollOffset != null),
-       super(parent: parent);
+    ScrollPhysics? parent,
+    required this.midScrollOffset,
+  }) : super(parent: parent);
 
   final double midScrollOffset;
 
   @override
-  _SnappingScrollPhysics applyTo(ScrollPhysics ancestor) {
+  _SnappingScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
   }
 
@@ -387,8 +383,8 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
-    final Simulation simulation = super.createBallisticSimulation(position, dragVelocity);
+  Simulation? createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
+    final Simulation? simulation = super.createBallisticSimulation(position, dragVelocity);
     final double offset = position.pixels;
 
     if (simulation != null) {
@@ -419,7 +415,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 }
 
 class AnimationDemoHome extends StatefulWidget {
-  const AnimationDemoHome({ Key key }) : super(key: key);
+  const AnimationDemoHome({ Key? key }) : super(key: key);
 
   static const String routeName = '/animation';
 
@@ -432,7 +428,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   final PageController _headingPageController = PageController();
   final PageController _detailsPageController = PageController();
   ScrollPhysics _headingScrollPhysics = const NeverScrollableScrollPhysics();
-  ValueNotifier<double> selectedIndex = ValueNotifier<double>(0.0);
+  ValueNotifier<double?> selectedIndex = ValueNotifier<double?>(0.0);
 
   @override
   Widget build(BuildContext context) {
@@ -492,7 +488,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   }
 
   Iterable<Widget> _detailItemsFor(Section section) {
-    final Iterable<Widget> detailItems = section.details.map<Widget>((SectionDetail detail) {
+    final Iterable<Widget> detailItems = section.details!.map<Widget>((SectionDetail detail) {
       return SectionDetailView(detail: detail);
     });
     return ListTile.divideTiles(context: context, tiles: detailItems);

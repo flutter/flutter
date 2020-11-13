@@ -21,5 +21,5 @@
   "selectAllButtonLabel": "Vali kõik",
   "tabSemanticsLabel": "$tabIndex. vaheleht $tabCount-st",
   "modalBarrierDismissLabel": "Loobu",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "Otsige"
 }

@@ -36,6 +36,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'charcode': '1.2.0-nullsafety.3',
   'clock': '1.1.0-nullsafety.3',
   'collection': '1.15.0-nullsafety.5',
+  'intl': '0.17.0-nullsafety.2',
   'fake_async': '1.2.0-nullsafety.3',
   'js': '0.6.3-nullsafety.3',
   'matcher': '0.12.10-nullsafety.3',
@@ -1259,6 +1260,8 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
   final StringBuffer result = StringBuffer();
   final StringBuffer overrides = StringBuffer();
   result.writeln('name: flutter_update_packages');
+  result.writeln('environment:');
+  result.writeln("  sdk: '>=2.10.0 <3.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (_kManuallyPinnedDependencies.isNotEmpty) {
