@@ -30,6 +30,12 @@ String localEngine;
 /// The path to the engine "src/" directory.
 String localEngineSrcPath;
 
+/// Name of the LUCI builder this test is currently running on.
+/// 
+/// This is only passed on CI runs for Cocoon to be able to uniquely identify
+/// this test run.
+String luciBuilder;
+
 /// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
 
@@ -81,9 +87,10 @@ Future<void> main(List<String> rawArgs) async {
   }
 
   deviceId = args['device-id'] as String;
+  exitOnFirstTestFailure = args['exit'] as bool;
   localEngine = args['local-engine'] as String;
   localEngineSrcPath = args['local-engine-src-path'] as String;
-  exitOnFirstTestFailure = args['exit'] as bool;
+  luciBuilder = args['luci-builder'] as String;
   serviceAccountTokenFile = args['service-account-token-file'] as String;
   silent = args['silent'] as bool;
 
@@ -111,7 +118,9 @@ Future<void> _runTasks() async {
 
     if (serviceAccountTokenFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-      await cocoon.sendTaskResult(taskName: taskName, result: result);
+      /// Cocoon's definition of a task is more specific than [taskName], and to
+      /// upload we instead send the [luciBuilder] this is running on.
+      await cocoon.sendTaskResult(taskName: luciBuilder, result: result);
     }
 
     if (!result.succeeded) {
@@ -337,6 +346,10 @@ final ArgParser _argParser = ArgParser()
     help: 'Path to your engine src directory, if you are building Flutter\n'
           'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
           'the location based on the value of the --flutter-root option.',
+  )
+  ..addOption(
+    'luci-builder',
+    help: '[Flutter infrastructure] Name of the LUCI builder being run on.'
   )
   ..addFlag(
     'match-host-platform',
