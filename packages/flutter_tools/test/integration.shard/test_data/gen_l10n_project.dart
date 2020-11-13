@@ -35,7 +35,7 @@ class GenL10nProject extends Project {
   final String pubspec = '''
 name: test
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.11.0-213.0.dev <2.12.0"
 
 dependencies:
   flutter:
@@ -47,17 +47,22 @@ dependencies:
 
   @override
   final String main = r'''
-// @dart = 2.8
-// generated localizations do not support null safety.
 import 'package:flutter/material.dart';
 
 import 'l10n/app_localizations.dart';
 
 class LocaleBuilder extends StatelessWidget {
-  const LocaleBuilder({ Key key, this.locale, this.test, this.callback }) : super(key: key);
-  final Locale locale;
-  final String test;
+  const LocaleBuilder({
+    Key? key,
+    this.locale,
+    this.test,
+    required this.callback,
+  }) : super(key: key);
+
+  final Locale? locale;
+  final String? test;
   final void Function (BuildContext context) callback;
+
   @override build(BuildContext context) {
     return Localizations.override(
       locale: locale,
@@ -71,9 +76,15 @@ class LocaleBuilder extends StatelessWidget {
 }
 
 class ResultBuilder extends StatelessWidget {
-  const ResultBuilder({ Key key, this.test, this.callback }) : super(key: key);
-  final String test;
+  const ResultBuilder({
+    Key? key,
+    this.test,
+    required this.callback,
+  }) : super(key: key);
+
+  final String? test;
   final void Function (BuildContext context) callback;
+
   @override build(BuildContext context) {
     return Builder(
       builder: (BuildContext context) {
@@ -102,8 +113,8 @@ class Home extends StatelessWidget {
             int n = 0;
             for (Locale locale in AppLocalizations.supportedLocales) {
               String languageCode = locale.languageCode;
-              String countryCode = locale.countryCode;
-              String scriptCode = locale.scriptCode;
+              String? countryCode = locale.countryCode;
+              String? scriptCode = locale.scriptCode;
               results.add('supportedLocales[$n]: languageCode: $languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
               n += 1;
             }
@@ -114,8 +125,8 @@ class Home extends StatelessWidget {
           test: 'countryCode - en_CA',
           callback: (BuildContext context) {
             results.add('--- countryCode (en_CA) tests ---');
-            results.add(AppLocalizations.of(context).helloWorld);
-            results.add(AppLocalizations.of(context).hello("CA fallback World"));
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.hello("CA fallback World"));
           },
         ),
         LocaleBuilder(
@@ -123,8 +134,8 @@ class Home extends StatelessWidget {
           test: 'countryCode - en_GB',
           callback: (BuildContext context) {
             results.add('--- countryCode (en_GB) tests ---');
-            results.add(AppLocalizations.of(context).helloWorld);
-            results.add(AppLocalizations.of(context).hello("GB fallback World"));
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.hello("GB fallback World"));
           },
         ),
         LocaleBuilder(
@@ -132,17 +143,17 @@ class Home extends StatelessWidget {
           test: 'zh',
           callback: (BuildContext context) {
             results.add('--- zh ---');
-            results.add(AppLocalizations.of(context).helloWorld);
-            results.add(AppLocalizations.of(context).helloWorlds(0));
-            results.add(AppLocalizations.of(context).helloWorlds(1));
-            results.add(AppLocalizations.of(context).helloWorlds(2));
+            results.add(AppLocalizations.of(context)!.helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorlds(0));
+            results.add(AppLocalizations.of(context)!.helloWorlds(1));
+            results.add(AppLocalizations.of(context)!.helloWorlds(2));
             // Should use the fallback language, in this case,
             // "Hello 世界" should be displayed.
-            results.add(AppLocalizations.of(context).hello("世界"));
+            results.add(AppLocalizations.of(context)!.hello("世界"));
             // helloCost is tested in 'zh' because 'es' currency format contains a
             // non-breaking space character (U+00A0), which if removed,
             // makes it hard to decipher why the test is failing.
-            results.add(AppLocalizations.of(context).helloCost("价钱", 123));
+            results.add(AppLocalizations.of(context)!.helloCost("价钱", 123));
           },
         ),
         LocaleBuilder(
@@ -150,7 +161,7 @@ class Home extends StatelessWidget {
           test: 'zh',
           callback: (BuildContext context) {
             results.add('--- scriptCode: zh_Hans ---');
-            results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorld);
           },
         ),
         LocaleBuilder(
@@ -158,7 +169,7 @@ class Home extends StatelessWidget {
           test: 'scriptCode - zh_Hant',
           callback: (BuildContext context) {
             results.add('--- scriptCode - zh_Hant ---');
-            results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorld);
           },
         ),
         LocaleBuilder(
@@ -166,7 +177,7 @@ class Home extends StatelessWidget {
           test: 'scriptCode - zh_TW_Hant',
           callback: (BuildContext context) {
             results.add('--- scriptCode - zh_Hant_TW ---');
-            results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context)!.helloWorld);
           },
         ),
         LocaleBuilder(
@@ -174,7 +185,7 @@ class Home extends StatelessWidget {
           test: 'General formatting',
           callback: (BuildContext context) {
             results.add('--- General formatting tests ---');
-            final AppLocalizations localizations = AppLocalizations.of(context);
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
             results.addAll(<String>[
               '${localizations.helloWorld}',
               '${localizations.helloNewlineWorld}',
@@ -213,7 +224,7 @@ class Home extends StatelessWidget {
           test: '--- es ---',
           callback: (BuildContext context) {
             results.add('--- es ---');
-            final AppLocalizations localizations = AppLocalizations.of(context);
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
             results.addAll(<String>[
               '${localizations.helloWorld}',
               '${localizations.helloNewlineWorld}',
@@ -254,7 +265,7 @@ class Home extends StatelessWidget {
           test: 'countryCode - es_419',
           callback: (BuildContext context) {
             results.add('--- es_419 ---');
-            final AppLocalizations localizations = AppLocalizations.of(context);
+            final AppLocalizations localizations = AppLocalizations.of(context)!;
             results.addAll([
               '${localizations.helloWorld}',
               '${localizations.helloWorlds(0)}',
