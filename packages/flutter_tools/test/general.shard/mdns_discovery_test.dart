@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
@@ -55,27 +56,35 @@ void main() {
       return client;
     }
 
-    testUsingContext('No ports available', () async {
+    testWithoutContext('No ports available', () async {
       final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
+      );
       final int port = (await portDiscovery.query())?.port;
       expect(port, isNull);
     });
 
-    testUsingContext('Prints helpful message when there is no ipv4 link local address.', () async {
+    testWithoutContext('Prints helpful message when there is no ipv4 link local address.', () async {
       final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-
+      final BufferLogger logger = BufferLogger.test();
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: logger,
+        flutterUsage: Usage.test(),
+      );
       final Uri uri = await portDiscovery.getObservatoryUri(
         '',
         MockIOSDevice(),
       );
       expect(uri, isNull);
-      expect(testLogger.errorText, contains('Personal Hotspot'));
+      expect(logger.errorText, contains('Personal Hotspot'));
     });
 
-    testUsingContext('One port available, no appId', () async {
+    testWithoutContext('One port available, no appId', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -87,12 +96,16 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
+      );
       final int port = (await portDiscovery.query())?.port;
       expect(port, 123);
     });
 
-    testUsingContext('One port available, no appId, with authCode', () async {
+    testWithoutContext('One port available, no appId, with authCode', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -111,13 +124,15 @@ void main() {
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
       );
       final MDnsObservatoryDiscoveryResult result = await portDiscovery.query();
       expect(result?.port, 123);
       expect(result?.authCode, 'xyz/');
     });
 
-    testUsingContext('Multiple ports available, without appId', () async {
+    testWithoutContext('Multiple ports available, without appId', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -133,11 +148,15 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
+      );
       expect(portDiscovery.query, throwsToolExit());
     });
 
-    testUsingContext('Multiple ports available, with appId', () async {
+    testWithoutContext('Multiple ports available, with appId', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -153,12 +172,16 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
+      );
       final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
       expect(port, 321);
     });
 
-    testUsingContext('Multiple ports available per process, with appId', () async {
+    testWithoutContext('Multiple ports available per process, with appId', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -176,23 +199,31 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
+      );
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, 1234);
     });
 
-    testUsingContext('Query returns null', () async {
+    testWithoutContext('Query returns null', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[],
          <String, List<SrvResourceRecord>>{},
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
+      );
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, isNull);
     });
 
-    testUsingContext('Throws Exception when client throws OSError on start', () async {
+    testWithoutContext('Throws Exception when client throws OSError on start', () async {
       final MDnsClient client = MockMDnsClient();
       when(client.start()).thenAnswer((_) {
         throw const OSError('Operation not suppoted on socket', 102);
@@ -200,6 +231,8 @@ void main() {
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
       );
       expect(
         () async => await portDiscovery.query(),
@@ -207,7 +240,7 @@ void main() {
       );
     });
 
-    testUsingContext('Correctly builds Observatory URI with hostVmservicePort == 0', () async {
+    testWithoutContext('Correctly builds Observatory URI with hostVmservicePort == 0', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -221,7 +254,11 @@ void main() {
 
       final MockIOSDevice mockDevice = MockIOSDevice();
       when(mockDevice.portForwarder).thenReturn(const NoOpDevicePortForwarder());
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: Usage.test(),
+      );
       final Uri uri = await portDiscovery.getObservatoryUri('bar', mockDevice, hostVmservicePort: 0);
       expect(uri.toString(), 'http://127.0.0.1:123/');
     });
