@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
@@ -406,15 +407,16 @@ class RawScrollbar extends StatefulWidget {
     this.trailing,
     required this.child,
     this.controller,
-    this.overlapsChild = false,
+    this.padsChild = true,
     this.isAlwaysShown = false,
-    //animateOnHover
-    //hoverAnimationDuration
-    //animateOnScroll
-    //scrollAnimationDuration
-    //animateOnDrag
-    //dragAnimationDuration
-  }) : super(key: key);
+    //bool animateOnHover
+    //Duration hoverAnimationDuration
+    //bool animateOnScroll
+    //Duration scrollAnimationDuration
+    //bool animateOnDrag
+    //Duration dragAnimationDuration
+  }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
+       super(key: key);
 
   // TODO(Piinks): leading, track, thumb, trailing should all be builders to
   //  pass animation values, whether drag is active etc.
@@ -431,7 +433,7 @@ class RawScrollbar extends StatefulWidget {
   ///
   final ScrollController? controller;
   ///
-  final bool overlapsChild;
+  final bool padsChild;
   ///
   final bool isAlwaysShown;
 
@@ -442,7 +444,18 @@ class RawScrollbar extends StatefulWidget {
 class _RawScrollbarState extends State<RawScrollbar> {
   ScrollMetrics? _lastMetrics;
   late _ScrollbarLayout _scrollbarLayoutDelegate;
-  Drag? _drag;
+  bool _dragIsActive = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.isAlwaysShown) {
+      assert(widget.controller != null);
+      WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+        widget.controller!.position.didUpdateScrollPositionBy(0);
+      });
+    }
+  }
 
   bool _handleScrollNotification(ScrollNotification notification) {
     setState(() {
@@ -484,83 +497,57 @@ class _RawScrollbarState extends State<RawScrollbar> {
     );
   }
 
+  late double _lastAppliedDelta;
+
   void _handleDragStart(DragStartDetails details) {
-    print('drag start: $details');
+    // TODO(Piinks): Update relevant animations
     assert(widget.controller != null);
+    _dragIsActive = true;
     final Axis direction = widget.controller!.position.axis;
     switch (direction) {
       case Axis.vertical:
-        _dragScrollbar(details.localPosition.dy);
+        _lastAppliedDelta = details.localPosition.dy;
         break;
       case Axis.horizontal:
-        _dragScrollbar(details.localPosition.dx);
+        _lastAppliedDelta = details.localPosition.dx;
         break;
     }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    print('drag update: $details');
+    // TODO(Piinks): Update relevant animations
     assert(widget.controller != null);
+    assert(_dragIsActive);
     final Axis direction = widget.controller!.position.axis;
     switch(direction) {
       case Axis.vertical:
-        _dragScrollbar(details.localPosition.dy);
+        _updatePosition(details.localPosition.dy - _lastAppliedDelta);
+        _lastAppliedDelta = details.localPosition.dy;
         break;
       case Axis.horizontal:
-        _dragScrollbar(details.localPosition.dx);
+        _updatePosition(details.localPosition.dx - _lastAppliedDelta);
+        _lastAppliedDelta = details.localPosition.dx;
         break;
     }
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    print('drag end: $details');
     assert(widget.controller != null);
-    final Axis direction = widget.controller!.position.axis;
-    final double scrollVelocity = 0.0; // get from thumb position
-    // _drag?.end(DragEndDetails(
-    //   primaryVelocity: -scrollVelocity,
-    //   velocity: Velocity(
-    //     pixelsPerSecond: direction == Axis.vertical
-    //       ? Offset(0.0, -scrollVelocity)
-    //       : Offset(-scrollVelocity, 0.0),
-    //   ),
-    // ));
-    // _drag = null;
+    _dragIsActive = false;
+    // TODO(Piinks): Update relevant animations
   }
 
-  void _dragScrollbar(double primaryDelta) {
-    print('dragScrollbar, primaryDelta: $primaryDelta');
+  void _updatePosition(double localDelta) {
     assert(widget.controller != null);
-    final double scrollDelta = _scrollbarLayoutDelegate.localDeltaToScrollDelta(primaryDelta)
-    final Axis direction = widget.controller!.position.axis;
-
-    if (_drag == null) {
-      _drag = widget.controller!.position.drag(
-        DragStartDetails(
-          globalPosition: direction == Axis.vertical
-            ? Offset(0.0, scrollDelta)
-            : Offset(scrollDelta, 0.0),
-        ),
-          () {},
-      );
-    } else {
-      _drag!.update(DragUpdateDetails(
-        globalPosition: direction == Axis.vertical
-          ? Offset(0.0, scrollDelta)
-          : Offset(scrollDelta, 0.0),
-        // delta: direction == Axis.vertical
-        //   ? Offset(0.0, -scrollOffsetLocal)
-        //   : Offset(-scrollOffsetLocal, 0.0),
-        // primaryDelta: -scrollOffsetLocal,
-      ));
-    }
+    final double newScrollPosition = _scrollbarLayoutDelegate.localDeltaToScrollPosition(localDelta);
+    widget.controller!.jumpTo(newScrollPosition);
   }
 
   @override
   Widget build(BuildContext context) {
     _scrollbarLayoutDelegate = _ScrollbarLayout(
       textDirection: Directionality.of(context),
-      overlapsChild: widget.overlapsChild,
+      padsChild: widget.padsChild,
       controller: widget.controller,
       metrics: _lastMetrics,
     );
@@ -577,9 +564,6 @@ class _RawScrollbarState extends State<RawScrollbar> {
               child: widget.leading!,
             ),
           if (widget.track != null)
-            // TODO(Piinks): Should users implement tap gestures? What if they
-            //  want their tracks to have inkwell etc?
-            //  Maybe have this be the default and allow users to override?
             LayoutId(
               id: _ScrollbarSlot.track,
               child: widget.controller != null
@@ -589,20 +573,19 @@ class _RawScrollbarState extends State<RawScrollbar> {
                   )
                 : widget.track!,
             ),
-          // TODO(Piinks): Should users implement drag gestures? What is they
-          //  want different gestures, or if the thumb has buttons that should
-          //  handle different gestures?
           LayoutId(
             id: _ScrollbarSlot.thumb,
-            child: GestureDetector(
-              child: widget.thumb,
-              onHorizontalDragStart: _handleDragStart,
-              onHorizontalDragUpdate: _handleDragUpdate,
-              onHorizontalDragEnd: _handleDragEnd,
-              onVerticalDragStart: _handleDragStart,
-              onVerticalDragUpdate: _handleDragUpdate,
-              onVerticalDragEnd: _handleDragEnd,
-            ),
+            child: widget.controller != null
+              ? GestureDetector(
+                  child: widget.thumb,
+                  onHorizontalDragStart: _handleDragStart,
+                  onHorizontalDragUpdate: _handleDragUpdate,
+                  onHorizontalDragEnd: _handleDragEnd,
+                  onVerticalDragStart: _handleDragStart,
+                  onVerticalDragUpdate: _handleDragUpdate,
+                  onVerticalDragEnd: _handleDragEnd,
+              )
+              : widget.thumb,
           ),
           // Any gestures in the trailing widget are handled by the user
           if (widget.trailing != null)
@@ -630,15 +613,14 @@ enum _ScrollbarSlot {
 
 class _ScrollbarLayout extends MultiChildLayoutDelegate {
   _ScrollbarLayout({
-    this.overlapsChild = false,
+    this.padsChild = true,
     this.controller,
     this.metrics,
     required this.textDirection,
-  }) : assert(controller != null || metrics != null),
-       assert(overlapsChild != null);
+  }) : assert(padsChild != null);
 
 
-  final bool overlapsChild;
+  final bool padsChild;
   final ScrollController? controller;
   final ScrollMetrics? metrics;
   final TextDirection textDirection;
@@ -646,7 +628,8 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
   late double _trackLength;
   
   int getTrackIncrementCorrection(Offset localPosition) {
-    final AxisDirection direction = controller?.position.axisDirection ?? metrics!.axisDirection;
+    assert(controller != null);
+    final AxisDirection direction = controller!.position.axisDirection;
     switch (direction) {
       case AxisDirection.up:
         if (localPosition.dy > _thumbLocalPosition)
@@ -667,36 +650,54 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
     }
   }
 
-  double localDeltaToScrollDelta(double localDelta) {
-    print('thumbPosition: $_thumbLocalPosition');
-    print('trackLegnth: $_trackLength');
+  double localDeltaToScrollPosition(double localDelta) {
+    assert(controller != null);
     double newPosition = _thumbLocalPosition + localDelta;
     if (newPosition < 0.0)
       newPosition = 0.0;
     else if (newPosition > _trackLength)
       newPosition = _trackLength;
     // Convert local track position to scroll position
-    final double maxScrollExtent = controller!.position.maxScrollExtent ?? metrics!.maxScrollExtent;
-    final double newScrollPosition = (newPosition / _trackLength) * maxScrollExtent;
-    return controller!.position.pixels - newScrollPosition;
+    final double maxScrollExtent = controller!.position.maxScrollExtent;
+    return (newPosition / _trackLength) * maxScrollExtent;
   }
 
   @override
   void performLayout(Size size) {
-    // TODO(Piinks): Add assertions along the way to ensure we don't run out of
-    //  room
+    // We can't lay out the scrollbar without information about the scrollable child.
+    // If a controller has not been provided, or we haven't received a scroll
+    // notification yet, we can't lay out the scrollbar.
+    bool skipScrollbarLayout = false;
+    if (controller == null && metrics == null)
+      skipScrollbarLayout = true;
+    // If we are using a controller to inform the layout of the scrollbar, we
+    // need a position attached first.
+    if (metrics == null && controller != null && (!controller!.hasClients || !controller!.position.hasViewportDimension))
+      skipScrollbarLayout = true;
+
+    // Child Widget
+    if (!padsChild || skipScrollbarLayout) {
+      // TODO(Piinks): This does not WAI when laying out the scrollbar yet..
+      // Scrollbar is laid out on top of the child, does not contribute to
+      // padding it.
+      layoutChild(_ScrollbarSlot.child, BoxConstraints.tight(size));
+    }
+
+    if (skipScrollbarLayout) {
+      if (hasChild(_ScrollbarSlot.leading))
+        layoutChild(_ScrollbarSlot.leading, BoxConstraints.tight(const Size(0.0, 0.0)));
+      if (hasChild(_ScrollbarSlot.trailing))
+        layoutChild(_ScrollbarSlot.trailing, BoxConstraints.tight(const Size(0.0, 0.0)));
+      if (hasChild(_ScrollbarSlot.track))
+        layoutChild(_ScrollbarSlot.track, BoxConstraints.tight(const Size(0.0, 0.0)));
+      layoutChild(_ScrollbarSlot.thumb, BoxConstraints.tight(const Size(0.0, 0.0)));
+      return;
+    }
+
     final BoxConstraints looseConstraints = BoxConstraints.loose(size);
     final AxisDirection direction = controller?.position.axisDirection ?? metrics!.axisDirection;
     final Axis scrollAxis = controller?.position.axis ?? metrics!.axis;
     double trackPadding = 0.0;
-
-    // Child Widget
-    if (overlapsChild) {
-      // TODO(Piinks): This does not work yet..
-      // Scrollbar is laid out on top of the child, does not contribute to
-      // padding it.
-      layoutChild(_ScrollbarSlot.child, looseConstraints);
-    }
 
     // Leading Widget
     Size leadingSize = Size.zero;
@@ -782,44 +783,53 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
     }
 
     // Thumb Widget
-    // TODO(Piinks): Update the constraints given to the thumb here, maybe we
-    //  should enforce the min size and max size (max being relative to the
-    //  scroll view and viewport size)
-    //  Or maybe that should be handled by the user in the thumbBuilder widget..
-    final Size thumbSize = layoutChild(_ScrollbarSlot.thumb, trackConstraints);
+    double fractionVisible;
+    // The thumb should not be larger than the relative amount of the visible
+    // scroll content.
+    // TODO(Piinks): Infinite extent handling is needed here as well.
+    if (metrics != null )
+      fractionVisible = metrics!.viewportDimension / metrics!.maxScrollExtent;
+    else
+      fractionVisible = controller!.position.viewportDimension / controller!.position.maxScrollExtent;
+
+    final double maxThumbExtent = fractionVisible * (size.height - trackPadding);
+    final BoxConstraints thumbConstraints = scrollAxis == Axis.vertical
+      ? BoxConstraints(maxHeight: maxThumbExtent)
+      : BoxConstraints(maxWidth: maxThumbExtent);
+    final Size thumbSize = layoutChild(_ScrollbarSlot.thumb, thumbConstraints);
     late double maxScrollExtent;
     // TODO(Piinks): Handle infinite scroll views
     // Assume always [~100 || custom number] of pixels ahead, and add to current offset?
     // Also check variable sized list items performance.
-    try {
-      maxScrollExtent = controller?.position.maxScrollExtent ?? metrics!.maxScrollExtent;
-    } catch (_) {
-      maxScrollExtent = 0.0;
-    }
+    if (metrics != null)
+      maxScrollExtent = metrics!.maxScrollExtent;
+    else
+      maxScrollExtent = controller!.position.maxScrollExtent;
 
     final double scrollOffset = controller?.offset ?? metrics!.pixels;
-    final double fractionalOffset = maxScrollExtent == 0.0
-      ? 0.0
-      : (scrollOffset / maxScrollExtent).clamp(0.0, 1.0);
+    final double fractionalOffset = (scrollOffset / maxScrollExtent).clamp(0.0, 1.0);
     double x, y;
-    _trackLength = size.height - trackPadding - thumbSize.height;
     switch (direction) {
       case AxisDirection.down:
         x = textDirection == TextDirection.rtl ? 0.0 : size.width - thumbSize.width;
+        _trackLength = size.height - trackPadding - thumbSize.height;
         _thumbLocalPosition = _trackLength * fractionalOffset;
         y = _thumbLocalPosition + leadingSize.height;
         break;
       case AxisDirection.up:
         x = textDirection == TextDirection.rtl ? 0.0 : size.width - thumbSize.width;
+        _trackLength = size.height - trackPadding - thumbSize.height;
         _thumbLocalPosition = _trackLength * (1 - fractionalOffset);
         y = _thumbLocalPosition + leadingSize.height;
         break;
       case AxisDirection.left:
+        _trackLength = size.height - trackPadding - thumbSize.width;
         _thumbLocalPosition = _trackLength * (1 - fractionalOffset);
         x = _thumbLocalPosition + leadingSize.width;
         y = size.height - thumbSize.height;
         break;
       case AxisDirection.right:
+        _trackLength = size.height - trackPadding - thumbSize.width;
         _thumbLocalPosition = _trackLength * fractionalOffset;
         x = _thumbLocalPosition + leadingSize.width;
         y = size.height - thumbSize.height;
@@ -828,7 +838,7 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
     positionChild(_ScrollbarSlot.thumb, Offset(x, y));
 
     // Child Widget
-    if (!overlapsChild) {
+    if (padsChild) {
       layoutChild(
         _ScrollbarSlot.child,
         scrollAxis == Axis.vertical
@@ -849,6 +859,6 @@ class _ScrollbarLayout extends MultiChildLayoutDelegate {
     return  oldDelegate.textDirection != textDirection
       || oldDelegate.controller != controller
       || oldDelegate.metrics != metrics
-      || oldDelegate.overlapsChild != overlapsChild;
+      || oldDelegate.padsChild != padsChild;
   }
 }
