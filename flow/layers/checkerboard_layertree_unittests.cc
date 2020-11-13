@@ -43,8 +43,8 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerNotCheckBoard) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), child_intersect_bounds);
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), intersect_bounds);
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(),
@@ -93,8 +93,8 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerCheckBoard) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), child_intersect_bounds);
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), intersect_bounds);
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(),
@@ -136,8 +136,8 @@ TEST_F(CheckerBoardLayerTest, ClipPathSaveLayerNotCheckBoard) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_path)}));
@@ -177,8 +177,8 @@ TEST_F(CheckerBoardLayerTest, ClipPathSaveLayerCheckBoard) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_path)}));
@@ -218,8 +218,8 @@ TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerNotCheckBoard) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_rrect)}));
@@ -259,8 +259,8 @@ TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerCheckBoard) {
   EXPECT_TRUE(preroll_context()->mutators_stack.is_empty());  // Untouched
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_cull_rect(), layer_bounds);
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_rrect)}));
@@ -296,7 +296,7 @@ TEST_F(CheckerBoardLayerTest, PhysicalSaveLayerNotCheckBoard) {
   EXPECT_EQ(layer->paint_bounds(),
             PhysicalShapeLayer::ComputeShadowBounds(layer_path.getBounds(),
                                                     initial_elevation, 1.0f));
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_FALSE(layer->needs_system_composite());
   EXPECT_EQ(layer->elevation(), initial_elevation);
 
@@ -340,7 +340,7 @@ TEST_F(CheckerBoardLayerTest, PhysicalSaveLayerCheckBoard) {
   EXPECT_EQ(layer->paint_bounds(),
             PhysicalShapeLayer::ComputeShadowBounds(layer_path.getBounds(),
                                                     initial_elevation, 1.0f));
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_FALSE(layer->needs_system_composite());
   EXPECT_EQ(layer->elevation(), initial_elevation);
 

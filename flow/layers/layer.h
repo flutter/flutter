@@ -163,15 +163,40 @@ class Layer {
     needs_system_composite_ = value;
   }
 
+  // Returns the paint bounds in the layer's local coordinate system
+  // as determined during Preroll().  The bounds should include any
+  // transform, clip or distortions performed by the layer itself,
+  // but not any similar modifications inherited from its ancestors.
   const SkRect& paint_bounds() const { return paint_bounds_; }
 
   // This must be set by the time Preroll() returns otherwise the layer will
   // be assumed to have empty paint bounds (paints no content).
+  // The paint bounds should be independent of the context outside of this
+  // layer as the layer may be painted under different conditions than
+  // the Preroll context. The most common example of this condition is
+  // that we might Preroll the layer with a cull_rect established by a
+  // clip layer above it but then we might be asked to paint anyway if
+  // another layer above us needs to cache its children. During the
+  // paint operation that arises due to the caching, the clip will
+  // be the bounds of the layer needing caching, not the cull_rect
+  // that we saw in the overall Preroll operation.
   void set_paint_bounds(const SkRect& paint_bounds) {
     paint_bounds_ = paint_bounds;
   }
 
-  bool needs_painting() const { return !paint_bounds_.isEmpty(); }
+  // Determines if the layer has any content.
+  bool is_empty() const { return paint_bounds_.isEmpty(); }
+
+  // Determines if the Paint() method is necessary based on the properties
+  // of the indicated PaintContext object.
+  bool needs_painting(PaintContext& context) const {
+    // Workaround for Skia bug (quickReject does not reject empty bounds).
+    // https://bugs.chromium.org/p/skia/issues/detail?id=10951
+    if (paint_bounds_.isEmpty()) {
+      return false;
+    }
+    return !context.internal_nodes_canvas->quickReject(paint_bounds_);
+  }
 
   uint64_t unique_id() const { return unique_id_; }
 

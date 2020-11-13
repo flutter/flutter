@@ -33,7 +33,7 @@ void MockLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void MockLayer::Paint(PaintContext& context) const {
-  FML_DCHECK(needs_painting());
+  FML_DCHECK(needs_painting(context));
 
   context.leaf_nodes_canvas->drawPath(fake_paint_path_, fake_paint_);
 }

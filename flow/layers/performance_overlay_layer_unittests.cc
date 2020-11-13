@@ -126,7 +126,7 @@ TEST_F(PerformanceOverlayLayerTest, PaintingEmptyLayerDies) {
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
-  EXPECT_FALSE(layer->needs_painting());
+  EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   // Crashes reading a nullptr.
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()), "");
@@ -143,7 +143,7 @@ TEST_F(PerformanceOverlayLayerTest, InvalidOptions) {
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), layer_bounds);
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
 
   // Nothing is drawn if options are invalid (0).
   layer->Paint(paint_context());
@@ -161,7 +161,7 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), layer_bounds);
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
 
   layer->Paint(paint_context());
   auto overlay_text = PerformanceOverlayLayer::MakeStatisticsText(

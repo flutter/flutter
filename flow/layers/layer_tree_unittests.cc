@@ -46,7 +46,7 @@ TEST_F(LayerTreeTest, PaintingEmptyLayerDies) {
   layer_tree().set_root_layer(layer);
   layer_tree().Preroll(frame());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
-  EXPECT_FALSE(layer->needs_painting());
+  EXPECT_TRUE(layer->is_empty());
 
   layer_tree().Paint(frame());
 }
@@ -62,8 +62,8 @@ TEST_F(LayerTreeTest, PaintBeforePreollDies) {
   layer_tree().set_root_layer(layer);
   EXPECT_EQ(mock_layer->paint_bounds(), kEmptyRect);
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
-  EXPECT_FALSE(mock_layer->needs_painting());
-  EXPECT_FALSE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->is_empty());
+  EXPECT_TRUE(layer->is_empty());
 
   layer_tree().Paint(frame());
   EXPECT_EQ(mock_canvas().draw_calls(), std::vector<MockCanvas::DrawCall>());
@@ -81,8 +81,8 @@ TEST_F(LayerTreeTest, Simple) {
   layer_tree().Preroll(frame());
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_FALSE(mock_layer->is_empty());
+  EXPECT_FALSE(layer->is_empty());
   EXPECT_EQ(mock_layer->parent_matrix(), root_transform());
 
   layer_tree().Paint(frame());
@@ -110,9 +110,9 @@ TEST_F(LayerTreeTest, Multiple) {
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_total_bounds);
-  EXPECT_TRUE(mock_layer1->needs_painting());
-  EXPECT_TRUE(mock_layer2->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_FALSE(mock_layer1->is_empty());
+  EXPECT_FALSE(mock_layer2->is_empty());
+  EXPECT_FALSE(layer->is_empty());
   EXPECT_FALSE(mock_layer1->needs_system_composite());
   EXPECT_FALSE(mock_layer2->needs_system_composite());
   EXPECT_FALSE(layer->needs_system_composite());
@@ -146,9 +146,9 @@ TEST_F(LayerTreeTest, MultipleWithEmpty) {
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), SkPath().getBounds());
   EXPECT_EQ(layer->paint_bounds(), child_path1.getBounds());
-  EXPECT_TRUE(mock_layer1->needs_painting());
-  EXPECT_FALSE(mock_layer2->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_FALSE(mock_layer1->is_empty());
+  EXPECT_TRUE(mock_layer2->is_empty());
+  EXPECT_FALSE(layer->is_empty());
   EXPECT_FALSE(mock_layer1->needs_system_composite());
   EXPECT_FALSE(mock_layer2->needs_system_composite());
   EXPECT_FALSE(layer->needs_system_composite());
@@ -183,9 +183,9 @@ TEST_F(LayerTreeTest, NeedsSystemComposite) {
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_total_bounds);
-  EXPECT_TRUE(mock_layer1->needs_painting());
-  EXPECT_TRUE(mock_layer2->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_FALSE(mock_layer1->is_empty());
+  EXPECT_FALSE(mock_layer2->is_empty());
+  EXPECT_FALSE(layer->is_empty());
   EXPECT_TRUE(mock_layer1->needs_system_composite());
   EXPECT_FALSE(mock_layer2->needs_system_composite());
   EXPECT_TRUE(layer->needs_system_composite());
