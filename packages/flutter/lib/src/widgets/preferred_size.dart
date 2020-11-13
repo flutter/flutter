@@ -43,7 +43,7 @@ abstract class PreferredSizeWidget implements Widget {
 ///
 /// Consider changing the [PreferredSize] value and see how the
 /// custom [AppBar] behaves. The benefit of using
-/// PreferredSize as an [Scaffold.appBar] child it's the possibility of creating
+/// PreferredSize as a [Scaffold.appBar] child it's the possibility of creating
 /// custom and adapting appBars.
 ///
 /// ```dart preamble
