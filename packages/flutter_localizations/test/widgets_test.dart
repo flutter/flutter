@@ -689,8 +689,11 @@ void main() {
           const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale1 = ui.window.locales!.first;
-          final Locale locale2 = ui.window.locales![1];
+          // TODO(gspencergood): remove the casts once
+          // https://github.com/flutter/engine/pull/22473 rolls into the
+          // framework.
+          final Locale locale1 = ((ui.window.locales as dynamic) as List<Locale>).first;
+          final Locale locale2 = ((ui.window.locales as dynamic) as List<Locale>)[1];
           return Text('$locale1 $locale2');
         },
       )
