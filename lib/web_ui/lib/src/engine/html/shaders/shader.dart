@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.10
+// @dart = 2.12
 part of engine;
 
 abstract class EngineGradient implements ui.Gradient {
@@ -31,8 +31,8 @@ class GradientSweep extends EngineGradient {
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
     assert(shaderBounds != null);
-    int widthInPixels = shaderBounds!.right.ceil();
-    int heightInPixels = shaderBounds.bottom.ceil();
+    int widthInPixels = shaderBounds!.width.ceil();
+    int heightInPixels = shaderBounds.height.ceil();
     assert(widthInPixels > 0 && heightInPixels > 0);
 
     initWebGl();
@@ -42,7 +42,7 @@ class GradientSweep extends EngineGradient {
     _GlContext gl = _OffScreenCanvas.supported
         ? _GlContext.fromOffscreenCanvas(offScreenCanvas._canvas!)
         : _GlContext.fromCanvas(offScreenCanvas._glCanvas!,
-            webGLVersion == 1);
+            webGLVersion == WebGLVersion.webgl1);
     gl.setViewportSize(widthInPixels, heightInPixels);
 
     NormalizedGradient normalizedGradient = NormalizedGradient(
@@ -56,8 +56,8 @@ class GradientSweep extends EngineGradient {
     double centerX = (center.dx - shaderBounds.left) / (shaderBounds.width);
     double centerY = (center.dy - shaderBounds.top) / (shaderBounds.height);
     gl.setUniform2f(tileOffset,
-        shaderBounds.left + 2 * (shaderBounds.width * (centerX - 0.5)),
-        -shaderBounds.top - 2 * (shaderBounds.height * (centerY - 0.5)));
+        2 * (shaderBounds.width * (centerX - 0.5)),
+        2 * (shaderBounds.height * (centerY - 0.5)));
     Object angleRange = gl.getUniformLocation(glProgram.program, 'angle_range');
     gl.setUniform2f(angleRange, startAngle, endAngle);
     normalizedGradient.setupUniforms(gl, glProgram);
@@ -67,8 +67,8 @@ class GradientSweep extends EngineGradient {
       gl.setUniformMatrix4fv(gradientMatrix, false, matrix4!);
     }
 
-    Object? imageBitmap = _glRenderer!.drawRect(shaderBounds, gl,
-      glProgram, normalizedGradient, widthInPixels, heightInPixels);
+    Object? imageBitmap = _glRenderer!.drawRect(ui.Rect.fromLTWH(0, 0, shaderBounds.width, shaderBounds.height),
+        gl, glProgram, normalizedGradient, widthInPixels, heightInPixels);
 
     return ctx!.createPattern(imageBitmap!, 'no-repeat')!;
   }
@@ -170,6 +170,8 @@ class GradientLinear extends EngineGradient {
       ui.Rect? shaderBounds, double density) {
     _FastMatrix64? matrix4 = this.matrix4;
     html.CanvasGradient gradient;
+    final double offsetX = shaderBounds!.left;
+    final double offsetY = shaderBounds.top;
     if (matrix4 != null) {
       final centerX = (from.dx + to.dx) / 2.0;
       final centerY = (from.dy + to.dy) / 2.0;
@@ -177,10 +179,10 @@ class GradientLinear extends EngineGradient {
       final double fromX = matrix4.transformedX + centerX;
       final double fromY = matrix4.transformedY + centerY;
       matrix4.transform(to.dx - centerX, to.dy - centerY);
-      gradient = ctx!.createLinearGradient(fromX, fromY,
-          matrix4.transformedX + centerX, matrix4.transformedY + centerY);
+      gradient = ctx!.createLinearGradient(fromX - offsetX, fromY - offsetY,
+          matrix4.transformedX + centerX - offsetX, matrix4.transformedY - offsetY + centerY);
     } else {
-      gradient = ctx!.createLinearGradient(from.dx, from.dy, to.dx, to.dy);
+      gradient = ctx!.createLinearGradient(from.dx - offsetX, from.dy - offsetY, to.dx - offsetX, to.dy - offsetY);
     }
 
     final List<double>? colorStops = this.colorStops;
@@ -222,8 +224,11 @@ class GradientRadial extends EngineGradient {
             'TileMode not supported in GradientRadial shader');
       }
     }
+    final double offsetX = shaderBounds!.left;
+    final double offsetY = shaderBounds.top;
     final html.CanvasGradient gradient = ctx!.createRadialGradient(
-        center.dx, center.dy, 0, center.dx, center.dy, radius);
+        center.dx - offsetX, center.dy - offsetY, 0,
+        center.dx - offsetX, center.dy - offsetY, radius);
     final List<double>? colorStops = this.colorStops;
     if (colorStops == null) {
       assert(colors.length == 2);

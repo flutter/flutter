@@ -95,5 +95,6 @@ analyze \
   "$FLUTTER_DIR/testing/scenario_app"
 
 # Check that dart libraries conform.
+echo "Checking web_ui api conformance..."
 (cd "$FLUTTER_DIR/web_sdk"; pub get)
 (cd "$FLUTTER_DIR"; dart "web_sdk/test/api_conform_test.dart")
