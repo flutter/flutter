@@ -48,7 +48,7 @@ void main() {
         reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
-  }, skip: platform.isMacOS);
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/70486
 
   tearDown(() async {
     await flutter.stop();
