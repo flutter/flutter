@@ -205,14 +205,16 @@ class Checkbox extends StatefulWidget {
 
   /// The color for the checkbox's [Material] when it has the input focus.
   ///
-  /// If null, then the value of [CheckboxThemeData.splashColor] is used. If
-  /// that is also null, then the value of [ThemeData.focusColor] is used.
+  /// If null, then the value of [CheckboxThemeData.splashColor] is used in the
+  /// focused state. If that is also null, then the value of
+  /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
   ///
-  /// If null, then the value of [CheckboxThemeData.splashColor] is used. If
-  /// that is also null, then the value of [ThemeData.hoverColor] is used.
+  /// If null, then the value of [CheckboxThemeData.splashColor] is used in the
+  /// hovered state. If that is also null, then the value of
+  /// [ThemeData.hoverColor] is used.
   final Color? hoverColor;
 
   /// {@template flutter.material.checkbox.splashRadius}
