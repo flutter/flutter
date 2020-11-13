@@ -622,22 +622,26 @@ class Actions extends StatefulWidget {
   ///
   /// The `context`, `intent` and `nullOk` arguments must not be null.
   ///
-  /// If the given `intent` isn't found in the first [Actions.actions] map, then
-  /// it will look to the next [Actions] widget in the hierarchy until it
-  /// reaches the root.
+  /// If the given `intent` doesn't map to an action, or doesn't map to one that
+  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
+  /// then it will look to the next ancestor [Actions] widget in the hierarchy
+  /// until it reaches the root.
   ///
-  /// Will throw if no ambient [Actions] widget is found, or if the given
-  /// `intent` doesn't map to an action in any of the [Actions.actions] maps
-  /// that are found.
+  /// In debug mode, if `nullOk` is false, this method will throw an exception
+  /// if no ambient [Actions] widget is found, or if the given `intent` doesn't
+  /// map to an action in any of the [Actions.actions] maps that are found. In
+  /// release mode, this method will return null if no matching enabled action
+  /// is found, regardless of the setting of `nullOk`.
   ///
-  /// Setting `nullOk` to true means that if no ambient [Actions] widget is
-  /// found, then this method will return null instead of throwing.
+  /// Setting `nullOk` to true indicates that if no ambient [Actions] widget is
+  /// found, then in debug mode, this method should return null instead of
+  /// throwing an exception.
   ///
-  /// Returns the result of invoking the action's [Action.invoke] method. If
-  /// no action mapping was found for the specified intent, or if the action
-  /// that was found was disabled, then this returns null. Callers can detect
-  /// whether or not the action is available (found, and not disabled) using
-  /// [Actions.find] with its `nullOk` argument set to true.
+  /// This method returns the result of invoking the action's [Action.invoke]
+  /// method. If no action mapping was found for the specified intent (and
+  /// `nullOk` is true), or if the actions that were found were disabled, or the
+  /// action itself returns null from [Action.invoke], then this method returns
+  /// null.
   static Object? invoke<T extends Intent>(
     BuildContext context,
     T intent, {
@@ -653,18 +657,17 @@ class Actions extends StatefulWidget {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
       final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
       if (result != null) {
-        action = result;
         actionElement = element;
-        return true;
+        if (result.isEnabled(intent)) {
+          action = result;
+          return true;
+        }
       }
       return false;
     });
 
     assert(() {
-      if (nullOk) {
-        return true;
-      }
-      if (action == null) {
+      if (!nullOk && actionElement == null) {
         throw FlutterError('Unable to find an action for an Intent with type '
             '${intent.runtimeType} in an $Actions widget in the given context.\n'
             '$Actions.invoke() was unable to find an $Actions widget that '
@@ -681,12 +684,9 @@ class Actions extends StatefulWidget {
     if (actionElement == null || action == null) {
       return null;
     }
-    if (action!.isEnabled(intent)) {
-      // Invoke the action we found using the relevant dispatcher from the Actions
-      // Element we found.
-      return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
-    }
-    return null;
+    // Invoke the action we found using the relevant dispatcher from the Actions
+    // Element we found.
+    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
   }
 
   @override

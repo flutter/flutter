@@ -448,7 +448,6 @@ void main() {
       expect(identical(result, sentinel), isTrue);
       expect(invoked, isTrue);
     });
-
     testWidgets('ContextAction can return null', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       const TestIntent intent = TestIntent();
@@ -474,6 +473,52 @@ void main() {
       expect(invokedAction, equals(testAction));
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
       expect(testAction.capturedContexts.single, containerKey.currentContext);
+    });
+    testWidgets('Disabled actions allow propagation to an ancestor', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+      const TestIntent intent = TestIntent();
+      final TestAction enabledTestAction = TestAction(
+        onInvoke: (Intent intent) {
+          invoked = true;
+          return invoked;
+        },
+      );
+      enabledTestAction.enabled = true;
+      final TestAction disabledTestAction = TestAction(
+        onInvoke: (Intent intent) {
+          invoked = true;
+          return invoked;
+        },
+      );
+      disabledTestAction.enabled = false;
+
+      await tester.pumpWidget(
+        Actions(
+          dispatcher: TestDispatcher1(postInvoke: collect),
+          actions: <Type, Action<Intent>>{
+            TestIntent: enabledTestAction,
+          },
+          child: Actions(
+            dispatcher: TestDispatcher(postInvoke: collect),
+            actions: <Type, Action<Intent>>{
+              TestIntent: disabledTestAction,
+            },
+            child: Container(key: containerKey),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      final Object? result = Actions.invoke<TestIntent>(
+        containerKey.currentContext!,
+        intent,
+      );
+      expect(result, isTrue);
+      expect(invoked, isTrue);
+      expect(invokedIntent, equals(intent));
+      expect(invokedAction, equals(enabledTestAction));
+      expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
   });
 
