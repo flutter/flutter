@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
-#import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 
 #include <memory>
 
@@ -25,14 +24,10 @@ bool IsIosEmbeddedViewsPreviewEnabled();
 
 class IOSSurface {
  public:
-  static std::unique_ptr<IOSSurface> Create(
-      std::shared_ptr<IOSContext> context,
-      fml::scoped_nsobject<CALayer> layer,
-      const std::shared_ptr<IOSExternalViewEmbedder>& external_view_embedder);
+  static std::unique_ptr<IOSSurface> Create(std::shared_ptr<IOSContext> context,
+                                            fml::scoped_nsobject<CALayer> layer);
 
   std::shared_ptr<IOSContext> GetContext() const;
-
-  std::shared_ptr<IOSExternalViewEmbedder> GetSurfaceExternalViewEmbedder() const;
 
   virtual ~IOSSurface();
 
@@ -48,12 +43,10 @@ class IOSSurface {
   virtual std::unique_ptr<Surface> CreateGPUSurface(GrDirectContext* gr_context = nullptr) = 0;
 
  protected:
-  IOSSurface(std::shared_ptr<IOSContext> ios_context,
-             const std::shared_ptr<IOSExternalViewEmbedder>& external_view_embedder);
+  explicit IOSSurface(std::shared_ptr<IOSContext> ios_context);
 
  private:
   std::shared_ptr<IOSContext> ios_context_;
-  std::shared_ptr<IOSExternalViewEmbedder> external_view_embedder_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
 };
