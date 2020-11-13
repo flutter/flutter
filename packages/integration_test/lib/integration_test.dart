@@ -6,155 +6,68 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
-// ignore: implementation_imports
-import 'package:test_core/src/direct_run.dart';
-// ignore: implementation_imports
-import 'package:test_core/src/runner/engine.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 import 'package:vm_service/vm_service_io.dart' as vm_io;
 
-import '_callback_io.dart' if (dart.library.html) '_callback_web.dart'
-    as driver_actions;
+import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'common.dart';
-import 'src/constants.dart';
-import 'src/reporter.dart';
 
-/// Toggles the legacy reporting mechansim where results are only collected
-/// for [testWidgets].
-///
-/// If [run] is called, this will be disabled.
-bool _isUsingLegacyReporting = true;
-
-/// Executes a block that contains tests.
-///
-/// Example Usage:
-/// ```
-/// import 'package:flutter_test/flutter_test.dart';
-/// import 'package:integration_test/integration_test.dart';
-///
-/// void main() => run(_testMain);
-///
-/// void _testMain() {
-///   test('A test', () {
-///     expect(true, true);
-///   });
-/// }
-/// ```
-///
-/// If not explicitly passed, the default [reporter] will send results over the
-/// platform channel to native.
-Future<void> run(
-  FutureOr<void> Function() testMain, {
-  Reporter reporter = const _ReporterImpl(),
-}) async {
-  _isUsingLegacyReporting = false;
-  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
-
-  // Pipe detailed exceptions within [testWidgets] to `package:test`.
-  reportTestException = (FlutterErrorDetails details, String testDescription) {
-    registerException('Test $testDescription failed: $details');
-  };
-
-  final Completer<List<TestResult>> resultsCompleter = Completer<List<TestResult>>();
-
-  await directRunTests(
-    testMain,
-    reporterFactory: (Engine engine) => ResultReporter(engine, resultsCompleter),
-  );
-
-  final List<TestResult> results = await resultsCompleter.future;
-
-  binding._updateTestResultState(<String, TestResult>{
-    for (final TestResult result in results)
-      result.methodName: result,
-  });
-  await reporter.report(results);
-}
-
-/// Abstract interface for a result reporter.
-abstract class Reporter {
-  /// Reports test results.
-  ///
-  /// This method will be called at the end of [run] with the [results] of
-  /// running the test suite.
-  Future<void> report(List<TestResult> results);
-}
-
-/// Default implementation of the reporter that sends results over to the
-/// platform side.
-class _ReporterImpl implements Reporter {
-  const _ReporterImpl();
-
-  @override
-  Future<void> report(
-    List<TestResult> results,
-  ) async {
-    try {
-      await IntegrationTestWidgetsFlutterBinding._channel.invokeMethod<void>(
-        'allTestsFinished',
-        <String, dynamic>{
-          'results': <String, String>{
-            for (final TestResult result in results)
-              result.methodName: result is Failure
-                  ? _formatFailureForPlatform(result)
-                  : success
-          }
-        },
-      );
-    } on MissingPluginException {
-      print('Warning: integration_test test plugin was not detected.');
-    }
-  }
-}
-
-String _formatFailureForPlatform(Failure failure) => '${failure.error} ${failure.details}';
+const String _success = 'success';
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
-class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
-    implements IntegrationTestResults {
-  /// If [run] is not used, sets up a listener to report that the tests are
-  /// finished when everything is torn down.
-  ///
-  /// This functionality is deprecated – clients are expected to use [run] to
-  /// execute their tests instead.
+class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
+  /// Sets up a listener to report that the tests are finished when everything is
+  /// torn down.
   IntegrationTestWidgetsFlutterBinding() {
-    if (!_isUsingLegacyReporting) {
-      // TODO(jiahaog): Point users to use the CLI https://github.com/flutter/flutter/issues/66264.
-      print('Using the legacy test result reporter, which will not catch all '
-          'errors thrown in declared tests. Consider wrapping tests with '
-          'https://api.flutter.dev/flutter/integration_test/run.html instead.');
-      return;
-    }
-
+    // TODO(jackson): Report test results as they arrive
     tearDownAll(() async {
-      _updateTestResultState(results);
-      await const _ReporterImpl().report(results.values.toList());
+      try {
+        // For web integration tests we are not using the
+        // `plugins.flutter.io/integration_test`. Mark the tests as complete
+        // before invoking the channel.
+        if (kIsWeb) {
+          if (!_allTestsPassed.isCompleted) {
+            _allTestsPassed.complete(true);
+          }
+        }
+        callbackManager.cleanup();
+        await _channel.invokeMethod<void>(
+          'allTestsFinished',
+          <String, dynamic>{
+            'results': results.map((String name, Object result) {
+              if (result is Failure) {
+                return MapEntry<String, dynamic>(name, result.details);
+              }
+              return MapEntry<String, Object>(name, result);
+            })
+          },
+        );
+      } on MissingPluginException {
+        print('Warning: integration_test test plugin was not detected.');
+      }
+      if (!_allTestsPassed.isCompleted) {
+        _allTestsPassed.complete(true);
+      }
     });
 
+    // TODO(jackson): Report the results individually instead of all at once
+    // See https://github.com/flutter/flutter/issues/38985
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
-    reportTestException = (FlutterErrorDetails details, String testDescription) {
-      results[testDescription] = Failure(
-        testDescription,
-        details.toString(),
-        error: details.exception,
-      );
+    reportTestException =
+        (FlutterErrorDetails details, String testDescription) {
+      results[testDescription] = Failure(testDescription, details.toString());
+      if (!_allTestsPassed.isCompleted) {
+        _allTestsPassed.complete(false);
+      }
       oldTestExceptionReporter(details, testDescription);
     };
-  }
-
-  void _updateTestResultState(Map<String, TestResult> results) {
-    this.results = results;
-    print('Test execution completed: $results');
-
-    _allTestsPassed.complete(!results.values.any((TestResult result) => result is Failure));
-    callbackManager.cleanup();
   }
 
   @override
@@ -218,8 +131,11 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       MethodChannel('plugins.flutter.io/integration_test');
 
   /// Test results that will be populated after the tests have completed.
+  ///
+  /// Keys are the test descriptions, and values are either [_success] or
+  /// a [Failure].
   @visibleForTesting
-  Map<String, TestResult> results = <String, TestResult>{};
+  Map<String, Object> results = <String, Object>{};
 
   List<Failure> get _failures => results.values.whereType<Failure>().toList();
 
@@ -275,7 +191,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
       description: description,
       timeout: timeout,
     );
-    results[description] ??= Success(description);
+    results[description] ??= _success;
   }
 
   vm.VmService _vmService;
