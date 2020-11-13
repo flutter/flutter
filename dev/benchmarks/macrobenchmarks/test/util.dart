@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:macrobenchmarks/common.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:macrobenchmarks/main.dart' as app;
+import 'package:vm_service/vm_service.dart' as vm;
 
 typedef ControlCallback = Future<void> Function(WidgetController controller);
 
@@ -19,6 +20,7 @@ void macroPerfTestE2E(
   Duration timeout = const Duration(seconds: 30),
   ControlCallback body,
   ControlCallback setup,
+  bool measureCpuGpu = false,
 }) {
   final WidgetsBinding _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(_binding is IntegrationTestWidgetsFlutterBinding);
@@ -57,12 +59,42 @@ void macroPerfTestE2E(
       await setup(tester);
     }
 
-    await binding.watchPerformance(() async {
+    Future<void> testBody() async {
       final Future<void> durationFuture = tester.binding.delayed(duration);
       if (body != null) {
         await body(tester);
       }
       await durationFuture;
+    }
+
+    vm.Timeline timeline;
+    await binding.watchPerformance(() async {
+      if (measureCpuGpu) {
+        timeline = await binding.traceTimeline(testBody, streams: <String>['Embedder']);
+      } else {
+        await testBody();
+      }
     });
+
+    if (measureCpuGpu) {
+      final List<double> cpuUsage = timeline.traceEvents.where(
+        (vm.TimelineEvent event) => event.json['name'] == 'CpuUsage').map<double>(
+        (vm.TimelineEvent event) => double.parse(event.json['args']['total_cpu_usage'] as String)
+      ).toList();
+      if (cpuUsage.isNotEmpty) {
+        binding.reportData['average_cpu_usage'] = cpuUsage.reduce(
+          (double a, double b) => a + b,
+        ) / cpuUsage.length;
+      }
+      final List<double> gpuUsage = timeline.traceEvents.where(
+        (vm.TimelineEvent event) => event.json['name'] == 'GpuUsage').map<double>(
+        (vm.TimelineEvent event) => double.parse(event.json['args']['gpu_usage'] as String)
+      ).toList();
+      if (gpuUsage.isNotEmpty) {
+        binding.reportData['average_gpu_usage'] = gpuUsage.reduce(
+          (double a, double b) => a + b,
+        ) / gpuUsage.length;
+      }
+    }
   }, semanticsEnabled: false, timeout: Timeout(timeout));
 }

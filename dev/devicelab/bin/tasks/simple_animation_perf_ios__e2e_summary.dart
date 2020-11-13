@@ -11,5 +11,5 @@ import 'package:flutter_devicelab/framework/framework.dart';
 // TODO(CareF): add it to manifest.yaml
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createSimpleAnimationPerfE2ETest());
+  await task(createSimpleAnimationPerfE2ETest(measureCpuGpu: true));
 }

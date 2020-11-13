@@ -10,5 +10,6 @@ void main() {
   macroPerfTestE2E(
     'simple_animation_perf',
     kSimpleAnimationRouteName,
+    measureCpuGpu: true,
   );
 }

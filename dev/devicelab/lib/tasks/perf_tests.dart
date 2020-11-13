@@ -172,10 +172,18 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfE2ETest() {
+TaskFunction createSimpleAnimationPerfE2ETest({bool measureCpuGpu = true}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/simple_animation_perf_e2e.dart',
+    measureCpuGpu: measureCpuGpu,
+    benchmarkScoreKeys: <String>[
+      ..._kCommonScoreKeys,
+    if (measureCpuGpu) ...<String>[
+      'average_cpu_usage',
+      'average_gpu_usage',
+    ],
+    ]
   ).run;
 }
 
@@ -555,8 +563,8 @@ class PerfTest {
   const PerfTest.e2e(
     this.testDirectory,
     this.testTarget, {
-    this.measureCpuGpu = true,
-    this.measureMemory = true,
+    this.measureCpuGpu = false,
+    this.measureMemory = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
