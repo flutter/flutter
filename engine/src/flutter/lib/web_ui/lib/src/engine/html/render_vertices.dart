@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.10
+// @dart = 2.12
 part of engine;
 
 _GlRenderer? _glRenderer;
@@ -833,7 +833,7 @@ class _GlContextCache {
           _GlContext.fromOffscreenCanvas(_offScreenCanvas!._canvas!);
     } else {
       _cachedContext ??= _GlContext.fromCanvas(_offScreenCanvas!._glCanvas!,
-          webGLVersion == 1);
+          webGLVersion == WebGLVersion.webgl1);
     }
     _cachedContext!.setViewportSize(widthInPixels, heightInPixels);
     return _cachedContext;

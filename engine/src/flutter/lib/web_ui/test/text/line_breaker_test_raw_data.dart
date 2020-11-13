@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.10
+// @dart = 2.12
 
 /// The list of test cases from:
 /// - https://www.unicode.org/Public/13.0.0/ucd/auxiliary/LineBreakTest.txt

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.10
+// @dart = 2.12
 part of engine;
 
 /// Allocates and caches 0 or more canvas(s) for [BitmapCanvas].
@@ -515,19 +515,28 @@ class _CanvasPool extends _SaveStackTracking {
   void strokeLine(ui.Offset p1, ui.Offset p2) {
     html.CanvasRenderingContext2D ctx = context;
     ctx.beginPath();
-    ctx.moveTo(p1.dx, p1.dy);
-    ctx.lineTo(p2.dx, p2.dy);
+    final ui.Rect? shaderBounds = contextHandle._shaderBounds;
+    if (shaderBounds == null) {
+      ctx.moveTo(p1.dx, p1.dy);
+      ctx.lineTo(p2.dx, p2.dy);
+    } else {
+      ctx.moveTo(p1.dx - shaderBounds.left, p1.dy - shaderBounds.top);
+      ctx.lineTo(p2.dx - shaderBounds.left, p2.dy - shaderBounds.top);
+    }
     ctx.stroke();
   }
 
   void drawPoints(ui.PointMode pointMode, Float32List points, double radius) {
     html.CanvasRenderingContext2D ctx = context;
     final int len = points.length;
+    final ui.Rect? shaderBounds = contextHandle._shaderBounds;
+    double offsetX = shaderBounds == null ? 0 : -shaderBounds.left;
+    double offsetY = shaderBounds == null ? 0 : -shaderBounds.top;
     switch (pointMode) {
       case ui.PointMode.points:
         for (int i = 0; i < len; i += 2) {
-          final double x = points[i];
-          final double y = points[i + 1];
+          final double x = points[i] + offsetX;
+          final double y = points[i + 1] + offsetY;
           ctx.beginPath();
           ctx.arc(x, y, radius, 0, 2.0 * math.pi);
           ctx.fill();
@@ -536,16 +545,16 @@ class _CanvasPool extends _SaveStackTracking {
       case ui.PointMode.lines:
         ctx.beginPath();
         for (int i = 0; i < (len - 2); i += 4) {
-          ctx.moveTo(points[i], points[i + 1]);
-          ctx.lineTo(points[i + 2], points[i + 3]);
+          ctx.moveTo(points[i] + offsetX, points[i + 1] + offsetY);
+          ctx.lineTo(points[i + 2] + offsetX, points[i + 3] + offsetY);
           ctx.stroke();
         }
         break;
       case ui.PointMode.polygon:
         ctx.beginPath();
-        ctx.moveTo(points[0], points[1]);
+        ctx.moveTo(points[0] + offsetX, points[1] + offsetY);
         for (int i = 2; i < len; i += 2) {
-          ctx.lineTo(points[i], points[i + 1]);
+          ctx.lineTo(points[i] + offsetX, points[i + 1] + offsetY);
         }
         ctx.stroke();
         break;
@@ -597,39 +606,117 @@ class _CanvasPool extends _SaveStackTracking {
     }
   }
 
+  /// Applies path to drawing context, preparing for fill and other operations.
+  ///
+  /// WARNING: Don't refactor _runPath/_runPathWithOffset. Latency sensitive
+  void _runPathWithOffset(html.CanvasRenderingContext2D ctx, SurfacePath path,
+      double offsetX, double offsetY) {
+    ctx.beginPath();
+    final Float32List p = _runBuffer;
+    final PathRefIterator iter = PathRefIterator(path.pathRef);
+    int verb = 0;
+    while ((verb = iter.next(p)) != SPath.kDoneVerb) {
+      switch (verb) {
+        case SPath.kMoveVerb:
+          ctx.moveTo(p[0] + offsetX, p[1] + offsetY);
+          break;
+        case SPath.kLineVerb:
+          ctx.lineTo(p[2] + offsetX, p[3] + offsetY);
+          break;
+        case SPath.kCubicVerb:
+          ctx.bezierCurveTo(p[2] + offsetX, p[3] + offsetY,
+              p[4] + offsetX, p[5] + offsetY, p[6] + offsetX, p[7] + offsetY);
+          break;
+        case SPath.kQuadVerb:
+          ctx.quadraticCurveTo(p[2] + offsetX, p[3] + offsetY,
+              p[4] + offsetX, p[5] + offsetY);
+          break;
+        case SPath.kConicVerb:
+          final double w = iter.conicWeight;
+          Conic conic = Conic(p[0], p[1], p[2], p[3], p[4], p[5], w);
+          List<ui.Offset> points = conic.toQuads();
+          final int len = points.length;
+          for (int i = 1; i < len; i += 2) {
+            final double p1x = points[i].dx;
+            final double p1y = points[i].dy;
+            final double p2x = points[i + 1].dx;
+            final double p2y = points[i + 1].dy;
+            ctx.quadraticCurveTo(p1x + offsetX, p1y + offsetY,
+                p2x + offsetX, p2y + offsetY);
+          }
+          break;
+        case SPath.kCloseVerb:
+          ctx.closePath();
+          break;
+        default:
+          throw UnimplementedError('Unknown path verb $verb');
+      }
+    }
+  }
+
   void drawRect(ui.Rect rect, ui.PaintingStyle? style) {
     context.beginPath();
-    context.rect(rect.left, rect.top, rect.width, rect.height);
+    final ui.Rect? shaderBounds = contextHandle._shaderBounds;
+    if (shaderBounds == null) {
+      context.rect(rect.left, rect.top, rect.width, rect.height);
+    } else {
+      context.rect(rect.left - shaderBounds.left, rect.top - shaderBounds.top,
+          rect.width, rect.height);
+    }
     contextHandle.paint(style);
   }
 
   void drawRRect(ui.RRect roundRect, ui.PaintingStyle? style) {
-    _RRectToCanvasRenderer(context).render(roundRect);
+    final ui.Rect? shaderBounds = contextHandle._shaderBounds;
+    _RRectToCanvasRenderer(context).render(
+        shaderBounds == null ? roundRect
+            : roundRect.shift(ui.Offset(-shaderBounds.left, -shaderBounds.top)));
     contextHandle.paint(style);
   }
 
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.PaintingStyle? style) {
     _RRectRenderer renderer = _RRectToCanvasRenderer(context);
-    renderer.render(outer);
-    renderer.render(inner, startNewPath: false, reverse: true);
+    final ui.Rect? shaderBounds = contextHandle._shaderBounds;
+    if (shaderBounds == null) {
+      renderer.render(outer);
+      renderer.render(inner, startNewPath: false, reverse: true);
+    } else {
+      final ui.Offset shift = ui.Offset(-shaderBounds.left, -shaderBounds.top);
+      renderer.render(outer.shift(shift));
+      renderer.render(inner.shift(shift), startNewPath: false, reverse: true);
+    }
     contextHandle.paint(style);
   }
 
   void drawOval(ui.Rect rect, ui.PaintingStyle? style) {
     context.beginPath();
-    DomRenderer.ellipse(context, rect.center.dx, rect.center.dy, rect.width / 2,
+    ui.Rect? shaderBounds = contextHandle._shaderBounds;
+    final double cx = shaderBounds == null ? rect.center.dx :
+        rect.center.dx - shaderBounds.left;
+    final double cy = shaderBounds == null ? rect.center.dy :
+        rect.center.dy - shaderBounds.top;
+    DomRenderer.ellipse(context, cx, cy, rect.width / 2,
         rect.height / 2, 0, 0, 2.0 * math.pi, false);
     contextHandle.paint(style);
   }
 
   void drawCircle(ui.Offset c, double radius, ui.PaintingStyle? style) {
     context.beginPath();
-    DomRenderer.ellipse(context, c.dx, c.dy, radius, radius, 0, 0, 2.0 * math.pi, false);
+    final ui.Rect? shaderBounds = contextHandle._shaderBounds;
+    final double cx = shaderBounds == null ? c.dx : c.dx - shaderBounds.left;
+    final double cy = shaderBounds == null ? c.dy : c.dy - shaderBounds.top;
+    DomRenderer.ellipse(context, cx, cy, radius, radius, 0, 0, 2.0 * math.pi, false);
     contextHandle.paint(style);
   }
 
   void drawPath(ui.Path path, ui.PaintingStyle? style) {
-    _runPath(context, path as SurfacePath);
+    final ui.Rect? shaderBounds = contextHandle._shaderBounds;
+    if (shaderBounds == null) {
+      _runPath(context, path as SurfacePath);
+    } else {
+      _runPathWithOffset(context, path as SurfacePath,
+          -shaderBounds.left, -shaderBounds.top);
+    }
     contextHandle.paintPath(style, path.fillType);
   }
 
@@ -789,6 +876,14 @@ class ContextStateHandle {
   ui.MaskFilter? _currentFilter;
   SurfacePaintData? _lastUsedPaint;
 
+  /// Currently active shader bounds.
+  ///
+  /// When a paint style uses a shader that produces a pattern, the pattern
+  /// origin is relative to current transform. Therefore any painting operations
+  /// will have to reverse the transform to correctly align pattern with
+  /// drawing bounds.
+  ui.Rect? _shaderBounds;
+
   /// The painting state.
   ///
   /// Used to validate that the [setUpPaint] and [tearDownPaint] are called in
@@ -824,6 +919,9 @@ class ContextStateHandle {
               density);
       fillStyle = paintStyle;
       strokeStyle = paintStyle;
+      _shaderBounds = shaderBounds;
+      // Align pattern origin to destination.
+      context.translate(shaderBounds!.left, shaderBounds.top);
     } else if (paint.color != null) {
       final String? colorString = colorToCssString(paint.color);
       fillStyle = colorString;
@@ -906,6 +1004,10 @@ class ContextStateHandle {
       // shadow attributes.
       context.restore();
     }
+    if (_shaderBounds != null) {
+      context.translate(-_shaderBounds!.left, -_shaderBounds!.top);
+      _shaderBounds = null;
+    }
   }
 
   void paint(ui.PaintingStyle? style) {
@@ -948,6 +1050,7 @@ class ContextStateHandle {
     _currentStrokeCap = ui.StrokeCap.butt;
     context.lineJoin = 'miter';
     _currentStrokeJoin = ui.StrokeJoin.miter;
+    _shaderBounds = null;
   }
 }
 

@@ -4,7 +4,7 @@
 
 // TODO(flutter_web): the Web-only API below need to be cleaned up.
 
-// @dart = 2.10
+// @dart = 2.12
 part of ui;
 
 Future<void>? _testPlatformInitializedFuture;

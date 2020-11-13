@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.10
+// @dart = 2.12
 part of engine;
 
 /// The HTML engine used by the current browser.
@@ -25,6 +25,14 @@ enum BrowserEngine {
 
   /// We were unable to detect the current browser engine.
   unknown,
+}
+
+/// html webgl version qualifier constants.
+abstract class WebGLVersion {
+  // WebGL 1.0 is based on OpenGL ES 2.0 / GLSL 1.00
+  static const int webgl1 = 1;
+  // WebGL 2.0 is based on OpenGL ES 3.0 / GLSL 3.00
+  static const int webgl2 = 2;
 }
 
 /// Lazily initialized current browser engine.
@@ -181,10 +189,10 @@ int _detectWebGLVersion() {
     height: 1,
   );
   if (canvas.getContext('webgl2') != null) {
-    return 2;
+    return WebGLVersion.webgl2;
   }
   if (canvas.getContext('webgl') != null) {
-    return 1;
+    return WebGLVersion.webgl1;
   }
   return -1;
 }
