@@ -437,7 +437,7 @@ class InkResponse extends StatelessWidget {
   /// The custom clip border which overrides [borderRadius].
   final ShapeBorder? customBorder;
 
-  /// The color of the ink response when the parent widget is focused. If this
+  /// The color of the ink response when the this widget is focused. If this
   /// property is null then the focus color of the theme,
   /// [ThemeData.focusColor], will be used.
   ///

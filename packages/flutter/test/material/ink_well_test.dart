@@ -221,7 +221,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(inkFeatures, paints
