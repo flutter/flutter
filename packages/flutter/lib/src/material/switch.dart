@@ -467,10 +467,10 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       ?? _defaultTrackColor.resolve(inactiveStates);
 
     final Color effectiveFocusSplashColor = widget.focusColor
-        ?? theme.switchTheme.splashColor?.resolve({MaterialState.focused})
+        ?? theme.switchTheme.splashColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? theme.focusColor;
     final Color effectiveHoverSplashColor = widget.hoverColor
-        ?? theme.switchTheme.splashColor?.resolve({MaterialState.hovered})
+        ?? theme.switchTheme.splashColor?.resolve(<MaterialState>{MaterialState.hovered})
         ?? theme.hoverColor;
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)

@@ -352,10 +352,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       ?? _defaultFillColor.resolve(inactiveStates);
 
     final Color effectiveFocusSplashColor = widget.focusColor
-        ?? themeData.checkboxTheme.splashColor?.resolve({MaterialState.focused})
+        ?? themeData.checkboxTheme.splashColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? themeData.focusColor;
     final Color effectiveHoverSplashColor = widget.hoverColor
-        ?? themeData.checkboxTheme.splashColor?.resolve({MaterialState.hovered})
+        ?? themeData.checkboxTheme.splashColor?.resolve(<MaterialState>{MaterialState.hovered})
         ?? themeData.hoverColor;
 
     return FocusableActionDetector(

@@ -443,10 +443,10 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
       ?? _defaultFillColor.resolve(inactiveStates);
 
     final Color effectiveFocusSplashColor = widget.focusColor
-        ?? themeData.radioTheme.splashColor?.resolve({MaterialState.focused})
+        ?? themeData.radioTheme.splashColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? themeData.focusColor;
     final Color effectiveHoverSplashColor = widget.hoverColor
-        ?? themeData.radioTheme.splashColor?.resolve({MaterialState.hovered})
+        ?? themeData.radioTheme.splashColor?.resolve(<MaterialState>{MaterialState.hovered})
         ?? themeData.hoverColor;
 
     return FocusableActionDetector(
