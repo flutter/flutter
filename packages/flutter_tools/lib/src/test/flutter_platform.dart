@@ -19,7 +19,6 @@ import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../test/test_wrapper.dart';
@@ -374,10 +373,7 @@ class FlutterPlatform extends PlatformPlugin {
     StreamChannel<dynamic> controller,
     int ourTestCount,
   ) async {
-    _packageConfig ??= await loadPackageConfigWithLogging(
-      globals.fs.file(buildInfo.packagesPath),
-      logger: globals.logger,
-    );
+    _packageConfig ??= buildInfo.packageConfig;
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future

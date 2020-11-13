@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
@@ -128,10 +127,7 @@ class TestCompiler {
       return;
     }
     if (_packageConfig == null) {
-      _packageConfig ??= await loadPackageConfigWithLogging(
-        globals.fs.file(buildInfo.packagesPath),
-        logger: globals.logger,
-      );
+      _packageConfig ??= buildInfo.packageConfig;
       // Compilation will fail if there is no flutter_test dependency, since
       // this library is imported by the generated entrypoint script.
       if (_packageConfig['test_api'] == null) {

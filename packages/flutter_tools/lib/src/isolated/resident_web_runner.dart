@@ -508,7 +508,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
-          nullSafetyMode: device.nullSafetyMode,
+          nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -719,7 +719,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
       lastCompiled: device.devFS.lastCompiled,
       urisToMonitor: device.devFS.sources,
       packagesPath: packagesFilePath,
-      packageConfig: device.devFS.lastPackageConfig,
+      packageConfig: device.devFS.lastPackageConfig
+        ?? debuggingOptions.buildInfo.packageConfig,
     );
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.device.name}...',
