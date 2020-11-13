@@ -950,7 +950,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     final bool showFocus;
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
-        showFocus = widget.alwaysShowFocusColor ? _shouldShowFocus : false;
+        showFocus = widget.alwaysShowFocusColor &&_shouldShowFocus;
         break;
       case FocusHighlightMode.traditional:
         showFocus = _shouldShowFocus;
