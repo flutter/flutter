@@ -691,7 +691,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
         if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistry);',
+          '  registerPlugins(webPluginRegistrar);',
         '  await ui.webOnlyInitializePlatform();',
         '  if (entrypoint.main is _UnaryFunction) {',
         '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
