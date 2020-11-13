@@ -18,7 +18,7 @@ void ColorFilterLayer::Preroll(PrerollContext* context,
 
 void ColorFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
-  FML_DCHECK(needs_painting());
+  FML_DCHECK(needs_painting(context));
 
   SkPaint paint;
   paint.setColorFilter(filter_);

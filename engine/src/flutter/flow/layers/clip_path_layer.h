@@ -28,7 +28,6 @@ class ClipPathLayer : public ContainerLayer {
  private:
   SkPath clip_path_;
   Clip clip_behavior_;
-  bool children_inside_clip_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ClipPathLayer);
 };
