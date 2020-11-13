@@ -682,7 +682,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     .childDirectory('Flutter')
     .childFile('Generated.xcconfig');
 
-  Directory get compiledDartFramework => _flutterLibRoot
+  /// No longer compiled to this location.
+  ///
+  /// Used only for "flutter clean" to remove old references.
+  Directory get deprecatedCompiledDartFramework => _flutterLibRoot
       .childDirectory('Flutter')
       .childDirectory('App.framework');
 

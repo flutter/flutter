@@ -81,6 +81,70 @@ class _TableElementRow {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_lbE0wsVZSw}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows a `Table` with borders, multiple types of column widths and different vertical cell alignments.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Table(
+///     border: TableBorder.all(),
+///     columnWidths: {
+///       0: IntrinsicColumnWidth(),
+///       1: FlexColumnWidth(),
+///       2: FixedColumnWidth(64),
+///     },
+///     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+///     children: [
+///       TableRow(
+///         children: [
+///           Container(
+///             height: 32,
+///             color: Colors.green,
+///           ),
+///           TableCell(
+///             verticalAlignment: TableCellVerticalAlignment.top,
+///             child: Container(
+///               height: 32,
+///               width: 32,
+///               color: Colors.red,
+///             ),
+///           ),
+///           Container(
+///             height: 64,
+///             color: Colors.blue,
+///           ),
+///         ],
+///       ),
+///       TableRow(
+///         decoration: BoxDecoration(
+///           color: Colors.grey,
+///         ),
+///         children: [
+///           Container(
+///             height: 64,
+///             width: 128,
+///             color: Colors.purple,
+///           ),
+///           Container(
+///             height: 32,
+///             color: Colors.yellow,
+///           ),
+///           Center(
+///             child: Container(
+///               height: 32,
+///               width: 32,
+///               color: Colors.orange,
+///             ),
+///           ),
+///         ],
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// If you only have one row, the [Row] widget is more appropriate. If you only
 /// have one column, the [SliverList] or [Column] widgets will be more
 /// appropriate.
@@ -116,10 +180,11 @@ class Table extends RenderObjectWidget {
     this.textDirection,
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
-    this.textBaseline = TextBaseline.alphabetic,
+    this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
   }) : assert(children != null),
        assert(defaultColumnWidth != null),
        assert(defaultVerticalAlignment != null),
+       assert(defaultVerticalAlignment != TableCellVerticalAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the defaultVerticalAlignment with TableCellVerticalAlignment.baseline'),
        assert(() {
          if (children.any((TableRow row) => row.children == null)) {
            throw FlutterError(
@@ -231,8 +296,9 @@ class Table extends RenderObjectWidget {
 
   /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
   ///
-  /// Defaults to [TextBaseline.alphabetic].
-  final TextBaseline textBaseline;
+  /// This must be set if using baseline alignment. There is no default because there is no
+  /// way for the framework to know the correct baseline _a priori_.
+  final TextBaseline? textBaseline;
 
   final List<Decoration?>? _rowDecorations;
 
@@ -247,7 +313,7 @@ class Table extends RenderObjectWidget {
       rows: children.length,
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
-      textDirection: textDirection ?? Directionality.of(context)!,
+      textDirection: textDirection ?? Directionality.of(context),
       border: border,
       rowDecorations: _rowDecorations,
       configuration: createLocalImageConfiguration(context),
@@ -264,7 +330,7 @@ class Table extends RenderObjectWidget {
     renderObject
       ..columnWidths = columnWidths
       ..defaultColumnWidth = defaultColumnWidth
-      ..textDirection = textDirection ?? Directionality.of(context)!
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..border = border
       ..rowDecorations = _rowDecorations
       ..configuration = createLocalImageConfiguration(context)

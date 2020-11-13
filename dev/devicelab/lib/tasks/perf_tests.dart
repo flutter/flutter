@@ -482,8 +482,10 @@ class StartupTest {
           break;
       }
 
+      const int maxFailures = 3;
+      int currentFailures = 0;
       for (int i = 0; i < iterations; i += 1) {
-        await flutter('run', options: <String>[
+        final int result = await flutter('run', options: <String>[
           '--no-android-gradle-daemon',
           '--verbose',
           '--profile',
@@ -492,11 +494,19 @@ class StartupTest {
           device.deviceId,
           if (applicationBinaryPath != null)
             '--use-application-binary=$applicationBinaryPath',
-        ]);
-        final Map<String, dynamic> data = json.decode(
-          file('$testDirectory/build/start_up_info.json').readAsStringSync(),
-        ) as Map<String, dynamic>;
-        results.add(data);
+         ], canFail: true);
+        if (result == 0) {
+          final Map<String, dynamic> data = json.decode(
+            file('$testDirectory/build/start_up_info.json').readAsStringSync(),
+          ) as Map<String, dynamic>;
+          results.add(data);
+        } else {
+          currentFailures += 1;
+          i -= 1;
+          if (currentFailures == maxFailures) {
+            return TaskResult.failure('Application failed to start $maxFailures times');
+          }
+        }
 
         await flutter('install', options: <String>[
           '--uninstall-only',
@@ -538,8 +548,8 @@ class PerfTest {
   const PerfTest.e2e(
     this.testDirectory,
     this.testTarget, {
-    this.measureCpuGpu = true,
-    this.measureMemory = true,
+    this.measureCpuGpu = false,
+    this.measureMemory = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
@@ -606,7 +616,6 @@ class PerfTest {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
 
       await flutter('drive', options: <String>[
         '--no-android-gradle-daemon',
@@ -655,11 +664,13 @@ class PerfTest {
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
           if (measureCpuGpu && !isAndroid) ...<String>[
-            'average_cpu_usage',
-            'average_gpu_usage',
+            // See https://github.com/flutter/flutter/issues/68888
+            if (data['average_cpu_usage'] != null) 'average_cpu_usage',
+            if (data['average_gpu_usage'] != null) 'average_gpu_usage',
           ],
           if (measureMemory && !isAndroid) ...<String>[
-            'average_memory_usage',
+            // See https://github.com/flutter/flutter/issues/68888
+            if (data['average_memory_usage'] != null) 'average_memory_usage',
             '90th_percentile_memory_usage',
             '99th_percentile_memory_usage',
           ],
@@ -769,6 +780,10 @@ class PerfTestWithSkSL extends PerfTest {
       _flutterPath,
       <String>[
         'run',
+        if (deviceOperatingSystem == DeviceOperatingSystem.ios)
+          ...<String>[
+            '--device-timeout', '5',
+          ],
         '--verbose',
         '--verbose-system-logs',
         '--purge-persistent-cache',
@@ -1216,7 +1231,6 @@ class DevToolsMemoryTest {
     return inDirectory<TaskResult>(project, () async {
       _device = await devices.workingDevice;
       await _device.unlock();
-      await flutter('packages', options: <String>['get']);
 
       await _launchApp();
       if (_observatoryUri == null) {
@@ -1248,14 +1262,21 @@ class DevToolsMemoryTest {
       int maxRss = 0;
       int maxAdbTotal = 0;
       for (final dynamic sample in samples) {
-        maxRss = math.max(maxRss, sample['rss'] as int);
+        if (sample['rss'] != null) {
+          maxRss = math.max(maxRss, sample['rss'] as int);
+        }
         if (sample['adb_memoryInfo'] != null) {
           maxAdbTotal = math.max(maxAdbTotal, sample['adb_memoryInfo']['Total'] as int);
         }
       }
+
+      await flutter('install', options: <String>[
+        '--uninstall-only',
+      ]);
+
       return TaskResult.success(
-          <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
-          benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
+        <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
+        benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
       );
     });
   }

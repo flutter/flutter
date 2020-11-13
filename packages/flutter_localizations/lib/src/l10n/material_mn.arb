@@ -54,7 +54,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount тэмдэгт үлдсэн",
   "refreshIndicatorSemanticLabel": "Сэргээх",
   "moreButtonTooltip": "Бусад",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "сар/өдөр/жил",
   "selectYearSemanticsLabel": "Жил сонгох",
   "unspecifiedDate": "Огноо",

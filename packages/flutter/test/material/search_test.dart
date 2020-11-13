@@ -703,8 +703,8 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final ThemeData? textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    expect(textFieldTheme?.inputDecorationTheme, searchFieldDecorationTheme);
+    final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
+    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme);
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
@@ -846,7 +846,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     if (defaultAppBarTheme) {
       return super.appBarTheme(context);
     }
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return theme.copyWith(
       inputDecorationTheme: searchFieldDecorationTheme ??
           InputDecorationTheme(

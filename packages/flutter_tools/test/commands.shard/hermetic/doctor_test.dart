@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -704,7 +705,12 @@ class NoOpDoctor implements Doctor {
   Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
 
   @override
-  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async => true;
+  Future<bool> diagnose({
+    bool androidLicenses = false,
+    bool verbose = true,
+    bool showColor = true,
+    AndroidLicenseValidator androidLicenseValidator,
+  }) async => true;
 
   @override
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
@@ -1059,5 +1065,6 @@ class MockDevice extends Mock implements Device {
     when(id).thenReturn('device-id');
     when(isLocalEmulator).thenAnswer((_) => Future<bool>.value(false));
     when(targetPlatform).thenAnswer((_) => Future<TargetPlatform>.value(TargetPlatform.android));
+    when(targetPlatformDisplayName).thenAnswer((_) async => 'android');
   }
 }

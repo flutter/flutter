@@ -148,8 +148,8 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
       painter = _buildCupertinoScrollbarPainter(context);
     } else {
       painter!
-        ..textDirection = Directionality.of(context)!
-        ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)!
+        ..textDirection = Directionality.of(context)
+        ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
         ..padding = MediaQuery.of(context).padding;
     }
     triggerScrollbar();
@@ -165,8 +165,8 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
   ScrollbarPainter _buildCupertinoScrollbarPainter(BuildContext context) {
     return ScrollbarPainter(
-      color: CupertinoDynamicColor.resolve(_kScrollbarColor, context)!,
-      textDirection: Directionality.of(context)!,
+      color: CupertinoDynamicColor.resolve(_kScrollbarColor, context),
+      textDirection: Directionality.of(context),
       thickness: _thickness,
       fadeoutOpacityAnimation: fadeoutOpacityAnimation,
       mainAxisMargin: _kScrollbarMainAxisMargin,

@@ -16,17 +16,6 @@ import 'globals.dart' as globals;
 /// The flutter GitHub repository.
 String get _flutterGit => globals.platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
 
-/// This maps old branch names to the names of branches that replaced them.
-///
-/// For example, in early 2018 we changed from having an "alpha" branch to
-/// having a "dev" branch, so anyone using "alpha" now gets transitioned to
-/// "dev".
-const Map<String, String> kObsoleteBranches = <String, String>{
-  'alpha': 'dev',
-  'hackathon': 'dev',
-  'codelab': 'dev',
-};
-
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
   master,
@@ -67,7 +56,11 @@ class FlutterVersion {
   ///
   /// Call [fetchTagsAndUpdate] to update the version based on the latest tags
   /// available upstream.
-  FlutterVersion([this._clock = const SystemClock(), this._workingDirectory]) {
+  FlutterVersion({
+    SystemClock clock = const SystemClock(),
+    String workingDirectory,
+  }) : _clock = clock,
+      _workingDirectory = workingDirectory {
     _frameworkRevision = _runGit(
       gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
       globals.processUtils,
@@ -76,6 +69,9 @@ class FlutterVersion {
     _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, fetchTags: false);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
+
+  final SystemClock _clock;
+  final String _workingDirectory;
 
   /// Fetches tags from the upstream Flutter repository and re-calculates the
   /// version.
@@ -88,19 +84,10 @@ class FlutterVersion {
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
-  final SystemClock _clock;
-  final String _workingDirectory;
-
   String _repositoryUrl;
   String get repositoryUrl {
     final String _ = channel;
     return _repositoryUrl;
-  }
-
-  /// Whether we are currently on the master branch.
-  bool get isMaster {
-    final String branchName = getBranchName();
-    return !<String>['dev', 'beta', 'stable'].contains(branchName);
   }
 
   String _channel;
@@ -161,9 +148,8 @@ class FlutterVersion {
   String get engineRevision => globals.cache.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
-  Future<void> ensureVersionFile() {
+  void ensureVersionFile() {
     globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'version')).writeAsStringSync(_frameworkVersion);
-    return Future<void>.value();
   }
 
   @override
@@ -298,8 +284,7 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kOfficialChannels.contains(_branch) &&
-          !kObsoleteBranches.containsKey(_branch)) {
+      if (!kOfficialChannels.contains(_branch)) {
         return '[user-branch]';
       }
     }
@@ -484,7 +469,7 @@ class FlutterVersion {
   /// Returns null if the cached version is out-of-date or missing, and we are
   /// unable to reach the server to get the latest version.
   Future<DateTime> _getLatestAvailableFlutterDate() async {
-    Cache.checkLockAcquired();
+    globals.cache.checkLockAcquired();
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
 
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
@@ -779,7 +764,7 @@ class GitTagVersion {
     // recent tag and number of commits past.
     return parse(
       _runGit(
-        'git describe --match *.*.* --first-parent --long --tags',
+        'git describe --match *.*.* --long --tags',
         processUtils,
         workingDirectory,
       )

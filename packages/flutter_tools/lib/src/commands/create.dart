@@ -474,19 +474,18 @@ class CreateCommand extends FlutterCommand {
       ));
       globals.printStatus('Your module code is in $relativeMainPath.');
     } else {
-      // Run doctor; tell the user the next steps.
+      // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       final String relativePluginMain = globals.fs.path.join(relativePluginPath, 'lib', '$projectName.dart');
-      if (globals.doctor.canLaunchAnything) {
-        // Let them know a summary of the state of their tooling.
-        await globals.doctor.summary();
-        final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-        final String platformsString = platforms.join(', ');
-        globals.printStatus('''
+
+      // Let them know a summary of the state of their tooling.
+      final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+      final String platformsString = platforms.join(', ');
+      globals.printStatus('''
 In order to run your $application, type:
 
   \$ cd $relativeAppPath
@@ -501,20 +500,6 @@ Your plugin code is in $relativePluginMain.
 Host platform code is in the $platformsString directories under $relativePluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
-        }
-      } else {
-        globals.printStatus("You'll need to install additional components before you can run "
-            'your Flutter app:');
-        globals.printStatus('');
-
-        // Give the user more detailed analysis.
-        await globals.doctor.diagnose();
-        globals.printStatus('');
-        globals.printStatus("After installing components, run 'flutter doctor' in order to "
-            're-validate your setup.');
-        globals.printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
-            'directory in order to launch your app.');
-        globals.printStatus('Your $application code is in $relativeAppMain');
       }
     }
     return FlutterCommandResult.success();

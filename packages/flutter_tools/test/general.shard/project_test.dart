@@ -699,7 +699,10 @@ apply plugin: 'kotlin-android'
 
 Future<FlutterProject> someProject() async {
   final Directory directory = globals.fs.directory('some_project');
-  directory.childFile('.packages').createSync(recursive: true);
+  directory.childDirectory('.dart_tool')
+    .childFile('package_config.json')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   directory.childDirectory('ios').createSync(recursive: true);
   final Directory androidDirectory = directory
       .childDirectory('android')
@@ -750,7 +753,11 @@ flutter:
 
 Future<FlutterProject> aModuleProject() async {
   final Directory directory = globals.fs.directory('module_project');
-  directory.childFile('.packages').createSync(recursive: true);
+  directory
+    .childDirectory('.dart_tool')
+    .childFile('package_config.json')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
 flutter:
@@ -768,27 +775,43 @@ void _testInMemory(String description, Future<void> testMethod()) {
   final FileSystem testFileSystem = MemoryFileSystem(
     style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
   );
-  testFileSystem.file('.packages').writeAsStringSync('\n');
+  testFileSystem
+    .directory('.dart_tool')
+    .childFile('package_config.json')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
-  transfer(Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
+  transfer(Cache(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    osUtils: globals.os,
+    platform: globals.platform,
+  ).getArtifactDirectory('gradle_wrapper'), testFileSystem);
   transfer(globals.fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('templates'), testFileSystem);
-  transfer(globals.fs.directory(Cache.flutterRoot)
-      .childDirectory('packages')
-      .childDirectory('flutter_tools')
-      .childDirectory('schema'), testFileSystem);
   // Set up enough of the packages to satisfy the templating code.
   final File packagesFile = testFileSystem.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
-      .childFile('.packages');
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json');
   final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
   dummyTemplateImagesDirectory.createSync(recursive: true);
   packagesFile.createSync(recursive: true);
-  packagesFile.writeAsStringSync('flutter_template_images:${dummyTemplateImagesDirectory.uri}');
+  packagesFile.writeAsStringSync(json.encode(<String, Object>{
+    'configVersion': 2,
+    'packages': <Object>[
+      <String, Object>{
+        'name': 'flutter_template_images',
+        'rootUri': dummyTemplateImagesDirectory.uri.toString(),
+        'packageUri': 'lib/',
+        'languageVersion': '2.6'
+      },
+    ],
+  }));
 
   final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
     fileSystem: testFileSystem,
@@ -801,7 +824,12 @@ void _testInMemory(String description, Future<void> testMethod()) {
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => Cache(),
+      Cache: () => Cache(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        osUtils: globals.os,
+        platform: globals.platform,
+      ),
       FlutterProjectFactory: () => flutterProjectFactory,
     },
   );

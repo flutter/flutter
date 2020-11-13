@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
@@ -82,7 +83,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, {
+  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, PackageConfig packageConfig, {
     bool headless,
     String chromeBinary,
     String browserName,
@@ -153,6 +154,11 @@ class WebDriverService extends DriverService {
       'ANDROID_CHROME_ON_EMULATOR': (_browserNameToEnum(browserName) == Browser.androidChrome && androidEmulator).toString(),
     };
   }
+
+  @override
+  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async {
+    throwToolExit('--use-existing-app is not supported with flutter web driver');
+  }
 }
 
 /// A list of supported browsers.
@@ -180,7 +186,10 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
-        'goog:loggingPrefs': <String, String>{ async_io.LogType.performance: 'ALL'},
+        'goog:loggingPrefs': <String, String>{
+          async_io.LogType.browser: 'INFO',
+          async_io.LogType.performance: 'ALL',
+        },
         'chromeOptions': <String, dynamic>{
           if (chromeBinary != null)
             'binary': chromeBinary,

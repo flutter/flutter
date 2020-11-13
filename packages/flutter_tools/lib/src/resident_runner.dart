@@ -92,18 +92,21 @@ class FlutterDevice {
     // a warning message and dump some debug information which can be
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
+      // TODO(jonahwilliams): consistently provide these flags across platforms.
       Artifact platformDillArtifact;
-      List<String> extraFrontEndOptions;
+      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
-        extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      } else {
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
+      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions = <String>[
-          ...?buildInfo?.extraFrontEndOptions,
-          if (!(buildInfo?.extraFrontEndOptions?.contains('--sound-null-safety') ?? false))
-            '--sound-null-safety'
-        ];
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
+        }
+      } else {
+        assert(false);
       }
 
       generator = ResidentCompiler(
@@ -118,7 +121,6 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
-          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
@@ -160,7 +162,6 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: extraFrontEndOptions,
-          nullSafetyMode: buildInfo.nullSafetyMode,
         ),
         packagesPath: buildInfo.packagesPath,
         artifacts: globals.artifacts,
@@ -344,9 +345,8 @@ class FlutterDevice {
 
   Future<Uri> setupDevFS(
     String fsName,
-    Directory rootDirectory, {
-    String packagesFilePath,
-  }) {
+    Directory rootDirectory,
+  ) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmService,
@@ -764,11 +764,6 @@ abstract class ResidentRunner {
   Completer<int> _finished = Completer<int>();
   bool hotMode;
 
-  /// Whether the compiler was instructed to run with null-safety enabled.
-  @protected
-  bool get usageNullSafety => debuggingOptions?.buildInfo
-    ?.extraFrontEndOptions?.any((String option) => option.contains('non-nullable')) ?? false;
-
   /// Returns true if every device is streaming observatory URIs.
   bool get isWaitingForObservatory {
     return flutterDevices.every((FlutterDevice device) {
@@ -894,14 +889,6 @@ abstract class ResidentRunner {
       }
     }
     globals.logger.printTrace('complete');
-  }
-
-  /// Toggle whether canvaskit is being used for rendering, returning the new
-  /// state.
-  ///
-  /// Only supported on the web.
-  Future<bool> toggleCanvaskit() {
-    throw Exception('Canvaskit not supported by this runner.');
   }
 
   /// Write the SkSL shaders to a zip file in build directory.
@@ -1184,7 +1171,6 @@ abstract class ResidentRunner {
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
-        nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
       );
       globals.fs
           .file(copyPath)

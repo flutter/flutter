@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
+import 'app_bar_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'input_border.dart';
@@ -44,7 +46,7 @@ import 'theme.dart';
 /// used to exit the search page.
 ///
 /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.editableText.complexCharacters}
+/// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// See also:
 ///
@@ -90,7 +92,7 @@ Future<T?> showSearch<T>({
 /// for another [showSearch] call.
 ///
 /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.editableText.complexCharacters}
+/// {@macro flutter.widgets.EditableText.onChanged}
 abstract class SearchDelegate<T> {
   /// Constructor to be called by subclasses which may specify
   /// [searchFieldLabel], either [searchFieldStyle] or [searchFieldDecorationTheme],
@@ -186,27 +188,34 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.actions], the intended use for the return value of this method.
   List<Widget> buildActions(BuildContext context);
 
-  /// The theme used to style the [AppBar].
+  /// The theme used to configure the search page.
   ///
-  /// By default, a white theme is used.
+  /// The returned [ThemeData] will be used to wrap the entire search page,
+  /// so it can be used to configure any of its components with the appropriate
+  /// theme properties.
+  ///
+  /// Unless overridden, the default theme will configure the AppBar containing
+  /// the search input text field with a white background and black text on light
+  /// themes. For dark themes the default is a dark grey background with light
+  /// color text.
   ///
   /// See also:
   ///
-  ///  * [AppBar.backgroundColor], which is set to [ThemeData.primaryColor].
-  ///  * [AppBar.iconTheme], which is set to [ThemeData.primaryIconTheme].
-  ///  * [AppBar.textTheme], which is set to [ThemeData.primaryTextTheme].
-  ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
+  ///  * [AppBarTheme], which configures the AppBar's appearance.
+  ///  * [InputDecorationTheme], which configures the appearance of the search
+  ///    text field.
   ThemeData appBarTheme(BuildContext context) {
     assert(context != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     assert(theme != null);
     return theme.copyWith(
-      primaryColor: theme.brightness == Brightness.dark
-          ? theme.primaryColor
-          : Colors.white,
-      primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
-      primaryColorBrightness: Brightness.light,
-      primaryTextTheme: theme.textTheme,
+      appBarTheme: AppBarTheme(
+        brightness: colorScheme.brightness,
+        color: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
+        iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
+        textTheme: theme.textTheme,
+      ),
       inputDecorationTheme: searchFieldDecorationTheme ??
           InputDecorationTheme(
             hintStyle: searchFieldStyle ?? theme.inputDecorationTheme.hintStyle,
@@ -284,15 +293,14 @@ abstract class SearchDelegate<T> {
   /// If this value is set to null, the value of the ambient [Theme]'s
   /// [InputDecorationTheme.hintStyle] will be used instead.
   ///
-  /// If this value is not null, [searchFieldDecorationTheme]
-  /// will be ignored so this can be used.
+  /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
+  /// be non-null.
   final TextStyle? searchFieldStyle;
 
-  /// The [InputDecorationTheme] for the search field, use
-  /// this if you just want to customize the [TextField]
+  /// The [InputDecorationTheme] used to configure the search field's visuals.
   ///
-  /// If this value is not null, [searchFieldStyle]
-  /// will be ignored so this can be used.
+  /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
+  /// be non-null.
   final InputDecorationTheme? searchFieldDecorationTheme;
 
   /// The type of action button to use for the keyboard.
@@ -543,7 +551,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             title: TextField(
               controller: widget.delegate._queryTextController,
               focusNode: focusNode,
-              style: theme.textTheme.title,
+              style: theme.textTheme.headline6,
               textInputAction: widget.delegate.textInputAction,
               keyboardType: widget.delegate.keyboardType,
               onSubmitted: (String _) {

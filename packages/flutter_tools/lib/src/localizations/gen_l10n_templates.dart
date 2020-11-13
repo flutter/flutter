@@ -47,7 +47,7 @@ import 'package:intl/intl.dart' as intl;
 ///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
-///   intl: 0.16.1
+///   intl: 0.17.0-nullsafety.2
 ///
 ///   # rest of dependencies
 /// ```
@@ -180,12 +180,16 @@ class @(class) extends @(baseLanguageClassName) {
 ''';
 
 const String baseClassGetterTemplate = '''
-  // @(comment)
+  /// @(comment)
+  ///
+@(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
 const String baseClassMethodTemplate = '''
-  // @(comment)
+  /// @(comment)
+  ///
+@(templateLocaleTranslationComment)
   String @(name)(@(parameters));
 ''';
 

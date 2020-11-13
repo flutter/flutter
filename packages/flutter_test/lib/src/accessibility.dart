@@ -311,7 +311,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   // Given a pixel buffer based on the physical window size, can we actually
   // get all the data from this node? allow a small delta overlap before
   // culling the node.
-  bool _isNodeOffScreen(Rect paintBounds, ui.Window window) {
+  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
     return paintBounds.top < -50.0
       || paintBounds.left <  -50.0
       || paintBounds.bottom > (window.physicalSize.height * window.devicePixelRatio) + 50.0
