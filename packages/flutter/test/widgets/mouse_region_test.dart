@@ -1731,6 +1731,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/67044
   testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
