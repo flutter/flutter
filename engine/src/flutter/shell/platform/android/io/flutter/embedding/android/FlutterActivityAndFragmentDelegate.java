@@ -307,8 +307,10 @@ import java.util.Arrays;
     return flutterSplashView;
   }
 
-  void onActivityCreated(@Nullable Bundle bundle) {
-    Log.v(TAG, "onActivityCreated. Giving framework and plugins an opportunity to restore state.");
+  void onRestoreInstanceState(@Nullable Bundle bundle) {
+    Log.v(
+        TAG,
+        "onRestoreInstanceState. Giving framework and plugins an opportunity to restore state.");
     ensureAlive();
 
     Bundle pluginState = null;
@@ -900,10 +902,11 @@ import java.util.Arrays;
     /**
      * Whether state restoration is enabled.
      *
-     * <p>When this returns true, the instance state provided to {@code onActivityCreated(Bundle)}
-     * will be forwarded to the framework via the {@code RestorationChannel} and during {@code
-     * onSaveInstanceState(Bundle)} the current framework instance state obtained from {@code
-     * RestorationChannel} will be stored in the provided bundle.
+     * <p>When this returns true, the instance state provided to {@code
+     * onRestoreInstanceState(Bundle)} will be forwarded to the framework via the {@code
+     * RestorationChannel} and during {@code onSaveInstanceState(Bundle)} the current framework
+     * instance state obtained from {@code RestorationChannel} will be stored in the provided
+     * bundle.
      *
      * <p>This defaults to true, unless a cached engine is used.
      */

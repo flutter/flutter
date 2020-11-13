@@ -608,17 +608,17 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     delegate.onAttach(context);
   }
 
+  @Override
+  public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    delegate.onRestoreInstanceState(savedInstanceState);
+  }
+
   @Nullable
   @Override
   public View onCreateView(
       LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     return delegate.onCreateView(inflater, container, savedInstanceState);
-  }
-
-  @Override
-  public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-    delegate.onActivityCreated(savedInstanceState);
   }
 
   @Override
