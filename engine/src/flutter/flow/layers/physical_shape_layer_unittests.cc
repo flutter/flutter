@@ -23,11 +23,11 @@ TEST_F(PhysicalShapeLayerTest, PaintingEmptyLayerDies) {
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
-  EXPECT_FALSE(layer->needs_painting());
+  EXPECT_FALSE(layer->needs_painting(paint_context()));
   EXPECT_FALSE(layer->needs_system_composite());
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "needs_painting\\(\\)");
+                            "needs_painting\\(context\\)");
 }
 
 TEST_F(PhysicalShapeLayerTest, PaintBeforePreollDies) {
@@ -41,7 +41,7 @@ TEST_F(PhysicalShapeLayerTest, PaintBeforePreollDies) {
   layer->Add(mock_layer);
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "needs_painting\\(\\)");
+                            "needs_painting\\(context\\)");
 }
 #endif
 
@@ -54,7 +54,7 @@ TEST_F(PhysicalShapeLayerTest, NonEmptyLayer) {
                                            layer_path, Clip::none);
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), layer_path.getBounds());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_FALSE(layer->needs_system_composite());
 
   SkPaint layer_paint;
@@ -93,7 +93,7 @@ TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPath) {
   child_paint_bounds.join(child2->paint_bounds());
   EXPECT_EQ(layer->paint_bounds(), layer_path.getBounds());
   EXPECT_NE(layer->paint_bounds(), child_paint_bounds);
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_FALSE(layer->needs_system_composite());
 
   SkPaint layer_paint;
@@ -129,7 +129,7 @@ TEST_F(PhysicalShapeLayerTest, ElevationSimple) {
   EXPECT_EQ(layer->paint_bounds(),
             PhysicalShapeLayer::ComputeShadowBounds(layer_path.getBounds(),
                                                     initial_elevation, 1.0f));
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_FALSE(layer->needs_system_composite());
   EXPECT_EQ(layer->elevation(), initial_elevation);
 
@@ -184,7 +184,7 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
               (PhysicalShapeLayer::ComputeShadowBounds(
                   layer_path.getBounds(), initial_elevations[i],
                   1.0f /* pixel_ratio */)));
-    EXPECT_TRUE(layers[i]->needs_painting());
+    EXPECT_TRUE(layers[i]->needs_painting(paint_context()));
     EXPECT_FALSE(layers[i]->needs_system_composite());
   }
 

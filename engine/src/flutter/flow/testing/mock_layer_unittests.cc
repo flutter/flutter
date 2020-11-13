@@ -19,7 +19,7 @@ TEST_F(MockLayerTest, PaintBeforePreollDies) {
   auto layer = std::make_shared<MockLayer>(path, SkPaint());
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "needs_painting\\(\\)");
+                            "needs_painting\\(context\\)");
 }
 
 TEST_F(MockLayerTest, PaintingEmptyLayerDies) {
@@ -29,7 +29,7 @@ TEST_F(MockLayerTest, PaintingEmptyLayerDies) {
   EXPECT_EQ(layer->paint_bounds(), SkPath().getBounds());
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "needs_painting\\(\\)");
+                            "needs_painting\\(context\\)");
 }
 #endif
 
@@ -48,7 +48,7 @@ TEST_F(MockLayerTest, SimpleParams) {
   layer->Preroll(preroll_context(), start_matrix);
   EXPECT_EQ(preroll_context()->has_platform_view, false);
   EXPECT_EQ(layer->paint_bounds(), path.getBounds());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_FALSE(layer->needs_system_composite());
   EXPECT_EQ(layer->parent_mutators(), std::vector{Mutator(scale_matrix)});
   EXPECT_EQ(layer->parent_matrix(), start_matrix);

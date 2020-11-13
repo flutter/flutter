@@ -171,7 +171,7 @@ std::unique_ptr<RasterCacheResult> RasterCache::RasterizeLayer(
             context->has_platform_view ? nullptr : context->raster_cache,
             context->checkerboard_offscreen_layers,
             context->frame_device_pixel_ratio};
-        if (layer->needs_painting()) {
+        if (layer->needs_painting(paintContext)) {
           layer->Paint(paintContext);
         }
       });

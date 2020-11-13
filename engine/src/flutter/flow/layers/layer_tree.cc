@@ -79,7 +79,7 @@ void LayerTree::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
   if (root_layer_->needs_system_composite()) {
     root_layer_->UpdateScene(context);
   }
-  if (root_layer_->needs_painting()) {
+  if (!root_layer_->is_empty()) {
     frame.AddPaintLayer(root_layer_.get());
   }
   context->root_node().AddChild(transform.entity_node());
@@ -117,7 +117,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
       checkerboard_offscreen_layers_,
       device_pixel_ratio_};
 
-  if (root_layer_->needs_painting()) {
+  if (root_layer_->needs_painting(context)) {
     root_layer_->Paint(context);
   }
 }
@@ -176,7 +176,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   if (root_layer_) {
     root_layer_->Preroll(&preroll_context, root_surface_transformation);
     // The needs painting flag may be set after the preroll. So check it after.
-    if (root_layer_->needs_painting()) {
+    if (root_layer_->needs_painting(paint_context)) {
       root_layer_->Paint(paint_context);
     }
   }

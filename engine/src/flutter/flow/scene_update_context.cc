@@ -338,7 +338,7 @@ SceneUpdateContext::Frame::~Frame() {
 }
 
 void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
-  FML_DCHECK(layer->needs_painting());
+  FML_DCHECK(!layer->is_empty());
   paint_layers_.push_back(layer);
   paint_bounds_.join(layer->paint_bounds());
 }

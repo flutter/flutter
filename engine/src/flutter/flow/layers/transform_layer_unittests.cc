@@ -20,10 +20,10 @@ TEST_F(TransformLayerTest, PaintingEmptyLayerDies) {
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
-  EXPECT_FALSE(layer->needs_painting());
+  EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "needs_painting\\(\\)");
+                            "needs_painting\\(context\\)");
 }
 
 TEST_F(TransformLayerTest, PaintBeforePreollDies) {
@@ -34,7 +34,7 @@ TEST_F(TransformLayerTest, PaintBeforePreollDies) {
   layer->Add(mock_layer);
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "needs_painting\\(\\)");
+                            "needs_painting\\(context\\)");
 }
 #endif
 
@@ -50,8 +50,8 @@ TEST_F(TransformLayerTest, Identity) {
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(), SkMatrix());  // identity
   EXPECT_EQ(mock_layer->parent_cull_rect(), cull_rect);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(SkMatrix())}));
@@ -80,8 +80,8 @@ TEST_F(TransformLayerTest, Simple) {
   EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer->paint_bounds(),
             layer_transform.mapRect(mock_layer->paint_bounds()));
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(),
             SkMatrix::Concat(initial_transform, layer_transform));
   EXPECT_EQ(mock_layer->parent_cull_rect(),
@@ -124,9 +124,9 @@ TEST_F(TransformLayerTest, Nested) {
             layer2_transform.mapRect(mock_layer->paint_bounds()));
   EXPECT_EQ(layer1->paint_bounds(),
             layer1_transform.mapRect(layer2->paint_bounds()));
-  EXPECT_TRUE(mock_layer->needs_painting());
-  EXPECT_TRUE(layer2->needs_painting());
-  EXPECT_TRUE(layer1->needs_painting());
+  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
+  EXPECT_TRUE(layer2->needs_painting(paint_context()));
+  EXPECT_TRUE(layer1->needs_painting(paint_context()));
   EXPECT_EQ(
       mock_layer->parent_matrix(),
       SkMatrix::Concat(SkMatrix::Concat(initial_transform, layer1_transform),
@@ -184,10 +184,10 @@ TEST_F(TransformLayerTest, NestedSeparated) {
             layer2_transform.mapRect(mock_layer2->paint_bounds()));
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path.getBounds());
   EXPECT_EQ(layer1->paint_bounds(), expected_layer1_bounds);
-  EXPECT_TRUE(mock_layer2->needs_painting());
-  EXPECT_TRUE(layer2->needs_painting());
-  EXPECT_TRUE(mock_layer1->needs_painting());
-  EXPECT_TRUE(layer1->needs_painting());
+  EXPECT_TRUE(mock_layer2->needs_painting(paint_context()));
+  EXPECT_TRUE(layer2->needs_painting(paint_context()));
+  EXPECT_TRUE(mock_layer1->needs_painting(paint_context()));
+  EXPECT_TRUE(layer1->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer1->parent_matrix(),
             SkMatrix::Concat(initial_transform, layer1_transform));
   EXPECT_EQ(
