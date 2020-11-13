@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.10
+// @dart = 2.12
 
 import 'dart:math' as math;
 import 'package:test/bootstrap/browser.dart'; // ignore: import_of_legacy_library_into_null_safe

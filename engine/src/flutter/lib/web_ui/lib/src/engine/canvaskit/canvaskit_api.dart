@@ -7,7 +7,7 @@
 /// Prefer keeping the original CanvasKit names so it is easier to locate
 /// the API behind these bindings in the Skia source code.
 
-// @dart = 2.10
+// @dart = 2.12
 part of engine;
 
 /// Entrypoint into the CanvasKit API.
