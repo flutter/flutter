@@ -248,25 +248,19 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [LinearProgressIndicator] with a changing value.
 ///
 /// ```dart
-/// AnimationController controller;
-/// Animation<double> animation;
+///  AnimationController controller;
 ///
-/// @override
-/// void initState() {
-///   controller = AnimationController(
-///     vsync: this,
-///     duration: const Duration(seconds: 5),
-///   );
-///   animation = Tween<double>(
-///     begin: 0,
-///     end: 1,
-///   ).animate(controller)
-///     ..addListener(() {
-///       setState(() {});
-///     });
-///   controller.repeat(reverse: true);
-///   super.initState();
-/// }
+///  @override
+///  void initState() {
+///    controller = AnimationController(
+///      vsync: this,
+///      duration: const Duration(seconds: 5),
+///    )..addListener(() {
+///        setState(() {});
+///      });
+///    controller.repeat(reverse: true);
+///    super.initState();
+///  }
 ///
 /// @override
 /// void dispose() {
