@@ -633,7 +633,7 @@ class _TabBarScrollController extends ScrollController {
 /// ```dart preamble
 ///
 /// TabController _tabController;
-/// 
+///
 ///  @override
 ///  void initState() {
 ///    super.initState();
