@@ -405,11 +405,11 @@ public class FlutterActivity extends Activity
 
     super.onCreate(savedInstanceState);
 
-    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
-
     delegate = new FlutterActivityAndFragmentDelegate(this);
     delegate.onAttach(this);
-    delegate.onActivityCreated(savedInstanceState);
+    delegate.onRestoreInstanceState(savedInstanceState);
+
+    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
 
     configureWindowForTransparency();
     setContentView(createFlutterView());
