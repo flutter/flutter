@@ -4692,6 +4692,9 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get unspecifiedDateRange => 'Date range';
 
   @override
+  String get dateHelpText => 'dd/mm/yyyy';
+
+  @override
   String get licensesPageTitle => 'Licences';
 
   @override
