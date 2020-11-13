@@ -36,8 +36,7 @@ class RadioThemeData with Diagnosticable {
   const RadioThemeData({
     this.mouseCursor,
     this.fillColor,
-    this.focusColor,
-    this.hoverColor,
+    this.splashColor,
     this.splashRadius,
     this.materialTapTargetSize,
     this.visualDensity,
@@ -46,22 +45,22 @@ class RadioThemeData with Diagnosticable {
   /// {@macro flutter.material.radio.mouseCursor}
   ///
   /// If specified, overrides the default value of [Radio.mouseCursor].
-  final MouseCursor? mouseCursor;
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// {@macro flutter.material.radio.fillColor}
   ///
   /// If specified, overrides the default value of [Radio.fillColor].
   final MaterialStateProperty<Color?>? fillColor;
 
-  /// {@macro flutter.material.radio.focusColor}
+  /// The color for the checkbox's [Material].
   ///
-  /// If specified, overrides the default value of [Radio.focusColor].
-  final Color? focusColor;
-
-  /// {@macro flutter.material.radio.hoverColor}
+  /// Resolves in the following states:
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   ///
-  /// If specified, overrides the default value of [Radio.hoverColor].
-  final Color? hoverColor;
+  /// If specified, overrides the default value of [Checkbox.focusColor] and
+  /// [Checkbox.hoverColor].
+  final MaterialStateProperty<Color?>? splashColor;
 
   /// {@macro flutter.material.radio.splashRadius}
   ///
@@ -82,10 +81,9 @@ class RadioThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   RadioThemeData copyWith({
-    MouseCursor? mouseCursor,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
     MaterialStateProperty<Color?>? fillColor,
-    Color? focusColor,
-    Color? hoverColor,
+    MaterialStateProperty<Color?>? splashColor,
     double? splashRadius,
     MaterialTapTargetSize? materialTapTargetSize,
     VisualDensity? visualDensity,
@@ -93,8 +91,7 @@ class RadioThemeData with Diagnosticable {
     return RadioThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
       fillColor: fillColor ?? this.fillColor,
-      focusColor: focusColor ?? this.focusColor,
-      hoverColor: hoverColor ?? this.hoverColor,
+      splashColor: splashColor ?? this.splashColor,
       splashRadius: splashRadius ?? this.splashRadius,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       visualDensity: visualDensity ?? this.visualDensity,
@@ -109,8 +106,7 @@ class RadioThemeData with Diagnosticable {
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
-      focusColor: Color.lerp(a?.focusColor, b?.focusColor, t),
-      hoverColor: Color.lerp(a?.hoverColor, b?.hoverColor, t),
+      splashColor: _lerpProperties<Color?>(a?.splashColor, b?.splashColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
     );
@@ -121,8 +117,7 @@ class RadioThemeData with Diagnosticable {
     return hashValues(
       mouseCursor,
       fillColor,
-      focusColor,
-      hoverColor,
+      splashColor,
       splashRadius,
       materialTapTargetSize,
       visualDensity,
@@ -138,8 +133,7 @@ class RadioThemeData with Diagnosticable {
     return other is RadioThemeData
       && other.mouseCursor == mouseCursor
       && other.fillColor == fillColor
-      && other.focusColor == focusColor
-      && other.hoverColor == hoverColor
+      && other.splashColor == splashColor
       && other.splashRadius == splashRadius
       && other.materialTapTargetSize == materialTapTargetSize
       && other.visualDensity == visualDensity;
@@ -148,10 +142,9 @@ class RadioThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('splashColor', splashColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));

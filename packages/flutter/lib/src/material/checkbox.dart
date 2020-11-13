@@ -203,20 +203,16 @@ class Checkbox extends StatefulWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// {@template flutter.material.checkbox.focusColor}
   /// The color for the checkbox's [Material] when it has the input focus.
-  /// {@endtemplate}
   ///
-  /// If null, then the value of [CheckboxThemeData.focusColor] is used. If that
-  /// is also null, then the value of [ThemeData.focusColor] is used.
+  /// If null, then the value of [CheckboxThemeData.splashColor] is used. If
+  /// that is also null, then the value of [ThemeData.focusColor] is used.
   final Color? focusColor;
 
-  /// {@template flutter.material.checkbox.hoverColor}
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
-  /// {@endtemplate}
   ///
-  /// If null, then the value of [CheckboxThemeData.hoverColor] is used. If that
-  /// is also null, then the value of [ThemeData.hoverColor] is used.
+  /// If null, then the value of [CheckboxThemeData.splashColor] is used. If
+  /// that is also null, then the value of [ThemeData.hoverColor] is used.
   final Color? hoverColor;
 
   /// {@template flutter.material.checkbox.splashRadius}
@@ -338,7 +334,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     size += effectiveVisualDensity.baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
-      ?? MaterialStateProperty.resolveAs<MouseCursor?>(themeData.checkboxTheme.mouseCursor, _states)
+      ?? themeData.checkboxTheme.mouseCursor?.resolve(_states)
       ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, _states);
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
@@ -352,6 +348,13 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       ?? _widgetFillColor.resolve(inactiveStates)
       ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
+
+    final Color effectiveFocusSplashColor = widget.focusColor
+        ?? themeData.checkboxTheme.splashColor?.resolve({MaterialState.focused})
+        ?? themeData.focusColor;
+    final Color effectiveHoverSplashColor = widget.hoverColor
+        ?? themeData.checkboxTheme.splashColor?.resolve({MaterialState.hovered})
+        ?? themeData.hoverColor;
 
     return FocusableActionDetector(
       actions: _actionMap,
@@ -369,8 +372,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             activeColor: effectiveActiveColor,
             checkColor: widget.checkColor ?? themeData.checkboxTheme.checkColor ?? const Color(0xFFFFFFFF),
             inactiveColor: effectiveInactiveColor,
-            focusColor: widget.focusColor ?? themeData.checkboxTheme.focusColor ?? themeData.focusColor,
-            hoverColor: widget.hoverColor ?? themeData.checkboxTheme.hoverColor ?? themeData.hoverColor,
+            focusColor: effectiveFocusSplashColor,
+            hoverColor: effectiveHoverSplashColor,
             splashRadius: widget.splashRadius ?? themeData.checkboxTheme.splashRadius ?? kRadialReactionRadius,
             onChanged: widget.onChanged,
             additionalConstraints: additionalConstraints,

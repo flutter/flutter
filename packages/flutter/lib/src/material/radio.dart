@@ -428,7 +428,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     size += effectiveVisualDensity.baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
-      ?? MaterialStateProperty.resolveAs<MouseCursor?>(themeData.radioTheme.mouseCursor, _states)
+      ?? themeData.radioTheme.mouseCursor?.resolve(_states)
       ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, _states);
 
     // Colors need to be resolved in selected and non selected states separately
@@ -444,6 +444,13 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
       ?? themeData.radioTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
+    final Color effectiveFocusSplashColor = widget.focusColor
+        ?? themeData.radioTheme.splashColor?.resolve({MaterialState.focused})
+        ?? themeData.focusColor;
+    final Color effectiveHoverSplashColor = widget.hoverColor
+        ?? themeData.radioTheme.splashColor?.resolve({MaterialState.hovered})
+        ?? themeData.hoverColor;
+
     return FocusableActionDetector(
       actions: _actionMap,
       focusNode: widget.focusNode,
@@ -458,8 +465,8 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
             selected: _selected,
             activeColor: effectiveActiveColor,
             inactiveColor: effectiveInactiveColor,
-            focusColor: widget.focusColor ?? themeData.radioTheme.focusColor ?? themeData.focusColor,
-            hoverColor: widget.hoverColor ?? themeData.radioTheme.hoverColor ?? themeData.hoverColor,
+            focusColor: effectiveFocusSplashColor,
+            hoverColor: effectiveHoverSplashColor,
             splashRadius: widget.splashRadius ?? themeData.radioTheme.splashRadius ?? kRadialReactionRadius,
             onChanged: enabled ? _handleChanged : null,
             toggleable: widget.toggleable,

@@ -37,8 +37,7 @@ class CheckboxThemeData with Diagnosticable {
     this.mouseCursor,
     this.fillColor,
     this.checkColor,
-    this.focusColor,
-    this.hoverColor,
+    this.splashColor,
     this.splashRadius,
     this.materialTapTargetSize,
     this.visualDensity,
@@ -47,7 +46,7 @@ class CheckboxThemeData with Diagnosticable {
   /// {@macro flutter.material.checkbox.mouseCursor}
   ///
   /// If specified, overrides the default value of [Checkbox.mouseCursor].
-  final MouseCursor? mouseCursor;
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// {@macro flutter.material.checkbox.fillColor}
   ///
@@ -59,15 +58,15 @@ class CheckboxThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Checkbox.checkColor].
   final Color? checkColor;
 
-  /// {@macro flutter.material.checkbox.focusColor}
+  /// The color for the checkbox's [Material].
   ///
-  /// If specified, overrides the default value of [Checkbox.focusColor].
-  final Color? focusColor;
-
-  /// {@macro flutter.material.checkbox.hoverColor}
+  /// Resolves in the following states:
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   ///
-  /// If specified, overrides the default value of [Checkbox.hoverColor].
-  final Color? hoverColor;
+  /// If specified, overrides the default value of [Checkbox.focusColor] and
+  /// [Checkbox.hoverColor].
+  final MaterialStateProperty<Color?>? splashColor;
 
   /// {@macro flutter.material.checkbox.splashRadius}
   ///
@@ -88,11 +87,10 @@ class CheckboxThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   CheckboxThemeData copyWith({
-    MouseCursor? mouseCursor,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
     MaterialStateProperty<Color?>? fillColor,
     Color? checkColor,
-    Color? focusColor,
-    Color? hoverColor,
+    MaterialStateProperty<Color?>? splashColor,
     double? splashRadius,
     MaterialTapTargetSize? materialTapTargetSize,
     VisualDensity? visualDensity,
@@ -101,8 +99,7 @@ class CheckboxThemeData with Diagnosticable {
       mouseCursor: mouseCursor ?? this.mouseCursor,
       fillColor: fillColor ?? this.fillColor,
       checkColor: checkColor ?? this.checkColor,
-      focusColor: focusColor ?? this.focusColor,
-      hoverColor: hoverColor ?? this.hoverColor,
+      splashColor: splashColor ?? this.splashColor,
       splashRadius: splashRadius ?? this.splashRadius,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       visualDensity: visualDensity ?? this.visualDensity,
@@ -117,8 +114,7 @@ class CheckboxThemeData with Diagnosticable {
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
       checkColor: Color.lerp(a?.checkColor, b?.checkColor, t),
-      focusColor: Color.lerp(a?.focusColor, b?.focusColor, t),
-      hoverColor: Color.lerp(a?.hoverColor, b?.hoverColor, t),
+      splashColor: _lerpProperties<Color?>(a?.splashColor, b?.splashColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
@@ -131,8 +127,7 @@ class CheckboxThemeData with Diagnosticable {
       mouseCursor,
       fillColor,
       checkColor,
-      focusColor,
-      hoverColor,
+      splashColor,
       splashRadius,
       materialTapTargetSize,
       visualDensity,
@@ -149,8 +144,7 @@ class CheckboxThemeData with Diagnosticable {
       && other.mouseCursor == mouseCursor
       && other.fillColor == fillColor
       && other.checkColor == checkColor
-      && other.focusColor == focusColor
-      && other.hoverColor == hoverColor
+      && other.splashColor == splashColor
       && other.splashRadius == splashRadius
       && other.materialTapTargetSize == materialTapTargetSize
       && other.visualDensity == visualDensity;
@@ -159,11 +153,10 @@ class CheckboxThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('checkColor', checkColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('splashColor', splashColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
