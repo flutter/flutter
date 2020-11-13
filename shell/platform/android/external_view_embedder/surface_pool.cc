@@ -21,7 +21,7 @@ SurfacePool::~SurfacePool() = default;
 
 std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     GrDirectContext* gr_context,
-    std::shared_ptr<AndroidContext> android_context,
+    const AndroidContext& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     std::shared_ptr<AndroidSurfaceFactory> surface_factory) {
   // Destroy current layers in the pool if the frame size has changed.

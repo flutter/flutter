@@ -13,7 +13,6 @@
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/android/android_context_gl.h"
 #include "flutter/shell/platform/android/android_environment_gl.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 
@@ -22,10 +21,8 @@ namespace flutter {
 class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
                                public AndroidSurface {
  public:
-  AndroidSurfaceGL(
-      std::shared_ptr<AndroidContext> android_context,
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-      std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder);
+  AndroidSurfaceGL(const AndroidContext& android_context,
+                   std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
   ~AndroidSurfaceGL() override;
 
@@ -67,8 +64,7 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
   sk_sp<const GrGLInterface> GetGLInterface() const override;
 
  private:
-  const std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
-  const std::shared_ptr<AndroidContextGL> android_context_;
+  const AndroidContextGL& android_context_;
 
   fml::RefPtr<AndroidNativeWindow> native_window_;
   std::unique_ptr<AndroidEGLSurface> onscreen_surface_;

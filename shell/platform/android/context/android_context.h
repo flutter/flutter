@@ -20,7 +20,7 @@ enum class AndroidRenderingAPI {
 ///
 class AndroidContext {
  public:
-  AndroidContext(AndroidRenderingAPI rendering_api);
+  explicit AndroidContext(AndroidRenderingAPI rendering_api);
 
   ~AndroidContext();
 
