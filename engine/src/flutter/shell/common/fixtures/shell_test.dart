@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart=2.10
+
 import 'dart:convert' show utf8, json;
 import 'dart:isolate';
 import 'dart:typed_data';
