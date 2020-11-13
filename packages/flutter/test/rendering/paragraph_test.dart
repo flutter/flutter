@@ -37,6 +37,26 @@ class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
   }
 }
 
+// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
+// for a selection representing a WidgetSpan.
+// This is intended to simulate how SkParagraph's implementation of Paragraph.getBoxesForRange
+// can return an empty list for a WidgetSpan with empty dimensions.
+class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
+  RenderParagraphWithEmptyBoxListForWidgetSpan(
+    InlineSpan text, {
+    required List<RenderBox> children,
+    required TextDirection textDirection,
+  }) : super(text, children: children, textDirection: textDirection);
+
+  @override
+  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+    if (text.getSpanForPosition(selection.base) is WidgetSpan) {
+      return <ui.TextBox>[];
+    }
+    return super.getBoxesForSelection(selection);
+  }
+}
+
 void main() {
   test('getOffsetForCaret control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -581,6 +601,27 @@ void main() {
       ]),
       textDirection: TextDirection.rtl,
       emptyListSelection: const TextSelection(baseOffset: 0, extentOffset: 1),
+    );
+    layout(paragraph);
+
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(node.childrenCount, 2);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+  test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
+    final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
+      TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+      const WidgetSpan(child: SizedBox(width: 0, height: 0)),
+      TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+    ]);
+    final List<RenderBox> renderBoxes = <RenderBox>[
+      RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+    ];
+    final RenderParagraph paragraph = RenderParagraphWithEmptyBoxListForWidgetSpan(
+      text,
+      children: renderBoxes,
+      textDirection: TextDirection.ltr,
     );
     layout(paragraph);
 
