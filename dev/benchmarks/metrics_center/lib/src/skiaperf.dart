@@ -6,7 +6,7 @@
 // the SDK constraint to `>=2.12.0-0` before the deps are ready.
 // @dart=2.12
 
-import 'package:metrics_center/src/common.dart';
+import 'package:metrics_center/src/common.dart'; // ignore: import_of_legacy_library_into_null_safe
 
 // Skia Perf Format is a JSON file that looks like:
 

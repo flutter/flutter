@@ -6,7 +6,7 @@
 // the SDK constraint to `>=2.12.0-0` before the deps are ready.
 // @dart=2.12
 
-import 'package:github/github.dart';
+import 'package:github/github.dart'; // ignore: import_of_legacy_library_into_null_safe
 
 /// Singleton class to query some Github info with an in-memory cache.
 class GithubHelper {
