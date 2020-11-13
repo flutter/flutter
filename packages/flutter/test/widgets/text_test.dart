@@ -1249,7 +1249,7 @@ void main() {
     // The inline spans are rendered on one (horizontal) line, the sum of the widths is the max intrinsic width.
     expect(paragraph.getMaxIntrinsicWidth(0.0), 200 + 4 * 16.0);
     // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
-    expect(paragraph.getMinIntrinsicWidth(0.0), 200, skip: 'https://github.com/flutter/flutter/issues/70230');
+    expect(paragraph.getMinIntrinsicWidth(0.0), 200);
   });
 }
 
