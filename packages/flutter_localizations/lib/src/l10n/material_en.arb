@@ -73,7 +73,22 @@
   },
 
   "licensesPackageDetailTextZero": "No licenses",
+  "@licensesPackageDetailTextZero": {
+    "optional": true
+  },
   "licensesPackageDetailTextOne": "1 license",
+  "@licensesPackageDetailTextOne": {
+    "optional": true
+  },
+  "@licensesPackageDetailTextTwo": {
+    "optional": true
+  },
+  "@licensesPackageDetailTextFew": {
+    "optional": true
+  },
+  "@licensesPackageDetailTextMany": {
+    "optional": true
+  },
   "licensesPackageDetailTextOther": "$licenseCount licenses",
   "@licensesPackageDetailText": {
     "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has.",
@@ -104,7 +119,22 @@
   },
 
   "selectedRowCountTitleZero": "No items selected",
+  "@selectedRowCountTitleZero": {
+    "optional": true
+  },
   "selectedRowCountTitleOne": "1 item selected",
+  "@selectedRowCountTitleOne": {
+    "optional": true
+  },
+  "@selectedRowCountTitleTwo": {
+    "optional": true
+  },
+  "@selectedRowCountTitleFew": {
+    "optional": true
+  },
+  "@selectedRowCountTitleMany": {
+    "optional": true
+  },
   "selectedRowCountTitleOther": "$selectedRowCount items selected",
   "@selectedRowCountTitle": {
     "description": "The title for the header of a paginated data table when the user is selecting rows. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
@@ -389,7 +419,22 @@
   },
 
   "remainingTextFieldCharacterCountZero": "No characters remaining",
+  "@remainingTextFieldCharacterCountZero": {
+    "optional": true
+  },
   "remainingTextFieldCharacterCountOne": "1 character remaining",
+  "@remainingTextFieldCharacterCountOne": {
+    "optional": true
+  },
+  "@remainingTextFieldCharacterCountTwo": {
+    "optional": true
+  },
+  "@remainingTextFieldCharacterCountFew": {
+    "optional": true
+  },
+  "@remainingTextFieldCharacterCountMany": {
+    "optional": true
+  },
   "remainingTextFieldCharacterCountOther": "$remainingCount characters remaining",
   "@remainingTextFieldCharacterCount": {
     "description": "The label for the TextField's character counter. remainingCharacters is a integer representing how many more characters the user can type into the text field before using up a given budget. All values are greater than or equal to zero.",

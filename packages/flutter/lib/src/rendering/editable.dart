@@ -776,7 +776,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyX) {
+    if (key == LogicalKeyboardKey.keyX && !_readOnly) {
       if (!selection!.isCollapsed) {
         Clipboard.setData(ClipboardData(text: selection!.textInside(_plainText)));
         textSelectionDelegate.textEditingValue = TextEditingValue(
@@ -787,7 +787,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyV) {
+    if (key == LogicalKeyboardKey.keyV && !_readOnly) {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final TextEditingValue value = textSelectionDelegate.textEditingValue;
@@ -818,6 +818,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _handleDelete({ required bool forward }) {
     assert(_selection != null);
+    if (_readOnly) {
+      return;
+    }
     String textBefore = selection!.textBefore(_plainText);
     String textAfter = selection!.textAfter(_plainText);
     int cursorPosition = selection!.start;
@@ -1155,7 +1158,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsLayout();
   }
 
-  /// {@template flutter.rendering.editable.paintCursorOnTop}
+  /// {@template flutter.rendering.RenderEditable.paintCursorAboveText}
   /// If the cursor should be painted on top of the text or underneath it.
   ///
   /// By default, the cursor should be painted on top for iOS platforms and
@@ -1170,7 +1173,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsLayout();
   }
 
-  /// {@template flutter.rendering.editable.cursorOffset}
+  /// {@template flutter.rendering.RenderEditable.cursorOffset}
   /// The offset that is used, in pixels, when painting the cursor on screen.
   ///
   /// By default, the cursor position should be set to an offset of
@@ -1362,7 +1365,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   double get _caretMargin => _kCaretGap + cursorWidth;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -1818,7 +1821,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Move selection to the location of the last tap down.
   ///
-  /// {@template flutter.rendering.editable.select}
+  /// {@template flutter.rendering.RenderEditable.selectPosition}
   /// This method is mainly used to translate user inputs in global positions
   /// into a [TextSelection]. When used in conjunction with a [EditableText],
   /// the selection change is fed back into [TextEditingController.selection].
@@ -1861,7 +1864,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Select a word around the location of the last tap down.
   ///
-  /// {@macro flutter.rendering.editable.select}
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
@@ -1871,7 +1874,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
   ///
-  /// {@macro flutter.rendering.editable.select}
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     assert(cause != null);
     assert(from != null);
@@ -1896,7 +1899,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Move the selection to the beginning or end of a word.
   ///
-  /// {@macro flutter.rendering.editable.select}
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordEdge({ required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);

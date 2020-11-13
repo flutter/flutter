@@ -1118,7 +1118,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// location at which this object was inserted into the tree (i.e., [context])
   /// or on the widget used to configure this object (i.e., [widget]).
   ///
-  /// {@template flutter.widgets.subscriptions}
+  /// {@template flutter.widgets.State.initState}
   /// If a [State]'s [build] method depends on an object that can itself
   /// change state, for example a [ChangeNotifier] or [Stream], or some
   /// other object to which one can subscribe to receive notifications, then
@@ -1160,7 +1160,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// The framework always calls [build] after calling [didUpdateWidget], which
   /// means any calls to [setState] in [didUpdateWidget] are redundant.
   ///
-  /// {@macro flutter.widgets.subscriptions}
+  /// {@macro flutter.widgets.State.initState}
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.didUpdateWidget(oldWidget).
@@ -1168,7 +1168,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
 
-  /// {@macro flutter.widgets.reassemble}
+  /// {@macro flutter.widgets.Element.reassemble}
   ///
   /// In addition to this method being invoked, it is guaranteed that the
   /// [build] method will be invoked when a reassemble is signaled. Most
@@ -1328,7 +1328,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Subclasses should override this method to release any resources retained
   /// by this object (e.g., stop any active animations).
   ///
-  /// {@macro flutter.widgets.subscriptions}
+  /// {@macro flutter.widgets.State.initState}
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
@@ -1506,7 +1506,7 @@ abstract class ProxyWidget extends Widget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@template flutter.widgets.child}
+  /// {@template flutter.widgets.ProxyWidget.child}
   /// This widget can only have one child. To lay out multiple children, let this
   /// widget's child be a widget such as [Row], [Column], or [Stack], which have a
   /// `children` property, and then provide the children to that widget.
@@ -1888,7 +1888,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -3120,7 +3120,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   BuildOwner? get owner => _owner;
   BuildOwner? _owner;
 
-  /// {@template flutter.widgets.reassemble}
+  /// {@template flutter.widgets.Element.reassemble}
   /// Called whenever the application is reassembled during debugging, for
   /// example during hot reload.
   ///
@@ -5865,7 +5865,7 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// ## Deprecation
   ///
@@ -5912,7 +5912,7 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@template flutter.widgets.slots}
+  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   /// The semantics of `slot` are determined by this element. For example, if
   /// this element has a single child, the slot should always be null. If this
   /// element has a list of children, the previous sibling element wrapped in an
@@ -5927,7 +5927,7 @@ abstract class RenderObjectElement extends Element {
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// This method is only ever called if [updateChild] can end up being called
   /// with an existing [Element] child and a `slot` that differs from the slot
@@ -5987,7 +5987,7 @@ abstract class RenderObjectElement extends Element {
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// This method is only ever called if [updateChild] can end up being called
   /// with an existing [Element] child and a `slot` that differs from the slot
