@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file uses Dart 2.12 semantics. This is needed as we can't upgrade
-// the SDK constraint to `>=2.12.0-0` before the deps are ready.
-// @dart=2.12
-
 import 'package:github/github.dart'; // ignore: import_of_legacy_library_into_null_safe
 
 /// Singleton class to query some Github info with an in-memory cache.
@@ -29,7 +25,7 @@ class GithubHelper {
           .getCommit(RepositorySlug.full(githubRepo), sha);
       _commitDateTimeCache[key] = commit.commit.committer.date;
     }
-    return _commitDateTimeCache[key]!;
+    return _commitDateTimeCache[key];
   }
 
   static final GithubHelper _singleton = GithubHelper._internal();

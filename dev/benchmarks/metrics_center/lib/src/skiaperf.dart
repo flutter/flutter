@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file uses Dart 2.12 semantics. This is needed as we can't upgrade
-// the SDK constraint to `>=2.12.0-0` before the deps are ready.
-// @dart=2.12
-
 import 'package:metrics_center/src/common.dart'; // ignore: import_of_legacy_library_into_null_safe
 
 // Skia Perf Format is a JSON file that looks like:
@@ -68,9 +64,15 @@ class SkiaPerfPoint extends MetricPoint {
   /// Skia perf will use the git revision's date instead of this date tag in
   /// the time axis.
   factory SkiaPerfPoint.fromPoint(MetricPoint p) {
-    final String githubRepo = p.tags[kGithubRepoKey]!;
-    final String gitHash = p.tags[kGitRevisionKey]!;
-    final String name = p.tags[kNameKey]!;
+    final String githubRepo = p.tags[kGithubRepoKey];
+    final String gitHash = p.tags[kGitRevisionKey];
+    final String name = p.tags[kNameKey];
+
+    if (githubRepo == null || gitHash == null || name == null) {
+      throw '$kGithubRepoKey, $kGitRevisionKey, $kGitRevisionKey must be set in'
+          ' the tags of $p.';
+    }
+
     final String subResult = p.tags[kSubResultKey] ?? kSkiaPerfValueKey;
 
     final Map<String, String> options = <String, String>{}..addEntries(
@@ -122,7 +124,7 @@ class SkiaPerfPoint extends MetricPoint {
   /// The url to the Skia perf json file in the Google Cloud Storage bucket.
   ///
   /// This can be null if the point has been stored in the bucket yet.
-  final String? jsonUrl;
+  final String jsonUrl;
 
   Map<String, dynamic> _toSubResultJson() {
     return <String, dynamic>{
