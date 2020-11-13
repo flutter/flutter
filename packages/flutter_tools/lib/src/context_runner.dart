@@ -229,7 +229,10 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
+      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
+      ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
         logger: globals.logger,
