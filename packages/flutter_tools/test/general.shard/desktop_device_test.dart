@@ -247,6 +247,29 @@ void main() {
 
     expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
   });
+
+  testWithoutContext('startApp supports dartEntrypointArgs', () async {
+    final Completer<void> completer = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug', 'arg1', 'arg2'],
+        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        completer: completer
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        dartEntrypointArgs: <String>['arg1', 'arg2']
+      ),
+    );
+
+    expect(result.started, true);
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({

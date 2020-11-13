@@ -122,6 +122,57 @@ class Step {
 /// to this widget based on some logic triggered by the three callbacks that it
 /// provides.
 ///
+/// {@tool sample --template=stateful_widget_scaffold_center}
+///
+/// ```dart
+/// int _index = 0;
+/// Widget build(BuildContext context) {
+///   return Container(
+///     height: 300,
+///     width: 300,
+///     child: Stepper(
+///       currentStep: _index,
+///       onStepCancel: () {
+///         if (_index <= 0) {
+///          return;
+///         }
+///         setState(() {
+///           _index--;
+///         });
+///       },
+///       onStepContinue: () {
+///         if (_index >= 1) {
+///          return;
+///         }
+///         setState(() {
+///           _index++;
+///         });
+///       },
+///       onStepTapped: (index) {
+///         setState(() {
+///           _index = index;
+///         });
+///       },
+///       steps: [
+///         Step(
+///           title: Text("Step 1 title"),
+///           content: Container(
+///             alignment: Alignment.centerLeft,
+///             child: Text("Content for Step 1")
+///           ),
+///         ),
+///         Step(
+///           title: Text("Step 2 title"),
+///           content: Text("Content for Step 2"),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Step]
@@ -281,7 +332,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   bool _isDark() {
-    return Theme.of(context)!.brightness == Brightness.dark;
+    return Theme.of(context).brightness == Brightness.dark;
   }
 
   Widget _buildLine(bool visible) {
@@ -321,7 +372,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Color _circleColor(int index) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     if (!_isDark()) {
       return widget.steps[index].isActive ? themeData.primaryColor : Colors.black38;
     } else {
@@ -395,7 +446,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       return widget.controlsBuilder!(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
 
     final Color cancelColor;
-    switch (Theme.of(context)!.brightness) {
+    switch (Theme.of(context).brightness) {
       case Brightness.light:
         cancelColor = Colors.black54;
         break;
@@ -404,7 +455,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         break;
     }
 
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final ColorScheme colorScheme = themeData.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
@@ -453,7 +504,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   TextStyle _titleStyle(int index) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
     assert(widget.steps[index].state != null);
@@ -474,7 +525,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   TextStyle _subtitleStyle(int index) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
     assert(widget.steps[index].state != null);

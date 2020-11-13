@@ -76,7 +76,7 @@ import 'text_field.dart';
 /// ```
 /// {@end-tool}
 class CupertinoSearchTextField extends StatefulWidget {
-  /// Creates a [CupertinoTextField] that mimicks the look and behavior of
+  /// Creates a [CupertinoTextField] that mimics the look and behavior of
   /// UIKit's `UISearchTextField`.
   ///
   /// Similar to [CupertinoTextField], to provide a prefilled text entry, pass
@@ -344,7 +344,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   @override
   Widget build(BuildContext context) {
     final String placeholder = widget.placeholder ??
-        CupertinoLocalizations.of(context).searchTextFieldPlaceholerLabel;
+        CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
 
     final TextStyle placeholderStyle = widget.placeholderStyle ??
         const TextStyle(color: CupertinoColors.systemGrey);

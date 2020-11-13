@@ -1763,9 +1763,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         });
       },
       children: List<Widget>.generate(24, (int index) {
+        final String label = localizations.timerPickerHourLabel(index) ?? '';
         final String semanticsLabel = textDirectionFactor == 1
-            ? localizations.timerPickerHour(index) + localizations.timerPickerHourLabel(index)
-            : localizations.timerPickerHourLabel(index) + localizations.timerPickerHour(index);
+            ? localizations.timerPickerHour(index) + label
+            : label + localizations.timerPickerHour(index);
 
         return Semantics(
           label: semanticsLabel,
@@ -1793,7 +1794,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildHourPicker(additionalPadding, selectionOverlay),
         ),
         _buildLabel(
-          localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!),
+          localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!) ?? '',
           additionalPadding,
         ),
       ],
@@ -1826,10 +1827,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       },
       children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
         final int minute = index * widget.minuteInterval;
-
+        final String label = localizations.timerPickerMinuteLabel(minute) ?? '';
         final String semanticsLabel = textDirectionFactor == 1
-            ? localizations.timerPickerMinute(minute) + localizations.timerPickerMinuteLabel(minute)
-            : localizations.timerPickerMinuteLabel(minute) + localizations.timerPickerMinute(minute);
+            ? localizations.timerPickerMinute(minute) + label
+            : label + localizations.timerPickerMinute(minute);
 
         return Semantics(
           label: semanticsLabel,
@@ -1857,7 +1858,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildMinutePicker(additionalPadding, selectionOverlay),
         ),
         _buildLabel(
-          localizations.timerPickerMinuteLabel(lastSelectedMinute ?? selectedMinute),
+          localizations.timerPickerMinuteLabel(lastSelectedMinute ?? selectedMinute) ?? '',
           additionalPadding,
         ),
       ],
@@ -1890,10 +1891,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       },
       children: List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
         final int second = index * widget.secondInterval;
-
+        final String label = localizations.timerPickerSecondLabel(second) ?? '';
         final String semanticsLabel = textDirectionFactor == 1
-            ? localizations.timerPickerSecond(second) + localizations.timerPickerSecondLabel(second)
-            : localizations.timerPickerSecondLabel(second) + localizations.timerPickerSecond(second);
+            ? localizations.timerPickerSecond(second) + label
+            : label + localizations.timerPickerSecond(second);
 
         return Semantics(
           label: semanticsLabel,
@@ -1921,7 +1922,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           child: _buildSecondPicker(additionalPadding, selectionOverlay),
         ),
         _buildLabel(
-          localizations.timerPickerSecondLabel(lastSelectedSecond ?? selectedSecond!),
+          localizations.timerPickerSecondLabel(lastSelectedSecond ?? selectedSecond!) ?? '',
           additionalPadding,
         ),
       ],
@@ -2087,7 +2088,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             child: Align(
               alignment: widget.alignment,
               child: Container(
-                color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
+                color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context),
                 width: totalWidth,
                 height: _kPickerHeight,
                 child: DefaultTextStyle(

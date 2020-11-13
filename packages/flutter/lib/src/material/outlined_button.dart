@@ -79,13 +79,13 @@ class OutlinedButton extends ButtonStyleButton {
   ///
   /// The [icon] and [label] arguments must not be null.
   factory OutlinedButton.icon({
-    Key key,
-    required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ButtonStyle style,
-    FocusNode focusNode,
-    bool autofocus,
-    Clip clipBehavior,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ButtonStyle? style,
+    FocusNode? focusNode,
+    bool? autofocus,
+    Clip? clipBehavior,
     required Widget icon,
     required Widget label,
   }) = _OutlinedButtonWithIcon;
@@ -219,7 +219,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
@@ -239,10 +239,10 @@ class OutlinedButton extends ButtonStyleButton {
       padding: scaledPadding,
       minimumSize: const Size(64, 36),
       side: BorderSide(
-        color: Theme.of(context)!.colorScheme.onSurface.withOpacity(0.12),
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
         width: 1,
       ),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+      shape: const _Outline(borderRadius: BorderRadius.all(Radius.circular(4))),
       enabledMouseCursor: SystemMouseCursors.click,
       disabledMouseCursor: SystemMouseCursors.forbidden,
       visualDensity: theme.visualDensity,
@@ -347,5 +347,71 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[icon, SizedBox(width: gap), label],
     );
+  }
+}
+
+
+// This subclass only exists for the sake of backwards compatibility with the
+// outline drawn by the original OutlineButton widget. The paint override
+// draws a Path that's stroked with BorderSide, rather than filling a rounded
+// rect whose inner path is the outer path inset by the BorderSide's width.
+class _Outline extends RoundedRectangleBorder {
+  const _Outline({
+    BorderSide side = BorderSide.none,
+    required BorderRadiusGeometry borderRadius,
+  }) : super(side: side, borderRadius: borderRadius);
+
+  @override
+  ShapeBorder scale(double t) {
+    return _Outline(
+      side: side.scale(t),
+      borderRadius: borderRadius * t,
+    );
+  }
+
+  @override
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+    assert(t != null);
+    if (a is _Outline) {
+      return _Outline(
+        side: BorderSide.lerp(a.side, side, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
+      );
+    }
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+    assert(t != null);
+    if (b is _Outline) {
+      return _Outline(
+        side: BorderSide.lerp(side, b.side, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
+      );
+    }
+    return super.lerpTo(b, t);
+  }
+
+  @override
+  _Outline copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
+    return _Outline(
+      side: side ?? this.side,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+    switch (side.style) {
+      case BorderStyle.none:
+        break;
+      case BorderStyle.solid:
+        if (side.width == 0.0) {
+          super.paint(canvas, rect, textDirection: textDirection);
+        } else {
+          canvas.drawPath(getOuterPath(rect, textDirection: textDirection), side.toPaint());
+        }
+    }
   }
 }

@@ -189,13 +189,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   final TestWindow _window;
 
   @override
-  TestRestorationManager get restorationManager => _restorationManager;
-  late TestRestorationManager _restorationManager;
+  TestRestorationManager get restorationManager {
+    _restorationManager ??= createRestorationManager();
+    return _restorationManager!;
+  }
+  TestRestorationManager? _restorationManager;
 
   /// Called by the test framework at the beginning of a widget test to
   /// prepare the binding for the next test.
   void reset() {
-    _restorationManager = createRestorationManager();
+    _restorationManager = null;
     resetGestureBinding();
   }
 
@@ -1038,7 +1041,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void ensureFrameCallbacksRegistered() {
-    // Leave Window alone, do nothing.
+    // Leave PlatformDispatcher alone, do nothing.
     assert(window.onDrawFrame == null);
     assert(window.onBeginFrame == null);
   }
@@ -1268,7 +1271,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// These values are set on the binding's
 /// [LiveTestWidgetsFlutterBinding.framePolicy] property.
 ///
-/// {@template flutter.flutter_test.frame_policy}
+/// {@template flutter.flutter_test.LiveTestWidgetsFlutterBindingFramePolicy}
 /// The default is [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers].
 /// Setting this to anything other than
 /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] results in pumping
@@ -1326,7 +1329,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// pipeline directly. It tells the binding to entirely ignore requests for a
   /// frame to be scheduled, while still allowing frames that are pumped
   /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
-  /// [Window.onBeginFrame] and [Window.onDrawFrame]).
+  /// [PlatformDispatcher.onBeginFrame] and [PlatformDispatcher.onDrawFrame]).
   ///
   /// This allows all frame requests from the engine to be serviced, and allows
   /// all frame requests that are artificially triggered to be serviced, but
@@ -1417,7 +1420,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// system requests during an asynchronous pause (as would normally happen
   /// when running an application with [WidgetsFlutterBinding]).
   ///
-  /// {@macro flutter.flutter_test.frame_policy}
+  /// {@macro flutter.flutter_test.LiveTestWidgetsFlutterBindingFramePolicy}
   ///
   /// See [LiveTestWidgetsFlutterBindingFramePolicy].
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
@@ -1684,17 +1687,17 @@ class TestViewConfiguration extends ViewConfiguration {
   /// If a [window] instance is not provided it defaults to [ui.window].
   factory TestViewConfiguration({
     Size size = _kDefaultTestViewportSize,
-    ui.Window? window,
+    ui.FlutterView? window,
   }) {
     return TestViewConfiguration._(size, window ?? ui.window);
   }
 
-  TestViewConfiguration._(Size size, ui.Window window)
+  TestViewConfiguration._(Size size, ui.FlutterView window)
     : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
       _hitTestMatrix = _getMatrix(size, 1.0, window),
       super(size: size);
 
-  static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.Window window) {
+  static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
     final double actualWidth = window.physicalSize.width * inverseRatio;
     final double actualHeight = window.physicalSize.height * inverseRatio;
@@ -1756,7 +1759,7 @@ class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
     required ViewConfiguration configuration,
     required this.onNeedPaint,
-    required ui.Window window,
+    required ui.FlutterView window,
   }) : super(configuration: configuration, window: window);
 
   @override

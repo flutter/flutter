@@ -135,7 +135,7 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
   int get _numberOfMonths => utils.monthDelta(widget.firstDate, widget.lastDate) + 1;
 
   void _vibrate() {
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         HapticFeedback.vibrate();
@@ -424,7 +424,7 @@ class _DayHeaders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final ColorScheme colorScheme = themeData.colorScheme;
     final TextStyle textStyle = themeData.textTheme.subtitle2!.apply(color: colorScheme.onSurface);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -676,7 +676,7 @@ class _MonthItemState extends State<_MonthItem> {
   }
 
   Color _highlightColor(BuildContext context) {
-    return Theme.of(context)!.colorScheme.primary.withOpacity(0.12);
+    return Theme.of(context).colorScheme.primary.withOpacity(0.12);
   }
 
   void _dayFocusChanged(bool focused) {
@@ -703,7 +703,7 @@ class _MonthItemState extends State<_MonthItem> {
   }
 
   Widget _buildDayItem(BuildContext context, DateTime dayToBuild, int firstDayOffset, int daysInMonth) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final TextTheme textTheme = theme.textTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -816,7 +816,7 @@ class _MonthItemState extends State<_MonthItem> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final int year = widget.displayedMonth.year;
