@@ -61,7 +61,7 @@ class MockDelegate : public PlatformView::Delegate {
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
-      flutter::IOSSurfaceFactory::Create(flutter::IOSRenderingAPI::kSoftware),
+      /*platform_views_controller=*/nil,
       /*task_runners=*/runners);
 
   id project = OCMClassMock([FlutterDartProject class]);
