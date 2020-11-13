@@ -185,7 +185,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(inkFeatures, paints
@@ -228,7 +228,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(inkFeatures, paints
@@ -350,20 +350,18 @@ void main() {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Focus(
-            focusNode: focusNode,
-            child: Container(
-              width: 100,
-              height: 100,
-              child: InkWell(
-                  hoverColor: const Color(0xff00ff00),
-                  splashColor: const Color(0xffff0000),
-                  focusColor: const Color(0xff0000ff),
-                  highlightColor: const Color(0xf00fffff),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
-              ),
+          child: Container(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              focusNode: focusNode,
+              hoverColor: const Color(0xff00ff00),
+              splashColor: const Color(0xffff0000),
+              focusColor: const Color(0xff0000ff),
+              highlightColor: const Color(0xf00fffff),
+              onTap: () { },
+              onLongPress: () { },
+              onHover: (bool hover) { },
             ),
           ),
         ),
@@ -371,10 +369,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
   });
 
   testWidgets('InkWell.mouseCursor changes cursor on hover', (WidgetTester tester) async {
