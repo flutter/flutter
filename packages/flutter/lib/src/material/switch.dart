@@ -289,7 +289,7 @@ class Switch extends StatefulWidget {
   /// The color for the button's [Material] when it has the input focus.
   /// {@endtemplate}
   ///
-  /// If null, then the value of [SwitchThemeData.focusColor] is used. If that
+  /// If null, then the value of [SwitchThemeData.splashColor] is used. If that
   /// is also null, then the value of [ThemeData.focusColor] is used.
   final Color? focusColor;
 
@@ -297,7 +297,7 @@ class Switch extends StatefulWidget {
   /// The color for the button's [Material] when a pointer is hovering over it.
   /// {@endtemplate}
   ///
-  /// If null, then the value of [SwitchThemeData.hoverColor] is used. If that
+  /// If null, then the value of [SwitchThemeData.splashColor] is used. If that
   /// is also null, then the value of [ThemeData.hoverColor] is used.
   final Color? hoverColor;
 
@@ -468,11 +468,15 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       ?? theme.switchTheme.trackColor?.resolve(inactiveStates)
       ?? _defaultTrackColor.resolve(inactiveStates);
 
-    final Color hoverColor = widget.hoverColor ?? theme.switchTheme.hoverColor ?? theme.hoverColor;
-    final Color focusColor = widget.focusColor ?? theme.switchTheme.focusColor ?? theme.focusColor;
+    final Color effectiveFocusSplashColor = widget.focusColor
+        ?? theme.switchTheme.splashColor?.resolve({MaterialState.focused})
+        ?? theme.focusColor;
+    final Color effectiveHoverSplashColor = widget.hoverColor
+        ?? theme.switchTheme.splashColor?.resolve({MaterialState.hovered})
+        ?? theme.hoverColor;
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
-      ?? MaterialStateProperty.resolveAs<MouseCursor?>(theme.switchTheme.mouseCursor, _states)
+      ?? theme.switchTheme.mouseCursor?.resolve(_states)
       ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, _states);
 
     return FocusableActionDetector(
@@ -491,8 +495,8 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             activeColor: effectiveActiveThumbColor,
             inactiveColor: effectiveInactiveThumbColor,
             surfaceColor: theme.colorScheme.surface,
-            hoverColor: hoverColor,
-            focusColor: focusColor,
+            focusColor: effectiveFocusSplashColor,
+            hoverColor: effectiveHoverSplashColor,
             splashRadius: widget.splashRadius ?? theme.switchTheme.splashRadius ?? kRadialReactionRadius,
             activeThumbImage: widget.activeThumbImage,
             onActiveThumbImageError: widget.onActiveThumbImageError,

@@ -296,16 +296,16 @@ class Radio<T> extends StatefulWidget {
   /// The color for the radio's [Material] when it has the input focus.
   /// {@endtemplate}
   ///
-  /// If null, then the value of [RadioThemeData.focusColor] is used. If that is
-  /// also null, then the value of [ThemeData.focusColor] is used.
+  /// If null, then the value of [RadioThemeData.splashColor] is used. If that
+  /// is also null, then the value of [ThemeData.focusColor] is used.
   final Color? focusColor;
 
   /// {@template flutter.material.radio.hoverColor}
   /// The color for the radio's [Material] when a pointer is hovering over it.
   /// {@endtemplate}
   ///
-  /// If null, then the value of [RadioThemeData.hoverColor] is used. If that is
-  /// also null, then the value of [ThemeData.hoverColor] is used.
+  /// If null, then the value of [RadioThemeData.splashColor] is used. If that
+  /// is also null, then the value of [ThemeData.hoverColor] is used.
   final Color? hoverColor;
 
   /// {@template flutter.material.radio.splashRadius}

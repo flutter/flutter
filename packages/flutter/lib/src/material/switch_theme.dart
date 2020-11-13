@@ -38,8 +38,7 @@ class SwitchThemeData with Diagnosticable {
     this.trackColor,
     this.materialTapTargetSize,
     this.mouseCursor,
-    this.focusColor,
-    this.hoverColor,
+    this.splashColor,
     this.splashRadius,
   });
 
@@ -62,17 +61,17 @@ class SwitchThemeData with Diagnosticable {
   /// {@macro flutter.material.switch.mouseCursor}
   ///
   /// If specified, overrides the default value of [Switch.mouseCursor].
-  final MouseCursor? mouseCursor;
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
-  /// {@macro flutter.material.switch.focusColor}
+  /// The color for the checkbox's [Material].
   ///
-  /// If specified, overrides the default value of [Switch.focusColor].
-  final Color? focusColor;
-
-  /// {@macro flutter.material.switch.hoverColor}
+  /// Resolves in the following states:
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   ///
-  /// If specified, overrides the default value of [Switch.hoverColor].
-  final Color? hoverColor;
+  /// If specified, overrides the default value of [Switch.focusColor] and
+  /// [Switch.hoverColor].
+  final MaterialStateProperty<Color?>? splashColor;
 
   /// {@macro flutter.material.switch.splashRadius}
   ///
@@ -85,9 +84,8 @@ class SwitchThemeData with Diagnosticable {
     MaterialStateProperty<Color?>? thumbColor,
     MaterialStateProperty<Color?>? trackColor,
     MaterialTapTargetSize? materialTapTargetSize,
-    MouseCursor? mouseCursor,
-    Color? focusColor,
-    Color? hoverColor,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    MaterialStateProperty<Color?>? splashColor,
     double? splashRadius,
   }) {
     return SwitchThemeData(
@@ -95,8 +93,7 @@ class SwitchThemeData with Diagnosticable {
       trackColor: trackColor ?? this.trackColor,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       mouseCursor: mouseCursor ?? this.mouseCursor,
-      focusColor: focusColor ?? this.focusColor,
-      hoverColor: hoverColor ?? this.hoverColor,
+      splashColor: splashColor ?? this.splashColor,
       splashRadius: splashRadius ?? this.splashRadius,
     );
   }
@@ -110,8 +107,7 @@ class SwitchThemeData with Diagnosticable {
       trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
-      focusColor: Color.lerp(a?.focusColor, b?.focusColor, t),
-      hoverColor: Color.lerp(a?.hoverColor, b?.hoverColor, t),
+      splashColor: _lerpProperties<Color?>(a?.splashColor, b?.splashColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
     );
   }
@@ -123,8 +119,7 @@ class SwitchThemeData with Diagnosticable {
       trackColor,
       materialTapTargetSize,
       mouseCursor,
-      focusColor,
-      hoverColor,
+      splashColor,
       splashRadius,
     );
   }
@@ -140,8 +135,7 @@ class SwitchThemeData with Diagnosticable {
       && other.trackColor == trackColor
       && other.materialTapTargetSize == materialTapTargetSize
       && other.mouseCursor == mouseCursor
-      && other.focusColor == focusColor
-      && other.hoverColor == hoverColor
+      && other.splashColor == splashColor
       && other.splashRadius == splashRadius;
   }
 
@@ -151,9 +145,8 @@ class SwitchThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('splashColor', splashColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
   }
 

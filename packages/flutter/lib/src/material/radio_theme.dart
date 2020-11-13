@@ -58,8 +58,8 @@ class RadioThemeData with Diagnosticable {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///
-  /// If specified, overrides the default value of [Checkbox.focusColor] and
-  /// [Checkbox.hoverColor].
+  /// If specified, overrides the default value of [Radio.focusColor] and
+  /// [Radio.hoverColor].
   final MaterialStateProperty<Color?>? splashColor;
 
   /// {@macro flutter.material.radio.splashRadius}
