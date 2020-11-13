@@ -569,13 +569,13 @@ class _TabBarScrollController extends ScrollController {
 /// Uses values from [TabBarTheme] if it is set in the current context.
 ///
 /// To see a sample implementation, visit the [TabController] documentation.
-/// 
+///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows the implementation of [TabBar] with a [DefaultTabController]
 /// and a [TabBar] consisting of three [Tab] widgets with an [Icon] as a child.
 ///
-///```dart
+/// ```dart
 /// Widget build(BuildContext context) {
 ///    return DefaultTabController(
 ///      initialIndex: 1,
@@ -625,21 +625,24 @@ class _TabBarScrollController extends ScrollController {
 ///      ),
 ///    );
 ///  }
-///```
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// [TabBar] can also be implmented by using a [TabController] which provides more options,
 /// instead of a [DefaultTabController], below is a sample for this.
 ///
-///```dart preamble
+/// ```dart preamble
 ///
 /// TabController _tabController;
-/// 
+///
 ///  @override
 ///  void initState() {
 ///    super.initState();
 ///    _tabController = TabController(length: 3, vsync: this);
 ///  }
-/// 
+///
 ///  Widget build(BuildContext context) {
 ///    return Scaffold(
 ///      appBar: AppBar(
@@ -653,7 +656,7 @@ class _TabBarScrollController extends ScrollController {
 ///              ),
 ///            ),
 ///            Tab(
-///             icon: Icon(
+///              icon: Icon(
 ///                Icons.beach_access_sharp,
 ///              ),
 ///            ),
@@ -687,8 +690,8 @@ class _TabBarScrollController extends ScrollController {
 ///      ),
 ///    );
 ///  }
-///```
-///{@end-tool}
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
