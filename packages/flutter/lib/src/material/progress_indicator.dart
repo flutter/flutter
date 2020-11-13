@@ -515,7 +515,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///         children: [
 ///           Text(
 ///             'Linear progress indicator with a fixed color',
-///             style: const TextStyle(fontSize: 20),
+///             style: Theme.of(context).textTheme.headline6,
 ///           ),
 ///           CircularProgressIndicator(
 ///             value: animation.value,
