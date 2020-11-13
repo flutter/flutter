@@ -178,6 +178,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     Widget child = FadeTransition(
       opacity: opacity,
       child: InkWell(
+        alwaysShowFocusColor: true,
         autofocus: widget.itemIndex == widget.route.selectedIndex,
         child: Container(
           padding: widget.padding,
@@ -1061,6 +1062,9 @@ class DropdownButton<T> extends StatefulWidget {
   final double? itemHeight;
 
   /// The color for the button's [Material] when it has the input focus.
+  ///
+  /// The button only draws the focus highligt when [FocusManager.highlightMode]
+  /// returns [FocusHighlightMode.traditional].
   final Color? focusColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
