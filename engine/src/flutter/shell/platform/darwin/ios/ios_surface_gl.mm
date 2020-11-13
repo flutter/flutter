@@ -15,9 +15,8 @@ static IOSContextGL* CastToGLContext(const std::shared_ptr<IOSContext>& context)
 }
 
 IOSSurfaceGL::IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-                           std::shared_ptr<IOSContext> context,
-                           const std::shared_ptr<IOSExternalViewEmbedder>& external_view_embedder)
-    : IOSSurface(context, external_view_embedder) {
+                           std::shared_ptr<IOSContext> context)
+    : IOSSurface(context) {
   render_target_ = CastToGLContext(context)->CreateRenderTarget(std::move(layer));
 }
 

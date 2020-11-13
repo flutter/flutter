@@ -28,9 +28,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
-#import "flutter/shell/platform/darwin/ios/ios_context.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_factory.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
@@ -67,7 +64,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   std::shared_ptr<flutter::FlutterPlatformViewsController> _platformViewsController;
   flutter::IOSRenderingAPI _renderingApi;
-  std::shared_ptr<flutter::IOSSurfaceFactory> _surfaceFactory;
   std::unique_ptr<flutter::ProfilerMetricsIOS> _profiler_metrics;
   std::unique_ptr<flutter::SamplingProfiler> _profiler;
 
@@ -168,9 +164,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)recreatePlatformViewController {
   _renderingApi = flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering);
-  _surfaceFactory = flutter::IOSSurfaceFactory::Create(_renderingApi);
-  _platformViewsController.reset(new flutter::FlutterPlatformViewsController(_surfaceFactory));
-  _surfaceFactory->SetPlatformViewsController(_platformViewsController);
+  _platformViewsController.reset(new flutter::FlutterPlatformViewsController());
 }
 
 - (flutter::IOSRenderingAPI)platformViewsRenderingAPI {
@@ -564,7 +558,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       [self](flutter::Shell& shell) {
         [self recreatePlatformViewController];
         return std::make_unique<flutter::PlatformViewIOS>(
-            shell, self->_renderingApi, self->_surfaceFactory, shell.GetTaskRunners());
+            shell, self->_renderingApi, self->_platformViewsController, shell.GetTaskRunners());
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =

@@ -13,11 +13,9 @@ static IOSContextMetal* CastToMetalContext(const std::shared_ptr<IOSContext>& co
   return reinterpret_cast<IOSContextMetal*>(context.get());
 }
 
-IOSSurfaceMetal::IOSSurfaceMetal(
-    fml::scoped_nsobject<CAMetalLayer> layer,
-    std::shared_ptr<IOSContext> context,
-    const std::shared_ptr<IOSExternalViewEmbedder>& external_view_embedder)
-    : IOSSurface(std::move(context), external_view_embedder), layer_(std::move(layer)) {
+IOSSurfaceMetal::IOSSurfaceMetal(fml::scoped_nsobject<CAMetalLayer> layer,
+                                 std::shared_ptr<IOSContext> context)
+    : IOSSurface(std::move(context)), layer_(std::move(layer)) {
   if (!layer_) {
     return;
   }

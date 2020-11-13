@@ -18,8 +18,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
+#import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_factory.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterViewController;
@@ -40,10 +40,11 @@ namespace flutter {
  */
 class PlatformViewIOS final : public PlatformView {
  public:
-  explicit PlatformViewIOS(PlatformView::Delegate& delegate,
-                           IOSRenderingAPI rendering_api,
-                           std::shared_ptr<IOSSurfaceFactory> surface_factory,
-                           flutter::TaskRunners task_runners);
+  explicit PlatformViewIOS(
+      PlatformView::Delegate& delegate,
+      IOSRenderingAPI rendering_api,
+      const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
+      flutter::TaskRunners task_runners);
 
   ~PlatformViewIOS() override;
 
@@ -106,7 +107,7 @@ class PlatformViewIOS final : public PlatformView {
   /// information to Dart.
   class AccessibilityBridgePtr {
    public:
-    AccessibilityBridgePtr(const std::function<void(bool)>& set_semantics_enabled);
+    explicit AccessibilityBridgePtr(const std::function<void(bool)>& set_semantics_enabled);
     AccessibilityBridgePtr(const std::function<void(bool)>& set_semantics_enabled,
                            AccessibilityBridge* bridge);
     ~AccessibilityBridgePtr();
@@ -126,7 +127,7 @@ class PlatformViewIOS final : public PlatformView {
   std::mutex ios_surface_mutex_;
   std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
-  std::shared_ptr<IOSSurfaceFactory> ios_surface_factory_;
+  const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller_;
   PlatformMessageRouter platform_message_router_;
   AccessibilityBridgePtr accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;

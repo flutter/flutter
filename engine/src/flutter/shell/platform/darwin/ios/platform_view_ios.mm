@@ -45,13 +45,14 @@ void PlatformViewIOS::AccessibilityBridgePtr::reset(AccessibilityBridge* bridge)
   }
 }
 
-PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
-                                 IOSRenderingAPI rendering_api,
-                                 std::shared_ptr<IOSSurfaceFactory> surface_factory,
-                                 flutter::TaskRunners task_runners)
+PlatformViewIOS::PlatformViewIOS(
+    PlatformView::Delegate& delegate,
+    IOSRenderingAPI rendering_api,
+    const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
+    flutter::TaskRunners task_runners)
     : PlatformView(delegate, std::move(task_runners)),
       ios_context_(IOSContext::Create(rendering_api)),
-      ios_surface_factory_(surface_factory),
+      platform_views_controller_(platform_views_controller),
       accessibility_bridge_([this](bool enabled) { PlatformView::SetSemanticsEnabled(enabled); }) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
@@ -107,7 +108,7 @@ void PlatformViewIOS::attachView() {
          "before attaching to PlatformViewIOS.";
   auto flutter_view = static_cast<FlutterView*>(owner_controller_.get().view);
   auto ca_layer = fml::scoped_nsobject<CALayer>{[[flutter_view layer] retain]};
-  ios_surface_ = ios_surface_factory_->CreateSurface(ca_layer);
+  ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);
 
   if (accessibility_bridge_) {
@@ -142,7 +143,7 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
 
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder> PlatformViewIOS::CreateExternalViewEmbedder() {
-  return ios_surface_factory_->GetExternalViewEmbedder();
+  return std::make_shared<IOSExternalViewEmbedder>(platform_views_controller_, ios_context_);
 }
 
 // |PlatformView|
