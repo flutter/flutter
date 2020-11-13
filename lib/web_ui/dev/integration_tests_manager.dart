@@ -164,9 +164,6 @@ class IntegrationTestsManager {
       e2eTestsToRun.add(basename);
     }
 
-    int numberOfPassedTests = 0;
-    int numberOfFailedTests = 0;
-
     final Set<String> buildModes = _getBuildModes();
 
     for (String fileName in e2eTestsToRun) {
@@ -175,9 +172,9 @@ class IntegrationTestsManager {
 
     final int numberOfTestsRun = _numberOfPassedTests + _numberOfFailedTests;
 
-    print('INFO: ${numberOfTestsRun} tests run. ${numberOfPassedTests} passed '
-        'and ${numberOfFailedTests} failed.');
-    return numberOfFailedTests == 0;
+    print('INFO: ${numberOfTestsRun} tests run. ${_numberOfPassedTests} passed '
+        'and ${_numberOfFailedTests} failed.');
+    return _numberOfFailedTests == 0;
   }
 
   Future<void> _runTestsTarget(
