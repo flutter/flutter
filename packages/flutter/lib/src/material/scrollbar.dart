@@ -58,7 +58,6 @@ class Scrollbar extends RawScrollbarThumb {
 class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   late TextDirection _textDirection;
   late Color _themeColor;
-  late bool _useCupertinoScrollbar;
 
   @override
   ScrollbarPainter? painter;
@@ -70,36 +69,18 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ThemeData theme = Theme.of(context)!;
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        // On iOS, stop all local animations. CupertinoScrollbar has its own
-        // animations.
-        fadeoutTimer?.cancel();
-        fadeoutAnimationController.reset();
-        _useCupertinoScrollbar = true;
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        _themeColor = theme.highlightColor.withOpacity(1.0);
-        _textDirection = Directionality.of(context)!;
-        painter = _buildMaterialScrollbarPainter();
-        _useCupertinoScrollbar = false;
-        triggerScrollbar();
-        break;
-    }
+    _themeColor = theme.highlightColor.withOpacity(1.0);
+    _textDirection = Directionality.of(context)!;
+    painter = _buildMaterialScrollbarPainter();
+    triggerScrollbar();
   }
 
   @override
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_useCupertinoScrollbar) {
-      painter!
-        ..thickness = widget.thickness ?? _kScrollbarThickness
-        ..radius = widget.radius;
-    }
+    painter!
+      ..thickness = widget.thickness ?? _kScrollbarThickness
+      ..radius = widget.radius;
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
@@ -114,25 +95,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   }
 
   @override
-  bool handleScrollNotification(ScrollNotification notification) {
-    if (_useCupertinoScrollbar)
-      return false;
-    return super.handleScrollNotification(notification);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_useCupertinoScrollbar) {
-      return CupertinoScrollbar(
-        child: widget.child,
-        isAlwaysShown: widget.isAlwaysShown,
-        thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
-        thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
-        radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
-        controller: widget.controller,
-      );
-    }
     return NotificationListener<ScrollNotification>(
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
