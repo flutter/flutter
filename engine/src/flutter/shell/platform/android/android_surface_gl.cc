@@ -20,17 +20,14 @@ constexpr char kEmulatorRendererPrefix[] =
 }  // anonymous namespace
 
 AndroidSurfaceGL::AndroidSurfaceGL(
-    std::shared_ptr<AndroidContext> android_context,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder)
-    : external_view_embedder_(external_view_embedder),
-      android_context_(
-          std::static_pointer_cast<AndroidContextGL>(android_context)),
+    const AndroidContext& android_context,
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+    : android_context_(static_cast<const AndroidContextGL&>(android_context)),
       native_window_(nullptr),
       onscreen_surface_(nullptr),
       offscreen_surface_(nullptr) {
   // Acquire the offscreen surface.
-  offscreen_surface_ = android_context_->CreateOffscreenSurface();
+  offscreen_surface_ = android_context_.CreateOffscreenSurface();
   if (!offscreen_surface_->IsValid()) {
     offscreen_surface_ = nullptr;
   }
@@ -42,12 +39,12 @@ void AndroidSurfaceGL::TeardownOnScreenContext() {
   // When the onscreen surface is destroyed, the context and the surface
   // instance should be deleted. Issue:
   // https://github.com/flutter/flutter/issues/64414
-  android_context_->ClearCurrent();
+  android_context_.ClearCurrent();
   onscreen_surface_ = nullptr;
 }
 
 bool AndroidSurfaceGL::IsValid() const {
-  return offscreen_surface_ && android_context_->IsValid();
+  return offscreen_surface_ && android_context_.IsValid();
 }
 
 std::unique_ptr<Surface> AndroidSurfaceGL::CreateGPUSurface(
@@ -67,12 +64,12 @@ bool AndroidSurfaceGL::OnScreenSurfaceResize(const SkISize& size) {
     return true;
   }
 
-  android_context_->ClearCurrent();
+  android_context_.ClearCurrent();
 
   // Ensure the destructor is called since it destroys the `EGLSurface` before
   // creating a new onscreen surface.
   onscreen_surface_ = nullptr;
-  onscreen_surface_ = android_context_->CreateOnscreenSurface(native_window_);
+  onscreen_surface_ = android_context_.CreateOnscreenSurface(native_window_);
   if (!onscreen_surface_->IsValid()) {
     FML_LOG(ERROR) << "Unable to create EGL window surface on resize.";
     return false;
@@ -88,7 +85,7 @@ bool AndroidSurfaceGL::ResourceContextMakeCurrent() {
 
 bool AndroidSurfaceGL::ResourceContextClearCurrent() {
   FML_DCHECK(IsValid());
-  return android_context_->ClearCurrent();
+  return android_context_.ClearCurrent();
 }
 
 bool AndroidSurfaceGL::SetNativeWindow(
@@ -100,7 +97,7 @@ bool AndroidSurfaceGL::SetNativeWindow(
   // creating a new onscreen surface.
   onscreen_surface_ = nullptr;
   // Create the onscreen surface.
-  onscreen_surface_ = android_context_->CreateOnscreenSurface(window);
+  onscreen_surface_ = android_context_.CreateOnscreenSurface(window);
   if (!onscreen_surface_->IsValid()) {
     return false;
   }
@@ -117,7 +114,7 @@ std::unique_ptr<GLContextResult> AndroidSurfaceGL::GLContextMakeCurrent() {
 
 bool AndroidSurfaceGL::GLContextClearCurrent() {
   FML_DCHECK(IsValid());
-  return android_context_->ClearCurrent();
+  return android_context_.ClearCurrent();
 }
 
 bool AndroidSurfaceGL::GLContextPresent(uint32_t fbo_id) {
@@ -146,7 +143,7 @@ sk_sp<const GrGLInterface> AndroidSurfaceGL::GetGLInterface() const {
       reinterpret_cast<const char*>(glGetString(GL_RENDERER));
   if (gl_renderer && strncmp(gl_renderer, kEmulatorRendererPrefix,
                              strlen(kEmulatorRendererPrefix)) == 0) {
-    EGLContext new_context = android_context_->CreateNewContext();
+    EGLContext new_context = android_context_.CreateNewContext();
     if (new_context != EGL_NO_CONTEXT) {
       EGLContext old_context = eglGetCurrentContext();
       EGLDisplay display = eglGetCurrentDisplay();

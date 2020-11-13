@@ -13,11 +13,9 @@
 namespace flutter {
 
 AndroidSurfaceVulkan::AndroidSurfaceVulkan(
-    std::shared_ptr<AndroidContext> android_context,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder)
-    : external_view_embedder_(external_view_embedder),
-      proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>()) {}
+    const AndroidContext& android_context,
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+    : proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>()) {}
 
 AndroidSurfaceVulkan::~AndroidSurfaceVulkan() = default;
 

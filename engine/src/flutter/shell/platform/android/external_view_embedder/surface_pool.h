@@ -53,7 +53,7 @@ class SurfacePool {
   // `available_layer_index_`.
   std::shared_ptr<OverlayLayer> GetLayer(
       GrDirectContext* gr_context,
-      std::shared_ptr<AndroidContext> android_context,
+      const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory);
 
