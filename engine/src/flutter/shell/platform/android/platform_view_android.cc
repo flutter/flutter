@@ -29,32 +29,23 @@
 namespace flutter {
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
-    std::shared_ptr<AndroidContext> context,
+    const AndroidContext& context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
     : android_context_(context), jni_facade_(jni_facade) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
-void AndroidSurfaceFactoryImpl::SetExternalViewEmbedder(
-    std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder) {
-  external_view_embedder_ = external_view_embedder;
-}
-
 std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
-  std::shared_ptr<AndroidExternalViewEmbedder> external_view_embedder =
-      external_view_embedder_.lock();
-  FML_CHECK(external_view_embedder);
-  switch (android_context_->RenderingApi()) {
+  switch (android_context_.RenderingApi()) {
     case AndroidRenderingAPI::kSoftware:
-      return std::make_unique<AndroidSurfaceSoftware>(
-          android_context_, jni_facade_, external_view_embedder);
+      return std::make_unique<AndroidSurfaceSoftware>(android_context_,
+                                                      jni_facade_);
     case AndroidRenderingAPI::kOpenGLES:
-      return std::make_unique<AndroidSurfaceGL>(android_context_, jni_facade_,
-                                                external_view_embedder);
+      return std::make_unique<AndroidSurfaceGL>(android_context_, jni_facade_);
     case AndroidRenderingAPI::kVulkan:
 #if SHELL_ENABLE_VULKAN
-      return std::make_unique<AndroidSurfaceVulkan>(
-          android_context_, jni_facade_, external_view_embedder);
+      return std::make_unique<AndroidSurfaceVulkan>(android_context_,
+                                                    jni_facade_);
 #endif  // SHELL_ENABLE_VULKAN
     default:
       return nullptr;
@@ -70,28 +61,24 @@ PlatformViewAndroid::PlatformViewAndroid(
     : PlatformView(delegate, std::move(task_runners)),
       jni_facade_(jni_facade),
       platform_view_android_delegate_(jni_facade) {
-  std::shared_ptr<AndroidContext> android_context;
   if (use_software_rendering) {
-    android_context =
-        std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+    android_context_ =
+        std::make_unique<AndroidContext>(AndroidRenderingAPI::kSoftware);
   } else {
 #if SHELL_ENABLE_VULKAN
-    android_context =
-        std::make_shared<AndroidContext>(AndroidRenderingAPI::kVulkan);
+    android_context_ =
+        std::make_unique<AndroidContext>(AndroidRenderingAPI::kVulkan);
 #else   // SHELL_ENABLE_VULKAN
-    android_context = std::make_shared<AndroidContextGL>(
+    android_context_ = std::make_unique<AndroidContextGL>(
         AndroidRenderingAPI::kOpenGLES,
         fml::MakeRefCounted<AndroidEnvironmentGL>());
 #endif  // SHELL_ENABLE_VULKAN
   }
-  FML_CHECK(android_context && android_context->IsValid())
+  FML_CHECK(android_context_ && android_context_->IsValid())
       << "Could not create an Android context.";
 
-  surface_factory_ =
-      std::make_shared<AndroidSurfaceFactoryImpl>(android_context, jni_facade);
-  external_view_embedder_ = std::make_shared<AndroidExternalViewEmbedder>(
-      android_context, jni_facade, surface_factory_);
-  surface_factory_->SetExternalViewEmbedder(external_view_embedder_);
+  surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
+      *android_context_, jni_facade);
 
   android_surface_ = surface_factory_->CreateSurface();
   FML_CHECK(android_surface_ && android_surface_->IsValid())
@@ -310,7 +297,8 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
-  return external_view_embedder_;
+  return std::make_shared<AndroidExternalViewEmbedder>(
+      *android_context_, jni_facade_, surface_factory_);
 }
 
 // |PlatformView|

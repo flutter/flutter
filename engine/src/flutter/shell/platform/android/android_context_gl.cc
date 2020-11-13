@@ -119,7 +119,7 @@ bool AndroidEGLSurface::IsValid() const {
   return surface_ != EGL_NO_SURFACE;
 }
 
-bool AndroidEGLSurface::MakeCurrent() {
+bool AndroidEGLSurface::MakeCurrent() const {
   if (eglMakeCurrent(display_, surface_, surface_, context_) != EGL_TRUE) {
     FML_LOG(ERROR) << "Could not make the context current";
     LogLastEGLError();
@@ -235,7 +235,7 @@ bool AndroidContextGL::IsValid() const {
   return valid_;
 }
 
-bool AndroidContextGL::ClearCurrent() {
+bool AndroidContextGL::ClearCurrent() const {
   if (eglGetCurrentContext() != context_) {
     return true;
   }

@@ -39,8 +39,7 @@ TEST(SurfacePool, GetLayer__AllocateOneLayer) {
   auto pool = std::make_unique<SurfacePool>();
 
   auto gr_context = GrDirectContext::MakeMock(nullptr);
-  auto android_context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
 
   auto jni_mock = std::make_shared<JNIMock>();
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
@@ -69,8 +68,7 @@ TEST(SurfacePool, GetUnusedLayers) {
   auto pool = std::make_unique<SurfacePool>();
 
   auto gr_context = GrDirectContext::MakeMock(nullptr);
-  auto android_context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
 
   auto jni_mock = std::make_shared<JNIMock>();
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
@@ -108,8 +106,7 @@ TEST(SurfacePool, GetLayer__Recycle) {
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               0, window))));
 
-  auto android_context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
 
   auto gr_context_2 = GrDirectContext::MakeMock(nullptr);
   auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>(
@@ -145,8 +142,7 @@ TEST(SurfacePool, GetLayer__AllocateTwoLayers) {
   auto pool = std::make_unique<SurfacePool>();
 
   auto gr_context = GrDirectContext::MakeMock(nullptr);
-  auto android_context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
 
   auto jni_mock = std::make_shared<JNIMock>();
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
@@ -186,8 +182,7 @@ TEST(SurfacePool, DestroyLayers) {
   pool->DestroyLayers(jni_mock);
 
   auto gr_context = GrDirectContext::MakeMock(nullptr);
-  auto android_context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
 
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
   EXPECT_CALL(*jni_mock, FlutterViewCreateOverlaySurface())
@@ -218,8 +213,7 @@ TEST(SurfacePool, DestroyLayers__frameSizeChanged) {
   auto jni_mock = std::make_shared<JNIMock>();
 
   auto gr_context = GrDirectContext::MakeMock(nullptr);
-  auto android_context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
 
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
 
