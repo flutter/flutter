@@ -81,7 +81,7 @@ public class FlutterAndroidComponentTest {
     assertNotNull(binding.getTextureRegistry());
     assertNotNull(binding.getPlatformViewRegistry());
 
-    delegate.onActivityCreated(null);
+    delegate.onRestoreInstanceState(null);
     delegate.onCreateView(null, null, null);
     delegate.onStart();
     delegate.onResume();
@@ -151,7 +151,7 @@ public class FlutterAndroidComponentTest {
     assertNotNull(binding.getActivity());
     assertNotNull(binding.getLifecycle());
 
-    delegate.onActivityCreated(null);
+    delegate.onRestoreInstanceState(null);
 
     // Verify that after Activity creation, the plugin was allowed to restore state.
     verify(mockSaveStateListener, times(1)).onRestoreInstanceState(any(Bundle.class));
@@ -194,7 +194,7 @@ public class FlutterAndroidComponentTest {
     // --- Execute the behavior under test ---
     // Push the delegate through all lifecycle methods all the way to destruction.
     delegate.onAttach(RuntimeEnvironment.application);
-    delegate.onActivityCreated(null);
+    delegate.onRestoreInstanceState(null);
     delegate.onCreateView(null, null, null);
     delegate.onStart();
     delegate.onResume();

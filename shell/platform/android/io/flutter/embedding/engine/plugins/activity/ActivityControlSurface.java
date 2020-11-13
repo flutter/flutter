@@ -142,8 +142,7 @@ public interface ActivityControlSurface {
   /**
    * Call this method from the {@link Activity} or {@code Fragment} that is attached to this {@code
    * ActivityControlSurface}'s {@link FlutterEngine} when {@link Activity#onCreate(Bundle)} or
-   * {@code Fragment#onActivityCreated(Bundle)} is invoked in the {@link Activity} or {@code
-   * Fragment}.
+   * {@code Fragment#onCreate(Bundle)} is invoked in the {@link Activity} or {@code Fragment}.
    */
   void onRestoreInstanceState(@Nullable Bundle bundle);
 }

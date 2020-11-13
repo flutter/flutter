@@ -112,7 +112,7 @@ public interface ActivityPluginBinding {
 
     /**
      * Invoked when the associated {@code Activity} executes {@link Activity#onCreate(Bundle)} or
-     * associated {@code Fragment} executes {@code Fragment#onActivityCreated(Bundle)}.
+     * associated {@code Fragment} executes {@code Fragment#onCreate(Bundle)}.
      */
     void onRestoreInstanceState(@Nullable Bundle bundle);
   }
