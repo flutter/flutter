@@ -1021,63 +1021,6 @@ class EditableText extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the
   /// field.
   /// {@endtemplate}
-  ///
-  /// {@tool dartpad --template=stateful_widget_material}
-  /// When a non-completion action is pressed, such as "next" or "previous", it
-  /// is often desirable to move the focus to the next or previous field.  To do
-  /// this, handle it as in this example, by calling [FocusNode.nextFocus] in
-  /// the `onFieldSubmitted` callback of [TextFormField]. ([TextFormField] wraps
-  /// [EditableText] internally, and uses the value of `onFieldSubmitted` as its
-  /// [onSubmitted]).
-  ///
-  /// ```dart
-  /// FocusScopeNode _focusScopeNode = FocusScopeNode();
-  /// final _controller1 = TextEditingController();
-  /// final _controller2 = TextEditingController();
-  ///
-  /// void dispose() {
-  ///   _focusScopeNode.dispose();
-  ///   _controller1.dispose();
-  ///   _controller2.dispose();
-  ///   super.dispose();
-  /// }
-  ///
-  /// void _handleSubmitted(String value) {
-  ///   _focusScopeNode.nextFocus();
-  /// }
-  ///
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: FocusScope(
-  ///       node: _focusScopeNode,
-  ///       child: Column(
-  ///         mainAxisAlignment: MainAxisAlignment.center,
-  ///         children: <Widget>[
-  ///           Padding(
-  ///             padding: const EdgeInsets.all(8.0),
-  ///             child: TextFormField(
-  ///               textInputAction: TextInputAction.next,
-  ///               onFieldSubmitted: _handleSubmitted,
-  ///               controller: _controller1,
-  ///               decoration: InputDecoration(border: OutlineInputBorder()),
-  ///             ),
-  ///           ),
-  ///           Padding(
-  ///             padding: const EdgeInsets.all(8.0),
-  ///             child: TextFormField(
-  ///               textInputAction: TextInputAction.next,
-  ///               onFieldSubmitted: _handleSubmitted,
-  ///               controller: _controller2,
-  ///               decoration: InputDecoration(border: OutlineInputBorder()),
-  ///             ),
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
   final ValueChanged<String>? onSubmitted;
 
   /// {@template flutter.widgets.editableText.onAppPrivateCommand}

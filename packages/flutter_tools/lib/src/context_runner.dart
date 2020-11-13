@@ -72,7 +72,17 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
-      AndroidLicenseValidator: () => AndroidLicenseValidator(),
+      AndroidLicenseValidator: () => AndroidLicenseValidator(
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+        userMessages: globals.userMessages,
+        processManager: globals.processManager,
+        androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        stdio: globals.stdio,
+      ),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
@@ -100,7 +110,13 @@ Future<T> runInContext<T>(
         cache: globals.cache,
         platform: globals.platform,
       ),
-      AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
+      AssetBundleFactory: () {
+        return AssetBundleFactory.defaultInstance(
+          logger: globals.logger,
+          fileSystem: globals.fs,
+          platform: globals.platform,
+        );
+      },
       BuildSystem: () => FlutterBuildSystem(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -110,6 +126,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        osUtils: globals.os,
       ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,
@@ -169,7 +186,7 @@ Future<T> runInContext<T>(
         androidWorkflow: androidWorkflow,
       ),
       FeatureFlags: () => const FlutterFeatureFlags(),
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),

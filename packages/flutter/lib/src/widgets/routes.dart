@@ -652,9 +652,19 @@ mixin LocalHistoryRoute<T> on Route<T> {
 }
 
 class _DismissModalAction extends DismissAction {
+  _DismissModalAction(this.context);
+
+  final BuildContext context;
+
+  @override
+  bool isEnabled(DismissIntent intent) {
+    final ModalRoute<dynamic> route = ModalRoute.of<dynamic>(context)!;
+    return route.barrierDismissible;
+  }
+
   @override
   Object invoke(DismissIntent intent) {
-    return Navigator.of(primaryFocus!.context!)!.maybePop();
+    return Navigator.of(context)!.maybePop();
   }
 }
 
@@ -770,10 +780,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     setState(fn);
   }
 
-  static final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    DismissIntent: _DismissModalAction(),
-  };
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -793,54 +799,60 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
           offstage: widget.route.offstage, // _routeSetState is called if this updates
           child: PageStorage(
             bucket: widget.route._storageBucket, // immutable
-            child: Actions(
-              actions: _actionMap,
-              child: PrimaryScrollController(
-                controller: primaryScrollController,
-                child: FocusScope(
-                  node: focusScopeNode, // immutable
-                  child: RepaintBoundary(
-                    child: AnimatedBuilder(
-                      animation: _listenable, // immutable
-                      builder: (BuildContext context, Widget? child) {
-                        return widget.route.buildTransitions(
-                          context,
-                          widget.route.animation!,
-                          widget.route.secondaryAnimation!,
-                          // This additional AnimatedBuilder is include because if the
-                          // value of the userGestureInProgressNotifier changes, it's
-                          // only necessary to rebuild the IgnorePointer widget and set
-                          // the focus node's ability to focus.
-                          AnimatedBuilder(
-                            animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                            builder: (BuildContext context, Widget? child) {
-                              final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                              focusScopeNode.canRequestFocus = !ignoreEvents;
-                              return IgnorePointer(
-                                ignoring: ignoreEvents,
-                                child: child,
-                              );
-                            },
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: _page ??= RepaintBoundary(
-                        key: widget.route._subtreeKey, // immutable
-                        child: Builder(
-                          builder: (BuildContext context) {
-                            return widget.route.buildPage(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Actions(
+                  actions: <Type, Action<Intent>>{
+                    DismissIntent: _DismissModalAction(context),
+                  },
+                  child: PrimaryScrollController(
+                    controller: primaryScrollController,
+                    child: FocusScope(
+                      node: focusScopeNode, // immutable
+                      child: RepaintBoundary(
+                        child: AnimatedBuilder(
+                          animation: _listenable, // immutable
+                          builder: (BuildContext context, Widget? child) {
+                            return widget.route.buildTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
+                              // This additional AnimatedBuilder is include because if the
+                              // value of the userGestureInProgressNotifier changes, it's
+                              // only necessary to rebuild the IgnorePointer widget and set
+                              // the focus node's ability to focus.
+                              AnimatedBuilder(
+                                animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                                builder: (BuildContext context, Widget? child) {
+                                  final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                                  focusScopeNode.canRequestFocus = !ignoreEvents;
+                                  return IgnorePointer(
+                                    ignoring: ignoreEvents,
+                                    child: child,
+                                  );
+                                },
+                                child: child,
+                              ),
                             );
                           },
+                          child: _page ??= RepaintBoundary(
+                            key: widget.route._subtreeKey, // immutable
+                            child: Builder(
+                              builder: (BuildContext context) {
+                                return widget.route.buildPage(
+                                  context,
+                                  widget.route.animation!,
+                                  widget.route.secondaryAnimation!,
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ),

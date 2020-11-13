@@ -10,7 +10,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
@@ -87,7 +86,7 @@ class DowngradeCommand extends FlutterCommand {
     String workingDirectory = Cache.flutterRoot;
     if (argResults.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory');
-      _flutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
+      _flutterVersion = FlutterVersion(workingDirectory: workingDirectory);
     }
 
     final String currentChannel = _flutterVersion.channel;

@@ -95,10 +95,10 @@ class WebEntrypointTarget extends Target {
       logger: environment.logger,
     );
     final FlutterProject flutterProject = FlutterProject.current();
-    final String languageVersion = determineLanguageVersion(
+    final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
-    ) ?? '';
+    );
 
     // Use the PackageConfig to find the correct package-scheme import path
     // for the user application. If the application has a mix of package-scheme
@@ -122,7 +122,7 @@ class WebEntrypointTarget extends Target {
       final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
         ?? generatedUri.toString();
       contents = '''
-$languageVersion
+// @dart=${languageVersion.major}.${languageVersion.minor}
 
 import 'dart:ui' as ui;
 
@@ -139,7 +139,7 @@ Future<void> main() async {
 ''';
     } else {
       contents = '''
-$languageVersion
+// @dart=${languageVersion.major}.${languageVersion.minor}
 
 import 'dart:ui' as ui;
 
