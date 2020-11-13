@@ -22,9 +22,14 @@ const Map<String, int> kWebToPhysicalKey = <String, int>{
 @@@WEB_PHYSICAL_KEY_CODE_MAP@@@
 };
 
-/// A map of Web KeyboardEvent codes which have printable representations, but appear
-/// on the number pad. Used to provide different key objects for keys like
-/// KEY_EQUALS and NUMPAD_EQUALS.
-const Map<String, int> kWebNumPadMap = <String, int>{
-@@@WEB_NUMPAD_CODE_MAP@@@
+/// Maps Web KeyboardEvent keys to Flutter logical IDs that depend on locations.
+///
+/// `KeyboardEvent.location` is defined as:
+///
+///  * 0: Standard
+///  * 1: Left
+///  * 2: Right
+///  * 3: Numpad
+const Map<String, List<int?>> kWebLogicalLocationMap = <String, List<int?>>{
+@@@WEB_LOGICAL_LOCATION_MAP@@@
 };

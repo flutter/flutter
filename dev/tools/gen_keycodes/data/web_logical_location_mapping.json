@@ -11,7 +11,7 @@
   "9": ["digit9", null, null, "numpad9"],
   "/": ["slash", null, null, "numpadDivide"],
   "*": ["asterisk", null, null, "numpadMultiply"],
-  "-": ["minus", null, null, "numpadMinus"],
+  "-": ["minus", null, null, "numpadSubtract"],
   "+": ["add", null, null, "numpadAdd"],
   "Enter": ["enter", null, null, "numpadEnter"],
   ".": ["period", null, null, "numpadDecimal"],
