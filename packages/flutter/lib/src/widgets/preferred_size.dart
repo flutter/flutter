@@ -33,23 +33,18 @@ abstract class PreferredSizeWidget implements Widget {
 /// affect the child's layout in any way. It just advertises a preferred size
 /// which can be used by the parent.
 ///
-/// ### Let's see an example
-///
-/// The basic use of [PreferredSize] is when we need to change the
-/// `Status Bar Color` of our app but we don't want to render an actual
-/// [AppBar], and neither use [SystemChrome] of `services library`
+/// Widgets like [AppBar] implements a [PreferredSizeWidget], meaning the
+/// possibility of changing [Scaffold.appBar] behavior.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-/// This example explain how can we make a custom [AppBar] which has more `height`
-/// than usual. We will have a [Container] with a [LinearGradient] colors.
-/// As a child we will have a `title` and two [IconButton].
+/// This sample shows a custom AppBar with a [PreferredSize].
+/// The preferred size is set to 80 logical pixels.
 ///
-/// We assign the `height` parameter of our [PreferredSize] equal to 80, but you
-/// can change this value and see how your custom [AppBar] behaves. The benefit of using
-/// PreferredSize as an AppBar child its that we can use a different widget for creating
-/// *custom app bars*, in this case. All this work because [Scaffold.appBar]
-/// expect a [PreferredSizeWidget] and, as is describe above AppBar implements it.
+/// Consider changing the [PreferredSize] value and see how the
+/// custom [AppBar] behaves. The benefit of using
+/// PreferredSize as an [Scaffold.appBar] child it's the possibility of creating
+/// custom and adapting appBars.
 ///
 /// ```dart preamble
 /// class AppBarContent extends StatelessWidget {
@@ -95,7 +90,7 @@ abstract class PreferredSizeWidget implements Widget {
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: PreferredSize(
-///       preferredSize: const Size(double.infinity, 80.0),
+///       preferredSize: const Size.fromHeight(80.0),
 ///       child: Container(
 ///         decoration: BoxDecoration(
 ///           gradient: LinearGradient(
