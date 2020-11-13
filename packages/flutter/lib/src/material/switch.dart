@@ -285,17 +285,13 @@ class Switch extends StatefulWidget {
   /// is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
-  /// {@template flutter.material.switch.focusColor}
   /// The color for the button's [Material] when it has the input focus.
-  /// {@endtemplate}
   ///
   /// If null, then the value of [SwitchThemeData.splashColor] is used. If that
   /// is also null, then the value of [ThemeData.focusColor] is used.
   final Color? focusColor;
 
-  /// {@template flutter.material.switch.hoverColor}
   /// The color for the button's [Material] when a pointer is hovering over it.
-  /// {@endtemplate}
   ///
   /// If null, then the value of [SwitchThemeData.splashColor] is used. If that
   /// is also null, then the value of [ThemeData.hoverColor] is used.
