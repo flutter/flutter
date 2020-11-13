@@ -28,5 +28,5 @@ void main() {
 
   testWithoutContext('flutter run works on web devices with a unary main function', () async {
     await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
-  }, skip: platform.isMacOS);
+  });
 }
