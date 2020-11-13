@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:metrics_center/src/common.dart'; // ignore: import_of_legacy_library_into_null_safe
+import 'package:metrics_center/src/common.dart';
 
 const String _kTimeUnitKey = 'time_unit';
 

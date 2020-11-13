@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:metrics_center/src/common.dart'; // ignore: import_of_legacy_library_into_null_safe
+import 'package:metrics_center/src/common.dart';
 
 // Skia Perf Format is a JSON file that looks like:
 
