@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
-import 'theme.dart';
-
-const double _kScrollbarThickness = 6.0;
+const double _kScrollbarThickness = 8.0;
+const double _kScrollbarMargin = 2.0;
+const double _kScrollbarMinLength = 48.0;
+const Radius _kScrollbarRadius = Radius.circular(8.0);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
@@ -37,6 +39,7 @@ class Scrollbar extends RawScrollbarThumb {
     required Widget child,
     ScrollController? controller,
     bool isAlwaysShown = false,
+    this.showTrack = false,
     double? thickness,
     Radius? radius,
   }) : super(
@@ -51,13 +54,31 @@ class Scrollbar extends RawScrollbarThumb {
     pressDuration: Duration.zero,
   );
 
+  /// Track will animate in on hover and remain during drag\
+  // TODO(Piinks): Update painter to include track on hover.
+  // Adding the track brings in a thickness animation like the cupertino widget
+  final bool showTrack;
+
+  // TODO(Piinks): Add tap on track.
+
   @override
   _ScrollbarState createState() => _ScrollbarState();
 }
 
 class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
+  late AnimationController _colorAnimationController;
   late TextDirection _textDirection;
-  late Color _themeColor;
+  bool _dragIsActive = false;
+
+  Color get _thumbColor {
+    if (_dragIsActive)
+      return const Color(0xFF616161);
+    return Color.lerp(
+      const Color(0xFFE0E0E0),
+      const Color(0xFF757575),
+      _colorAnimationController.value,
+    )!;
+  }
 
   @override
   ScrollbarPainter? painter;
@@ -66,11 +87,21 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   final GlobalKey customPaintKey = GlobalKey();
 
   @override
+  void initState() {
+    super.initState();
+    _colorAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _colorAnimationController.addListener(() {
+      painter!.updateColor(_thumbColor);
+    });
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final ThemeData theme = Theme.of(context)!;
-    _themeColor = theme.highlightColor.withOpacity(1.0);
-    _textDirection = Directionality.of(context)!;
+    _textDirection = Directionality.of(context);
     painter = _buildMaterialScrollbarPainter();
     triggerScrollbar();
   }
@@ -84,14 +115,61 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
+    print(widget.radius);
+    print(_kScrollbarRadius);
     return ScrollbarPainter(
-      color: _themeColor,
+      color: _thumbColor,
       textDirection: _textDirection,
       thickness: widget.thickness ?? _kScrollbarThickness,
-      radius: widget.radius,
+      radius: widget.radius ?? _kScrollbarRadius,
+      crossAxisMargin: _kScrollbarMargin,
+      minLength: _kScrollbarMinLength,
       fadeoutOpacityAnimation: fadeoutOpacityAnimation,
       padding: MediaQuery.of(context).padding,
     );
+  }
+
+  @override
+  void handleLongPressStart(LongPressStartDetails details) {
+    super.handleLongPressStart(details);
+    _dragIsActive = true;
+    painter!.updateColor(_thumbColor);
+  }
+
+  @override
+  void handleLongPressEnd(LongPressEndDetails details) {
+    super.handleLongPressEnd(details);
+    _dragIsActive = false;
+    painter!.updateColor(_thumbColor);
+  }
+
+  void maybeHovering(PointerHoverEvent event) {
+    if (customPaintKey.currentContext == null) {
+      return;
+    }
+    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
+    final Offset localOffset = renderBox.globalToLocal(event.position);
+    final bool onThumb = painter.hitTestInteractive(localOffset);
+    // Check is the position of the pointer falls over the painted scrollbar
+    if (onThumb) {
+      // Pointer exited hovering the scrollbar
+      _colorAnimationController.forward();
+    } else {
+      // Pointer entered the area of the painted scrollbar
+      _colorAnimationController.reverse();
+    }
+  }
+
+  void maybeHoverExit(PointerExitEvent event) {
+    _colorAnimationController.reverse();
+  }
+
+  @override
+  void dispose() {
+    _colorAnimationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -101,10 +179,14 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
       child: RepaintBoundary(
         child: RawGestureDetector(
           gestures: gestures,
-          child: CustomPaint(
-            key: customPaintKey,
-            foregroundPainter: painter,
-            child: RepaintBoundary(child: widget.child),
+          child: MouseRegion(
+            onExit: maybeHoverExit,
+            onHover: maybeHovering,
+            child: CustomPaint(
+              key: customPaintKey,
+              foregroundPainter: painter,
+              child: RepaintBoundary(child: widget.child),
+            ),
           ),
         ),
       ),

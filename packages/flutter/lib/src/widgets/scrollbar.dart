@@ -202,6 +202,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
+  /// Update and redraw with new scrollbar color.
+  void updateColor(Color nextColor) {
+    color = nextColor;
+    notifyListeners();
+  }
+
   Paint get _paint {
     return Paint()
       ..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
