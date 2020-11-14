@@ -207,11 +207,10 @@ enum BottomNavigationBarType {
 ///       items: <BottomNavigationBarItem>[
 ///         BottomNavigationBarItem(
 ///           icon: Icon(Icons.arrow_circle_up),
-///           label: Text('Back to Top'),
+///           label: 'Back top',
 ///         ),
 ///         BottomNavigationBarItem(
 ///           icon: _dropdownButton(),
-///           label: Container()
 ///         ),
 ///       ],
 ///       currentIndex: _selectedIndex,
