@@ -1,4 +1,4 @@
-Signature: f6a46168a0e2927475150466ee5cfa94
+Signature: b46e8e8fc8aa790a94caedb34c040e25
 
 UNUSED LICENSES:
 
@@ -9263,7 +9263,6 @@ FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_android.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
-FILE: ../../../third_party/dart/runtime/lib/wasm.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/bit.h
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/main.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/test.cc
@@ -9400,14 +9399,12 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/recipe_s
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_dynamic_library_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_type_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/wasm_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/annotations.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/native_type.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/struct.dart
 FILE: ../../../third_party/dart/sdk/lib/internal/errors.dart
-FILE: ../../../third_party/dart/sdk/lib/wasm/wasm.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.

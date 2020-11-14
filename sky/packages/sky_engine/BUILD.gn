@@ -22,7 +22,6 @@ import("//third_party/dart/sdk/lib/js/js_sources.gni")
 import("//third_party/dart/sdk/lib/js_util/js_util_sources.gni")
 import("//third_party/dart/sdk/lib/math/math_sources.gni")
 import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
-import("//third_party/dart/sdk/lib/wasm/wasm_sources.gni")
 
 if (!is_fuchsia) {
   copy("copy_sky_engine_authors") {
@@ -146,13 +145,6 @@ copy("typed_data") {
   ]
 }
 
-copy("wasm") {
-  lib_path = rebase_path("wasm", "", dart_sdk_lib_path)
-  sources = rebase_path(wasm_sdk_sources, "", lib_path)
-  outputs =
-      [ "$root_gen_dir/dart-pkg/sky_engine/lib/wasm/{{source_file_part}}" ]
-}
-
 copy("copy_dart_ui") {
   sources = dart_ui_files
 
@@ -186,7 +178,6 @@ group("copy_dart_sdk") {
     ":js_util",
     ":math",
     ":typed_data",
-    ":wasm",
   ]
 }
 
