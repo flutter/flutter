@@ -21,7 +21,6 @@ class BuildBundleCommand extends BuildSubCommand {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesExtraDartFlagOptions();
     argParser
-      ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
@@ -36,11 +35,7 @@ class BuildBundleCommand extends BuildSubCommand {
           'windows-x64',
         ],
       )
-      ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
-      ..addFlag('report-licensed-packages',
-        help: 'Whether to report the names of all the packages that are included '
-              "in the application's LICENSE file.",
-        defaultsTo: false);
+      ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory());
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
 
@@ -107,7 +102,7 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
-      manifestPath: stringArg('manifest'),
+      manifestPath: defaultManifestPath,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
       trackWidgetCreation: boolArg('track-widget-creation'),
