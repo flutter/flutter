@@ -8,16 +8,17 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/src/constants.dart';
+import 'package:path/path.dart' as path;
 
 import 'utils.dart';
 
-// Assumes that the flutter command is in `$PATH`.
-const String _flutterBin = 'flutter';
+final String _bat = Platform.isWindows ? '.bat' : '';
+final String _flutterBin = path.join(Directory.current.parent.parent.parent.path, 'bin', 'flutter$_bat');
 const String _integrationResultsPrefix = 'IntegrationTestWidgetsFlutterBinding test results:';
 
 Future<void> main() async {
   test('When multiple tests pass', () async {
-    final Map<String, dynamic> results = await _runTest('test/reporter/data/pass_test_script.dart');
+    final Map<String, dynamic> results = await _runTest(path.join('test', 'reporter', 'data', 'pass_test_script.dart'));
 
     expect(results, hasLength(2));
     expect(results, containsPair('Passing test 1', _isSuccess));
@@ -25,7 +26,7 @@ Future<void> main() async {
   });
 
   test('When multiple tests fail', () async {
-    final Map<String, dynamic> results = await _runTest('test/reporter/data/fail_test_script.dart');
+    final Map<String, dynamic> results = await _runTest(path.join('test', 'reporter', 'data', 'fail_test_script.dart'));
 
     expect(results, hasLength(2));
     expect(results, containsPair('Failing test 1', _isSerializedFailure));
@@ -33,7 +34,7 @@ Future<void> main() async {
   });
 
   test('When one test passes, then another fails', () async {
-    final Map<String, dynamic> results = await _runTest('test/reporter/data/pass_then_fail_test_script.dart');
+    final Map<String, dynamic> results = await _runTest(path.join('test', 'reporter', 'data', 'pass_then_fail_test_script.dart'));
 
     expect(results, hasLength(2));
     expect(results, containsPair('Passing test', _isSuccess));
@@ -55,16 +56,16 @@ Future<Map<String, dynamic>> _runTest(String scriptPath) async {
   final String testResults = (await process.stdout
           .transform(utf8.decoder)
           .expand((String text) => text.split('\n'))
-          .map<dynamic>((String line) {
+          .map((String line) {
             try {
-              return jsonDecode(line);
+              return jsonDecode(line) as Map<String, dynamic>;
             } on FormatException {
               // Only interested in test events which are JSON.
             }
           })
-          .where((dynamic testEvent) =>
+          .where((Map<String, dynamic> testEvent) =>
               testEvent != null && testEvent['type'] == 'print')
-          .map((dynamic printEvent) => printEvent['message'] as String)
+          .map((Map<String, dynamic> printEvent) => printEvent['message'] as String)
           .firstWhere((String message) =>
               message.startsWith(_integrationResultsPrefix)))
       .replaceAll(_integrationResultsPrefix, '');
