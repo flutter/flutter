@@ -1,4 +1,4 @@
-Signature: b46e8e8fc8aa790a94caedb34c040e25
+Signature: 5a4a08bda10ca49776a3a75c8f205654
 
 UNUSED LICENSES:
 
@@ -9488,6 +9488,7 @@ FILE: ../../../third_party/dart/runtime/observatory/bin/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/process_snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/bin/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/process_snapshot.dart
+FILE: ../../../third_party/dart/runtime/platform/allocation.cc
 FILE: ../../../third_party/dart/runtime/platform/leak_sanitizer.h
 FILE: ../../../third_party/dart/runtime/platform/unaligned.h
 FILE: ../../../third_party/dart/runtime/platform/undefined_behavior_sanitizer.h
