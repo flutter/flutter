@@ -629,6 +629,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -745,6 +746,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullSafetyMode: NullSafetyMode.autodetect,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -853,6 +855,7 @@ void main() {
       expressionCompiler: null,
       chromiumLauncher: null,
       nullAssertions: true,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -903,6 +906,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -954,6 +958,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -980,6 +985,7 @@ void main() {
       ),
       false,
       Uri.base,
+      null,
       null,
       testMode: true);
 

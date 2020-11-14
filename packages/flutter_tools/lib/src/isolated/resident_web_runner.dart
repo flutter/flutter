@@ -508,6 +508,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
+          nullSafetyMode: device.nullSafetyMode,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -669,12 +670,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
           path: '/' + mainUri.pathSegments.last,
         );
       }
+      final LanguageVersion languageVersion =  determineLanguageVersion(
+        globals.fs.file(mainUri),
+        packageConfig[flutterProject.manifest.appName],
+      );
 
       final String entrypoint = <String>[
-        determineLanguageVersion(
-          globals.fs.file(mainUri),
-          packageConfig[flutterProject.manifest.appName],
-        ),
+        '// @dart=${languageVersion.major}.${languageVersion.minor}',
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",
