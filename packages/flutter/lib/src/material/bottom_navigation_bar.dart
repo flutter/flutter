@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
+import '../../cupertino.dart';
 import 'bottom_navigation_bar_theme.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -129,6 +130,98 @@ enum BottomNavigationBarType {
 ///   );
 /// }
 /// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows [BottomNavigationBar] used in a [Scaffold] Widget with
+/// different interaction patterns. Tapping on the first [BottomNavigationBarItem]
+/// uses the [ScrollController] to animate the [ListView] to the top. The second
+/// [BottomNavigationBarItem] opens a [DropdownButton].
+///
+///```dart
+/// int _selectedIndex = 0;
+/// final ScrollController _homeController = ScrollController();
+/// String dropdownValue = 'One';
+/// static const TextStyle optionStyle = TextStyle(fontSize: 15, fontWeight: FontWeight.bold);
+///
+/// void _onItemTapped(int index) {
+///   if (index == 0) {
+///     _homeController.animateTo(
+///       0.0,
+///       duration: Duration(milliseconds: 500),
+///       curve: Curves.easeOut
+///     );
+///   }
+///   setState(() {
+///     _selectedIndex = index;
+///   });
+/// }
+///
+/// Widget _listViewBody() {
+///   return ListView.separated(
+///     controller: _homeController,
+///     itemBuilder: (context, index) {
+///       return Center(
+///         child: Text(
+///         "Item $index",
+///         style: optionStyle,
+///       ));
+///     },
+///     separatorBuilder: (context, index) => Divider(thickness: 1,),
+///     itemCount: 50
+///   );
+/// }
+///
+/// Widget _dropdownButton() {
+///   final container = Container(
+///     height: 2,
+///     color: Colors.amber[800],
+///   );
+///   return DropdownButton<String>(
+///     value: dropdownValue,
+///     icon: Icon(Icons.arrow_downward),
+///     iconSize: 24,
+///     elevation: 16,
+///     underline: container,
+///     onChanged: (String newValue) {
+///       setState(() {
+///         dropdownValue = newValue;
+///       });
+///     },
+///     items: <String>['One', 'Two', 'Three'].map<DropdownMenuItem<String>>((String value) {
+///        return DropdownMenuItem<String>(
+///         value: value,
+///         child: Text(value),
+///       );
+///     }).toList(),
+///   );
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('BottomNavigationBar Sample'),
+///     ),
+///     body: _listViewBody(),
+///     bottomNavigationBar: BottomNavigationBar(
+///       items: <BottomNavigationBarItem>[
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.arrow_circle_up),
+///           title: Text('Back to Top'),
+///         ),
+///         BottomNavigationBarItem(
+///           icon: _dropdownButton(),
+///           title: Container()
+///         ),
+///       ],
+///       currentIndex: _selectedIndex,
+///       selectedItemColor: Colors.amber[800],
+///       onTap: _onItemTapped,
+///     ),
+///   );
+/// }
+///```
 /// {@end-tool}
 ///
 /// See also:
