@@ -298,6 +298,13 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
+         "name":"Mac web_tool_tests",
+         "repo":"flutter",
+         "task_name":"mac_web_tool_tests",
+         "enabled":false,
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
+      },
+      {
          "name": "Windows build_aar_module_test",
          "repo": "flutter",
          "task_name": "win_build_aar_module_test",
@@ -382,7 +389,7 @@
          "name": "Windows web_tool_tests",
          "repo": "flutter",
          "task_name": "win_web_tool_tests",
-         "enabled":true
+         "enabled":false
       }
    ]
 }
