@@ -665,15 +665,12 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       )
     );
     if (framework.existsSync()) {
-      final Directory engineDest = ephemeralDirectory
-          .childDirectory('Flutter')
-          .childDirectory('engine');
       final File podspec = framework.parent.childFile('Flutter.podspec');
       globals.fsUtils.copyDirectorySync(
         framework,
-        engineDest.childDirectory('Flutter.framework'),
+        engineCopyDirectory.childDirectory('Flutter.framework'),
       );
-      podspec.copySync(engineDest.childFile('Flutter.podspec').path);
+      podspec.copySync(engineCopyDirectory.childFile('Flutter.podspec').path);
     }
   }
 
@@ -702,6 +699,22 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
             .childDirectory('Flutter')
             .childDirectory('FlutterPluginRegistrant')
         : hostAppRoot.childDirectory(_hostAppProjectName);
+  }
+
+  File get pluginRegistrantHeader {
+    final Directory registryDirectory = isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    return registryDirectory.childFile('GeneratedPluginRegistrant.h');
+  }
+
+  File get pluginRegistrantImplementation {
+    final Directory registryDirectory = isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    return registryDirectory.childFile('GeneratedPluginRegistrant.m');
+  }
+
+  Directory get engineCopyDirectory {
+    return isModule
+        ? ephemeralDirectory.childDirectory('Flutter').childDirectory('engine')
+        : hostAppRoot.childDirectory('Flutter');
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
