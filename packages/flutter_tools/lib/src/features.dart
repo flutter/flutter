@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 
+import 'base/config.dart';
 import 'base/context.dart';
-import 'globals.dart' as globals;
+import 'base/platform.dart';
 
 /// The current [FeatureFlags] implementation.
 ///
@@ -54,7 +56,17 @@ abstract class FeatureFlags {
 }
 
 class FlutterFeatureFlags implements FeatureFlags {
-  const FlutterFeatureFlags();
+  FlutterFeatureFlags({
+    @required FlutterVersion flutterVersion,
+    @required Config config,
+    @required Platform platform,
+  }) : _flutterVersion = flutterVersion,
+       _config = config,
+       _platform = platform;
+
+  final FlutterVersion _flutterVersion;
+  final Config _config;
+  final Platform _platform;
 
   @override
   bool get isLinuxEnabled => isEnabled(flutterLinuxDesktopFeature);
@@ -82,20 +94,20 @@ class FlutterFeatureFlags implements FeatureFlags {
 
   @override
   bool isEnabled(Feature feature) {
-    final String currentChannel = globals.flutterVersion.channel;
+    final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
       return false;
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = globals.config.getValue(feature.configSetting) as bool;
+      final bool configOverride = _config.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }
     }
     if (feature.environmentOverride != null) {
-      if (globals.platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+      if (_platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
         isEnabled = true;
       }
     }
