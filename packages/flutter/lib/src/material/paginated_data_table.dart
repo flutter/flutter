@@ -471,6 +471,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     sortColumnIndex: widget.sortColumnIndex,
                     sortAscending: widget.sortAscending,
                     onSelectAll: widget.onSelectAll,
+                    decoration: const BoxDecoration(),
                     dataRowHeight: widget.dataRowHeight,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
