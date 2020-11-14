@@ -82,8 +82,6 @@ class BundleBuilder {
     String applicationKernelFilePath,
     String depfilePath,
     String assetDirPath,
-    bool precompiledSnapshot = false,
-    bool reportLicensedPackages = false,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions = const <String>[],
     List<String> extraGenSnapshotOptions = const <String>[],
@@ -102,7 +100,6 @@ class BundleBuilder {
       flutterProject: flutterProject,
       outputDir: assetDirPath,
       depfilePath: depfilePath,
-      precompiled: precompiledSnapshot,
       trackWidgetCreation: trackWidgetCreation,
       treeShakeIcons: treeShakeIcons,
       dartDefines: buildInfo.dartDefines,
@@ -128,13 +125,11 @@ Future<void> buildWithAssemble({
   @required String mainPath,
   @required String outputDir,
   @required String depfilePath,
-  @required bool precompiled,
   bool trackWidgetCreation,
   @required bool treeShakeIcons,
   List<String> dartDefines,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
-  buildMode = precompiled ? buildMode : BuildMode.debug;
   final Environment environment = Environment(
     projectDir: flutterProject.directory,
     outputDir: globals.fs.directory(outputDir),

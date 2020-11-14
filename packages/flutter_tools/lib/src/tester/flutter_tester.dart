@@ -158,9 +158,7 @@ class FlutterTesterDevice extends Device {
     await BundleBuilder().build(
       buildInfo: buildInfo,
       mainPath: mainPath,
-      assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
       treeShakeIcons: buildInfo.treeShakeIcons,
