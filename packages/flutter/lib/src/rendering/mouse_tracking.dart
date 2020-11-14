@@ -107,7 +107,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// even if it's included in the hit test, affecting mouse-related behavior such as enter events,
   /// exit events, and mouse cursors. The [validForMouseTracker] does not affect hit testing.
   ///
-  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]'s built by the constructor.
+  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]s built by the constructor.
   final bool validForMouseTracker;
 
   @override
