@@ -13,7 +13,6 @@ embedded_libs:
   "dart:math": "math/math.dart"
   "dart:typed_data": "typed_data/typed_data.dart"
   "dart:ui": "ui/ui.dart"
-  "dart:wasm": "wasm/wasm.dart"
 
   "dart:_http": "_http/http.dart"
   "dart:_interceptors": "_interceptors/interceptors.dart"
