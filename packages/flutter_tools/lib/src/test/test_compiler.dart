@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
@@ -39,14 +38,12 @@ class TestCompiler {
   TestCompiler(
     this.buildInfo,
     this.flutterProject,
-    this.extraFrontEndOptions,
   ) : testFilePath = globals.fs.path.join(
         flutterProject.directory.path,
         getBuildDirectory(),
         'test_cache',
         getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
-          nullSafetyMode: buildInfo.nullSafetyMode,
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         )) {
@@ -68,7 +65,6 @@ class TestCompiler {
   final FlutterProject flutterProject;
   final BuildInfo buildInfo;
   final String testFilePath;
-  final List<String> extraFrontEndOptions;
 
 
   ResidentCompiler compiler;
@@ -110,8 +106,8 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       unsafePackageSerialization: false,
       dartDefines: buildInfo.dartDefines,
-      packagesPath: globalPackagesPath,
-      extraFrontEndOptions: extraFrontEndOptions,
+      packagesPath: buildInfo.packagesPath,
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
     );
@@ -131,16 +127,13 @@ class TestCompiler {
       return;
     }
     if (_packageConfig == null) {
-      _packageConfig ??= await loadPackageConfigWithLogging(
-        globals.fs.file(globalPackagesPath),
-        logger: globals.logger,
-      );
+      _packageConfig ??= buildInfo.packageConfig;
       // Compilation will fail if there is no flutter_test dependency, since
       // this library is imported by the generated entrypoint script.
-      if (_packageConfig['flutter_test'] == null) {
+      if (_packageConfig['test_api'] == null) {
         globals.printError(
           '\n'
-          'Error: cannot run without a dependency on "package:flutter_test". '
+          'Error: cannot run without a dependency on either "package:flutter_test" or "package:test". '
           'Ensure the following lines are present in your pubspec.yaml:'
           '\n\n'
           'dev_dependencies:\n'

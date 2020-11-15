@@ -285,7 +285,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   // pair of independent setters. Changing that would allow a more
   // rational API and would let us make the getter non-nullable.
 
-  /// {@template flutter.rendering.viewport.cacheExtent}
+  /// {@template flutter.rendering.RenderViewportBase.cacheExtent}
   /// The viewport has an area before and after the visible area to cache items
   /// that are about to become visible when the user scrolls.
   ///
@@ -330,7 +330,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// expressed in pixels.
   double? _calculatedCacheExtent;
 
-  /// {@template flutter.rendering.viewport.cacheExtentStyle}
+  /// {@template flutter.rendering.RenderViewportBase.cacheExtentStyle}
   /// Controls how the [cacheExtent] is interpreted.
   ///
   /// If set to [CacheExtentStyle.pixel], the [cacheExtent] will be
@@ -356,7 +356,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     markNeedsLayout();
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;

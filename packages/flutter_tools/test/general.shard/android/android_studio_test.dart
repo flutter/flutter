@@ -29,6 +29,19 @@ const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
   },
 };
 
+const Map<String, dynamic> macStudioInfoPlist4_1 = <String, dynamic>{
+  'CFBundleGetInfoString': 'Android Studio 4.1, build AI-201.8743.12.41.6858069. Copyright JetBrains s.r.o., (c) 2000-2020',
+  'CFBundleShortVersionString': '4.1',
+  'CFBundleVersion': 'AI-201.8743.12.41.6858069',
+  'JVMOptions': <String, dynamic>{
+    'Properties': <String, dynamic>{
+      'idea.vendor.name' : 'Google',
+      'idea.paths.selector': 'AndroidStudio4.1',
+      'idea.platform.prefix': 'AndroidStudio',
+    },
+  },
+};
+
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{'HOME': homeLinux},
@@ -37,7 +50,7 @@ final Platform linuxPlatform = FakePlatform(
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
   environment: <String, String>{
-    'LOCALAPPDATA': 'C:\\Users\\Dash\\AppData\\Local',
+    'LOCALAPPDATA': r'C:\Users\Dash\AppData\Local',
   }
 );
 
@@ -94,6 +107,71 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
       );
+    });
+
+    testUsingContext('Can discover Android Studio >=4.1 location on Mac', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist4_1);
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
+      );
+
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'Google',
+        'AndroidStudio4.1',
+      )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
+    testUsingContext('Can discover Android Studio <4.1 location on Mac', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
+      );
+
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'AndroidStudio3.3',
+      )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
     });
 
     testUsingContext('extracts custom paths for directly downloaded Android Studio on Mac', () {
@@ -193,11 +271,11 @@ void main() {
   });
 
   testUsingContext('Can discover Android Studio 4.1 location on Windows', () {
-    windowsFileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio4.1\\.home')
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
       ..createSync(recursive: true)
-      ..writeAsStringSync('C:\\Program Files\\AndroidStudio');
+      ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
     windowsFileSystem
-      .directory('C:\\Program Files\\AndroidStudio')
+      .directory(r'C:\Program Files\AndroidStudio')
       .createSync(recursive: true);
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;

@@ -1632,6 +1632,57 @@ void main() {
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
   });
+
+  testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
+
+    final CupertinoPageRoute<void> r = CupertinoPageRoute<void>(builder: (BuildContext context) {
+      return const Scaffold(
+        body: Center(
+          child: Text('child'),
+        ),
+      );
+    });
+
+    late NavigatorState navigator;
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: Builder(builder: (BuildContext context) {
+          return RaisedButton(
+            child: const Text('Home'),
+            onPressed: () {
+              navigator = Navigator.of(context)!;
+              assert(navigator != null);
+              navigator.push<void>(r);
+            },
+          );
+        }),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.byType(RaisedButton)));
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+
+    await gesture.down(const Offset(3, 300), timeStamp: Duration.zero);
+
+    // Need 2 events to form a valid drag
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveTo(const Offset(30, 300), timeStamp: const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.moveTo(const Offset(50, 300), timeStamp: const Duration(milliseconds: 200));
+
+    // Pause a while so that the route is popped when the drag is canceled
+    await tester.pump(const Duration(milliseconds: 1000));
+    await gesture.moveTo(const Offset(51, 300), timeStamp: const Duration(milliseconds: 1200));
+
+    // Remove the drag
+    navigator.removeRoute(r);
+    await tester.pump();
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {

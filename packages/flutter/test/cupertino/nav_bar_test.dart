@@ -1106,7 +1106,7 @@ void main() {
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: CupertinoPageScaffold(
               child: CustomScrollView(
                 slivers: <Widget>[
@@ -1154,7 +1154,7 @@ void main() {
       title: 'title',
       builder: (BuildContext context) {
         return MediaQuery(
-          data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
           child: Container(
             child: const CupertinoPageScaffold(
               child: CustomScrollView(

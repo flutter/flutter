@@ -761,6 +761,22 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   void jumpTo(double value);
 
+  /// Changes the scrolling position based on a pointer signal from current
+  /// value to delta without animation and without checking if new value is in
+  /// range, taking min/max scroll extent into account.
+  ///
+  /// Any active animation is canceled. If the user is currently scrolling, that
+  /// action is canceled.
+  ///
+  /// This method dispatches the start/update/end sequence of scrolling
+  /// notifications.
+  ///
+  /// This method is very similar to [jumpTo], but [pointerScroll] will
+  /// update the [ScrollDirection].
+  ///
+  // TODO(YeungKC): Support trackpad scroll, https://github.com/flutter/flutter/issues/23604.
+  void pointerScroll(double delta);
+
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
   /// [animateTo] is called.
   ///

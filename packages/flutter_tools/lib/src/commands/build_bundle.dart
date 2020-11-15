@@ -9,7 +9,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -19,7 +19,7 @@ class BuildBundleCommand extends BuildSubCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
-    usesExtraFrontendOptions();
+    usesExtraDartFlagOptions();
     argParser
       ..addFlag(
         'precompiled',
@@ -49,10 +49,6 @@ class BuildBundleCommand extends BuildSubCommand {
         ],
       )
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
-      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
-        splitCommas: true,
-        hide: true,
-      )
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
               "in the application's LICENSE file.",
@@ -117,7 +113,7 @@ class BuildBundleCommand extends BuildSubCommand {
         break;
     }
 
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
 
     await bundleBuilder.build(
       platform: platform,
@@ -125,7 +121,6 @@ class BuildBundleCommand extends BuildSubCommand {
       mainPath: targetFile,
       manifestPath: stringArg('manifest'),
       depfilePath: stringArg('depfile'),
-      privateKeyPath: stringArg('private-key'),
       assetDirPath: stringArg('asset-dir'),
       precompiledSnapshot: boolArg('precompiled'),
       reportLicensedPackages: boolArg('report-licensed-packages'),

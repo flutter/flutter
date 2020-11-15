@@ -174,7 +174,7 @@ class CircleAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     TextStyle textStyle = theme.primaryTextTheme.subtitle1!.copyWith(color: foregroundColor);
     Color? effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {
@@ -223,7 +223,7 @@ class CircleAvatar extends StatelessWidget {
               child: MediaQuery(
                 // Need to ignore the ambient textScaleFactor here so that the
                 // text doesn't escape the avatar when the textScaleFactor is large.
-                data: MediaQuery.of(context)!.copyWith(textScaleFactor: 1.0),
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
                 child: IconTheme(
                   data: theme.iconTheme.copyWith(color: textStyle.color),
                   child: DefaultTextStyle(

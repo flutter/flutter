@@ -227,6 +227,11 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// The scale will be clamped between this and [maxScale] inclusively.
   ///
+  /// Scale is also affected by [boundaryMargin]. If the scale would result in
+  /// viewing beyond the boundary, then it will not be allowed. By default,
+  /// boundaryMargin is EdgeInsets.zero, so scaling below 1.0 will not be
+  /// allowed in most cases without first increasing the boundaryMargin.
+  ///
   /// Defaults to 0.8.
   ///
   /// Cannot be null, and must be a finite number greater than zero and less
@@ -238,7 +243,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction.
   ///
-  /// {@template flutter.widgets.interactiveViewer.onInteraction}
+  /// {@template flutter.widgets.InteractiveViewer.onInteractionEnd}
   /// Will be called even if the interaction is disabled with
   /// [panEnabled] or [scaleEnabled].
   ///
@@ -260,7 +265,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will not have
   /// changed due to this interaction.
   ///
-  /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
   /// The coordinates provided in the details' `focalPoint` and
   /// `localFocalPoint` are normal Flutter event coordinates, not
@@ -279,7 +284,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction.
   ///
-  /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
   /// The coordinates provided in the details' `focalPoint` and
   /// `localFocalPoint` are normal Flutter event coordinates, not

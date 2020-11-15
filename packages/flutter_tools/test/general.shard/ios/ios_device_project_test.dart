@@ -88,7 +88,6 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     cpuArchitecture: DarwinArch.arm64,
     iProxy: IProxy.test(logger: BufferLogger.test(), processManager: FakeProcessManager.any()),
     interfaceType: IOSDeviceInterface.usb,
-    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 

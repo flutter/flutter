@@ -55,7 +55,7 @@ void main() {
 
     testWithoutContext('Install and uninstall are no-ops that report success', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      final FakeApplicationPackage package = FakeApplicationPackage();
 
       expect(await device.uninstallApp(package), true);
       expect(await device.isAppInstalled(package), true);
@@ -71,7 +71,7 @@ void main() {
   group('Starting and stopping application', () {
     testWithoutContext('Stop without start is a successful no-op', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      final FakeApplicationPackage package = FakeApplicationPackage();
 
       expect(await device.stopApp(package), true);
     });
@@ -89,7 +89,7 @@ void main() {
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
       final String executableName = device.executablePathForDevice(null, BuildMode.debug);
       fileSystem.file(executableName).writeAsStringSync('\n');
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      final FakeApplicationPackage package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -103,7 +103,7 @@ void main() {
     testWithoutContext('Null executable path fails gracefully', () async {
       final BufferLogger logger = BufferLogger.test();
       final DesktopDevice device = setUpDesktopDevice(nullExecutablePathForDevice: true, logger: logger);
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      final FakeApplicationPackage package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -124,7 +124,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      final FakeApplicationPackage package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -168,7 +168,7 @@ void main() {
       ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-    final FakeAppplicationPackage package = FakeAppplicationPackage();
+    final FakeApplicationPackage package = FakeApplicationPackage();
     final LaunchResult result = await device.startApp(
       package,
       prebuiltApplication: true,
@@ -191,7 +191,6 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
-        initializePlatform: true,
         nullAssertions: true,
       ),
     );
@@ -217,7 +216,7 @@ void main() {
       ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-    final FakeAppplicationPackage package = FakeAppplicationPackage();
+    final FakeApplicationPackage package = FakeApplicationPackage();
     final LaunchResult result = await device.startApp(
       package,
       prebuiltApplication: true,
@@ -228,7 +227,6 @@ void main() {
         BuildInfo.debug,
         traceAllowlist: 'foo,bar',
         cacheSkSL: true,
-        initializePlatform: true,
       ),
     );
 
@@ -248,6 +246,29 @@ void main() {
     final FakeDesktopDevice device = setUpDesktopDevice();
 
     expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
+  });
+
+  testWithoutContext('startApp supports dartEntrypointArgs', () async {
+    final Completer<void> completer = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug', 'arg1', 'arg2'],
+        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        completer: completer
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        dartEntrypointArgs: <String>['arg1', 'arg2']
+      ),
+    );
+
+    expect(result.started, true);
   });
 }
 
@@ -325,7 +346,7 @@ class FakeDesktopDevice extends DesktopDevice {
   }
 }
 
-class FakeAppplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   String get name => 'Example';

@@ -2072,7 +2072,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
           ),
         ]);
       }
@@ -2119,7 +2119,7 @@ abstract class RenderBox extends RenderObject {
             ...failures,
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
             ),
           ]);
         }

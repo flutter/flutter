@@ -158,7 +158,7 @@ class Drawer extends StatelessWidget {
   ///
   /// Typically a [SliverList].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The semantic label of the dialog used by accessibility frameworks to
@@ -177,7 +177,7 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     String? label = semanticLabel;
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -255,7 +255,7 @@ class DrawerController extends StatefulWidget {
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback? drawerCallback;
 
-  /// {@template flutter.material.drawer.dragStartBehavior}
+  /// {@template flutter.material.DrawerController.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used for opening
@@ -407,7 +407,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         delta = -delta;
         break;
     }
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.value -= delta;
         break;
@@ -434,7 +434,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           visualVelocity = -visualVelocity;
           break;
       }
-      switch (Directionality.of(context)!) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
           if (widget.drawerCallback != null)
@@ -498,12 +498,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
-    final EdgeInsets padding = MediaQuery.of(context)!.padding;
-    final TextDirection? textDirection = Directionality.of(context);
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final TextDirection textDirection = Directionality.of(context);
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
-      switch (textDirection!) {
+      switch (textDirection) {
         case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.left : padding.right);
@@ -534,7 +534,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       }
     } else {
       final bool platformHasBackButton;
-      switch (Theme.of(context)!.platform) {
+      switch (Theme.of(context).platform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
           break;

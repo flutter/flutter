@@ -98,7 +98,7 @@ class CocoaPods {
   Future<String> _versionText;
 
   String get cocoaPodsMinimumVersion => '1.6.0';
-  String get cocoaPodsRecommendedVersion => '1.8.0';
+  String get cocoaPodsRecommendedVersion => '1.9.0';
 
   Future<bool> get isInstalled =>
     _processUtils.exitsHappy(<String>['which', 'pod']);

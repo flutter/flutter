@@ -133,6 +133,12 @@
          "flaky": false
       },
       {
+         "name": "Linux web_long_running_tests",
+         "repo": "flutter",
+         "task_name": "linux_web_long_running_tests",
+         "flaky": false
+      },
+      {
          "name":"Linux web_e2e_test",
          "repo":"flutter",
          "task_name":"linux_web_e2e_test",

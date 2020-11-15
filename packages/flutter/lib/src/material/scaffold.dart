@@ -105,7 +105,7 @@ class ScaffoldMessenger extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The state from the closest instance of this class that encloses the given
@@ -204,16 +204,34 @@ class ScaffoldMessenger extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// If there is no [ScaffoldMessenger] in scope, then this will return null.
+  /// If there is no [ScaffoldMessenger] in scope, then this will assert in
+  /// debug mode, and throw an exception in release mode.
+  ///
   /// See also:
   ///
+  ///  * [maybeOf], which is a similar function but will return null instead of
+  ///    throwing if there is no [ScaffoldMessenger] ancestor.
   ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
   ///    has a [ScaffoldMessenger] ancestor.
-  static ScaffoldMessengerState? of(BuildContext context, { bool nullOk = false }) {
-    assert(nullOk != null);
+  static ScaffoldMessengerState of(BuildContext context) {
     assert(context != null);
+    assert(debugCheckHasScaffoldMessenger(context));
 
-    assert(nullOk || debugCheckHasScaffoldMessenger(context));
+    final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>()!;
+    return scope._scaffoldMessengerState;
+  }
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context, if any.
+  ///
+  /// Will return null if a [ScaffoldMessenger] is not found in the given context.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is a similar function, except that it will throw an
+  ///    exception if a [ScaffoldMessenger] is not found in the given context.
+  static ScaffoldMessengerState? maybeOf(BuildContext context) {
+    assert(context != null);
 
     final _ScaffoldMessengerScope? scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
     return scope?._scaffoldMessengerState;
@@ -240,7 +258,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void didChangeDependencies() {
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     // If we transition from accessible navigation to non-accessible navigation
     // and there is a SnackBar that would have timed out that has already
     // completed its timer, dismiss that SnackBar. If the timer hasn't finished
@@ -406,7 +424,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     _accessibleNavigation = mediaQuery.accessibleNavigation;
 
     if (_snackBars.isNotEmpty) {
@@ -418,7 +436,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
             assert(_snackBarController!.status == AnimationStatus.forward ||
                    _snackBarController!.status == AnimationStatus.completed);
             // Look up MediaQuery again in case the setting changed.
-            final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
@@ -769,7 +787,7 @@ class _BodyBuilder extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
-        final MediaQueryData metrics = MediaQuery.of(context)!;
+        final MediaQueryData metrics = MediaQuery.of(context);
 
         final double bottom = extendBody
           ? math.max(metrics.padding.bottom, bodyConstraints.bottomWidgetsHeight)
@@ -1729,7 +1747,7 @@ class Scaffold extends StatefulWidget {
   /// [AppBar.primary], is true.
   final bool primary;
 
-  /// {@macro flutter.material.drawer.dragStartBehavior}
+  /// {@macro flutter.material.DrawerController.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
 
   /// The width of the area within which a horizontal swipe will open the
@@ -1755,7 +1773,11 @@ class Scaffold extends StatefulWidget {
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// Finds the [ScaffoldState] from the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If no instance of this class encloses the given context, will cause an
+  /// assert in debug mode, and throw an exception in release mode.
   ///
   /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
@@ -1892,12 +1914,11 @@ class Scaffold extends StatefulWidget {
   /// [ScaffoldState] rather than using the [Scaffold.of] function.
   ///
   /// If there is no [Scaffold] in scope, then this will throw an exception.
-  /// To return null if there is no [Scaffold], then pass `nullOk: true`.
-  static ScaffoldState? of(BuildContext context, { bool nullOk = false }) {
-    assert(nullOk != null);
+  /// To return null if there is no [Scaffold], use [maybeOf] instead.
+  static ScaffoldState of(BuildContext context) {
     assert(context != null);
     final ScaffoldState? result = context.findAncestorStateOfType<ScaffoldState>();
-    if (nullOk || result != null)
+    if (result != null)
       return result;
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
@@ -1925,6 +1946,22 @@ class Scaffold extends StatefulWidget {
       ),
       context.describeElement('The context used was')
     ]);
+  }
+
+  /// Finds the [ScaffoldState] from the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If no instance of this class encloses the given context, will return null.
+  /// To throw an exception instead, use [of] instead of this function.
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar function to this one that throws if no instance
+  ///    encloses the given context. Also includes some sample code in its
+  ///    documentation.
+  static ScaffoldState? maybeOf(BuildContext context) {
+    assert(context != null);
+    return context.findAncestorStateOfType<ScaffoldState>();
   }
 
   /// Returns a [ValueListenable] for the [ScaffoldGeometry] for the closest
@@ -2200,7 +2237,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   /// [ScaffoldMessengerState.removeCurrentSnackBar] removes the current
   /// [SnackBar] (if any) immediately. This method should not be used, and will
-  /// be depracted in the near future.
+  /// be deprecated in the near future.
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
@@ -2281,7 +2318,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed)
       return;
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
     if (mediaQuery.accessibleNavigation) {
       _snackBarController!.value = 0.0;
@@ -2714,7 +2751,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void didChangeDependencies() {
     // nullOk is valid here since  both the Scaffold and ScaffoldMessenger are
     // currently available for managing SnackBars.
-    final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.of(context, nullOk: true);
+    final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
     if (_scaffoldMessenger != null &&
       (_currentScaffoldMessenger == null || _scaffoldMessenger != _currentScaffoldMessenger)) {
@@ -2725,7 +2762,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _scaffoldMessenger?._register(this);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     // If we transition from accessible navigation to non-accessible navigation
     // and there is a SnackBar that would have timed out that has already
     // completed its timer, dismiss that SnackBar. If the timer hasn't finished
@@ -2773,7 +2810,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     bool removeBottomInset = false,
     bool maintainBottomViewPadding = false,
   }) {
-    MediaQueryData data = MediaQuery.of(context)!.removePadding(
+    MediaQueryData data = MediaQuery.of(context).removePadding(
       removeLeft: removeLeftPadding,
       removeTop: removeTopPadding,
       removeRight: removeRightPadding,
@@ -2869,9 +2906,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
-    final ThemeData themeData = Theme.of(context)!;
-    final TextDirection textDirection = Directionality.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final ThemeData themeData = Theme.of(context);
+    final TextDirection textDirection = Directionality.of(context);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     _accessibleNavigation = mediaQuery.accessibleNavigation;
@@ -2884,7 +2921,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             assert(_snackBarController!.status == AnimationStatus.forward ||
                    _snackBarController!.status == AnimationStatus.completed);
             // Look up MediaQuery again in case the setting changed.
-            final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
@@ -3304,7 +3341,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   bool extentChanged(DraggableScrollableNotification notification) {
     final double extentRemaining = 1.0 - notification.extent;
-    final ScaffoldState scaffold = Scaffold.of(context)!;
+    final ScaffoldState scaffold = Scaffold.of(context);
     if (extentRemaining < _kBottomSheetDominatesPercentage) {
       scaffold._floatingActionButtonVisibilityValue = extentRemaining * _kBottomSheetDominatesPercentage * 10;
       scaffold.showBodyScrim(true,  math.max(

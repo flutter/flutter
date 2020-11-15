@@ -62,6 +62,41 @@ enum DismissDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=iEMgjrfuc58}
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample shows how you can use the [Dismissible] widget to
+/// remove list items using swipe gestures.
+///
+/// ```dart
+/// List<int> items = List<int>.generate(100, (index) => index);
+///
+/// Widget build(BuildContext context) {
+///   return ListView.builder(
+///     itemCount: items.length,
+///     padding: const EdgeInsets.symmetric(vertical: 16),
+///     itemBuilder: (BuildContext context, int index) {
+///       return Dismissible(
+///         child: ListTile(
+///           title: Text(
+///             'Item ${items[index]}',
+///           ),
+///         ),
+///         background: Container(
+///           color: Colors.green,
+///         ),
+///         key: ValueKey(items[index]),
+///         onDismissed: (DismissDirection direction) {
+///           setState(() {
+///             items.remove(index);
+///           });
+///         },
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
 /// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
@@ -102,7 +137,7 @@ class Dismissible extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// A widget that is stacked behind the child. If secondaryBackground is also
@@ -274,7 +309,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     if (extent == 0.0)
       return null;
     if (_directionIsXAxis) {
-      switch (Directionality.of(context)!) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           return extent < 0 ? DismissDirection.startToEnd : DismissDirection.endToStart;
         case TextDirection.ltr:
@@ -332,7 +367,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         break;
 
       case DismissDirection.endToStart:
-        switch (Directionality.of(context)!) {
+        switch (Directionality.of(context)) {
           case TextDirection.rtl:
             if (_dragExtent + delta > 0)
               _dragExtent += delta;
@@ -345,7 +380,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         break;
 
       case DismissDirection.startToEnd:
-        switch (Directionality.of(context)!) {
+        switch (Directionality.of(context)) {
           case TextDirection.rtl:
             if (_dragExtent + delta < 0)
               _dragExtent += delta;

@@ -14,7 +14,6 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
-import 'dart/pub.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
@@ -683,7 +682,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     .childDirectory('Flutter')
     .childFile('Generated.xcconfig');
 
-  Directory get compiledDartFramework => _flutterLibRoot
+  /// No longer compiled to this location.
+  ///
+  /// Used only for "flutter clean" to remove old references.
+  Directory get deprecatedCompiledDartFramework => _flutterLibRoot
       .childDirectory('Flutter')
       .childDirectory('App.framework');
 
@@ -702,7 +704,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       templateManifest: null,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
-      pub: pub,
     );
     template.render(
       target,
@@ -862,7 +863,6 @@ to migrate your project.
       templateManifest: null,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
-      pub: pub,
     );
     template.render(
       target,

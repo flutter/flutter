@@ -202,13 +202,12 @@ class NavigationRailTheme extends InheritedTheme {
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
     final NavigationRailTheme? navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
-    return navigationRailTheme?.data ?? Theme.of(context)!.navigationRailTheme;
+    return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final NavigationRailTheme? ancestorTheme = context.findAncestorWidgetOfExactType<NavigationRailTheme>();
-    return identical(this, ancestorTheme) ? child : NavigationRailTheme(data: data, child: child);
+    return NavigationRailTheme(data: data, child: child);
   }
 
   @override

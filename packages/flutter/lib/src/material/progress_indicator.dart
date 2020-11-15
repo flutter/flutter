@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,6 +14,8 @@ import 'theme.dart';
 const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;
 const int _kIndeterminateCircularDuration = 1333 * 2222;
+
+enum _ActivityIndicatorType { material, adaptive }
 
 /// A base class for material design progress indicators.
 ///
@@ -26,7 +29,7 @@ const int _kIndeterminateCircularDuration = 1333 * 2222;
 abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
-  /// {@template flutter.material.progressIndicator.parameters}
+  /// {@template flutter.material.ProgressIndicator.ProgressIndicator}
   /// The [value] argument can either be null for an indeterminate
   /// progress indicator, or non-null for a determinate progress
   /// indicator.
@@ -53,11 +56,17 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// If null, this progress indicator is indeterminate, which means the
   /// indicator displays a predetermined animation that does not indicate how
   /// much actual progress is being made.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final double? value;
 
   /// The progress indicator's background color.
   ///
   /// The current theme's [ThemeData.backgroundColor] by default.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final Color? backgroundColor;
 
   /// The progress indicator's color as an animated value.
@@ -66,18 +75,24 @@ abstract class ProgressIndicator extends StatefulWidget {
   ///
   /// If null, the progress indicator is rendered with the current theme's
   /// [ThemeData.accentColor].
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final Animation<Color?>? valueColor;
 
-  /// {@template flutter.material.progressIndicator.semanticsLabel}
+  /// {@template flutter.progress_indicator.ProgressIndicator.semanticsLabel}
   /// The [SemanticsProperties.label] for this progress indicator.
   ///
   /// This value indicates the purpose of the progress bar, and will be
   /// read out by screen readers to indicate the purpose of this progress
   /// indicator.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   /// {@endtemplate}
   final String? semanticsLabel;
 
-  /// {@template flutter.material.progressIndicator.semanticsValue}
+  /// {@template flutter.progress_indicator.ProgressIndicator.semanticsValue}
   /// The [SemanticsProperties.value] for this progress indicator.
   ///
   /// This will be used in conjunction with the [semanticsLabel] by
@@ -88,11 +103,14 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// For determinate progress indicators, this will be defaulted to
   /// [ProgressIndicator.value] expressed as a percentage, i.e. `0.1` will
   /// become '10%'.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   /// {@endtemplate}
   final String? semanticsValue;
 
-  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context)!.backgroundColor;
-  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context)!.accentColor;
+  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
+  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -234,7 +252,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 class LinearProgressIndicator extends ProgressIndicator {
   /// Creates a linear progress indicator.
   ///
-  /// {@macro flutter.material.progressIndicator.parameters}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const LinearProgressIndicator({
     Key? key,
     double? value,
@@ -314,7 +332,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
   @override
   Widget build(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null)
       return _buildIndicator(context, _controller.value, textDirection);
@@ -424,7 +442,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 class CircularProgressIndicator extends ProgressIndicator {
   /// Creates a circular progress indicator.
   ///
-  /// {@macro flutter.material.progressIndicator.parameters}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator({
     Key? key,
     double? value,
@@ -433,7 +451,8 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     String? semanticsLabel,
     String? semanticsValue,
-  }) : super(
+  }) : _indicatorType = _ActivityIndicatorType.material,
+       super(
          key: key,
          value: value,
          backgroundColor: backgroundColor,
@@ -442,7 +461,38 @@ class CircularProgressIndicator extends ProgressIndicator {
          semanticsValue: semanticsValue,
        );
 
+  /// Creates an adaptive progress indicator that is a
+  /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
+  /// material theme/non-iOS.
+  ///
+  /// The [value], [backgroundColor], [valueColor], [strokeWidth],
+  /// [semanticsLabel], and [semanticsValue] will be ignored in iOS.
+  ///
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
+  const CircularProgressIndicator.adaptive({
+    Key? key,
+    double? value,
+    Color? backgroundColor,
+    Animation<Color?>? valueColor,
+    this.strokeWidth = 4.0,
+    String? semanticsLabel,
+    String? semanticsValue,
+  }) : _indicatorType = _ActivityIndicatorType.adaptive,
+       super(
+         key: key,
+         value: value,
+         backgroundColor: backgroundColor,
+         valueColor: valueColor,
+         semanticsLabel: semanticsLabel,
+         semanticsValue: semanticsValue,
+       );
+
+  final _ActivityIndicatorType _indicatorType;
+
   /// The width of the line used to draw the circle.
+  ///
+  /// This property is ignored if used in an adaptive constructor inside an iOS
+  /// environment.
   final double strokeWidth;
 
   @override
@@ -494,7 +544,11 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     super.dispose();
   }
 
-  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildCupertinoIndicator(BuildContext context) {
+    return CupertinoActivityIndicator(key: widget.key);
+  }
+
+  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
@@ -522,7 +576,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
-        return _buildIndicator(
+        return _buildMaterialIndicator(
           context,
           _strokeHeadTween.evaluate(_controller),
           _strokeTailTween.evaluate(_controller),
@@ -535,9 +589,27 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
   @override
   Widget build(BuildContext context) {
-    if (widget.value != null)
-      return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
-    return _buildAnimation();
+    switch (widget._indicatorType) {
+      case _ActivityIndicatorType.material:
+        if (widget.value != null)
+          return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+        return _buildAnimation();
+      case _ActivityIndicatorType.adaptive:
+        final ThemeData theme = Theme.of(context);
+        assert(theme.platform != null);
+        switch (theme.platform) {
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return _buildCupertinoIndicator(context);
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            if (widget.value != null)
+              return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+            return _buildAnimation();
+        }
+    }
   }
 }
 
@@ -617,7 +689,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// Rather than creating a refresh progress indicator directly, consider using
   /// a [RefreshIndicator] together with a [Scrollable] widget.
   ///
-  /// {@macro flutter.material.progressIndicator.parameters}
+  /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const RefreshProgressIndicator({
     Key? key,
     double? value,
@@ -657,7 +729,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   }
 
   @override
-  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
     final double arrowheadScale = widget.value == null ? 0.0 : (widget.value! * 2.0).clamp(0.0, 1.0);
     return widget._buildSemanticsWrapper(
       context: context,
@@ -667,7 +739,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
         margin: const EdgeInsets.all(4.0), // accommodate the shadow
         child: Material(
           type: MaterialType.circle,
-          color: widget.backgroundColor ?? Theme.of(context)!.canvasColor,
+          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
           elevation: 2.0,
           child: Padding(
             padding: const EdgeInsets.all(12.0),

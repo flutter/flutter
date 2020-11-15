@@ -50,8 +50,6 @@ class DaemonCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
-    isRunningFromDaemon = true;
-
     final Daemon daemon = Daemon(
       stdinCommandStream, stdoutCommandResponse,
       notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
@@ -466,7 +464,6 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      flutterProject: flutterProject,
       target: target,
       buildInfo: options.buildInfo,
       platform: globals.platform,
