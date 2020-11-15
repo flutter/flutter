@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/platform.dart';
+import 'version.dart';
 
 /// The current [FeatureFlags] implementation.
 ///
