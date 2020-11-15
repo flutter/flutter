@@ -152,7 +152,6 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await upgradeChannel(flutterVersion);
     await attemptReset(upstreamVersion.frameworkRevision);
     if (!testFlow) {
       await flutterUpgradeContinue();
