@@ -386,6 +386,57 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// Here, we will use a [Shortcuts] and [Actions] widget to add and remove from a counter.
+/// This can be done by creating a child widget that is focused and pressing the logical key
+/// sets that have been defined in [Shortcuts] and defining the actions that each key set
+/// performs.
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart preamble
+/// class Increment extends Intent {}
+///
+/// class Decrement extends Intent {}
+/// ```
+///
+/// ```dart
+/// int count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return Shortcuts(
+///     shortcuts: <LogicalKeySet, Intent> {
+///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyK): Increment(),
+///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyL): Decrement(),
+///     },
+///     child: Actions(
+///       actions: <Type, Action<Intent>> {
+///         Increment: CallbackAction<Increment>(
+///           onInvoke: (Increment intent) => setState(() { count = count + 1; }),
+///         ),
+///         Decrement: CallbackAction<Decrement>(
+///           onInvoke: (Decrement intent) => setState(() { count = count - 1; }),
+///         ),
+///       },
+///       child: Focus(
+///         autofocus:true,
+///         child: Column(
+///           children: <Widget>[
+///             Text('Add to the counter by pressing keyboard Shift and keyboard "K"'),
+///             Text('Subtract from the counter by pressing keyboard Shift and keyboard "L"'),
+///             Text('count: $count'),
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Intent], a class for containing a description of a user action to be

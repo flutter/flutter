@@ -478,13 +478,6 @@ void main() {
         '--lazy-async-stacks',
         '$build/app.dill',
       ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
       FakeCommand(command: <String>[
         'xcrun',
         'cc',
@@ -593,13 +586,6 @@ void main() {
         '--lazy-async-stacks',
         '$build/app.dill',
       ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
       FakeCommand(command: <String>[
         'xcrun',
         'cc',
@@ -677,13 +663,6 @@ void main() {
         '--lazy-async-stacks',
         '$build/app.dill',
       ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
       FakeCommand(command: <String>[
         'xcrun',
         'cc',

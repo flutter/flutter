@@ -759,10 +759,8 @@ void main() {
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
-    const Offset offset = Offset(100.0, 100.0);
-
-    final PopupMenuButton<int> popupMenuButton =
-      PopupMenuButton<int>(
+    PopupMenuButton<int> buildMenuButton({Offset offset = const Offset(0.0, 0.0)}) {
+      return  PopupMenuButton<int>(
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
@@ -777,14 +775,36 @@ void main() {
           ];
         },
       );
+    }
 
+    // Popup a menu without any offset.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Center(
-            child: Material(
-              child: popupMenuButton,
-            ),
+          body: Material(
+            child: buildMenuButton(),
+          ),
+        ),
+      ),
+    );
+
+    // Popup the menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    // Initial state, the menu start at Offset(8.0, 8.0), the 8 pixels is edge padding when offset.dx < 8.0.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
+
+    // Collapse the menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    // Popup a new menu with Offset(50.0, 50.0).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(offset: const Offset(50.0, 50.0)),
           ),
         ),
       ),
@@ -793,8 +813,8 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
-    // The position is different than the offset because the default position isn't at the origin.
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(364.0, 324.0));
+    // This time the menu should start at Offset(50.0, 50.0), the padding only added when offset.dx < 8.0.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(50.0, 50.0));
   });
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {

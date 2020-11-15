@@ -57,7 +57,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     final String targetPlatform = stringArg('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     final String outputPath = stringArg('output-dir') ?? getAotBuildDirectory();
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
     }

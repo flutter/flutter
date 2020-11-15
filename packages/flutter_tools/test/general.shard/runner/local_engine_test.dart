@@ -43,7 +43,7 @@ void main() {
     );
 
     expect(
-      await localEngineLocator.findEnginePath(null, 'ios_debug'),
+      await localEngineLocator.findEnginePath(null, 'ios_debug', null),
       matchesEngineBuildPaths(
         hostEngine: '/arbitrary/engine/src/out/host_debug',
         targetEngine: '/arbitrary/engine/src/out/ios_debug',
@@ -57,7 +57,7 @@ void main() {
       .writeAsStringSync('sky_engine:file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
 
     expect(
-      await localEngineLocator.findEnginePath(null, 'ios_debug'),
+      await localEngineLocator.findEnginePath(null, 'ios_debug', null),
       matchesEngineBuildPaths(
         hostEngine: '/symlink/src/out/host_debug',
         targetEngine: '/symlink/src/out/ios_debug',
@@ -81,7 +81,7 @@ void main() {
     );
 
     expect(
-      await localEngineLocator.findEnginePath('$kArbitraryEngineRoot/src', 'ios_debug'),
+      await localEngineLocator.findEnginePath('$kArbitraryEngineRoot/src', 'ios_debug', null),
       matchesEngineBuildPaths(
         hostEngine: '/arbitrary/engine/src/out/host_debug',
         targetEngine: '/arbitrary/engine/src/out/ios_debug',
@@ -112,7 +112,7 @@ void main() {
     );
 
     expect(
-      await localEngineLocator.findEnginePath(null, 'ios_debug'),
+      await localEngineLocator.findEnginePath(null, 'ios_debug', null),
       matchesEngineBuildPaths(
         hostEngine: 'flutter/engine/src/out/host_debug',
         targetEngine: 'flutter/engine/src/out/ios_debug',

@@ -613,9 +613,9 @@ class TextField extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [EditableText.onSubmitted] for an example of how to handle moving to
-  ///    the next/previous field when using [TextInputAction.next] and
-  ///    [TextInputAction.previous] for [textInputAction].
+  ///  * [TextInputAction.next] and [TextInputAction.previous], which
+  ///    automatically shift the focus to the next/previous focusable item when
+  ///    the user is done editing.
   final ValueChanged<String>? onSubmitted;
 
   /// {@macro flutter.widgets.editableText.onAppPrivateCommand}

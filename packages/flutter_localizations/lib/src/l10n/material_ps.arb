@@ -1,7 +1,9 @@
 {
   "scriptCategory": "tall",
   "timeOfDayFormat": "HH:mm",
+  "anteMeridiemAbbreviation": "AM",
   "@anteMeridiemAbbreviation": {"notUsed":"Pashto time format does not use a.m. indicator"},
+  "postMeridiemAbbreviation": "PM",
   "@postMeridiemAbbreviation": {"notUsed":"Pashto time format does not use p.m. indicator"},
   "openAppDrawerTooltip": "د پرانیستی نیینګ مینو",
   "backButtonTooltip": "شاته",
