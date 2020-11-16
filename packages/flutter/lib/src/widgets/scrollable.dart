@@ -17,7 +17,6 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
-import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'scroll_configuration.dart';
@@ -960,10 +959,6 @@ class ScrollIntent extends Intent {
 /// An [Action] that scrolls the [Scrollable] that encloses the current
 /// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
 ///
-/// If a Scrollable cannot be found above the current [primaryFocus], the
-/// [PrimaryScrollController] will be considered for default handling of
-/// [ScrollAction]s.
-///
 /// If [Scrollable.incrementCalculator] is null for the scrollable, the default
 /// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
 /// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
@@ -972,21 +967,7 @@ class ScrollAction extends Action<ScrollIntent> {
   @override
   bool isEnabled(ScrollIntent intent) {
     final FocusNode? focus = primaryFocus;
-    final bool contextIsValid = focus != null && focus.context != null;
-    if (contextIsValid) {
-      // Check for primary scrollable within the current context
-      if (Scrollable.of(focus!.context!) != null)
-        return true;
-      // Check for fallback scrollable with context from PrimaryScrollController
-      if (PrimaryScrollController.of(focus.context!) != null) {
-        final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
-        return primaryScrollController != null
-          && primaryScrollController.hasClients
-          && primaryScrollController.position.context.notificationContext != null
-          && Scrollable.of(primaryScrollController.position.context.notificationContext!) != null;
-      }
-    }
-    return false;
+    return focus != null && focus.context != null && Scrollable.of(focus.context!) != null;
   }
 
   // Returns the scroll increment for a single scroll request, for use when
@@ -1070,11 +1051,7 @@ class ScrollAction extends Action<ScrollIntent> {
 
   @override
   void invoke(ScrollIntent intent) {
-    ScrollableState? state = Scrollable.of(primaryFocus!.context!);
-    if (state == null) {
-      final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
-      state = Scrollable.of(primaryScrollController!.position.context.notificationContext!);
-    }
+    final ScrollableState? state = Scrollable.of(primaryFocus!.context!);
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
     assert(state!.position.viewportDimension != null);
