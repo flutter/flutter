@@ -252,7 +252,7 @@ abstract class UnpackIOS extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{BUILD_DIR}/Flutter.framework'),
+        Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
       ];
 
   @override
