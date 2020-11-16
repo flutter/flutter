@@ -733,17 +733,33 @@ class _RenderInputPadding extends RenderShiftedBox {
     return 0.0;
   }
 
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    if (child != null) {
+      final Size childSize = layoutChild(child!, constraints);
+      final double width = math.max(childSize.width, minSize.width);
+      final double height = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(width, height));
+    }
+    return Size.zero;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
   @override
   void performLayout() {
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
     if (child != null) {
-      child!.layout(constraints, parentUsesSize: true);
-      final double width = math.max(child!.size.width, minSize.width);
-      final double height = math.max(child!.size.height, minSize.height);
-      size = constraints.constrain(Size(width, height));
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
-    } else {
-      size = Size.zero;
     }
   }
 

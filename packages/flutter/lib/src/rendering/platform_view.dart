@@ -166,8 +166,13 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   bool get isRepaintBoundary => true;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
   void performResize() {
-    size = constraints.biggest;
+    super.performResize();
     _sizePlatformView();
   }
 
@@ -332,8 +337,8 @@ class RenderUiKitView extends RenderBox {
   PointerEvent? _lastPointerDownEvent;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   @override
@@ -653,8 +658,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   bool get isRepaintBoundary => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   @override
