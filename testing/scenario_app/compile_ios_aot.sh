@@ -103,7 +103,7 @@ cp "$SCRIPT_DIR/ios/AppFrameworkInfo.plist" "$OUTDIR/App.framework/Info.plist"
 echo "Created $OUTDIR/App.framework/App."
 
 rm -rf "$SCRIPT_DIR/ios/Scenarios/App.framework"
-rm -rf "$SCRIPT_DIR/ios/Scenarios/Flutter.framework"
+rm -rf "$SCRIPT_DIR/ios/Scenarios/Flutter.xcframework"
 cp -R "$OUTDIR/App.framework" "$SCRIPT_DIR/ios/Scenarios"
-cp -R "$DEVICE_TOOLS/../Flutter.framework" "$SCRIPT_DIR/ios/Scenarios"
+cp -R "$DEVICE_TOOLS/../Flutter.xcframework" "$SCRIPT_DIR/ios/Scenarios"
 

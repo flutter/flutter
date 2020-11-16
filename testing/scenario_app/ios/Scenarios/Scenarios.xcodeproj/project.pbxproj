@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,19 +14,19 @@
 		0A97D7C024BA937000050525 /* FlutterViewControllerInitialRouteTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A97D7BF24BA937000050525 /* FlutterViewControllerInitialRouteTest.m */; };
 		0D14A3FE239743190013D873 /* golden_platform_view_rotate_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 0D14A3FD239743190013D873 /* golden_platform_view_rotate_iPhone SE_simulator.png */; };
 		0D8470A4240F0B1F0030B565 /* StatusBarTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D8470A3240F0B1F0030B565 /* StatusBarTest.m */; };
-		0DB781EF22E931BE00E9B371 /* Flutter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		0DB781F122E933E800E9B371 /* Flutter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		0DB781FE22EA2C6D00E9B371 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; };
-		0DB781FF22EA2C7200E9B371 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; };
+		0DB781EF22E931BE00E9B371 /* Flutter.xcframework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0DB781F122E933E800E9B371 /* Flutter.xcframework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0DB781FE22EA2C6D00E9B371 /* Flutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.xcframework */; };
+		0DB781FF22EA2C7200E9B371 /* Flutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.xcframework */; };
 		0DB7820022EA2C9D00E9B371 /* App.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0DB7820122EA2CA500E9B371 /* App.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0DB7820222EA493B00E9B371 /* FlutterViewControllerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */; };
-		242F37A222E636DE001E83D4 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		242F37A222E636DE001E83D4 /* Flutter.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		242F37A322E636DE001E83D4 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		244EA6D0230DBE8900B2D26E /* golden_platform_view_D21AP.png in Resources */ = {isa = PBXBuildFile; fileRef = 244EA6CF230DBE8900B2D26E /* golden_platform_view_D21AP.png */; };
 		246A6611252E693A00EAB0F3 /* RenderingSelectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */; };
 		246B4E4222E3B5F700073EBF /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; };
-		246B4E4622E3B61000073EBF /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; };
+		246B4E4622E3B61000073EBF /* Flutter.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.xcframework */; };
 		248D76CC22E388370012F0C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 248D76CB22E388370012F0C1 /* AppDelegate.m */; };
 		248D76D422E388380012F0C1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 248D76D322E388380012F0C1 /* Assets.xcassets */; };
 		248D76DA22E388380012F0C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 248D76D922E388380012F0C1 /* main.m */; };
@@ -83,7 +83,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				0DB781EF22E931BE00E9B371 /* Flutter.framework in CopyFiles */,
+				0DB781EF22E931BE00E9B371 /* Flutter.xcframework in CopyFiles */,
 				0DB7820122EA2CA500E9B371 /* App.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -94,7 +94,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				0DB781F122E933E800E9B371 /* Flutter.framework in CopyFiles */,
+				0DB781F122E933E800E9B371 /* Flutter.xcframework in CopyFiles */,
 				0DB7820022EA2C9D00E9B371 /* App.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -105,7 +105,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				242F37A222E636DE001E83D4 /* Flutter.framework in Embed Frameworks */,
+				242F37A222E636DE001E83D4 /* Flutter.xcframework in Embed Frameworks */,
 				242F37A322E636DE001E83D4 /* App.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -129,7 +129,7 @@
 		244EA6CF230DBE8900B2D26E /* golden_platform_view_D21AP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = golden_platform_view_D21AP.png; sourceTree = "<group>"; };
 		246A6610252E693A00EAB0F3 /* RenderingSelectionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RenderingSelectionTest.m; sourceTree = "<group>"; };
 		246B4E4122E3B5F700073EBF /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = App.framework; sourceTree = "<group>"; };
-		246B4E4522E3B61000073EBF /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Flutter.framework; sourceTree = "<group>"; };
+		246B4E4522E3B61000073EBF /* Flutter.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Flutter.xcframework; sourceTree = "<group>"; };
 		248D76C722E388370012F0C1 /* Scenarios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scenarios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		248D76CA22E388370012F0C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		248D76CB22E388370012F0C1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -180,7 +180,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				246B4E4222E3B5F700073EBF /* App.framework in Frameworks */,
-				246B4E4622E3B61000073EBF /* Flutter.framework in Frameworks */,
+				246B4E4622E3B61000073EBF /* Flutter.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,7 +188,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0DB781FF22EA2C7200E9B371 /* Flutter.framework in Frameworks */,
+				0DB781FF22EA2C7200E9B371 /* Flutter.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -196,7 +196,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0DB781FE22EA2C6D00E9B371 /* Flutter.framework in Frameworks */,
+				0DB781FE22EA2C6D00E9B371 /* Flutter.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,7 +301,7 @@
 		248D76FC22E388900012F0C1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				246B4E4522E3B61000073EBF /* Flutter.framework */,
+				246B4E4522E3B61000073EBF /* Flutter.xcframework */,
 				246B4E4122E3B5F700073EBF /* App.framework */,
 			);
 			name = Frameworks;
