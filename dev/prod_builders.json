@@ -118,7 +118,8 @@
          "name": "Linux web_benchmarks_html",
          "repo": "flutter",
          "task_name": "linux_web_benchmarks_html",
-         "flaky": false
+         "flaky": false,
+	 "upload_metrics": true
       },
       {
          "name": "Linux web_tests",
