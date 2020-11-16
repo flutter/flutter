@@ -132,7 +132,7 @@ import '$generatedImport';
 import '$mainImport' as entrypoint;
 
 Future<void> main() async {
-  registerPlugins(webPluginRegistrar);
+  registerPlugins(webPluginRegistry);
   await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }

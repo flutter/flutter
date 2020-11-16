@@ -779,7 +779,8 @@ const String _dartPluginRegistryTemplate = '''
 // Generated file. Do not edit.
 //
 
-import 'dart:ui' as ui;
+// ignore: unused_import
+import 'dart:ui';
 
 {{#plugins}}
 import 'package:{{name}}/{{file}}';
@@ -788,15 +789,11 @@ import 'package:{{name}}/{{file}}';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
-void registerPlugins(Registrar registrar) {
+void registerPlugins(PluginRegistry registry) {
 {{#plugins}}
-  {{class}}.registerWith(registrar);
+  {{class}}.registerWith(registry.registrarFor({{class}}));
 {{/plugins}}
-  // The function below is only defined in the web version of dart:ui,
-  // but the analyzer uses the VM version, so we have to explicitly
-  // tell the analyzer to ignore it here.
-  // ignore: undefined_function
-  ui.webOnlySetPluginHandler(registrar.handleFrameworkMessage);
+  registry.registerMessageHandler();
 }
 ''';
 

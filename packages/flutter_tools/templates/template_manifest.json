@@ -173,7 +173,6 @@
         "templates/module/common/pubspec.yaml.tmpl",
         "templates/module/common/README.md.tmpl",
         "templates/module/common/test/widget_test.dart.tmpl",
-        "templates/module/ios/host_app_editable_cocoapods/Config.tmpl/Flutter.xcconfig",
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Debug.xcconfig",
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Flutter.xcconfig",
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Release.xcconfig",
