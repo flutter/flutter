@@ -15,6 +15,9 @@ import '../framework/utils.dart';
 
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/flutter_gallery'));
+const String kSourceLine = 'fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0';
+const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait) ? 34.0 : 24.0';
+
 
 TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> environment}) {
   return () async {
@@ -60,12 +63,10 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
               if (hotReloadCount == 0) {
                 // Update the file and reload again.
                 final File appDartSource = file(path.join(
-                    _editedFlutterGalleryDir.path, 'lib/gallery/app.dart',
+                    _editedFlutterGalleryDir.path, 'lib/demo/calculator/home.dart',
                 ));
                 appDartSource.writeAsStringSync(
-                    appDartSource.readAsStringSync().replaceFirst(
-                        "'Flutter Gallery'", "'Updated Flutter Gallery'",
-                    )
+                    appDartSource.readAsStringSync().replaceFirst(kSourceLine, kReplacementLine)
                 );
                 process.stdin.writeln('r');
                 ++hotReloadCount;
