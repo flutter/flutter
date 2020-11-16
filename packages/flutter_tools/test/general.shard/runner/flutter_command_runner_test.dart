@@ -96,18 +96,6 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
-      testUsingContext('throw tool exit if the version file cannot be written', () async {
-        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
-        when(version.ensureVersionFile()).thenThrow(const FileSystemException());
-
-        expect(() async => await runner.run(<String>['dummy']), throwsToolExit());
-
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-      }, initializeFlutterRoot: false);
-
     testUsingContext('Doesnt crash on invalid .packages file', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages')

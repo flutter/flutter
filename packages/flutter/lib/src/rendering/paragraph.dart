@@ -395,42 +395,36 @@ class RenderParagraph extends RenderBox
     RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
-    // Takes textScaleFactor into account because the content of the placeholder
-    // span will be scale up when it paints.
-    height = height / textScaleFactor;
     while (child != null) {
       // Height and baseline is irrelevant as all text will be laid
-      // out in a single line.
+      // out in a single line. Therefore, using 0.0 as a dummy for the height.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(child.getMaxIntrinsicWidth(height), height),
+        size: Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions.cast<PlaceholderDimensions>());
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
-    // Takes textScaleFactor into account because the content of the placeholder
-    // span will be scale up when it paints.
-    height = height / textScaleFactor;
     while (child != null) {
-      final double intrinsicWidth = child.getMinIntrinsicWidth(height);
-      final double intrinsicHeight = child.getMinIntrinsicHeight(intrinsicWidth);
+      // Height and baseline is irrelevant; only looking for the widest word or
+      // placeholder. Therefore, using 0.0 as a dummy for height.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(intrinsicWidth, intrinsicHeight),
+        size: Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions.cast<PlaceholderDimensions>());
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
@@ -451,7 +445,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions.cast<PlaceholderDimensions>());
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   @override
@@ -593,7 +587,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _placeholderDimensions = placeholderDimensions.cast<PlaceholderDimensions>();
+    _placeholderDimensions = placeholderDimensions;
   }
 
   // Iterate through the laid-out children and set the parentData offsets based

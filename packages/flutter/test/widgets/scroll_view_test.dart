@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -1259,49 +1258,5 @@ void main() {
       itemCount: 1,
       semanticChildCount: 4,
     ), throwsAssertionError);
-  });
-
-  testWidgets('PrimaryScrollController provides fallback ScrollActions', (WidgetTester tester)  async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
-          primary: true,
-          slivers: List<Widget>.generate(
-            20,
-            (int index) {
-              return SliverToBoxAdapter(
-                child: Focus(
-                  autofocus: index == 0,
-                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-    final ScrollController controller = PrimaryScrollController.of(
-      tester.element(find.byType(CustomScrollView))
-    )!;
-    await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(0.0));
-    expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
-      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
-    );
-    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
-    await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(400.0));
-    expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
-      equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -350.0)),
-    );
-    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
-    await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(0.0));
-    expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
-      equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
-    );
   });
 }
