@@ -154,6 +154,24 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _updateValueForSelectedDate();
+  }
+
+  @override
+  void didUpdateWidget(InputDatePickerFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDate != oldWidget.initialDate) {
+      // Can't update the form field in the middle of a build, so do it next frame
+      WidgetsBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        setState(() {
+          _selectedDate = widget.initialDate;
+          _updateValueForSelectedDate();
+        });
+      });
+    }
+  }
+
+  void _updateValueForSelectedDate() {
     if (_selectedDate != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       _inputText = localizations.formatCompactDate(_selectedDate!);
@@ -167,6 +185,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         _autoSelected = true;
       }
       _controller.value = textEditingValue;
+    } else {
+      _inputText = '';
+      _controller.value = _controller.value.copyWith(text: _inputText);
     }
   }
 
@@ -193,25 +214,25 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return null;
   }
 
+  bool _updateDate(String? text) {
+    final DateTime? date = _parseDate(text);
+    if (_isValidAcceptableDate(date)) {
+      _selectedDate = date;
+      _inputText = text;
+      return true;
+    }
+    return false;
+  }
+
   void _handleSaved(String? text) {
-    if (widget.onDateSaved != null) {
-      final DateTime? date = _parseDate(text);
-      if (_isValidAcceptableDate(date)) {
-        _selectedDate = date;
-        _inputText = text;
-        widget.onDateSaved!(date!);
-      }
+    if (_updateDate(text)) {
+      widget.onDateSaved?.call(_selectedDate!);
     }
   }
 
   void _handleSubmitted(String text) {
-    if (widget.onDateSubmitted != null) {
-      final DateTime? date = _parseDate(text);
-      if (_isValidAcceptableDate(date)) {
-        _selectedDate = date;
-        _inputText = text;
-        widget.onDateSubmitted!(date!);
-      }
+    if (_updateDate(text)) {
+      widget.onDateSubmitted?.call(_selectedDate!);
     }
   }
 
