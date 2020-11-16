@@ -209,18 +209,18 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// changes.
   ///
   /// {@tool snippet}
-  /// Querying [Window.platformBrightness].
-  ///
-  /// ```dart
-  /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
-  /// ```
-  /// {@end-tool}
-  ///
-  /// {@tool snippet}
   /// Querying [MediaQuery] directly. Preferred.
   ///
   /// ```dart
   /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool snippet}
+  /// Querying [PlatformDispatcher.platformBrightness].
+  ///
+  /// ```dart
+  /// final Brightness brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
   /// ```
   /// {@end-tool}
   ///
@@ -402,11 +402,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [Window.onBeginFrame], invokes all the transient frame callbacks
-  /// registered with [scheduleFrameCallback], in registration order. This
-  /// includes all the [Ticker] instances that are driving [AnimationController]
-  /// objects, which means all of the active [Animation] objects tick at this
-  /// point.
+  /// with [PlatformDispatcher.onBeginFrame], invokes all the transient frame
+  /// callbacks registered with [scheduleFrameCallback], in registration order.
+  /// This includes all the [Ticker] instances that are driving
+  /// [AnimationController] objects, which means all of the active [Animation]
+  /// objects tick at this point.
   ///
   /// 2. Microtasks: After [handleBeginFrame] returns, any microtasks that got
   /// scheduled by transient frame callbacks get to run. This typically includes
