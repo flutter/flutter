@@ -215,16 +215,19 @@ void main() {
     expect(getRenderImage(tester, key).scale, 1.5);
   });
 
+  // A 1.75 DPR screen is typically a low-resolution screen, such that physical
+  // pixels are visible to the user. For such screens we prefer to pick the
+  // higher resolution image, if available.
   testWidgets('Image for device pixel ratio 1.75', (WidgetTester tester) async {
     const double ratio = 1.75;
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
-    expect(getRenderImage(tester, key).scale, 1.5);
+    expect(getRenderImage(tester, key).scale, 2.0);
     key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, images));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
-    expect(getRenderImage(tester, key).scale, 1.5);
+    expect(getRenderImage(tester, key).scale, 2.0);
   });
 
   testWidgets('Image for device pixel ratio 2.3', (WidgetTester tester) async {
@@ -336,4 +339,50 @@ void main() {
     expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
   });
 
+  // For low-resolution screens we prefer higher-resolution images due to
+  // visible physical pixel size (see the test for 1.75 DPR above). However,
+  // if higher resolution assets are not available we will pick the best
+  // available.
+  testWidgets('Low-resolution assets', (WidgetTester tester) async {
+    final AssetBundle bundle = TestAssetBundle(manifest: '''
+      {
+        "assets/image.png" : [
+          "assets/image.png",
+          "assets/1.5x/image.png"
+        ]
+      }
+    ''');
+
+    Future<void> testRatio({required double ratio, required double expectedScale}) async {
+      Key key = GlobalKey();
+      await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images, bundle));
+      expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
+      expect(getRenderImage(tester, key).scale, expectedScale);
+      key = GlobalKey();
+      await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, images, bundle));
+      expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
+      expect(getRenderImage(tester, key).scale, expectedScale);
+    }
+
+    // Choose higher resolution image as it's the lowest available.
+    await testRatio(ratio: 0.25, expectedScale: 1.0);
+    await testRatio(ratio: 0.5, expectedScale: 1.0);
+    await testRatio(ratio: 0.75, expectedScale: 1.0);
+    await testRatio(ratio: 1.0, expectedScale: 1.0);
+
+    // Choose higher resolution image even though a lower resolution
+    // image is closer.
+    await testRatio(ratio: 1.20, expectedScale: 1.5);
+
+    // Choose higher resolution image because it's closer.
+    await testRatio(ratio: 1.25, expectedScale: 1.5);
+    await testRatio(ratio: 1.5, expectedScale: 1.5);
+
+    // Choose lower resolution image because no higher resolution assets
+    // are not available.
+    await testRatio(ratio: 1.75, expectedScale: 1.5);
+    await testRatio(ratio: 2.0, expectedScale: 1.5);
+    await testRatio(ratio: 2.25, expectedScale: 1.5);
+    await testRatio(ratio: 10.0, expectedScale: 1.5);
+  });
 }

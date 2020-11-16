@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -20,6 +21,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
+      Cache.flutterRoot = 'flutter';
     });
 
     setUp(() {
@@ -38,14 +40,24 @@ void main() {
         }
         // Set up enough of the packages to satisfy the templating code.
         final File packagesFile = globals.fs.file(
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', '.packages'));
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', '.dart_tool', 'package_config.json'));
         final File flutterManifest = globals.fs.file(
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'template_manifest.json'))
             ..createSync(recursive: true);
         final Directory templateImagesDirectory = globals.fs.directory('flutter_template_images');
         templateImagesDirectory.createSync(recursive: true);
         packagesFile.createSync(recursive: true);
-        packagesFile.writeAsStringSync('flutter_template_images:file:///${templateImagesDirectory.uri}');
+        packagesFile.writeAsStringSync(json.encode(<String, Object>{
+          'configVersion': 2,
+          'packages': <Object>[
+            <String, Object>{
+              'name': 'flutter_template_images',
+              'languageVersion': '2.8',
+              'rootUri': templateImagesDirectory.uri.toString(),
+              'packageUri': 'lib/',
+            },
+          ],
+        }));
         flutterManifest.writeAsStringSync('{"files":[]}');
       }, overrides: <Type, Generator>{
         DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
@@ -56,16 +68,16 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=module', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'module'));
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'app'));
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=package', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=package', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'package'));
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=plugin', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
       expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'plugin'));
     }));
 
@@ -74,13 +86,12 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
-        'create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+        'create', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues,
              containsPair(CustomDimensions.commandCreateIosLanguage, 'swift'));
 
       await runner.run(<String>[
         'create',
-        '--flutter-root=flutter',
         '--no-pub',
         '--template=app',
         '--ios-language=objc',
@@ -95,13 +106,12 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+      await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues,
              containsPair(CustomDimensions.commandCreateAndroidLanguage, 'kotlin'));
 
       await runner.run(<String>[
         'create',
-        '--flutter-root=flutter',
         '--no-pub',
         '--template=app',
         '--android-language=java',

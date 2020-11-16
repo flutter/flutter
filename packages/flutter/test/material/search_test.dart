@@ -122,7 +122,8 @@ void main() {
   });
 
   testWidgets('Hint text color overridden', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    const String searchHintText = 'Enter search terms';
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHintText);
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -130,9 +131,8 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    final Color hintColor = textField.decoration!.hintStyle!.color!;
-    expect(hintColor, delegate.hintTextColor);
+    final Text hintText = tester.widget(find.text(searchHintText));
+    expect(hintText.style!.color, _TestSearchDelegate.hintTextColor);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -540,20 +540,18 @@ void main() {
   });
 
   testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
-    const TextStyle searchStyle = TextStyle(color: Colors.red, fontSize: 3);
+    const String searchHintText = 'Enter search terms';
+    const TextStyle searchFieldStyle = TextStyle(color: Colors.red, fontSize: 3);
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate(searchFieldStyle: searchStyle);
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHintText, searchFieldStyle: searchFieldStyle);
 
-    await tester.pumpWidget(
-      TestHomePage(
-      delegate: delegate,
-    ));
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    final TextStyle hintStyle = textField.decoration!.hintStyle!;
-    expect(hintStyle, delegate.searchFieldStyle);
+    final Text hintText = tester.widget(find.text(searchHintText));
+    expect(hintText.style?.color, delegate.searchFieldStyle?.color);
+    expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
@@ -692,6 +690,23 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
 
+  testWidgets('Custom searchFieldDecorationTheme value',
+      (WidgetTester tester) async {
+    const InputDecorationTheme searchFieldDecorationTheme = InputDecorationTheme(
+      hintStyle: TextStyle(color: _TestSearchDelegate.hintTextColor),
+    );
+    final _TestSearchDelegate delegate = _TestSearchDelegate(
+      searchFieldDecorationTheme: searchFieldDecorationTheme,
+    );
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
+    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme);
+  });
+
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (light mode)', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData.light();
@@ -709,8 +724,11 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, Colors.white);
+      final Material appBarBackground = tester.widget<Material>(find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      ));
+      expect(appBarBackground.color, Colors.white);
 
       final TextField textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
@@ -734,8 +752,11 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, themeData.primaryColor);
+      final Material appBarBackground = tester.widget<Material>(find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      ));
+      expect(appBarBackground.color, themeData.primaryColor);
 
       final TextField textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
@@ -803,16 +824,22 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.result = 'Result',
     this.actions = const <Widget>[],
     this.defaultAppBarTheme = false,
+    InputDecorationTheme? searchFieldDecorationTheme,
     TextStyle? searchFieldStyle,
     String? searchHint,
     TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, searchFieldStyle: searchFieldStyle);
+  }) : super(
+          searchFieldLabel: searchHint,
+          textInputAction: textInputAction,
+          searchFieldStyle: searchFieldStyle,
+          searchFieldDecorationTheme: searchFieldDecorationTheme,
+        );
 
   final bool defaultAppBarTheme;
   final String suggestions;
   final String result;
   final List<Widget> actions;
-  final Color hintTextColor = Colors.green;
+  static const Color hintTextColor = Colors.green;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -821,7 +848,13 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     }
     final ThemeData theme = Theme.of(context);
     return theme.copyWith(
-      inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
+      inputDecorationTheme: searchFieldDecorationTheme ??
+          InputDecorationTheme(
+            hintStyle: searchFieldStyle ??
+                const TextStyle(
+                  color: hintTextColor,
+                ),
+          ),
     );
   }
 

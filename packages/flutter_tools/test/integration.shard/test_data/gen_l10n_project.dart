@@ -42,11 +42,13 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: 0.16.1
+  intl: 0.17.0-nullsafety.2
 ''';
 
   @override
   final String main = r'''
+// @dart = 2.8
+// generated localizations do not support null safety.
 import 'package:flutter/material.dart';
 
 import 'l10n/app_localizations.dart';

@@ -42,6 +42,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     FlutterProject flutterProject,
     String shellPath,
     this.updateGoldens,
+    @required BuildInfo buildInfo,
   }) {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
@@ -67,7 +68,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
-      () => TestCompiler(BuildInfo.debug, flutterProject),
+      () => TestCompiler(buildInfo, flutterProject),
     );
   }
 
@@ -76,6 +77,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     String shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
+    @required BuildInfo buildInfo,
   }) async {
     final shelf_io.IOServer server =
         shelf_io.IOServer(await HttpMultiServer.loopback(0));
@@ -86,11 +88,12 @@ class FlutterWebPlatform extends PlatformPlugin {
       flutterProject: flutterProject,
       shellPath: shellPath,
       updateGoldens: updateGoldens,
+      buildInfo: buildInfo,
     );
   }
 
   final Future<PackageConfig> _packagesFuture = loadPackageConfigWithLogging(
-    globals.fs.file(globalPackagesPath),
+    globals.fs.file(globals.fs.path.join('.dart_tool', 'package_config.json')),
     logger: globals.logger,
   );
 
@@ -864,7 +867,7 @@ class TestGoldenComparator {
       shellPath,
       '--disable-observatory',
       '--non-interactive',
-      '--packages=$globalPackagesPath',
+      '--packages=${globals.fs.path.join('.dart_tool', 'package_config.json')}',
       output,
     ];
 

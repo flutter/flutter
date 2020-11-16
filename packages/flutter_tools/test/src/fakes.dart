@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 
@@ -51,12 +54,12 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   };
 
   @override
-  Future<bool> isUpToDate() => Future<bool>.value(true);
+  Future<bool> isUpToDate(FileSystem fileSystem) => Future<bool>.value(true);
 
   @override
   String get name => 'fake';
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater) async {
+  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async {
   }
 }

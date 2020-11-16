@@ -62,13 +62,10 @@ void generateLocalizations({
         useDeferredLoading: options.deferredLoading ?? false,
         useSyntheticPackage: options.useSyntheticPackage ?? true,
         areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
+        untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
       )
       ..loadResources()
-      ..writeOutputFiles()
-      ..outputUnimplementedMessages(
-        options?.untranslatedMessagesFile?.toFilePath(),
-        logger,
-      );
+      ..writeOutputFiles(logger);
   } on L10nException catch (e) {
     logger.printError(e.message);
     throw Exception();
