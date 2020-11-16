@@ -394,7 +394,7 @@ class _Outline extends RoundedRectangleBorder {
   }
 
   @override
-  _Outline copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
+  _Outline copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
     return _Outline(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
