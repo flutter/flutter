@@ -280,7 +280,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///             style: const TextStyle(fontSize: 20),
 ///           ),
 ///           LinearProgressIndicator(
-///             value: animation.value,
+///             value: controller.value,
 ///             semanticsLabel: 'Linear progress indicator',
 ///           ),
 ///         ],
@@ -518,7 +518,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///             style: Theme.of(context).textTheme.headline6,
 ///           ),
 ///           CircularProgressIndicator(
-///             value: animation.value,
+///             value: controller.value,
 ///             semanticsLabel: 'Linear progress indicator',
 ///           ),
 ///         ],
