@@ -95,6 +95,7 @@ void main() {
         else
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
+        'EXCLUDED_ARCHS=arm64',
       ],
       stdout: 'STDOUT STUFF',
       onRun: () {
