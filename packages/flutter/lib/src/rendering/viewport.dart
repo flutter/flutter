@@ -1352,7 +1352,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
+  Size computeDryLayout(BoxConstraints constraints) {
     assert(() {
       if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
         switch (axis) {
@@ -1420,7 +1420,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       }
       return true;
     }());
-    size = constraints.biggest;
+    return constraints.biggest;
   }
 
   static const int _maxLayoutCycles = 10;
