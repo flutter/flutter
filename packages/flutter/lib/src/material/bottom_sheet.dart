@@ -191,7 +191,9 @@ class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStat
     return renderBox.size.height;
   }
 
-  late final AnimationController _effectiveAnimationController = widget.animationController ?? BottomSheet.createAnimationController(this);
+  late final AnimationController _effectiveAnimationController =
+      widget.animationController ?? BottomSheet.createAnimationController(this);
+
   bool get _dismissUnderway => _effectiveAnimationController.status == AnimationStatus.reverse;
 
   void _handleDragStart(DragStartDetails details) {
