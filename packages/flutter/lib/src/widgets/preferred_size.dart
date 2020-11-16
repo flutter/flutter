@@ -33,18 +33,13 @@ abstract class PreferredSizeWidget implements Widget {
 /// affect the child's layout in any way. It just advertises a preferred size
 /// which can be used by the parent.
 ///
-/// Widgets like [AppBar] implements a [PreferredSizeWidget], meaning the
-/// possibility of changing [Scaffold.appBar] behavior.
+/// Widgets like [AppBar] implement a [PreferredSizeWidget].
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-/// This sample shows a custom AppBar with a [PreferredSize].
-/// The preferred size is set to 80 logical pixels.
-///
-/// Consider changing the [PreferredSize] value and see how the
-/// custom [AppBar] behaves. The benefit of using
-/// PreferredSize as a [Scaffold.appBar] child it's the possibility of creating
-/// custom and adapting appBars.
+/// This sample shows a custom AppBar with a [PreferredSize], with its height
+/// set to 80 logical pixels. Changing the [PreferredSize] can be used to change
+/// the height of the AppBar.
 ///
 /// ```dart preamble
 /// class AppBarContent extends StatelessWidget {
@@ -58,7 +53,7 @@ abstract class PreferredSizeWidget implements Widget {
 ///           child: Row(
 ///             children: [
 ///               Text(
-///                 "Awesome Name App",
+///                 "PreferredSize Sample",
 ///                 style: TextStyle(color: Colors.white),
 ///               ),
 ///               Spacer(),
@@ -101,7 +96,7 @@ abstract class PreferredSizeWidget implements Widget {
 ///       ),
 ///     ),
 ///     body: Center(
-///       child: Text("Awesome content"),
+///       child: Text("Content"),
 ///     ),
 ///   );
 /// }
