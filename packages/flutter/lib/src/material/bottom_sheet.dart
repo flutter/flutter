@@ -182,7 +182,7 @@ class BottomSheet extends StatefulWidget {
   }
 }
 
-class _BottomSheetState extends State<BottomSheet> {
+class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStateMixin {
 
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
@@ -191,7 +191,8 @@ class _BottomSheetState extends State<BottomSheet> {
     return renderBox.size.height;
   }
 
-  bool get _dismissUnderway => widget.animationController!.status == AnimationStatus.reverse;
+  late final AnimationController _effectiveAnimationController = widget.animationController ?? BottomSheet.createAnimationController(this);
+  bool get _dismissUnderway => _effectiveAnimationController.status == AnimationStatus.reverse;
 
   void _handleDragStart(DragStartDetails details) {
     if (widget.onDragStart != null) {
@@ -203,7 +204,7 @@ class _BottomSheetState extends State<BottomSheet> {
     assert(widget.enableDrag);
     if (_dismissUnderway)
       return;
-    widget.animationController!.value -= details.primaryDelta! / _childHeight;
+    _effectiveAnimationController.value -= details.primaryDelta! / _childHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -213,18 +214,18 @@ class _BottomSheetState extends State<BottomSheet> {
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
-      if (widget.animationController!.value > 0.0) {
-        widget.animationController!.fling(velocity: flingVelocity);
+      if (_effectiveAnimationController.value > 0.0) {
+        _effectiveAnimationController.fling(velocity: flingVelocity);
       }
       if (flingVelocity < 0.0) {
         isClosing = true;
       }
-    } else if (widget.animationController!.value < _closeProgressThreshold) {
-      if (widget.animationController!.value > 0.0)
-        widget.animationController!.fling(velocity: -1.0);
+    } else if (_effectiveAnimationController.value < _closeProgressThreshold) {
+      if (_effectiveAnimationController.value > 0.0)
+        _effectiveAnimationController.fling(velocity: -1.0);
       isClosing = true;
     } else {
-      widget.animationController!.forward();
+      _effectiveAnimationController.forward();
     }
 
     if (widget.onDragEnd != null) {
