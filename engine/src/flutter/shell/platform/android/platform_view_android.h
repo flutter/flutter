@@ -35,7 +35,6 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  private:
   const AndroidContext& android_context_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
-  std::weak_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
 };
 
 class PlatformViewAndroid final : public PlatformView {

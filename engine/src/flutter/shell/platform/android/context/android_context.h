@@ -22,7 +22,7 @@ class AndroidContext {
  public:
   explicit AndroidContext(AndroidRenderingAPI rendering_api);
 
-  ~AndroidContext();
+  virtual ~AndroidContext();
 
   AndroidRenderingAPI RenderingApi() const;
 
