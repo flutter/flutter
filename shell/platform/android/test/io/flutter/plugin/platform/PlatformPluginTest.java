@@ -15,10 +15,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.view.View;
 import android.view.Window;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.ClipboardContentFormat;
+import io.flutter.embedding.engine.systemchannels.PlatformChannel.SystemChromeStyle;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -109,5 +111,26 @@ public class PlatformPluginTest {
     clip = ClipData.newPlainText("", "");
     clipboardManager.setPrimaryClip(clip);
     assertFalse(platformPlugin.mPlatformMessageHandler.clipboardHasStrings());
+  }
+
+  @Config(sdk = 29)
+  @Test
+  public void setNavigationBarDividerColor() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    Activity fakeActivity = mock(Activity.class);
+    when(fakeActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
+    SystemChromeStyle style = new SystemChromeStyle(0XFF000000, null, 0XFFC70039, null, 0XFF006DB3);
+
+    if (Build.VERSION.SDK_INT >= 28) {
+      platformPlugin.mPlatformMessageHandler.setSystemUiOverlayStyle(style);
+
+      assertEquals(0XFF006DB3, fakeActivity.getWindow().getNavigationBarDividerColor());
+      assertEquals(0XFFC70039, fakeActivity.getWindow().getStatusBarColor());
+      assertEquals(0XFF000000, fakeActivity.getWindow().getNavigationBarColor());
+    }
   }
 }
