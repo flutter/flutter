@@ -41,7 +41,7 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 ///           } else if (scrollNotification is ScrollEndNotification) {
 ///             print("Scrolling has ended");
 ///           }
-///          // Return true to cancel the notification bubbling.
+///           // Return true to cancel the notification bubbling.
 ///           return true;
 ///         },
 ///         child: NestedScrollView(
