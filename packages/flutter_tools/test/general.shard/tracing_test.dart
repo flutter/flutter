@@ -35,6 +35,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: [],
 );
 
 final FlutterView fakeFlutterView = FlutterView(
