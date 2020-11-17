@@ -8,7 +8,7 @@
 // following exceptions:
 //
 //  * All comments except this one are removed.
-//  * _invoke2 is replaced with engine.invoke2
+//  * _invokeX is replaced with engine.invokeX (X=1,2)
 //  * _printDebug is replaced with print in an assert.
 
 part of ui;
@@ -18,21 +18,27 @@ typedef DrainChannelCallback = Future<void> Function(ByteData? data, PlatformMes
 typedef ChannelCallback = void Function(ByteData? data, PlatformMessageResponseCallback callback);
 
 class _ChannelCallbackRecord {
-  _ChannelCallbackRecord(this.callback) : zone = Zone.current;
-  final ChannelCallback callback;
-  final Zone zone;
+  _ChannelCallbackRecord(this._callback) : _zone = Zone.current;
+  final ChannelCallback _callback;
+  final Zone _zone;
 
   void invoke(ByteData? dataArg, PlatformMessageResponseCallback callbackArg) {
-    engine.invoke2<ByteData?, PlatformMessageResponseCallback>(callback, zone, dataArg, callbackArg);
+    engine.invoke2<ByteData?, PlatformMessageResponseCallback>(_callback, _zone, dataArg, callbackArg);
   }
 }
 
 class _StoredMessage {
-  const _StoredMessage(this.data, this.callback);
+  _StoredMessage(this.data, this._callback) : _zone = Zone.current;
 
   final ByteData? data;
 
-  final PlatformMessageResponseCallback callback;
+  final PlatformMessageResponseCallback _callback;
+
+  final Zone _zone;
+
+  void invoke(ByteData? dataArg) {
+    engine.invoke1(_callback, _zone, dataArg);
+  }
 }
 
 class _Channel {
@@ -57,7 +63,7 @@ class _Channel {
   bool push(_StoredMessage message) {
     if (!_draining && _channelCallbackRecord != null) {
       assert(_queue.isEmpty);
-      _channelCallbackRecord!.invoke(message.data, message.callback);
+      _channelCallbackRecord!.invoke(message.data, message.invoke);
       return false;
     }
     if (_capacity <= 0) {
@@ -74,7 +80,7 @@ class _Channel {
     bool result = false;
     while (_queue.length > lengthLimit) {
       final _StoredMessage message = _queue.removeFirst();
-      message.callback(null); // send empty reply to the plugin side
+      message.invoke(null); // send empty reply to the plugin side
       result = true;
     }
     return result;
@@ -103,7 +109,7 @@ class _Channel {
     assert(_draining);
     if (_queue.isNotEmpty && _channelCallbackRecord != null) {
       final _StoredMessage message = pop();
-      _channelCallbackRecord!.invoke(message.data, message.callback);
+      _channelCallbackRecord!.invoke(message.data, message.invoke);
       scheduleMicrotask(_drainStep);
     } else {
       _draining = false;
@@ -152,7 +158,7 @@ class ChannelBuffers {
     final _Channel? channel = _channels[name];
     while (channel != null && !channel._queue.isEmpty) {
       final _StoredMessage message = channel.pop();
-      await callback(message.data, message.callback);
+      await callback(message.data, message.invoke);
     }
   }
 
