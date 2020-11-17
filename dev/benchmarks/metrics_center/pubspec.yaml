@@ -7,7 +7,6 @@ dependencies:
   args: 1.6.0
   crypto: 2.1.5
   gcloud: 0.7.3
-  googleapis: 0.56.1
   googleapis_auth: 0.2.12
   github: 7.0.3
   equatable: 1.2.5
