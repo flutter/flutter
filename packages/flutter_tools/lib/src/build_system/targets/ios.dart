@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/common.dart';
@@ -145,6 +147,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
 
   @override
   List<Target> get dependencies => const <Target>[
+    ReleaseUnpackIOS(),
     KernelSnapshot(),
   ];
 }
@@ -179,6 +182,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
 
   @override
   List<Target> get dependencies => const <Target>[
+    ProfileUnpackIOS(),
     KernelSnapshot(),
   ];
 }
@@ -192,6 +196,7 @@ class DebugUniversalFramework extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
+    DebugUnpackIOS(),
     KernelSnapshot(),
   ];
 
@@ -224,6 +229,95 @@ class DebugUniversalFramework extends Target {
       throw Exception('Failed to create App.framework.');
     }
   }
+}
+
+/// Copy the iOS framework to the correct copy dir by invoking 'rsync'.
+///
+/// This class is abstract to share logic between the three concrete
+/// implementations. The shelling out is done to avoid complications with
+/// preserving special files (e.g., symbolic links) in the framework structure.
+abstract class UnpackIOS extends Target {
+  const UnpackIOS();
+
+  @override
+  List<Source> get inputs => <Source>[
+        const Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+        Source.artifact(
+          Artifact.flutterFramework,
+          platform: TargetPlatform.ios,
+          mode: buildMode,
+        ),
+      ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+        Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
+      ];
+
+  @override
+  List<Target> get dependencies => <Target>[];
+
+  @visibleForOverriding
+  BuildMode get buildMode;
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String basePath = environment.artifacts.getArtifactPath(
+      Artifact.flutterFramework,
+      platform: TargetPlatform.ios,
+      mode: buildMode,
+    );
+
+    final ProcessResult result = environment.processManager.runSync(<String>[
+      'rsync',
+      '-av',
+      '--delete',
+      '--filter',
+      '- .DS_Store/',
+      basePath,
+      environment.outputDir.path,
+    ]);
+    if (result.exitCode != 0) {
+      throw Exception(
+        'Failed to copy framework (exit ${result.exitCode}:\n'
+        '${result.stdout}\n---\n${result.stderr}',
+      );
+    }
+  }
+}
+
+/// Unpack the release prebuilt engine framework.
+class ReleaseUnpackIOS extends UnpackIOS {
+  const ReleaseUnpackIOS();
+
+  @override
+  String get name => 'release_unpack_ios';
+
+  @override
+  BuildMode get buildMode => BuildMode.release;
+}
+
+/// Unpack the profile prebuilt engine framework.
+class ProfileUnpackIOS extends UnpackIOS {
+  const ProfileUnpackIOS();
+
+  @override
+  String get name => 'profile_unpack_ios';
+
+  @override
+  BuildMode get buildMode => BuildMode.profile;
+}
+
+/// Unpack the debug prebuilt engine framework.
+class DebugUnpackIOS extends UnpackIOS {
+  const DebugUnpackIOS();
+
+  @override
+  String get name => 'debug_unpack_ios';
+
+  @override
+  BuildMode get buildMode => BuildMode.debug;
 }
 
 /// The base class for all iOS bundle targets.

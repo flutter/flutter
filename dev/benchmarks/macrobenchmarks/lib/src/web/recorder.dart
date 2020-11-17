@@ -528,11 +528,16 @@ class _WidgetBuildRecorderHost extends StatefulWidget {
   final WidgetBuildRecorder recorder;
 
   @override
-  State<StatefulWidget> createState() =>
-      recorder._hostState = _WidgetBuildRecorderHostState();
+  State<StatefulWidget> createState() => _WidgetBuildRecorderHostState();
 }
 
 class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
+  @override
+  void initState() {
+    super.initState();
+    widget.recorder._hostState = this;
+  }
+
   // This is just to bypass the @protected on setState.
   void _setStateTrampoline() {
     setState(() {});
