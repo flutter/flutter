@@ -4,6 +4,7 @@
 
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -529,6 +530,6 @@ void main() {
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                             size: Size(800.0, 400.0)\n'
     ));
-  });
+  }, skip: kIsWeb);
 
 }
