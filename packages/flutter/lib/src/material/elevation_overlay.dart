@@ -44,7 +44,7 @@ class ElevationOverlay {
   ///  * <https://material.io/design/color/dark-theme.html>, which specifies how
   ///    the overlay should be applied.
   static Color applyOverlay(BuildContext context, Color color, double elevation) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     if (elevation > 0.0 &&
         theme.applyElevationOverlayColor &&
         theme.brightness == Brightness.dark &&
