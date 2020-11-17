@@ -471,6 +471,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     sortColumnIndex: widget.sortColumnIndex,
                     sortAscending: widget.sortAscending,
                     onSelectAll: widget.onSelectAll,
+                    // Make sure no decoration is set on the DataTable
+                    // from the theme, as its already wrapped in a Card.
                     decoration: const BoxDecoration(),
                     dataRowHeight: widget.dataRowHeight,
                     headingRowHeight: widget.headingRowHeight,

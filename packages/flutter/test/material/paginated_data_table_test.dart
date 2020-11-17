@@ -787,7 +787,7 @@ void main() {
     expect(find.byType(Checkbox), findsNothing);
   });
 
-  testWidgets('Table has no decoration with DataTableTheme', (WidgetTester tester) async {
+  testWidgets('Table should not use decoration from DataTableTheme', (WidgetTester tester) async {
     final Size originalSize = binding.renderView.size;
     await binding.setSurfaceSize(const Size(800, 800));
 
