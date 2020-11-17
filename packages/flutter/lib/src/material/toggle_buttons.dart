@@ -15,9 +15,9 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggle_buttons_theme.dart';
 
-/// A horizontal set of toggle buttons.
+/// A set of toggle buttons.
 ///
-/// The list of [children] are laid out in a row. The state of each button
+/// The list of [children] are laid out along [direction]. The state of each button
 /// is controlled by [isSelected], which is a list of bools that determine
 /// if a button is in an unselected or selected state. They are both
 /// correlated by their index in the list. The length of [isSelected] has to
@@ -150,9 +150,9 @@ import 'toggle_buttons_theme.dart';
 ///
 ///  * <https://material.io/design/components/buttons.html#toggle-button>
 class ToggleButtons extends StatelessWidget {
-  /// Creates a horizontal set of toggle buttons.
+  /// Creates a set of toggle buttons.
   ///
-  /// It displays its widgets provided in a [List] of [children] horizontally.
+  /// It displays its widgets provided in a [List] of [children] along [direction].
   /// The state of each button is controlled by [isSelected], which is a list
   /// of bools that determine if a button is in an active, disabled, or
   /// selected state. They are both correlated by their index in the list.
@@ -162,7 +162,8 @@ class ToggleButtons extends StatelessWidget {
   /// Both [children] and [isSelected] properties arguments are required.
   ///
   /// [isSelected] values must be non-null. [focusNodes] must be null or a
-  /// list of non-null nodes. [renderBorder] must not be null.
+  /// list of non-null nodes. [renderBorder] and [direction] must not be null.
+  /// If [direction] is [Axis.vertical], [verticalDirection] must not be null.
   const ToggleButtons({
     Key? key,
     required this.children,
@@ -192,6 +193,8 @@ class ToggleButtons extends StatelessWidget {
     assert(children != null),
     assert(isSelected != null),
     assert(children.length == isSelected.length),
+    assert(direction != null),
+    assert(direction == Axis.horizontal || verticalDirection != null),
     super(key: key);
 
   static const double _defaultBorderWidth = 1.0;
@@ -485,7 +488,6 @@ class ToggleButtons extends StatelessWidget {
         );
       }
     }
-
     return BorderRadius.zero;
   }
 
@@ -668,7 +670,7 @@ class ToggleButtons extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: buttons
+          children: buttons,
         ),
       )
       : IntrinsicWidth(
@@ -676,7 +678,7 @@ class ToggleButtons extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           verticalDirection: verticalDirection,
-          children: buttons
+          children: buttons,
         ),
       );
   }
@@ -703,6 +705,8 @@ class ToggleButtons extends StatelessWidget {
     properties.add(ColorProperty('disabledBorderColor', disabledBorderColor, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
     properties.add(DoubleProperty('borderWidth', borderWidth, defaultValue: null));
+    properties.add(DiagnosticsProperty<Axis>('direction', direction, defaultValue: Axis.horizontal));
+    properties.add(DiagnosticsProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
   }
 }
 
@@ -801,7 +805,11 @@ class _ToggleButton extends StatelessWidget {
   /// The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
 
-  /// The width and color of the button's top and bottom side borders.
+  /// If [direction] is [Axis.horizontal], this corresponds the width and color
+  /// of the button's top and bottom side borders.
+  ///
+  /// If [direction] is [Axis.vertical], this corresponds the width and color
+  /// of the button's left and right side borders.
   final BorderSide borderSide;
 
   /// The width and color of the button's trailing side border.
@@ -822,7 +830,7 @@ class _ToggleButton extends StatelessWidget {
   /// Whether or not this toggle button is the last button in the list.
   final bool isLastButton;
 
-  /// Axis
+  /// The direction along which the buttons are rendered.
   final Axis direction;
 
   /// Determines the order to lay children out vertically and how to interpret start and end in the vertical direction.
@@ -966,12 +974,11 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
   // Whether or not this toggle button is the last button in the list.
   final bool isLastButton;
 
-  // The direction along which the buttons are rendered
+  // The direction along which the buttons are rendered.
   final Axis direction;
 
-  /// Determines the order to lay children out vertically and how to interpret start and end in the vertical direction.
-  ///
-  /// If the direction is Axis.vertical, this controls which order children are painted in (down or up).
+  // Determines the order to lay children out vertically
+  // and how to interpret start and end in the vertical direction.
   final VerticalDirection verticalDirection;
 
   @override
@@ -1162,7 +1169,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           leadingBorderSide.width + trailingBorderSide.width,
         ));
       }
-
       return;
     }
 
@@ -1343,7 +1349,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.left + borderSide.width / 2.0, rrect.bottom);
             context.canvas.drawPath(endingPath, endingPaint);
           } else if (isFirstButton) {
-            Path leadingPath = Path();
+            final Path leadingPath = Path();
             leadingPath..moveTo(outer.right, rrect.bottom)
               ..lineTo(rrect.left + rrect.blRadiusX, rrect.bottom)
               ..addArc(blCorner, math.pi / 2.0, sweepAngle)
@@ -1352,13 +1358,13 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.right, rrect.top);
             context.canvas.drawPath(leadingPath, leadingPaint);
           } else {
-            Path leadingPath = Path();
+            final Path leadingPath = Path();
             leadingPath..moveTo(rrect.left, rrect.bottom + leadingBorderSide.width / 2)
               ..lineTo(rrect.left, rrect.top - leadingBorderSide.width / 2);
             context.canvas.drawPath(leadingPath, leadingPaint);
 
             final Paint horizontalPaint = borderSide.toPaint();
-            Path horizontalPaths = Path();
+            final Path horizontalPaths = Path();
             horizontalPaths..moveTo(rrect.left + borderSide.width / 2.0, rrect.top)
               ..lineTo(outer.right - rrect.trRadiusX, rrect.top)
               ..moveTo(rrect.left + borderSide.width / 2.0 + rrect.tlRadiusX, rrect.bottom)
@@ -1430,7 +1436,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
             context.canvas.drawPath(endingPath, endingPaint);
           } else if (isFirstButton) {
-            Path leadingPath = Path();
+            final Path leadingPath = Path();
             leadingPath..moveTo(rrect.left, outer.bottom)
               ..lineTo(rrect.left, rrect.top + rrect.tlRadiusX)
               ..addArc(tlCorner, math.pi, sweepAngle)
@@ -1440,16 +1446,16 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
             context.canvas.drawPath(leadingPath, leadingPaint);
           } else {
-            Path topPath = Path();
+            final Path topPath = Path();
             topPath..moveTo(outer.left, outer.top + leadingBorderSide.width / 2)
               ..lineTo(outer.right, outer.top + leadingBorderSide.width / 2);
             context.canvas.drawPath(topPath, leadingPaint);
 
             final Paint paint = borderSide.toPaint();
-            Path paths = Path(); // Left and right borders.
+            final Path paths = Path(); // Left and right borders.
             paths..moveTo(rrect.left, outer.top + leadingBorderSide.width)
               ..lineTo(rrect.left, outer.bottom)
-              ..moveTo(rrect.right, rrect.top + leadingBorderSide.width / 2.0)
+              ..moveTo(rrect.right, outer.top + leadingBorderSide.width)
               ..lineTo(rrect.right, outer.bottom);
 
             context.canvas.drawPath(paths, paint);
@@ -1472,7 +1478,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, rrect.bottom + leadingBorderSide.width / 2.0);
             context.canvas.drawPath(endingPath, endingPaint);
           } else if (isFirstButton) {
-            Path leadingPath = Path();
+            final Path leadingPath = Path();
             leadingPath..moveTo(rrect.left, rrect.top + leadingBorderSide.width / 2.0)
               ..lineTo(rrect.left, rrect.bottom - rrect.blRadiusY)
               ..addArc(blCorner, math.pi, -sweepAngle)
@@ -1481,16 +1487,16 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, rrect.top + leadingBorderSide.width / 2.0);
             context.canvas.drawPath(leadingPath, leadingPaint);
           } else {
-            Path bottomPath = Path();
+            final Path bottomPath = Path();
             bottomPath..moveTo(outer.left, outer.bottom + leadingBorderSide.width / 2)
               ..lineTo(outer.right, outer.bottom + leadingBorderSide.width / 2);
             context.canvas.drawPath(bottomPath, leadingPaint);
 
             final Paint paint = borderSide.toPaint();
-            Path paths = Path(); // Left and right borders.
+            final Path paths = Path(); // Left and right borders.
             paths..moveTo(rrect.left, outer.top + leadingBorderSide.width)
               ..lineTo(rrect.left, outer.bottom)
-              ..moveTo(rrect.right, rrect.top + leadingBorderSide.width / 2.0)
+              ..moveTo(rrect.right, outer.top + leadingBorderSide.width)
               ..lineTo(rrect.right, outer.bottom);
             context.canvas.drawPath(paths, paint);
           }
