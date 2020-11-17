@@ -24,6 +24,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly, nullable) NSOpenGLContext* resourceContext;
 
 /**
+ * The main OpenGL which will be used for rendering contents to the FlutterView.
+ */
+@property(readwrite, nonatomic, nonnull) NSOpenGLContext* openGLContext;
+
+/**
  * Intializes the renderer with the given FlutterEngine.
  */
 - (instancetype)initWithFlutterEngine:(FLUTTER_API_SYMBOL(FlutterEngine))engine;
