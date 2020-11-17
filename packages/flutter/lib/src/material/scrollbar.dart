@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 const double _kScrollbarThickness = 8.0;
+const double _kScrollbarHoverThickness = 12.0;
 const double _kScrollbarMargin = 2.0;
 const double _kScrollbarMinLength = 48.0;
 const Radius _kScrollbarRadius = Radius.circular(8.0);
@@ -39,7 +40,7 @@ class Scrollbar extends RawScrollbarThumb {
     required Widget child,
     ScrollController? controller,
     bool isAlwaysShown = false,
-    this.showTrack = false,
+    this.showTrackOnHover = false,
     double? thickness,
     Radius? radius,
   }) : super(
@@ -54,10 +55,9 @@ class Scrollbar extends RawScrollbarThumb {
     pressDuration: Duration.zero,
   );
 
-  /// Track will animate in on hover and remain during drag\
-  // TODO(Piinks): Update painter to include track on hover.
-  // Adding the track brings in a thickness animation like the cupertino widget
-  final bool showTrack;
+  /// Track will animate in on hover and remain during drag.
+  // TODO(Piinks): Track should show on hover if true, also updates thickness with track
+  final bool showTrackOnHover;
 
   // TODO(Piinks): Add tap on track.
 
@@ -66,9 +66,10 @@ class Scrollbar extends RawScrollbarThumb {
 }
 
 class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
-  late AnimationController _colorAnimationController;
+  late AnimationController _hoverAnimationController;
   late TextDirection _textDirection;
   bool _dragIsActive = false;
+  bool _hoverIsActive = false;
 
   Color get _thumbColor {
     if (_dragIsActive)
@@ -76,8 +77,24 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
     return Color.lerp(
       const Color(0xFFE0E0E0),
       const Color(0xFF757575),
-      _colorAnimationController.value,
+      _hoverAnimationController.value,
     )!;
+  }
+
+  Color get _trackColor => _hoverIsActive && widget.showTrackOnHover
+    ? const Color(0xFF424242).withOpacity(0.04)
+    : const Color(0x00000000);
+
+  Color get _trackBorderColor => _hoverIsActive && widget.showTrackOnHover
+    ? const Color(0xFFE0E0E0)
+    : const Color(0x00000000);
+
+  double get _thickness {
+   if (widget.thickness != null)
+     return widget.thickness!;
+   return _hoverIsActive && widget.showTrackOnHover
+     ? _kScrollbarHoverThickness
+     : _kScrollbarThickness;
   }
 
   @override
@@ -89,12 +106,20 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   @override
   void initState() {
     super.initState();
-    _colorAnimationController = AnimationController(
+    _hoverAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _colorAnimationController.addListener(() {
-      painter!.updateColor(_thumbColor);
+    _hoverAnimationController.addListener(() {
+      painter!.updateColors(
+        _thumbColor,
+        _trackColor,
+        _trackBorderColor,
+      );
+      painter!.updateThickness(
+        _thickness,
+        widget.radius ?? _kScrollbarRadius,
+      );
     });
   }
 
@@ -110,15 +135,15 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     painter!
-      ..thickness = widget.thickness ?? _kScrollbarThickness
-      ..radius = widget.radius;
+      ..thickness = _thickness
+      ..radius = widget.radius ?? _kScrollbarRadius;
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
-    print(widget.radius);
-    print(_kScrollbarRadius);
     return ScrollbarPainter(
       color: _thumbColor,
+      trackColor: _trackColor,
+      trackBorderColor: _trackBorderColor,
       textDirection: _textDirection,
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius ?? _kScrollbarRadius,
@@ -133,42 +158,55 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
   void handleLongPressStart(LongPressStartDetails details) {
     super.handleLongPressStart(details);
     _dragIsActive = true;
-    painter!.updateColor(_thumbColor);
+    painter!.updateColors(
+      _thumbColor,
+      _trackColor,
+      _trackBorderColor,
+    );
   }
 
   @override
   void handleLongPressEnd(LongPressEndDetails details) {
     super.handleLongPressEnd(details);
     _dragIsActive = false;
-    painter!.updateColor(_thumbColor);
+    painter!.updateColors(
+      _thumbColor,
+      _trackColor,
+      _trackBorderColor,
+    );
   }
 
   void maybeHovering(PointerHoverEvent event) {
     if (customPaintKey.currentContext == null) {
       return;
     }
+
     final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
     final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
     final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
     final Offset localOffset = renderBox.globalToLocal(event.position);
-    final bool onThumb = painter.hitTestInteractive(localOffset);
+    final bool onScrollbar = painter.hitTestInteractive(localOffset);
+
     // Check is the position of the pointer falls over the painted scrollbar
-    if (onThumb) {
+    if (onScrollbar) {
       // Pointer exited hovering the scrollbar
-      _colorAnimationController.forward();
+      _hoverIsActive = true;
+      _hoverAnimationController.forward();
     } else {
       // Pointer entered the area of the painted scrollbar
-      _colorAnimationController.reverse();
+      _hoverIsActive = false;
+      _hoverAnimationController.reverse();
     }
   }
 
   void maybeHoverExit(PointerExitEvent event) {
-    _colorAnimationController.reverse();
+    _hoverIsActive = false;
+    _hoverAnimationController.reverse();
   }
 
   @override
   void dispose() {
-    _colorAnimationController.dispose();
+    _hoverAnimationController.dispose();
     super.dispose();
   }
 
@@ -178,7 +216,7 @@ class _ScrollbarState extends RawScrollbarThumbState<Scrollbar> {
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
-          gestures: gestures,
+          gestures: defaultGestures,
           child: MouseRegion(
             onExit: maybeHoverExit,
             onHover: maybeHovering,

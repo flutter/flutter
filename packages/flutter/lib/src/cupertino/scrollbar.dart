@@ -244,7 +244,7 @@ class _CupertinoScrollbarState extends RawScrollbarThumbState<CupertinoScrollbar
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
-          gestures: gestures,
+          gestures: defaultGestures,
           child: CustomPaint(
             key: customPaintKey,
             foregroundPainter: painter,
