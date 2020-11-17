@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import 'color_scheme.dart';
 import 'theme.dart';
 
 /// A utility class for dealing with the overlay color needed
