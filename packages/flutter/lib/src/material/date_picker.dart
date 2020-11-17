@@ -546,9 +546,9 @@ class _DatePickerHeader extends StatelessWidget {
     required this.iconTooltip,
     required this.onIconPressed,
   }) : assert(helpText != null),
-        assert(orientation != null),
-        assert(isShort != null),
-        super(key: key);
+       assert(orientation != null),
+       assert(isShort != null),
+       super(key: key);
 
   static const double _datePickerHeaderLandscapeWidth = 152.0;
   static const double _datePickerHeaderPortraitHeight = 120.0;
@@ -793,12 +793,12 @@ Future<DateTimeRange?> showDateRangePicker({
 }) async {
   assert(context != null);
   assert(
-  initialDateRange == null || (initialDateRange.start != null && initialDateRange.end != null),
-  'initialDateRange must be null or have non-null start and end dates.'
+    initialDateRange == null || (initialDateRange.start != null && initialDateRange.end != null),
+    'initialDateRange must be null or have non-null start and end dates.'
   );
   assert(
-  initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
-  'initialDateRange\'s start date must not be after it\'s end date.'
+    initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
+    'initialDateRange\'s start date must not be after it\'s end date.'
   );
   initialDateRange = initialDateRange == null ? null : DateUtils.datesOnly(initialDateRange);
   assert(firstDate != null);
@@ -806,24 +806,24 @@ Future<DateTimeRange?> showDateRangePicker({
   assert(lastDate != null);
   lastDate = DateUtils.dateOnly(lastDate);
   assert(
-  !lastDate.isBefore(firstDate),
-  'lastDate $lastDate must be on or after firstDate $firstDate.'
+    !lastDate.isBefore(firstDate),
+    'lastDate $lastDate must be on or after firstDate $firstDate.'
   );
   assert(
-  initialDateRange == null || !initialDateRange.start.isBefore(firstDate),
-  'initialDateRange\'s start date must be on or after firstDate $firstDate.'
+    initialDateRange == null || !initialDateRange.start.isBefore(firstDate),
+    'initialDateRange\'s start date must be on or after firstDate $firstDate.'
   );
   assert(
-  initialDateRange == null || !initialDateRange.end.isBefore(firstDate),
-  'initialDateRange\'s end date must be on or after firstDate $firstDate.'
+    initialDateRange == null || !initialDateRange.end.isBefore(firstDate),
+    'initialDateRange\'s end date must be on or after firstDate $firstDate.'
   );
   assert(
-  initialDateRange == null || !initialDateRange.start.isAfter(lastDate),
-  'initialDateRange\'s start date must be on or before lastDate $lastDate.'
+    initialDateRange == null || !initialDateRange.start.isAfter(lastDate),
+    'initialDateRange\'s start date must be on or before lastDate $lastDate.'
   );
   assert(
-  initialDateRange == null || !initialDateRange.end.isAfter(lastDate),
-  'initialDateRange\'s end date must be on or before lastDate $lastDate.'
+    initialDateRange == null || !initialDateRange.end.isAfter(lastDate),
+    'initialDateRange\'s end date must be on or before lastDate $lastDate.'
   );
   currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
   assert(initialEntryMode != null);
@@ -2405,16 +2405,16 @@ class _InputDateRangePicker extends StatefulWidget {
     this.autofocus = false,
     this.autovalidate = false,
   }) : initialStartDate = initialStartDate == null ? null : DateUtils.dateOnly(initialStartDate),
-        initialEndDate = initialEndDate == null ? null : DateUtils.dateOnly(initialEndDate),
-        assert(firstDate != null),
-        firstDate = DateUtils.dateOnly(firstDate),
-        assert(lastDate != null),
-        lastDate = DateUtils.dateOnly(lastDate),
-        assert(firstDate != null),
-        assert(lastDate != null),
-        assert(autofocus != null),
-        assert(autovalidate != null),
-        super(key: key);
+       initialEndDate = initialEndDate == null ? null : DateUtils.dateOnly(initialEndDate),
+       assert(firstDate != null),
+       firstDate = DateUtils.dateOnly(firstDate),
+       assert(lastDate != null),
+       lastDate = DateUtils.dateOnly(lastDate),
+       assert(firstDate != null),
+       assert(lastDate != null),
+       assert(autofocus != null),
+       assert(autovalidate != null),
+       super(key: key);
 
   /// The [DateTime] that represents the start of the initial date range selection.
   final DateTime? initialStartDate;
