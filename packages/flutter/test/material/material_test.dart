@@ -368,11 +368,8 @@ void main() {
       const Color onSurfaceColor = Color(0xFF654321);
       const double elevation = 8.0;
 
-      final Color surfaceColorWithOverlay = ElevationOverlay.colorWithOverlay(
-        surface: surfaceColor,
-        overlay: onSurfaceColor,
-        elevation: elevation,
-      );
+      final Color surfaceColorWithOverlay =
+        ElevationOverlay.colorWithOverlay(surfaceColor, onSurfaceColor, elevation);
 
       await tester.pumpWidget(
         Theme(

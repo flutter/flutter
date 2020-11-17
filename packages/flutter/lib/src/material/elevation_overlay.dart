@@ -48,11 +48,7 @@ class ElevationOverlay {
         theme.applyElevationOverlayColor &&
         theme.brightness == Brightness.dark &&
         color.withOpacity(1.0) == theme.colorScheme.surface.withOpacity(1.0)) {
-      return colorWithOverlay(
-        surface: color,
-        overlay: theme.colorScheme.onSurface,
-        elevation: elevation,
-      );
+      return colorWithOverlay(color, theme.colorScheme.onSurface, elevation);
     }
     return color;
   }
@@ -76,7 +72,7 @@ class ElevationOverlay {
   /// increases, the opacity will also increase.
   ///
   /// See https://material.io/design/color/dark-theme.html#properties.
-  static Color colorWithOverlay({required Color surface, required Color overlay, required double elevation}) {
+  static Color colorWithOverlay(Color surface, Color overlay, double elevation) {
     return Color.alphaBlend(_overlayColor(overlay, elevation), surface);
   }
 
