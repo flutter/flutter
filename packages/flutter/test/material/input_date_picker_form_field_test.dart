@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
 
   Widget _inputDatePickerField({
     Key? key,
@@ -233,6 +235,34 @@ void main() {
       expect(find.text('Give me a date!'), findsOneWidget);
     });
 
+    testWidgets('Semantics', (WidgetTester tester) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      addTearDown(semantics.dispose);
+
+      // Fill the clipboard so that the Paste option is available in the text
+      // selection menu.
+      SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+      await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+      addTearDown(() => SystemChannels.platform.setMockMethodCallHandler(null));
+
+      await tester.pumpWidget(_inputDatePickerField(autofocus: true));
+      await tester.pumpAndSettle();
+
+      expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
+        label: 'Enter Date\nmm/dd/yyyy',
+        isTextField: true,
+        isFocused: true,
+        value: '01/15/2016',
+        hasTapAction: true,
+        hasSetSelectionAction: true,
+        hasCopyAction: true,
+        hasCutAction: true,
+        hasPasteAction: true,
+        hasMoveCursorBackwardByCharacterAction: true,
+        hasMoveCursorBackwardByWordAction: true,
+      ));
+    });
+
     testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(_inputDatePickerField(
@@ -265,5 +295,21 @@ void main() {
     });
 
   });
-
 }
+
+class MockClipboard {
+  dynamic _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+        break;
+    }
+  }
+}
+
