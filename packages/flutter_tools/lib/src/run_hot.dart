@@ -1095,12 +1095,17 @@ class HotRunner extends ResidentRunner {
       printHelpDetails();
     }
     for (final FlutterDevice device in flutterDevices) {
-      final String dname = device.device.name;
       // Caution: This log line is parsed by device lab tests.
       globals.printStatus(
-        'An Observatory debugger and profiler on $dname is available at: '
+        'An Observatory debugger and profiler on ${device.device.name} is available at: '
         '${device.vmService.httpAddress}',
       );
+    }
+    globals.printStatus('');
+    if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
+      globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
+    } else {
+      globals.printStatus('🔨 Running without sound null safety 🔨', emphasis: true);
     }
   }
 

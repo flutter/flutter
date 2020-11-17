@@ -833,6 +833,12 @@ class _ResidentWebRunner extends ResidentWebRunner {
           ..writeAsStringSync(websocketUri.toString());
       }
       globals.printStatus('Debug service listening on $websocketUri');
+      globals.printStatus('');
+      if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
+        globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
+      } else {
+        globals.printStatus('🔨 Running without sound null safety 🔨', emphasis: true);
+      }
     }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
