@@ -29,8 +29,8 @@ class TestScrollPhysics extends ScrollPhysics {
   @override
   String toString() {
     if (parent == null)
-      return '$runtimeType($name)';
-    return '$runtimeType($name) -> $parent';
+      return '${objectRuntimeType(this, 'TestScrollPhysics')}($name)';
+    return '${objectRuntimeType(this, 'TestScrollPhysics')}($name) -> $parent';
   }
 }
 
