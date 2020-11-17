@@ -239,7 +239,7 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)loadView {
-  NSOpenGLContext* resourceContext = _engine.resourceContext;
+  NSOpenGLContext* resourceContext = _engine.openGLRenderer.resourceContext;
   if (!resourceContext) {
     NSLog(@"Unable to create FlutterView; no resource context available.");
     return;
