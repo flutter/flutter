@@ -21,7 +21,7 @@
  * Coordinates a single instance of execution of a Flutter engine.
  */
 FLUTTER_EXPORT
-@interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
+@interface FlutterEngine : NSObject <FlutterPluginRegistry>
 
 /**
  * Initializes an engine with the given viewController.
