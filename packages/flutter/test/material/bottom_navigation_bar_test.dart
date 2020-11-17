@@ -22,11 +22,11 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                label: 'AC',
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                label: 'Alarm',
+                title: Text('Alarm'),
               ),
             ],
             onTap: (int index) {
@@ -1005,11 +1005,11 @@ void main() {
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  label: 'A',
+                  title: Text('A'),
                   icon: Icon(Icons.ac_unit),
                 ),
                 BottomNavigationBarItem(
-                  label: 'B',
+                  title: Text('B'),
                   icon: Icon(Icons.battery_alert),
                 ),
               ],
@@ -1020,7 +1020,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
-    expect(box.size.height, equals(56.0));
+    expect(box.size.height, equals(66.0));
   });
 
   testWidgets('BottomNavigationBar does not grow with textScaleFactor when labels are provided', (WidgetTester tester) async {
@@ -1151,8 +1151,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
-    final String longTextA = ''.padLeft(100, 'A');
-    final String longTextB = ''.padLeft(100, 'B');
+    final Text longTextA = Text(''.padLeft(100, 'A'));
+    final Text longTextB = Text(''.padLeft(100, 'B'));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1160,11 +1160,11 @@ void main() {
           bottomNavigationBar: BottomNavigationBar(
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                label: longTextA,
+                title: longTextA,
                 icon: const Icon(Icons.ac_unit),
               ),
               BottomNavigationBarItem(
-                label: longTextB,
+                title: longTextB,
                 icon: const Icon(Icons.battery_alert),
               ),
             ],
@@ -1176,9 +1176,9 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(kBottomNavigationBarHeight));
 
-    final RenderBox itemBoxA = tester.renderObject(find.text(longTextA));
+    final RenderBox itemBoxA = tester.renderObject(find.text(longTextA.data!));
     expect(itemBoxA.size, equals(const Size(400.0, 14.0)));
-    final RenderBox itemBoxB = tester.renderObject(find.text(longTextB));
+    final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data!));
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
   });
 
@@ -1313,15 +1313,15 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              label: 'AC',
+              title: Text('AC'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              label: 'Alarm',
+              title: Text('Alarm'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.hot_tub),
-              label: 'Hot Tub',
+              title: Text('Hot Tub'),
             ),
           ],
         ),
@@ -1331,7 +1331,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nAC\nTab 1 of 3',
+        label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -1341,7 +1341,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nAlarm\nTab 2 of 3',
+        label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -1350,7 +1350,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Hot Tub')),
       matchesSemantics(
-        label: 'Hot Tub\nHot Tub\nTab 3 of 3',
+        label: 'Hot Tub\nTab 3 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -1367,15 +1367,15 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              label: 'AC',
+              title: Text('AC'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              label: 'Alarm',
+              title: Text('Alarm'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.hot_tub),
-              label: 'Hot Tub',
+              title: Text('Hot Tub'),
             ),
           ],
         ),
@@ -1385,7 +1385,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nAC\nTab 1 of 3',
+        label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -1395,7 +1395,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nAlarm\nTab 2 of 3',
+        label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -1404,7 +1404,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Hot Tub')),
       matchesSemantics(
-        label: 'Hot Tub\nHot Tub\nTab 3 of 3',
+        label: 'Hot Tub\nTab 3 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -1665,11 +1665,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              label: 'Red',
+              title: Text('Red'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              label: 'Green',
+              title: Text('Green'),
             ),
           ],
         ),
@@ -1679,7 +1679,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Red')),
       matchesSemantics(
-        label: 'Red\nRed\nTab 1 of 2',
+        label: 'Red\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -1689,7 +1689,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Green')),
       matchesSemantics(
-        label: 'Green\nGreen\nTab 2 of 2',
+        label: 'Green\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -1708,11 +1708,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              label: 'Red',
+              title: Text('Red'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-              label: 'Green',
+              title: Text('Green'),
             ),
           ],
         ),
@@ -1722,7 +1722,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Red')),
       matchesSemantics(
-        label: 'Red\nRed\nTab 1 of 2',
+        label: 'Red\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -1732,7 +1732,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Green')),
       matchesSemantics(
-        label: 'Green\nGreen\nTab 2 of 2',
+        label: 'Green\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -1750,8 +1750,8 @@ void main() {
             child: BottomNavigationBar(
               mouseCursor: SystemMouseCursors.text,
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: 'AC'),
-                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Alarm'),
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
               ],
             ),
           ),
@@ -1775,8 +1775,8 @@ void main() {
             cursor: SystemMouseCursors.forbidden,
             child: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: 'AC'),
-                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Alarm'),
+                BottomNavigationBarItem(icon: Icon(Icons.ac_unit), title: Text('AC')),
+                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), title: Text('Alarm')),
               ],
             ),
           ),
