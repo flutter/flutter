@@ -337,7 +337,6 @@ class FlutterWebPlatform extends PlatformPlugin {
         </html>
       ''', headers: <String, String>{'Content-Type': 'text/html'});
     }
-    globals.printTrace('Did not find anything for request: ${request.url}');
     return shelf.Response.notFound('Not found.');
   }
 
