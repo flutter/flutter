@@ -121,9 +121,7 @@ class SkiaFontCollection {
   Future<_RegisteredFont?> _registerFont(String url, String family) async {
     ByteBuffer buffer;
     try {
-      buffer = await html.window
-          .fetch(url)
-          .then(_getArrayBuffer);
+      buffer = await html.window.fetch(url).then(_getArrayBuffer);
     } catch (e) {
       html.window.console.warn('Failed to load font $family at $url');
       html.window.console.warn(e);
@@ -143,7 +141,7 @@ class SkiaFontCollection {
   }
 
   String? _readActualFamilyName(Uint8List bytes) {
-    final SkFontMgr tmpFontMgr = canvasKit.SkFontMgr.FromData([bytes])!;
+    final SkFontMgr tmpFontMgr = canvasKit.FontMgr.FromData([bytes])!;
     String? actualFamily = tmpFontMgr.getFamilyName(0);
     tmpFontMgr.delete();
     return actualFamily;
@@ -171,8 +169,5 @@ class _RegisteredFont {
   /// The font family that was parsed from the font's bytes.
   final String actualFamily;
 
-  _RegisteredFont(this.bytes, this.flutterFamily, this.actualFamily)
-      : assert(bytes != null), // ignore: unnecessary_null_comparison
-        assert(flutterFamily != null), // ignore: unnecessary_null_comparison
-        assert(actualFamily != null); // ignore: unnecessary_null_comparison
+  _RegisteredFont(this.bytes, this.flutterFamily, this.actualFamily);
 }

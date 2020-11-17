@@ -80,7 +80,7 @@ class CkVertices extends ManagedSkiaObject<SkVertices> implements ui.Vertices {
 
   @override
   SkVertices createDefault() {
-    return canvasKit.MakeSkVertices(
+    return canvasKit.MakeVertices(
       _mode,
       _positions,
       _textureCoordinates,

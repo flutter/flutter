@@ -21,7 +21,7 @@ class CkMaskFilter extends ManagedSkiaObject<SkMaskFilter> {
   SkMaskFilter resurrect() => _initSkiaObject();
 
   SkMaskFilter _initSkiaObject() {
-    return canvasKit.MakeBlurMaskFilter(
+    return canvasKit.MaskFilter.MakeBlur(
       toSkBlurStyle(_blurStyle),
       _sigma,
       true,

@@ -126,7 +126,7 @@ class CkAnimatedImage implements ui.Image {
       // Defaults to PNG 100%.
       final SkData skData = _skAnimatedImage.encodeToData();
       // Make a copy that we can return.
-      bytes = Uint8List.fromList(canvasKit.getSkDataBytes(skData));
+      bytes = Uint8List.fromList(canvasKit.getDataBytes(skData));
     }
 
     final ByteData data = bytes.buffer.asByteData(0, bytes.length);
@@ -207,7 +207,7 @@ class CkImage implements ui.Image {
     } else {
       final SkData skData = skImage.encodeToData(); //defaults to PNG 100%
       // make a copy that we can return
-      bytes = Uint8List.fromList(canvasKit.getSkDataBytes(skData));
+      bytes = Uint8List.fromList(canvasKit.getDataBytes(skData));
     }
 
     final ByteData data = bytes.buffer.asByteData(0, bytes.length);
