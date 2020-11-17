@@ -470,7 +470,7 @@ deps = {
   'src/third_party/android_tools/sdk/licenses': {
      'packages': [
        {
-        'package': 'flutter_internal/android/sdk/licenses',
+        'package': 'flutter/android/sdk/licenses',
         'version': 'latest',
        }
      ],
