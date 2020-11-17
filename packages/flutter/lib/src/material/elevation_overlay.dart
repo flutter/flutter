@@ -74,15 +74,14 @@ class ElevationOverlay {
   /// [overlay] color) on top of a surface (using the [surface] color).
   ///
   /// The opacity of the overlay depends on [elevation]. As [elevation]
-  /// increases, the opacity of will also increase.
+  /// increases, the opacity will also increase.
   ///
   /// See https://material.io/design/color/dark-theme.html#properties.
   static Color colorWithOverlay({required Color surface, required Color overlay, required double elevation}) {
     return Color.alphaBlend(_overlayColor(overlay, elevation), surface);
   }
 
-  /// Applies the opacity from the dark theme elevation overlay formula at
-  /// [elevation] to the [ColorScheme.onSurface] of [colorScheme].
+  /// Applies an opacity to [color] based on [elevation].
   static Color _overlayColor(Color color, double elevation) {
     // Compute the opacity for the given elevation
     // This formula matches the values in the spec:
