@@ -207,6 +207,7 @@ def to_gn_args(args):
 
     goma_dir = os.environ.get('GOMA_DIR')
     goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
+    depot_tools_bin_dir = os.path.join(args.depot_tools, '.cipd_bin')
 
     # GOMA has a different default (home) path on gWindows.
     if not os.path.exists(goma_home_dir) and sys.platform.startswith(('cygwin', 'win')):
@@ -218,6 +219,9 @@ def to_gn_args(args):
     elif args.goma and os.path.exists(goma_home_dir):
       gn_args['use_goma'] = True
       gn_args['goma_dir'] = goma_home_dir
+    elif args.goma and os.path.exists(depot_tools_bin_dir):
+      gn_args['use_goma'] = True
+      gn_args['goma_dir'] = depot_tools_bin_dir
     else:
       gn_args['use_goma'] = False
       gn_args['goma_dir'] = None
@@ -326,6 +330,9 @@ def parse_args(args):
 
   parser.add_argument('--goma', default=True, action='store_true')
   parser.add_argument('--no-goma', dest='goma', action='store_false')
+  parser.add_argument('--depot-tools', default='~/depot_tools', type=str,
+                      help='Depot tools provides an alternative location for gomacc in ' +
+                      '/path/to/depot_tools/.cipd_bin')
 
   parser.add_argument('--lto', default=True, action='store_true')
   parser.add_argument('--no-lto', dest='lto', action='store_false')
