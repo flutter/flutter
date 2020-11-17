@@ -201,7 +201,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
   import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
   import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
-  
+
   // Extra initialization for flutter_web.
   // The following parameters are hard-coded in Flutter's test embedder. Since
   // we don't have an embedder yet this is the lowest-most layer we can put
@@ -214,14 +214,14 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
     internalBootstrapBrowserTest(() => test.main);
   }
-  
+
   void internalBootstrapBrowserTest(Function getMain()) {
     var channel = serializeSuite(getMain, hidePrints: false);
     postMessageChannel().pipe(channel);
   }
-  
+
   StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true, Future beforeLoad()}) => RemoteListener.start(getMain, hidePrints: hidePrints, beforeLoad: beforeLoad);
-  
+
   StreamChannel suiteChannel(String name) {
     var manager = SuiteChannelManager.current;
     if (manager == null) {
@@ -229,7 +229,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     }
     return manager.connectOut(name);
   }
-  
+
   StreamChannel postMessageChannel() {
     var controller = StreamChannelController(sync: true);
     window.onMessage.firstWhere((message) {
