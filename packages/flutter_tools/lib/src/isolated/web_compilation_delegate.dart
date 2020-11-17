@@ -39,11 +39,13 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       ..createSync(recursive: true);
     final List<File> generatedFiles = <File>[];
     for (final String testFilePath in testFiles) {
-      final List<String> relativeTestSegments = globals.fs.path.split(globals.fs.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path));
-      final File generatedFile = globals.fs.file(globals.fs.path.join(outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
+      final List<String> relativeTestSegments = globals.fs.path.split(
+        globals.fs.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path));
+      final File generatedFile = globals.fs.file(
+        globals.fs.path.join(outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
       generatedFile
         ..createSync(recursive: true)
-        ..writeAsStringSync(_generateEntrypoint(relativeTestSegments.join('/')));
+        ..writeAsStringSync(_generateEntrypoint(relativeTestSegments.join('/'), testFilePath));
       generatedFiles.add(generatedFile);
     }
     final StringBuffer buffer = StringBuffer('// @dart=2.8\n');
@@ -160,8 +162,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       final int sourcemapStart = sourcemapOffsets[0];
       final int sourcemapEnd = sourcemapOffsets[1];
       if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
-        globals
-            .printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
+        globals.printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
         continue;
       }
       final Uint8List sourcemapView = Uint8List.view(
@@ -189,7 +190,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     }
   }
 
-  String _generateEntrypoint(String relativeTestPath) {
+  String _generateEntrypoint(String relativeTestPath, String absolutePath) {
     return '''
   // @dart = 2.8
   import 'org-dartlang-app:///$relativeTestPath' as test;
@@ -209,7 +210,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   Future<void> main() async {
     ui.debugEmulateFlutterTesterEnvironment = true;
     await ui.webOnlyInitializePlatform();
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$relativeTestPath'));
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$absolutePath'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
     internalBootstrapBrowserTest(() => test.main);
