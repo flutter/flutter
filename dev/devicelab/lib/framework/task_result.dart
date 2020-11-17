@@ -10,7 +10,7 @@ class TaskResult {
   /// Constructs a successful result.
   TaskResult.success(this.data, {
     this.benchmarkScoreKeys = const <String>[],
-    this.detailFiles,
+    this.detailFiles = const <String>[],
   })
       : succeeded = true,
         message = 'success' {
@@ -29,11 +29,14 @@ class TaskResult {
   }
 
   /// Constructs a successful result using JSON data stored in a file.
-  factory TaskResult.successFromFile(File file,
-      {List<String> benchmarkScoreKeys}) {
+  factory TaskResult.successFromFile(File file, {
+    List<String> benchmarkScoreKeys = const <String>[],
+    List<String> detailFiles = const <String>[],
+  }) {
     return TaskResult.success(
       json.decode(file.readAsStringSync()) as Map<String, dynamic>,
       benchmarkScoreKeys: benchmarkScoreKeys,
+      detailFiles: detailFiles,
     );
   }
 
@@ -57,7 +60,7 @@ class TaskResult {
       : succeeded = false,
         data = null,
         detailFiles = null,
-        benchmarkScoreKeys = const <String>[];
+        benchmarkScoreKeys = null;
 
   /// Whether the task succeeded.
   final bool succeeded;
@@ -101,8 +104,7 @@ class TaskResult {
 
     if (succeeded) {
       json['data'] = data;
-      if (detailFiles != null)
-        json['detailFiles'] = detailFiles;
+      json['detailFiles'] = detailFiles;
       json['benchmarkScoreKeys'] = benchmarkScoreKeys;
     } else {
       json['reason'] = message;
