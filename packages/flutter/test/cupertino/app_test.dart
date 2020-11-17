@@ -50,8 +50,8 @@ void main() {
           builder: (BuildContext context) {
             return Column(
               children: <Widget>[
-                Text(CupertinoLocalizations.of(context)!.selectAllButtonLabel),
-                Text(CupertinoLocalizations.of(context)!.datePickerMediumDate(
+                Text(CupertinoLocalizations.of(context).selectAllButtonLabel),
+                Text(CupertinoLocalizations.of(context).datePickerMediumDate(
                   DateTime(2018, 10, 4),
                 )),
               ],

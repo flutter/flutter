@@ -379,12 +379,12 @@ abstract class ImageProvider<T extends Object> {
   /// [FlutterError.onError], and the method will return null.
   ///
   /// A completed return value of null indicates that an error has occurred.
-  Future<ImageCacheStatus> obtainCacheStatus({
+  Future<ImageCacheStatus?> obtainCacheStatus({
     required ImageConfiguration configuration,
     ImageErrorListener? handleError,
   }) {
     assert(configuration != null);
-    final Completer<ImageCacheStatus> completer = Completer<ImageCacheStatus>();
+    final Completer<ImageCacheStatus?> completer = Completer<ImageCacheStatus?>();
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {

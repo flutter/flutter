@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -218,7 +216,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(find.text('top'), findsOneWidget);
 
-    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle'))).position;
+    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle')))!.position;
     expect(position.viewportDimension, 600.0);
     expect(position.pixels, 0.0);
 

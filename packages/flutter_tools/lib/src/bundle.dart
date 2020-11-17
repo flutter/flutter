@@ -27,7 +27,9 @@ const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
-String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
+String getDefaultApplicationKernelPath({
+  @required bool trackWidgetCreation,
+}) {
   return getKernelPathForTransformerOptions(
     globals.fs.path.join(getBuildDirectory(), 'app.dill'),
     trackWidgetCreation: trackWidgetCreation,
@@ -79,9 +81,7 @@ class BundleBuilder {
     String manifestPath = defaultManifestPath,
     String applicationKernelFilePath,
     String depfilePath,
-    String privateKeyPath = defaultPrivateKeyPath,
     String assetDirPath,
-    String packagesPath,
     bool precompiledSnapshot = false,
     bool reportLicensedPackages = false,
     bool trackWidgetCreation = false,
@@ -94,7 +94,6 @@ class BundleBuilder {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute('.packages');
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
       buildMode: buildInfo.mode,

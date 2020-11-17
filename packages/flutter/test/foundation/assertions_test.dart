@@ -219,7 +219,7 @@ void main() {
 
   test('Malformed FlutterError objects', () {
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[]);
       } on AssertionError catch (e) {
@@ -235,7 +235,7 @@ void main() {
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           (ErrorDescription('Error description without a summary'))]);
@@ -255,13 +255,13 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Error Summary A'),
@@ -292,13 +292,13 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
 
     {
-      AssertionError error;
+      final AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorDescription('Some description'),
@@ -321,7 +321,7 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
@@ -329,7 +329,7 @@ void main() {
 
   test('User-thrown exceptions have ErrorSummary properties', () {
     {
-      DiagnosticsNode node;
+      final DiagnosticsNode node;
       try {
         throw 'User thrown string';
       } catch (e) {
@@ -340,7 +340,7 @@ void main() {
     }
 
     {
-      DiagnosticsNode node;
+      final DiagnosticsNode node;
       try {
         throw ArgumentError.notNull('myArgument');
       } catch (e) {
@@ -421,7 +421,7 @@ void main() {
       'provide substantially more information in this error message to help you determine '
       'and fix the underlying cause.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github.com/flutter/flutter/issues/new?template=BUG.md',
+      '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
     );
     expect(builder.properties[4] is ErrorSpacer, true);
     final DiagnosticsStackTrace trace = builder.properties[5] as DiagnosticsStackTrace;

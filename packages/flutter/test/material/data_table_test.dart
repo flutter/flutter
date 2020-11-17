@@ -107,7 +107,7 @@ void main() {
   testWidgets('DataTable control test - tristate', (WidgetTester tester) async {
     final List<String> log = <String>[];
     const int numItems = 3;
-    Widget buildTable(List<bool> selected) {
+    Widget buildTable(List<bool> selected, {int? disabledIndex}) {
       return DataTable(
         onSelectAll: (bool? value) {
           log.add('select-all: $value');
@@ -123,7 +123,7 @@ void main() {
           (int index) => DataRow(
             cells: <DataCell>[DataCell(Text('Row $index'))],
             selected: selected[index],
-            onSelectChanged: (bool? value) {
+            onSelectChanged: index == disabledIndex ? null : (bool? value) {
               log.add('row-selected: $index');
             },
           ),
@@ -152,6 +152,21 @@ void main() {
     // Tapping the parent checkbox when all rows are selected, deselects all.
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(<bool>[true, true, true])),
+    ));
+    await tester.tap(find.byType(Checkbox).first);
+
+    expect(log, <String>['select-all: false']);
+    log.clear();
+
+    // Tapping the parent checkbox when all rows are selected and one is
+    // disabled, deselects all.
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: buildTable(
+          <bool>[true, true, false],
+          disabledIndex: 2,
+        ),
+      ),
     ));
     await tester.tap(find.byType(Checkbox).first);
 
@@ -1188,6 +1203,82 @@ void main() {
     // Wait for the tooltip timer to expire to prevent it scheduling a new frame
     // after the view is destroyed, which causes exceptions.
     await tester.pumpAndSettle(const Duration(seconds: 1));
+  });
+
+  testWidgets('DataRow renders default selected row colors', (WidgetTester tester) async {
+    final ThemeData _themeData = ThemeData.light();
+    Widget buildTable({bool selected = false}) {
+      return MaterialApp(
+        theme: _themeData,
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Column1'),
+              ),
+            ],
+            rows: <DataRow>[
+              DataRow(
+                onSelectChanged: (bool? checked) {},
+                selected: selected,
+                cells: const <DataCell>[
+                  DataCell(Text('Content1')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    BoxDecoration lastTableRowBoxDecoration() {
+      final Table table = tester.widget(find.byType(Table));
+      final TableRow tableRow = table.children.last;
+      return tableRow.decoration! as BoxDecoration;
+    }
+
+    await tester.pumpWidget(buildTable(selected: false));
+    expect(lastTableRowBoxDecoration().color, null);
+
+    await tester.pumpWidget(buildTable(selected: true));
+    expect(
+      lastTableRowBoxDecoration().color,
+      _themeData.colorScheme.primary.withOpacity(0.08),
+    );
+  });
+
+  testWidgets('DataRow renders checkbox with colors from Theme', (WidgetTester tester) async {
+    final ThemeData _themeData = ThemeData.light();
+    Widget buildTable() {
+      return MaterialApp(
+        theme: _themeData,
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Column1'),
+              ),
+            ],
+            rows: <DataRow>[
+              DataRow(
+                onSelectChanged: (bool? checked) {},
+                cells: const <DataCell>[
+                  DataCell(Text('Content1')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Checkbox lastCheckbox() {
+      return tester.widgetList<Checkbox>(find.byType(Checkbox)).last;
+    }
+
+    await tester.pumpWidget(buildTable());
+    expect(lastCheckbox().activeColor, _themeData.colorScheme.primary);
+    expect(lastCheckbox().checkColor, _themeData.colorScheme.onPrimary);
   });
 
   testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {

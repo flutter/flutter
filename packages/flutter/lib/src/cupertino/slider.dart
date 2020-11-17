@@ -243,7 +243,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
       activeColor: CupertinoDynamicColor.resolve(
         widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
         context,
-      )!,
+      ),
       thumbColor: widget.thumbColor,
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
@@ -282,13 +282,13 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       divisions: divisions,
       activeColor: activeColor,
-      thumbColor: CupertinoDynamicColor.resolve(thumbColor, context)!,
-      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)!,
+      thumbColor: CupertinoDynamicColor.resolve(thumbColor, context),
+      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
       vsync: vsync,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -299,12 +299,12 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..divisions = divisions
       ..activeColor = activeColor
-      ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)!
-      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)!
+      ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)
+      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context)!;
+      ..textDirection = Directionality.of(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -439,7 +439,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double get _trackLeft => _kPadding;
   double get _trackRight => size.width - _kPadding;
   double get _thumbCenter {
-    double visualPosition;
+    final double visualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _value;
@@ -504,9 +504,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    double visualPosition;
-    Color leftColor;
-    Color rightColor;
+    final double visualPosition;
+    final Color leftColor;
+    final Color rightColor;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _position.value;
@@ -548,6 +548,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isInteractive;
+    config.isSlider = true;
     if (isInteractive) {
       config.textDirection = textDirection;
       config.onIncrease = _increaseAction;

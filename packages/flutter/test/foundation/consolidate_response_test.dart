@@ -111,7 +111,7 @@ void main() {
 
       test('Notifies onBytesReceived with gzipped numbers', () async {
         response.contentLength = gzipped.length;
-        final List<int?> records = <int>[];
+        final List<int?> records = <int?>[];
         await consolidateHttpClientResponseBytes(
           response,
           onBytesReceived: (int cumulative, int? total) {

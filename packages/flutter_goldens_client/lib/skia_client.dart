@@ -75,11 +75,7 @@ class SkiaGoldClient {
   ///
   /// This ensures that the goldctl tool is authorized and ready for testing.
   /// Used by the [FlutterPostSubmitFileComparator] and the
-  /// [_AuthorizedFlutterPreSubmitComparator].
-  ///
-  /// Based on the current environment, the goldctl tool may be authorized by
-  /// a service account provided by Cirrus, or through the context provided by a
-  /// luci environment.
+  /// [FlutterPreSubmitFileComparator].
   Future<void> auth() async {
     if (await clientIsAuthorized())
       return;
@@ -200,7 +196,7 @@ class SkiaGoldClient {
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob. Used by the
-  /// [_AuthorizedFlutterPreSubmitComparator].
+  /// [FlutterPreSubmitFileComparator].
   Future<void> tryjobInit() async {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
@@ -259,7 +255,7 @@ class SkiaGoldClient {
   /// result for the tryjob.
   ///
   /// The [testName] and [goldenFile] parameters reference the current
-  /// comparison being evaluated by the [_AuthorizedFlutterPreSubmitComparator].
+  /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
   Future<void> tryjobAdd(String testName, File goldenFile) async {
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
@@ -289,40 +285,6 @@ class SkiaGoldClient {
         ..writeln();
       throw Exception(buf.toString());
     }
-  }
-
-  /// Executes the `imgtest check` command in the goldctl tool for unauthorized
-  /// clients.
-  ///
-  /// Using the `check` command hashes the current test images and checks that
-  /// hash against Gold's known expectation hashes. A response is returned from
-  /// the invocation of this command that indicates a pass or fail result,
-  /// indicating if Gold has seen this image before.
-  ///
-  /// This will not allow for state change on the Gold dashboard, it is
-  /// essentially a lookup function. If an unauthorized change needs to be made,
-  /// use Gold's ignore feature.
-  ///
-  /// The [testName] and [goldenFile] parameters reference the current
-  /// comparison being evaluated by the
-  /// [_UnauthorizedFlutterPreSubmitComparator].
-  Future<bool> imgtestCheck(String testName, File goldenFile) async {
-    final List<String> imgtestArguments = <String>[
-      'imgtest', 'check',
-      '--work-dir', workDirectory
-        .childDirectory('temp')
-        .path,
-      '--test-name', cleanTestName(testName),
-      '--png-file', goldenFile.path,
-      '--instance', 'flutter',
-    ];
-
-    final io.ProcessResult result = await io.Process.run(
-      _goldctl,
-      imgtestArguments,
-    );
-
-    return result.exitCode == 0;
   }
 
   /// Returns the latest positive digest for the given test known to Flutter
@@ -381,70 +343,6 @@ class SkiaGoldClient {
       SkiaGoldHttpOverrides(),
     );
     return imageBytes;
-  }
-
-  /// Returns a boolean value for whether or not the given test and current pull
-  /// request are ignored on Flutter Gold.
-  ///
-  /// This is only relevant when used by the
-  /// [_UnauthorizedFlutterPreSubmitComparator] when a golden file test fails.
-  /// In order to land a change to an existing golden file, an ignore must be
-  /// set up in Flutter Gold. This will serve as a flag to permit the change to
-  /// land, protect against any unwanted changes, and ensure that changes that
-  /// have landed are triaged.
-  Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
-    bool ignoreIsActive = false;
-    testName = cleanTestName(testName);
-    late String rawResponse;
-    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
-      final Uri requestForIgnores = Uri.parse(
-        'https://flutter-gold.skia.org/json/v1/ignores'
-      );
-
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForIgnores);
-        final io.HttpClientResponse response = await request.close();
-        rawResponse = await utf8.decodeStream(response);
-        final List<dynamic> ignores = json.decode(rawResponse) as List<dynamic>;
-        for(final dynamic ignore in ignores) {
-          final List<String> ignoredQueries = (ignore['query'] as String/*!*/).split('&');
-          final String ignoredPullRequest = (ignore['note'] as String/*!*/).split('/').last;
-          final DateTime expiration = DateTime.parse(ignore['expires'] as String);
-          // The currently failing test is in the process of modification.
-          if (ignoredQueries.contains('name=$testName')) {
-            if (expiration.isAfter(DateTime.now())) {
-              ignoreIsActive = true;
-            } else {
-              // If any ignore is expired for the given test, throw with
-              // guidance.
-              final StringBuffer buf = StringBuffer()
-                ..writeln('This test has an expired ignore in place, and the')
-                ..writeln('change has not been triaged.')
-                ..writeln('The associated pull request is:')
-                ..writeln('https://github.com/flutter/flutter/pull/$ignoredPullRequest');
-              throw Exception(buf.toString());
-            }
-          }
-        }
-      } on FormatException catch(_) {
-        if (rawResponse.contains('stream timeout')) {
-          final StringBuffer buf = StringBuffer()
-            ..writeln('Stream timeout on /ignores api.')
-            ..writeln('This may be caused by a failure to triage a change.')
-            ..writeln('Check https://flutter-gold.skia.org/ignores, or')
-            ..writeln('https://flutter-gold.skia.org/?query=source_type%3Dflutter')
-            ..writeln('for untriaged golden files.');
-          throw Exception(buf.toString());
-        } else {
-          print('Formatting error detected requesting /ignores from Flutter Gold.'
-            '\nrawResponse: $rawResponse');
-          rethrow;
-        }
-      }
-    },
-      SkiaGoldHttpOverrides(),
-    );
-    return ignoreIsActive;
   }
 
   /// Returns the current commit hash of the Flutter repository.

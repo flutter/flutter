@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/globals.dart' as globals show flutterUsage;
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -18,6 +21,9 @@ class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockPathContext extends Mock implements path.Context {}
 class MockDirectory extends Mock implements Directory {}
+class MockRandomAccessFile extends Mock implements RandomAccessFile {}
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockUsage extends Mock implements Usage {}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -787,6 +793,122 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
   });
+
+  group('CopySync' , () {
+    const int eaccess = 13;
+    MockFileSystem mockFileSystem;
+    ErrorHandlingFileSystem fileSystem;
+
+    setUp(() {
+      mockFileSystem = MockFileSystem();
+      fileSystem = ErrorHandlingFileSystem(
+        delegate: mockFileSystem,
+        platform: linuxPlatform,
+      );
+      when(mockFileSystem.path).thenReturn(MockPathContext());
+    });
+
+    testWithoutContext('copySync handles error if openSync on source file fails', () {
+      final MockFile source = MockFile();
+      when(source.openSync(mode: anyNamed('mode')))
+        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
+      when(mockFileSystem.file('source')).thenReturn(source);
+
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
+    });
+
+    testWithoutContext('copySync handles error if openSync on destination file fails', () {
+      final MockFile source = MockFile();
+      final MockFile dest = MockFile();
+      when(source.openSync(mode: anyNamed('mode')))
+        .thenReturn(MockRandomAccessFile());
+      when(dest.openSync(mode: anyNamed('mode')))
+        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
+      when(mockFileSystem.file('source')).thenReturn(source);
+      when(mockFileSystem.file('dest')).thenReturn(dest);
+
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
+    });
+
+    testWithoutContext('copySync will copySync if there are no exceptions', () {
+      final MockFile source = MockFile();
+      final MockFile dest = MockFile();
+
+      when(source.copySync(any)).thenReturn(dest);
+      when(mockFileSystem.file('source')).thenReturn(source);
+      when(source.openSync(mode: anyNamed('mode')))
+        .thenReturn(MockRandomAccessFile());
+      when(mockFileSystem.file('dest')).thenReturn(dest);
+      when(dest.openSync(mode: anyNamed('mode')))
+        .thenReturn(MockRandomAccessFile());
+
+      fileSystem.file('source').copySync('dest');
+
+      verify(source.copySync('dest')).called(1);
+    });
+
+    // Uses context for analytics.
+    testUsingContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
+      final MockFile source = MockFile();
+      final MockFile dest = MockFile();
+      final List<int> expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
+      final File memorySource = memoryFileSystem.file('source')
+        ..writeAsBytesSync(expectedBytes);
+      final File memoryDest = memoryFileSystem.file('dest')
+        ..createSync();
+
+      when(source.copySync(any))
+        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
+      when(source.openSync(mode: anyNamed('mode')))
+        .thenAnswer((Invocation invocation) => memorySource.openSync(mode: invocation.namedArguments[#mode] as FileMode));
+      when(dest.openSync(mode: anyNamed('mode')))
+        .thenAnswer((Invocation invocation) => memoryDest.openSync(mode: invocation.namedArguments[#mode] as FileMode));
+      when(mockFileSystem.file('source')).thenReturn(source);
+      when(mockFileSystem.file('dest')).thenReturn(dest);
+
+      fileSystem.file('source').copySync('dest');
+
+      expect(memoryDest.readAsBytesSync(), expectedBytes);
+      verify(globals.flutterUsage.sendEvent('error-handling', 'copy-fallback')).called(1);
+    }, overrides: <Type, Generator>{
+      Usage: () => MockUsage(),
+    });
+
+    // Uses context for analytics.
+    testUsingContext('copySync deletes the result file if the fallback fails', () {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
+      final MockFile source = MockFile();
+      final MockFile dest = MockFile();
+      final File memorySource = memoryFileSystem.file('source')
+        ..createSync();
+      final File memoryDest = memoryFileSystem.file('dest')
+        ..createSync();
+      int calledCount = 0;
+
+      when(dest.existsSync()).thenReturn(true);
+      when(source.copySync(any))
+        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
+      when(source.openSync(mode: anyNamed('mode')))
+        .thenAnswer((Invocation invocation) {
+          if (calledCount == 1) {
+            throw const FileSystemException('', '', OSError('', eaccess));
+          }
+          calledCount +=  1;
+          return memorySource.openSync(mode: invocation.namedArguments[#mode] as FileMode);
+        });
+      when(dest.openSync(mode: anyNamed('mode')))
+        .thenAnswer((Invocation invocation) => memoryDest.openSync(mode: invocation.namedArguments[#mode] as FileMode));
+      when(mockFileSystem.file('source')).thenReturn(source);
+      when(mockFileSystem.file('dest')).thenReturn(dest);
+
+      expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
+
+      verify(dest.deleteSync(recursive: true)).called(1);
+    }, overrides: <Type, Generator>{
+      Usage: () => MockUsage(),
+    });
+  });
 }
 
 void setupProcessManagerMocks(
@@ -823,5 +945,3 @@ void setupProcessManagerMocks(
     workingDirectory: anyNamed('workingDirectory'),
   )).thenThrow(ProcessException('', <String>[], '', errorCode));
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

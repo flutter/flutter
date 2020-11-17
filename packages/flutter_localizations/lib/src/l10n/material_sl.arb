@@ -59,7 +59,7 @@
   "remainingTextFieldCharacterCountOther": "Še $remainingCount znakov",
   "refreshIndicatorSemanticLabel": "Osveži",
   "moreButtonTooltip": "Več",
-  "dateSeparator": "/",
+  "dateSeparator": ". ",
   "dateHelpText": "dd/mm/llll",
   "selectYearSemanticsLabel": "Izberite leto",
   "unspecifiedDate": "Datum",

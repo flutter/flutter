@@ -143,7 +143,8 @@ void main() {
         packageConfig: packageConfig,
       );
 
-      expect(invalidationResult.packageConfig, isNot(packageConfig));
+      // Initial package config is re-used.
+      expect(invalidationResult.packageConfig, packageConfig);
 
       fileSystem.file('.packages')
         .writeAsStringSync('foo:lib/\n');

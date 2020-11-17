@@ -406,7 +406,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     // Don't generate more media query padding from the translucent bottom
     // tab since the tab is behind the keyboard now.
-    expect(MediaQuery.of(innerContext)!.padding.bottom, 0);
+    expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
   testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
@@ -433,7 +433,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 600));
     // Media query padding shows up in the inner content because it wasn't masked
     // by the view inset.
-    expect(MediaQuery.of(innerContext)!.padding.bottom, 50);
+    expect(MediaQuery.of(innerContext).padding.bottom, 50);
   });
 
   testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
@@ -502,7 +502,7 @@ void main() {
                   items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
                 ),
                 tabBuilder: (BuildContext context, int index) {
-                  contentPadding = MediaQuery.of(context)!.padding;
+                  contentPadding = MediaQuery.of(context).padding;
                   return const Placeholder();
                 }
               ),
@@ -543,7 +543,7 @@ void main() {
     );
 
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
-    expect(MediaQuery.of(innerContext)!.padding.bottom, 0);
+    expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
   testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
@@ -1074,7 +1074,7 @@ void main() {
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
@@ -1109,6 +1109,110 @@ void main() {
 
     expect(contents.length, greaterThan(0));
     expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+  });
+
+  testWidgets('state restoration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        restorationScopeId: 'app',
+        home: CupertinoTabScaffold(
+          restorationId: 'scaffold',
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(
+              4,
+              (int i) => BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
+            ),
+          ),
+          tabBuilder: (BuildContext context, int i) => Text('Content $i'),
+        ),
+      ),
+    );
+
+    expect(find.text('Content 0'), findsOneWidget);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsNothing);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsOneWidget);
+    expect(find.text('Content 3'), findsNothing);
+
+    await tester.restartAndRestore();
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsOneWidget);
+    expect(find.text('Content 3'), findsNothing);
+
+    final TestRestorationData data = await tester.getRestorationData();
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsOneWidget);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsNothing);
+
+    await tester.restoreFrom(data);
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsOneWidget);
+    expect(find.text('Content 3'), findsNothing);
+  });
+
+  testWidgets('switch from internal to external controller with state restoration', (WidgetTester tester) async {
+    Widget buildWidget({CupertinoTabController? controller}) {
+      return CupertinoApp(
+        restorationScopeId: 'app',
+        home: CupertinoTabScaffold(
+          controller: controller,
+          restorationId: 'scaffold',
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(
+              4,
+              (int i) => BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
+            ),
+          ),
+          tabBuilder: (BuildContext context, int i) => Text('Content $i'),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(find.text('Content 0'), findsOneWidget);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsNothing);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsOneWidget);
+    expect(find.text('Content 3'), findsNothing);
+
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 3);
+    await tester.pumpWidget(buildWidget(controller: controller));
+
+    expect(find.text('Content 0'), findsNothing);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsOneWidget);
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(find.text('Content 0'), findsOneWidget);
+    expect(find.text('Content 1'), findsNothing);
+    expect(find.text('Content 2'), findsNothing);
+    expect(find.text('Content 3'), findsNothing);
   });
 }
 

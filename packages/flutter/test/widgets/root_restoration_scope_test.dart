@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -44,7 +42,7 @@ void main() {
 
     expect(binding.restorationManager.rootBucketAccessed, 0);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    expect(state.bucket.restorationId, 'root-child');
+    expect(state.bucket!.restorationId, 'root-child');
     expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
 
     expect(find.text('Hello'), findsOneWidget);
@@ -82,7 +80,7 @@ void main() {
     expect(binding.firstFrameIsDeferred, isFalse);
 
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    expect(state.bucket.restorationId, 'root-child');
+    expect(state.bucket!.restorationId, 'root-child');
     expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
   });
 
@@ -108,7 +106,7 @@ void main() {
     expect(binding.firstFrameIsDeferred, isFalse);
 
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    expect(state.bucket.restorationId, 'root-child');
+    expect(state.bucket!.restorationId, 'root-child');
     expect(rawData[childrenMapKey].containsKey('root-child'), isTrue);
   });
 
@@ -158,7 +156,7 @@ void main() {
 
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
-    expect(state.bucket.restorationId, 'root-child');
+    expect(state.bucket!.restorationId, 'root-child');
 
     // Change ID back to null.
     await tester.pumpWidget(
@@ -203,7 +201,7 @@ void main() {
     expect(binding.restorationManager.rootBucketAccessed, 0);
     expect(find.text('Hello'), findsOneWidget);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    expect(state.bucket.restorationId, 'root-child');
+    expect(state.bucket!.restorationId, 'root-child');
     expect(inScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
 
     // Move out of scope.
@@ -232,7 +230,7 @@ void main() {
 
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
-    expect(state.bucket.restorationId, 'root-child');
+    expect(state.bucket!.restorationId, 'root-child');
     expect(outOfScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
     expect(inScopeRawData, isEmpty);
 
@@ -255,7 +253,7 @@ void main() {
 
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
-    expect(state.bucket.restorationId, 'root-child');
+    expect(state.bucket!.restorationId, 'root-child');
     expect(outOfScopeRawData, isEmpty);
     expect(inScopeRawData[childrenMapKey].containsKey('root-child'), isTrue);
   });
@@ -280,9 +278,9 @@ void main() {
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsOneWidget);
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
-    state.bucket.write('foo', 42);
+    state.bucket!.write('foo', 42);
     expect(firstRawData[childrenMapKey]['root-child'][valuesMapKey]['foo'], 42);
-    final RestorationBucket firstBucket = state.bucket;
+    final RestorationBucket firstBucket = state.bucket!;
 
     // Replace with new root.
     final Map<String, dynamic> secondRawData = <String, dynamic>{
@@ -300,11 +298,11 @@ void main() {
     firstRoot.dispose();
 
     expect(state.bucket, isNot(same(firstBucket)));
-    expect(state.bucket.read<int>('foo'), 22);
+    expect(state.bucket!.read<int>('foo'), 22);
   });
 
   testWidgets('injects null when rootBucket is null', (WidgetTester tester) async {
-    final Completer<RestorationBucket> completer = Completer<RestorationBucket>();
+    final Completer<RestorationBucket?> completer = Completer<RestorationBucket?>();
     binding.restorationManager.rootBucket = completer.future;
 
     await tester.pumpWidget(
@@ -361,7 +359,7 @@ void main() {
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     expect(state.bucket, isNotNull);
 
-    binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(null);
+    binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket?>(null);
     await tester.pump();
     root.dispose();
 
@@ -372,7 +370,7 @@ void main() {
 }
 
 class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
-  MockRestorationManager _restorationManager;
+  late MockRestorationManager _restorationManager;
 
   @override
   MockRestorationManager get restorationManager => _restorationManager;

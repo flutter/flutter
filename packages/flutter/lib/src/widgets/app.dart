@@ -49,7 +49,7 @@ export 'dart:ui' show Locale;
 ///    is recommended over [LocaleResolutionCallback].
 typedef LocaleListResolutionCallback = Locale? Function(List<Locale>? locales, Iterable<Locale> supportedLocales);
 
-/// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
+/// {@template flutter.widgets.LocaleResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
 /// It is recommended to provide a [LocaleListResolutionCallback] instead of a
@@ -433,8 +433,8 @@ class WidgetsApp extends StatefulWidget {
   /// This object will be used by the underlying [Router].
   ///
   /// If this is not provided, the widgets app will create a
-  /// [PlatformRouteInformationProvider] with initial route name equals to
-  /// the [Window.defaultRouteName] by default.
+  /// [PlatformRouteInformationProvider] with initial route name equal to the
+  /// [dart:ui.PlatformDispatcher.defaultRouteName] by default.
   ///
   /// See also:
   ///
@@ -525,8 +525,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
   ///
-  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
-  /// that launched the application.
+  /// Defaults to [dart:ui.PlatformDispatcher.defaultRouteName], which may be
+  /// overridden by the code that launched the application.
   ///
   /// If the route name starts with a slash, then it is treated as a "deep link",
   /// and before this route is pushed, the routes leading to this one are pushed
@@ -1095,6 +1095,7 @@ class WidgetsApp extends StatefulWidget {
   /// The default value of [WidgetsApp.actions].
   static Map<Type, Action<Intent>> defaultActions = <Type, Action<Intent>>{
     DoNothingIntent: DoNothingAction(),
+    DoNothingAndStopPropagationIntent: DoNothingAction(consumesKey: false),
     RequestFocusIntent: RequestFocusAction(),
     NextFocusIntent: NextFocusAction(),
     PreviousFocusIntent: PreviousFocusAction(),
@@ -1586,7 +1587,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
-    Widget title;
+    final Widget title;
     if (widget.onGenerateTitle != null) {
       title = Builder(
         // This Builder exists to provide a context below the Localizations widget.

@@ -66,14 +66,28 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
       }
     }
-    final String presetPluginsPath = pathsSelectorValue == null
-      ? null
-      : globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        pathsSelectorValue,
-      );
+
+    final int major = version?.major;
+    final int minor = version?.minor;
+    String presetPluginsPath;
+    if (pathsSelectorValue != null) {
+      if (major != null && major >= 4 && minor != null && minor >= 1) {
+        presetPluginsPath = globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'Google',
+          pathsSelectorValue,
+        );
+      } else {
+        presetPluginsPath = globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          pathsSelectorValue,
+        );
+      }
+    }
     return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
@@ -127,12 +141,23 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final int major = version?.major;
     final int minor = version?.minor;
     if (globals.platform.isMacOS) {
-      return globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        'AndroidStudio$major.$minor',
-      );
+      /// plugin path of Android Studio has been changed after version 4.1.
+      if (major != null && major >= 4 && minor != null && minor >= 1) {
+        return globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'Google',
+          'AndroidStudio$major.$minor',
+        );
+      } else {
+        return globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'AndroidStudio$major.$minor',
+        );
+      }
     } else {
       return globals.fs.path.join(
         globals.fsUtils.homeDirPath,
@@ -260,6 +285,29 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         }
       }
     }
+    // 4.1 has a different location for AndroidStudio installs on Windows.
+    if (globals.platform.isWindows) {
+      final File homeDot = globals.fs.file(globals.fs.path.join(
+        globals.platform.environment['LOCALAPPDATA'],
+        'Google',
+        'AndroidStudio4.1',
+        '.home',
+      ));
+      if (homeDot.existsSync()) {
+        final String installPath = homeDot.readAsStringSync();
+        if (globals.fs.isDirectorySync(installPath)) {
+          final AndroidStudio studio = AndroidStudio(
+            installPath,
+            version: Version(4, 1, 0),
+            studioAppName: 'Android Studio 4.1',
+          );
+          if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
+            studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+            studios.add(studio);
+          }
+        }
+      }
+    }
 
     final String configuredStudioDir = globals.config.getValue('android-studio-dir') as String;
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
@@ -310,7 +358,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     } else {
       RunResult result;
       try {
-        result = processUtils.runSync(<String>[javaExecutable, '-version']);
+        result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
       } on ProcessException catch (e) {
         _validationMessages.add('Failed to run Java: $e');
       }

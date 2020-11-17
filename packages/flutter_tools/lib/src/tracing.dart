@@ -43,7 +43,6 @@ class Tracing {
     if (awaitFirstFrame) {
       final Status status = _logger.startProgress(
         'Waiting for application to render first frame...',
-        timeout: null,
       );
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();

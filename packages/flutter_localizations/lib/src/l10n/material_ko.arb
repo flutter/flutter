@@ -53,7 +53,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount자 남음",
   "refreshIndicatorSemanticLabel": "새로고침",
   "moreButtonTooltip": "더보기",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "yyyy/mm/dd",
   "selectYearSemanticsLabel": "연도 선택",
   "unspecifiedDate": "날짜",

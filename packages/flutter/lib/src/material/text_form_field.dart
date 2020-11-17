@@ -182,6 +182,7 @@ class TextFormField extends FormField<String> {
     Brightness? keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
+    TextSelectionControls? selectionControls,
     InputCounterWidgetBuilder? buildCounter,
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
@@ -228,7 +229,7 @@ class TextFormField extends FormField<String> {
        builder: (FormFieldState<String> field) {
          final _TextFormFieldState state = field as _TextFormFieldState;
          final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-             .applyDefaults(Theme.of(field.context)!.inputDecorationTheme);
+             .applyDefaults(Theme.of(field.context).inputDecorationTheme);
          void onChangedHandler(String value) {
            field.didChange(value);
            if (onChanged != null) {
@@ -276,6 +277,7 @@ class TextFormField extends FormField<String> {
            scrollPhysics: scrollPhysics,
            keyboardAppearance: keyboardAppearance,
            enableInteractiveSelection: enableInteractiveSelection,
+           selectionControls: selectionControls,
            buildCounter: buildCounter,
            autofillHints: autofillHints,
          );

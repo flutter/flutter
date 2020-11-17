@@ -70,7 +70,6 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
-    @required FlutterProject flutterProject,
     @required String target,
     @required BuildInfo buildInfo,
     @required Platform platform,
@@ -93,18 +92,21 @@ class FlutterDevice {
     // a warning message and dump some debug information which can be
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
+      // TODO(jonahwilliams): consistently provide these flags across platforms.
       Artifact platformDillArtifact;
-      List<String> extraFrontEndOptions;
+      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
-        extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      } else {
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
+      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions = <String>[
-          ...?buildInfo?.extraFrontEndOptions,
-          if (!(buildInfo?.extraFrontEndOptions?.contains('--sound-null-safety') ?? false))
-            '--sound-null-safety'
-        ];
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
+        }
+      } else {
+        assert(false);
       }
 
       generator = ResidentCompiler(
@@ -118,7 +120,7 @@ class FlutterDevice {
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
           dartDefines: buildInfo.dartDefines,
-          extraFrontEndOptions: extraFrontEndOptions
+          extraFrontEndOptions: extraFrontEndOptions,
         ),
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
@@ -288,7 +290,7 @@ class FlutterDevice {
     }, onDone: () {
       _isListeningForObservatoryUri = false;
       if (!completer.isCompleted && !isWaitingForVm) {
-        completer.completeError('connection to device ended too early');
+        completer.completeError(Exception('connection to device ended too early'));
       }
     });
     _isListeningForObservatoryUri = true;
@@ -328,7 +330,7 @@ class FlutterDevice {
     return vmService.onDone
       .catchError((dynamic error, StackTrace stackTrace) {
         globals.logger.printError(
-          'unhanlded error waiting for vm service exit:\n $error',
+          'unhandled error waiting for vm service exit:\n $error',
           stackTrace: stackTrace,
          );
       })
@@ -343,9 +345,8 @@ class FlutterDevice {
 
   Future<Uri> setupDevFS(
     String fsName,
-    Directory rootDirectory, {
-    String packagesFilePath,
-  }) {
+    Directory rootDirectory,
+  ) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmService,
@@ -356,37 +357,6 @@ class FlutterDevice {
       logger: globals.logger,
     );
     return devFS.create();
-  }
-
-  Future<List<Future<vm_service.ReloadReport>>> reloadSources(
-    String entryPath, {
-    bool pause = false,
-  }) async {
-    final String deviceEntryUri = devFS.baseUri
-      .resolveUri(globals.fs.path.toUri(entryPath)).toString();
-    final vm_service.VM vm = await vmService.getVM();
-    return <Future<vm_service.ReloadReport>>[
-      for (final vm_service.IsolateRef isolateRef in vm.isolates)
-        vmService.reloadSources(
-          isolateRef.id,
-          pause: pause,
-          rootLibUri: deviceEntryUri,
-        )
-    ];
-  }
-
-  Future<void> resetAssetDirectory() async {
-    final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
-        globals.fs.path.toUri(getAssetBuildDirectory()));
-    assert(deviceAssetsDirectoryUri != null);
-    final List<FlutterView> views = await vmService.getFlutterViews();
-    await Future.wait<void>(views.map<Future<void>>(
-      (FlutterView view) => vmService.setAssetDirectory(
-        assetsDirectory: deviceAssetsDirectoryUri,
-        uiIsolateId: view.uiIsolate.id,
-        viewId: view.id,
-      )
-    ));
   }
 
   Future<void> debugDumpApp() async {
@@ -701,7 +671,6 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.name}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     UpdateFSReport report;
     try {
@@ -795,11 +764,6 @@ abstract class ResidentRunner {
   Completer<int> _finished = Completer<int>();
   bool hotMode;
 
-  /// Whether the compiler was instructed to run with null-safety enabled.
-  @protected
-  bool get usageNullSafety => debuggingOptions?.buildInfo
-    ?.extraFrontEndOptions?.any((String option) => option.contains('non-nullable')) ?? false;
-
   /// Returns true if every device is streaming observatory URIs.
   bool get isWaitingForObservatory {
     return flutterDevices.every((FlutterDevice device) {
@@ -813,9 +777,9 @@ abstract class ResidentRunner {
     @required bool swap,
   }) {
     if (!fullRestart) {
-      return '$mainPath.incremental.dill';
+      return 'main.dart.incremental.dill';
     }
-    return '$mainPath${swap ? '.swap' : ''}.dill';
+    return 'main.dart${swap ? '.swap' : ''}.dill';
   }
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
@@ -909,7 +873,6 @@ abstract class ResidentRunner {
       processManager: globals.processManager,
       projectDir: globals.fs.currentDirectory,
     );
-    globals.logger.printTrace('Starting incremental build...');
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),
       _environment,
@@ -926,14 +889,6 @@ abstract class ResidentRunner {
       }
     }
     globals.logger.printTrace('complete');
-  }
-
-  /// Toggle whether canvaskit is being used for rendering, returning the new
-  /// state.
-  ///
-  /// Only supported on the web.
-  Future<bool> toggleCanvaskit() {
-    throw Exception('Canvaskit not supported by this runner.');
   }
 
   /// Write the SkSL shaders to a zip file in build directory.
@@ -1114,13 +1069,12 @@ abstract class ResidentRunner {
   /// If the device has a connected vmservice, this method will attempt to hide
   /// and restore the debug banner before taking the screenshot.
   ///
-  /// Throws an [AssertionError] if [Devce.supportsScreenshot] is not true.
+  /// Throws an [AssertionError] if [Device.supportsScreenshot] is not true.
   Future<void> screenshot(FlutterDevice device) async {
     assert(device.device.supportsScreenshot);
 
     final Status status = globals.logger.startProgress(
       'Taking screenshot for ${device.device.name}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
@@ -1268,7 +1222,6 @@ abstract class ResidentRunner {
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
         'Waiting for ${device.device.name} to report its views...',
-        timeout: const Duration(milliseconds: 200),
       );
       try {
         await device.vmService.getFlutterViews();

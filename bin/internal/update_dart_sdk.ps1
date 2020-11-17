@@ -76,9 +76,9 @@ If (Get-Command 7z -errorAction SilentlyContinue) {
 } ElseIf (Get-Command 7za -errorAction SilentlyContinue) {
     # Use 7-Zip's standalone version 7za.exe, if available.
     & 7za x $dartSdkZip "-o$cachePath" -bd | Out-Null
-} ElseIf (Get-Command Expand-Archive -errorAction SilentlyContinue) {
+} ElseIf (Get-Command Microsoft.PowerShell.Archive\Expand-Archive -errorAction SilentlyContinue) {
     # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
-    Expand-Archive $dartSdkZip -DestinationPath $cachePath
+    Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $cachePath
 } Else {
     # As last resort: fall back to the Windows GUI.
     $shell = New-Object -com shell.application

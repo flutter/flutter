@@ -43,6 +43,7 @@ class BuildAarCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: false);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser
       ..addMultiOption(
         'target-platform',
@@ -111,7 +112,7 @@ class BuildAarCommand extends BuildSubCommand {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
-            getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
+            await getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
             targetArchs: targetArchitectures,
           )
         );

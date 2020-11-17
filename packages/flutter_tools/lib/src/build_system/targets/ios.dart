@@ -10,7 +10,6 @@ import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals hide fs, logger, processManager, artifacts;
-import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -87,9 +86,9 @@ abstract class AotAssemblyBase extends Target {
         platform: targetPlatform,
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
-        packagesPath: environment.projectDir.childFile('.packages').path,
         outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
         darwinArch: darwinArch,
+        sdkRoot: environment.defines[kSdkRoot],
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
@@ -128,7 +127,6 @@ class AotAssemblyRelease extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
@@ -163,7 +161,6 @@ class AotAssemblyProfile extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
@@ -187,8 +184,8 @@ class AotAssemblyProfile extends AotAssemblyBase {
 }
 
 /// Create a trivial App.framework file for debug iOS builds.
-class DebugUniveralFramework extends Target {
-  const DebugUniveralFramework();
+class DebugUniversalFramework extends Target {
+  const DebugUniversalFramework();
 
   @override
   String get name => 'debug_universal_framework';
@@ -211,44 +208,19 @@ class DebugUniveralFramework extends Target {
   @override
   Future<void> build(Environment environment) async {
     // Generate a trivial App.framework.
-    final Set<DarwinArch> iosArchs = environment.defines[kIosArchs]
+    final Set<String> iosArchNames = environment.defines[kIosArchs]
       ?.split(' ')
-      ?.map(getIOSArchForName)
-      ?.toSet()
-      ?? <DarwinArch>{DarwinArch.arm64};
-    final File iphoneFile = environment.buildDir.childFile('iphone_framework');
-    final File simulatorFile = environment.buildDir.childFile('simulator_framework');
-    final File lipoOutputFile = environment.buildDir
+      ?.toSet();
+    final File output = environment.buildDir
       .childDirectory('App.framework')
       .childFile('App');
-    lipoOutputFile.parent.createSync(recursive: true);
-    final RunResult iphoneResult = await createStubAppFramework(
-      iphoneFile,
-      SdkType.iPhone,
-      // Only include 32bit if it is contained in the active architectures.
-      include32Bit: iosArchs.contains(DarwinArch.armv7)
+    environment.buildDir.createSync(recursive: true);
+    final RunResult createFrameworkResult = await createStubAppFramework(
+      output,
+      environment.defines[kSdkRoot],
+      iosArchNames,
     );
-    final RunResult simulatorResult = await createStubAppFramework(
-      simulatorFile,
-      SdkType.iPhoneSimulator,
-    );
-    if (iphoneResult.exitCode != 0 || simulatorResult.exitCode != 0) {
-      throw Exception('Failed to create App.framework.');
-    }
-    final List<String> lipoCommand = <String>[
-      'xcrun',
-      'lipo',
-      '-create',
-      iphoneFile.path,
-      simulatorFile.path,
-      '-output',
-      lipoOutputFile.path
-    ];
-    final RunResult lipoResult = await processUtils.run(
-      lipoCommand,
-    );
-
-    if (lipoResult.exitCode != 0) {
+    if (createFrameworkResult.exitCode != 0) {
       throw Exception('Failed to create App.framework.');
     }
   }
@@ -375,7 +347,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Target> get dependencies => <Target>[
-    const DebugUniveralFramework(),
+    const DebugUniversalFramework(),
     ...super.dependencies,
   ];
 }
@@ -411,7 +383,8 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool include32Bit = true }) async {
+Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
+    Set<String> iosArchNames) async {
   try {
     outputFile.createSync(recursive: true);
   } on Exception catch (e) {
@@ -426,32 +399,19 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
   static const int Moo = 88;
   ''');
 
-    List<String> archFlags;
-    if (sdk == SdkType.iPhone) {
-      archFlags = <String>[
-        if (include32Bit)
-          ...<String>['-arch', getNameForDarwinArch(DarwinArch.armv7)],
-        '-arch',
-        getNameForDarwinArch(DarwinArch.arm64),
-      ];
-    } else {
-      archFlags = <String>[
-        '-arch',
-        getNameForDarwinArch(DarwinArch.x86_64),
-      ];
-    }
-
     return await globals.xcode.clang(<String>[
       '-x',
       'c',
-      ...archFlags,
+      for (String arch in iosArchNames) ...<String>['-arch', arch],
       stubSource.path,
       '-dynamiclib',
       '-fembed-bitcode-marker',
+      // Keep version in sync with AOTSnapshotter flag
+      '-miphoneos-version-min=8.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      '-isysroot', await globals.xcode.sdkLocation(sdk),
+      '-isysroot', sdkRoot,
       '-o', outputFile.path,
     ]);
   } finally {

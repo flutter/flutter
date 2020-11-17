@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -14,50 +12,39 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget buildSliverAppBarApp({
-  bool floating,
-  bool pinned,
-  double collapsedHeight,
-  double expandedHeight,
+  bool floating = false,
+  bool pinned = false,
+  double? collapsedHeight,
+  double? expandedHeight,
   bool snap = false,
   double toolbarHeight = kToolbarHeight,
 }) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultMaterialLocalizations.delegate,
-      DefaultWidgetsLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          body: DefaultTabController(
-            length: 3,
-            child: CustomScrollView(
-              primary: true,
-              slivers: <Widget>[
-                SliverAppBar(
-                  title: const Text('AppBar Title'),
-                  floating: floating,
-                  pinned: pinned,
-                  collapsedHeight: collapsedHeight,
-                  expandedHeight: expandedHeight,
-                  toolbarHeight: toolbarHeight,
-                  snap: snap,
-                  bottom: TabBar(
-                    tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    height: 1200.0,
-                    color: Colors.orange[400],
-                  ),
-                ),
-              ],
+  return MaterialApp(
+    home: Scaffold(
+      body: DefaultTabController(
+        length: 3,
+        child: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar(
+              title: const Text('AppBar Title'),
+              floating: floating,
+              pinned: pinned,
+              collapsedHeight: collapsedHeight,
+              expandedHeight: expandedHeight,
+              toolbarHeight: toolbarHeight,
+              snap: snap,
+              bottom: TabBar(
+                tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
+              ),
             ),
-          ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200.0,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
         ),
       ),
     ),
@@ -65,7 +52,7 @@ Widget buildSliverAppBarApp({
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
@@ -303,7 +290,7 @@ void main() {
 
     final Key titleKey = UniqueKey();
     Widget leading = Container();
-    List<Widget> actions;
+    List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
       return MaterialApp(
@@ -360,8 +347,8 @@ void main() {
 
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
-    Widget leading = Container();
-    List<Widget> actions;
+    Widget? leading = Container();
+    List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
       return MaterialApp(
@@ -412,8 +399,8 @@ void main() {
 
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
-    Widget leading = Container();
-    List<Widget> actions;
+    Widget? leading = Container();
+    List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
       return MaterialApp(
@@ -1952,7 +1939,7 @@ void main() {
   });
 
   testWidgets('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2', (WidgetTester tester) async {
-    double textScaleFactor;
+    late double textScaleFactor;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -1988,9 +1975,9 @@ void main() {
   });
 
   testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
-    double textScaleFactor;
-    TextDirection textDirection;
-    bool centerTitle;
+    double textScaleFactor = 1.0;
+    TextDirection textDirection = TextDirection.ltr;
+    bool centerTitle = false;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -2023,10 +2010,8 @@ void main() {
     // Overall screen size is 800x600
     // Left or right justified title is padded by 16 on the "start" side.
     // Toolbar height is 56.
+    // "Jumbo" title is 100x20.
 
-    textScaleFactor = 1; // "Jumbo" title is 100x20.
-    textDirection = TextDirection.ltr;
-    centerTitle = false;
     await tester.pumpWidget(buildFrame());
     expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 18, 116, 38));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
@@ -2058,7 +2043,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
-    Future<void> buildAndVerifyDelegate({ bool pinned, bool floating, bool snap }) async {
+    Future<void> buildAndVerifyDelegate({ required bool pinned, required bool floating, required bool snap }) async {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -2148,17 +2133,6 @@ void main() {
     await tester.pump();
     expect(find.byType(SliverAppBar), findsNothing);
     expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
-  });
-
-  test('SliverApp toolbarHeight cannot be null', () {
-    try{
-       SliverAppBar(
-        toolbarHeight: null,
-      );
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('toolbarHeight != null'));
-      expect(error.toString(), contains('is not true'));
-    }
   });
 
   testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {

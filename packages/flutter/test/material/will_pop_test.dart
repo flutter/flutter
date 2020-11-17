@@ -222,8 +222,8 @@ void main() {
   });
 
   testWidgets('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
-    Future<bool> showYesNoAlert(BuildContext context) {
-      return showDialog<bool>(
+    Future<bool> showYesNoAlert(BuildContext context) async {
+      return (await showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
@@ -239,7 +239,7 @@ void main() {
             ],
           );
         },
-      );
+      ))!;
     }
 
     Widget buildFrame() {

@@ -880,17 +880,20 @@ mixin WidgetInspectorService {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        const String argPrefix = 'arg';
         final List<String> args = <String>[];
-        parameters.forEach((String name, String value) {
-          if (name.startsWith(argPrefix)) {
-            final int index = int.parse(name.substring(argPrefix.length));
-            if (index >= args.length) {
-              args.length = index + 1;
-            }
-            args[index] = value;
+        int index = 0;
+        while (true) {
+          final String name = 'arg$index';
+          if (parameters.containsKey(name)) {
+            args.add(parameters[name]!);
+          } else {
+            break;
           }
-        });
+          index++;
+        }
+        // Verify that the only arguments other than perhaps 'isolateId' are
+        // arguments we have already handled.
+        assert(index == parameters.length || (index == parameters.length - 1 && parameters.containsKey('isolateId')));
         return <String, Object?>{'result': await callback(args)};
       },
     );
@@ -1541,7 +1544,7 @@ mixin WidgetInspectorService {
   /// object that `diagnosticsNodeId` references only including children that
   /// were created directly by user code.
   ///
-  /// {@template widgets.inspector.trackCreation}
+  /// {@template flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
   /// Requires [Widget] creation locations which are only available for debug
   /// mode builds when the `--track-widget-creation` flag is enabled on the call
   /// to the `flutter` tool. This flag is enabled by default in debug builds.
@@ -1827,7 +1830,7 @@ mixin WidgetInspectorService {
 
   /// Returns whether [Widget] creation locations are available.
   ///
-  /// {@macro widgets.inspector.trackCreation}
+  /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
   bool isWidgetCreationTracked() {
     _widgetCreationTracked ??= _WidgetForTypeTests() is _HasCreationLocation;
     return _widgetCreationTracked!;
@@ -2758,7 +2761,7 @@ const TextStyle _messageStyle = TextStyle(
 /// Interface for classes that track the source code location the their
 /// constructor was called from.
 ///
-/// {@macro widgets.inspector.trackCreation}
+/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 // ignore: unused_element
 abstract class _HasCreationLocation {
   _Location get _location;
@@ -2891,7 +2894,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
 ///
 /// This always returns false if it is not called in debug mode.
 ///
-/// {@macro widgets.inspector.trackCreation}
+/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently is local creation locations are only available for
 /// [Widget] and [Element].
@@ -2911,7 +2914,7 @@ bool debugIsLocalCreationLocation(Object object) {
 ///
 /// ex: "file:///path/to/main.dart:4:3"
 ///
-/// {@macro widgets.inspector.trackCreation}
+/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 String? _describeCreationLocation(Object object) {
@@ -2921,7 +2924,7 @@ String? _describeCreationLocation(Object object) {
 
 /// Returns the creation location of an object if one is available.
 ///
-/// {@macro widgets.inspector.trackCreation}
+/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location? _getCreationLocation(Object? object) {

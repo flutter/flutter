@@ -487,7 +487,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   // are treated as not overflowing.
   bool get _hasOverflow => _overflow! > precisionErrorTolerance;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -512,6 +512,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     required double extent, // the extent in the direction that isn't the sizing direction
     required _ChildSizingFunction childSize, // a method to find the size in the sizing direction
   }) {
+    if (crossAxisAlignment == CrossAxisAlignment.baseline) {
+      // Intrinsics cannot be calculated without a full layout for
+      // baseline alignment. Throw an assertion and return 0.0 as documented
+      // on [RenderBox.computeMinIntrinsicWidth].
+      assert(
+        RenderObject.debugCheckingIntrinsics,
+        'Intrinsics are not available for CrossAxisAlignment.baseline.'
+      );
+      return 0.0;
+    }
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
@@ -739,14 +749,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             ...addendum,
             ErrorDescription(
               "If none of the above helps enough to fix this problem, please don't hesitate to file a bug:\n"
-              '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+              '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
             ),
           ]);
         }());
         totalFlex += flex;
         lastFlexChild = child;
       } else {
-        BoxConstraints innerConstraints;
+        final BoxConstraints innerConstraints;
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
           switch (_direction) {
             case Axis.horizontal:
@@ -798,7 +808,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               break;
           }
           assert(minChildExtent != null);
-          BoxConstraints innerConstraints;
+          final BoxConstraints innerConstraints;
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {
               case Axis.horizontal:
@@ -862,7 +872,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
     // Align items along the main axis.
     final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
-    double actualSize;
+    final double actualSize;
     switch (_direction) {
       case Axis.horizontal:
         size = constraints.constrain(Size(idealSize, crossSize));
@@ -917,7 +927,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     child = firstChild;
     while (child != null) {
       final FlexParentData childParentData = child.parentData! as FlexParentData;
-      double childCrossPosition;
+      final double childCrossPosition;
       switch (_crossAxisAlignment) {
         case CrossAxisAlignment.start:
         case CrossAxisAlignment.end:
@@ -933,12 +943,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           childCrossPosition = 0.0;
           break;
         case CrossAxisAlignment.baseline:
-          childCrossPosition = 0.0;
           if (_direction == Axis.horizontal) {
             assert(textBaseline != null);
             final double? distance = child.getDistanceToBaseline(textBaseline!, onlyReal: true);
             if (distance != null)
               childCrossPosition = maxBaselineDistance - distance;
+            else
+              childCrossPosition = 0.0;
+          } else {
+            childCrossPosition = 0.0;
           }
           break;
       }
@@ -1015,7 +1028,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Simulate a child rect that overflows by the right amount. This child
       // rect is never used for drawing, just for determining the overflow
       // location and amount.
-      Rect overflowChildRect;
+      final Rect overflowChildRect;
       switch (_direction) {
         case Axis.horizontal:
           overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow!, 0.0);

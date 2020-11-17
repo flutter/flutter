@@ -22,9 +22,9 @@ final ProcessUtils processUtils = ProcessUtils(processManager: processManager, l
   ),
   stdio: stdio,
   outputPreferences: OutputPreferences.test(wrapText: true),
-  timeoutConfiguration: const TimeoutConfiguration(),
 ));
-final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+final String dartBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {
@@ -99,7 +99,6 @@ void main() {
       'describe',
       '--match',
       'v*.*.*',
-      '--first-parent',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);
@@ -123,7 +122,6 @@ void main() {
       'describe',
       '--match',
       'v*.*.*',
-      '--first-parent',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);

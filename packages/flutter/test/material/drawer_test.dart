@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -126,7 +124,7 @@ void main() {
     }
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    Widget buildFrame({ Color drawerScrimColor }) {
+    Widget buildFrame({ Color? drawerScrimColor }) {
       return MaterialApp(
         home: Scaffold(
           key: scaffoldKey,
@@ -147,7 +145,7 @@ void main() {
     // Default drawerScrimColor
 
     await tester.pumpWidget(buildFrame(drawerScrimColor: null));
-    scaffoldKey.currentState.openDrawer();
+    scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
     expect(getScrim().color, Colors.black54);
@@ -159,7 +157,7 @@ void main() {
     // Specific drawerScrimColor
 
     await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
-    scaffoldKey.currentState.openDrawer();
+    scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
     expect(getScrim().color, const Color(0xFF323232));

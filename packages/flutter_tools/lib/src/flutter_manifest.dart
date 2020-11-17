@@ -10,7 +10,6 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'plugins.dart';
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
@@ -347,24 +346,7 @@ class FontAsset {
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
 
-@visibleForTesting
-String buildSchemaDir(FileSystem fileSystem) {
-  return fileSystem.path.join(
-    fileSystem.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
-  );
-}
 
-@visibleForTesting
-String buildSchemaPath(FileSystem fileSystem) {
-  return fileSystem.path.join(
-    buildSchemaDir(fileSystem),
-    'pubspec_yaml.json',
-  );
-}
-
-/// This method should be kept in sync with the schema in
-/// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
-/// but avoid introducing dependencies on packages for simple validation.
 bool _validate(dynamic manifest, Logger logger) {
   final List<String> errors = <String>[];
   if (manifest is! YamlMap) {

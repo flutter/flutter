@@ -101,13 +101,16 @@ Future<void> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   VoidCallback test,
-  List<String> expectations,
-) async {
+  List<String> expectations, [
+  List<String> expectationsAfterAnotherPump = const <String>[],
+]) async {
   expect(host, isNotNull);
   test();
   expect(results, equals(expectations));
   results.clear();
   await tester.pump();
+  expect(results, equals(expectationsAfterAnotherPump));
+  results.clear();
 }
 
 void main() {
@@ -199,6 +202,8 @@ void main() {
       <String>[ // stack is: initial, two
         'third: didPop hello',
         'two: didPopNext third',
+      ],
+      <String>[
         'third: dispose',
       ],
     );
@@ -209,6 +214,8 @@ void main() {
       <String>[ // stack is: initial
         'two: didPop good bye',
         'initial: didPopNext two',
+      ],
+      <String>[
         'two: dispose',
       ],
     );
@@ -278,6 +285,8 @@ void main() {
       <String>[
         'third: didPop good bye',
         'second: didPopNext third',
+      ],
+      <String>[
         'third: dispose',
       ],
     );
@@ -320,6 +329,8 @@ void main() {
       <String>[
         'four: didPop the end',
         'second: didPopNext four',
+      ],
+      <String>[
         'four: dispose',
       ],
     );
@@ -395,6 +406,8 @@ void main() {
       <String>[
         'C: didPop null',
         'b: didPopNext C',
+      ],
+      <String>[
         'C: dispose',
       ],
     );
@@ -1319,28 +1332,28 @@ void main() {
       final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
       expect(animatedModalBarrier, findsOneWidget);
 
-      Animation<Color> modalBarrierAnimation;
+      Animation<Color?> modalBarrierAnimation;
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(modalBarrierAnimation.value, Colors.transparent);
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
@@ -1382,28 +1395,28 @@ void main() {
       final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
       expect(animatedModalBarrier, findsOneWidget);
 
-      Animation<Color> modalBarrierAnimation;
+      Animation<Color?> modalBarrierAnimation;
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(modalBarrierAnimation.value, Colors.transparent);
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
+        modalBarrierAnimation.value!.alpha,
         closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
@@ -1626,6 +1639,29 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.text('dialog1'), findsNothing);
+  });
+
+  testWidgets('can not be dismissed with escape keyboard shortcut if barrier not dismissible', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      home: const Text('dummy1'),
+    ));
+    final Element textOnPageOne = tester.element(find.text('dummy1'));
+
+    // Show a simple dialog
+    showDialog<void>(
+      context: textOnPageOne,
+      barrierDismissible: false,
+      builder: (BuildContext context) => const Text('dialog1'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
+
+    // Try to dismiss the dialog with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
   });
 
   testWidgets('ModalRoute.of works for void routes', (WidgetTester tester) async {

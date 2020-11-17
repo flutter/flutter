@@ -85,7 +85,12 @@ class FlutterProjectMetadata {
       if (!_metadataFile.existsSync()) {
         return null;
       }
-      final dynamic metadataYaml = loadYaml(_metadataFile.readAsStringSync());
+      dynamic metadataYaml;
+      try {
+        metadataYaml = loadYaml(_metadataFile.readAsStringSync());
+      } on YamlException {
+        // Handled in return below.
+      }
       if (metadataYaml is YamlMap) {
         _metadataYaml = metadataYaml;
       } else {

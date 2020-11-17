@@ -19,7 +19,7 @@ typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, Sliver
 /// The [SliverLayoutBuilder]'s final [SliverGeometry] will match the [SliverGeometry]
 /// of its child.
 ///
-/// {@macro flutter.widgets.layoutBuilder.builderFunctionInvocation}
+/// {@macro flutter.widgets.ConstrainedLayoutBuilder}
 ///
 /// See also:
 ///

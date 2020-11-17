@@ -76,7 +76,7 @@ class FuchsiaPM {
   /// When successful, creates a file `app_name-0.far` under [buildPath], which
   /// is the Fuchsia package.
   ///
-  /// [buildPath] should be the same path passed to [init], and [manfiestPath]
+  /// [buildPath] should be the same path passed to [init], and [manifestPath]
   /// should be the same manifest passed to [build].
   Future<bool> archive(String buildPath, String keyPath, String manifestPath) {
     return _runPMCommand(<String>[
@@ -121,7 +121,7 @@ class FuchsiaPM {
       '-l',
       '$host:$port',
     ];
-    final Process process = await processUtils.start(command);
+    final Process process = await globals.processUtils.start(command);
     process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -155,7 +155,7 @@ class FuchsiaPM {
       throwToolExit('Fuchsia pm tool not found');
     }
     final List<String> command = <String>[globals.fuchsiaArtifacts.pm.path, ...args];
-    final RunResult result = await processUtils.run(command);
+    final RunResult result = await globals.processUtils.run(command);
     return result.exitCode == 0;
   }
 }

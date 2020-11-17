@@ -229,7 +229,8 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 /// See also:
 ///
-///  * [Window.devicePixelRatio], which defines the device's current resolution.
+///  * [dart:ui.FlutterView.devicePixelRatio], which defines the device's
+///    current resolution.
 ///  * [Listener], a widget that calls callbacks in response to common pointer
 ///    events.
 @immutable
@@ -2111,39 +2112,39 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
   }
 }
 
-/// Determine the approriate hit slop pixels based on the [kind] of pointer.
+/// Determine the appropriate hit slop pixels based on the [kind] of pointer.
 double computeHitSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+      return kPrecisePointerHitSlop;
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPrecisePointerHitSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kTouchSlop;
   }
 }
 
-/// Determine the approriate pan slop pixels based on the [kind] of pointer.
+/// Determine the appropriate pan slop pixels based on the [kind] of pointer.
 double computePanSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+      return kPrecisePointerPanSlop;
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPrecisePointerPanSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kPanSlop;
   }
 }
 
-/// Determine the approriate scale slop pixels based on the [kind] of pointer.
+/// Determine the appropriate scale slop pixels based on the [kind] of pointer.
 double computeScaleSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+      return kPrecisePointerScaleSlop;
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
-      return kPrecisePointerScaleSlop;
     case PointerDeviceKind.unknown:
     case PointerDeviceKind.touch:
       return kScaleSlop;

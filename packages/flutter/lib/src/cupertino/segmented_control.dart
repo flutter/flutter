@@ -448,7 +448,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSegmentedControl<T>(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
       backgroundColors: backgroundColors,
@@ -459,7 +459,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSegmentedControl<T> renderObject) {
     renderObject
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..selectedIndex = selectedIndex
       ..pressedIndex = pressedIndex
       ..backgroundColors = backgroundColors
@@ -611,7 +611,7 @@ class _RenderSegmentedControl<T> extends RenderBox
       final Offset childOffset = Offset(start, 0.0);
       childParentData.offset = childOffset;
       final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
-      RRect rChildRect;
+      final RRect rChildRect;
       if (child == leftChild) {
         rChildRect = RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0),
             bottomLeft: const Radius.circular(3.0));

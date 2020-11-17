@@ -96,7 +96,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   @protected
   Widget buildContent(BuildContext context);
 
-  /// {@template flutter.cupertino.cupertinoRouteTransitionMixin.title}
+  /// {@template flutter.cupertino.CupertinoRouteTransitionMixin.title}
   /// A title string for this route.
   ///
   /// Used to auto-populate [CupertinoNavigationBar] and
@@ -433,13 +433,13 @@ class CupertinoPage<T> extends Page<T> {
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
 
-  /// {@macro flutter.cupertino.cupertinoRouteTransitionMixin.title}
+  /// {@macro flutter.cupertino.CupertinoRouteTransitionMixin.title}
   final String? title;
 
-  /// {@macro flutter.widgets.modalRoute.maintainState}
+  /// {@macro flutter.widgets.ModalRoute.maintainState}
   final bool maintainState;
 
-  /// {@macro flutter.widgets.pageRoute.fullscreenDialog}
+  /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
   final bool fullscreenDialog;
 
   @override
@@ -514,7 +514,7 @@ class CupertinoPageTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context);
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
@@ -578,7 +578,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final TextDirection? textDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context);
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
@@ -677,7 +677,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 
   double _convertToLogical(double value) {
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         return -value;
       case TextDirection.ltr:
@@ -691,8 +691,8 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     // For devices with notches, the drag area needs to be larger on the side
     // that has the notch.
     double dragAreaWidth = Directionality.of(context) == TextDirection.ltr ?
-                           MediaQuery.of(context)!.padding.left :
-                           MediaQuery.of(context)!.padding.right;
+                           MediaQuery.of(context).padding.left :
+                           MediaQuery.of(context).padding.right;
     dragAreaWidth = max(dragAreaWidth, _kBackGestureWidth);
     return Stack(
       fit: StackFit.passthrough,
@@ -756,7 +756,7 @@ class _CupertinoBackGestureController<T> {
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
     const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
-    bool animateForward;
+    final bool animateForward;
 
     // If the user releases the page before mid screen with sufficient velocity,
     // or after mid screen, we should animate the page out. Otherwise, the page
@@ -911,7 +911,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     // its parent box one box width on the start side of the box.
     final TextDirection? textDirection = configuration.textDirection;
     assert(textDirection != null);
-    double deltaX;
+    final double deltaX;
     switch (textDirection!) {
       case TextDirection.rtl:
         deltaX = configuration.size!.width;
@@ -1031,6 +1031,9 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// The `semanticsDismissible` argument is used to determine whether the
 /// semantics of the modal barrier are included in the semantics tree.
 ///
+/// The `routeSettings` argument is used to provide [RouteSettings] to the
+/// created Route.
+///
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
 /// by the `builder` does not share a context with the location that
@@ -1046,7 +1049,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
-Future<T> showCupertinoModalPopup<T>({
+Future<T?> showCupertinoModalPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   ImageFilter? filter,
@@ -1054,6 +1057,7 @@ Future<T> showCupertinoModalPopup<T>({
   bool barrierDismissible = true,
   bool useRootNavigator = true,
   bool? semanticsDismissible,
+  RouteSettings? routeSettings,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator)!.push(
@@ -1064,6 +1068,7 @@ Future<T> showCupertinoModalPopup<T>({
       builder: builder,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
+      settings: routeSettings,
     ),
   );
 }
@@ -1099,12 +1104,11 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// barrier behavior (by default, the dialog is not dismissible with a tap on
 /// the barrier).
 ///
-/// This function takes a `builder` which typically builds a [CupertinoDialog]
-/// or [CupertinoAlertDialog] widget. Content below the dialog is dimmed with a
-/// [ModalBarrier]. The widget returned by the `builder` does not share a
-/// context with the location that `showCupertinoDialog` is originally called
-/// from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the dialog
-/// needs to update dynamically.
+/// This function takes a `builder` which typically builds a [CupertinoAlertDialog]
+/// widget. Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showCupertinoDialog` is originally called from. Use a [StatefulBuilder] or
+/// a custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] for the dialog.
 /// It is only used when the method is called. Its corresponding widget can
@@ -1124,12 +1128,11 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// See also:
 ///
-///  * [CupertinoDialog], an iOS-style dialog.
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-Future<T> showCupertinoDialog<T>({
+Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   bool useRootNavigator = true,
@@ -1141,8 +1144,8 @@ Future<T> showCupertinoDialog<T>({
   return showGeneralDialog(
     context: context,
     barrierDismissible: barrierDismissible,
-    barrierLabel: CupertinoLocalizations.of(context)!.modalBarrierDismissLabel,
-    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context)!,
+    barrierLabel: CupertinoLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
     // This transition duration was eyeballed comparing with iOS
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {

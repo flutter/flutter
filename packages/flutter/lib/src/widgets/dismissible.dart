@@ -28,7 +28,7 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 /// confirm or veto a dismiss gesture.
 ///
 /// Used by [Dismissible.confirmDismiss].
-typedef ConfirmDismissCallback = Future<bool> Function(DismissDirection direction);
+typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection direction);
 
 /// The direction in which a [Dismissible] can be dismissed.
 enum DismissDirection {
@@ -61,6 +61,41 @@ enum DismissDirection {
 /// perpendicular to the dismiss direction) to zero over the [resizeDuration].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=iEMgjrfuc58}
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This sample shows how you can use the [Dismissible] widget to
+/// remove list items using swipe gestures.
+///
+/// ```dart
+/// List<int> items = List<int>.generate(100, (index) => index);
+///
+/// Widget build(BuildContext context) {
+///   return ListView.builder(
+///     itemCount: items.length,
+///     padding: const EdgeInsets.symmetric(vertical: 16),
+///     itemBuilder: (BuildContext context, int index) {
+///       return Dismissible(
+///         child: ListTile(
+///           title: Text(
+///             'Item ${items[index]}',
+///           ),
+///         ),
+///         background: Container(
+///           color: Colors.green,
+///         ),
+///         key: ValueKey(items[index]),
+///         onDismissed: (DismissDirection direction) {
+///           setState(() {
+///             items.remove(index);
+///           });
+///         },
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
 /// is specified it is stacked behind the Dismissible's child and is exposed when
@@ -102,7 +137,7 @@ class Dismissible extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// A widget that is stacked behind the child. If secondaryBackground is also
@@ -120,7 +155,7 @@ class Dismissible extends StatefulWidget {
   /// If the returned Future<bool> completes true, then this widget will be
   /// dismissed, otherwise it will be moved back to its original location.
   ///
-  /// If the returned Future<bool> completes to false or null the [onResize]
+  /// If the returned Future<bool?> completes to false or null the [onResize]
   /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback? confirmDismiss;
 
@@ -274,7 +309,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     if (extent == 0.0)
       return null;
     if (_directionIsXAxis) {
-      switch (Directionality.of(context)!) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           return extent < 0 ? DismissDirection.startToEnd : DismissDirection.endToStart;
         case TextDirection.ltr:
@@ -332,7 +367,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         break;
 
       case DismissDirection.endToStart:
-        switch (Directionality.of(context)!) {
+        switch (Directionality.of(context)) {
           case TextDirection.rtl:
             if (_dragExtent + delta > 0)
               _dragExtent += delta;
@@ -345,7 +380,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         break;
 
       case DismissDirection.startToEnd:
-        switch (Directionality.of(context)!) {
+        switch (Directionality.of(context)) {
           case TextDirection.rtl:
             if (_dragExtent + delta < 0)
               _dragExtent += delta;
@@ -458,7 +493,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     updateKeepAlive();
   }
 
-  Future<bool> _confirmStartResizeAnimation() async {
+  Future<bool?> _confirmStartResizeAnimation() async {
     if (widget.confirmDismiss != null) {
       final DismissDirection direction = _dismissDirection!;
       assert(direction != null);

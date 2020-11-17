@@ -33,9 +33,9 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
     curve: Curves.fastOutSlowIn,
   ));
 
-  AnimationController _controller;
-  Animation<double> _drawerContentsOpacity;
-  Animation<Offset> _drawerDetailsPosition;
+  late AnimationController _controller;
+  late Animation<double> _drawerContentsOpacity;
+  late Animation<Offset> _drawerDetailsPosition;
   bool _showDrawerContents = true;
 
   @override
@@ -58,7 +58,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  IconData _backIcon() {
+  IconData? _backIcon() {
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -69,13 +69,11 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       case TargetPlatform.macOS:
         return Icons.arrow_back_ios;
     }
-    assert(false);
-    return null;
   }
 
   void _showNotImplementedMessage() {
     Navigator.pop(context); // Dismiss the drawer.
-    _scaffoldKey.currentState.showSnackBar(const SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text("The drawer's items don't do anything"),
     ));
   }
@@ -211,7 +209,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       body: Center(
         child: InkWell(
           onTap: () {
-            _scaffoldKey.currentState.openDrawer();
+            _scaffoldKey.currentState!.openDrawer();
           },
           child: Semantics(
             button: true,

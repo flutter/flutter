@@ -62,7 +62,9 @@ class CreateCommand extends FlutterCommand {
       'with-driver-test',
       negatable: true,
       defaultsTo: false,
-      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test.",
+      help: '(Deprecated) Also add a flutter_driver dependency and generate a '
+      "sample 'flutter drive' test. This flag has been deprecated, instead see "
+      'package:integration_test at https://pub.dev/packages/integration_test .',
     );
     argParser.addOption(
       'template',
@@ -132,12 +134,11 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
     );
-    // TODO(egarciad): Remove this flag. https://github.com/flutter/flutter/issues/52363
     argParser.addFlag(
-      'androidx',
+      'skip-name-checks',
+      help: 'integration test only parameter to allow creating applications/plugins with '
+        'invalid names.',
       hide: true,
-      negatable: true,
-      help: 'Deprecated. Setting this flag has no effect.',
     );
   }
 
@@ -394,9 +395,19 @@ class CreateCommand extends FlutterCommand {
     }
 
     final String projectName = stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
-    error = _validateProjectName(projectName);
-    if (error != null) {
-      throwToolExit(error);
+    if (!boolArg('skip-name-checks')) {
+      error = _validateProjectName(projectName);
+      if (error != null) {
+        throwToolExit(error);
+      }
+    }
+
+    if (boolArg('with-driver-test')) {
+      globals.printError(
+        '--with-driver-test has been deprecated and will no longer add a flutter '
+        'driver template. Instead, learn how to use package:integration_test by '
+        'visiting https://pub.dev/packages/integration_test .'
+      );
     }
 
     final Map<String, dynamic> templateContext = _createTemplateContext(
@@ -404,7 +415,6 @@ class CreateCommand extends FlutterCommand {
       projectName: projectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
-      renderDriverTest: boolArg('with-driver-test'),
       withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
@@ -464,19 +474,18 @@ class CreateCommand extends FlutterCommand {
       ));
       globals.printStatus('Your module code is in $relativeMainPath.');
     } else {
-      // Run doctor; tell the user the next steps.
+      // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       final String relativePluginMain = globals.fs.path.join(relativePluginPath, 'lib', '$projectName.dart');
-      if (globals.doctor.canLaunchAnything) {
-        // Let them know a summary of the state of their tooling.
-        await globals.doctor.summary();
-        final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-        final String platformsString = platforms.join(', ');
-        globals.printStatus('''
+
+      // Let them know a summary of the state of their tooling.
+      final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+      final String platformsString = platforms.join(', ');
+      globals.printStatus('''
 In order to run your $application, type:
 
   \$ cd $relativeAppPath
@@ -491,20 +500,6 @@ Your plugin code is in $relativePluginMain.
 Host platform code is in the $platformsString directories under $relativePluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
-        }
-      } else {
-        globals.printStatus("You'll need to install additional components before you can run "
-            'your Flutter app:');
-        globals.printStatus('');
-
-        // Give the user more detailed analysis.
-        await globals.doctor.diagnose();
-        globals.printStatus('');
-        globals.printStatus("After installing components, run 'flutter doctor' in order to "
-            're-validate your setup.');
-        globals.printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
-            'directory in order to launch your app.');
-        globals.printStatus('Your $application code is in $relativeAppMain');
       }
     }
     return FlutterCommandResult.success();
@@ -536,7 +531,10 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         generateSyntheticPackage: false,
       );
       final FlutterProject project = FlutterProject.fromDirectory(directory);
-      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
+      await project.ensureReadyForPlatformSpecificTooling(
+        androidPlatform: true,
+        iosPlatform: true,
+      );
     }
     return generatedCount;
   }
@@ -631,7 +629,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       }
     }
 
-
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
@@ -663,11 +660,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       generatedCount += _injectGradleWrapper(project);
     }
 
-    if (boolArg('with-driver-test')) {
-      final Directory testDirectory = directory.childDirectory('test_driver');
-      generatedCount += await _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
-    }
-
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.create,
@@ -675,7 +667,15 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
         offline: boolArg('offline'),
         generateSyntheticPackage: false,
       );
-      await project.ensureReadyForPlatformSpecificTooling(checkProjects: pluginExampleApp);
+
+      await project.ensureReadyForPlatformSpecificTooling(
+        androidPlatform: templateContext['android'] as bool ?? false,
+        iosPlatform: templateContext['ios'] as bool ?? false,
+        linuxPlatform: templateContext['linux'] as bool ?? false,
+        macOSPlatform: templateContext['macos'] as bool ?? false,
+        windowsPlatform: templateContext['windows'] as bool ?? false,
+        webPlatform: templateContext['web'] as bool ?? false,
+      );
     }
     if (templateContext['android'] == true) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
@@ -721,7 +721,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
     String androidLanguage,
     String iosLanguage,
     String flutterRoot,
-    bool renderDriverTest = false,
     bool withPluginHook = false,
     bool ios = false,
     bool android = false,
@@ -755,7 +754,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': kAndroidSdkMinVersion,
-      'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
@@ -783,7 +781,6 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
       templateManifest: templateManifest,
-      pub: pub,
     );
     return template.render(directory, context, overwriteExisting: overwrite);
   }
@@ -887,9 +884,10 @@ const Set<String> _packageDependencies = <String>{
   'yaml',
 };
 
-// A valid Dart identifier.
+// A valid Dart identifier that can be used for a package, i.e. no
+// capital letters.
 // https://dart.dev/guides/language/language-tour#important-concepts
-final RegExp _identifierRegExp = RegExp('[a-zA-Z_][a-zA-Z0-9_]*');
+final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
 //' https://dart.dev/guides/language/language-tour#keywords
@@ -1009,16 +1007,14 @@ String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite 
 
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.notFound) {
-    switch (type) {
-      case FileSystemEntityType.file:
-        // Do not overwrite files.
-        return "Invalid project name: '$dirPath' - file exists.";
-      case FileSystemEntityType.link:
-        // Do not overwrite links.
-        return "Invalid project name: '$dirPath' - refers to a link.";
-    }
+  switch (type) {
+    case FileSystemEntityType.file:
+      // Do not overwrite files.
+      return "Invalid project name: '$dirPath' - file exists.";
+    case FileSystemEntityType.link:
+      // Do not overwrite links.
+      return "Invalid project name: '$dirPath' - refers to a link.";
+    default:
+      return null;
   }
-
-  return null;
 }

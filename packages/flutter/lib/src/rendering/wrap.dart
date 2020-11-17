@@ -331,7 +331,7 @@ class RenderWrap extends RenderBox
     }
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -580,7 +580,7 @@ class RenderWrap extends RenderBox
       size = constraints.smallest;
       return;
     }
-    BoxConstraints childConstraints;
+    final BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;

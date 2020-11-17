@@ -95,6 +95,7 @@ void main() {
         else
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
+        'EXCLUDED_ARCHS=arm64',
       ],
       stdout: 'STDOUT STUFF',
       onRun: () {
@@ -229,6 +230,8 @@ void main() {
     createMinimalMockProjectFiles();
     fileSystem.file('lib/other.dart')
       .createSync(recursive: true);
+    fileSystem.file('foo/bar.sksl.json')
+      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -345,14 +348,15 @@ void main() {
       setUpMockXcodeBuildHandler('Release', onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.x86_64.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('''[
-{
-  "l": "dart:_internal",
-  "c": "SubListIterable",
-  "n": "[Optimized] skip",
-  "s": 2400
-}
-          ]''');
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
         fileSystem.file('build/flutter_size_01/trace.x86_64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');

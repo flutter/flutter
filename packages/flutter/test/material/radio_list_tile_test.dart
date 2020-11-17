@@ -589,7 +589,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       wrap(
@@ -604,6 +604,109 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('RadioListTile contentPadding test', (WidgetTester tester) async {
+    final Type radioType = const Radio<bool>(
+      groupValue: true,
+      value: true,
+      onChanged: null,
+    ).runtimeType;
+
+    await tester.pumpWidget(
+      wrap(
+        child: Center(
+          child: RadioListTile<bool>(
+            groupValue: true,
+            value: true,
+            title: const Text('Title'),
+            onChanged: (_){},
+            contentPadding: const EdgeInsets.fromLTRB(8, 10, 15, 20),
+          )
+        )
+      )
+    );
+
+    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect radioRect = tester.getRect(find.byType(radioType));
+    final Rect titleRect = tester.getRect(find.text('Title'));
+
+    // Get the taller Rect of the Radio and Text widgets
+    final Rect tallerRect = radioRect.height > titleRect.height ? radioRect : titleRect;
+
+    // Get the extra height between the tallerRect and ListTile height
+    final double extraHeight = 56 - tallerRect.height;
+
+    // Check for correct top and bottom padding
+    expect(paddingRect.top, tallerRect.top - extraHeight / 2 - 10); //top padding
+    expect(paddingRect.bottom, tallerRect.bottom + extraHeight / 2 + 20); //bottom padding
+
+    // Check for correct left and right padding
+    expect(paddingRect.left, radioRect.left - 8); //left padding
+    expect(paddingRect.right, titleRect.right + 15); //right padding
+  });
+
+  testWidgets('RadioListTile respects shape', (WidgetTester tester) async {
+    const ShapeBorder shapeBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
+    );
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: RadioListTile<bool>(
+          value: true,
+          groupValue: true,
+          onChanged: null,
+          title: Text('Title'),
+          shape: shapeBorder,
+        ),
+      ),
+    ));
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+  });
+
+  testWidgets('RadioListTile respects tileColor', (WidgetTester tester) async {
+    const Color tileColor = Colors.red;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: RadioListTile<bool>(
+            value: false,
+            groupValue: true,
+            onChanged: null,
+            title: Text('Title'),
+            tileColor: tileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
+  });
+
+  testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
+    const Color selectedTileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: RadioListTile<bool>(
+            value: false,
+            groupValue: true,
+            onChanged: null,
+            title: Text('Title'),
+            selected: true,
+            selectedTileColor: selectedTileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
   });
 }

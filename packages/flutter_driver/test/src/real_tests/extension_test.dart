@@ -20,6 +20,8 @@ import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'stubs/stub_command.dart';
+import 'stubs/stub_command_extension.dart';
 import 'stubs/stub_finder.dart';
 import 'stubs/stub_finder_extension.dart';
 
@@ -891,7 +893,7 @@ void main() {
           children: <Widget>[
             const Text('Foo', key: ValueKey<String>('Text1')),
             const Text('Bar', key: ValueKey<String>('Text2')),
-            FlatButton(
+            TextButton(
               child: const Text('Whatever'),
               key: const ValueKey<String>('Button'),
               onPressed: () {},
@@ -981,6 +983,100 @@ void main() {
 
       final Map<String, dynamic> result = await tap(StubFinder('Button'));
       expect(result['isError'], false);
+    });
+  });
+
+  group('extension commands', () {
+    int invokes = 0;
+    final VoidCallback stubCallback = () => invokes++;
+
+    final Widget debugTree = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: Column(
+          children: <Widget>[
+            TextButton(
+              child: const Text('Whatever'),
+              key: const ValueKey<String>('Button'),
+              onPressed: stubCallback,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    setUp(() {
+      invokes = 0;
+    });
+
+    testWidgets('unknown extension command', (WidgetTester tester) async {
+      final FlutterDriverExtension driverExtension = FlutterDriverExtension(
+        (String arg) async => '',
+        true,
+        commands: <CommandExtension>[],
+      );
+
+      Future<Map<String, dynamic>> invokeCommand(SerializableFinder finder, int times) async {
+        final Map<String, String> arguments = StubNestedCommand(finder, times).serialize();
+        return await driverExtension.call(arguments);
+      }
+
+      await tester.pumpWidget(debugTree);
+
+      final Map<String, dynamic> result = await invokeCommand(ByValueKey('Button'), 10);
+      expect(result['isError'], true);
+      expect(result['response'] is String, true);
+      expect(result['response'] as String, contains('Unsupported command kind StubNestedCommand'));
+    });
+
+    testWidgets('nested command', (WidgetTester tester) async {
+      final FlutterDriverExtension driverExtension = FlutterDriverExtension(
+        (String arg) async => '',
+        true,
+        commands: <CommandExtension>[
+          StubNestedCommandExtension(),
+        ],
+      );
+
+      Future<StubCommandResult> invokeCommand(SerializableFinder finder, int times) async {
+        await driverExtension.call(const SetFrameSync(false).serialize()); // disable frame sync for test to avoid lock
+        final Map<String, String> arguments = StubNestedCommand(finder, times, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> response = await driverExtension.call(arguments);
+        final Map<String, dynamic> commandResponse = response['response'] as Map<String, dynamic>;
+        return StubCommandResult(commandResponse['resultParam'] as String);
+      }
+
+      await tester.pumpWidget(debugTree);
+
+      const int times = 10;
+      final StubCommandResult result = await invokeCommand(ByValueKey('Button'), times);
+      expect(result.resultParam, 'stub response');
+      expect(invokes, times);
+    });
+
+    testWidgets('prober command', (WidgetTester tester) async {
+      final FlutterDriverExtension driverExtension = FlutterDriverExtension(
+        (String arg) async => '',
+        true,
+        commands: <CommandExtension>[
+          StubProberCommandExtension(),
+        ],
+      );
+
+      Future<StubCommandResult> invokeCommand(SerializableFinder finder, int times) async {
+        await driverExtension.call(const SetFrameSync(false).serialize()); // disable frame sync for test to avoid lock
+        final Map<String, String> arguments = StubProberCommand(finder, times, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> response = await driverExtension.call(arguments);
+        final Map<String, dynamic> commandResponse = response['response'] as Map<String, dynamic>;
+        return StubCommandResult(commandResponse['resultParam'] as String);
+      }
+
+      await tester.pumpWidget(debugTree);
+
+      const int times = 10;
+      final StubCommandResult result = await invokeCommand(ByValueKey('Button'), times);
+      expect(result.resultParam, 'stub response');
+      expect(invokes, times);
     });
   });
 

@@ -420,7 +420,7 @@ class RenderStack extends RenderBox
     }
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -540,7 +540,7 @@ class RenderStack extends RenderBox
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
-    BoxConstraints nonPositionedConstraints;
+    final BoxConstraints nonPositionedConstraints;
     assert(fit != null);
     switch (fit) {
       case StackFit.loose:

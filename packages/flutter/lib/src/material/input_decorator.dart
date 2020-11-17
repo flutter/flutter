@@ -237,7 +237,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         border: _border,
         gapAnimation: widget.gapAnimation,
         gap: widget.gap,
-        textDirection: Directionality.of(context)!,
+        textDirection: Directionality.of(context),
         fillColor: widget.fillColor,
         hoverColorTween: _hoverColorTween,
         hoverAnimation: _hoverAnimation,
@@ -976,11 +976,15 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.right));
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
+    double suffixIconWidth = _boxSize(suffixIcon).width;
+    if (decoration.border!.isOutline) {
+      suffixIconWidth = lerpDouble(suffixIconWidth, 0.0, decoration.floatingLabelProgress)!;
+    }
     final double labelWidth = math.max(0.0, constraints.maxWidth - (
       _boxSize(icon).width
       + contentPadding.left
       + _boxSize(prefixIcon).width
-      + _boxSize(suffixIcon).width
+      + suffixIconWidth
       + contentPadding.right));
     boxToBaseline[label] = _layoutLineBox(
       label,
@@ -1290,7 +1294,7 @@ class _RenderDecoration extends RenderBox {
         width: overallWidth - _boxSize(icon).width,
       );
       container!.layout(containerConstraints, parentUsesSize: true);
-      double x;
+      final double x;
       switch (textDirection) {
         case TextDirection.rtl:
           x = 0.0;
@@ -1321,7 +1325,7 @@ class _RenderDecoration extends RenderBox {
     baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
 
     if (icon != null) {
-      double x;
+      final double x;
       switch (textDirection) {
         case TextDirection.rtl:
           x = overallWidth - icon!.size.width;
@@ -1461,7 +1465,7 @@ class _RenderDecoration extends RenderBox {
         ? isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
         : isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
-      double dx;
+      final double dx;
       switch (textDirection) {
         case TextDirection.rtl:
           dx = labelOffset.dx + label!.size.width * (1.0 - scale); // origin is on the right
@@ -1808,7 +1812,7 @@ class InputDecorator extends StatefulWidget {
   /// How the text in the decoration should be aligned horizontally.
   final TextAlign? textAlign;
 
-  /// {@template flutter.widgets.inputDecorator.textAlignVertical}
+  /// {@template flutter.material.InputDecorator.textAlignVertical}
   /// How the text should be aligned vertically.
   ///
   /// Determines the alignment of the baseline within the available space of
@@ -1952,7 +1956,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   InputDecoration? _effectiveDecoration;
   InputDecoration? get decoration {
     _effectiveDecoration ??= widget.decoration.applyDefaults(
-      Theme.of(context)!.inputDecorationTheme,
+      Theme.of(context).inputDecorationTheme,
     );
     return _effectiveDecoration;
   }
@@ -2116,7 +2120,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return decoration!.border!;
     }
 
-    Color borderColor;
+    final Color borderColor;
     if (decoration!.enabled || isFocused) {
       borderColor = decoration!.errorText == null
         ? _getDefaultBorderColor(themeData)
@@ -2127,7 +2131,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         : themeData.disabledColor;
     }
 
-    double borderWeight;
+    final double borderWeight;
     if (decoration!.isCollapsed || decoration?.border == InputBorder.none || !decoration!.enabled)
       borderWeight = 0.0;
     else
@@ -2139,7 +2143,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextStyle inlineStyle = _getInlineStyle(themeData);
     final TextBaseline textBaseline = inlineStyle.textBaseline!;
 
@@ -2307,11 +2311,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     // The _Decoration widget and _RenderDecoration assume that contentPadding
     // has been resolved to EdgeInsets.
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets? decorationContentPadding = decoration!.contentPadding?.resolve(textDirection);
 
-    EdgeInsets contentPadding;
-    double floatingLabelHeight;
+    final EdgeInsets contentPadding;
+    final double floatingLabelHeight;
     if (decoration!.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;

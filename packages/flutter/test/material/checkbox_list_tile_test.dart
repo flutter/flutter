@@ -98,7 +98,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isTrue);
+    expect(Focus.maybeOf(childKey.currentContext!)!.hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       wrap(
@@ -112,7 +112,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext!, nullOk: true)!.hasPrimaryFocus, isFalse);
+    expect(Focus.maybeOf(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
   });
 
   testWidgets('CheckboxListTile contentPadding test', (WidgetTester tester) async {
@@ -238,5 +238,46 @@ void main() {
     ));
 
     expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+  });
+
+  testWidgets('CheckboxListTile respects tileColor', (WidgetTester tester) async {
+    const Color tileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: CheckboxListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            tileColor: tileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(tileColor));
+  });
+
+  testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
+    const Color selectedTileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: CheckboxListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            selected: true,
+            selectedTileColor: selectedTileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
   });
 }
