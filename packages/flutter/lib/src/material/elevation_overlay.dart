@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
 import 'theme.dart';
 
 /// A utility class for dealing with the overlay color needed
@@ -49,8 +50,8 @@ class ElevationOverlay {
         theme.brightness == Brightness.dark &&
         color.withOpacity(1.0) == theme.colorScheme.surface.withOpacity(1.0)) {
       return colorWithOverlay(
-        surfaceColor: theme.colorScheme.surface,
-        overlayColor: theme.colorScheme.onSurface,
+        surface: color,
+        overlay: theme.colorScheme.onSurface,
         elevation: elevation,
       );
     }
@@ -66,24 +67,27 @@ class ElevationOverlay {
   ///    specifies the exact overlay values for a given elevation.
   static Color overlayColor(BuildContext context, double elevation) {
     final ThemeData theme = Theme.of(context)!;
-    return theme.colorScheme.onSurface.withOpacity(_opacity(elevation));
+    return _overlayColor(theme.colorScheme.onSurface, elevation);
   }
 
-  /// Returns a color blended by laying a semi-transparent [overlayColor] on top
-  /// of [surfaceColor].
+  /// Returns a color blended by laying a semi-transparent overlay (using the
+  /// [overlay] color) on top of a surface (using the [surface] color).
   ///
-  /// The opacity of [overlayColor] depends on [elevation]. As [elevation]
-  /// increases, the opacity of [overlayColor] will also increase.
-  static Color colorWithOverlay({
-    required Color surfaceColor,
-    required Color overlayColor,
-    required double elevation,
-  }) {
-    return Color.alphaBlend(overlayColor.withOpacity(_opacity(elevation)), surfaceColor);
+  /// The opacity of the overlay depends on [elevation]. As [elevation]
+  /// increases, the opacity of will also increase.
+  ///
+  /// See https://material.io/design/color/dark-theme.html#properties.
+  static Color colorWithOverlay({required Color surface, required Color overlay, required double elevation}) {
+    return Color.alphaBlend(_overlayColor(overlay, elevation), surface);
   }
 
-  // Compute the opacity for the given elevation
-  // This formula matches the values in the spec:
-  // https://material.io/design/color/dark-theme.html#properties
-  static double _opacity(double elevation) => (4.5 * math.log(elevation + 1) + 2) / 100.0;
+  /// Applies the opacity from the dark theme elevation overlay formula at
+  /// [elevation] to the [ColorScheme.onSurface] of [colorScheme].
+  static Color _overlayColor(Color color, double elevation) {
+    // Compute the opacity for the given elevation
+    // This formula matches the values in the spec:
+    // https://material.io/design/color/dark-theme.html#properties
+    final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
+    return color.withOpacity(opacity);
+  }
 }
