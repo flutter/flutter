@@ -21,13 +21,17 @@
     "english": "Backspace",
     "value": 8,
     "names": {
-      "web": [],
+      "web": [
+        "Backspace"
+      ],
       "gtk": [
         "BackSpace"
       ]
     },
     "values": {
-      "web": [],
+      "web": [
+        8
+      ],
       "gtk": [
         65288
       ]
@@ -38,7 +42,9 @@
     "english": "Tab",
     "value": 9,
     "names": {
-      "web": [],
+      "web": [
+        "Tab"
+      ],
       "gtk": [
         "Tab",
         "KP_Tab",
@@ -46,7 +52,9 @@
       ]
     },
     "values": {
-      "web": [],
+      "web": [
+        9
+      ],
       "gtk": [
         65289,
         65417,
@@ -59,7 +67,9 @@
     "english": "Enter",
     "value": 13,
     "names": {
-      "web": [],
+      "web": [
+        "Enter"
+      ],
       "gtk": [
         "Return",
         "ISO_Enter",
@@ -67,7 +77,9 @@
       ]
     },
     "values": {
-      "web": [],
+      "web": [
+        13
+      ],
       "gtk": [
         65293,
         65076,
@@ -80,13 +92,17 @@
     "english": "Escape",
     "value": 27,
     "names": {
-      "web": [],
+      "web": [
+        "Escape"
+      ],
       "gtk": [
         "Escape"
       ]
     },
     "values": {
-      "web": [],
+      "web": [
+        27
+      ],
       "gtk": [
         65307
       ]
@@ -1002,13 +1018,17 @@
     "english": "Delete",
     "value": 127,
     "names": {
-      "web": [],
+      "web": [
+        "Delete"
+      ],
       "gtk": [
         "Delete"
       ]
     },
     "values": {
-      "web": [],
+      "web": [
+        127
+      ],
       "gtk": [
         65535
       ]

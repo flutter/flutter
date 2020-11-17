@@ -107,7 +107,9 @@ class LogicalKeyData {
 
   /// Parses entries from Chromium's key mapping header file.
   ///
-  /// Lines in this file look like this (without the ///):
+  /// Lines in this file look like either of these (without the ///):
+  ///                Key        Enum      Unicode code point
+  /// DOM_KEY_UNI("Backspace", BACKSPACE, 0x0008),
   ///                Key        Enum       Value
   /// DOM_KEY_MAP("Accel",      ACCEL,    0x0101),
   ///
@@ -116,7 +118,7 @@ class LogicalKeyData {
   void _readHidEntries(Map<String, LogicalKeyEntry> data, String input) {
     final List<LogicalKeyEntry> entries = <LogicalKeyEntry>[];
     final RegExp domKeyRegExp = RegExp(
-        r'DOM_KEY_(?:MAP)\s*\(\s*"([^\s]+?)",\s*([^\s]+?),\s*0x([a-fA-F0-9]+)\s*\)',
+        r'DOM_KEY_(?:UNI|MAP)\s*\(\s*"([^\s]+?)",\s*([^\s]+?),\s*0x([a-fA-F0-9]+)\s*\)',
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
@@ -127,8 +129,9 @@ class LogicalKeyData {
       final String name = match.group(1).replaceAll(RegExp('[^A-Za-z0-9]'), '');
       final int value = getHex(match.group(3));
       // If it's a modifier key, add left and right keys instead.
-      if (webModifiers.containsKey(name)) {
-        final _ModifierPair pair = webModifiers[name];
+      // Don't add web names and values; they're solved with locations.
+      if (chromeModifiers.containsKey(name)) {
+        final _ModifierPair pair = chromeModifiers[name];
         data[LogicalKeyEntry.computeConstantName(pair.left)] = LogicalKeyEntry(
           value: value + kLeftModifierPlane,
           commentName: LogicalKeyEntry.computeCommentName(pair.left),
@@ -206,7 +209,7 @@ class LogicalKeyData {
   static Map<String, String> _printable;
 
   // Map Web key to the pair of key names
-  static Map<String, _ModifierPair> get webModifiers {
+  static Map<String, _ModifierPair> get chromeModifiers {
     return _webModifiers ??= () {
       final String rawJson = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_modifiers.json',)).readAsStringSync();
       return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
