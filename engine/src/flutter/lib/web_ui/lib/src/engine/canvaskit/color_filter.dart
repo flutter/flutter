@@ -54,7 +54,7 @@ abstract class CkColorFilter implements _CkManagedSkImageFilterConvertible<SkIma
   /// Called by [ManagedSkiaObject.createDefault] and
   /// [ManagedSkiaObject.resurrect] to create a new [SKImageFilter], when this
   /// filter is used as an [ImageFilter].
-  SkImageFilter _initRawImageFilter() => canvasKit.SkImageFilter.MakeColorFilter(_initRawColorFilter(), null);
+  SkImageFilter _initRawImageFilter() => canvasKit.ImageFilter.MakeColorFilter(_initRawColorFilter(), null);
 
   /// Called by [ManagedSkiaObject.createDefault] and
   /// [ManagedSkiaObject.resurrect] to create a new [SKColorFilter], when this
@@ -72,7 +72,7 @@ class _CkBlendModeColorFilter extends CkColorFilter {
 
   @override
   SkColorFilter _initRawColorFilter() {
-    return canvasKit.SkColorFilter.MakeBlend(
+    return canvasKit.ColorFilter.MakeBlend(
       toSharedSkColor1(color),
       toSkBlendMode(blendMode),
     );
@@ -104,12 +104,12 @@ class _CkMatrixColorFilter extends CkColorFilter {
     assert(this.matrix.length == 20,  'Color Matrix must have 20 entries.');
     final List<double> matrix = this.matrix;
     if (matrix is Float32List)
-      return canvasKit.SkColorFilter.MakeMatrix(matrix);
+      return canvasKit.ColorFilter.MakeMatrix(matrix);
     final Float32List float32Matrix = Float32List(20);
     for (int i = 0; i < 20; i++) {
       float32Matrix[i] = matrix[i];
     }
-    return canvasKit.SkColorFilter.MakeMatrix(float32Matrix);
+    return canvasKit.ColorFilter.MakeMatrix(float32Matrix);
   }
 
   @override
@@ -129,7 +129,7 @@ class _CkMatrixColorFilter extends CkColorFilter {
 class _CkLinearToSrgbGammaColorFilter extends CkColorFilter {
   const _CkLinearToSrgbGammaColorFilter();
   @override
-  SkColorFilter _initRawColorFilter() => canvasKit.SkColorFilter.MakeLinearToSRGBGamma();
+  SkColorFilter _initRawColorFilter() => canvasKit.ColorFilter.MakeLinearToSRGBGamma();
 
   @override
   bool operator ==(Object other) => runtimeType == other.runtimeType;
@@ -141,7 +141,7 @@ class _CkLinearToSrgbGammaColorFilter extends CkColorFilter {
 class _CkSrgbToLinearGammaColorFilter extends CkColorFilter {
   const _CkSrgbToLinearGammaColorFilter();
   @override
-  SkColorFilter _initRawColorFilter() => canvasKit.SkColorFilter.MakeSRGBToLinearGamma();
+  SkColorFilter _initRawColorFilter() => canvasKit.ColorFilter.MakeSRGBToLinearGamma();
 
   @override
   bool operator ==(Object other) => runtimeType == other.runtimeType;
