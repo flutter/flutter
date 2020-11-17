@@ -66,7 +66,7 @@ class ElevationOverlay {
   ///  * https://material.io/design/color/dark-theme.html#properties which
   ///    specifies the exact overlay values for a given elevation.
   static Color overlayColor(BuildContext context, double elevation) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     return _overlayColor(theme.colorScheme.onSurface, elevation);
   }
 
