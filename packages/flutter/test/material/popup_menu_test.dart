@@ -123,7 +123,7 @@ void main() {
     await tester.tap(find.byKey(withCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    Navigator.of(popupContext)!.pop();
+    Navigator.of(popupContext).pop();
     await tester.pump();
     expect(cancels, equals(2));
   });

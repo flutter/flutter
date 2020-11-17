@@ -282,7 +282,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('PUSH'),
-          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => Container(child: const Text('HELLO')),
@@ -737,7 +737,7 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 0);
 
-    final ValueNotifier<bool> notifier = Navigator.of(homeScaffoldKey.currentContext!)!.userGestureInProgressNotifier;
+    final ValueNotifier<bool> notifier = Navigator.of(homeScaffoldKey.currentContext!).userGestureInProgressNotifier;
     expect(notifier.value, false);
 
     Navigator.push<void>(homeScaffoldKey.currentContext!, MaterialPageRoute<void>(
