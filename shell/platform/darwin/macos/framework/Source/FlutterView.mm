@@ -15,30 +15,29 @@
   __weak id<FlutterViewReshapeListener> _reshapeListener;
   FlutterResizeSynchronizer* _resizeSynchronizer;
   FlutterSurfaceManager* _surfaceManager;
+  NSOpenGLContext* _openGLContext;
 }
 
 @end
 
 @implementation FlutterView
 
-- (instancetype)initWithShareContext:(NSOpenGLContext*)shareContext
-                     reshapeListener:(id<FlutterViewReshapeListener>)reshapeListener {
-  return [self initWithFrame:NSZeroRect shareContext:shareContext reshapeListener:reshapeListener];
+- (instancetype)initWithMainContext:(NSOpenGLContext*)mainContext
+                    reshapeListener:(id<FlutterViewReshapeListener>)reshapeListener {
+  return [self initWithFrame:NSZeroRect mainContext:mainContext reshapeListener:reshapeListener];
 }
 
 - (instancetype)initWithFrame:(NSRect)frame
-                 shareContext:(NSOpenGLContext*)shareContext
+                  mainContext:(NSOpenGLContext*)mainContext
               reshapeListener:(id<FlutterViewReshapeListener>)reshapeListener {
   self = [super initWithFrame:frame];
   if (self) {
-    self.openGLContext = [[NSOpenGLContext alloc] initWithFormat:shareContext.pixelFormat
-                                                    shareContext:shareContext];
-
+    _openGLContext = mainContext;
     [self setWantsLayer:YES];
 
     _resizeSynchronizer = [[FlutterResizeSynchronizer alloc] initWithDelegate:self];
     _surfaceManager = [[FlutterSurfaceManager alloc] initWithLayer:self.layer
-                                                     openGLContext:self.openGLContext];
+                                                     openGLContext:_openGLContext];
 
     _reshapeListener = reshapeListener;
   }
@@ -46,7 +45,7 @@
 }
 
 - (void)resizeSynchronizerFlush:(FlutterResizeSynchronizer*)synchronizer {
-  MacOSGLContextSwitch context_switch(self.openGLContext);
+  MacOSGLContextSwitch context_switch(_openGLContext);
   glFlush();
 }
 
