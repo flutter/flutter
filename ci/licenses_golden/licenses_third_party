@@ -1,4 +1,4 @@
-Signature: 3f375d0abd88e141bb20845718f3f277
+Signature: fab7fa08c8e9d1904640fe4693dda233
 
 UNUSED LICENSES:
 
@@ -9168,6 +9168,34 @@ FILE: ../../../third_party/dart/runtime/tools/wiki/styles/style.scss
 FILE: ../../../third_party/dart/runtime/tools/wiki/templates/includes/auto-refresh.html
 FILE: ../../../third_party/dart/runtime/tools/wiki/templates/includes/favicon.html
 FILE: ../../../third_party/dart/runtime/tools/wiki/templates/page.html
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/floatx10/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/int8x10/x64_win.expect
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
 FILE: ../../../third_party/dart/sdk/lib/_internal/allowed_experiments.json
@@ -9477,6 +9505,7 @@ FILE: ../../../third_party/dart/runtime/bin/dartdev_isolate.h
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.h
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_functions_generated.cc
+FILE: ../../../third_party/dart/runtime/bin/ffi_unit_test/run_ffi_unit_tests.cc
 FILE: ../../../third_party/dart/runtime/bin/file_win.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_test.cc
@@ -9518,12 +9547,18 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/marshaller.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/marshaller.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_calling_convention.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_calling_convention.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_calling_convention_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_location.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_location.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_location_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_type.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_type.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_type_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_test.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_test_custom_zone.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_test_custom_zone.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/multiple_entrypoints_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler.cc
