@@ -73,7 +73,7 @@ class _CkBlurImageFilter extends CkImageFilter {
 
   @override
   SkImageFilter _initSkiaObject() {
-    return canvasKit.SkImageFilter.MakeBlur(
+    return canvasKit.ImageFilter.MakeBlur(
       sigmaX,
       sigmaY,
       canvasKit.TileMode.Clamp,
