@@ -1484,7 +1484,6 @@ void main() {
   testWidgets(
     'VerticalDirection test when direction is vertical.',
         (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         Material(
           child: boilerplate(

@@ -959,7 +959,10 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
   // The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
 
-  // The width and color of the button's top and bottom side borders.
+  // If [direction] is [Axis.horizontal], this corresponds the width and color
+  // of the button's top and bottom side borders.
+  // If [direction] is [Axis.vertical], this corresponds the width and color
+  // of the button's left and right side borders.
   final BorderSide borderSide;
 
   // The width and color of the button's trailing side border.
