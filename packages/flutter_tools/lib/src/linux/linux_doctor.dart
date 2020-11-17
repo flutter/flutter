@@ -153,6 +153,10 @@ class LinuxDoctorValidator extends DoctorValidator {
       validationType = ValidationType.missing;
       messages.add(ValidationMessage.error(_userMessages.blkidLibraryMissing));
     }
+    if (!await _libraryIsPresent('liblzma')) {
+      validationType = ValidationType.missing;
+      messages.add(ValidationMessage.error(_userMessages.lzmaLibraryMissing));
+    }
 
     return ValidationResult(validationType, messages);
   }
