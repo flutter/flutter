@@ -191,8 +191,6 @@ Future<AssetBundle> buildAssets({
   String manifestPath,
   String assetDirPath,
   @required String packagesPath,
-  bool includeDefaultFonts = true,
-  bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= globals.fs.path.absolute(packagesPath);
@@ -203,8 +201,6 @@ Future<AssetBundle> buildAssets({
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
-    includeDefaultFonts: includeDefaultFonts,
-    reportLicensedPackages: reportLicensedPackages,
   );
   if (result != 0) {
     return null;
