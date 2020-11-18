@@ -4981,7 +4981,7 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.verticalDirection = VerticalDirection.down,
     this.clipBehavior = Clip.none,
     @Deprecated(
-      'New code should never set this to true to calculate the intrinsics correctly.'
+      'New code should never set this to true to calculate the intrinsics correctly. '
       'This feature was deprecated after 1.24.0-7.0.pre.'
     )
     this.useLegacyMethodToCalculateIntrinsics = false,
@@ -5127,7 +5127,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 
   /// {@macro flutter.rendering.RenderWrap.useLegacyMethodToCalculateIntrinsics}
   @Deprecated(
-    'New code should never set this to true to calculate the intrinsics correctly.'
+    'New code should never set this to true to calculate the intrinsics correctly. '
     'This feature was deprecated after 1.24.0-7.0.pre.'
   )
   final bool useLegacyMethodToCalculateIntrinsics;
