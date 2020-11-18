@@ -39,7 +39,7 @@ fi
 
 if [[ ! -d "$DEVICE_TOOLS" ]]; then
   echo "Directory $DEVICE_TOOLS not found."
-  ehco "Second argument must specify the device out directory containing gen_snapshot (e.g. android_debug_unopt_x64)."
+  echo "Second argument must specify the device out directory containing gen_snapshot (e.g. android_debug_unopt_x64)."
   exit 1
 fi
 
