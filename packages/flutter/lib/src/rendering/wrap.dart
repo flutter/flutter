@@ -123,7 +123,7 @@ class RenderWrap extends RenderBox
     Clip clipBehavior = Clip.none,
     @Deprecated(
       'New code should never set this to true to calculate the intrinsics correctly.'
-      'This feature was deprecated after 1.24.0-7.0.'
+      'This feature was deprecated after 1.24.0-7.0.pre.'
     )
     bool useLegacyMethodToCalculateIntrinsics = false,
   }) : assert(direction != null),
@@ -367,13 +367,13 @@ class RenderWrap extends RenderBox
   /// {@endtemplate}
   @Deprecated(
     'New code should never set this to true to calculate the intrinsics correctly.'
-    'This feature was deprecated after 1.24.0-7.0.'
+    'This feature was deprecated after 1.24.0-7.0.pre.'
   )
   bool get useLegacyMethodToCalculateIntrinsics => _useLegacyMethodToCalculateIntrinsics;
   bool _useLegacyMethodToCalculateIntrinsics = false;
   @Deprecated(
     'New code should never set this to true to calculate the intrinsics correctly.'
-    'This feature was deprecated after 1.24.0-7.0.'
+    'This feature was deprecated after 1.24.0-7.0.pre.'
   )
   set useLegacyMethodToCalculateIntrinsics(bool value) {
     assert(value != null);

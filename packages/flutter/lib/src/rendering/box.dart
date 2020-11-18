@@ -1191,7 +1191,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// bool get sizedByParent => true;
 ///
 /// @override
-/// Size computeDryLayout() {
+/// Size computeDryLayout(BoxConstraints constraints) {
 ///   return constraints.smallest;
 /// }
 /// ```
