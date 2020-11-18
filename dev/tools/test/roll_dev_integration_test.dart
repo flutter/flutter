@@ -58,6 +58,7 @@ void main() {
       final FakeArgResults fakeArgResults = FakeArgResults(
         level: 'm',
         commit: latestCommit,
+        force: true,
         remote: 'origin',
       );
 
@@ -95,6 +96,7 @@ void main() {
       final FakeArgResults fakeArgResults = FakeArgResults(
         level: 'y',
         commit: latestCommit,
+        force: true,
         remote: 'origin',
       );
 
