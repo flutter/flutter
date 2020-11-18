@@ -174,7 +174,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// rasterized frames.
   ///
   /// It's preferred to use [SchedulerBinding.addTimingsCallback] than to use
-  /// [Window.onReportTimings] directly because
+  /// [PlatformDispatcher.onReportTimings] directly because
   /// [SchedulerBinding.addTimingsCallback] allows multiple callbacks.
   ///
   /// This can be used to see if the application has missed frames (through

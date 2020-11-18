@@ -7,7 +7,7 @@
 #  - "sort_constructors_first" disabled (because we have private fake
 #     constructors),
 #  - "prefer_final_fields" disabled (because we do weird things with
-#    private fields, especially on the Window object):
+#    private fields, especially on the PlatformDispatcher object):
 
 analyzer:
   enable-experiment:
