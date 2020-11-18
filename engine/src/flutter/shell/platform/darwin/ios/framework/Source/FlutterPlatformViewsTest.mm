@@ -800,8 +800,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
       nullptr, true,
       [](const flutter::SurfaceFrame& surface_frame, SkCanvas* canvas) { return false; });
-  XCTAssertFalse(
-      flutterPlatformViewsController->SubmitFrame(nullptr, nullptr, std::move(mock_surface)));
+  auto is_gpu_disabled = std::make_shared<fml::SyncSwitch>();
+  is_gpu_disabled->SetSwitch(false);
+  XCTAssertFalse(flutterPlatformViewsController->SubmitFrame(
+      nullptr, nullptr, std::move(mock_surface), is_gpu_disabled));
 
   auto embeddedViewParams_2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
@@ -810,8 +812,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   auto mock_surface_submit_false = std::make_unique<flutter::SurfaceFrame>(
       nullptr, true,
       [](const flutter::SurfaceFrame& surface_frame, SkCanvas* canvas) { return true; });
-  XCTAssertTrue(flutterPlatformViewsController->SubmitFrame(nullptr, nullptr,
-                                                            std::move(mock_surface_submit_false)));
+  auto gpu_is_disabled = std::make_shared<fml::SyncSwitch>();
+  gpu_is_disabled->SetSwitch(false);
+  XCTAssertTrue(flutterPlatformViewsController->SubmitFrame(
+      nullptr, nullptr, std::move(mock_surface_submit_false), gpu_is_disabled));
 
   flutterPlatformViewsController->Reset();
 }
