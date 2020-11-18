@@ -21,7 +21,7 @@ void main() {
     expect(themeData.trackColor, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.materialTapTargetSize, null);
-    expect(themeData.splashColor, null);
+    expect(themeData.overlayColor, null);
     expect(themeData.splashRadius, null);
 
     const SwitchTheme theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
@@ -29,7 +29,7 @@ void main() {
     expect(theme.data.trackColor, null);
     expect(theme.data.mouseCursor, null);
     expect(theme.data.materialTapTargetSize, null);
-    expect(theme.data.splashColor, null);
+    expect(theme.data.overlayColor, null);
     expect(theme.data.splashRadius, null);
   });
 
@@ -52,7 +52,7 @@ void main() {
       trackColor: MaterialStateProperty.all(const Color(0xfffffff1)),
       mouseCursor: MaterialStateProperty.all(SystemMouseCursors.click),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      splashColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
       splashRadius: 1.0,
     ).debugFillProperties(builder);
 
@@ -65,7 +65,7 @@ void main() {
     expect(description[1], 'trackColor: MaterialStateProperty.all(Color(0xfffffff1))');
     expect(description[2], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
     expect(description[3], 'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(click))');
-    expect(description[4], 'splashColor: MaterialStateProperty.all(Color(0xfffffff2))');
+    expect(description[4], 'overlayColor: MaterialStateProperty.all(Color(0xfffffff2))');
     expect(description[5], 'splashRadius: 1.0');
   });
 
@@ -78,8 +78,8 @@ void main() {
     const Color selectedTrackColor = Color(0xfffffff3);
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const Color focusSplashColor = Color(0xfffffff4);
-    const Color hoverSplashColor = Color(0xfffffff5);
+    const Color focusOverlayColor = Color(0xfffffff4);
+    const Color hoverOverlayColor = Color(0xfffffff5);
     const double splashRadius = 1.0;
 
     Widget buildSwitch({bool selected = false, bool autofocus = false}) {
@@ -100,12 +100,12 @@ void main() {
             }),
             mouseCursor: MaterialStateProperty.all(mouseCursor),
             materialTapTargetSize: materialTapTargetSize,
-            splashColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
-                return focusSplashColor;
+                return focusOverlayColor;
               }
               if (states.contains(MaterialState.hovered)) {
-                return hoverSplashColor;
+                return hoverOverlayColor;
               }
               return null;
             }),
@@ -156,12 +156,12 @@ void main() {
     await _pointGestureToSwitch(tester);
     await tester.pumpAndSettle();
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
-    expect(_getSwitchMaterial(tester), paints..circle(color: hoverSplashColor));
+    expect(_getSwitchMaterial(tester), paints..circle(color: hoverOverlayColor));
 
     // Switch with focus.
     await tester.pumpWidget(buildSwitch(autofocus: true));
     await tester.pumpAndSettle();
-    expect(_getSwitchMaterial(tester), paints..circle(color: focusSplashColor, radius: splashRadius));
+    expect(_getSwitchMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
   testWidgets('Switch properties are taken over the theme values', (WidgetTester tester) async {
@@ -173,8 +173,8 @@ void main() {
     const Color themeSelectedTrackColor = Color(0xfffffff3);
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
-    const Color themeFocusSplashColor = Color(0xfffffff4);
-    const Color themeHoverSplashColor = Color(0xfffffff5);
+    const Color themeFocusOverlayColor = Color(0xfffffff4);
+    const Color themeHoverOverlayColor = Color(0xfffffff5);
     const double themeSplashRadius = 1.0;
 
     const Color defaultThumbColor = Color(0xffffff0f);
@@ -205,12 +205,12 @@ void main() {
             }),
             mouseCursor: MaterialStateProperty.all(themeMouseCursor),
             materialTapTargetSize: themeMaterialTapTargetSize,
-            splashColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
-                return themeFocusSplashColor;
+                return themeFocusOverlayColor;
               }
               if (states.contains(MaterialState.hovered)) {
-                return themeHoverSplashColor;
+                return themeHoverOverlayColor;
               }
               return null;
             }),

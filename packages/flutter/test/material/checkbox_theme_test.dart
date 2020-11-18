@@ -20,7 +20,7 @@ void main() {
     expect(themeData.mouseCursor, null);
     expect(themeData.fillColor, null);
     expect(themeData.checkColor, null);
-    expect(themeData.splashColor, null);
+    expect(themeData.overlayColor, null);
     expect(themeData.splashRadius, null);
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.visualDensity, null);
@@ -29,7 +29,7 @@ void main() {
     expect(theme.data.mouseCursor, null);
     expect(theme.data.fillColor, null);
     expect(theme.data.checkColor, null);
-    expect(theme.data.splashColor, null);
+    expect(theme.data.overlayColor, null);
     expect(theme.data.splashRadius, null);
     expect(theme.data.materialTapTargetSize, null);
     expect(theme.data.visualDensity, null);
@@ -53,7 +53,7 @@ void main() {
       mouseCursor: MaterialStateProperty.all(SystemMouseCursors.click),
       fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
       checkColor: const Color(0xfffffff1),
-      splashColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
       splashRadius: 1.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.standard,
@@ -67,7 +67,7 @@ void main() {
     expect(description[0], 'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(click))');
     expect(description[1], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
     expect(description[2], 'checkColor: Color(0xfffffff1)');
-    expect(description[3], 'splashColor: MaterialStateProperty.all(Color(0xfffffff2))');
+    expect(description[3], 'overlayColor: MaterialStateProperty.all(Color(0xfffffff2))');
     expect(description[4], 'splashRadius: 1.0');
     expect(description[5], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
     expect(description[6], 'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)');
@@ -80,8 +80,8 @@ void main() {
     const Color defaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff1);
     const Color checkColor = Color(0xfffffff2);
-    const Color focusSplashColor = Color(0xfffffff3);
-    const Color hoverSplashColor = Color(0xfffffff4);
+    const Color focusOverlayColor = Color(0xfffffff3);
+    const Color hoverOverlayColor = Color(0xfffffff4);
     const double splashRadius = 1.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity(vertical: 1.0, horizontal: 1.0);
@@ -98,12 +98,12 @@ void main() {
               return defaultFillColor;
             }),
             checkColor: checkColor,
-            splashColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
-                return focusSplashColor;
+                return focusOverlayColor;
               }
               if (states.contains(MaterialState.hovered)) {
-                return hoverSplashColor;
+                return hoverOverlayColor;
               }
               return null;
             }),
@@ -140,12 +140,12 @@ void main() {
     await _pointGestureToCheckbox(tester);
     await tester.pumpAndSettle();
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
-    expect(_getCheckboxMaterial(tester), paints..circle(color: hoverSplashColor));
+    expect(_getCheckboxMaterial(tester), paints..circle(color: hoverOverlayColor));
 
     // Checkbox with focus.
     await tester.pumpWidget(buildCheckbox(autofocus: true));
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..circle(color: focusSplashColor, radius: splashRadius));
+    expect(_getCheckboxMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
   testWidgets('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
@@ -155,8 +155,8 @@ void main() {
     const Color themeDefaultFillColor = Color(0xfffffff0);
     const Color themeSelectedFillColor = Color(0xfffffff1);
     const Color themeCheckColor = Color(0xfffffff2);
-    const Color themeFocusSplashColor = Color(0xfffffff3);
-    const Color themeHoverSplashColor = Color(0xfffffff4);
+    const Color themeFocusOverlayColor = Color(0xfffffff3);
+    const Color themeHoverOverlayColor = Color(0xfffffff4);
     const double themeSplashRadius = 1.0;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
     const VisualDensity themeVisualDensity = VisualDensity.standard;
@@ -183,12 +183,12 @@ void main() {
                 return themeDefaultFillColor;
               }),
               checkColor: themeCheckColor,
-              splashColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.focused)) {
-                  return themeFocusSplashColor;
+                  return themeFocusOverlayColor;
                 }
                 if (states.contains(MaterialState.hovered)) {
-                  return themeHoverSplashColor;
+                  return themeHoverOverlayColor;
                 }
                 return null;
               }),

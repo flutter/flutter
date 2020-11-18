@@ -205,14 +205,14 @@ class Checkbox extends StatefulWidget {
 
   /// The color for the checkbox's [Material] when it has the input focus.
   ///
-  /// If null, then the value of [CheckboxThemeData.splashColor] is used in the
+  /// If null, then the value of [CheckboxThemeData.overlayColor] is used in the
   /// focused state. If that is also null, then the value of
   /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
   ///
-  /// If null, then the value of [CheckboxThemeData.splashColor] is used in the
+  /// If null, then the value of [CheckboxThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
   /// [ThemeData.hoverColor] is used.
   final Color? hoverColor;
@@ -351,11 +351,11 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
-    final Color effectiveFocusSplashColor = widget.focusColor
-        ?? themeData.checkboxTheme.splashColor?.resolve(<MaterialState>{MaterialState.focused})
+    final Color effectiveFocusOverlayColor = widget.focusColor
+        ?? themeData.checkboxTheme.overlayColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? themeData.focusColor;
-    final Color effectiveHoverSplashColor = widget.hoverColor
-        ?? themeData.checkboxTheme.splashColor?.resolve(<MaterialState>{MaterialState.hovered})
+    final Color effectiveHoverOverlayColor = widget.hoverColor
+        ?? themeData.checkboxTheme.overlayColor?.resolve(<MaterialState>{MaterialState.hovered})
         ?? themeData.hoverColor;
 
     return FocusableActionDetector(
@@ -374,8 +374,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             activeColor: effectiveActiveColor,
             checkColor: widget.checkColor ?? themeData.checkboxTheme.checkColor ?? const Color(0xFFFFFFFF),
             inactiveColor: effectiveInactiveColor,
-            focusColor: effectiveFocusSplashColor,
-            hoverColor: effectiveHoverSplashColor,
+            focusColor: effectiveFocusOverlayColor,
+            hoverColor: effectiveHoverOverlayColor,
             splashRadius: widget.splashRadius ?? themeData.checkboxTheme.splashRadius ?? kRadialReactionRadius,
             onChanged: widget.onChanged,
             additionalConstraints: additionalConstraints,

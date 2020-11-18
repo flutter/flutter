@@ -287,14 +287,14 @@ class Switch extends StatefulWidget {
 
   /// The color for the button's [Material] when it has the input focus.
   ///
-  /// If null, then the value of [SwitchThemeData.splashColor] is used in the
+  /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
   /// focused state. If that is also null, then the value of
   /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
   /// The color for the button's [Material] when a pointer is hovering over it.
   ///
-  /// If null, then the value of [SwitchThemeData.splashColor] is used in the
+  /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
   /// [ThemeData.hoverColor] is used.
   final Color? hoverColor;
@@ -466,11 +466,11 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       ?? theme.switchTheme.trackColor?.resolve(inactiveStates)
       ?? _defaultTrackColor.resolve(inactiveStates);
 
-    final Color effectiveFocusSplashColor = widget.focusColor
-        ?? theme.switchTheme.splashColor?.resolve(<MaterialState>{MaterialState.focused})
+    final Color effectiveFocusOverlayColor = widget.focusColor
+        ?? theme.switchTheme.overlayColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? theme.focusColor;
-    final Color effectiveHoverSplashColor = widget.hoverColor
-        ?? theme.switchTheme.splashColor?.resolve(<MaterialState>{MaterialState.hovered})
+    final Color effectiveHoverOverlayColor = widget.hoverColor
+        ?? theme.switchTheme.overlayColor?.resolve(<MaterialState>{MaterialState.hovered})
         ?? theme.hoverColor;
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
@@ -493,8 +493,8 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             activeColor: effectiveActiveThumbColor,
             inactiveColor: effectiveInactiveThumbColor,
             surfaceColor: theme.colorScheme.surface,
-            focusColor: effectiveFocusSplashColor,
-            hoverColor: effectiveHoverSplashColor,
+            focusColor: effectiveFocusOverlayColor,
+            hoverColor: effectiveHoverOverlayColor,
             splashRadius: widget.splashRadius ?? theme.switchTheme.splashRadius ?? kRadialReactionRadius,
             activeThumbImage: widget.activeThumbImage,
             onActiveThumbImageError: widget.onActiveThumbImageError,

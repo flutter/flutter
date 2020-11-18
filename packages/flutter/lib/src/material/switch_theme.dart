@@ -38,7 +38,7 @@ class SwitchThemeData with Diagnosticable {
     this.trackColor,
     this.materialTapTargetSize,
     this.mouseCursor,
-    this.splashColor,
+    this.overlayColor,
     this.splashRadius,
   });
 
@@ -71,7 +71,7 @@ class SwitchThemeData with Diagnosticable {
   ///
   /// If specified, overrides the default value of [Switch.focusColor] and
   /// [Switch.hoverColor].
-  final MaterialStateProperty<Color?>? splashColor;
+  final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.switch.splashRadius}
   ///
@@ -85,7 +85,7 @@ class SwitchThemeData with Diagnosticable {
     MaterialStateProperty<Color?>? trackColor,
     MaterialTapTargetSize? materialTapTargetSize,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
-    MaterialStateProperty<Color?>? splashColor,
+    MaterialStateProperty<Color?>? overlayColor,
     double? splashRadius,
   }) {
     return SwitchThemeData(
@@ -93,7 +93,7 @@ class SwitchThemeData with Diagnosticable {
       trackColor: trackColor ?? this.trackColor,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       mouseCursor: mouseCursor ?? this.mouseCursor,
-      splashColor: splashColor ?? this.splashColor,
+      overlayColor: overlayColor ?? this.overlayColor,
       splashRadius: splashRadius ?? this.splashRadius,
     );
   }
@@ -107,7 +107,7 @@ class SwitchThemeData with Diagnosticable {
       trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
-      splashColor: _lerpProperties<Color?>(a?.splashColor, b?.splashColor, t, Color.lerp),
+      overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
     );
   }
@@ -119,7 +119,7 @@ class SwitchThemeData with Diagnosticable {
       trackColor,
       materialTapTargetSize,
       mouseCursor,
-      splashColor,
+      overlayColor,
       splashRadius,
     );
   }
@@ -135,7 +135,7 @@ class SwitchThemeData with Diagnosticable {
       && other.trackColor == trackColor
       && other.materialTapTargetSize == materialTapTargetSize
       && other.mouseCursor == mouseCursor
-      && other.splashColor == splashColor
+      && other.overlayColor == overlayColor
       && other.splashRadius == splashRadius;
   }
 
@@ -146,7 +146,7 @@ class SwitchThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('splashColor', splashColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
   }
 

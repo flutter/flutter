@@ -36,7 +36,7 @@ class RadioThemeData with Diagnosticable {
   const RadioThemeData({
     this.mouseCursor,
     this.fillColor,
-    this.splashColor,
+    this.overlayColor,
     this.splashRadius,
     this.materialTapTargetSize,
     this.visualDensity,
@@ -60,7 +60,7 @@ class RadioThemeData with Diagnosticable {
   ///
   /// If specified, overrides the default value of [Radio.focusColor] and
   /// [Radio.hoverColor].
-  final MaterialStateProperty<Color?>? splashColor;
+  final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.radio.splashRadius}
   ///
@@ -83,7 +83,7 @@ class RadioThemeData with Diagnosticable {
   RadioThemeData copyWith({
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     MaterialStateProperty<Color?>? fillColor,
-    MaterialStateProperty<Color?>? splashColor,
+    MaterialStateProperty<Color?>? overlayColor,
     double? splashRadius,
     MaterialTapTargetSize? materialTapTargetSize,
     VisualDensity? visualDensity,
@@ -91,7 +91,7 @@ class RadioThemeData with Diagnosticable {
     return RadioThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
       fillColor: fillColor ?? this.fillColor,
-      splashColor: splashColor ?? this.splashColor,
+      overlayColor: overlayColor ?? this.overlayColor,
       splashRadius: splashRadius ?? this.splashRadius,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       visualDensity: visualDensity ?? this.visualDensity,
@@ -106,7 +106,7 @@ class RadioThemeData with Diagnosticable {
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
-      splashColor: _lerpProperties<Color?>(a?.splashColor, b?.splashColor, t, Color.lerp),
+      overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
     );
@@ -117,7 +117,7 @@ class RadioThemeData with Diagnosticable {
     return hashValues(
       mouseCursor,
       fillColor,
-      splashColor,
+      overlayColor,
       splashRadius,
       materialTapTargetSize,
       visualDensity,
@@ -133,7 +133,7 @@ class RadioThemeData with Diagnosticable {
     return other is RadioThemeData
       && other.mouseCursor == mouseCursor
       && other.fillColor == fillColor
-      && other.splashColor == splashColor
+      && other.overlayColor == overlayColor
       && other.splashRadius == splashRadius
       && other.materialTapTargetSize == materialTapTargetSize
       && other.visualDensity == visualDensity;
@@ -144,7 +144,7 @@ class RadioThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('splashColor', splashColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));

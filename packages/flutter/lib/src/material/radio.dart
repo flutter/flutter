@@ -294,14 +294,14 @@ class Radio<T> extends StatefulWidget {
 
   /// The color for the radio's [Material] when it has the input focus.
   ///
-  /// If null, then the value of [RadioThemeData.splashColor] is used in the
+  /// If null, then the value of [RadioThemeData.overlayColor] is used in the
   /// focused state. If that is also null, then the value of
   /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
   /// The color for the radio's [Material] when a pointer is hovering over it.
   ///
-  /// If null, then the value of [RadioThemeData.splashColor] is used in the
+  /// If null, then the value of [RadioThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
   /// [ThemeData.hoverColor] is used.
   final Color? hoverColor;
@@ -442,11 +442,11 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
       ?? themeData.radioTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
-    final Color effectiveFocusSplashColor = widget.focusColor
-        ?? themeData.radioTheme.splashColor?.resolve(<MaterialState>{MaterialState.focused})
+    final Color effectiveFocusOverlayColor = widget.focusColor
+        ?? themeData.radioTheme.overlayColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? themeData.focusColor;
-    final Color effectiveHoverSplashColor = widget.hoverColor
-        ?? themeData.radioTheme.splashColor?.resolve(<MaterialState>{MaterialState.hovered})
+    final Color effectiveHoverOverlayColor = widget.hoverColor
+        ?? themeData.radioTheme.overlayColor?.resolve(<MaterialState>{MaterialState.hovered})
         ?? themeData.hoverColor;
 
     return FocusableActionDetector(
@@ -463,8 +463,8 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
             selected: _selected,
             activeColor: effectiveActiveColor,
             inactiveColor: effectiveInactiveColor,
-            focusColor: effectiveFocusSplashColor,
-            hoverColor: effectiveHoverSplashColor,
+            focusColor: effectiveFocusOverlayColor,
+            hoverColor: effectiveHoverOverlayColor,
             splashRadius: widget.splashRadius ?? themeData.radioTheme.splashRadius ?? kRadialReactionRadius,
             onChanged: enabled ? _handleChanged : null,
             toggleable: widget.toggleable,
