@@ -213,7 +213,7 @@ class SkiaPerfGcsAdaptor {
   /// The Github repo and revision of those points will be inferred from the
   /// `objectName`.
   ///
-  /// Return an  empty list if the object does not exist in the GCS bucket.
+  /// Return an empty list if the object does not exist in the GCS bucket.
   ///
   /// The read may retry multiple times if transient network errors with code
   /// 504 happens.
@@ -290,12 +290,12 @@ class SkiaPerfGcsAdaptor {
   /// json files can be put in that leaf directory. We intend to use multiple
   /// json files in the future to scale up the system if too many writes are
   /// competing for the same json file.
-  static Future<String> comptueObjectName(
-      String githubRepo, String revision) async {
+  static Future<String> comptueObjectName(String githubRepo, String revision,
+      {GithubHelper githubHelper}) async {
     assert(_githubRepoToGcsName[githubRepo] != null);
     final String topComponent = _githubRepoToGcsName[githubRepo];
-    final DateTime t =
-        await GithubHelper().getCommitDateTime(githubRepo, revision);
+    final DateTime t = await (githubHelper ?? GithubHelper())
+        .getCommitDateTime(githubRepo, revision);
     final String month = t.month.toString().padLeft(2, '0');
     final String day = t.day.toString().padLeft(2, '0');
     final String hour = t.hour.toString().padLeft(2, '0');

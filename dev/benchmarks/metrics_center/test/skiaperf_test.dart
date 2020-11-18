@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:gcloud/storage.dart';
 import 'package:googleapis/storage/v1.dart' show DetailedApiRequestError;
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:metrics_center/src/github_helper.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:metrics_center/src/common.dart';
@@ -21,6 +22,8 @@ import 'utility.dart';
 class MockBucket extends Mock implements Bucket {}
 
 class MockObjectInfo extends Mock implements ObjectInfo {}
+
+class MockGithubHelper extends Mock implements GithubHelper {}
 
 Future<void> main() async {
   const double kValue1 = 1.0;
@@ -276,19 +279,36 @@ Future<void> main() async {
   });
 
   test('SkiaPerfGcsAdaptor computes name correctly', () async {
+    final MockGithubHelper mockHelper = MockGithubHelper();
+    when(mockHelper.getCommitDateTime(
+            kFlutterFrameworkRepo, kFrameworkRevision1))
+        .thenAnswer((_) => Future<DateTime>.value(DateTime(2019, 12, 4, 23)));
     expect(
       await SkiaPerfGcsAdaptor.comptueObjectName(
-          kFlutterFrameworkRepo, kFrameworkRevision1),
+        kFlutterFrameworkRepo,
+        kFrameworkRevision1,
+        githubHelper: mockHelper,
+      ),
       equals('flutter-flutter/2019/12/04/23/$kFrameworkRevision1/values.json'),
     );
+    when(mockHelper.getCommitDateTime(kFlutterEngineRepo, kEngineRevision1))
+        .thenAnswer((_) => Future<DateTime>.value(DateTime(2019, 12, 3, 20)));
     expect(
       await SkiaPerfGcsAdaptor.comptueObjectName(
-          kFlutterEngineRepo, kEngineRevision1),
+        kFlutterEngineRepo,
+        kEngineRevision1,
+        githubHelper: mockHelper,
+      ),
       equals('flutter-engine/2019/12/03/20/$kEngineRevision1/values.json'),
     );
+    when(mockHelper.getCommitDateTime(kFlutterEngineRepo, kEngineRevision2))
+        .thenAnswer((_) => Future<DateTime>.value(DateTime(2020, 1, 3, 15)));
     expect(
       await SkiaPerfGcsAdaptor.comptueObjectName(
-          kFlutterEngineRepo, kEngineRevision2),
+        kFlutterEngineRepo,
+        kEngineRevision2,
+        githubHelper: mockHelper,
+      ),
       equals('flutter-engine/2020/01/03/15/$kEngineRevision2/values.json'),
     );
   });
@@ -432,8 +452,31 @@ Future<void> main() async {
   );
 
   test(
-    'SkiaPerfGcsAdaptor end-to-end test with engine points',
+    'SkiaPerfGcsAdaptor integration test with engine points',
     skiaPerfGcsIntegrationTestWithEnginePoints,
+    skip: testBucket == null,
+  );
+
+  test(
+    'SkiaPerfGcsAdaptor integration test for name computations',
+    () async {
+      expect(
+        await SkiaPerfGcsAdaptor.comptueObjectName(
+            kFlutterFrameworkRepo, kFrameworkRevision1),
+        equals(
+            'flutter-flutter/2019/12/04/23/$kFrameworkRevision1/values.json'),
+      );
+      expect(
+        await SkiaPerfGcsAdaptor.comptueObjectName(
+            kFlutterEngineRepo, kEngineRevision1),
+        equals('flutter-engine/2019/12/03/20/$kEngineRevision1/values.json'),
+      );
+      expect(
+        await SkiaPerfGcsAdaptor.comptueObjectName(
+            kFlutterEngineRepo, kEngineRevision2),
+        equals('flutter-engine/2020/01/03/15/$kEngineRevision2/values.json'),
+      );
+    },
     skip: testBucket == null,
   );
 }
