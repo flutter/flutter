@@ -73,7 +73,7 @@ FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* engine);
  * @destroy_notify: (allow-none): a function which gets called to free
  * @user_data, or %NULL.
  *
- * Registers the function called when a platform message is reveived. Call
+ * Registers the function called when a platform message is received. Call
  * fl_engine_send_platform_message_response() with the response to this message.
  * Ownership of #FlutterPlatformMessageResponseHandle is
  * transferred to the caller, and the message must be responded to to avoid

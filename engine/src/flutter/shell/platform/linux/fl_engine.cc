@@ -484,7 +484,7 @@ gboolean fl_engine_send_platform_message_response(
 
   if (result != kSuccess) {
     g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
-                "Failed to send platorm message response");
+                "Failed to send platform message response");
     return FALSE;
   }
 

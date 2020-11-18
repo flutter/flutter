@@ -63,5 +63,9 @@ TEST(FlDartProjectTest, Switches) {
                "--abc");
   EXPECT_STREQ(static_cast<const char*>(g_ptr_array_index(switches, 1)),
                "--foo=\"bar, baz\"");
+
+  unsetenv("FLUTTER_ENGINE_SWITCHES");
+  unsetenv("FLUTTER_ENGINE_SWITCH_1");
+  unsetenv("FLUTTER_ENGINE_SWITCH_2");
 }
 #endif  // !FLUTTER_RELEASE

@@ -19,8 +19,10 @@ std::vector<std::string> GetSwitchesFromEnvironment() {
   const char* switch_count_key = "FLUTTER_ENGINE_SWITCHES";
   const int kMaxSwitchCount = 50;
   const char* switch_count_string = std::getenv(switch_count_key);
-  int switch_count = std::min(
-      kMaxSwitchCount, switch_count_string ? atoi(switch_count_string) : 0);
+  if (!switch_count_string) {
+    return switches;
+  }
+  int switch_count = std::min(kMaxSwitchCount, atoi(switch_count_string));
   for (int i = 1; i <= switch_count; ++i) {
     std::ostringstream switch_key;
     switch_key << "FLUTTER_ENGINE_SWITCH_" << i;

@@ -17,7 +17,7 @@ struct _FlPluginRegistrar {
   FlBinaryMessenger* messenger;
 };
 
-// Added here to stop the compiler from optimising this function away.
+// Added here to stop the compiler from optimizing this function away.
 G_MODULE_EXPORT GType fl_plugin_registrar_get_type();
 
 G_DEFINE_TYPE(FlPluginRegistrar, fl_plugin_registrar, G_TYPE_OBJECT)

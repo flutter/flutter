@@ -8,7 +8,7 @@
 
 G_DEFINE_QUARK(fl_message_codec_error_quark, fl_message_codec_error)
 
-// Added here to stop the compiler from optimising this function away.
+// Added here to stop the compiler from optimizing this function away.
 G_MODULE_EXPORT GType fl_message_codec_get_type();
 
 G_DEFINE_TYPE(FlMessageCodec, fl_message_codec, G_TYPE_OBJECT)

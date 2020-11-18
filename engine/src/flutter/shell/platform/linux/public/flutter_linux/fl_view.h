@@ -30,7 +30,7 @@ G_DECLARE_FINAL_TYPE(FlView, fl_view, FL, VIEW, GtkWidget)
  *   gtk_widget_show (GTK_WIDGET (view));
  *   gtk_container_add (GTK_CONTAINER (parent), view);
  *
- *   FlBinaryMessenger *mesenger =
+ *   FlBinaryMessenger *messenger =
  *     fl_engine_get_binary_messenger (fl_view_get_engine (view));
  *   setup_channels_or_plugins (messenger);
  * ]|
