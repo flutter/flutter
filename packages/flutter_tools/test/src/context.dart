@@ -419,12 +419,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   List<String> xcrunCommand() => <String>['xcrun'];
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {
-  MockFlutterVersion({bool isStable = false, String revision}) {
-    when(frameworkRevision).thenReturn(revision);
-    when(frameworkRevisionShort).thenReturn(revision);
-  }
-}
+class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 class MockClock extends Mock implements SystemClock {}
 

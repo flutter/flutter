@@ -61,7 +61,7 @@ class FlutterVersion {
     String workingDirectory,
     String frameworkRevision,
   }) : _clock = clock,
-      _workingDirectory = workingDirectory, {
+       _workingDirectory = workingDirectory {
     _frameworkRevision = frameworkRevision ?? _runGit(
       gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
       globals.processUtils,
@@ -73,7 +73,6 @@ class FlutterVersion {
 
   final SystemClock _clock;
   final String _workingDirectory;
-  final String _frameworkRevision;
 
   /// Fetches tags from the upstream Flutter repository and re-calculates the
   /// version.

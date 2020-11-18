@@ -252,7 +252,7 @@ class UpgradeCommandRunner {
         throwToolExit(errorString);
       }
     }
-    return FlutterVersion(const SystemClock(), workingDirectory, revision);
+    return FlutterVersion(workingDirectory: workingDirectory, frameworkRevision: revision);
   }
 
   /// Attempts a hard reset to the given revision.
