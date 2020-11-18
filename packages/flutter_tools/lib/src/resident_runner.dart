@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart' as dds;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -220,6 +221,7 @@ class FlutterDevice {
     int ddsPort,
     bool disableServiceAuthCodes = false,
     bool disableDds = false,
+    bool allowExistingDdsInstance = false,
     bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
@@ -243,11 +245,16 @@ class FlutterDevice {
             disableServiceAuthCodes,
           );
         } on Exception catch (e) {
-          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
-          if (!completer.isCompleted && !_isListeningForObservatoryUri) {
-            completer.completeError('failed to connect to $observatoryUri');
+          final bool useExistingDdsInstance = e is dds.DartDevelopmentServiceException &&
+                                             allowExistingDdsInstance &&
+                                             e.message.contains('A DDS instance is already connected');
+          if (e is! dds.DartDevelopmentServiceException || !useExistingDdsInstance) {
+            globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
+            if (!completer.isCompleted) {
+              completer.completeError('failed to connect to $observatoryUri');
+            }
+            return;
           }
-          return;
         }
       }
       // This second try block handles cases where the VM service connection goes down
@@ -848,6 +855,7 @@ abstract class ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool allowExistingDdsInstance = false,
   });
 
   bool get supportsRestart => false;
@@ -1200,6 +1208,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
     GetSkSLMethod getSkSLMethod,
+    bool allowExistingDdsInstance,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -1213,6 +1222,7 @@ abstract class ResidentRunner {
         compileExpression: compileExpression,
         disableDds: debuggingOptions.disableDds,
         ddsPort: debuggingOptions.ddsPort,
+        allowExistingDdsInstance: allowExistingDdsInstance,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
