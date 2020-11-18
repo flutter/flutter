@@ -543,7 +543,7 @@ FlValue* fl_value_get_map_value(FlValue* value, size_t index);
  * fl_value_equal(). Calling this with an #FlValue that is not of type
  * #FL_VALUE_TYPE_MAP is a programming error.
  *
- * Map lookups are not optimised for performance - if you have a large map or
+ * Map lookups are not optimized for performance - if you have a large map or
  * need frequent access you should copy the data into another structure, e.g.
  * #GHashTable.
  *
@@ -560,7 +560,7 @@ FlValue* fl_value_lookup(FlValue* value, FlValue* key);
  * fl_value_equal(). Calling this with an #FlValue that is not of type
  * #FL_VALUE_TYPE_MAP is a programming error.
  *
- * Map lookups are not optimised for performance - if you have a large map or
+ * Map lookups are not optimized for performance - if you have a large map or
  * need frequent access you should copy the data into another structure, e.g.
  * #GHashTable.
  *

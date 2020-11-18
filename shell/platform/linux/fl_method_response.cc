@@ -26,7 +26,7 @@ struct _FlMethodNotImplementedResponse {
   FlMethodResponse parent_instance;
 };
 
-// Added here to stop the compiler from optimising these functions away.
+// Added here to stop the compiler from optimizing these functions away.
 G_MODULE_EXPORT GType fl_method_response_get_type();
 G_MODULE_EXPORT GType fl_method_success_response_get_type();
 G_MODULE_EXPORT GType fl_method_error_response_get_type();

@@ -81,7 +81,7 @@ static void fl_value_destroy(gpointer value) {
 }
 
 // Finds the index of a key in a FlValueMap.
-// FIXME(robert-ancell) This is highly inefficient, and should be optimised if
+// FIXME(robert-ancell) This is highly inefficient, and should be optimized if
 // necessary.
 static ssize_t fl_value_lookup_index(FlValue* self, FlValue* key) {
   g_return_val_if_fail(self->type == FL_VALUE_TYPE_MAP, -1);

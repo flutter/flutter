@@ -2225,7 +2225,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   ///
   /// The `scale` parameter will scale the `width` and `height` by the specified amount,
   /// and keep track of the scale. The scales of placeholders added can be accessed
-  /// through [placeholderScales]. This is primarily used for acessibility scaling.
+  /// through [placeholderScales]. This is primarily used for accessibility scaling.
   void addPlaceholder(double width, double height, PlaceholderAlignment alignment, {
     double scale = 1.0,
     double? baselineOffset,

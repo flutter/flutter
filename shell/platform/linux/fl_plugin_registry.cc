@@ -6,7 +6,7 @@
 
 #include <gmodule.h>
 
-// Added here to stop the compiler from optimising this function away.
+// Added here to stop the compiler from optimizing this function away.
 G_MODULE_EXPORT GType fl_plugin_registry_get_type();
 
 G_DEFINE_INTERFACE(FlPluginRegistry, fl_plugin_registry, G_TYPE_OBJECT)
