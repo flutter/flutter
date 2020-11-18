@@ -18,7 +18,6 @@ final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/in
 const String kSourceLine = 'fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0';
 const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait) ? 34.0 : 24.0';
 
-
 TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> environment}) {
   return () async {
     if (deviceIdOverride == null) {
@@ -29,72 +28,76 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', deviceIdOverride, '--benchmark', '--verbose', '--resident',  '--no-android-gradle-daemon',
+      '--hot', '-d', deviceIdOverride, '--benchmark', '--resident',  '--no-android-gradle-daemon',
     ];
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
+    Map<String, dynamic> threeReloadsData;
+    Map<String, dynamic> fourReloadsData;
     Map<String, dynamic> freshRestartReloadsData;
+
+
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
+
       await inDirectory<void>(_editedFlutterGalleryDir, () async {
-        {
-          final Process clearProcess = await startProcess(
-              path.join(flutterDirectory.path, 'bin', 'flutter'),
-              flutterCommandArgs('clean', <String>[]),
-              environment: environment,
-          );
-          await clearProcess.exitCode;
+        twoReloadsData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
+          if (!line.contains('Reloaded ')) {
+            return;
+          }
+          if (hotReloadCount == 0) {
+            // Update a file for 2-3 library invalidation.
+            final File appDartSource = file(path.join(
+              _editedFlutterGalleryDir.path, 'lib/gallery/app.dart',
+            ));
+            appDartSource.writeAsStringSync(
+              appDartSource.readAsStringSync().replaceFirst(
+                "'Flutter Gallery'", "'Updated Flutter Gallery'",
+              ));
+            process.stdin.writeln('r');
+            hotReloadCount += 1;
+          } else {
+            process.stdin.writeln('q');
+          }
+        });
 
-          final Process process = await startProcess(
-              path.join(flutterDirectory.path, 'bin', 'flutter'),
-              flutterCommandArgs('run', options),
-              environment: environment,
-          );
+        threeReloadsData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
+          if (!line.contains('Reloaded ')) {
+            return;
+          }
+          if (hotReloadCount == 1) {
+            // Update a file for 2-3 library invalidation.
+            final File appDartSource = file(path.join(
+              _editedFlutterGalleryDir.path, 'lib/demo/calculator/home.dart',
+            ));
+            appDartSource.writeAsStringSync(
+              appDartSource.readAsStringSync().replaceFirst(kSourceLine, kReplacementLine)
+            );
+            process.stdin.writeln('r');
+            hotReloadCount += 1;
+          } else {
+            process.stdin.writeln('q');
+          }
+        });
 
-          final Completer<void> stdoutDone = Completer<void>();
-          final Completer<void> stderrDone = Completer<void>();
-          process.stdout
-              .transform<String>(utf8.decoder)
-              .transform<String>(const LineSplitter())
-              .listen((String line) {
-            if (line.contains('] Reloaded ')) {
-              if (hotReloadCount == 0) {
-                // Update the file and reload again.
-                final File appDartSource = file(path.join(
-                    _editedFlutterGalleryDir.path, 'lib/demo/calculator/home.dart',
-                ));
-                appDartSource.writeAsStringSync(
-                    appDartSource.readAsStringSync().replaceFirst(kSourceLine, kReplacementLine)
-                );
-                process.stdin.writeln('r');
-                ++hotReloadCount;
-              } else {
-                // Quit after second hot reload.
-                process.stdin.writeln('q');
-              }
-            }
-            print('stdout: $line');
-          }, onDone: () {
-            stdoutDone.complete();
-          });
-          process.stderr
-              .transform<String>(utf8.decoder)
-              .transform<String>(const LineSplitter())
-              .listen((String line) {
-            print('stderr: $line');
-          }, onDone: () {
-            stderrDone.complete();
-          });
-
-          await Future.wait<void>(
-              <Future<void>>[stdoutDone.future, stderrDone.future]);
-          await process.exitCode;
-
-          twoReloadsData = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
-        }
-        benchmarkFile.deleteSync();
+        fourReloadsData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
+          if (!line.contains('Reloaded ')) {
+            return;
+          }
+          if (hotReloadCount == 2) {
+            // Trigger a framework invalidation (370 libraries) without modifying the source
+            final File flutterFrameworkSource = file(path.join(
+              flutterDirectory.path, 'packages/flutter/lib/src/widgets/framework.dart',
+            ));
+            flutterFrameworkSource.setLastModifiedSync(DateTime.now());
+            process.stdin.writeln('r');
+            hotReloadCount += 1;
+          } else {
+            process.stdin.writeln('q');
+          }
+        });
 
         // Start `flutter run` again to make sure it loads from the previous
         // state. Frontend loads up from previously generated kernel files.
@@ -110,7 +113,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            if (line.contains('] Reloaded ')) {
+            if (line.contains('Reloaded ')) {
               process.stdin.writeln('q');
             }
             print('stdout: $line');
@@ -136,8 +139,6 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
       });
     });
 
-
-
     return TaskResult.success(
       <String, dynamic> {
         'hotReloadInitialDevFSSyncMilliseconds': twoReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
@@ -151,6 +152,14 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
         'hotReloadFlutterReassembleMillisecondsAfterChange': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
         'hotReloadVMReloadMillisecondsAfterChange': twoReloadsData['hotReloadVMReloadMilliseconds'][1],
         'hotReloadInitialDevFSSyncAfterRelaunchMilliseconds' : freshRestartReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
+        'hotReloadMillisecondsToFrameAfterMediumChange' : threeReloadsData['hotReloadMillisecondsToFrame'][1],
+        'hotReloadDevFSSyncMillisecondsAfterMediumChange': threeReloadsData['hotReloadDevFSSyncMilliseconds'][1],
+        'hotReloadFlutterReassembleMillisecondsAfterMediumChange': threeReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
+        'hotReloadVMReloadMillisecondsAfterMediumChange': threeReloadsData['hotReloadVMReloadMilliseconds'][1],
+        'hotReloadMillisecondsToFrameAfterLargeChange' : fourReloadsData['hotReloadMillisecondsToFrame'][1],
+        'hotReloadDevFSSyncMillisecondsAfterLargeChange': fourReloadsData['hotReloadDevFSSyncMilliseconds'][1],
+        'hotReloadFlutterReassembleMillisecondsAfterLargeChange': fourReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
+        'hotReloadVMReloadMillisecondsAfterLargeChange': fourReloadsData['hotReloadVMReloadMilliseconds'][1],
       },
       benchmarkScoreKeys: <String>[
         'hotReloadInitialDevFSSyncMilliseconds',
@@ -164,7 +173,52 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
         'hotReloadFlutterReassembleMillisecondsAfterChange',
         'hotReloadVMReloadMillisecondsAfterChange',
         'hotReloadInitialDevFSSyncAfterRelaunchMilliseconds',
+        'hotReloadMillisecondsToFrameAfterMediumChange',
+        'hotReloadDevFSSyncMillisecondsAfterMediumChange',
+        'hotReloadFlutterReassembleMillisecondsAfterMediumChange',
+        'hotReloadVMReloadMillisecondsAfterMediumChange',
+        'hotReloadMillisecondsToFrameAfterLargeChange',
+        'hotReloadDevFSSyncMillisecondsAfterLargeChange',
+        'hotReloadFlutterReassembleMillisecondsAfterLargeChange',
+        'hotReloadVMReloadMillisecondsAfterLargeChange',
       ],
     );
   };
+}
+
+Future<Map<String, Object>> captureReloadData(
+  List<String> options,
+  Map<String, String> environment,
+  File benchmarkFile,
+  void Function(String, Process) onLine,
+) async {
+  final Process process = await startProcess(
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    flutterCommandArgs('run', options),
+    environment: environment,
+  );
+
+  final Completer<void> stdoutDone = Completer<void>();
+  final Completer<void> stderrDone = Completer<void>();
+  process.stdout
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .listen((String line) {
+      onLine(line, process);
+      print('stdout: $line');
+    }, onDone: stdoutDone.complete);
+
+  process.stderr
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .listen(
+      (String line) => print('stderr: $line'),
+      onDone: stderrDone.complete,
+    );
+
+  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+  await process.exitCode;
+  final Map<String, dynamic> result = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
+  benchmarkFile.deleteSync();
+  return result;
 }
