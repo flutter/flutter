@@ -15,6 +15,115 @@ import 'theme.dart';
 export 'text_form_field.dart';
 
 /// Creates a [FormField] that contains a [CupertinoTextField].
+///
+/// This is a convenience widget that wraps a [CupertinoTextField] widget in a
+/// [FormField].
+///
+/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// save, reset, or validate multiple fields at once. To use without a [Form],
+/// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
+/// save or reset the form field.
+///
+/// When a [controller] is specified, its [TextEditingController.text]
+/// defines the [initialValue]. If this [FormField] is part of a scrolling
+/// container that lazily constructs its children, like a [ListView] or a
+/// [CustomScrollView], then a [controller] should be specified.
+/// The controller's lifetime should be managed by a stateful widget ancestor
+/// of the scrolling container.
+///
+/// A [leadingText] is required. This string is displayed in a [Text] widget
+/// leading to the side of the [CupertinoTextFormField]. It can be set to
+/// an empty string, although it is encouraged to set the [leadingText] in
+/// order to follow standard iOS practices.
+///
+/// If a [controller] is not specified, [initialValue] can be used to give
+/// the automatically generated controller an initial value.
+///
+/// Remember to call [TextEditingController.dispose] of the [TextEditingController]
+/// when it is no longer needed. This will ensure we discard any resources used
+/// by the object.
+///
+/// By default, the [CupertinoTextFormField] will use a [CupertinoTextField] in
+/// combination with a [CupertinoSplitFormRow] to replicate iOS-styled forms.
+/// Unlike Material's [TextFormField], [CupertinoTextFormField] takes no
+/// `decoration` and does not apply an [InputDecoration.helperText] on the
+/// widget. [CupertinoTextFormField] utilizes [CupertinoSplitFormRow.errorText]
+/// to display [validator]'s response.
+///
+/// For a documentation about the various parameters, see [CupertinoTextField].
+///
+/// {@tool snippet}
+///
+/// Creates a [CupertinoTextFormField] with a leading text and validator
+/// function.
+///
+/// If the user enters valid text, the CupertinoTextField appears normally
+/// without any warnings to the user.
+///
+/// If the user enters invalid text, the error message returned from the
+/// validator function is displayed in dark red underneath the input.
+///
+/// ```dart
+/// CupertinoTextFormField(
+///   leadingText: 'Username',
+///   onSaved: (String value) {
+///     // This optional block of code can be used to run
+///     // code when the user saves the form.
+///   },
+///   validator: (String value) {
+///     return value.contains('@') ? 'Do not use the @ char.' : null;
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows how to move the focus to the next field when the user
+/// presses the SPACE key.
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Material(
+///     child: Center(
+///       child: Shortcuts(
+///         shortcuts: <LogicalKeySet, Intent>{
+///           // Pressing space in the field will now move to the next field.
+///           LogicalKeySet(LogicalKeyboardKey.space): const NextFocusIntent(),
+///         },
+///         child: FocusTraversalGroup(
+///           child: Form(
+///             autovalidateMode: AutovalidateMode.always,
+///             onChanged: () {
+///               Form.of(primaryFocus.context).save();
+///             },
+///             child: Wrap(
+///               children: List<Widget>.generate(5, (int index) {
+///                 return Padding(
+///                   padding: const EdgeInsets.all(8.0),
+///                   child: ConstrainedBox(
+///                     constraints: BoxConstraints.tight(const Size(200, 50)),
+///                     child: CupertinoTextFormField(
+///                       leadingText: 'Input',
+///                       onSaved: (String value) {
+///                         print('Value for field $index saved as "$value"');
+///                       },
+///                     ),
+///                   ),
+///                 );
+///               }),
+///             ),
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 class CupertinoTextFormFieldRow extends FormField<String> {
   /// Creates a [FormField] that contains a [CupertinoTextField].
   ///
@@ -24,10 +133,11 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// to [initialValue] or the empty string.
   ///
   /// For documentation about the various parameters, see the
-  /// [CupertinoTextField] class and [new TextField], the constructor.
+  /// [CupertinoTextField] class and [new CupertinoTextField.borderless],
+  /// the constructor.
   CupertinoTextFormFieldRow({
     Key? key,
-    required this.text,
+    required this.leadingText,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
@@ -133,9 +243,9 @@ class CupertinoTextFormFieldRow extends FormField<String> {
             }
 
             return CupertinoSplitFormRow(
-              text: text,
+              leadingText: leadingText,
               errorText: field.errorText,
-              child: CupertinoTextField.field(
+              child: CupertinoTextField.borderless(
                 controller: state._effectiveController,
                 focusNode: focusNode,
                 keyboardType: keyboardType,
@@ -188,8 +298,13 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           },
         );
 
-  /// Text that is shown to the side of the CupertinoTextField.
-  final String text;
+  /// Text that is shown leading the row.
+  ///
+  /// A [leadingText] is required. This string is displayed in a [Text] widget
+  /// leading to the side of the [CupertinoTextFormField]. It can be set to
+  /// an empty string, although it is encouraged to set the [leadingText] in
+  /// order to follow standard iOS practices.
+  final String leadingText;
 
   /// Controls the text being edited.
   ///

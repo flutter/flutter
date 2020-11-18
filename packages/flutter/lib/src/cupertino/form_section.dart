@@ -13,10 +13,49 @@ export 'form_section.dart';
 enum _CupertinoFormSectionType { base, centered }
 
 /// A section that mimicks standard iOS forms.
+///
+/// The standard constructor for [CupertinoFormSection] constructs an
+/// edge-to-edge style section. The [CupertinoFormSection.centered] constructor
+/// creates a round-edged and padded section that is commonly seen in
+/// notched-displays like iPhone X and beyond.
+///
+/// [title] sets the form section title. [titlePadding] sets the title's
+/// padding.
+///
+/// [children] sets the list of rows shown in the section. It is type-agnostic
+/// but recommended that only [CupertinoSplitFormRow] and
+/// [CupertinoTextFormField] widgets be included, to retain the iOS look.
+///
+/// [rowsPadding] sets the padding for [children].
+///
+/// [borderRadius] sets the circular border radius for the [Column]
+/// encapsulating [children] rows.
+///
+/// [decoration] sets the decoration for the section. Defaults to a
+/// [CupertinoColors.secondarySystemBackground] background color.
 class CupertinoFormSection extends StatefulWidget {
   /// A section that mimicks standard iOS forms.
   ///
+  /// This constructor returns a [CupertinoFormSection] with standard
+  /// edge-to-edge styling.
   ///
+  /// [title] sets the form section title. [titlePadding] sets the title's
+  /// padding, and defaults to the standard iOS padding, which is determined
+  /// using https://github.com/flutter/platform_tests/tree/master/ios_widget_catalog_compare.
+  ///
+  /// [children] sets the list of rows shown in the section. It is type-agnostic
+  /// but recommended that only [CupertinoSplitFormRow] and
+  /// [CupertinoTextFormField] widgets be included, to retain the iOS look.
+  ///
+  /// [rowsPadding] sets the padding for the [Column] encapsulating [children],
+  /// and defaults to zero padding.
+  ///
+  /// [borderRadius] sets the circular border radius for the [Column]
+  /// encapsulating [children] rows. Defaults to 0.0 for the standard
+  /// edge-to-edge style.
+  ///
+  /// [decoration] sets the decoration for the section. Defaults to a
+  /// [CupertinoColors.secondarySystemBackground] background color.
   const CupertinoFormSection({
     this.title,
     this.titlePadding =
@@ -30,7 +69,27 @@ class CupertinoFormSection extends StatefulWidget {
   })  : _type = _CupertinoFormSectionType.base,
         super();
 
-  /// A section that mimicks standard iOS forms with padded and rounded rows.
+  /// Creates a round-edged and padded form section that is commonly seen in
+  /// notched-displays like iPhone X and beyond.
+  ///
+  /// [title] sets the form section title. [titlePadding] sets the title's
+  /// padding, and defaults to the standard iOS padding, which is determined
+  /// using https://github.com/flutter/platform_tests/tree/master/ios_widget_catalog_compare.
+  ///
+  /// [children] sets the list of rows shown in the section. It is type-agnostic
+  /// but recommended that only [CupertinoSplitFormRow] and
+  /// [CupertinoTextFormField] widgets be included, to retain the iOS look.
+  ///
+  /// [rowsPadding] sets the padding for the [Column] encapsulating [children],
+  /// and defaults to the standard notched-style iOS padding, which is
+  /// determined using https://github.com/flutter/platform_tests/tree/master/ios_widget_catalog_compare.
+  ///
+  /// [borderRadius] sets the circular border radius for the [Column]
+  /// encapsulating [children] rows. Defaults to 10.0 for the standard
+  /// edge-to-edge style.
+  ///
+  /// [decoration] sets the decoration for the section. Defaults to a
+  /// [CupertinoColors.secondarySystemBackground] background color.
   const CupertinoFormSection.centered({
     this.title,
     this.titlePadding =
@@ -46,22 +105,38 @@ class CupertinoFormSection extends StatefulWidget {
 
   final _CupertinoFormSectionType _type;
 
-  /// Section title string
+  /// Sets the form section title.
   final String? title;
 
-  /// Padding for the section title
+  /// Sets padding for the section title.
+  ///
+  /// Defaults to the standard iOS padding, which is determined
+  /// using https://github.com/flutter/platform_tests/tree/master/ios_widget_catalog_compare.
   final EdgeInsetsGeometry titlePadding;
 
-  /// Padding for the section rows
+  /// Padding for the the [Column] encapsulating the [children].
+  ///
+  /// Defaults to zero padding if constructed with standard
+  /// [CupertinoFormSection] constructor. Defaults to the standard notched-style
+  /// iOS padding when constructing with [CupertinoFormSection.centered].
+  /// Determined using https://github.com/flutter/platform_tests/tree/master/ios_widget_catalog_compare.
   final EdgeInsetsGeometry rowsPadding;
 
-  /// The list of rows in the section
+  /// The list of rows in the section.
   final List<Widget> children;
 
-  /// Decoration for the section
+  /// Sets the decoration for the section.
+  ///
+  /// Defaults to a [CupertinoColors.secondarySystemBackground] background
+  /// color.
   final BoxDecoration decoration;
 
-  /// Border radius for the rows in the section. Not the section widget.
+  /// Sets the circular border radius for the [Column] encapsulating [children]
+  /// rows.
+  ///
+  /// Defaults to 0.0 when constructed with standard [CupertinoFormSection]
+  /// constructor. Defaults to 10.0 when constructing with
+  /// [CupertinoFormSection.centered].
   final double borderRadius;
 
   @override

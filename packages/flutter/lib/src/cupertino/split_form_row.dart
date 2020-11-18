@@ -13,27 +13,109 @@ export 'split_form_row.dart';
 
 /// Creates a standard split row, with a helper text to one side and a child
 /// widget to the other.
+///
+/// A [leadingText] is required. This string is displayed in a [Text] widget
+/// leading to the side of the [CupertinoSplitFormRow]. It can be set to
+/// an empty string, although it is encouraged to set the [leadingText] in
+/// order to follow standard iOS practices.
+///
+/// {@tool snippet}
+///
+/// Creates a [CupertinoFormSection] containing a [CupertinoSplitFormRow] with a
+/// [leadingText], [child] widget, [helperText] and [errorText].
+///
+/// ```dart
+/// class FlutterDemo extends StatefulWidget {
+///   FlutterDemo({Key key}) : super(key: key);
+///
+///   @override
+///   _FlutterDemoState createState() => _FlutterDemoState();
+/// }
+///
+/// class _FlutterDemoState extends State<FlutterDemo> {
+///   bool toggleValue = false;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoPageScaffold(
+///       child: Center(
+///         child: CupertinoFormSection(
+///           title: "Section 1",
+///           children: [
+///             CupertinoFormSplitRow(
+///               text: 'Toggle',
+///               child: CupertinoSwitch(
+///                 value: this.toggleValue,
+///                 onChanged: (value) {
+///                   setState(() {
+///                     this.toggleValue = value;
+///                   });
+///                 },
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class CupertinoSplitFormRow extends StatefulWidget {
   /// Creates a standard split row, with a helper text to one side and a child
   /// widget to the other.
+  ///
+  /// A [leadingText] is required. This string is displayed in a [Text]
+  /// widget leading to the side of the [CupertinoSplitFormRow]. It can be set to
+  /// an empty string, although it is encouraged to set the [leadingText] in
+  /// order to follow standard iOS practices.
+  ///
+  /// A [child] widget is required. This widget is shown trailing the row, and
+  /// expands to fill the space remaining trailing the row's leading text.
+  ///
+  /// [helperText] and [errorText] are optional parameters that set the text
+  /// underneath the [leadingText] and [child] widgets. [helperText] appears in
+  /// primary label coloring, and is meant to inform the user about interaction
+  /// with the child widget. [errorText] appears in
+  /// [CupertinoColors.destructiveRed] coloring, and is meant to inform the user
+  /// of issues attributed to the child widget. [errorText] is used in
+  /// [CupertinoTextFormField] to display validation errors.
   const CupertinoSplitFormRow({
-    required this.text,
+    required this.leadingText,
     this.helperText,
     this.errorText,
     required this.child,
     Key? key,
   }) : super(key: key);
 
-  /// String for the text widget
-  final String text;
+  /// Text that is shown leading the row.
+  ///
+  /// A [leadingText] is required. This string is displayed in a [Text]
+  /// widget leading to the side of the [CupertinoSplitFormRow]. It can be set
+  /// to an empty string, although it is encouraged to set the [leadingText] in
+  /// order to follow standard iOS practices.
+  final String leadingText;
 
-  /// String for the text displayed underneath the text widget and child
+  /// String for text displayed underneath [leadingText] and [child]
+  ///
+  /// [helperText] appears in primary label coloring, and is meant to inform the
+  /// user about interaction with the child widget.
   final String? helperText;
 
-  /// String for the error text displayed underneath the text widget and child
+  /// String for the error text displayed underneath the text widget and child.
+  ///
+  /// [errorText] appears in [CupertinoColors.destructiveRed] coloring and
+  /// medium-weight font, and is meant to inform the user of issues attributed
+  /// to the child widget. [errorText] is used in [CupertinoTextFormField] to
+  /// display validation errors.
   final String? errorText;
 
-  /// Child widget shown next to the text widget
+  /// Child widget trailing the row.
   final Widget child;
 
   @override
@@ -51,7 +133,7 @@ class _CupertinoFormSplitRowState extends State<CupertinoSplitFormRow> {
       Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 1.0, 0.0),
         child: Text(
-          widget.text,
+          widget.leadingText,
           style: textStyle,
         ),
       ),
