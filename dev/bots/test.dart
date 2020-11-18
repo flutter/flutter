@@ -98,6 +98,7 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/cupertino/text_field_test.dart',
   'test/cupertino/route_test.dart',
   'test/foundation/error_reporting_test.dart',
+  'test/services/message_codecs_vm_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
