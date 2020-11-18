@@ -33,6 +33,7 @@ final String bat = Platform.isWindows ? '.bat' : '';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
+final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub$bat');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
@@ -666,21 +667,8 @@ Future<void> _runFrameworkTests() async {
     if (Directory(pubCache).existsSync()) {
       pubEnvironment['PUB_CACHE'] = pubCache;
     }
-
-    // If an existing env variable exists append to it, but only if
-    // it doesn't appear to already include enable-asserts.
-    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-    if (!toolsArgs.contains('--enable-asserts')) {
-      toolsArgs += ' --enable-asserts';
-    }
-    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-    // The flutter_tool will originally have been snapshotted without asserts.
-    // We need to force it to be regenerated with them enabled.
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
-    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
-
     await runCommand(
-      flutter,
+      pub,
       args,
       workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_private'),
       environment: pubEnvironment,
