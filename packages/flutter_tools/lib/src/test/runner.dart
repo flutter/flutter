@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -13,6 +12,7 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/compile.dart';
+import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_wrapper.dart';

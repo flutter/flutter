@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
-import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -34,6 +33,7 @@ import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
+import '../web/memory_fs.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
 
