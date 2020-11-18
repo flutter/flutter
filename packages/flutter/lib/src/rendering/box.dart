@@ -1355,25 +1355,33 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<_IntrinsicDimensionsCacheEntry, double>? _cachedIntrinsicDimensions;
+  Map<_IntrinsicDimensionsCacheEntry, double>? _debugCachedIntrinsicDimensionsForChecks;
 
   double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double computer(double argument)) {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
-    bool shouldCache = true;
+
+    double? debugCachedResult;
+
+    // Use a separate cache for debug-only intrinisic size checks.
     assert(() {
-      // we don't want the checked-mode intrinsic tests to affect
-      // who gets marked dirty, etc.
-      if (RenderObject.debugCheckingIntrinsics)
-        shouldCache = false;
+      if (RenderObject.debugCheckingIntrinsics) {
+        _debugCachedIntrinsicDimensionsForChecks ??= <_IntrinsicDimensionsCacheEntry, double>{};
+        debugCachedResult = _debugCachedIntrinsicDimensionsForChecks!.putIfAbsent(
+          _IntrinsicDimensionsCacheEntry(dimension, argument),
+          () => computer(argument),
+        );
+      }
       return true;
     }());
-    if (shouldCache) {
-      _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
-      return _cachedIntrinsicDimensions!.putIfAbsent(
-        _IntrinsicDimensionsCacheEntry(dimension, argument),
-        () => computer(argument),
-      );
+    if (debugCachedResult != null) {
+      return debugCachedResult!;
     }
-    return computer(argument);
+
+    _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
+    return _cachedIntrinsicDimensions!.putIfAbsent(
+      _IntrinsicDimensionsCacheEntry(dimension, argument),
+      () => computer(argument),
+    );
   }
 
   /// Returns the minimum width that this box could be without failing to
@@ -2139,6 +2147,10 @@ abstract class RenderBox extends RenderObject {
       // notify them again.
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
+      assert(() {
+        _debugCachedIntrinsicDimensionsForChecks?.clear();
+        return true;
+      }());
       if (parent is RenderObject) {
         markParentNeedsLayout();
         return;
