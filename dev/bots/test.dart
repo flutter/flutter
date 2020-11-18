@@ -33,7 +33,6 @@ final String bat = Platform.isWindows ? '.bat' : '';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub$bat');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
@@ -297,7 +296,7 @@ Future<void> _runToolCoverage() async {
     ],
     coverage: 'coverage',
   );
-  await runCommand(pub,
+  await runCommand(flutter,
     <String>[
       'run',
       'coverage:format_coverage',
@@ -681,7 +680,7 @@ Future<void> _runFrameworkTests() async {
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
 
     await runCommand(
-      pub,
+      flutter,
       args,
       workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_private'),
       environment: pubEnvironment,
@@ -1152,7 +1151,6 @@ Future<void> _pubRunTest(String workingDirectory, {
   }
 
   final List<String> args = <String>[
-    'run',
     'test',
     if (useFlutterTestFormatter)
       '-rjson'
@@ -1192,7 +1190,7 @@ Future<void> _pubRunTest(String workingDirectory, {
     Stream<String> testOutput;
     try {
       testOutput = runAndGetStdout(
-        pub,
+        flutter,
         args,
         workingDirectory: workingDirectory,
         environment: pubEnvironment,
@@ -1203,7 +1201,7 @@ Future<void> _pubRunTest(String workingDirectory, {
     await _processTestOutput(formatter, testOutput, tableData);
   } else {
     await runCommand(
-      pub,
+      flutter,
       args,
       workingDirectory: workingDirectory,
       environment: pubEnvironment,
