@@ -25,14 +25,15 @@ import '../reporting/reporting.dart';
 final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
-String flutterFrameworkDir(BuildMode mode) {
-  return globals.fs.path.normalize(globals.fs.path.dirname(globals.artifacts.getArtifactPath(
-      Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode)));
-}
-
-String flutterMacOSFrameworkDir(BuildMode mode) {
-  return globals.fs.path.normalize(globals.fs.path.dirname(globals.artifacts.getArtifactPath(
-      Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin_x64, mode: mode)));
+String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
+    Artifacts artifacts) {
+  final String flutterMacOSFramework = artifacts.getArtifactPath(
+    Artifact.flutterMacOSFramework,
+    platform: TargetPlatform.darwin_x64,
+    mode: mode,
+  );
+  return fileSystem.path
+      .normalize(fileSystem.path.dirname(flutterMacOSFramework));
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
@@ -185,14 +186,13 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add(r'OTHER_LDFLAGS=$(inherited) -framework Flutter');
   }
 
-  if (!project.isModule) {
+  if (!project.isModule && useMacOSConfig) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
-    // However, this is necessary for regular projects using Cocoapods.
-    final String frameworkDir = useMacOSConfig
-      ? flutterMacOSFrameworkDir(buildInfo.mode)
-      : flutterFrameworkDir(buildInfo.mode);
+    // However, this is necessary for regular macOS projects using Cocoapods.
+    final String frameworkDir =
+        flutterMacOSFrameworkDir(buildInfo.mode, globals.fs, globals.artifacts);
     xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
