@@ -1460,10 +1460,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildChip());
-
-    final TextStyle labelStyle = getLabelStyle(tester).style;
-
-    expect(labelStyle.fontFamily, 'MyFont');
+    expect(getLabelStyle(tester).style.fontFamily, 'MyFont');
   });
 
   testWidgets('Chip size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
