@@ -271,7 +271,7 @@ void testMain() {
     expect(responded, true);
   });
 
-  test('Window implements locale, locales, and locale change notifications', () async {
+  test('SingletonFlutterWindow implements locale, locales, and locale change notifications', () async {
     // This will count how many times we notified about locale changes.
     int localeChangedCount = 0;
     window.onLocaleChanged = () {

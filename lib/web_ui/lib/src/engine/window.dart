@@ -22,10 +22,8 @@ set customUrlStrategy(UrlStrategy? strategy) {
   _customUrlStrategy = strategy;
 }
 
-/// The Web implementation of [ui.Window].
-// TODO(gspencergoog): Once the framework no longer uses ui.Window, make this extend
-// ui.SingletonFlutterWindow instead.
-class EngineFlutterWindow extends ui.Window {
+/// The Web implementation of [ui.SingletonFlutterWindow].
+class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   EngineFlutterWindow(this._windowId, this.platformDispatcher) {
     final EnginePlatformDispatcher engineDispatcher = platformDispatcher as EnginePlatformDispatcher;
     engineDispatcher._windows[_windowId] = this;
@@ -245,7 +243,7 @@ UrlStrategy? _createDefaultUrlStrategy() {
       : const HashUrlStrategy();
 }
 
-/// The Web implementation of [ui.Window].
+/// The Web implementation of [ui.SingletonFlutterWindow].
 class EngineSingletonFlutterWindow extends EngineFlutterWindow {
   EngineSingletonFlutterWindow(Object windowId, ui.PlatformDispatcher platformDispatcher) : super(windowId, platformDispatcher);
 
