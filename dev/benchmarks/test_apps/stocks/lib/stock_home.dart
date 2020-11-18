@@ -25,7 +25,7 @@ class _NotImplementedDialog extends StatelessWidget {
       title: const Text('Not Implemented'),
       content: const Text('This feature has not yet been implemented.'),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           onPressed: debugDumpApp,
           child: Row(
             children: <Widget>[
@@ -40,7 +40,7 @@ class _NotImplementedDialog extends StatelessWidget {
             ],
           ),
         ),
-        FlatButton(
+        TextButton(
           onPressed: () {
             Navigator.pop(context, false);
           },
@@ -247,7 +247,7 @@ class StockHomeState extends State<StockHome> {
       stock.percentChange = 100.0 * (1.0 / stock.lastSale);
       stock.lastSale += 1.0;
     });
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('Purchased ${stock.symbol} for ${stock.lastSale}'),
       action: SnackBarAction(
         label: 'BUY MORE',

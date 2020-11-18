@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -66,7 +64,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
         'information.'
       );
     }
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!globals.platform.isLinux && !globals.platform.isMacOS) {
       throwToolExit('"build fuchsia" is only supported on Linux and MacOS hosts.');

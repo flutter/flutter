@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -15,9 +13,9 @@ import 'theme.dart';
 // below the top.
 class _FadeUpwardsPageTransition extends StatelessWidget {
   _FadeUpwardsPageTransition({
-    Key key,
-    @required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
-    @required this.child,
+    Key? key,
+    required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
+    required this.child,
   }) : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
        _opacityAnimation = routeAnimation.drive(_easeInTween),
        super(key: key);
@@ -50,10 +48,10 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
 // This transition is intended to match the default for Android P.
 class _OpenUpwardsPageTransition extends StatelessWidget {
   const _OpenUpwardsPageTransition({
-    Key key,
-    this.animation,
-    this.secondaryAnimation,
-    this.child,
+    Key? key,
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.child,
   }) : super(key: key);
 
   // The new page slides upwards just a little as its clip
@@ -113,7 +111,7 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 
         return AnimatedBuilder(
           animation: animation,
-          builder: (BuildContext context, Widget child) {
+          builder: (BuildContext context, Widget? child) {
             return Container(
               color: Colors.black.withOpacity(opacityAnimation.value),
               alignment: Alignment.bottomLeft,
@@ -135,7 +133,7 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
               translation: primaryTranslationAnimation.value,
               child: child,
             ),
-            builder: (BuildContext context, Widget child) {
+            builder: (BuildContext context, Widget? child) {
               return FractionalTranslation(
                 translation: secondaryTranslationAnimation.value,
                 child: child,
@@ -156,9 +154,9 @@ class _ZoomPageTransition extends StatelessWidget {
   /// The [animation] and [secondaryAnimation] argument are required and must
   /// not be null.
   const _ZoomPageTransition({
-    Key key,
-    @required this.animation,
-    @required this.secondaryAnimation,
+    Key? key,
+    required this.animation,
+    required this.secondaryAnimation,
     this.child,
   }) : assert(animation != null),
        assert(secondaryAnimation != null),
@@ -194,14 +192,14 @@ class _ZoomPageTransition extends StatelessWidget {
   /// See also:
   ///
   ///  * [TransitionRoute.secondaryAnimation], which is the value given to this
-  //     property when the [_ZoomPageTransition] is used as a page transition.
+  ///    property when the [_ZoomPageTransition] is used as a page transition.
   final Animation<double> secondaryAnimation;
 
   /// The widget below this widget in the tree.
   ///
   /// This widget will transition in and out as driven by [animation] and
   /// [secondaryAnimation].
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +208,7 @@ class _ZoomPageTransition extends StatelessWidget {
       forwardBuilder: (
         BuildContext context,
         Animation<double> animation,
-        Widget child,
+        Widget? child,
       ) {
         return _ZoomEnterTransition(
           animation: animation,
@@ -220,7 +218,7 @@ class _ZoomPageTransition extends StatelessWidget {
       reverseBuilder: (
         BuildContext context,
         Animation<double> animation,
-        Widget child,
+        Widget? child,
       ) {
         return _ZoomExitTransition(
           animation: animation,
@@ -233,7 +231,7 @@ class _ZoomPageTransition extends StatelessWidget {
         forwardBuilder: (
           BuildContext context,
           Animation<double> animation,
-          Widget child,
+          Widget? child,
         ) {
           return _ZoomEnterTransition(
             animation: animation,
@@ -244,7 +242,7 @@ class _ZoomPageTransition extends StatelessWidget {
         reverseBuilder: (
           BuildContext context,
           Animation<double> animation,
-          Widget child,
+          Widget? child,
         ) {
           return _ZoomExitTransition(
             animation: animation,
@@ -259,8 +257,8 @@ class _ZoomPageTransition extends StatelessWidget {
 
 class _ZoomEnterTransition extends StatelessWidget {
   const _ZoomEnterTransition({
-    Key key,
-    @required this.animation,
+    Key? key,
+    required this.animation,
     this.reverse = false,
     this.child,
   }) : assert(animation != null),
@@ -268,7 +266,7 @@ class _ZoomEnterTransition extends StatelessWidget {
        super(key: key);
 
   final Animation<double> animation;
-  final Widget child;
+  final Widget? child;
   final bool reverse;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
@@ -286,7 +284,7 @@ class _ZoomEnterTransition extends StatelessWidget {
     end: 1.00,
   ).chain(_ZoomPageTransition._scaleCurveSequence);
 
-  static final Animatable<double> _scrimOpacityTween = Tween<double>(
+  static final Animatable<double?> _scrimOpacityTween = Tween<double?>(
     begin: 0.0,
     end: 0.60,
   ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
@@ -305,7 +303,7 @@ class _ZoomEnterTransition extends StatelessWidget {
     // forward transition to smoothly fade the scrim away. This prevents a disjointed
     // removal of the scrim.
     if (!reverse && animation.status != AnimationStatus.completed) {
-      opacity = _scrimOpacityTween.evaluate(animation);
+      opacity = _scrimOpacityTween.evaluate(animation)!;
     }
 
     final Animation<double> fadeTransition = reverse
@@ -319,7 +317,7 @@ class _ZoomEnterTransition extends StatelessWidget {
 
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         return Container(
           color: Colors.black.withOpacity(opacity),
           child: child,
@@ -338,8 +336,8 @@ class _ZoomEnterTransition extends StatelessWidget {
 
 class _ZoomExitTransition extends StatelessWidget {
   const _ZoomExitTransition({
-    Key key,
-    @required this.animation,
+    Key? key,
+    required this.animation,
     this.reverse = false,
     this.child,
   }) : assert(animation != null),
@@ -348,7 +346,7 @@ class _ZoomExitTransition extends StatelessWidget {
 
   final Animation<double> animation;
   final bool reverse;
-  final Widget child;
+  final Widget? child;
 
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
@@ -442,10 +440,10 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
+    PageRoute<T>? route,
+    BuildContext? context,
     Animation<double> animation,
-    Animation<double> secondaryAnimation,
+    Animation<double>? secondaryAnimation,
     Widget child,
   ) {
     return _FadeUpwardsPageTransition(routeAnimation: animation, child: child);
@@ -469,8 +467,8 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
+    PageRoute<T>? route,
+    BuildContext? context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
@@ -500,11 +498,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
+    PageRoute<T>? route,
+    BuildContext? context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-    Widget child,
+    Widget? child,
   ) {
     return _ZoomPageTransition(
       animation: animation,
@@ -566,7 +564,7 @@ class PageTransitionsTheme with Diagnosticable {
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
   /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
   /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders }) : _builders = builders;
+  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder>? builders }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
@@ -578,7 +576,7 @@ class PageTransitionsTheme with Diagnosticable {
 
   /// The [PageTransitionsBuilder]s supported by this theme.
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders ?? _defaultBuilders;
-  final Map<TargetPlatform, PageTransitionsBuilder> _builders;
+  final Map<TargetPlatform, PageTransitionsBuilder>? _builders;
 
   /// Delegates to the builder for the current [ThemeData.platform]
   /// or [FadeUpwardsPageTransitionsBuilder].
@@ -603,7 +601,7 @@ class PageTransitionsTheme with Diagnosticable {
 
   // Just used to the builders Map to a list with one PageTransitionsBuilder per platform
   // for the operator == overload.
-  List<PageTransitionsBuilder> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
+  List<PageTransitionsBuilder?> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
     return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
   }
 
@@ -616,7 +614,7 @@ class PageTransitionsTheme with Diagnosticable {
     if (other is PageTransitionsTheme && identical(builders, other.builders))
       return true;
     return other is PageTransitionsTheme
-        && listEquals<PageTransitionsBuilder>(_all(other.builders), _all(builders));
+        && listEquals<PageTransitionsBuilder?>(_all(other.builders), _all(builders));
   }
 
   @override

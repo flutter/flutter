@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +24,7 @@ class MySliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({ Key key }) : super(key: key);
+  const MyHomePage({ Key? key }) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -34,7 +32,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   static const int tabCount = 3;
-  TabController tabController;
+  late TabController tabController;
 
   @override
   void initState() {

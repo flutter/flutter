@@ -2,24 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 export '../services/restoration.dart';
 
 class BucketSpy extends StatefulWidget {
-  const BucketSpy({Key key, this.child}) : super(key: key);
+  const BucketSpy({Key? key, this.child}) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
 
   @override
   State<BucketSpy> createState() => BucketSpyState();
 }
 
 class BucketSpyState extends State<BucketSpy> {
-  RestorationBucket bucket;
+  RestorationBucket? bucket;
 
   @override
   void didChangeDependencies() {

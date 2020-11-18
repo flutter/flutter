@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -22,11 +20,11 @@ void main() {
       ],
       child: const Text('loaded')
     ));
-    final dynamic state = tester.state(find.byType(Localizations));
-    expect(state.locale, isNull);
+    final dynamic state = tester.state(find.byType(Localizations)); // ignore: unnecessary_nullable_for_final_variable_declarations
+    expect(state!.locale, isNull);
     expect(find.text('loaded'), findsNothing);
 
-    Locale locale;
+    late Locale locale;
     binding.onAllowFrame = () {
       locale = state.locale as Locale;
     };
@@ -35,6 +33,24 @@ void main() {
     expect(locale, const Locale('fo'));
     await tester.pump();
     expect(find.text('loaded'), findsOneWidget);
+  });
+
+  testWidgets('Localizations.localeOf throws when no localizations exist', (WidgetTester tester) async {
+    final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
+    await tester.pumpWidget(Container(key: contextKey));
+
+    expect(() => Localizations.localeOf(contextKey.currentContext!), throwsA(isAssertionError.having(
+          (AssertionError e) => e.message,
+      'message',
+      contains('does not include a Localizations ancestor'),
+    )));
+  });
+
+  testWidgets('Localizations.maybeLocaleOf returns null when no localizations exist', (WidgetTester tester) async {
+    final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
+    await tester.pumpWidget(Container(key: contextKey));
+
+    expect(Localizations.maybeLocaleOf(contextKey.currentContext!), isNull);
   });
 }
 
@@ -53,12 +69,11 @@ class FakeLocalizationsDelegate extends LocalizationsDelegate<String> {
 
 class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
 
-  VoidCallback onAllowFrame;
+  VoidCallback? onAllowFrame;
 
   @override
   void allowFirstFrame() {
-    if (onAllowFrame != null)
-      onAllowFrame();
+    onAllowFrame?.call();
     super.allowFirstFrame();
   }
 }

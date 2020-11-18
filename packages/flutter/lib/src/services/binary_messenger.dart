@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -11,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'binding.dart';
 
 /// A function which takes a platform message and asynchronously returns an encoded response.
-typedef MessageHandler = Future<ByteData?> Function(ByteData? message);
+typedef MessageHandler = Future<ByteData?>? Function(ByteData? message);
 
 /// A messenger which sends binary data across the Flutter platform barrier.
 ///
@@ -23,7 +22,7 @@ abstract class BinaryMessenger {
   /// Calls the handler registered for the given channel.
   ///
   /// Typically called by [ServicesBinding] to handle platform messages received
-  /// from [Window.onPlatformMessage].
+  /// from [dart:ui.PlatformDispatcher.onPlatformMessage].
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
   Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback);
@@ -32,7 +31,7 @@ abstract class BinaryMessenger {
   ///
   /// Returns a [Future] which completes to the received response, undecoded,
   /// in binary form.
-  Future<ByteData?> send(String channel, ByteData? message);
+  Future<ByteData?>? send(String channel, ByteData? message);
 
   /// Set a callback for receiving messages from the platform plugins on the
   /// given channel, without decoding them.
@@ -49,6 +48,9 @@ abstract class BinaryMessenger {
   ///
   /// This method is useful for tests or test harnesses that want to assert the
   /// handler for the specified channel has not been altered by a previous test.
+  ///
+  /// Passing null for the `handler` returns true if the handler for the
+  /// `channel` is not set.
   bool checkMessageHandler(String channel, MessageHandler? handler);
 
   /// Set a mock callback for intercepting messages from the [send] method on
@@ -70,6 +72,9 @@ abstract class BinaryMessenger {
   /// This method is useful for tests or test harnesses that want to assert the
   /// mock handler for the specified channel has not been altered by a previous
   /// test.
+  ///
+  /// Passing null for the `handler` returns true if the handler for the
+  /// `channel` is not set.
   bool checkMockMessageHandler(String channel, MessageHandler? handler);
 }
 

@@ -710,9 +710,6 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  bool get isMaster => true;
-
-  @override
   String get repositoryUrl => null;
 
   @override
@@ -783,68 +780,15 @@ class TestFeatureFlags implements FeatureFlags {
   }
 }
 
-class DelegateLogger implements Logger {
-  DelegateLogger(this.delegate);
+class FakeStatusLogger extends DelegatingLogger {
+  FakeStatusLogger(Logger delegate) : super(delegate);
 
-  final Logger delegate;
   Status status;
-
-  @override
-  bool get quiet => delegate.quiet;
-
-  @override
-  set quiet(bool value) => delegate.quiet;
-
-  @override
-  bool get hasTerminal => delegate.hasTerminal;
-
-  @override
-  bool get isVerbose => delegate.isVerbose;
-
-  @override
-  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
-    delegate.printError(
-      message,
-      stackTrace: stackTrace,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
-    delegate.printStatus(message,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printTrace(String message) {
-    delegate.printTrace(message);
-  }
-
-  @override
-  void sendEvent(String name, [Map<String, dynamic> args]) {
-    delegate.sendEvent(name, args);
-  }
 
   @override
   Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
     return status;
   }
-
-  @override
-  bool get supportsColor => delegate.supportsColor;
-
-  @override
-  void clear() => delegate.clear();
 }
 
 /// An implementation of the Cache which does not download or require locking.
@@ -931,7 +875,7 @@ class FakeCache implements Cache {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     return true;
   }
 
@@ -950,5 +894,14 @@ class FakeCache implements Cache {
   }
 
   @override
-  void clearStampFiles() {}
+  void clearStampFiles() { }
+
+  @override
+  void checkLockAcquired() { }
+
+  @override
+  Future<void> lock() async { }
+
+  @override
+  void releaseLock() { }
 }

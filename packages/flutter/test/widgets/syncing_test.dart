@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class TestWidget extends StatefulWidget {
   const TestWidget({
-    Key key,
-    this.child,
-    this.persistentState,
-    this.syncedState,
+    Key? key,
+    required this.child,
+    required this.persistentState,
+    required this.syncedState,
   }) : super(key: key);
 
   final Widget child;
@@ -24,8 +22,8 @@ class TestWidget extends StatefulWidget {
 }
 
 class TestWidgetState extends State<TestWidget> {
-  int persistentState;
-  int syncedState;
+  late int persistentState;
+  late int syncedState;
   int updates = 0;
 
   @override
@@ -56,6 +54,7 @@ void main() {
         child: Container(
           child: TestWidget(
             persistentState: 1,
+            syncedState: 0,
             child: Container(),
           ),
         ),
@@ -72,6 +71,7 @@ void main() {
         child: Container(
           child: TestWidget(
             persistentState: 2,
+            syncedState: 0,
             child: Container(),
           ),
         ),
@@ -90,6 +90,7 @@ void main() {
         child: Container(
           child: TestWidget(
             persistentState: 10,
+            syncedState: 0,
             child: Container(),
           ),
         ),
@@ -105,6 +106,7 @@ void main() {
       Container(
         child: TestWidget(
           persistentState: 11,
+          syncedState: 0,
           child: Container(),
         ),
       ),

@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
@@ -37,14 +36,17 @@ class TestCompiler {
   ///
   /// [flutterProject] is the project for which we are running tests.
   TestCompiler(
-    this.buildMode,
-    this.trackWidgetCreation,
+    this.buildInfo,
     this.flutterProject,
-    this.extraFrontEndOptions,
-  ) : testFilePath = getKernelPathForTransformerOptions(
-        globals.fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile.dill'),
-        trackWidgetCreation: trackWidgetCreation,
-      ) {
+  ) : testFilePath = globals.fs.path.join(
+        flutterProject.directory.path,
+        getBuildDirectory(),
+        'test_cache',
+        getDefaultCachedKernelPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+          dartDefines: buildInfo.dartDefines,
+          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        )) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -61,10 +63,8 @@ class TestCompiler {
   final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
   final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   final FlutterProject flutterProject;
-  final BuildMode buildMode;
-  final bool trackWidgetCreation;
+  final BuildInfo buildInfo;
   final String testFilePath;
-  final List<String> extraFrontEndOptions;
 
 
   ResidentCompiler compiler;
@@ -101,13 +101,15 @@ class TestCompiler {
       artifacts: globals.artifacts,
       logger: globals.logger,
       processManager: globals.processManager,
-      buildMode: buildMode,
-      trackWidgetCreation: trackWidgetCreation,
+      buildMode: buildInfo.mode,
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
       initializeFromDill: testFilePath,
       unsafePackageSerialization: false,
-      dartDefines: const <String>[],
-      packagesPath: globalPackagesPath,
-      extraFrontEndOptions: extraFrontEndOptions,
+      dartDefines: buildInfo.dartDefines,
+      packagesPath: buildInfo.packagesPath,
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      platform: globals.platform,
+      testCompilation: true,
     );
     return residentCompiler;
   }
@@ -125,16 +127,13 @@ class TestCompiler {
       return;
     }
     if (_packageConfig == null) {
-      _packageConfig ??= await loadPackageConfigWithLogging(
-        globals.fs.file(globalPackagesPath),
-        logger: globals.logger,
-      );
+      _packageConfig ??= buildInfo.packageConfig;
       // Compilation will fail if there is no flutter_test dependency, since
       // this library is imported by the generated entrypoint script.
-      if (_packageConfig['flutter_test'] == null) {
+      if (_packageConfig['test_api'] == null) {
         globals.printError(
           '\n'
-          'Error: cannot run without a dependency on "package:flutter_test". '
+          'Error: cannot run without a dependency on either "package:flutter_test" or "package:test". '
           'Ensure the following lines are present in your pubspec.yaml:'
           '\n\n'
           'dev_dependencies:\n'

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../cache.dart';
@@ -270,13 +268,11 @@ class IdeConfigCommand extends FlutterCommand {
 String _validateFlutterDir(String dirPath, { String flutterRoot }) {
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.notFound) {
-    switch (type) {
-      case FileSystemEntityType.link:
-        // Do not overwrite links.
-        return "Invalid project root dir: '$dirPath' - refers to a link.";
-    }
+  switch (type) {
+    case FileSystemEntityType.link:
+      // Do not overwrite links.
+      return "Invalid project root dir: '$dirPath' - refers to a link.";
+    default:
+      return null;
   }
-
-  return null;
 }

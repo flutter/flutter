@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui' as ui show Brightness;
 
 import 'assertions.dart';
@@ -103,7 +102,7 @@ String debugFormatDouble(double? value) {
 }
 
 /// A setting that can be used to override the platform [Brightness] exposed
-/// from [BindingBase.window].
+/// from [BindingBase.platformDispatcher].
 ///
 /// See also:
 ///

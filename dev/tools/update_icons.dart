@@ -74,7 +74,7 @@ const Map<String, String> _identifierRewrites = <String, String>{
   'class': 'class_',
 };
 
-const Set<String> _mirroredIcons = <String>{
+const Set<String> _iconsMirroredWhenRTL = <String>{
   // This list is obtained from:
   // http://google.github.io/material-design-icons/#icons-in-rtl
   'arrow_back',
@@ -197,10 +197,16 @@ void main(List<String> args) {
 
 ArgResults _handleArguments(List<String> args) {
   final ArgParser argParser = ArgParser()
-    ..addOption(_newCodepointsPathOption, defaultsTo: _defaultNewCodepointsPath)
-    ..addOption(_oldCodepointsPathOption, defaultsTo: _defaultOldCodepointsPath)
-    ..addOption(_iconsClassPathOption, defaultsTo: _defaultIconsPath)
+    ..addOption(_newCodepointsPathOption, defaultsTo: _defaultNewCodepointsPath, help: 'Location of the new codepoints directory')
+    ..addOption(_oldCodepointsPathOption, defaultsTo: _defaultOldCodepointsPath, help: 'Location of the existing codepoints directory')
+    ..addOption(_iconsClassPathOption, defaultsTo: _defaultIconsPath, help: 'Location of the material icons file')
     ..addFlag(_dryRunOption, defaultsTo: false);
+  argParser.addFlag('help', abbr: 'h', negatable: false, callback: (bool help) {
+    if (help) {
+      print(argParser.usage);
+      exit(1);
+    }
+  });
   return argParser.parse(args);
 }
 
@@ -236,7 +242,7 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
 
       final String iconDeclarationsString = <String>[
         for (MapEntry<String, String> entry in tokenPairMap.entries)
-          _generateDeclaration(entry)
+          _Icon(entry).fullDeclaration
       ].join();
 
       buf.write(iconDeclarationsString);
@@ -253,8 +259,8 @@ void _testIsMapSuperset(Map<String, String> newCodepoints, Map<String, String> o
   final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
 
   if (!newCodepointsSet.containsAll(oldCodepointsSet)) {
-    stderr.writeln(
-      '''Error: New codepoints file does not contain all the existing codepoints.\n
+    stderr.writeln('''
+Error: New codepoints file does not contain all the existing codepoints.\n
         Missing: ${oldCodepointsSet.difference(newCodepointsSet)}
         ''',
     );
@@ -262,26 +268,76 @@ void _testIsMapSuperset(Map<String, String> newCodepoints, Map<String, String> o
   }
 }
 
-String _generateDeclaration(MapEntry<String, String> tokenPair) {
-  final String identifier = _generateIdentifier(tokenPair.key);
-  final String description = tokenPair.key.replaceAll('_', ' ');
-  final String rtl = _mirroredIcons.contains(tokenPair.key)
-      ? ', matchTextDirection: true'
-      : '';
-  return '''
-
-  /// <i class="material-icons md-36">${tokenPair.key}</i> &#x2014; material icon named "$description".
-  static const IconData $identifier = IconData(0x${tokenPair.value}, fontFamily: 'MaterialIcons'$rtl);
-''';
+enum IconStyle {
+  regular,
+  outlined,
+  rounded,
+  sharp,
 }
 
-String _generateIdentifier(String rawIdentifier) {
-  for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
-    if (rawIdentifier.startsWith(rewritePair.key)) {
-      return rawIdentifier.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+extension IconStyleSuffix on IconStyle {
+  // The suffix for the 'material-icons' HTML class.
+  String suffix() {
+    switch (this) {
+      case IconStyle.outlined: return '-outlined';
+      case IconStyle.rounded: return '-round';
+      case IconStyle.sharp: return '-sharp';
+      default: return '';
     }
   }
-  return rawIdentifier;
+}
+
+class _Icon {
+  // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
+  _Icon(MapEntry<String, String> tokenPair) {
+    id = tokenPair.key;
+    hexCodepoint = tokenPair.value;
+
+    if (id.endsWith('_outlined') && id!='insert_chart_outlined') {
+      style = IconStyle.outlined;
+      shortId = id.replaceAll('_outlined', '');
+    } else if (id.endsWith('_rounded')) {
+      style = IconStyle.rounded;
+      shortId = id.replaceAll('_rounded', '');
+    } else if (id.endsWith('_sharp')) {
+      style = IconStyle.sharp;
+      shortId = id.replaceAll('_sharp', '');
+    } else {
+      style = IconStyle.regular;
+      shortId = id;
+    }
+
+    flutterId = id;
+    for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
+      if (id.startsWith(rewritePair.key)) {
+        flutterId = id.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+      }
+    }
+  }
+
+  // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
+  String id;
+  // e.g. 5g
+  String shortId;
+  // e.g. five_g
+  String flutterId;
+  // e.g. IconStyle.outlined
+  IconStyle style;
+  // e.g. e547
+  String hexCodepoint;
+
+  // TODO(guidezpl): will be fixed in a future PR to be shortId instead of id
+  String get mirroredInRTL => _iconsMirroredWhenRTL.contains(id) ? ', matchTextDirection: true' : '';
+
+  String get name => id.replaceAll('_', ' ');
+
+  String get dartDoc =>
+      '/// <i class="material-icons${style.suffix()} md-36">$shortId</i> &#x2014; material icon named "$name".';
+
+  String get declaration =>
+      "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
+
+  String get fullDeclaration => '''\n  $dartDoc\n  $declaration\n''';
 }
 
 // Replace the old codepoints file with the new.

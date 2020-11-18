@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -374,7 +371,7 @@ void _defineTests() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
 
     // Do the actions work?
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
       switch (action) {
@@ -415,6 +412,7 @@ void _defineTests() {
             selected: true,
             hidden: true,
             button: true,
+            slider: true,
             link: true,
             textField: true,
             readOnly: true,
@@ -465,6 +463,7 @@ void _defineTests() {
             selected: true,
             hidden: true,
             button: true,
+            slider: true,
             link: true,
             textField: true,
             readOnly: true,
@@ -502,7 +501,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  }, skip: true); // TODO(abrusher): Enable once engine PR #20385 lands.
+  });
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
@@ -709,7 +708,7 @@ class _DiffTester {
   ///
   /// - checks that initial and final configurations are in the desired states.
   /// - checks that keyed nodes have stable IDs.
-  Future<void> diff({ List<String> from, List<String> to }) async {
+  Future<void> diff({ required List<String> from, required List<String> to }) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     TestSemantics createExpectations(List<String> labels) {
@@ -734,12 +733,12 @@ class _DiffTester {
     ));
     expect(semanticsTester, hasSemantics(createExpectations(from), ignoreId: true));
 
-    SemanticsNode root = RendererBinding.instance?.renderView?.debugSemantics;
+    SemanticsNode root = RendererBinding.instance!.renderView.debugSemantics!;
     final Map<Key, int> idAssignments = <Key, int>{};
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null) {
-          idAssignments[node.key] = node.id;
+          idAssignments[node.key!] = node.id;
         }
         return true;
       });
@@ -752,7 +751,7 @@ class _DiffTester {
     await tester.pumpAndSettle();
     expect(semanticsTester, hasSemantics(createExpectations(to), ignoreId: true));
 
-    root = RendererBinding.instance?.renderView?.debugSemantics;
+    root = RendererBinding.instance!.renderView.debugSemantics!;
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null && idAssignments[node.key] != null) {
@@ -786,7 +785,7 @@ class _SemanticsDiffTest extends CustomPainter {
   List<CustomPainterSemantics> buildSemantics(Size size) {
     final List<CustomPainterSemantics> semantics = <CustomPainterSemantics>[];
     for (final String label in data) {
-      Key key;
+      Key? key;
       if (label.endsWith('-k')) {
         key = ValueKey<String>(label);
       }
@@ -809,7 +808,7 @@ class _SemanticsDiffTest extends CustomPainter {
 }
 
 class _PainterWithSemantics extends CustomPainter {
-  _PainterWithSemantics({ this.semantics });
+  _PainterWithSemantics({ required this.semantics });
 
   final CustomPainterSemantics semantics;
 

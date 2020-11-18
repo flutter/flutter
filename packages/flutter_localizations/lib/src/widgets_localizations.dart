@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -45,7 +43,7 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
 
   @override
   TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
+  late TextDirection _textDirection;
 
   /// Creates an object that provides localized resource values for the
   /// lowest levels of the Flutter framework.

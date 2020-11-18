@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -11,7 +9,7 @@ import '../../gallery/demo.dart';
 
 class _InputDropdown extends StatelessWidget {
   const _InputDropdown({
-    Key key,
+    Key? key,
     this.child,
     this.labelText,
     this.valueText,
@@ -19,11 +17,11 @@ class _InputDropdown extends StatelessWidget {
     this.onPressed,
   }) : super(key: key);
 
-  final String labelText;
-  final String valueText;
-  final TextStyle valueStyle;
-  final VoidCallback onPressed;
-  final Widget child;
+  final String? labelText;
+  final String? valueText;
+  final TextStyle? valueStyle;
+  final VoidCallback? onPressed;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +36,7 @@ class _InputDropdown extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(valueText, style: valueStyle),
+            Text(valueText!, style: valueStyle),
             Icon(Icons.arrow_drop_down,
               color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70,
             ),
@@ -51,7 +49,7 @@ class _InputDropdown extends StatelessWidget {
 
 class _DateTimePicker extends StatelessWidget {
   const _DateTimePicker({
-    Key key,
+    Key? key,
     this.labelText,
     this.selectedDate,
     this.selectedTime,
@@ -59,35 +57,35 @@ class _DateTimePicker extends StatelessWidget {
     this.selectTime,
   }) : super(key: key);
 
-  final String labelText;
-  final DateTime selectedDate;
-  final TimeOfDay selectedTime;
-  final ValueChanged<DateTime> selectDate;
-  final ValueChanged<TimeOfDay> selectTime;
+  final String? labelText;
+  final DateTime? selectedDate;
+  final TimeOfDay? selectedTime;
+  final ValueChanged<DateTime>? selectDate;
+  final ValueChanged<TimeOfDay>? selectTime;
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: selectedDate!,
       firstDate: DateTime(2015, 8),
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != selectedDate)
-      selectDate(picked);
+      selectDate!(picked);
   }
 
   Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay picked = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: selectedTime,
+      initialTime: selectedTime!,
     );
     if (picked != null && picked != selectedTime)
-      selectTime(picked);
+      selectTime!(picked);
   }
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle valueStyle = Theme.of(context).textTheme.headline6;
+    final TextStyle? valueStyle = Theme.of(context).textTheme.headline6;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
@@ -95,7 +93,7 @@ class _DateTimePicker extends StatelessWidget {
           flex: 4,
           child: _InputDropdown(
             labelText: labelText,
-            valueText: DateFormat.yMMMd().format(selectedDate),
+            valueText: DateFormat.yMMMd().format(selectedDate!),
             valueStyle: valueStyle,
             onPressed: () { _selectDate(context); },
           ),
@@ -104,7 +102,7 @@ class _DateTimePicker extends StatelessWidget {
         Expanded(
           flex: 3,
           child: _InputDropdown(
-            valueText: selectedTime.format(context),
+            valueText: selectedTime!.format(context),
             valueStyle: valueStyle,
             onPressed: () { _selectTime(context); },
           ),
@@ -127,7 +125,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   DateTime _toDate = DateTime.now();
   TimeOfDay _toTime = const TimeOfDay(hour: 8, minute: 28);
   final List<String> _allActivities = <String>['hiking', 'swimming', 'boating', 'fishing'];
-  String _activity = 'fishing';
+  String? _activity = 'fishing';
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +153,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                 decoration: const InputDecoration(
                   labelText: 'Location',
                 ),
-                style: Theme.of(context).textTheme.headline4.copyWith(fontSize: 20.0),
+                style: Theme.of(context).textTheme.headline4!.copyWith(fontSize: 20.0),
               ),
               _DateTimePicker(
                 labelText: 'From',
@@ -197,7 +195,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                 isEmpty: _activity == null,
                 child: DropdownButton<String>(
                   value: _activity,
-                  onChanged: (String newValue) {
+                  onChanged: (String? newValue) {
                     setState(() {
                       _activity = newValue;
                     });

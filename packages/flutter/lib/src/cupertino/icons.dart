@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 /// Identifiers for the supported Cupertino icons.
@@ -23,7 +21,7 @@ import 'package:flutter/widgets.dart';
 ///   cupertino_icons: ^1.0.0
 /// ```
 ///
-/// For a map of available icons for use, see <http://flutter.github.io/cupertino_icons>
+/// For a map of available icons for use, see <https://flutter.github.io/cupertino_icons>
 /// for cupertino_icons version >1.0.0.
 ///
 /// See <https://github.com/flutter/cupertino_icons/blob/master/map.png> for

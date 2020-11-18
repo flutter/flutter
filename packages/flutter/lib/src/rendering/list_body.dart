@@ -127,7 +127,7 @@ class RenderListBody extends RenderBox
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
-          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+          final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
           childParentData.offset = Offset(mainAxisExtent, 0.0);
           mainAxisExtent += child.size.width;
           assert(child.parentData == childParentData);
@@ -139,7 +139,7 @@ class RenderListBody extends RenderBox
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
-          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+          final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
           mainAxisExtent += child.size.width;
           assert(child.parentData == childParentData);
           child = childParentData.nextSibling;
@@ -147,7 +147,7 @@ class RenderListBody extends RenderBox
         double position = 0.0;
         child = firstChild;
         while (child != null) {
-          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+          final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
           position += child.size.width;
           childParentData.offset = Offset(mainAxisExtent - position, 0.0);
           assert(child.parentData == childParentData);
@@ -159,7 +159,7 @@ class RenderListBody extends RenderBox
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
-          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+          final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
           childParentData.offset = Offset(0.0, mainAxisExtent);
           mainAxisExtent += child.size.height;
           assert(child.parentData == childParentData);
@@ -171,7 +171,7 @@ class RenderListBody extends RenderBox
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
         while (child != null) {
           child.layout(innerConstraints, parentUsesSize: true);
-          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+          final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
           mainAxisExtent += child.size.height;
           assert(child.parentData == childParentData);
           child = childParentData.nextSibling;
@@ -179,7 +179,7 @@ class RenderListBody extends RenderBox
         double position = 0.0;
         child = firstChild;
         while (child != null) {
-          final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+          final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
           position += child.size.height;
           childParentData.offset = Offset(0.0, mainAxisExtent - position);
           assert(child.parentData == childParentData);
@@ -202,7 +202,7 @@ class RenderListBody extends RenderBox
     RenderBox? child = firstChild;
     while (child != null) {
       extent = math.max(extent, childSize(child));
-      final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+      final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
       child = childParentData.nextSibling;
     }
     return extent;
@@ -213,7 +213,7 @@ class RenderListBody extends RenderBox
     RenderBox? child = firstChild;
     while (child != null) {
       extent += childSize(child);
-      final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+      final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
       child = childParentData.nextSibling;
     }
     return extent;

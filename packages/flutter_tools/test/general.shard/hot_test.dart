@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -39,6 +37,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+  isSystemIsolate: false,
 );
 
 final FlutterView fakeFlutterView = FlutterView(
@@ -57,21 +56,20 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
-      expect(HotRunner.validateReloadReport(<String, dynamic>{}), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{},
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -79,15 +77,15 @@ void main() {
             'message': 'error',
           },
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -95,8 +93,8 @@ void main() {
             <String, dynamic>{'message': false},
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -104,8 +102,8 @@ void main() {
             <String, dynamic>{'message': <String>['error']},
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -114,8 +112,8 @@ void main() {
             <String, dynamic>{'message': <String>['error']},
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': false,
         'details': <String, dynamic>{
@@ -123,11 +121,19 @@ void main() {
             <String, dynamic>{'message': 'error'},
           ],
         },
-      }), false);
-      expect(HotRunner.validateReloadReport(<String, dynamic>{
+      })), false);
+      expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': true,
-      }), true);
+      })), true);
+    });
+
+    testWithoutContext('ReasonForCancelling toString has a hint for specific errors', () {
+      final ReasonForCancelling reasonForCancelling = ReasonForCancelling(
+        message: 'Const class cannot remove fields',
+      );
+
+      expect(reasonForCancelling.toString(), contains('Try performing a hot restart instead.'));
     });
   });
 
@@ -278,7 +284,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),
@@ -286,7 +292,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),
@@ -378,7 +384,7 @@ void main() {
           method: kRunInViewMethod,
           args: <String, Object>{
             'viewId': fakeFlutterView.id,
-            'mainScript': 'lib/main.dart.dill',
+            'mainScript': 'main.dart.dill',
             'assetDirectory': 'build/flutter_assets',
           }
         ),
@@ -575,11 +581,13 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    bool disableServiceAuthCodes = false,
     bool disableDds = false,
     bool ipv6 = false,
+    int hostVmServicePort,
+    int ddsPort,
   }) async {
     throw exception;
   }

@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('debugInstrumentAction', () {
-    DebugPrintCallback originalDebugPrintCallback;
-    StringBuffer printBuffer;
+    late DebugPrintCallback originalDebugPrintCallback;
+    late StringBuffer printBuffer;
 
     setUp(() {
       debugInstrumentationEnabled = true;
       printBuffer = StringBuffer();
       originalDebugPrintCallback = debugPrint;
-      debugPrint = (String message, { int wrapWidth }) {
+      debugPrint = (String? message, { int? wrapWidth }) {
         printBuffer.writeln(message);
       };
     });

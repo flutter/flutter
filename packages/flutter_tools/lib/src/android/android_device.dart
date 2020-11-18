@@ -26,33 +26,32 @@ import 'android.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 
-// TODO(jonahwilliams): update google3 client after roll to remove export.
-export 'android_device_discovery.dart';
-
-enum _HardwareType { emulator, physical }
+/// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
+enum HardwareType { emulator, physical }
 
 /// Map to help our `isLocalEmulator` detection.
-const Map<String, _HardwareType> _kKnownHardware = <String, _HardwareType>{
-  'goldfish': _HardwareType.emulator,
-  'qcom': _HardwareType.physical,
-  'ranchu': _HardwareType.emulator,
-  'samsungexynos7420': _HardwareType.physical,
-  'samsungexynos7580': _HardwareType.physical,
-  'samsungexynos7870': _HardwareType.physical,
-  'samsungexynos7880': _HardwareType.physical,
-  'samsungexynos8890': _HardwareType.physical,
-  'samsungexynos8895': _HardwareType.physical,
-  'samsungexynos9810': _HardwareType.physical,
-  'samsungexynos7570': _HardwareType.physical,
+///
+/// See [AndroidDevice] for more explanation of why this is needed.
+const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
+  'goldfish': HardwareType.emulator,
+  'qcom': HardwareType.physical,
+  'ranchu': HardwareType.emulator,
+  'samsungexynos7420': HardwareType.physical,
+  'samsungexynos7580': HardwareType.physical,
+  'samsungexynos7870': HardwareType.physical,
+  'samsungexynos7880': HardwareType.physical,
+  'samsungexynos8890': HardwareType.physical,
+  'samsungexynos8895': HardwareType.physical,
+  'samsungexynos9810': HardwareType.physical,
+  'samsungexynos7570': HardwareType.physical,
 };
 
-bool allowHeapCorruptionOnWindows(int exitCode, Platform platform) {
-  // In platform tools 29.0.0 adb.exe seems to be ending with this heap
-  // corruption error code on seemingly successful termination.
-  // So we ignore this error on Windows.
-  return exitCode == -1073740940 && platform.isWindows;
-}
-
+/// A physical Android device or emulator.
+///
+/// While [isEmulator] attempts to distinguish between the device categories,
+/// this is a best effort process and not a guarantee; certain physical devices
+/// identify as emulators. These device identifiers may be added to the [kKnownHardware]
+/// map to specify that they are actually physical devices.
 class AndroidDevice extends Device {
   AndroidDevice(
     String id, {
@@ -64,7 +63,6 @@ class AndroidDevice extends Device {
     @required Platform platform,
     @required AndroidSdk androidSdk,
     @required FileSystem fileSystem,
-    TimeoutConfiguration timeoutConfiguration = const TimeoutConfiguration(),
     AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
   }) : _logger = logger,
        _processManager = processManager,
@@ -72,7 +70,6 @@ class AndroidDevice extends Device {
        _platform = platform,
        _fileSystem = fileSystem,
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
-       _timeoutConfiguration = timeoutConfiguration,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(
          id,
@@ -88,7 +85,6 @@ class AndroidDevice extends Device {
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
-  final TimeoutConfiguration _timeoutConfiguration;
 
   final String productID;
   final String modelID;
@@ -113,7 +109,7 @@ class AndroidDevice extends Device {
           stdoutEncoding: latin1,
           stderrEncoding: latin1,
         );
-        if (result.exitCode == 0 || allowHeapCorruptionOnWindows(result.exitCode, _platform)) {
+        if (result.exitCode == 0 || _allowHeapCorruptionOnWindows(result.exitCode, _platform)) {
           _properties = parseAdbDeviceProperties(result.stdout as String);
         } else {
           _logger.printError('Error ${result.exitCode} retrieving device properties for $name:');
@@ -132,9 +128,9 @@ class AndroidDevice extends Device {
     if (_isLocalEmulator == null) {
       final String hardware = await _getProperty('ro.hardware');
       _logger.printTrace('ro.hardware = $hardware');
-      if (_kKnownHardware.containsKey(hardware)) {
+      if (kKnownHardware.containsKey(hardware)) {
         // Look for known hardware models.
-        _isLocalEmulator = _kKnownHardware[hardware] == _HardwareType.emulator;
+        _isLocalEmulator = kKnownHardware[hardware] == HardwareType.emulator;
       } else {
         // Fall back to a best-effort heuristic-based approach.
         final String characteristics = await _getProperty('ro.build.characteristics');
@@ -177,12 +173,12 @@ class AndroidDevice extends Device {
       try {
         await console
             .connect()
-            .timeout(_timeoutConfiguration.fastOperation,
+            .timeout(const Duration(seconds: 2),
                 onTimeout: () => throw TimeoutException('Connection timed out'));
 
         return await console
             .getAvdName()
-            .timeout(_timeoutConfiguration.fastOperation,
+            .timeout(const Duration(seconds: 2),
                 onTimeout: () => throw TimeoutException('"avd name" timed out'));
       } finally {
         console.destroy();
@@ -242,8 +238,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<String> get sdkNameAndVersion async =>
-      'Android ${await _sdkVersion} (API ${await apiVersion})';
+  Future<String> get sdkNameAndVersion async => 'Android ${await _sdkVersion} (API ${await apiVersion})';
 
   Future<String> get _sdkVersion => _getProperty('ro.build.version.release');
 
@@ -258,22 +253,6 @@ class AndroidDevice extends Device {
     return <String>[_androidSdk.adbPath, '-s', id, ...args];
   }
 
-  String runAdbCheckedSync(
-    List<String> params, {
-    String workingDirectory,
-    bool allowReentrantFlutter = false,
-    Map<String, String> environment,
-  }) {
-    return _processUtils.runSync(
-      adbCommandForDevice(params),
-      throwOnError: true,
-      workingDirectory: workingDirectory,
-      allowReentrantFlutter: allowReentrantFlutter,
-      environment: environment,
-      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
-    ).stdout.trim();
-  }
-
   Future<RunResult> runAdbCheckedAsync(
     List<String> params, {
     String workingDirectory,
@@ -284,7 +263,7 @@ class AndroidDevice extends Device {
       throwOnError: true,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
+      allowedFailures: (int value) => _allowHeapCorruptionOnWindows(value, _platform),
     );
   }
 
@@ -422,19 +401,45 @@ class AndroidDevice extends Device {
     AndroidApk app, {
     String userIdentifier,
   }) async {
+    if (!await _isAdbValid()) {
+      return false;
+    }
+    final bool wasInstalled = await isAppInstalled(app, userIdentifier: userIdentifier);
+    if (wasInstalled && await isLatestBuildInstalled(app)) {
+      _logger.printTrace('Latest build already installed.');
+      return true;
+    }
+    _logger.printTrace('Installing APK.');
+    if (await _installApp(app, userIdentifier: userIdentifier)) {
+      return true;
+    }
+    _logger.printTrace('Warning: Failed to install APK.');
+    if (!wasInstalled) {
+      return false;
+    }
+    _logger.printStatus('Uninstalling old version...');
+    if (!await uninstallApp(app, userIdentifier: userIdentifier)) {
+      _logger.printError('Error: Uninstalling old version failed.');
+      return false;
+    }
+    if (!await _installApp(app, userIdentifier: userIdentifier)) {
+      _logger.printError('Error: Failed to install APK again.');
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> _installApp(
+    AndroidApk app, {
+    String userIdentifier,
+  }) async {
     if (!app.file.existsSync()) {
       _logger.printError('"${_fileSystem.path.relative(app.file.path)}" does not exist.');
       return false;
     }
 
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
-      return false;
-    }
-
     final Status status = _logger.startProgress(
       'Installing ${_fileSystem.path.relative(app.file.path)}...',
-      timeout: _timeoutConfiguration.slowOperation,
     );
     final RunResult installResult = await _processUtils.run(
       adbCommandForDevice(<String>[
@@ -479,8 +484,7 @@ class AndroidDevice extends Device {
     AndroidApk app, {
     String userIdentifier,
   }) async {
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
+    if (!await _isAdbValid()) {
       return false;
     }
 
@@ -505,36 +509,13 @@ class AndroidDevice extends Device {
       _logger.printError('Package uninstall error: $failure');
       return false;
     }
-
     return true;
   }
 
-  Future<bool> _installLatestApp(AndroidApk package, String userIdentifier) async {
-    final bool wasInstalled = await isAppInstalled(package, userIdentifier: userIdentifier);
-    if (wasInstalled) {
-      if (await isLatestBuildInstalled(package)) {
-        _logger.printTrace('Latest build already installed.');
-        return true;
-      }
-    }
-    _logger.printTrace('Installing APK.');
-    if (!await installApp(package, userIdentifier: userIdentifier)) {
-      _logger.printTrace('Warning: Failed to install APK.');
-      if (wasInstalled) {
-        _logger.printStatus('Uninstalling old version...');
-        if (!await uninstallApp(package, userIdentifier: userIdentifier)) {
-          _logger.printError('Error: Uninstalling old version failed.');
-          return false;
-        }
-        if (!await installApp(package, userIdentifier: userIdentifier)) {
-          _logger.printError('Error: Failed to install APK again.');
-          return false;
-        }
-        return true;
-      }
-      return false;
-    }
-    return true;
+  // Whether the adb and Android versions are aligned.
+  bool _adbIsValid;
+  Future<bool> _isAdbValid() async {
+    return _adbIsValid ??= await _checkForSupportedAdbVersion() && await _checkForSupportedAndroidVersion();
   }
 
   AndroidApk _package;
@@ -550,8 +531,7 @@ class AndroidDevice extends Device {
     bool ipv6 = false,
     String userIdentifier,
   }) async {
-    if (!await _checkForSupportedAdbVersion() ||
-        !await _checkForSupportedAndroidVersion()) {
+    if (!await _isAdbValid()) {
       return LaunchResult.failed();
     }
 
@@ -595,7 +575,8 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = await AndroidApk.fromAndroidProject(project.android);
+      package = await ApplicationPackageFactory.instance
+        .getPackageForPlatform(devicePlatform, buildInfo: debuggingOptions.buildInfo) as AndroidApk;
     }
     // There was a failure parsing the android project information.
     if (package == null) {
@@ -605,24 +586,27 @@ class AndroidDevice extends Device {
     _logger.printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package, userIdentifier: userIdentifier);
 
-    if (!await _installLatestApp(package, userIdentifier)) {
+    if (!await installApp(package, userIdentifier: userIdentifier)) {
       return LaunchResult.failed();
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
-    _logger.printTrace('$this startApp');
-
     ProtocolDiscovery observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
-      // TODO(devoncarew): Remember the forwarding information (so we can later remove the
-      // port forwarding or set it up again when adb fails on us).
       observatoryDiscovery = ProtocolDiscovery.observatory(
-        await getLogReader(),
+        // Avoid using getLogReader, which returns a singleton instance, because the
+        // observatory discovery will dipose at the end. creating a new logger here allows
+        // logs to be surfaced normally during `flutter drive`.
+        await AdbLogReader.createLogReader(
+          this,
+          _processManager,
+        ),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
+        logger: _logger,
       );
     }
 
@@ -690,8 +674,6 @@ class AndroidDevice extends Device {
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Observatory is listening on...".
     _logger.printTrace('Waiting for observatory port to be available...');
-
-    // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
@@ -739,7 +721,7 @@ class AndroidDevice extends Device {
       app.id,
     ]);
     return _processUtils.stream(command).then<bool>(
-        (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode, _platform));
+        (int exitCode) => exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform));
   }
 
   @override
@@ -795,17 +777,18 @@ class AndroidDevice extends Device {
 
   /// Return the most recent timestamp in the Android log or [null] if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
-  String get lastLogcatTimestamp {
-    String output;
+  @visibleForTesting
+  Future<String> lastLogcatTimestamp() async {
+    RunResult output;
     try {
-      output = runAdbCheckedSync(<String>[
+      output = await runAdbCheckedAsync(<String>[
         'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
       ]);
     } on Exception catch (error) {
       _logger.printError('Failed to extract the most recent timestamp from the Android log: $error.');
       return null;
     }
-    final Match timeMatch = _timeRegExp.firstMatch(output);
+    final Match timeMatch = _timeRegExp.firstMatch(output.stdout);
     return timeMatch?.group(0);
   }
 
@@ -1013,11 +996,9 @@ class AdbLogReader extends DeviceLogReader {
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
     AndroidDevice device,
-    ProcessManager processManager,
-    {
-      bool includePastLogs = false,
-    }
-  ) async {
+    ProcessManager processManager, {
+    bool includePastLogs = false,
+  }) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
     final int apiVersion = (String v) {
@@ -1035,17 +1016,20 @@ class AdbLogReader extends DeviceLogReader {
       'logcat',
       '-v',
       'time',
-      // If we include logs from the past, filter for 'flutter' logs only.
-      if (includePastLogs) ...<String>[
-        '-s',
-        'flutter',
-      ] else if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
-        // Otherwise, filter for logs appearing past the present.
-        // '-T 0` means the timestamp of the logcat command invocation.
-        '-T',
-        if (device.lastLogcatTimestamp != null) '\'${device.lastLogcatTimestamp}\'' else '0',
-      ],
     ];
+
+    // If past logs are included then filter for 'flutter' logs only.
+    if (includePastLogs) {
+      args.addAll(<String>['-s', 'flutter']);
+    } else if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
+      // Otherwise, filter for logs appearing past the present.
+      // '-T 0` means the timestamp of the logcat command invocation.
+      final String lastLogcatTimestamp = await device.lastLogcatTimestamp();
+      args.addAll(<String>[
+        '-T',
+        if (lastLogcatTimestamp != null) '\'$lastLogcatTimestamp\'' else '0',
+      ]);
+    }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
     return AdbLogReader._(process, device.name);
   }
@@ -1340,4 +1324,11 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
       await unforward(port);
     }
   }
+}
+
+// In platform tools 29.0.0 adb.exe seems to be ending with this heap
+// corruption error code on seemingly successful termination. Ignore
+// this error on windows.
+bool _allowHeapCorruptionOnWindows(int exitCode, Platform platform) {
+  return exitCode == -1073740940 && platform.isWindows;
 }

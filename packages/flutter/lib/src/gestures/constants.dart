@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // Modeled after Android's ViewConfiguration:
 // https://github.com/android/platform_frameworks_base/blob/master/core/java/android/view/ViewConfiguration.java
 
@@ -95,3 +94,12 @@ const double kMaxFlingVelocity = 8000.0; // Logical pixels / second
 /// tap in a jump-tap gesture.
 // TODO(ianh): Implement jump-tap gestures.
 const Duration kJumpTapTimeout = Duration(milliseconds: 500);
+
+/// Like [kTouchSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerHitSlop = 1.0; // Logical pixels;
+
+/// Like [kPanSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerPanSlop = kPrecisePointerHitSlop * 2.0; // Logical pixels
+
+/// Like [kScaleSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerScaleSlop = kPrecisePointerHitSlop; // Logical pixels

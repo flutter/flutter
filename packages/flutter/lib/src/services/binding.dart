@@ -166,14 +166,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   // App life cycle
 
-  /// Initializes the [lifecycleState] with the [Window.initialLifecycleState]
-  /// from the window.
+  /// Initializes the [lifecycleState] with the
+  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState].
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// [Window.initialLifecycleState] may already be stale and it no longer makes
-  /// sense to use the initial state at dart vm startup as the current state
-  /// anymore.
+  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState] may already be
+  /// stale and it no longer makes sense to use the initial state at dart vm
+  /// startup as the current state anymore.
   ///
   /// The latest state should be obtained by subscribing to
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
@@ -222,7 +222,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// Creates the [RestorationManager] instance available via
   /// [restorationManager].
   ///
-  /// Can be overriden in subclasses to create a different [RestorationManager].
+  /// Can be overridden in subclasses to create a different [RestorationManager].
   @protected
   RestorationManager createRestorationManager() {
     return RestorationManager();
@@ -249,13 +249,14 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   Future<ByteData?> _sendPlatformMessage(String channel, ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
-    // ui.window is accessed directly instead of using ServicesBinding.instance.window
-    // because this method might be invoked before any binding is initialized.
-    // This issue was reported in #27541. It is not ideal to statically access
-    // ui.window because the Window may be dependency injected elsewhere with
-    // a different instance. However, static access at this location seems to be
-    // the least bad option.
-    ui.window.sendPlatformMessage(channel, message, (ByteData? reply) {
+    // ui.PlatformDispatcher.instance is accessed directly instead of using
+    // ServicesBinding.instance.platformDispatcher because this method might be
+    // invoked before any binding is initialized. This issue was reported in
+    // #27541. It is not ideal to statically access
+    // ui.PlatformDispatcher.instance because the PlatformDispatcher may be
+    // dependency injected elsewhere with a different instance. However, static
+    // access at this location seems to be the least bad option.
+    ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -300,7 +301,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  Future<ByteData?> send(String channel, ByteData? message) {
+  Future<ByteData?>? send(String channel, ByteData? message) {
     final MessageHandler? handler = _mockHandlers[channel];
     if (handler != null)
       return handler(message);
@@ -309,13 +310,14 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   @override
   void setMessageHandler(String channel, MessageHandler? handler) {
-    if (handler == null)
+    if (handler == null) {
       _handlers.remove(channel);
-    else
+    } else {
       _handlers[channel] = handler;
-    ui.channelBuffers.drain(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
-      await handlePlatformMessage(channel, data, callback);
-    });
+      ui.channelBuffers.drain(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+        await handlePlatformMessage(channel, data, callback);
+      });
+    }
   }
 
   @override

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// Convenience methods for Flutter application driving on Fuchsia. Can
 /// be run on either a host machine (making a remote connection to a Fuchsia
 /// device), or on the target Fuchsia machine.
-import 'dart:async';
-import 'dart:core';
 import 'dart:io';
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
@@ -24,6 +24,9 @@ class _DummyPortForwarder implements PortForwarder {
 
   @override
   int get remotePort => _remotePort;
+
+  @override
+  String get openPortAddress => InternetAddress.loopbackIPv4.address;
 
   @override
   Future<void> stop() async { }

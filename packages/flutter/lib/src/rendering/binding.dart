@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
 
@@ -45,6 +44,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
+    if (kIsWeb) {
+      addPostFrameCallback(_handleWebFirstFrame);
+    }
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -57,6 +59,17 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
     assert(() {
       // these service extensions only work in debug mode
+      registerBoolServiceExtension(
+        name: 'invertOversizedImages',
+        getter: () async => debugInvertOversizedImages,
+        setter: (bool value) async {
+          if (debugInvertOversizedImages != value) {
+            debugInvertOversizedImages = value;
+            return _forceRepaint();
+          }
+          return Future<void>.value();
+        },
+      );
       registerBoolServiceExtension(
         name: 'debugPaint',
         getter: () async => debugPaintSizeEnabled,
@@ -164,7 +177,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   late PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
-  RenderView get renderView => _pipelineOwner.rootNode as RenderView;
+  RenderView get renderView => _pipelineOwner.rootNode! as RenderView;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
   set renderView(RenderView value) {
@@ -174,7 +187,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// Called when the system metrics change.
   ///
-  /// See [Window.onMetricsChanged].
+  /// See [dart:ui.PlatformDispatcher.onMetricsChanged].
   @protected
   void handleMetricsChanged() {
     assert(renderView != null);
@@ -184,7 +197,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// Called when the platform text scale factor changes.
   ///
-  /// See [Window.onTextScaleFactorChanged].
+  /// See [dart:ui.PlatformDispatcher.onTextScaleFactorChanged].
   @protected
   void handleTextScaleFactorChanged() { }
 
@@ -220,7 +233,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ```
   /// {@end-tool}
   ///
-  /// See [Window.onPlatformBrightnessChanged].
+  /// See [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
   @protected
   void handlePlatformBrightnessChanged() { }
 
@@ -257,7 +270,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override // from GestureBinding
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     if (hitTestResult != null ||
-        event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       assert(event.position != null);
@@ -280,6 +292,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _semanticsHandle?.dispose();
       _semanticsHandle = null;
     }
+  }
+
+  void _handleWebFirstFrame(Duration _) {
+    assert(kIsWeb);
+    const MethodChannel methodChannel = MethodChannel('flutter/service_worker');
+    methodChannel.invokeMethod<void>('first-frame');
   }
 
   void _handleSemanticsAction(int id, SemanticsAction action, ByteData? args) {
@@ -396,9 +414,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// completed this frame.
   ///
   /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [Window.onDrawFrame], is called, which invokes all the persistent frame
-  /// callbacks, of which the most notable is this method, [drawFrame], which
-  /// proceeds as follows:
+  /// [dart:ui.PlatformDispatcher.onDrawFrame], is called, which invokes all the
+  /// persistent frame callbacks, of which the most notable is this method,
+  /// [drawFrame], which proceeds as follows:
   ///
   /// 3. The layout phase: All the dirty [RenderObject]s in the system are laid
   /// out (see [RenderObject.performLayout]). See [RenderObject.markNeedsLayout]

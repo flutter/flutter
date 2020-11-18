@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -30,7 +28,6 @@ abstract class AnalyzeBase {
     @required this.platform,
     @required this.processManager,
     @required this.terminal,
-    @required this.experiments,
     @required this.artifacts,
   });
 
@@ -50,8 +47,6 @@ abstract class AnalyzeBase {
   final Platform platform;
   @protected
   final Terminal terminal;
-  @protected
-  final List<String> experiments;
   @protected
   final Artifacts artifacts;
 

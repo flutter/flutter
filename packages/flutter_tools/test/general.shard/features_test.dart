@@ -98,7 +98,7 @@ void main() {
     test('flutter Windows desktop help string', () {
       expect(flutterWindowsDesktopFeature.generateHelpMessage(),
       'Enable or disable Flutter for desktop on Windows. '
-      'This setting will take effect on the master channel.');
+      'This setting will take effect on the master and dev channels.');
     });
 
     test('help string on multiple channels', () {
@@ -387,18 +387,18 @@ void main() {
       expect(featureFlags.isWindowsEnabled, false);
     }));
 
-    test('flutter windows desktop not enabled with config on dev', () => testbed.run(() {
+    test('flutter windows desktop enabled with config on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
       when<bool>(mockFlutterConfig.getValue('enable-windows-desktop') as bool).thenReturn(true);
 
-      expect(featureFlags.isWindowsEnabled, false);
+      expect(featureFlags.isWindowsEnabled, true);
     }));
 
     test('flutter windows desktop not enabled with environment variable on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
       when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WINDOWS': 'true'});
 
-      expect(featureFlags.isWindowsEnabled, false);
+      expect(featureFlags.isWindowsEnabled, true);
     }));
 
     test('flutter windows desktop off by default on beta', () => testbed.run(() {

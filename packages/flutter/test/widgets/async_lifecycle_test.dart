@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class InvalidOnInitLifecycleWidget extends StatefulWidget {
-  const InvalidOnInitLifecycleWidget({Key key}) : super(key: key);
+  const InvalidOnInitLifecycleWidget({Key? key}) : super(key: key);
 
   @override
   InvalidOnInitLifecycleWidgetState createState() => InvalidOnInitLifecycleWidgetState();
@@ -27,7 +25,7 @@ class InvalidOnInitLifecycleWidgetState extends State<InvalidOnInitLifecycleWidg
 }
 
 class InvalidDidUpdateWidgetLifecycleWidget extends StatefulWidget {
-  const InvalidDidUpdateWidgetLifecycleWidget({Key key, this.id}) : super(key: key);
+  const InvalidDidUpdateWidgetLifecycleWidget({Key? key, required this.id}) : super(key: key);
 
   final int id;
 

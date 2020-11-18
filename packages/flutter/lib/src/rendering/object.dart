@@ -216,7 +216,7 @@ class PaintingContext extends ClipContext {
       }());
     }
     assert(child._layer is OffsetLayer);
-    final OffsetLayer childOffsetLayer = child._layer as OffsetLayer;
+    final OffsetLayer childOffsetLayer = child._layer! as OffsetLayer;
     childOffsetLayer.offset = offset;
     appendLayer(child._layer!);
   }
@@ -365,7 +365,7 @@ class PaintingContext extends ClipContext {
   /// object, rather than reusing an existing layer, satisfies that
   /// requirement.)
   ///
-  /// {@template flutter.rendering.object.pushLayer.offset}
+  /// {@template flutter.rendering.PaintingContext.pushLayer.offset}
   /// The `offset` is the offset to pass to the `painter`. In particular, it is
   /// not an offset applied to the layer itself. Layers conceptually by default
   /// have no position or size, though they can transform their contents. For
@@ -407,7 +407,7 @@ class PaintingContext extends ClipContext {
 
   /// Clip further painting using a rectangle.
   ///
-  /// {@template flutter.rendering.object.needsCompositing}
+  /// {@template flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
   /// The `needsCompositing` argument specifies whether the child needs
   /// compositing. Typically this matches the value of
   /// [RenderObject.needsCompositing] for the caller. If false, this method
@@ -419,7 +419,7 @@ class PaintingContext extends ClipContext {
   /// way to apply the layer effect than actually creating a layer.
   /// {@endtemplate}
   ///
-  /// {@template flutter.rendering.object.pushClipLayer.offset}
+  /// {@template flutter.rendering.PaintingContext.pushClipRect.offset}
   /// The `offset` argument is the offset from the origin of the canvas'
   /// coordinate system to the origin of the caller's coordinate system.
   /// {@endtemplate}
@@ -433,7 +433,7 @@ class PaintingContext extends ClipContext {
   ///
   /// The `clipBehavior` argument controls how the rectangle is clipped.
   ///
-  /// {@template flutter.rendering.object.oldLayer}
+  /// {@template flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   /// For the `oldLayer` argument, specify the layer created in the previous
   /// frame. This gives the engine more information for performance
   /// optimizations. Typically this is the value of [RenderObject.layer] that a
@@ -459,9 +459,9 @@ class PaintingContext extends ClipContext {
 
   /// Clip further painting using a rounded rectangle.
   ///
-  /// {@macro flutter.rendering.object.needsCompositing}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
   ///
-  /// {@macro flutter.rendering.object.pushClipLayer.offset}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.offset}
   ///
   /// The `bounds` argument is used to specify the region of the canvas (in the
   /// caller's coordinate system) into which `painter` will paint.
@@ -475,7 +475,7 @@ class PaintingContext extends ClipContext {
   ///
   /// The `clipBehavior` argument controls how the rounded rectangle is clipped.
   ///
-  /// {@macro flutter.rendering.object.oldLayer}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ClipRRectLayer? pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer? oldLayer }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
@@ -495,9 +495,9 @@ class PaintingContext extends ClipContext {
 
   /// Clip further painting using a path.
   ///
-  /// {@macro flutter.rendering.object.needsCompositing}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
   ///
-  /// {@macro flutter.rendering.object.pushClipLayer.offset}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.offset}
   ///
   /// The `bounds` argument is used to specify the region of the canvas (in the
   /// caller's coordinate system) into which `painter` will paint.
@@ -511,7 +511,7 @@ class PaintingContext extends ClipContext {
   ///
   /// The `clipBehavior` argument controls how the path is clipped.
   ///
-  /// {@macro flutter.rendering.object.oldLayer}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ClipPathLayer? pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer? oldLayer }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
@@ -531,7 +531,7 @@ class PaintingContext extends ClipContext {
 
   /// Blend further painting with a color filter.
   ///
-  /// {@macro flutter.rendering.object.pushLayer.offset}
+  /// {@macro flutter.rendering.PaintingContext.pushLayer.offset}
   ///
   /// The `colorFilter` argument is the [ColorFilter] value to use when blending
   /// the painting done by `painter`.
@@ -539,7 +539,7 @@ class PaintingContext extends ClipContext {
   /// The `painter` callback will be called while the `colorFilter` is applied.
   /// It is called synchronously during the call to [pushColorFilter].
   ///
-  /// {@macro flutter.rendering.object.oldLayer}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ///
   /// A [RenderObject] that uses this function is very likely to require its
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
@@ -555,7 +555,7 @@ class PaintingContext extends ClipContext {
 
   /// Transform further painting using a matrix.
   ///
-  /// {@macro flutter.rendering.object.needsCompositing}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
   ///
   /// The `offset` argument is the offset to pass to `painter` and the offset to
   /// the origin used by `transform`.
@@ -567,7 +567,7 @@ class PaintingContext extends ClipContext {
   /// The `painter` callback will be called while the `transform` is applied. It
   /// is called synchronously during the call to [pushTransform].
   ///
-  /// {@macro flutter.rendering.object.oldLayer}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   TransformLayer? pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter, { TransformLayer? oldLayer }) {
     final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
       ..multiply(transform)..translate(-offset.dx, -offset.dy);
@@ -603,7 +603,7 @@ class PaintingContext extends ClipContext {
   /// The `painter` callback will be called while the `alpha` is applied. It
   /// is called synchronously during the call to [pushOpacity].
   ///
-  /// {@macro flutter.rendering.object.oldLayer}
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
   ///
   /// A [RenderObject] that uses this function is very likely to require its
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
@@ -1307,7 +1307,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Used in debug messages.
   Object? debugCreator;
 
-  void _debugReportException(String method, dynamic exception, StackTrace stack) {
+  void _debugReportException(String method, Object exception, StackTrace stack) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: exception,
       stack: stack,
@@ -1383,7 +1383,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           result = true;
           break;
         }
-        node = node.parent as RenderObject;
+        node = node.parent! as RenderObject;
       }
       return true;
     }());
@@ -1480,7 +1480,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     while (node != _relayoutBoundary) {
       assert(node._relayoutBoundary == _relayoutBoundary);
       assert(node.parent != null);
-      node = node.parent as RenderObject;
+      node = node.parent! as RenderObject;
       if ((!node._needsLayout) && (!node._debugDoingThisLayout))
         return false;
     }
@@ -1706,7 +1706,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject) {
       relayoutBoundary = this;
     } else {
-      relayoutBoundary = (parent as RenderObject)._relayoutBoundary;
+      relayoutBoundary = (parent! as RenderObject)._relayoutBoundary;
     }
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
@@ -2029,7 +2029,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     _needsCompositingBitsUpdate = true;
     if (parent is RenderObject) {
-      final RenderObject parent = this.parent as RenderObject;
+      final RenderObject parent = this.parent! as RenderObject;
       if (parent._needsCompositingBitsUpdate)
         return;
       if (!isRepaintBoundary && !parent.isRepaintBoundary) {
@@ -2141,7 +2141,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         owner!.requestVisualUpdate();
       }
     } else if (parent is RenderObject) {
-      final RenderObject parent = this.parent as RenderObject;
+      final RenderObject parent = this.parent! as RenderObject;
       parent.markNeedsPaint();
       assert(parent == this.parent);
     } else {
@@ -2247,7 +2247,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(() {
       if (_needsCompositingBitsUpdate) {
         if (parent is RenderObject) {
-          final RenderObject parent = this.parent as RenderObject;
+          final RenderObject parent = this.parent! as RenderObject;
           bool visitedByParent = false;
           parent.visitChildren((RenderObject child) {
             if (child == this) {
@@ -2381,7 +2381,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         ancestor = rootNode;
     }
     final List<RenderObject> renderers = <RenderObject>[];
-    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent as RenderObject) {
+    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
       assert(renderer != null); // Failed to find ancestor in parent chain.
       renderers.add(renderer);
     }
@@ -2505,7 +2505,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_semantics != null && !_semantics!.isMergedIntoParent) {
       _semantics!.sendEvent(semanticsEvent);
     } else if (parent != null) {
-      final RenderObject renderParent = parent as RenderObject;
+      final RenderObject renderParent = parent! as RenderObject;
       renderParent.sendSemanticsEvent(semanticsEvent);
     }
   }
@@ -2585,7 +2585,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         break;
       node._needsSemanticsUpdate = true;
 
-      node = node.parent as RenderObject;
+      node = node.parent! as RenderObject;
       isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
       if (isEffectiveSemanticsBoundary && node._semantics == null) {
         // We have reached a semantics boundary that doesn't own a semantics node.
@@ -2932,7 +2932,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     Curve curve = Curves.ease,
   }) {
     if (parent is RenderObject) {
-      final RenderObject renderParent = parent as RenderObject;
+      final RenderObject renderParent = parent! as RenderObject;
       renderParent.showOnScreen(
         descendant: descendant ?? this,
         rect: rect,
@@ -3089,20 +3089,20 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 /// Moreover, this is a required mixin for render objects returned to [MultiChildRenderObjectWidget].
 mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType? equals }) {
-    ParentDataType childParentData = child.parentData as ParentDataType;
+    ParentDataType childParentData = child.parentData! as ParentDataType;
     while (childParentData.previousSibling != null) {
       assert(childParentData.previousSibling != child);
       child = childParentData.previousSibling!;
-      childParentData = child.parentData as ParentDataType;
+      childParentData = child.parentData! as ParentDataType;
     }
     return child == equals;
   }
   bool _debugUltimateNextSiblingOf(ChildType child, { ChildType? equals }) {
-    ParentDataType childParentData = child.parentData as ParentDataType;
+    ParentDataType childParentData = child.parentData! as ParentDataType;
     while (childParentData.nextSibling != null) {
       assert(childParentData.nextSibling != child);
       child = childParentData.nextSibling!;
-      childParentData = child.parentData as ParentDataType;
+      childParentData = child.parentData! as ParentDataType;
     }
     return child == equals;
   }
@@ -3154,7 +3154,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   ChildType? _firstChild;
   ChildType? _lastChild;
   void _insertIntoChildList(ChildType child, { ChildType? after }) {
-    final ParentDataType childParentData = child.parentData as ParentDataType;
+    final ParentDataType childParentData = child.parentData! as ParentDataType;
     assert(childParentData.nextSibling == null);
     assert(childParentData.previousSibling == null);
     _childCount += 1;
@@ -3163,7 +3163,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       // insert at the start (_firstChild)
       childParentData.nextSibling = _firstChild;
       if (_firstChild != null) {
-        final ParentDataType _firstChildParentData = _firstChild!.parentData as ParentDataType;
+        final ParentDataType _firstChildParentData = _firstChild!.parentData! as ParentDataType;
         _firstChildParentData.previousSibling = child;
       }
       _firstChild = child;
@@ -3173,7 +3173,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       assert(_lastChild != null);
       assert(_debugUltimatePreviousSiblingOf(after, equals: _firstChild));
       assert(_debugUltimateNextSiblingOf(after, equals: _lastChild));
-      final ParentDataType afterParentData = after.parentData as ParentDataType;
+      final ParentDataType afterParentData = after.parentData! as ParentDataType;
       if (afterParentData.nextSibling == null) {
         // insert at the end (_lastChild); we'll end up with two or more children
         assert(after == _lastChild);
@@ -3186,8 +3186,8 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
         childParentData.nextSibling = afterParentData.nextSibling;
         childParentData.previousSibling = after;
         // set up links from siblings to child
-        final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling!.parentData as ParentDataType;
-        final ParentDataType childNextSiblingParentData = childParentData.nextSibling!.parentData as ParentDataType;
+        final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling!.parentData! as ParentDataType;
+        final ParentDataType childNextSiblingParentData = childParentData.nextSibling!.parentData! as ParentDataType;
         childPreviousSiblingParentData.nextSibling = child;
         childNextSiblingParentData.previousSibling = child;
         assert(afterParentData.nextSibling == child);
@@ -3219,7 +3219,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   }
 
   void _removeFromChildList(ChildType child) {
-    final ParentDataType childParentData = child.parentData as ParentDataType;
+    final ParentDataType childParentData = child.parentData! as ParentDataType;
     assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
     assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
     assert(_childCount >= 0);
@@ -3227,14 +3227,14 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       assert(_firstChild == child);
       _firstChild = childParentData.nextSibling;
     } else {
-      final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling!.parentData as ParentDataType;
+      final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling!.parentData! as ParentDataType;
       childPreviousSiblingParentData.nextSibling = childParentData.nextSibling;
     }
     if (childParentData.nextSibling == null) {
       assert(_lastChild == child);
       _lastChild = childParentData.previousSibling;
     } else {
-      final ParentDataType childNextSiblingParentData = childParentData.nextSibling!.parentData as ParentDataType;
+      final ParentDataType childNextSiblingParentData = childParentData.nextSibling!.parentData! as ParentDataType;
       childNextSiblingParentData.previousSibling = childParentData.previousSibling;
     }
     childParentData.previousSibling = null;
@@ -3256,7 +3256,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   void removeAll() {
     ChildType? child = _firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       final ChildType? next = childParentData.nextSibling;
       childParentData.previousSibling = null;
       childParentData.nextSibling = null;
@@ -3278,7 +3278,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     assert(after != this);
     assert(child != after);
     assert(child.parent == this);
-    final ParentDataType childParentData = child.parentData as ParentDataType;
+    final ParentDataType childParentData = child.parentData! as ParentDataType;
     if (childParentData.previousSibling == after)
       return;
     _removeFromChildList(child);
@@ -3292,7 +3292,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     ChildType? child = _firstChild;
     while (child != null) {
       child.attach(owner);
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       child = childParentData.nextSibling;
     }
   }
@@ -3303,7 +3303,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     ChildType? child = _firstChild;
     while (child != null) {
       child.detach();
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       child = childParentData.nextSibling;
     }
   }
@@ -3313,7 +3313,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     ChildType? child = _firstChild;
     while (child != null) {
       redepthChild(child);
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       child = childParentData.nextSibling;
     }
   }
@@ -3323,7 +3323,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     ChildType? child = _firstChild;
     while (child != null) {
       visitor(child);
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       child = childParentData.nextSibling;
     }
   }
@@ -3338,7 +3338,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   ChildType? childBefore(ChildType child) {
     assert(child != null);
     assert(child.parent == this);
-    final ParentDataType childParentData = child.parentData as ParentDataType;
+    final ParentDataType childParentData = child.parentData! as ParentDataType;
     return childParentData.previousSibling;
   }
 
@@ -3346,7 +3346,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   ChildType? childAfter(ChildType child) {
     assert(child != null);
     assert(child.parent == this);
-    final ParentDataType childParentData = child.parentData as ParentDataType;
+    final ParentDataType childParentData = child.parentData! as ParentDataType;
     return childParentData.nextSibling;
   }
 
@@ -3361,7 +3361,7 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
         if (child == lastChild)
           break;
         count += 1;
-        final ParentDataType childParentData = child.parentData as ParentDataType;
+        final ParentDataType childParentData = child.parentData! as ParentDataType;
         child = childParentData.nextSibling!;
       }
     }
@@ -3489,9 +3489,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   ///  * [SemanticsNode.parentSemanticsClipRect] for the source and definition
   ///    of the `parentSemanticsClipRect` argument.
   ///  * [SemanticsNode.parentPaintClipRect] for the source and definition
-  //     of the `parentPaintClipRect` argument.
+  ///    of the `parentPaintClipRect` argument.
   ///  * [SemanticsNode.elevationAdjustment] for the source and definition
-  //    of the `elevationAdjustment` argument.
+  ///    of the `elevationAdjustment` argument.
   void compileChildren({
     required Rect? parentSemanticsClipRect,
     required Rect? parentPaintClipRect,
@@ -3897,12 +3897,12 @@ class _SemanticsGeometry {
     assert(transform != null);
     assert(clipRectTransform != null);
     assert(clipRectTransform.isIdentity());
-    RenderObject intermediateParent = child.parent as RenderObject;
+    RenderObject intermediateParent = child.parent! as RenderObject;
     assert(intermediateParent != null);
     while (intermediateParent != ancestor) {
       intermediateParent.applyPaintTransform(child, transform);
-      intermediateParent = intermediateParent.parent as RenderObject;
-      child = child.parent as RenderObject;
+      intermediateParent = intermediateParent.parent! as RenderObject;
+      child = child.parent! as RenderObject;
       assert(intermediateParent != null);
     }
     ancestor.applyPaintTransform(child, transform);

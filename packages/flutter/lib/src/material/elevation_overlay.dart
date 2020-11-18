@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -49,7 +47,7 @@ class ElevationOverlay {
     if (elevation > 0.0 &&
         theme.applyElevationOverlayColor &&
         theme.brightness == Brightness.dark &&
-        color == theme.colorScheme.surface) {
+        color.withOpacity(1.0) == theme.colorScheme.surface.withOpacity(1.0)) {
       return Color.alphaBlend(overlayColor(context, elevation), color);
     }
     return color;

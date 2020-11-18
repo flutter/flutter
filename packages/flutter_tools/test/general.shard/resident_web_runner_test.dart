@@ -15,8 +15,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
-import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
+import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -282,10 +282,10 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     _setupMocks();
-    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
-    final BufferLogger bufferLogger = delegateLogger.delegate as BufferLogger;
+    final FakeStatusLogger fakeStatusLogger = globals.logger as FakeStatusLogger;
+    final BufferLogger bufferLogger = asLogger<BufferLogger>(fakeStatusLogger);
     final MockStatus status = MockStatus();
-    delegateLogger.status = status;
+    fakeStatusLogger.status = status;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -294,16 +294,10 @@ void main() {
 
     verify(mockAppConnection.runMain()).called(1);
     verify(status.stop()).called(1);
-    verify(pub.get(
-      context: PubContext.pubGet,
-      directory: anyNamed('directory'),
-      generateSyntheticPackage: false,
-    )).called(1);
-
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(BufferLogger.test()),
+    Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Pub: () => MockPub(),
@@ -752,26 +746,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
 
     expect(residentWebRunner.debuggingEnabled, true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Pub: () => MockPub(),
-    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
-  });
-
-  testUsingContext('web resident runner can toggle CanvasKit', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
-    when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
-
-    expect(residentWebRunner.supportsCanvasKit, true);
-    expect(webAssetServer.canvasKitRendering, false);
-
-    final bool toggleResult = await residentWebRunner.toggleCanvaskit();
-
-    expect(webAssetServer.canvasKitRendering, true);
-    expect(toggleResult, true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1507,9 +1481,9 @@ void main() {
     when(chrome.chromeConnection).thenReturn(mockChromeConnection);
     chromiumLauncher.testLaunchChromium(chrome);
 
-    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
+    final FakeStatusLogger fakeStatusLogger = globals.logger as FakeStatusLogger;
     final MockStatus mockStatus = MockStatus();
-    delegateLogger.status = mockStatus;
+    fakeStatusLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
@@ -1526,7 +1500,7 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was already launched.
-    expect((delegateLogger.delegate as BufferLogger).eventText,
+    expect(asLogger<BufferLogger>(fakeStatusLogger).eventText,
       contains(json.encode(<String, Object>{
         'name': 'app.webLaunchUrl',
         'args': <String, Object>{
@@ -1537,7 +1511,7 @@ void main() {
     )));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(BufferLogger.test()),
+    Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Pub: () => MockPub(),
@@ -1554,9 +1528,9 @@ void main() {
       return Uri.parse('http://localhost:8765/app/');
     });
 
-    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
+    final FakeStatusLogger fakeStatusLogger = globals.logger as FakeStatusLogger;
     final MockStatus mockStatus = MockStatus();
-    delegateLogger.status = mockStatus;
+    fakeStatusLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
@@ -1573,7 +1547,7 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was not already launched.
-    expect((delegateLogger.delegate as BufferLogger).eventText,
+    expect(asLogger<BufferLogger>(fakeStatusLogger).eventText,
       contains(json.encode(<String, Object>{
         'name': 'app.webLaunchUrl',
         'args': <String, Object>{
@@ -1584,7 +1558,7 @@ void main() {
     )));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(BufferLogger.test()),
+    Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Pub: () => MockPub(),
@@ -1661,9 +1635,9 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     _setupMocks();
-    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
+    final FakeStatusLogger fakeStatusLogger = globals.logger as FakeStatusLogger;
     final MockStatus mockStatus = MockStatus();
-    delegateLogger.status = mockStatus;
+    fakeStatusLogger.status = mockStatus;
 
     when(mockWebDevFS.connect(any)).thenThrow(StateError(''));
 
@@ -1671,7 +1645,7 @@ void main() {
     verify(mockStatus.stop()).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(BufferLogger(
+    Logger: () => FakeStatusLogger(BufferLogger(
       terminal: AnsiTerminal(
         stdio: null,
         platform: const LocalPlatform(),

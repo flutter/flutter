@@ -56,18 +56,16 @@ void generateLocalizations({
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         classNameString: options.outputClass ?? 'AppLocalizations',
-        preferredSupportedLocaleString: options.preferredSupportedLocales,
+        preferredSupportedLocale: options.preferredSupportedLocales,
         headerString: options.header,
         headerFile: options?.headerFile?.toFilePath(),
         useDeferredLoading: options.deferredLoading ?? false,
         useSyntheticPackage: options.useSyntheticPackage ?? true,
+        areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
+        untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
       )
       ..loadResources()
-      ..writeOutputFiles()
-      ..outputUnimplementedMessages(
-        options?.untranslatedMessagesFile?.toFilePath(),
-        logger,
-      );
+      ..writeOutputFiles(logger);
   } on L10nException catch (e) {
     logger.printError(e.message);
     throw Exception();
@@ -119,7 +117,6 @@ class GenerateLocalizationsTarget extends Target {
       logger: environment.logger,
       fileSystem: environment.fileSystem,
     );
-
     generateLocalizations(
       logger: environment.logger,
       options: options,
@@ -162,6 +159,7 @@ class LocalizationOptions {
     this.headerFile,
     this.deferredLoading,
     this.useSyntheticPackage = true,
+    this.areResourceAttributesRequired = false,
   }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
@@ -193,11 +191,11 @@ class LocalizationOptions {
   final String outputClass;
 
   /// The `--preferred-supported-locales` argument.
-  final String preferredSupportedLocales;
+  final List<String> preferredSupportedLocales;
 
   /// The `--header-file` argument.
   ///
-  /// A file containing the header to preprend to the generated
+  /// A file containing the header to prepend to the generated
   /// Dart localizations.
   final Uri headerFile;
 
@@ -212,6 +210,12 @@ class LocalizationOptions {
   /// Whether to generate the Dart localization files in a synthetic package
   /// or in a custom directory.
   final bool useSyntheticPackage;
+
+  /// The `required-resource-attributes` argument.
+  ///
+  /// Whether to require all resource ids to contain a corresponding
+  /// resource attribute.
+  final bool areResourceAttributesRequired;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -240,10 +244,11 @@ LocalizationOptions parseLocalizationsOptions({
     untranslatedMessagesFile: _tryReadUri(yamlMap, 'untranslated-messages-file', logger),
     header: _tryReadString(yamlMap, 'header', logger),
     outputClass: _tryReadString(yamlMap, 'output-class', logger),
-    preferredSupportedLocales: _tryReadString(yamlMap, 'preferred-supported-locales', logger),
+    preferredSupportedLocales: _tryReadStringList(yamlMap, 'preferred-supported-locales', logger),
     headerFile: _tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
     useSyntheticPackage: _tryReadBool(yamlMap, 'synthetic-package', logger) ?? true,
+    areResourceAttributesRequired: _tryReadBool(yamlMap, 'required-resource-attributes', logger) ?? false,
   );
 }
 
@@ -271,6 +276,21 @@ String _tryReadString(YamlMap yamlMap, String key, Logger logger) {
     throw Exception();
   }
   return value as String;
+}
+
+List<String> _tryReadStringList(YamlMap yamlMap, String key, Logger logger) {
+  final Object value = yamlMap[key];
+  if (value == null) {
+    return null;
+  }
+  if (value is String) {
+    return <String>[value];
+  }
+  if (value is Iterable) {
+    return value.map((dynamic e) => e.toString()).toList();
+  }
+  logger.printError('"$value" must be String or List.');
+  throw Exception();
 }
 
 // Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.

@@ -4,10 +4,8 @@
 
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/file_store.dart';
@@ -41,27 +39,28 @@ void main() {
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
       logger: BufferLogger.test(),
+      strategy: FileStoreStrategy.timestamp,
     );
     fileCache.initialize();
     final File file = fileSystem.file('test')..createSync();
 
     // Initial run does not contain any timestamps for file.
-    expect(await fileCache.diffFileList(<File>[file]), hasLength(1));
+    expect(fileCache.diffFileList(<File>[file]), hasLength(1));
 
     // Swap current timestamps to previous timestamps.
     fileCache.persistIncremental();
 
     // timestamp matches previous timestamp.
-    expect(await fileCache.diffFileList(<File>[file]), isEmpty);
+    expect(fileCache.diffFileList(<File>[file]), isEmpty);
 
     // clear current timestamp list.
     fileCache.persistIncremental();
 
     // modify the time stamp.
-    file.writeAsStringSync('foo');
+    file.setLastModifiedSync(DateTime(1991));
 
     // verify the file is marked as dirty again.
-    expect(await fileCache.diffFileList(<File>[file]), hasLength(1));
+    expect(fileCache.diffFileList(<File>[file]), hasLength(1));
   });
 
   testWithoutContext('FileStore saves and restores to file cache', () async {
@@ -76,7 +75,7 @@ void main() {
       ..writeAsStringSync('hello');
 
     fileCache.initialize();
-    await fileCache.diffFileList(<File>[file]);
+    fileCache.diffFileList(<File>[file]);
     fileCache.persist();
     final String currentHash =  fileCache.currentAssetKeys[file.path];
     final Uint8List buffer = cacheFile
@@ -120,7 +119,7 @@ void main() {
 
     cacheFile.parent.deleteSync(recursive: true);
 
-    await fileCache.diffFileList(<File>[file]);
+    fileCache.diffFileList(<File>[file]);
 
     expect(fileCache.persist, returnsNormally);
   });
@@ -134,7 +133,7 @@ void main() {
     );
     fileCache.initialize();
 
-    final List<File> results = await fileCache.diffFileList(<File>[fileSystem.file('hello.dart')]);
+    final List<File> results = fileCache.diffFileList(<File>[fileSystem.file('hello.dart')]);
 
     expect(results, hasLength(1));
     expect(results.single.path, 'hello.dart');
@@ -184,7 +183,6 @@ void main() {
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
       logger: BufferLogger.test(),
-      fileChunkThreshold: 1, // Chunk files larger than 1 byte.
     );
     final File file = fileSystem.file('foo.dart')
       ..createSync()
@@ -193,13 +191,10 @@ void main() {
 
     cacheFile.parent.deleteSync(recursive: true);
 
-    await fileCache.diffFileList(<File>[file]);
+    fileCache.diffFileList(<File>[file]);
 
-    // Validate that chunked hash is the same as non-chunked.
-    expect(fileCache.currentAssetKeys['foo.dart'],
-      md5.convert(file.readAsBytesSync()).toString());
+    expect(fileCache.currentAssetKeys['foo.dart'], '5d41402abc4b2a76b9719d911017c592');
   });
 }
 
 class MockFile extends Mock implements File {}
-class MockArtifacts extends Mock implements Artifacts {}

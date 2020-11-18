@@ -15,14 +15,14 @@ which we follow.
 First, ensure that the Dart SDK and other necessary artifacts are available by
 invoking the Flutter Tools wrapper script. In this directory run:
 ```shell
-$ ../../bin/flutter --version
+$ flutter --version
 ```
 
 ### Running the Tool
 
 To run Flutter Tools from source, in this directory run:
 ```shell
-$ ../../bin/cache/dart-sdk/bin/dart bin/flutter_tools.dart
+$ dart bin/flutter_tools.dart
 ```
 followed by command-line arguments, as usual.
 
@@ -31,7 +31,7 @@ followed by command-line arguments, as usual.
 
 To run the analyzer on Flutter Tools, in this directory run:
 ```shell
-$ ../../bin/flutter analyze
+$ flutter analyze
 ```
 
 ### Writing tests
@@ -50,30 +50,39 @@ In general, the tests for the code in a file called `file.dart` should go in a
 file called `file_test.dart` in the subdirectory that matches the behavior of
 the test.
 
-We measure [test coverage](https://codecov.io/gh/flutter/flutter) post-submit.
-A change that deletes code might decrease test coverage, however, most changes
-that add new code should aim to increase coverage. In particular, the coverage
-of the diff should be close to the average coverage, and should ideally be
-better.
+#### Using local engine builds in integration tests
+
+The integration tests can be configured to use a specific local engine
+variant by setting the `FLUTTER_LOCAL_ENGINE` environment variable to the
+name of the local engine (e.g. "android_debug_unopt"). If the local engine build
+requires a source path, this can be provided by setting the `FLUTTER_LOCAL_ENGINE_SRC_PATH`
+environment variable. This second variable is not necessary if the `flutter` and
+`engine` checkouts are in adjacent directories.
+
+```shell
+export FLUTTER_LOCAL_ENGINE=android_debug_unopt
+flutter test test/integration.shard/some_test_case
+```
 
 ### Running the tests
 
-To run the tests in the `test/` directory, first ensure that there are no
-connected devices. Then, in this directory run:
+To run the tests in the `test/` directory:
+
 ```shell
-$ ../../bin/cache/dart-sdk/bin/pub run test
+$ flutter test
 ```
 
 The tests in `test/integration.shard` are slower to run than the tests in
-`test/general.shard`. To run only the tests in `test/general.shard`, in this
+`test/general.shard`. They also require the `FLUTTER_ROOT` environment variable
+to be set and pointing to the root of the Flutter SDK. To run only the tests in `test/general.shard`, in this
 directory run:
 ```shell
-$ ../../bin/cache/dart-sdk/bin/pub run test test/general.shard
+$ flutter test test/general.shard
 ```
 
 To run the tests in a specific file, run:
 ```shell
-$ ../../bin/cache/dart-sdk/bin/pub run test test/general.shard/utils_test.dart
+$ flutter test test/general.shard/utils_test.dart
 ```
 
 ### Forcing snapshot regeneration

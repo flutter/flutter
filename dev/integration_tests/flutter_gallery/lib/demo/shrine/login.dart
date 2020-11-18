@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
             // The login screen is immediately displayed on top of the Shrine
             // home screen using onGenerateRoute and so rootNavigator must be
             // set to true in order to get out of Shrine completely.
-            Navigator.of(context, rootNavigator: true).pop();
+            Navigator.of(context, rootNavigator: true)!.pop();
           },
         ),
       ),
@@ -84,28 +84,32 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 ButtonBar(
                   children: <Widget>[
-                    FlatButton(
-                      child: const Text('CANCEL'),
-                      shape: const BeveledRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        shape: const BeveledRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                        ),
                       ),
                       onPressed: () {
                         // The login screen is immediately displayed on top of
                         // the Shrine home screen using onGenerateRoute and so
                         // rootNavigator must be set to true in order to get out
                         // of Shrine completely.
-                        Navigator.of(context, rootNavigator: true).pop();
+                        Navigator.of(context, rootNavigator: true)!.pop();
                       },
+                      child: const Text('CANCEL'),
                     ),
-                    RaisedButton(
-                      child: const Text('NEXT'),
-                      elevation: 8.0,
-                      shape: const BeveledRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 8.0,
+                        shape: const BeveledRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                        ),
                       ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
+                      child: const Text('NEXT'),
                     ),
                   ],
                 ),
@@ -119,15 +123,15 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class PrimaryColorOverride extends StatelessWidget {
-  const PrimaryColorOverride({Key key, this.color, this.child}) : super(key: key);
+  const PrimaryColorOverride({Key? key, this.color, this.child}) : super(key: key);
 
-  final Color color;
-  final Widget child;
+  final Color? color;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return Theme(
-      child: child,
+      child: child!,
       data: Theme.of(context).copyWith(primaryColor: color),
     );
   }

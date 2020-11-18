@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -32,7 +30,6 @@ class AnalyzeCommand extends FlutterCommand {
        _logger = logger,
        _terminal = terminal,
        _platform = platform {
-    addEnableExperimentation(hide: !verboseHelp);
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
@@ -75,6 +72,14 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'When analyzing the flutter repository, display the number of '
               'files that will be analyzed.\n'
               'Ignored if --watch is specified.');
+    argParser.addFlag('fatal-infos',
+        negatable: true,
+        help: 'Treat info level issues as fatal.',
+        defaultsTo: true);
+    argParser.addFlag('fatal-warnings',
+        negatable: true,
+        help: 'Treat warning level issues as fatal.',
+        defaultsTo: true);
   }
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -120,7 +125,6 @@ class AnalyzeCommand extends FlutterCommand {
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
-        experiments: stringsArg('enable-experiment'),
         artifacts: _artifacts,
       ).analyze();
     } else {
@@ -134,7 +138,6 @@ class AnalyzeCommand extends FlutterCommand {
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
-        experiments: stringsArg('enable-experiment'),
         artifacts: _artifacts,
       ).analyze();
     }

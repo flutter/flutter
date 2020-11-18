@@ -442,14 +442,14 @@ class LinearGradient extends Gradient {
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
     if (a == null || (a is LinearGradient))
-      return LinearGradient.lerp(a as LinearGradient, this, t);
+      return LinearGradient.lerp(a as LinearGradient?, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
     if (b == null || (b is LinearGradient))
-      return LinearGradient.lerp(this, b as LinearGradient, t);
+      return LinearGradient.lerp(this, b as LinearGradient?, t);
     return super.lerpTo(b, t);
   }
 
@@ -700,14 +700,14 @@ class RadialGradient extends Gradient {
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
     if (a == null || (a is RadialGradient))
-      return RadialGradient.lerp(a as RadialGradient, this, t);
+      return RadialGradient.lerp(a as RadialGradient?, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
     if (b == null || (b is RadialGradient))
-      return RadialGradient.lerp(this, b as RadialGradient, t);
+      return RadialGradient.lerp(this, b as RadialGradient?, t);
     return super.lerpTo(b, t);
   }
 
@@ -948,14 +948,14 @@ class SweepGradient extends Gradient {
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
     if (a == null || (a is SweepGradient))
-      return SweepGradient.lerp(a as SweepGradient, this, t);
+      return SweepGradient.lerp(a as SweepGradient?, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
     if (b == null || (b is SweepGradient))
-      return SweepGradient.lerp(this, b as SweepGradient, t);
+      return SweepGradient.lerp(this, b as SweepGradient?, t);
     return super.lerpTo(b, t);
   }
 

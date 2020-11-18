@@ -173,7 +173,7 @@ Win32Window::MessageHandler(HWND hwnd,
 
       return 0;
     }
-    case WM_SIZE:
+    case WM_SIZE: {
       RECT rect = GetClientArea();
       if (child_content_ != nullptr) {
         // Size and position the child window.
@@ -181,16 +181,12 @@ Win32Window::MessageHandler(HWND hwnd,
                    rect.bottom - rect.top, TRUE);
       }
       return 0;
+    }
 
     case WM_ACTIVATE:
       if (child_content_ != nullptr) {
         SetFocus(child_content_);
       }
-      return 0;
-
-    // Messages that are directly forwarded to embedding.
-    case WM_FONTCHANGE:
-      SendMessage(child_content_, WM_FONTCHANGE, NULL, NULL);
       return 0;
   }
 

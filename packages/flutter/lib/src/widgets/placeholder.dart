@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -11,8 +9,8 @@ import 'framework.dart';
 
 class _PlaceholderPainter extends CustomPainter {
   const _PlaceholderPainter({
-    this.color,
-    this.strokeWidth,
+    required this.color,
+    required this.strokeWidth,
   });
 
   final Color color;
@@ -56,7 +54,7 @@ class _PlaceholderPainter extends CustomPainter {
 class Placeholder extends StatelessWidget {
   /// Creates a widget which draws a box.
   const Placeholder({
-    Key key,
+    Key? key,
     this.color = const Color(0xFF455A64), // Blue Grey 700
     this.strokeWidth = 2.0,
     this.fallbackWidth = 400.0,

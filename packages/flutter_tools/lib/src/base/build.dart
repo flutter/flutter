@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -110,16 +109,15 @@ class AOTSnapshotter {
     @required TargetPlatform platform,
     @required BuildMode buildMode,
     @required String mainPath,
-    @required String packagesPath,
     @required String outputPath,
     DarwinArch darwinArch,
+    String sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
     @required String splitDebugInfo,
     @required bool dartObfuscation,
     bool quiet = false,
   }) async {
-    // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
     assert(platform != TargetPlatform.ios || darwinArch != null);
     if (bitcode && platform != TargetPlatform.ios) {
       _logger.printError('Bitcode is only supported for iOS.');
@@ -211,6 +209,7 @@ class AOTSnapshotter {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
         isIOS: platform == TargetPlatform.ios,
+        sdkRoot: sdkRoot,
         assemblyPath: assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
@@ -228,6 +227,7 @@ class AOTSnapshotter {
   Future<RunResult> _buildFramework({
     @required DarwinArch appleArch,
     @required bool isIOS,
+    @required String sdkRoot,
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
@@ -241,18 +241,19 @@ class AOTSnapshotter {
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
       if (isIOS)
-        '-miphoneos-version-min=9.0',
+        // When the minimum version is updated, remember to update
+        // template MinimumOSVersion.
+        // https://github.com/flutter/flutter/pull/62902
+        '-miphoneos-version-min=8.0',
     ];
 
     const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
     List<String> isysrootArgs;
-    if (isIOS) {
-      final String iPhoneSDKLocation = await _xcode.sdkLocation(SdkType.iPhone);
-      if (iPhoneSDKLocation != null) {
-        isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
-      }
+    if (sdkRoot != null) {
+      isysrootArgs = <String>['-isysroot', sdkRoot];
     }
+
     final RunResult compileResult = await _xcode.cc(<String>[
       '-arch', targetArch,
       if (isysrootArgs != null) ...isysrootArgs,

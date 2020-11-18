@@ -46,12 +46,38 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
   @override
   String toString() {
     final List<String> values = <String>[
-      if (offset != null) 'offset=$offset',
+      'offset=$offset',
       if (scale != null) 'scale=$scale',
       super.toString(),
     ];
     return values.join('; ');
   }
+}
+
+/// Used by the [RenderParagraph] to map its rendering children to their
+/// corresponding semantics nodes.
+///
+/// The [RichText] uses this to tag the relation between its placeholder spans
+/// and their semantics nodes.
+@immutable
+class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
+  /// Creates a semantics tag with the input `index`.
+  ///
+  /// Different [PlaceholderSpanIndexSemanticsTag]s with the same `index` are
+  /// consider the same.
+  const PlaceholderSpanIndexSemanticsTag(this.index) : super('PlaceholderSpanIndexSemanticsTag($index)');
+
+  /// The index of this tag.
+  final int index;
+
+  @override
+  bool operator ==(Object other) {
+    return other is PlaceholderSpanIndexSemanticsTag
+        && other.index == index;
+  }
+
+  @override
+  int get hashCode => hashValues(PlaceholderSpanIndexSemanticsTag, index);
 }
 
 /// A render object that displays a paragraph of text.
@@ -369,42 +395,36 @@ class RenderParagraph extends RenderBox
     RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
-    // Takes textScaleFactor into account because the content of the placeholder
-    // span will be scale up when it paints.
-    height = height / textScaleFactor;
     while (child != null) {
       // Height and baseline is irrelevant as all text will be laid
-      // out in a single line.
+      // out in a single line. Therefore, using 0.0 as a dummy for the height.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(child.getMaxIntrinsicWidth(height), height),
+        size: Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions.cast<PlaceholderDimensions>());
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
-    // Takes textScaleFactor into account because the content of the placeholder
-    // span will be scale up when it paints.
-    height = height / textScaleFactor;
     while (child != null) {
-      final double intrinsicWidth = child.getMinIntrinsicWidth(height);
-      final double intrinsicHeight = child.getMinIntrinsicHeight(intrinsicWidth);
+      // Height and baseline is irrelevant; only looking for the widest word or
+      // placeholder. Therefore, using 0.0 as a dummy for height.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(intrinsicWidth, intrinsicHeight),
+        size: Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions.cast<PlaceholderDimensions>());
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
@@ -425,7 +445,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions.cast<PlaceholderDimensions>());
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   @override
@@ -434,8 +454,9 @@ class RenderParagraph extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     RenderBox? child = firstChild;
-    while (child != null) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+    int childIndex = 0;
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
+      final TextParentData textParentData = child.parentData! as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
         textParentData.offset.dx,
         textParentData.offset.dy,
@@ -461,6 +482,7 @@ class RenderParagraph extends RenderBox
         return true;
       }
       child = childAfter(child);
+      childIndex += 1;
     }
     return false;
   }
@@ -565,7 +587,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _placeholderDimensions = placeholderDimensions.cast<PlaceholderDimensions>();
+    _placeholderDimensions = placeholderDimensions;
   }
 
   // Iterate through the laid-out children and set the parentData offsets based
@@ -574,7 +596,7 @@ class RenderParagraph extends RenderBox
     RenderBox? child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData! as TextParentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes![childIndex].left,
         _textPainter.inlinePlaceholderBoxes![childIndex].top,
@@ -706,7 +728,7 @@ class RenderParagraph extends RenderBox
     // it until we finish layout, and RenderObject is in immutable state at
     // this point.
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData! as TextParentData;
 
       final double scale = textParentData.scale!;
       context.pushTransform(
@@ -742,6 +764,15 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getOffsetForCaret(position, caretPrototype);
+  }
+
+  /// {@macro flutter.painting.textPainter.getFullHeightForCaret}
+  ///
+  /// Valid only after [layout].
+  double? getFullHeightForCaret(TextPosition position) {
+    assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.getFullHeightForCaret(position, Rect.zero);
   }
 
   /// Returns a list of rects that bound the given selection.
@@ -810,14 +841,12 @@ class RenderParagraph extends RenderBox
     String? workingLabel;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.requiresOwnNode) {
-        if (workingText != null) {
-          combined.add(InlineSpanSemanticsInformation(
-            workingText,
-            semanticsLabel: workingLabel ?? workingText,
-          ));
-          workingText = '';
-          workingLabel = null;
-        }
+        combined.add(InlineSpanSemanticsInformation(
+          workingText,
+          semanticsLabel: workingLabel ?? workingText,
+        ));
+        workingText = '';
+        workingLabel = null;
         combined.add(info);
       } else {
         workingText += info.text;
@@ -829,14 +858,10 @@ class RenderParagraph extends RenderBox
         }
       }
     }
-    if (workingText != null) {
-      combined.add(InlineSpanSemanticsInformation(
-        workingText,
-        semanticsLabel: workingLabel,
-      ));
-    } else { // ignore: dead_code
-      assert(workingLabel != null);
-    }
+    combined.add(InlineSpanSemanticsInformation(
+      workingText,
+      semanticsLabel: workingLabel,
+    ));
     return combined;
   }
 
@@ -873,6 +898,7 @@ class RenderParagraph extends RenderBox
     double ordinal = 0.0;
     int start = 0;
     int placeholderIndex = 0;
+    int childIndex = 0;
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
     for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
@@ -882,6 +908,7 @@ class RenderParagraph extends RenderBox
         extentOffset: start + info.text.length,
       );
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
+      start += info.text.length;
       if (rects.isEmpty) {
         continue;
       }
@@ -909,16 +936,23 @@ class RenderParagraph extends RenderBox
       );
 
       if (info.isPlaceholder) {
-        final SemanticsNode childNode = children.elementAt(placeholderIndex++);
-        final TextParentData parentData = child!.parentData as TextParentData;
-        childNode.rect = Rect.fromLTWH(
-          childNode.rect.left,
-          childNode.rect.top,
-          childNode.rect.width * parentData.scale!,
-          childNode.rect.height * parentData.scale!,
-        );
-        newChildren.add(childNode);
-        child = childAfter(child);
+        // A placeholder span may have 0 to multple semantics nodes, we need
+        // to annotate all of the semantics nodes belong to this span.
+        while (children.length > childIndex &&
+               children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+          final SemanticsNode childNode = children.elementAt(childIndex);
+          final TextParentData parentData = child!.parentData! as TextParentData;
+          childNode.rect = Rect.fromLTWH(
+            childNode.rect.left,
+            childNode.rect.top,
+            childNode.rect.width * parentData.scale!,
+            childNode.rect.height * parentData.scale!,
+          );
+          newChildren.add(childNode);
+          childIndex += 1;
+        }
+        child = childAfter(child!);
+        placeholderIndex += 1;
       } else {
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
@@ -927,13 +961,19 @@ class RenderParagraph extends RenderBox
         final GestureRecognizer? recognizer = info.recognizer;
         if (recognizer != null) {
           if (recognizer is TapGestureRecognizer) {
-            configuration.onTap = recognizer.onTap;
-            configuration.isLink = true;
+            if (recognizer.onTap != null) {
+              configuration.onTap = recognizer.onTap;
+              configuration.isLink = true;
+            }
           } else if (recognizer is DoubleTapGestureRecognizer) {
-            configuration.onTap = recognizer.onDoubleTap;
-            configuration.isLink = true;
+            if (recognizer.onDoubleTap != null) {
+              configuration.onTap = recognizer.onDoubleTap;
+              configuration.isLink = true;
+            }
           } else if (recognizer is LongPressGestureRecognizer) {
-            configuration.onLongPress = recognizer.onLongPress;
+            if (recognizer.onLongPress != null) {
+              configuration.onLongPress = recognizer.onLongPress;
+            }
           } else {
             assert(false, '${recognizer.runtimeType} is not supported.');
           }
@@ -947,8 +987,11 @@ class RenderParagraph extends RenderBox
         newChildCache.addLast(newChild);
         newChildren.add(newChild);
       }
-      start += info.text.length;
     }
+    // Makes sure we annotated all of the semantics children.
+    assert(childIndex == children.length);
+    assert(child == null);
+
     _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }

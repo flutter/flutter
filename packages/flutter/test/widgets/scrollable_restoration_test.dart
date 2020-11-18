@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -397,20 +395,20 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry.paintExtent, 150);
+    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
     await tester.drag(find.byType(ListView), const Offset(0, -500));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry.paintExtent, 56);
+    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
     await tester.restartAndRestore();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry.paintExtent, 56);
+    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
@@ -418,13 +416,13 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0, 600));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry.paintExtent, 150);
+    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
     await tester.restoreFrom(data);
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry.paintExtent, 56);
+    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
   });
@@ -552,7 +550,7 @@ Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 
 }
 
 class TestHarness extends StatelessWidget {
-  const TestHarness({Key key, this.child, this.height = 100}) : super(key: key);
+  const TestHarness({Key? key, required this.child, this.height = 100}) : super(key: key);
 
   final Widget child;
   final double height;

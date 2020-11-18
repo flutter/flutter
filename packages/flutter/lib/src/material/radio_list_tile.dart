@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
@@ -307,10 +305,10 @@ class RadioListTile<T> extends StatelessWidget {
   ///   selected.
   /// * [onChanged] is called when the user selects this radio button.
   const RadioListTile({
-    Key key,
-    @required this.value,
-    @required this.groupValue,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
     this.toggleable = false,
     this.activeColor,
     this.title,
@@ -321,7 +319,10 @@ class RadioListTile<T> extends StatelessWidget {
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
-
+    this.contentPadding,
+    this.shape,
+    this.tileColor,
+    this.selectedTileColor,
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -337,7 +338,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// This radio button is considered selected if its [value] matches the
   /// [groupValue].
-  final T groupValue;
+  final T? groupValue;
 
   /// Called when the user selects this radio button.
   ///
@@ -366,7 +367,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///   },
   /// )
   /// ```
-  final ValueChanged<T> onChanged;
+  final ValueChanged<T?>? onChanged;
 
   /// Set to true if this radio list tile is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
@@ -427,22 +428,22 @@ class RadioListTile<T> extends StatelessWidget {
   /// The color to use when this radio button is selected.
   ///
   /// Defaults to accent color of the current [Theme].
-  final Color activeColor;
+  final Color? activeColor;
 
   /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
-  final Widget title;
+  final Widget? title;
 
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// A widget to display on the opposite side of the tile from the radio button.
   ///
   /// Typically an [Icon] widget.
-  final Widget secondary;
+  final Widget? secondary;
 
   /// Whether this list tile is intended to display three lines of text.
   ///
@@ -453,7 +454,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
-  final bool dense;
+  final bool? dense;
 
   /// Whether to render icons and text in the [activeColor].
   ///
@@ -471,10 +472,28 @@ class RadioListTile<T> extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// Defines the insets surrounding the contents of the tile.
+  ///
+  /// Insets the [Radio], [title], [subtitle], and [secondary] widgets
+  /// in [RadioListTile].
+  ///
+  /// When null, `EdgeInsets.symmetric(horizontal: 16.0)` is used.
+  final EdgeInsetsGeometry? contentPadding;
+
   /// Whether this radio button is checked.
   ///
   /// To control this value, set [value] and [groupValue] appropriately.
   bool get checked => value == groupValue;
+
+  /// If specified, [shape] defines the shape of the [RadioListTile]'s [InkWell] border.
+  final ShapeBorder? shape;
+
+  /// If specified, defines the background color for `RadioListTile` when
+  /// [RadioListTile.selected] is false.
+  final Color? tileColor;
+
+  /// If non-null, defines the background color when [RadioListTile.selected] is true.
+  final Color? selectedTileColor;
 
   @override
   Widget build(BuildContext context) {
@@ -487,7 +506,7 @@ class RadioListTile<T> extends StatelessWidget {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       autofocus: autofocus,
     );
-    Widget leading, trailing;
+    Widget? leading, trailing;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
       case ListTileControlAffinity.platform:
@@ -510,17 +529,21 @@ class RadioListTile<T> extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
+          shape: shape,
+          tileColor: tileColor,
+          selectedTileColor: selectedTileColor,
           onTap: onChanged != null ? () {
             if (toggleable && checked) {
-              onChanged(null);
+              onChanged!(null);
               return;
             }
             if (!checked) {
-              onChanged(value);
+              onChanged!(value);
             }
           } : null,
           selected: selected,
           autofocus: autofocus,
+          contentPadding: contentPadding,
         ),
       ),
     );

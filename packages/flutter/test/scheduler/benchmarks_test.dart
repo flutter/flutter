@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,10 +12,10 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
   int framesBegun = 0;
   int framesDrawn = 0;
 
-  bool handleBeginFrameMicrotaskRun;
+  late bool handleBeginFrameMicrotaskRun;
 
   @override
-  void handleBeginFrame(Duration rawTimeStamp) {
+  void handleBeginFrame(Duration? rawTimeStamp) {
     handleBeginFrameMicrotaskRun = false;
     framesBegun += 1;
     Future<void>.microtask(() { handleBeginFrameMicrotaskRun = true; });
@@ -37,7 +33,7 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
 }
 
 void main() {
-  TestBinding binding;
+  late TestBinding binding;
 
   setUp(() {
     binding = TestBinding();

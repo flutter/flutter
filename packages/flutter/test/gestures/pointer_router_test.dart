@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -136,7 +134,7 @@ void main() {
       log.add('per-pointer 3');
     });
 
-    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    final FlutterExceptionHandler? previousErrorHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       log.add('error report');
     };

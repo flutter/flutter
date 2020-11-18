@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -40,16 +38,16 @@ class InkHighlight extends InteractiveInkFeature {
   ///
   /// When the highlight is removed, `onRemoved` will be called.
   InkHighlight({
-    @required MaterialInkController controller,
-    @required RenderBox referenceBox,
-    @required Color color,
-    @required TextDirection textDirection,
+    required MaterialInkController controller,
+    required RenderBox referenceBox,
+    required Color color,
+    required TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
-    double radius,
-    BorderRadius borderRadius,
-    ShapeBorder customBorder,
-    RectCallback rectCallback,
-    VoidCallback onRemoved,
+    double? radius,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    RectCallback? rectCallback,
+    VoidCallback? onRemoved,
     Duration fadeDuration = _kDefaultHighlightFadeDuration,
   }) : assert(color != null),
        assert(shape != null),
@@ -75,14 +73,14 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   final BoxShape _shape;
-  final double _radius;
+  final double? _radius;
   final BorderRadius _borderRadius;
-  final ShapeBorder _customBorder;
-  final RectCallback _rectCallback;
+  final ShapeBorder? _customBorder;
+  final RectCallback? _rectCallback;
   final TextDirection _textDirection;
 
-  Animation<int> _alpha;
-  AnimationController _alphaController;
+  late Animation<int> _alpha;
+  late AnimationController _alphaController;
 
   /// Whether this part of the material is being visually emphasized.
   bool get active => _active;
@@ -115,7 +113,7 @@ class InkHighlight extends InteractiveInkFeature {
     assert(_shape != null);
     canvas.save();
     if (_customBorder != null) {
-      canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
+      canvas.clipPath(_customBorder!.getOuterPath(rect, textDirection: _textDirection));
     }
     switch (_shape) {
       case BoxShape.circle:
@@ -140,8 +138,8 @@ class InkHighlight extends InteractiveInkFeature {
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
-    final Offset originOffset = MatrixUtils.getAsTranslation(transform);
-    final Rect rect = _rectCallback != null ? _rectCallback() : Offset.zero & referenceBox.size;
+    final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
+    final Rect rect = _rectCallback != null ? _rectCallback!() : Offset.zero & referenceBox.size;
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);

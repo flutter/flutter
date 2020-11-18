@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'date_picker.dart';
+import 'debug.dart';
 
 /// Determines the order of the columns inside [CupertinoDatePicker] in
 /// time and date time mode.
@@ -112,7 +108,7 @@ abstract class CupertinoLocalizations {
 
   /// Semantics label for the given hour value in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
-  String datePickerHourSemanticsLabel(int hour);
+  String? datePickerHourSemanticsLabel(int hour);
 
   /// Minute that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given minute value.
@@ -126,7 +122,7 @@ abstract class CupertinoLocalizations {
 
   /// Semantics label for the given minute value in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
-  String datePickerMinuteSemanticsLabel(int minute);
+  String? datePickerMinuteSemanticsLabel(int minute);
 
   /// The order of the date elements that will be shown in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
@@ -158,7 +154,7 @@ abstract class CupertinoLocalizations {
   /// there are, e.g. 'tab, 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabSemanticsLabel({int tabIndex, int tabCount});
+  String tabSemanticsLabel({required int tabIndex, required int tabCount});
 
   /// Hour that is shown in [CupertinoTimerPicker] corresponding to
   /// the given hour value.
@@ -194,19 +190,31 @@ abstract class CupertinoLocalizations {
   /// [CupertinoTimerPicker] when selected hour value is `hour`.
   /// This function will deal with pluralization based on the `hour` parameter.
   // The global version uses the translated string from the arb file.
-  String timerPickerHourLabel(int hour);
+  String? timerPickerHourLabel(int hour);
+
+  /// All possible hour labels that appears next to the hour picker in
+  /// [CupertinoTimerPicker]
+  List<String> get timerPickerHourLabels;
 
   /// Label that appears next to the minute picker in
   /// [CupertinoTimerPicker] when selected minute value is `minute`.
   /// This function will deal with pluralization based on the `minute` parameter.
   // The global version uses the translated string from the arb file.
-  String timerPickerMinuteLabel(int minute);
+  String? timerPickerMinuteLabel(int minute);
+
+  /// All possible minute labels that appears next to the minute picker in
+  /// [CupertinoTimerPicker]
+  List<String> get timerPickerMinuteLabels;
 
   /// Label that appears next to the minute picker in
   /// [CupertinoTimerPicker] when selected minute value is `second`.
   /// This function will deal with pluralization based on the `second` parameter.
   // The global version uses the translated string from the arb file.
-  String timerPickerSecondLabel(int second);
+  String? timerPickerSecondLabel(int second);
+
+  /// All possible second labels that appears next to the second picker in
+  /// [CupertinoTimerPicker]
+  List<String> get timerPickerSecondLabels;
 
   /// The term used for cutting.
   // The global version uses the translated string from the arb file.
@@ -224,6 +232,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
+  /// The default placeholder used in [CupertinoSearchTextField].
+  // The global version uses the translated string from the arb file.
+  String get searchTextFieldPlaceholderLabel;
+
   /// Label read out by accessibility tools (VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
   ///
@@ -234,8 +246,11 @@ abstract class CupertinoLocalizations {
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
+  /// If no [CupertinoLocalizations] are available in the given `context`, this
+  /// method throws an exception.
+  ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)`.
+  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -244,7 +259,8 @@ abstract class CupertinoLocalizations {
   /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
   static CupertinoLocalizations of(BuildContext context) {
-    return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations);
+    assert(debugCheckHasCupertinoLocalizations(context));
+    return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!;
   }
 }
 
@@ -366,7 +382,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get alertDialogLabel => 'Alert';
 
   @override
-  String tabSemanticsLabel({int tabIndex, int tabCount}) {
+  String tabSemanticsLabel({required int tabIndex, required int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';
@@ -385,10 +401,19 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String timerPickerHourLabel(int hour) => hour == 1 ? 'hour' : 'hours';
 
   @override
+  List<String> get timerPickerHourLabels => const <String>['hour', 'hours'];
+
+  @override
   String timerPickerMinuteLabel(int minute) => 'min.';
 
   @override
+  List<String> get timerPickerMinuteLabels => const <String>['min.'];
+
+  @override
   String timerPickerSecondLabel(int second) => 'sec.';
+
+  @override
+  List<String> get timerPickerSecondLabels => const <String>['sec.'];
 
   @override
   String get cutButtonLabel => 'Cut';
@@ -401,6 +426,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'Search';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';

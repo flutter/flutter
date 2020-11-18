@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
@@ -44,7 +42,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isWindowsEnabled) {
       throwToolExit('"build windows" is not currently supported.');
     }

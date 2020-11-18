@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -71,7 +69,7 @@ class PrecacheCommand extends FlutterCommand {
   final String name = 'precache';
 
   @override
-  final String description = "Populates the Flutter tool's cache of binary artifacts.";
+  final String description = "Populate the Flutter tool's cache of binary artifacts.";
 
   @override
   bool get shouldUpdateCache => false;
@@ -132,7 +130,7 @@ class PrecacheCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     // Re-lock the cache.
     if (_platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-      await Cache.lock();
+      await _cache.lock();
     }
     if (boolArg('force')) {
       _cache.clearStampFiles();
@@ -158,7 +156,7 @@ class PrecacheCommand extends FlutterCommand {
         requiredArtifacts.add(artifact);
       }
     }
-    if (!_cache.isUpToDate()) {
+    if (!await _cache.isUpToDate()) {
       await _cache.updateAll(requiredArtifacts);
     } else {
       _logger.printStatus('Already up-to-date.');

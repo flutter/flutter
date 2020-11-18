@@ -19,7 +19,7 @@ import 'pointer_router.dart';
 import 'pointer_signal_resolver.dart';
 import 'resampler.dart';
 
-typedef HandleSampleTimeChangedCallback = void Function();
+typedef _HandleSampleTimeChangedCallback = void Function();
 
 // Class that handles resampling of touch events for multiple pointer
 // devices.
@@ -48,30 +48,25 @@ class _Resampler {
   final HandleEventCallback _handlePointerEvent;
 
   // Callback used to handle sample time changes.
-  final HandleSampleTimeChangedCallback _handleSampleTimeChanged;
+  final _HandleSampleTimeChangedCallback _handleSampleTimeChanged;
 
-  // Enqueue `events` for resampling or dispatch them directly if
+  // Add `event` for resampling or dispatch it directly if
   // not a touch event.
-  void addOrDispatchAll(Queue<PointerEvent> events) {
+  void addOrDispatch(PointerEvent event) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
-
-    while (events.isNotEmpty) {
-      final PointerEvent event = events.removeFirst();
-
       // Add touch event to resampler or dispatch pointer event directly.
-      if (event.kind == PointerDeviceKind.touch) {
-        // Save last event time for debugPrint of resampling margin.
-        _lastEventTime = event.timeStamp;
+    if (event.kind == PointerDeviceKind.touch) {
+      // Save last event time for debugPrint of resampling margin.
+      _lastEventTime = event.timeStamp;
 
-        final PointerEventResampler resampler = _resamplers.putIfAbsent(
-          event.device,
-          () => PointerEventResampler(),
-        );
-        resampler.addEvent(event);
-      } else {
-        _handlePointerEvent(event);
-      }
+      final PointerEventResampler resampler = _resamplers.putIfAbsent(
+        event.device,
+        () => PointerEventResampler(),
+      );
+      resampler.addEvent(event);
+    } else {
+      _handlePointerEvent(event);
     }
   }
 
@@ -79,9 +74,11 @@ class _Resampler {
   //
   // `samplingOffset` is relative to the current frame time, which
   // can be in the past when we're not actively resampling.
+  // `samplingInterval` is used to determine the approximate next
+  // time for resampling.
   // `currentSystemFrameTimeStamp` is used to determine the current
   // frame time.
-  void sample(Duration samplingOffset) {
+  void sample(Duration samplingOffset, Duration samplingInterval) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
 
@@ -91,10 +88,14 @@ class _Resampler {
     // resampling events.
     final Duration sampleTime = _frameTime + samplingOffset;
 
+    // Determine next sample time by adding the sampling interval
+    // to the current sample time.
+    final Duration nextSampleTime = sampleTime + samplingInterval;
+
     // Iterate over active resamplers and sample pointer events for
     // current sample time.
     for (final PointerEventResampler resampler in _resamplers.values) {
-      resampler.sample(sampleTime, _handlePointerEvent);
+      resampler.sample(sampleTime, nextSampleTime, _handlePointerEvent);
     }
 
     // Remove inactive resamplers.
@@ -143,6 +144,13 @@ class _Resampler {
 // 4.666 ms margin is added for this.
 const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
 
+// The sampling interval.
+//
+// Sampling interval is used to determine the approximate time for subsequent
+// sampling. This is used to decide if early processing of up and removed events
+// is appropriate. 16667 us for 60hz sampling interval.
+const Duration _samplingInterval = Duration(microseconds: 16667);
+
 /// A binding for the gesture subsystem.
 ///
 /// ## Lifecycle of pointer events and the gesture arena
@@ -150,7 +158,7 @@ const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
 /// ### [PointerDownEvent]
 ///
 /// When a [PointerDownEvent] is received by the [GestureBinding] (from
-/// [Window.onPointerDataPacket], as interpreted by the
+/// [dart:ui.PlatformDispatcher.onPointerDataPacket], as interpreted by the
 /// [PointerEventConverter]), a [hitTest] is performed to determine which
 /// [HitTestTarget] nodes are affected. (Other bindings are expected to
 /// implement [hitTest] to defer to [HitTestable] objects. For example, the
@@ -176,9 +184,9 @@ const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
 ///
 /// A pointer that is [PointerEvent.down] may send further events, such as
 /// [PointerMoveEvent], [PointerUpEvent], or [PointerCancelEvent]. These are
-/// sent to the same [HitTestTarget] nodes as were found when the down event was
-/// received (even if they have since been disposed; it is the responsibility of
-/// those objects to be aware of that possibility).
+/// sent to the same [HitTestTarget] nodes as were found when the
+/// [PointerDownEvent] was received (even if they have since been disposed; it is
+/// the responsibility of those objects to be aware of that possibility).
 ///
 /// Then, the events are routed to any still-registered entrants in the
 /// [PointerRouter]'s table for that pointer.
@@ -226,18 +234,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _flushPointerEventQueue() {
     assert(!locked);
 
-    if (resamplingEnabled) {
-      _resampler.addOrDispatchAll(_pendingPointerEvents);
-      _resampler.sample(samplingOffset);
-      return;
-    }
-
-    // Stop resampler if resampling is not enabled. This is a no-op if
-    // resampling was never enabled.
-    _resampler.stop();
-
     while (_pendingPointerEvents.isNotEmpty)
-      _handlePointerEvent(_pendingPointerEvents.removeFirst());
+      handlePointerEvent(_pendingPointerEvents.removeFirst());
   }
 
   /// A router that routes all pointer events received from the engine.
@@ -247,8 +245,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// pointer events.
   final GestureArenaManager gestureArena = GestureArenaManager();
 
-  /// The resolver used for determining which widget handles a pointer
-  /// signal event.
+  /// The resolver used for determining which widget handles a
+  /// [PointerSignalEvent].
   final PointerSignalResolver pointerSignalResolver = PointerSignalResolver();
 
   /// State for all pointers which are currently down.
@@ -257,10 +255,34 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// hit-testing on every frame.
   final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
-  void _handlePointerEvent(PointerEvent event) {
+  /// Dispatch an event to the targets found by a hit test on its position.
+  ///
+  /// This method sends the given event to [dispatchEvent] based on event types:
+  ///
+  ///  * [PointerDownEvent]s and [PointerSignalEvent]s are dispatched to the
+  ///    result of a new [hitTest].
+  ///  * [PointerUpEvent]s and [PointerMoveEvent]s are dispatched to the result of hit test of the
+  ///    preceding [PointerDownEvent]s.
+  ///  * [PointerHoverEvent]s, [PointerAddedEvent]s, and [PointerRemovedEvent]s
+  ///    are dispatched without a hit test result.
+  void handlePointerEvent(PointerEvent event) {
     assert(!locked);
+
+    if (resamplingEnabled) {
+      _resampler.addOrDispatch(event);
+      _resampler.sample(samplingOffset, _samplingInterval);
+      return;
+    }
+
+    // Stop resampler if resampling is not enabled. This is a no-op if
+    // resampling was never enabled.
+    _resampler.stop();
+    _handlePointerEventImmediately(event);
+  }
+
+  void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
-    if (event is PointerDownEvent || event is PointerSignalEvent) {
+    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
@@ -276,7 +298,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       hitTestResult = _hitTests.remove(event.pointer);
     } else if (event.down) {
       // Because events that occur with the pointer down (like
-      // PointerMoveEvents) should be dispatched to the same place that their
+      // [PointerMoveEvent]s) should be dispatched to the same place that their
       // initial PointerDownEvent was, we want to re-use the path we found when
       // the pointer went down, rather than do hit detection each time we get
       // such an event.
@@ -288,7 +310,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       return true;
     }());
     if (hitTestResult != null ||
-        event is PointerHoverEvent ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
       assert(event.position != null);
@@ -302,20 +323,22 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     result.add(HitTestEntry(this));
   }
 
-  /// Dispatch an event to a hit test result's path.
+  /// Dispatch an event to [pointerRouter] and the path of a hit test result.
   ///
-  /// This sends the given event to every [HitTestTarget] in the entries of the
-  /// given [HitTestResult], and catches exceptions that any of the handlers
-  /// might throw. The [hitTestResult] argument may only be null for
-  /// [PointerHoverEvent], [PointerAddedEvent], or [PointerRemovedEvent] events.
+  /// The `event` is routed to [pointerRouter]. If the `hitTestResult` is not
+  /// null, the event is also sent to every [HitTestTarget] in the entries of the
+  /// given [HitTestResult]. Any exceptions from the handlers are caught.
+  ///
+  /// The `hitTestResult` argument may only be null for [PointerAddedEvent]s or
+  /// [PointerRemovedEvent]s.
   @override // from HitTestDispatcher
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
-    // No hit test information implies that this is a pointer hover or
-    // add/remove event. These events are specially routed here; other events
-    // will be routed through the `handleEvent` below.
+    // No hit test information implies that this is a [PointerHoverEvent],
+    // [PointerAddedEvent], or [PointerRemovedEvent]. These events are specially
+    // routed here; other events will be routed through the `handleEvent` below.
     if (hitTestResult == null) {
-      assert(event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent);
+      assert(event is PointerAddedEvent || event is PointerRemovedEvent);
       try {
         pointerRouter.route(event);
       } catch (exception, stack) {
@@ -365,16 +388,31 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
+  /// Reset states of [GestureBinding].
+  ///
+  /// This clears the hit test records.
+  ///
+  /// This is typically called between tests.
+  @protected
+  void resetGestureBinding() {
+    _hitTests.clear();
+  }
+
   void _handleSampleTimeChanged() {
     if (!locked) {
-      _flushPointerEventQueue();
+      if (resamplingEnabled) {
+        _resampler.sample(samplingOffset, _samplingInterval);
+      }
+      else {
+        _resampler.stop();
+      }
     }
   }
 
   // Resampler used to filter incoming pointer events when resampling
   // is enabled.
   late final _Resampler _resampler = _Resampler(
-    _handlePointerEvent,
+    _handlePointerEventImmediately,
     _handleSampleTimeChanged,
   );
 
@@ -407,7 +445,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   /// The gesture library calls this constructor when catching an exception
   /// that will subsequently be reported using [FlutterError.onError].
   const FlutterErrorDetailsForPointerEventDispatcher({
-    dynamic exception,
+    required Object exception,
     StackTrace? stack,
     String? library,
     DiagnosticsNode? context,
@@ -429,7 +467,8 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
 
   /// The hit test result entry for the object whose handleEvent method threw
   /// the exception. May be null if no hit test entry is associated with the
-  /// event (e.g. hover and pointer add/remove events).
+  /// event (e.g. [PointerHoverEvent]s, [PointerAddedEvent]s, and
+  /// [PointerRemovedEvent]s).
   ///
   /// The target object itself is given by the [HitTestEntry.target] property of
   /// the hitTestEntry object.

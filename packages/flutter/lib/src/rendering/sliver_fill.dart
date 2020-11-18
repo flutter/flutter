@@ -86,7 +86,6 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
-    // TODO(Piinks): This may fill too much space for NestedScrollView, https://github.com/flutter/flutter/issues/46028
     final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (child != null)
@@ -142,7 +141,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
 
     if (child != null) {
-      double childExtent;
+      final double childExtent;
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
@@ -218,7 +217,7 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
     double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (child != null) {
-      double childExtent;
+      final double childExtent;
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);

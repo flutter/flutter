@@ -61,7 +61,7 @@ class IconTreeShaker {
        _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
-      logger.printError('Font subetting is not supported in debug mode. The '
+      logger.printError('Font subsetting is not supported in debug mode. The '
                          '--tree-shake-icons flag will be ignored.');
     }
   }
@@ -132,7 +132,7 @@ class IconTreeShaker {
     if (fonts.length != iconData.length) {
       environment.logger.printStatus(
         'Expected to find fonts for ${iconData.keys}, but found '
-        '${fonts.keys}. This usually means you are refering to '
+        '${fonts.keys}. This usually means you are referring to '
         'font families in an IconData class but not including them '
         'in the assets section of your pubspec.yaml, are missing '
         'the package that would include them, or are missing '
@@ -219,7 +219,7 @@ class IconTreeShaker {
     return true;
   }
 
-  /// Returns a map of { fontFamly: relativePath } pairs.
+  /// Returns a map of { fontFamily: relativePath } pairs.
   Future<Map<String, String>> _parseFontJson(
     String fontManifestData,
     Set<String> families,
@@ -303,9 +303,9 @@ class IconTreeShaker {
     return _parseConstFinderResult(constFinderResult);
   }
 
-  Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult consts) {
+  Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult constants) {
     final Map<String, List<int>> result = <String, List<int>>{};
-    for (final Map<String, dynamic> iconDataMap in consts.constantInstances) {
+    for (final Map<String, dynamic> iconDataMap in constants.constantInstances) {
       if ((iconDataMap['fontPackage'] ?? '') is! String || // Null is ok here.
            iconDataMap['fontFamily'] is! String ||
            iconDataMap['codePoint'] is! num) {
@@ -344,7 +344,7 @@ class _ConstFinderResult {
   List<Map<String, dynamic>> get nonConstantLocations {
     _nonConstantLocations ??= _getList(
       result['nonConstantLocations'],
-      'Invalid ConstFinder output: Expected "nonConstLocations" to be a list ofobjects',
+      'Invalid ConstFinder output: Expected "nonConstLocations" to be a list of objects',
     );
     return _nonConstantLocations;
   }

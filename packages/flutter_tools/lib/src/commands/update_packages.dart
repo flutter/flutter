@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -26,42 +25,50 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
   'flutter_gallery_assets': '^0.2.0',
-  'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
+  'mockito': '4.1.1',  // Prevent mockito from upgrading to the source gen version.
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
-  // nnbd
-  'async': '2.5.0-nullsafety',
-  'boolean_selector': '2.1.0-nullsafety',
-  'characters': '1.1.0-nullsafety.2',
-  'charcode': '1.2.0-nullsafety',
-  'clock': '1.1.0-nullsafety',
-  'collection': '1.15.0-nullsafety.2',
-  'fake_async': '1.1.0-nullsafety',
-  'js': '0.6.3-nullsafety',
-  'matcher': '0.12.10-nullsafety',
-  'meta': '1.3.0-nullsafety.2',
-  'path': '1.8.0-nullsafety',
-  'pedantic': '1.10.0-nullsafety',
-  'pool': '1.5.0-nullsafety',
-  'source_maps': '0.10.10-nullsafety',
-  'source_map_stack_trace': '2.1.0-nullsafety.1',
-  'source_span': '1.8.0-nullsafety',
-  'stack_trace': '1.10.0-nullsafety',
-  'stream_channel': '2.1.0-nullsafety',
-  'string_scanner': '1.1.0-nullsafety',
-  'term_glyph': '1.2.0-nullsafety',
-  'test': '1.16.0-nullsafety.1',
-  'test_api': '0.2.19-nullsafety',
-  'test_core': '0.3.12-nullsafety.1',
-  'typed_data': '1.3.0-nullsafety.2',
-  'vector_math': '2.1.0-nullsafety.2',
-  'platform': '3.0.0-nullsafety.1',
-  'file': '6.0.0-nullsafety.1',
-  'process': '4.0.0-nullsafety.1',
+  // Dart team owned nnbd deps
+  'async': '2.5.0-nullsafety.3',
+  'boolean_selector': '2.1.0-nullsafety.3',
+  'characters': '1.1.0-nullsafety.5',
+  'charcode': '1.2.0-nullsafety.3',
+  'clock': '1.1.0-nullsafety.3',
+  'collection': '1.15.0-nullsafety.5',
+  'intl': '0.17.0-nullsafety.2',
+  'fake_async': '1.2.0-nullsafety.3',
+  'js': '0.6.3-nullsafety.3',
+  'matcher': '0.12.10-nullsafety.3',
+  'meta': '1.3.0-nullsafety.6',
+  'path': '1.8.0-nullsafety.3',
+  'pedantic': '1.10.0-nullsafety.3',
+  'pool': '1.5.0-nullsafety.3',
+  'source_maps': '0.10.10-nullsafety.3',
+  'source_map_stack_trace': '2.1.0-nullsafety.4',
+  'source_span': '1.8.0-nullsafety.4',
+  'stack_trace': '1.10.0-nullsafety.6',
+  'stream_channel': '2.1.0-nullsafety.3',
+  'string_scanner': '1.1.0-nullsafety.3',
+  'term_glyph': '1.2.0-nullsafety.3',
+  'test': '1.16.0-nullsafety.9',
+  'test_api': '0.2.19-nullsafety.6',
+  'test_core': '0.3.12-nullsafety.9',
+  'typed_data': '1.3.0-nullsafety.5',
+  'vector_math': '2.1.0-nullsafety.5',
+  // Flutter team owned nnbd deps
+  'platform': '3.0.0-nullsafety.4',
+  'file': '6.0.0-nullsafety.4',
+  'process': '4.0.0-nullsafety.4',
+  'process_runner': '4.0.0-nullsafety.5',
   // https://github.com/dart-lang/build/issues/2772
   'build_runner_core': '5.2.0',
+  'build_modules': '2.10.1',
+  'path_provider': '1.6.14',
+  'video_player': '2.0.0-nullsafety.2',
+  'url_launcher': '6.0.0-nullsafety.1',
+  'connectivity': '3.0.0-nullsafety.1',
+  'device_info': '2.0.0-nullsafety.1',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -144,7 +151,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _downloadCoverageData() async {
     final Status status = globals.logger.startProgress(
       'Downloading lcov data for package:flutter...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
@@ -179,7 +185,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       );
     }
 
-    // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
+    // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations, integration_test).
     if (isConsumerOnly) {
       if (!isPrintTransitiveClosure) {
         throwToolExit(
@@ -187,7 +193,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
       // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
-      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations'];
+      const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations', 'integration_test'];
       // ensure we only get flutter/packages
       packages.retainWhere((Directory directory) {
         return consumerPackages.any((String package) {
@@ -328,7 +334,6 @@ class UpdatePackagesCommand extends FlutterCommand {
           context: PubContext.updatePackages,
           directory: tempDir.path,
           upgrade: true,
-          checkLastModified: false,
           offline: offline,
           flutterRootOverride: upgrade
             ? temporaryFlutterSdk.path
@@ -411,7 +416,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       await pub.get(
         context: PubContext.updatePackages,
         directory: dir.path,
-        checkLastModified: false,
         offline: offline,
         generateSyntheticPackage: false,
       );
@@ -516,7 +520,7 @@ enum DependencyKind {
   // "sdk" dependency in the dependency_overrides section.
   overridden,
 
-  // A depdendency that uses git.
+  // A dependency that uses git.
   git,
 }
 
@@ -810,7 +814,7 @@ class PubspecYaml {
             // Since we're in one of the places where we can list dependencies,
             // remember this as the current last known valid place to insert our
             // transitive dev dependencies. If the section is for regular dependencies,
-            // then also rememeber the line for the end of direct dependencies.
+            // then also remember the line for the end of direct dependencies.
             if (section == Section.dependencies) {
               endOfDirectDependencies = output.length;
             }
@@ -1256,6 +1260,8 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
   final StringBuffer result = StringBuffer();
   final StringBuffer overrides = StringBuffer();
   result.writeln('name: flutter_update_packages');
+  result.writeln('environment:');
+  result.writeln("  sdk: '>=2.10.0 <3.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (_kManuallyPinnedDependencies.isNotEmpty) {

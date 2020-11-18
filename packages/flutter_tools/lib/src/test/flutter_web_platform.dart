@@ -19,14 +19,7 @@ import 'package:shelf_packages_handler/shelf_packages_handler.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/runtime.dart';
-import 'package:test_api/src/backend/suite_platform.dart';
-import 'package:test_core/src/runner/configuration.dart';
-import 'package:test_core/src/runner/environment.dart';
-import 'package:test_core/src/runner/platform.dart';
-import 'package:test_core/src/runner/plugin/platform_helpers.dart';
-import 'package:test_core/src/runner/runner_suite.dart';
-import 'package:test_core/src/runner/suite.dart';
+import 'package:test_core/src/platform.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
@@ -49,6 +42,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     FlutterProject flutterProject,
     String shellPath,
     this.updateGoldens,
+    @required BuildInfo buildInfo,
   }) {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
@@ -74,7 +68,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
-      () => TestCompiler(BuildMode.debug, false, flutterProject, <String>[]),
+      () => TestCompiler(buildInfo, flutterProject),
     );
   }
 
@@ -83,6 +77,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     String shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
+    @required BuildInfo buildInfo,
   }) async {
     final shelf_io.IOServer server =
         shelf_io.IOServer(await HttpMultiServer.loopback(0));
@@ -93,11 +88,12 @@ class FlutterWebPlatform extends PlatformPlugin {
       flutterProject: flutterProject,
       shellPath: shellPath,
       updateGoldens: updateGoldens,
+      buildInfo: buildInfo,
     );
   }
 
   final Future<PackageConfig> _packagesFuture = loadPackageConfigWithLogging(
-    globals.fs.file(globalPackagesPath),
+    globals.fs.file(globals.fs.path.join('.dart_tool', 'package_config.json')),
     logger: globals.logger,
   );
 
@@ -871,7 +867,7 @@ class TestGoldenComparator {
       shellPath,
       '--disable-observatory',
       '--non-interactive',
-      '--packages=$globalPackagesPath',
+      '--packages=${globals.fs.path.join('.dart_tool', 'package_config.json')}',
       output,
     ];
 
@@ -888,7 +884,7 @@ class TestGoldenComparator {
     final TestGoldenComparatorProcess process = await _processForTestFile(testUri);
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
-    final Map<String, dynamic> result = await process.getResponse().timeout(const Duration(seconds: 20));
+    final Map<String, dynamic> result = await process.getResponse();
 
     if (result == null) {
       return 'unknown error';
@@ -952,6 +948,7 @@ class TestGoldenComparatorProcess {
     final File testConfigFile = findTestConfigFile(globals.fs.file(testUri));
     // Generate comparator process for the file.
     return '''
+// @dart=2.9
 import 'dart:convert'; // ignore: dart_convert_import
 import 'dart:io'; // ignore: dart_io_import
 
@@ -963,7 +960,7 @@ void main() async {
   LocalFileComparator comparator = LocalFileComparator(Uri.parse('$testUri'));
   goldenFileComparator = comparator;
 
-  ${testConfigFile != null ? 'test_config.main(() async {' : ''}
+  ${testConfigFile != null ? 'test_config.testExecutable(() async {' : ''}
   final commands = stdin
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())

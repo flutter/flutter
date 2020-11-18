@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
+import 'app_bar_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'input_border.dart';
@@ -47,19 +45,22 @@ import 'theme.dart';
 /// the [AppBar.leading] position e.g. from the hamburger menu to the back arrow
 /// used to exit the search page.
 ///
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.EditableText.onChanged}
+///
 /// See also:
 ///
 ///  * [SearchDelegate] to define the content of the search page.
-Future<T> showSearch<T>({
-  @required BuildContext context,
-  @required SearchDelegate<T> delegate,
-  String query = '',
+Future<T?> showSearch<T>({
+  required BuildContext context,
+  required SearchDelegate<T> delegate,
+  String? query = '',
 }) {
   assert(delegate != null);
   assert(context != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context).push(_SearchPageRoute<T>(
+  return Navigator.of(context)!.push(_SearchPageRoute<T>(
     delegate: delegate,
   ));
 }
@@ -89,10 +90,14 @@ Future<T> showSearch<T>({
 /// A given [SearchDelegate] can only be associated with one active [showSearch]
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
+///
+/// ## Handling emojis and other complex characters
+/// {@macro flutter.widgets.EditableText.onChanged}
 abstract class SearchDelegate<T> {
-
-  /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
-  /// [textInputAction].
+  /// Constructor to be called by subclasses which may specify
+  /// [searchFieldLabel], either [searchFieldStyle] or [searchFieldDecorationTheme],
+  /// [keyboardType] and/or [textInputAction]. Only one of [searchFieldLabel]
+  /// and [searchFieldDecorationTheme] may be non-null.
   ///
   /// {@tool snippet}
   /// ```dart
@@ -122,9 +127,10 @@ abstract class SearchDelegate<T> {
   SearchDelegate({
     this.searchFieldLabel,
     this.searchFieldStyle,
+    this.searchFieldDecorationTheme,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
-  });
+  }) : assert(searchFieldStyle == null || searchFieldDecorationTheme == null);
 
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
@@ -182,25 +188,39 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.actions], the intended use for the return value of this method.
   List<Widget> buildActions(BuildContext context);
 
-  /// The theme used to style the [AppBar].
+  /// The theme used to configure the search page.
   ///
-  /// By default, a white theme is used.
+  /// The returned [ThemeData] will be used to wrap the entire search page,
+  /// so it can be used to configure any of its components with the appropriate
+  /// theme properties.
+  ///
+  /// Unless overridden, the default theme will configure the AppBar containing
+  /// the search input text field with a white background and black text on light
+  /// themes. For dark themes the default is a dark grey background with light
+  /// color text.
   ///
   /// See also:
   ///
-  ///  * [AppBar.backgroundColor], which is set to [ThemeData.primaryColor].
-  ///  * [AppBar.iconTheme], which is set to [ThemeData.primaryIconTheme].
-  ///  * [AppBar.textTheme], which is set to [ThemeData.primaryTextTheme].
-  ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
+  ///  * [AppBarTheme], which configures the AppBar's appearance.
+  ///  * [InputDecorationTheme], which configures the appearance of the search
+  ///    text field.
   ThemeData appBarTheme(BuildContext context) {
     assert(context != null);
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
     assert(theme != null);
     return theme.copyWith(
-      primaryColor: Colors.white,
-      primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
-      primaryColorBrightness: Brightness.light,
-      primaryTextTheme: theme.textTheme,
+      appBarTheme: AppBarTheme(
+        brightness: colorScheme.brightness,
+        color: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
+        iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
+        textTheme: theme.textTheme,
+      ),
+      inputDecorationTheme: searchFieldDecorationTheme ??
+          InputDecorationTheme(
+            hintStyle: searchFieldStyle ?? theme.inputDecorationTheme.hintStyle,
+            border: InputBorder.none,
+          ),
     );
   }
 
@@ -246,7 +266,7 @@ abstract class SearchDelegate<T> {
   ///  * [showResults] to show the search results.
   void showSuggestions(BuildContext context) {
     assert(_focusNode != null, '_focusNode must be set by route before showSuggestions is called.');
-    _focusNode.requestFocus();
+    _focusNode!.requestFocus();
     _currentBody = _SearchBody.suggestions;
   }
 
@@ -257,7 +277,7 @@ abstract class SearchDelegate<T> {
   void close(BuildContext context, T result) {
     _currentBody = null;
     _focusNode?.unfocus();
-    Navigator.of(context)
+    Navigator.of(context)!
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
   }
@@ -266,18 +286,27 @@ abstract class SearchDelegate<T> {
   ///
   /// If this value is set to null, the value of
   /// `MaterialLocalizations.of(context).searchFieldLabel` will be used instead.
-  final String searchFieldLabel;
+  final String? searchFieldLabel;
 
   /// The style of the [searchFieldLabel].
   ///
   /// If this value is set to null, the value of the ambient [Theme]'s
   /// [InputDecorationTheme.hintStyle] will be used instead.
-  final TextStyle searchFieldStyle;
+  ///
+  /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
+  /// be non-null.
+  final TextStyle? searchFieldStyle;
+
+  /// The [InputDecorationTheme] used to configure the search field's visuals.
+  ///
+  /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
+  /// be non-null.
+  final InputDecorationTheme? searchFieldDecorationTheme;
 
   /// The type of action button to use for the keyboard.
   ///
   /// Defaults to the default value specified in [TextField].
-  final TextInputType keyboardType;
+  final TextInputType? keyboardType;
 
   /// The text input action configuring the soft keyboard to a particular action
   /// button.
@@ -295,20 +324,20 @@ abstract class SearchDelegate<T> {
 
   // The focus node to use for manipulating focus on the search page. This is
   // managed, owned, and set by the _SearchPageRoute using this delegate.
-  FocusNode _focusNode;
+  FocusNode? _focusNode;
 
   final TextEditingController _queryTextController = TextEditingController();
 
   final ProxyAnimation _proxyAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
-  final ValueNotifier<_SearchBody> _currentBodyNotifier = ValueNotifier<_SearchBody>(null);
+  final ValueNotifier<_SearchBody?> _currentBodyNotifier = ValueNotifier<_SearchBody?>(null);
 
-  _SearchBody get _currentBody => _currentBodyNotifier.value;
-  set _currentBody(_SearchBody value) {
+  _SearchBody? get _currentBody => _currentBodyNotifier.value;
+  set _currentBody(_SearchBody? value) {
     _currentBodyNotifier.value = value;
   }
 
-  _SearchPageRoute<T> _route;
+  _SearchPageRoute<T>? _route;
 }
 
 /// Describes the body that is currently shown under the [AppBar] in the
@@ -327,7 +356,7 @@ enum _SearchBody {
 
 class _SearchPageRoute<T> extends PageRoute<T> {
   _SearchPageRoute({
-    @required this.delegate,
+    required this.delegate,
   }) : assert(delegate != null) {
     assert(
       delegate._route == null,
@@ -341,10 +370,10 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   final SearchDelegate<T> delegate;
 
   @override
-  Color get barrierColor => null;
+  Color? get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
@@ -385,7 +414,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void didComplete(T result) {
+  void didComplete(T? result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
@@ -395,8 +424,8 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 
 class _SearchPage<T> extends StatefulWidget {
   const _SearchPage({
-    this.delegate,
-    this.animation,
+    required this.delegate,
+    required this.animation,
   });
 
   final SearchDelegate<T> delegate;
@@ -478,9 +507,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
       ?? MaterialLocalizations.of(context).searchFieldLabel;
-    final TextStyle searchFieldStyle = widget.delegate.searchFieldStyle
-      ?? theme.inputDecorationTheme.hintStyle;
-    Widget body;
+    Widget? body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
         body = KeyedSubtree(
@@ -494,8 +521,11 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           child: widget.delegate.buildResults(context),
         );
         break;
+      case null:
+        break;
     }
-    String routeName;
+
+    late final String routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -513,33 +543,28 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       scopesRoute: true,
       namesRoute: true,
       label: routeName,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: theme.primaryColor,
-          iconTheme: theme.primaryIconTheme,
-          textTheme: theme.primaryTextTheme,
-          brightness: theme.primaryColorBrightness,
-          leading: widget.delegate.buildLeading(context),
-          title: TextField(
-            controller: widget.delegate._queryTextController,
-            focusNode: focusNode,
-            style: theme.textTheme.headline6,
-            textInputAction: widget.delegate.textInputAction,
-            keyboardType: widget.delegate.keyboardType,
-            onSubmitted: (String _) {
-              widget.delegate.showResults(context);
-            },
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: searchFieldLabel,
-              hintStyle: searchFieldStyle,
+      child: Theme(
+        data: theme,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: widget.delegate.buildLeading(context),
+            title: TextField(
+              controller: widget.delegate._queryTextController,
+              focusNode: focusNode,
+              style: theme.textTheme.headline6,
+              textInputAction: widget.delegate.textInputAction,
+              keyboardType: widget.delegate.keyboardType,
+              onSubmitted: (String _) {
+                widget.delegate.showResults(context);
+              },
+              decoration: InputDecoration(hintText: searchFieldLabel),
             ),
+            actions: widget.delegate.buildActions(context),
           ),
-          actions: widget.delegate.buildActions(context),
-        ),
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: body,
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: body,
+          ),
         ),
       ),
     );

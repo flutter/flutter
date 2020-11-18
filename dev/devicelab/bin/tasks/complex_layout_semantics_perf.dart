@@ -4,6 +4,7 @@
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as p;
 
@@ -20,6 +21,7 @@ void main() {
 
     await inDirectory(complexLayoutPath, () async {
       await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
         '-v',
         '--profile',
         '--trace-startup', // Enables "endless" timeline event buffering.

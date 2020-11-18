@@ -52,7 +52,7 @@ void main() {
       expect(globals.fs.isFileSync(outputFile), isTrue);
       expect(globals.fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Stdio: () => mockStdio,
     });
@@ -73,7 +73,7 @@ void main() {
       expect(globals.fs.isFileSync(outputFile), isTrue);
       expect(globals.fs.file(outputFile).readAsStringSync(), isEmpty);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Stdio: () => mockStdio,
     });
@@ -88,7 +88,7 @@ void main() {
       expect(globals.fs.isFileSync(outputFile), isTrue);
       expect(globals.fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Stdio: () => mockStdio,
     });

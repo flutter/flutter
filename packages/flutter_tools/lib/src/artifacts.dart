@@ -50,10 +50,14 @@ enum Artifact {
   webPrecompiledSdkSourcemaps,
   webPrecompiledCanvaskitSdk,
   webPrecompiledCanvaskitSdkSourcemaps,
+  webPrecompiledCanvaskitAndHtmlSdk,
+  webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
   webPrecompiledSoundSdk,
   webPrecompiledSoundSdkSourcemaps,
   webPrecompiledCanvaskitSoundSdk,
   webPrecompiledCanvaskitSoundSdkSourcemaps,
+  webPrecompiledCanvaskitAndHtmlSoundSdk,
+  webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
 
   iosDeploy,
   idevicesyslog,
@@ -158,13 +162,17 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'libraries.json';
     case Artifact.webPrecompiledSdk:
     case Artifact.webPrecompiledCanvaskitSdk:
+    case Artifact.webPrecompiledCanvaskitAndHtmlSdk:
     case Artifact.webPrecompiledSoundSdk:
     case Artifact.webPrecompiledCanvaskitSoundSdk:
+    case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk:
       return 'dart_sdk.js';
     case Artifact.webPrecompiledSdkSourcemaps:
     case Artifact.webPrecompiledCanvaskitSdkSourcemaps:
+    case Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps:
     case Artifact.webPrecompiledSoundSdkSourcemaps:
     case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
+    case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
       return 'dart_sdk.js.map';
   }
   assert(false, 'Invalid artifact $artifact.');
@@ -415,6 +423,10 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', _artifactToFileName(artifact, platform, mode));
       case Artifact.webPrecompiledCanvaskitSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledCanvaskitAndHtmlSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html', _artifactToFileName(artifact, platform, mode));
       case Artifact.webPrecompiledSoundSdk:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', _artifactToFileName(artifact, platform, mode));
       case Artifact.webPrecompiledSoundSdkSourcemaps:
@@ -423,6 +435,10 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _artifactToFileName(artifact, platform, mode));
       case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _artifactToFileName(artifact, platform, mode));
+      case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _artifactToFileName(artifact, platform, mode));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -610,6 +626,10 @@ class LocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', artifactFileName);
       case Artifact.webPrecompiledCanvaskitSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit', artifactFileName);
+      case Artifact.webPrecompiledCanvaskitAndHtmlSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html', artifactFileName);
+      case Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html', artifactFileName);
       case Artifact.webPrecompiledSoundSdk:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-sound', artifactFileName);
       case Artifact.webPrecompiledSoundSdkSourcemaps:
@@ -618,6 +638,10 @@ class LocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', artifactFileName);
       case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-sound', artifactFileName);
+      case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
+      case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

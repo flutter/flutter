@@ -12,7 +12,6 @@ import 'base/logger.dart';
 import 'base/template.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
-import 'dart/pub.dart';
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
@@ -70,11 +69,10 @@ class Template {
     @required Set<Uri> templateManifest,
     @required Logger logger,
     @required TemplateRenderer templateRenderer,
-    @required Pub pub,
   }) async {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
-    final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger, pub);
+    final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger);
     return Template(
       templateDir,
       templateDir, imageDir,
@@ -166,6 +164,7 @@ class Template {
       final String projectName = context['projectName'] as String;
       final String androidIdentifier = context['androidIdentifier'] as String;
       final String pluginClass = context['pluginClass'] as String;
+      final String pluginClassSnakeCase = context['pluginClassSnakeCase'] as String;
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = _fileSystem.path.separator;
       String finalDestinationPath = _fileSystem.path
@@ -180,6 +179,10 @@ class Template {
       }
       if (projectName != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
+      }
+      // This must be before the pluginClass replacement step.
+      if (pluginClassSnakeCase != null) {
+        finalDestinationPath = finalDestinationPath.replaceAll('pluginClassSnakeCase', pluginClassSnakeCase);
       }
       if (pluginClass != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
@@ -230,7 +233,6 @@ class Template {
       //         not need mustache rendering but needs to be directly copied.
 
       if (sourceFile.path.endsWith(copyTemplateExtension)) {
-        _validateReadPermissions(sourceFile);
         sourceFile.copySync(finalDestinationFile.path);
 
         return;
@@ -242,7 +244,6 @@ class Template {
       if (sourceFile.path.endsWith(imageTemplateExtension)) {
         final File imageSourceFile = _fileSystem.file(_fileSystem.path.join(
             imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')));
-        _validateReadPermissions(imageSourceFile);
         imageSourceFile.copySync(finalDestinationFile.path);
 
         return;
@@ -252,7 +253,6 @@ class Template {
       //         rendering via mustache.
 
       if (sourceFile.path.endsWith(templateExtension)) {
-         _validateReadPermissions(sourceFile);
         final String templateContents = sourceFile.readAsStringSync();
         final String renderedContents = _templateRenderer.renderString(templateContents, context);
 
@@ -263,19 +263,10 @@ class Template {
 
       // Step 5: This file does not end in .tmpl but is in a directory that
       //         does. Directly copy the file to the destination.
-      _validateReadPermissions(sourceFile);
       sourceFile.copySync(finalDestinationFile.path);
     });
 
     return fileCount;
-  }
-
-  /// Attempt open/close the file to ensure that read permissions are correct.
-  ///
-  /// If this fails with a certain error code, the [ErrorHandlingFileSystem] will
-  /// trigger a tool exit with a better message.
-  void _validateReadPermissions(File file) {
-    file.openSync().closeSync();
   }
 }
 
@@ -287,40 +278,17 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
 
 // Returns the directory containing the 'name' template directory in
 // flutter_template_images, to resolve image placeholder against.
-Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger, Pub pub) async {
+Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools');
-  final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
-  // Ensure that .packgaes is present.
-  if (!fileSystem.file(packageFilePath).existsSync()) {
-    await _ensurePackageDependencies(toolPackagePath, pub);
-  }
-  PackageConfig packageConfig = await loadPackageConfigWithLogging(
+  final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
+  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,
   );
-  Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
-  // Ensure that the template image package is present.
-  if (imagePackageLibDir == null || !fileSystem.directory(imagePackageLibDir).existsSync()) {
-    await _ensurePackageDependencies(toolPackagePath, pub);
-    packageConfig = await loadPackageConfigWithLogging(
-      fileSystem.file(packageFilePath),
-      logger: logger,
-    );
-    imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
-  }
+  final Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
   return fileSystem.directory(imagePackageLibDir)
       .parent
       .childDirectory('templates')
       .childDirectory(name);
-}
-
-// Runs 'pub get' for the given path to ensure that .packages is created and
-// all dependencies are present.
-Future<void> _ensurePackageDependencies(String packagePath, Pub pub) async {
-  await pub.get(
-    context: PubContext.pubGet,
-    directory: packagePath,
-    generateSyntheticPackage: false,
-  );
 }

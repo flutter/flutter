@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -67,7 +67,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios-framework',
-            '--xcframework',
+            '--universal',
             '--output=$outputDirectoryName'
           ],
         );
@@ -234,10 +234,7 @@ Future<void> main() async {
       section("Check all modes' engine header");
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
-        checkFileContains(
-          <String>['#include "FlutterEngine.h"'],
-          path.join(outputPath, mode, 'Flutter.framework', 'Headers', 'Flutter.h'),
-        );
+        checkFileExists(path.join(outputPath, mode, 'Flutter.framework', 'Headers', 'Flutter.h'));
       }
 
       section('Check all modes have plugins');
@@ -355,6 +352,7 @@ Future<void> main() async {
           options: <String>[
             'ios-framework',
             '--cocoapods',
+            '--universal',
             '--force', // Allow podspec creation on master.
             '--output=$cocoapodsOutputDirectoryName'
           ],

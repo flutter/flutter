@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -12,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -183,7 +182,7 @@ List<String> _xcodeBuildSettingsLines({
 
   // iOS does not link on Flutter in any build phase. Add the linker flag.
   if (!useMacOSConfig) {
-    xcodeBuildSettings.add('OTHER_LDFLAGS=\$(inherited) -framework Flutter');
+    xcodeBuildSettings.add(r'OTHER_LDFLAGS=$(inherited) -framework Flutter');
   }
 
   if (!project.isModule) {
@@ -244,26 +243,32 @@ class XcodeProjectInterpreter {
       _terminal = terminal,
       _logger = logger,
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+      _operatingSystemUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
       _usage = usage;
 
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
+  final OperatingSystemUtils _operatingSystemUtils;
   final Terminal _terminal;
   final Logger _logger;
   final Usage _usage;
 
-  static const String _executable = '/usr/bin/xcodebuild';
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
-    if (!_platform.isMacOS || !_fileSystem.file(_executable).existsSync()) {
+    if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
       return;
     }
     try {
       if (_versionText == null) {
         final RunResult result = _processUtils.runSync(
-          <String>[_executable, '-version'],
+          <String>[...xcrunCommand(), 'xcodebuild', '-version'],
         );
         if (result.exitCode != 0) {
           return;
@@ -318,6 +323,25 @@ class XcodeProjectInterpreter {
     return _patchVersion;
   }
 
+  /// The `xcrun` Xcode command to run or locate development
+  /// tools and properties.
+  ///
+  /// Returns `xcrun` on x86 macOS.
+  /// Returns `/usr/bin/arch -arm64e xcrun` on ARM macOS to force Xcode commands
+  /// to run outside the x86 Rosetta translation, which may cause crashes.
+  List<String> xcrunCommand() {
+    final List<String> xcrunCommand = <String>[];
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+      // Force Xcode commands to run outside Rosetta.
+      xcrunCommand.addAll(<String>[
+        '/usr/bin/arch',
+        '-arm64e',
+      ]);
+    }
+    xcrunCommand.add('xcrun');
+    return xcrunCommand;
+  }
+
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
   ///
@@ -329,13 +353,12 @@ class XcodeProjectInterpreter {
     Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = Status.withSpinner(
-      timeout: const TimeoutConfiguration().fastOperation,
-      timeoutConfiguration: const TimeoutConfiguration(),
       stopwatch: Stopwatch(),
       terminal: _terminal,
     );
     final List<String> showBuildSettingsCommand = <String>[
-      _executable,
+      ...xcrunCommand(),
+      'xcodebuild',
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null)
@@ -372,7 +395,8 @@ class XcodeProjectInterpreter {
 
   Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
     await _processUtils.run(<String>[
-      _executable,
+      ...xcrunCommand(),
+      'xcodebuild',
       '-workspace',
       workspacePath,
       '-scheme',
@@ -391,7 +415,8 @@ class XcodeProjectInterpreter {
     const int missingProjectExitCode = 66;
     final RunResult result = await _processUtils.run(
       <String>[
-        _executable,
+        ...xcrunCommand(),
+        'xcodebuild',
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
@@ -504,7 +529,7 @@ class XcodeProjectInfo {
 
   /// Checks whether the [buildConfigurations] contains the specified string, without
   /// regard to case.
-  bool hasBuildConfiguratinForBuildMode(String buildMode) {
+  bool hasBuildConfigurationForBuildMode(String buildMode) {
     buildMode = buildMode.toLowerCase();
     for (final String name in buildConfigurations) {
       if (name.toLowerCase() == buildMode) {
@@ -539,7 +564,7 @@ class XcodeProjectInfo {
   /// null, if there is no unique best match.
   String buildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    if (hasBuildConfiguratinForBuildMode(expectedConfiguration)) {
+    if (hasBuildConfigurationForBuildMode(expectedConfiguration)) {
       return expectedConfiguration;
     }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
