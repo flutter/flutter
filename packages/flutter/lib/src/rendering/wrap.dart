@@ -355,10 +355,10 @@ class RenderWrap extends RenderBox
   /// {@template flutter.rendering.RenderWrap.useLegacyMethodToCalculateIntrinsics}
   /// Uses the legacy method of calculating the intrinsics for its children.
   ///
-  /// The legacy method uses calls to [getMaxIntrinsicWidth] and
-  /// [getMaxIntrinsicHeight] to determine the dimensions of its children. This
-  /// produces an incorrect result. The new method uses calls to [getDryLayout],
-  /// which calculates the correct dimensions.
+  /// The legacy method uses calls to [RenderBox.getMaxIntrinsicWidth] and
+  /// [RenderBox.getMaxIntrinsicHeight] to determine the dimensions of its
+  /// children. This produces an incorrect result. The new method uses calls to
+  /// [RenderBox.getDryLayout], which calculates the correct dimensions.
   ///
   /// Setting this to true is not recommend. Only set this to true if your
   /// application depends on the old, incorrect behavior.
