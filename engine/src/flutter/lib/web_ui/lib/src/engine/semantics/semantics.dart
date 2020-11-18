@@ -1265,11 +1265,11 @@ class EngineSemanticsOwner {
 
   final SemanticsHelper semanticsHelper = SemanticsHelper();
 
-  /// Whether the user has requested that [updateSemantics] be called when
-  /// the semantic contents of window changes.
+  /// Whether the user has requested that [updateSemantics] be called when the
+  /// semantic contents of window changes.
   ///
-  /// The [ui.Window.onSemanticsEnabledChanged] callback is called whenever this
-  /// value changes.
+  /// The [ui.PlatformDispatcher.onSemanticsEnabledChanged] callback is called
+  /// whenever this value changes.
   ///
   /// This is separate from accessibility [mode], which controls how gestures
   /// are interpreted when this value is true.
