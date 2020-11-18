@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'box.dart';
 import 'layer.dart';
+import 'layout_helper.dart';
 import 'object.dart';
 
 /// How [Wrap] should align objects.
@@ -120,6 +121,11 @@ class RenderWrap extends RenderBox
     TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     Clip clipBehavior = Clip.none,
+    @Deprecated(
+      'New code should never set this to true to calculate the intrinsics correctly.'
+      'This feature was deprecated after 1.24.0-7.0.'
+    )
+    bool useLegacyMethodToCalculateIntrinsics = false,
   }) : assert(direction != null),
        assert(alignment != null),
        assert(spacing != null),
@@ -135,7 +141,8 @@ class RenderWrap extends RenderBox
        _crossAxisAlignment = crossAxisAlignment,
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _useLegacyMethodToCalculateIntrinsics = useLegacyMethodToCalculateIntrinsics {
     addAll(children);
   }
 
@@ -345,6 +352,37 @@ class RenderWrap extends RenderBox
     }
   }
 
+  /// {@template flutter.rendering.RenderWrap.useLegacyMethodToCalculateIntrinsics}
+  /// Uses the legacy method of calculating the intrinsics for its children.
+  ///
+  /// The legacy method uses calls to [getMaxIntrinsicWidth] and
+  /// [getMaxIntrinsicHeight] to determine the dimensions of its children. This
+  /// produces an incorrect result. The new method uses calls to [getDryLayout],
+  /// which calculates the correct dimensions.
+  ///
+  /// Setting this to true is not recommend. Only set this to true if your
+  /// application depends on the old, incorrect behavior.
+  ///
+  /// Defaults to false.
+  /// {@endtemplate}
+  @Deprecated(
+    'New code should never set this to true to calculate the intrinsics correctly.'
+    'This feature was deprecated after 1.24.0-7.0.'
+  )
+  bool get useLegacyMethodToCalculateIntrinsics => _useLegacyMethodToCalculateIntrinsics;
+  bool _useLegacyMethodToCalculateIntrinsics = false;
+  @Deprecated(
+    'New code should never set this to true to calculate the intrinsics correctly.'
+    'This feature was deprecated after 1.24.0-7.0.'
+  )
+  set useLegacyMethodToCalculateIntrinsics(bool value) {
+    assert(value != null);
+    if (value != _useLegacyMethodToCalculateIntrinsics) {
+      _useLegacyMethodToCalculateIntrinsics = value;
+      markNeedsLayout();
+    }
+  }
+
   bool get _debugHasNecessaryDirections {
     assert(direction != null);
     assert(alignment != null);
@@ -400,6 +438,33 @@ class RenderWrap extends RenderBox
       child.parentData = WrapParentData();
   }
 
+
+  double _computeIntrinsicHeightForWidth(double width) {
+    assert(direction == Axis.horizontal);
+    final BoxConstraints constraints = BoxConstraints(maxWidth: width);
+    if (useLegacyMethodToCalculateIntrinsics) {
+      return _computeDryLayout(constraints, (RenderBox child, BoxConstraints constraints) {
+        final double childWidth = math.min(child.getMaxIntrinsicWidth(double.infinity), width);
+        final double childHeight = child.getMaxIntrinsicHeight(childWidth);
+        return Size(childHeight, childWidth);
+      }).width;
+    }
+    return computeDryLayout(constraints).height;
+  }
+
+  double _computeIntrinsicWidthForHeight(double height) {
+    assert(direction == Axis.vertical);
+    final BoxConstraints constraints = BoxConstraints(maxHeight: height);
+    if (useLegacyMethodToCalculateIntrinsics) {
+      return _computeDryLayout(constraints, (RenderBox child, BoxConstraints constraints) {
+        final double childHeight = math.min(child.getMaxIntrinsicHeight(double.infinity), height);
+        final double childWidth = child.getMaxIntrinsicWidth(childHeight);
+        return Size(childHeight, childWidth);
+      }).width;
+    }
+    return computeDryLayout(constraints).width;
+  }
+
   @override
   double computeMinIntrinsicWidth(double height) {
     switch (direction) {
@@ -412,7 +477,7 @@ class RenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
-        return computeDryLayout(BoxConstraints(maxHeight: height)).width;
+        return _computeIntrinsicWidthForHeight(height);
     }
   }
 
@@ -428,7 +493,7 @@ class RenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
-        return computeDryLayout(BoxConstraints(maxHeight: height)).width;
+        return _computeIntrinsicWidthForHeight(height);
     }
   }
 
@@ -436,7 +501,7 @@ class RenderWrap extends RenderBox
   double computeMinIntrinsicHeight(double width) {
     switch (direction) {
       case Axis.horizontal:
-        return computeDryLayout(BoxConstraints(maxWidth: width)).height;
+        return _computeIntrinsicHeightForWidth(width);
       case Axis.vertical:
         double height = 0.0;
         RenderBox? child = firstChild;
@@ -452,7 +517,7 @@ class RenderWrap extends RenderBox
   double computeMaxIntrinsicHeight(double width) {
     switch (direction) {
       case Axis.horizontal:
-        return computeDryLayout(BoxConstraints(maxWidth: width)).height;
+        return _computeIntrinsicHeightForWidth(width);
       case Axis.vertical:
         double height = 0.0;
         RenderBox? child = firstChild;
@@ -512,6 +577,10 @@ class RenderWrap extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
+    return _computeDryLayout(constraints);
+  }
+
+  Size _computeDryLayout(BoxConstraints constraints, [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
     final BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
     switch (direction) {
@@ -532,7 +601,7 @@ class RenderWrap extends RenderBox
     int childCount = 0;
     RenderBox? child = firstChild;
     while (child != null) {
-      final Size childSize = child.getDryLayout(childConstraints);
+      final Size childSize = layoutChild(child, childConstraints);
       final double childMainAxisExtent = _getMainAxisExtent(childSize);
       final double childCrossAxisExtent = _getCrossAxisExtent(childSize);
       // There must be at least one child before we move on to the next run.
