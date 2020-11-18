@@ -694,12 +694,12 @@ class _RenderCupertinoDialog extends RenderBox {
   _DialogSizes _performLayout({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     return isInAccessibilityMode
         ? performAccessibilityLayout(
-      constraints: constraints,
-      layoutChild: layoutChild,
-    ) : performRegularLayout(
-      constraints: constraints,
-      layoutChild: layoutChild,
-    );
+          constraints: constraints,
+          layoutChild: layoutChild,
+        ) : performRegularLayout(
+          constraints: constraints,
+          layoutChild: layoutChild,
+        );
   }
 
   // When not in accessibility mode, an alert dialog might reduce the space
