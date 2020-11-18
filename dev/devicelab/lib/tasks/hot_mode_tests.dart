@@ -31,9 +31,9 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
       '--hot', '-d', deviceIdOverride, '--benchmark', '--resident',  '--no-android-gradle-daemon',
     ];
     int hotReloadCount = 0;
-    Map<String, dynamic> twoReloadsData;
-    Map<String, dynamic> threeReloadsData;
-    Map<String, dynamic> fourReloadsData;
+    Map<String, dynamic> smallReloadData;
+    Map<String, dynamic> mediumReloadData;
+    Map<String, dynamic> largeReloadData;
     Map<String, dynamic> freshRestartReloadsData;
 
 
@@ -43,12 +43,12 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
 
       await inDirectory<void>(_editedFlutterGalleryDir, () async {
-        twoReloadsData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
+        smallReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
           if (!line.contains('Reloaded ')) {
             return;
           }
           if (hotReloadCount == 0) {
-            // Update a file for 2-3 library invalidation.
+            // Update a file for 2 library invalidation.
             final File appDartSource = file(path.join(
               _editedFlutterGalleryDir.path, 'lib/gallery/app.dart',
             ));
@@ -63,12 +63,12 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
           }
         });
 
-        threeReloadsData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
+        mediumReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
           if (!line.contains('Reloaded ')) {
             return;
           }
           if (hotReloadCount == 1) {
-            // Update a file for 2-3 library invalidation.
+            // Update a file for ~50 library invalidation.
             final File appDartSource = file(path.join(
               _editedFlutterGalleryDir.path, 'lib/demo/calculator/home.dart',
             ));
@@ -82,7 +82,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
           }
         });
 
-        fourReloadsData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
+        largeReloadData = await captureReloadData(options, environment, benchmarkFile, (String line, Process process) {
           if (!line.contains('Reloaded ')) {
             return;
           }
@@ -141,25 +141,25 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
 
     return TaskResult.success(
       <String, dynamic> {
-        'hotReloadInitialDevFSSyncMilliseconds': twoReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
-        'hotRestartMillisecondsToFrame': twoReloadsData['hotRestartMillisecondsToFrame'][0],
-        'hotReloadMillisecondsToFrame' : twoReloadsData['hotReloadMillisecondsToFrame'][0],
-        'hotReloadDevFSSyncMilliseconds': twoReloadsData['hotReloadDevFSSyncMilliseconds'][0],
-        'hotReloadFlutterReassembleMilliseconds': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][0],
-        'hotReloadVMReloadMilliseconds': twoReloadsData['hotReloadVMReloadMilliseconds'][0],
-        'hotReloadMillisecondsToFrameAfterChange' : twoReloadsData['hotReloadMillisecondsToFrame'][1],
-        'hotReloadDevFSSyncMillisecondsAfterChange': twoReloadsData['hotReloadDevFSSyncMilliseconds'][1],
-        'hotReloadFlutterReassembleMillisecondsAfterChange': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
-        'hotReloadVMReloadMillisecondsAfterChange': twoReloadsData['hotReloadVMReloadMilliseconds'][1],
+        'hotReloadInitialDevFSSyncMilliseconds': smallReloadData['hotReloadInitialDevFSSyncMilliseconds'][0],
+        'hotRestartMillisecondsToFrame': smallReloadData['hotRestartMillisecondsToFrame'][0],
+        'hotReloadMillisecondsToFrame' : smallReloadData['hotReloadMillisecondsToFrame'][0],
+        'hotReloadDevFSSyncMilliseconds': smallReloadData['hotReloadDevFSSyncMilliseconds'][0],
+        'hotReloadFlutterReassembleMilliseconds': smallReloadData['hotReloadFlutterReassembleMilliseconds'][0],
+        'hotReloadVMReloadMilliseconds': smallReloadData['hotReloadVMReloadMilliseconds'][0],
+        'hotReloadMillisecondsToFrameAfterChange' : smallReloadData['hotReloadMillisecondsToFrame'][1],
+        'hotReloadDevFSSyncMillisecondsAfterChange': smallReloadData['hotReloadDevFSSyncMilliseconds'][1],
+        'hotReloadFlutterReassembleMillisecondsAfterChange': smallReloadData['hotReloadFlutterReassembleMilliseconds'][1],
+        'hotReloadVMReloadMillisecondsAfterChange': smallReloadData['hotReloadVMReloadMilliseconds'][1],
         'hotReloadInitialDevFSSyncAfterRelaunchMilliseconds' : freshRestartReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
-        'hotReloadMillisecondsToFrameAfterMediumChange' : threeReloadsData['hotReloadMillisecondsToFrame'][1],
-        'hotReloadDevFSSyncMillisecondsAfterMediumChange': threeReloadsData['hotReloadDevFSSyncMilliseconds'][1],
-        'hotReloadFlutterReassembleMillisecondsAfterMediumChange': threeReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
-        'hotReloadVMReloadMillisecondsAfterMediumChange': threeReloadsData['hotReloadVMReloadMilliseconds'][1],
-        'hotReloadMillisecondsToFrameAfterLargeChange' : fourReloadsData['hotReloadMillisecondsToFrame'][1],
-        'hotReloadDevFSSyncMillisecondsAfterLargeChange': fourReloadsData['hotReloadDevFSSyncMilliseconds'][1],
-        'hotReloadFlutterReassembleMillisecondsAfterLargeChange': fourReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
-        'hotReloadVMReloadMillisecondsAfterLargeChange': fourReloadsData['hotReloadVMReloadMilliseconds'][1],
+        'hotReloadMillisecondsToFrameAfterMediumChange' : mediumReloadData['hotReloadMillisecondsToFrame'][1],
+        'hotReloadDevFSSyncMillisecondsAfterMediumChange': mediumReloadData['hotReloadDevFSSyncMilliseconds'][1],
+        'hotReloadFlutterReassembleMillisecondsAfterMediumChange': mediumReloadData['hotReloadFlutterReassembleMilliseconds'][1],
+        'hotReloadVMReloadMillisecondsAfterMediumChange': mediumReloadData['hotReloadVMReloadMilliseconds'][1],
+        'hotReloadMillisecondsToFrameAfterLargeChange' : largeReloadData['hotReloadMillisecondsToFrame'][1],
+        'hotReloadDevFSSyncMillisecondsAfterLargeChange': largeReloadData['hotReloadDevFSSyncMilliseconds'][1],
+        'hotReloadFlutterReassembleMillisecondsAfterLargeChange': largeReloadData['hotReloadFlutterReassembleMilliseconds'][1],
+        'hotReloadVMReloadMillisecondsAfterLargeChange': largeReloadData['hotReloadVMReloadMilliseconds'][1],
       },
       benchmarkScoreKeys: <String>[
         'hotReloadInitialDevFSSyncMilliseconds',
