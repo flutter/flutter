@@ -67,6 +67,7 @@
 @implementation TextPlatformView {
   UITextView* _textView;
   FlutterMethodChannel* _channel;
+  BOOL _viewCreated;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -87,11 +88,18 @@
     [_textView addGestureRecognizer:gestureRecognizer];
     gestureRecognizer.testTapGestureRecognizerDelegate = self;
     _textView.accessibilityLabel = @"";
+
+    _viewCreated = NO;
   }
   return self;
 }
 
 - (UIView*)view {
+  // Makes sure the engine only calls this method once.
+  if (_viewCreated) {
+    abort();
+  }
+  _viewCreated = YES;
   return _textView;
 }
 
