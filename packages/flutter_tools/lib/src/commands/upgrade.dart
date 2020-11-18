@@ -14,7 +14,6 @@ import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
-import 'channel.dart';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand([UpgradeCommandRunner commandRunner])
@@ -38,6 +37,11 @@ class UpgradeCommand extends FlutterCommand {
         'working-directory',
         hide: true,
         help: 'Override the upgrade working directory for integration testing.'
+      )
+      ..addFlag(
+        'verify-only',
+        help: 'Verifies for any new flutter update, without fetching the update.',
+        negatable: false,
       );
   }
 
@@ -62,7 +66,8 @@ class UpgradeCommand extends FlutterCommand {
       gitTagVersion: GitTagVersion.determine(globals.processUtils),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
-        : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
+        : FlutterVersion(clock: const SystemClock(), workingDirectory: _commandRunner.workingDirectory),
+      verifyOnly: boolArg('verify-only'),
     );
   }
 }
@@ -78,6 +83,7 @@ class UpgradeCommandRunner {
     @required bool testFlow,
     @required GitTagVersion gitTagVersion,
     @required FlutterVersion flutterVersion,
+    @required bool verifyOnly,
   }) async {
     if (!continueFlow) {
       await runCommandFirstHalf(
@@ -85,6 +91,7 @@ class UpgradeCommandRunner {
         gitTagVersion: gitTagVersion,
         flutterVersion: flutterVersion,
         testFlow: testFlow,
+        verifyOnly: verifyOnly,
       );
     } else {
       await runCommandSecondHalf(flutterVersion);
@@ -97,11 +104,23 @@ class UpgradeCommandRunner {
     @required GitTagVersion gitTagVersion,
     @required FlutterVersion flutterVersion,
     @required bool testFlow,
+    @required bool verifyOnly,
   }) async {
     final String upstreamRevision = await fetchRemoteRevision();
     if (flutterVersion.frameworkRevision == upstreamRevision) {
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
+      return;
+    } else if (verifyOnly) {
+      globals.printStatus('A new version of Flutter is available on channel ${flutterVersion.channel}\n');
+      // TODO(fujino): use a [FlutterVersion] once that class supports arbitrary revisions.
+      globals.printStatus('The latest revision: $upstreamRevision', emphasis: true);
+      globals.printStatus('Your current version: ${flutterVersion.frameworkRevision}\n');
+      globals.printStatus('To upgrade now, run "flutter upgrade".');
+      if (flutterVersion.channel == 'stable') {
+        globals.printStatus('\nSee the announcement and release notes:');
+        globals.printStatus('https://flutter.dev/docs/development/tools/sdk/release-notes');
+      }
       return;
     }
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
@@ -134,7 +153,6 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await upgradeChannel(flutterVersion);
     await attemptReset(upstreamRevision);
     if (!testFlow) {
       await flutterUpgradeContinue();
@@ -236,15 +254,6 @@ class UpgradeCommandRunner {
       }
     }
     return revision;
-  }
-
-  /// Attempts to upgrade the channel.
-  ///
-  /// If the user is on a deprecated channel, attempts to migrate them off of
-  /// it.
-  Future<void> upgradeChannel(FlutterVersion flutterVersion) async {
-    globals.printStatus('Upgrading Flutter from $workingDirectory...');
-    await ChannelCommand.upgradeChannel();
   }
 
   /// Attempts a hard reset to the given revision.

@@ -991,8 +991,8 @@ void main() {
                 data: MediaQueryData(textScaleFactor: textScaleFactor),
                 child: Material(
                   child: Theme(
-                    data: Theme.of(context)!.copyWith(
-                      sliderTheme: Theme.of(context)!.sliderTheme.copyWith(showValueIndicator: show),
+                    data: Theme.of(context).copyWith(
+                      sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
                     ),
                     child: Center(
                       child: OverflowBox(

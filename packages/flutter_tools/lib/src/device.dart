@@ -621,6 +621,10 @@ abstract class Device {
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
 
+  /// Platform name for display only.
+  Future<String> get targetPlatformDisplayName async =>
+      getNameForTargetPlatform(await targetPlatform);
+
   Future<String> get sdkNameAndVersion;
 
   /// Create a platform-specific [DevFSWriter] for the given [app], or
@@ -749,7 +753,7 @@ abstract class Device {
       table.add(<String>[
         '${device.name} (${device.category})',
         device.id,
-        getNameForTargetPlatform(targetPlatform),
+        await device.targetPlatformDisplayName,
         '${await device.sdkNameAndVersion}$supportIndicator',
       ]);
     }
@@ -831,6 +835,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.disableDds = false,
+    this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
@@ -861,6 +866,7 @@ class DebuggingOptions {
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
+      this.dartEntrypointArgs = const <String>[],
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
@@ -898,6 +904,7 @@ class DebuggingOptions {
   final BuildInfo buildInfo;
   final bool startPaused;
   final String dartFlags;
+  final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
   final bool disableDds;
   final bool enableSoftwareRendering;

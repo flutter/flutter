@@ -2440,7 +2440,7 @@ class RenderFittedBox extends RenderProxyBox {
   bool? _hasVisualOverflow;
   Matrix4? _transform;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -2777,11 +2777,13 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     this.onHover,
     this.onExit,
     MouseCursor cursor = MouseCursor.defer,
+    bool validForMouseTracker = true,
     bool opaque = true,
     RenderBox? child,
   }) : assert(opaque != null),
        assert(cursor != null),
        _cursor = cursor,
+       _validForMouseTracker = validForMouseTracker,
        _opaque = opaque,
        super(child);
 
@@ -2850,6 +2852,25 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   }
 
   @override
+  bool get validForMouseTracker => _validForMouseTracker;
+  bool _validForMouseTracker;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _validForMouseTracker = true;
+  }
+
+  @override
+  void detach() {
+    // It's possible that the renderObject be detached during mouse events
+    // dispatching, set the [MouseTrackerAnnotation.validForMouseTracker] false to prevent
+    // the callbacks from being called.
+    _validForMouseTracker = false;
+    super.detach();
+  }
+
+  @override
   void performResize() {
     size = constraints.biggest;
   }
@@ -2868,6 +2889,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     ));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: MouseCursor.defer));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
+    properties.add(FlagProperty('validForMouseTracker', value: validForMouseTracker, defaultValue: true, ifFalse: 'invalid for MouseTracker'));
   }
 }
 
@@ -2914,9 +2936,9 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
-  /// [Window.devicePixelRatio] for the device, so specifying 1.0 (the default)
-  /// will give you a 1:1 mapping between logical pixels and the output pixels
-  /// in the image.
+  /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
+  /// (the default) will give you a 1:1 mapping between logical pixels and the
+  /// output pixels in the image.
   ///
   /// {@tool snippet}
   ///
@@ -3600,6 +3622,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
+    SemanticsTag? tagForChildren,
     VoidCallback? onTap,
     VoidCallback? onDismiss,
     VoidCallback? onLongPress,
@@ -3655,6 +3678,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
+       _tagForChildren = tagForChildren,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -4072,6 +4096,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// Adds a semenatics tag to the semantics subtree.
+  SemanticsTag? get tagForChildren => _tagForChildren;
+  SemanticsTag? _tagForChildren;
+  set tagForChildren(SemanticsTag? value) {
+    if (_tagForChildren == value)
+      return;
+    markNeedsSemanticsUpdate();
+    _tagForChildren = value;
+  }
+
   /// The handler for [SemanticsAction.tap].
   ///
   /// This is the semantic equivalent of a user briefly tapping the screen with
@@ -4087,7 +4121,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = _onTap != null;
     _onTap = handler;
-    if ((handler != null) == hadValue)
+    if ((handler != null) != hadValue)
       markNeedsSemanticsUpdate();
   }
 
@@ -4105,7 +4139,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = _onDismiss != null;
     _onDismiss = handler;
-    if ((handler != null) == hadValue)
+    if ((handler != null) != hadValue)
       markNeedsSemanticsUpdate();
   }
 
@@ -4549,6 +4583,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.textDirection = textDirection;
     if (sortKey != null)
       config.sortKey = sortKey;
+    if (tagForChildren != null)
+      config.addTagForChildren(tagForChildren!);
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
@@ -4986,7 +5022,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// The anchor point on the linked [RenderLeaderLayer] that [followerAnchor]
   /// will line up with.
   ///
-  /// {@template flutter.rendering.followerLayer.anchor}
+  /// {@template flutter.rendering.RenderFollowerLayer.leaderAnchor}
   /// For example, when [leaderAnchor] and [followerAnchor] are both
   /// [Alignment.topLeft], this [RenderFollowerLayer] will be top left aligned
   /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
@@ -5010,7 +5046,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// The anchor point on this [RenderFollowerLayer] that will line up with
   /// [followerAnchor] on the linked [RenderLeaderLayer].
   ///
-  /// {@macro flutter.rendering.followerLayer.anchor}
+  /// {@macro flutter.rendering.RenderFollowerLayer.leaderAnchor}
   ///
   /// Defaults to [Alignment.topLeft].
   Alignment get followerAnchor => _followerAnchor;

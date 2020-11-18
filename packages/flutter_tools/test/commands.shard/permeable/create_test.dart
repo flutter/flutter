@@ -2283,7 +2283,7 @@ Future<void> _createProject(
   List<String> expectedPaths, {
   List<String> unexpectedPaths = const <String>[],
 }) async {
-  Cache.flutterRoot = '../../..';
+  Cache.flutterRoot = '../..';
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[

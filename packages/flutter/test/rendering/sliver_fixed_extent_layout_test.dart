@@ -41,6 +41,74 @@ void main() {
     expect(children[1].attached, false);
     expect(children[2].attached, true);
   });
+
+  group('getMaxChildIndexForScrollOffset', () {
+    // Regression test for https://github.com/flutter/flutter/issues/68182
+
+    const double genericItemExtent = 600.0;
+    const double extraValueToNotHaveRoundingIssues = 0.0000001; // 6 zeros
+    const double extraValueToHaveRoundingIssues = 0.00000001; // 7 zeros
+
+    test('should be 0 when item extent is 0', () {
+      const double offsetValueWhichDoesntCare = 1234;
+      final int actual = testGetMaxChildIndexForScrollOffset(offsetValueWhichDoesntCare, 0);
+      expect(actual, 0);
+    });
+
+    test('should be 0 when offset is 0', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(0, genericItemExtent);
+      expect(actual, 0);
+    });
+
+    test('should be 0 when offset is equal to item extent', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(genericItemExtent, genericItemExtent);
+      expect(actual, 0);
+    });
+
+    test('should be 1 when offset is greater than item extent', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(
+        genericItemExtent + 1, genericItemExtent);
+      expect(actual, 1);
+    });
+
+    test('should be 1 when offset is slightly greater than item extent', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(
+        genericItemExtent + extraValueToNotHaveRoundingIssues, genericItemExtent);
+      expect(actual, 1);
+    });
+
+    test('should be 4 when offset is four times and a half greater than item extent', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(
+        genericItemExtent * 4.5, genericItemExtent);
+      expect(actual, 4);
+    });
+
+    test('should be 5 when offset is 6 times greater than item extent', () {
+      const double anotherGenericItemExtent = 414.0;
+      final int actual = testGetMaxChildIndexForScrollOffset(
+        anotherGenericItemExtent * 6, anotherGenericItemExtent);
+      expect(actual, 5);
+    });
+
+    test('should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals', () {
+      const double itemExtentSpecificForAProblematicSreenSize = 411.42857142857144;
+      final int actual = testGetMaxChildIndexForScrollOffset(
+          itemExtentSpecificForAProblematicSreenSize * 6 + extraValueToHaveRoundingIssues,
+          itemExtentSpecificForAProblematicSreenSize);
+      expect(actual, 5);
+    });
+
+    test('should be 0 when offset is 0.00000001 times greater than item extent where the divison will return more than 13 zero decimals', () {
+      final int actual = testGetMaxChildIndexForScrollOffset(
+        genericItemExtent + extraValueToHaveRoundingIssues, genericItemExtent);
+      expect(actual, 0);
+    });
+  });
+}
+
+int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+  final TestRenderSliverFixedExtentBoxAdaptor renderSliver = TestRenderSliverFixedExtentBoxAdaptor();
+  return renderSliver.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
 }
 
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
@@ -102,4 +170,18 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void setDidUnderflow(bool value) { }
+}
+
+class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAdaptor {
+  TestRenderSliverFixedExtentBoxAdaptor()
+    :super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
+
+  @override
+  // ignore: unnecessary_overrides
+  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    return super.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
+  }
+
+  @override
+  double get itemExtent => throw UnimplementedError();
 }

@@ -873,7 +873,7 @@ void main() {
 
     await tester.tap(find.text('Alarm'));
     await tester.pump(const Duration(seconds: 1));
-    expect(Theme.of(tester.element(find.text('Alarm')))!.brightness, equals(Brightness.dark));
+    expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
   });
 
   testWidgets('BottomNavigationBar inherits shadowed app theme for fixed navbar', (WidgetTester tester) async {
@@ -911,7 +911,7 @@ void main() {
 
     await tester.tap(find.text('Alarm'));
     await tester.pump(const Duration(seconds: 1));
-    expect(Theme.of(tester.element(find.text('Alarm')))!.brightness, equals(Brightness.dark));
+    expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
   });
 
   testWidgets('BottomNavigationBar iconSize test', (WidgetTester tester) async {

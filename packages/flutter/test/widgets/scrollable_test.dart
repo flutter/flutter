@@ -323,6 +323,39 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
+  testWidgets('Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse', (WidgetTester tester) async {
+    ScrollDirection? lastUserScrollingDirection;
+
+    final ScrollController controller = ScrollController();
+    await pumpTest(tester, TargetPlatform.fuchsia, controller: controller);
+
+    controller.addListener(() {
+      if(controller.position.userScrollDirection != ScrollDirection.idle)
+        lastUserScrollingDirection = controller.position.userScrollDirection;
+    });
+
+    await tester.drag(find.byType(Viewport), const Offset(0.0, -20.0), touchSlopY: 0.0);
+
+    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+
+    expect(lastUserScrollingDirection, ScrollDirection.reverse);
+
+    await tester.drag(find.byType(Viewport), const Offset(0.0, 20.0), touchSlopY: 0.0);
+
+    expect(lastUserScrollingDirection, ScrollDirection.forward);
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
+
+    expect(lastUserScrollingDirection, ScrollDirection.forward);
+  });
+
+
   testWidgets('Scrolls in correct direction when scroll axis is reversed', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia, reverse: true);
 
@@ -333,6 +366,82 @@ void main() {
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
 
     expect(getScrollOffset(tester), 20.0);
+  });
+
+  group('setCanDrag to false with active drag gesture: ', () {
+    Future<void> pumpTestWidget(WidgetTester tester, { required bool canDrag }) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            physics: canDrag ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+            slivers: <Widget>[SliverToBoxAdapter(
+              child: SizedBox(
+                height: 2000,
+                child: GestureDetector(onTap: () {},),
+              ),
+            )],
+          ),
+        ),
+      );
+    }
+
+    testWidgets('Hold does not disable user interaction', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/66816.
+      await pumpTestWidget(tester, canDrag: true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+
+      expect(renderIgnorePointer.ignoring, false);
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+      expect(renderIgnorePointer.ignoring, false);
+
+      await pumpTestWidget(tester, canDrag: false);
+      expect(renderIgnorePointer.ignoring, false);
+
+      await gesture.up();
+      expect(renderIgnorePointer.ignoring, false);
+    });
+
+    testWidgets('Drag disables user interaction when recognized', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/66816.
+      await pumpTestWidget(tester, canDrag: true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+      expect(renderIgnorePointer.ignoring, false);
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+      expect(renderIgnorePointer.ignoring, false);
+
+      await gesture.moveBy(const Offset(0, -100));
+      // Starts ignoring when the drag is recognized.
+      expect(renderIgnorePointer.ignoring, true);
+
+      await pumpTestWidget(tester, canDrag: false);
+      expect(renderIgnorePointer.ignoring, false);
+
+      await gesture.up();
+      expect(renderIgnorePointer.ignoring, false);
+    });
+
+    testWidgets('Ballistic disables user interaction until it stops', (WidgetTester tester) async {
+      await pumpTestWidget(tester, canDrag: true);
+      final RenderIgnorePointer renderIgnorePointer = tester.renderObject<RenderIgnorePointer>(
+        find.descendant(of: find.byType(CustomScrollView), matching: find.byType(IgnorePointer)),
+      );
+      expect(renderIgnorePointer.ignoring, false);
+
+      // Starts ignoring when the drag is recognized.
+      await tester.fling(find.byType(Viewport), const Offset(0, -100), 1000);
+      expect(renderIgnorePointer.ignoring, true);
+      await tester.pump();
+
+      // When the activity ends we should stop ignoring pointers.
+      await tester.pumpAndSettle();
+      expect(renderIgnorePointer.ignoring, false);
+    });
   });
 
   testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {

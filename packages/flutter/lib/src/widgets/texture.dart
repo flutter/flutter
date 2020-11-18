@@ -45,7 +45,7 @@ class Texture extends LeafRenderObjectWidget {
   /// The identity of the backend texture.
   final int textureId;
 
-  /// {@template FilterQuality}
+  /// {@template flutter.widgets.Texture.filterQuality}
   /// The quality of sampling the texture and rendering it on screen.
   ///
   /// When the texture is scaled, a default [FilterQuality.low] is used for a higher quality but slower

@@ -225,8 +225,9 @@ class TextInputType {
 ///
 /// Despite the logical meaning of each action, choosing a particular
 /// [TextInputAction] does not necessarily cause any specific behavior to
-/// happen. It is up to the developer to ensure that the behavior that occurs
-/// when an action button is pressed is appropriate for the action button chosen.
+/// happen, other than changing the focus when approapriate. It is up to the
+/// developer to ensure that the behavior that occurs when an action button is
+/// pressed is appropriate for the action button chosen.
 ///
 /// For example: If the user presses the keyboard action button on iOS when it
 /// reads "Emergency Call", the result should not be a focus change to the next
@@ -314,6 +315,8 @@ enum TextInputAction {
   /// Logical meaning: The user is done with the current input source and wants
   /// to move to the next one.
   ///
+  /// Moves the focus to the next focusable item in the same [FocusScope].
+  ///
   /// Android: Corresponds to Android's "IME_ACTION_NEXT". The OS displays a
   /// button that represents moving forward, e.g., a right-facing arrow button.
   ///
@@ -323,6 +326,8 @@ enum TextInputAction {
 
   /// Logical meaning: The user wishes to return to the previous input source
   /// in the group, e.g., a form with multiple [TextField]s.
+  ///
+  /// Moves the focus to the previous focusable item in the same [FocusScope].
   ///
   /// Android: Corresponds to Android's "IME_ACTION_PREVIOUS". The OS displays a
   /// button that represents moving backward, e.g., a left-facing arrow button.
@@ -495,7 +500,7 @@ class TextInputConfiguration {
   /// Android and web, setting [autofillConfiguration] to null disables autofill.
   final AutofillConfiguration? autofillConfiguration;
 
-  /// {@template flutter.services.textInput.smartDashesType}
+  /// {@template flutter.services.TextInputConfiguration.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
   ///
   /// This flag only affects iOS versions 11 and above. It sets
@@ -520,7 +525,7 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final SmartDashesType smartDashesType;
 
-  /// {@template flutter.services.textInput.smartQuotesType}
+  /// {@template flutter.services.TextInputConfiguration.smartQuotesType}
   /// Whether to allow the platform to automatically format quotes.
   ///
   /// This flag only affects iOS. It sets
@@ -545,7 +550,7 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final SmartQuotesType smartQuotesType;
 
-  /// {@template flutter.services.textInput.enableSuggestions}
+  /// {@template flutter.services.TextInputConfiguration.enableSuggestions}
   /// Whether to show input suggestions as the user types.
   ///
   /// This flag only affects Android. On iOS, suggestions are tied directly to
@@ -824,7 +829,19 @@ abstract class TextInputClient {
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
 
-  /// Requests that this client perform the private command.
+  /// Request from the input method that this client perform the given private
+  /// command.
+  ///
+  /// This can be used to provide domain-specific features that are only known
+  /// between certain input methods and their clients.
+  ///
+  /// See also:
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand(java.lang.String,%20android.os.Bundle)],
+  ///     which is the Android documentation for performPrivateCommand, used to
+  ///     send a command from the input method.
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand],
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     send a command to the input method.
   void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
@@ -1365,7 +1382,7 @@ class TextInput {
   /// automatically when they are disposed. The default behavior can be
   /// overridden in [AutofillGroup.onDisposeAction].
   ///
-  /// {@template flutter.services.autofill.autofillContext}
+  /// {@template flutter.services.TextInput.finishAutofillContext}
   /// An autofill context is a collection of input fields that live in the
   /// platform's text input plugin. The platform is encouraged to save the user
   /// input stored in the current autofill context before the context is

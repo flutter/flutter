@@ -115,6 +115,12 @@
          "flaky": false
       },
       {
+         "name": "Linux web_tool_tests",
+         "repo": "flutter",
+         "task_name": "linux_web_tool_tests",
+         "flaky": true
+      },
+      {
          "name": "Linux web_benchmarks_html",
          "repo": "flutter",
          "task_name": "linux_web_benchmarks_html",
@@ -130,6 +136,12 @@
          "name": "Linux web_integration_tests",
          "repo": "flutter",
          "task_name": "linux_web_integration_tests",
+         "flaky": false
+      },
+      {
+         "name": "Linux web_long_running_tests",
+         "repo": "flutter",
+         "task_name": "linux_web_long_running_tests",
          "flaky": false
       },
       {
@@ -323,6 +335,12 @@
          "repo": "flutter",
          "task_name": "win_tool_tests",
          "flaky": false
+      },
+      {
+         "name": "Windows web_tool_tests",
+         "repo": "flutter",
+         "task_name": "win_web_tool_tests",
+         "flaky": true
       }
    ]
 }

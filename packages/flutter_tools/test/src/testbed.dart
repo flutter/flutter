@@ -710,9 +710,6 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  bool get isMaster => true;
-
-  @override
   String get repositoryUrl => null;
 
   @override
@@ -897,5 +894,14 @@ class FakeCache implements Cache {
   }
 
   @override
-  void clearStampFiles() {}
+  void clearStampFiles() { }
+
+  @override
+  void checkLockAcquired() { }
+
+  @override
+  Future<void> lock() async { }
+
+  @override
+  void releaseLock() { }
 }

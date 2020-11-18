@@ -305,7 +305,7 @@ void main() {
         final FlutterError error = FlutterError('Oops');
         double errorCount = 0;
 
-        runZoned(
+        runZonedGuarded(
           () async {
             mockHelper.refreshCompleter = Completer<void>.sync();
             await tester.pumpWidget(
@@ -371,7 +371,7 @@ void main() {
             )));
             expect(mockHelper.invocations, hasLength(5));
           },
-          onError: (dynamic e) {
+          (Object e, StackTrace stack) {
             expect(e, error);
             expect(errorCount, 0);
             errorCount++;

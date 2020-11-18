@@ -107,7 +107,7 @@ class TimeOfDay {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.formatTimeOfDay(
       this,
-      alwaysUse24HourFormat: MediaQuery.of(context)!.alwaysUse24HourFormat,
+      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
     );
   }
 

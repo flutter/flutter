@@ -220,7 +220,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationTheme inputTheme = Theme.of(context)!.inputDecorationTheme;
+    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
     return TextFormField(
       decoration: InputDecoration(
         border: inputTheme.border ?? const UnderlineInputBorder(),

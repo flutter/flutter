@@ -131,6 +131,17 @@ class TestCommand extends FlutterCommand {
               'interact with the vmservice at runtime.\n'
               'This flag is ignored if --start-paused or coverage are requested. '
               'The vmservice will be enabled no matter what in those cases.'
+      )
+      ..addOption('reporter',
+        abbr: 'r',
+        defaultsTo: 'compact',
+        help: 'Set how to print test results.\n'
+        '[compact] (default)         A single line, updated continuously.\n'
+        '[expanded]                  A separate line for each update.\n'
+        '[json]                      A machine-readable format (see https://dart.dev/go/test-docs/json_reporter.md).\n')
+      ..addOption('timeout',
+        help: 'The default test timeout. For example: 15s, 2x, none. Defaults to "30s"',
+        defaultsTo: '30s',
       );
       addDdsOptions(verboseHelp: verboseHelp);
   }
@@ -171,6 +182,7 @@ class TestCommand extends FlutterCommand {
     final List<String> plainNames = stringsArg('plain-name');
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
+    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -225,6 +237,8 @@ class TestCommand extends FlutterCommand {
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
+        // TODO(jonahwilliams): file bug for incorrect URI handling on windows
+        packagesPath: globals.fs.path.absolute('.packages'),
       );
     }
 
@@ -236,7 +250,6 @@ class TestCommand extends FlutterCommand {
     }
 
     final bool disableServiceAuthCodes = boolArg('disable-service-auth-codes');
-    final BuildInfo buildInfo = getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     final int result = await testRunner.runTests(
       testWrapper,
@@ -261,6 +274,8 @@ class TestCommand extends FlutterCommand {
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      reporter: stringArg('reporter'),
+      timeout: stringArg('timeout'),
     );
 
     if (collector != null) {

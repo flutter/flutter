@@ -431,7 +431,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
@@ -726,7 +726,7 @@ class _RailDestination extends StatelessWidget {
         break;
     }
 
-    final ColorScheme colors = Theme.of(context)!.colorScheme;
+    final ColorScheme colors = Theme.of(context).colorScheme;
     return Semantics(
       container: true,
       selected: selected,

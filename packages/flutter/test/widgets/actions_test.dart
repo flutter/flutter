@@ -293,7 +293,7 @@ void main() {
       await tester.pump();
       expect(Actions.find<TestIntent>(containerKey.currentContext!), equals(testAction));
       expect(() => Actions.find<DoNothingIntent>(containerKey.currentContext!), throwsAssertionError);
-      expect(Actions.find<DoNothingIntent>(containerKey.currentContext!, nullOk: true), isNull);
+      expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
 
       await tester.pumpWidget(
         Actions(
@@ -313,7 +313,7 @@ void main() {
       await tester.pump();
       expect(Actions.find<TestIntent>(containerKey.currentContext!), equals(testAction));
       expect(() => Actions.find<DoNothingIntent>(containerKey.currentContext!), throwsAssertionError);
-      expect(Actions.find<DoNothingIntent>(containerKey.currentContext!, nullOk: true), isNull);
+      expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
     testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -447,6 +447,78 @@ void main() {
       );
       expect(identical(result, sentinel), isTrue);
       expect(invoked, isTrue);
+    });
+    testWidgets('ContextAction can return null', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      const TestIntent intent = TestIntent();
+      final TestContextAction testAction = TestContextAction();
+
+      await tester.pumpWidget(
+        Actions(
+          dispatcher: TestDispatcher1(postInvoke: collect),
+          actions: <Type, Action<Intent>>{
+            TestIntent: testAction,
+          },
+          child: Container(key: containerKey),
+        ),
+      );
+
+      await tester.pump();
+      final Object? result = Actions.invoke<TestIntent>(
+        containerKey.currentContext!,
+        intent,
+      );
+      expect(result, isNull);
+      expect(invokedIntent, equals(intent));
+      expect(invokedAction, equals(testAction));
+      expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
+      expect(testAction.capturedContexts.single, containerKey.currentContext);
+    });
+    testWidgets('Disabled actions allow propagation to an ancestor', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+      const TestIntent intent = TestIntent();
+      final TestAction enabledTestAction = TestAction(
+        onInvoke: (Intent intent) {
+          invoked = true;
+          return invoked;
+        },
+      );
+      enabledTestAction.enabled = true;
+      final TestAction disabledTestAction = TestAction(
+        onInvoke: (Intent intent) {
+          invoked = true;
+          return invoked;
+        },
+      );
+      disabledTestAction.enabled = false;
+
+      await tester.pumpWidget(
+        Actions(
+          dispatcher: TestDispatcher1(postInvoke: collect),
+          actions: <Type, Action<Intent>>{
+            TestIntent: enabledTestAction,
+          },
+          child: Actions(
+            dispatcher: TestDispatcher(postInvoke: collect),
+            actions: <Type, Action<Intent>>{
+              TestIntent: disabledTestAction,
+            },
+            child: Container(key: containerKey),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      final Object? result = Actions.invoke<TestIntent>(
+        containerKey.currentContext!,
+        intent,
+      );
+      expect(result, isTrue);
+      expect(invoked, isTrue);
+      expect(invokedIntent, equals(intent));
+      expect(invokedAction, equals(enabledTestAction));
+      expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
   });
 
@@ -833,4 +905,14 @@ void main() {
       expect(description[1], equalsIgnoringHashCodes('actions: {TestIntent: TestAction#00000}'));
     });
   });
+}
+
+class TestContextAction extends ContextAction<TestIntent> {
+  List<BuildContext?> capturedContexts = <BuildContext?>[];
+
+  @override
+  Object? invoke(covariant TestIntent intent, [BuildContext? context]) {
+    capturedContexts.add(context);
+    return null;
+  }
 }

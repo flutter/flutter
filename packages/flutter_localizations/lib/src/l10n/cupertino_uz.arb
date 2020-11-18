@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Joylash",
   "selectAllButtonLabel": "Barchasini tanlash",
   "tabSemanticsLabel": "$tabCount varaqdan $tabIndex",
-  "modalBarrierDismissLabel": "Yopish"
+  "modalBarrierDismissLabel": "Yopish",
+  "searchTextFieldPlaceholderLabel": "Qidiruv"
 }
