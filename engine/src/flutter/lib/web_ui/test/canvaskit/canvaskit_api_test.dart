@@ -1187,10 +1187,10 @@ void _canvasTests() {
     final CkImage image = await picture.toImage(1, 1);
     final ByteData rawData =
         await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    expect(rawData, isNotNull);
+    expect(rawData.lengthInBytes, greaterThan(0));
     final ByteData pngData =
         await image.toByteData(format: ui.ImageByteFormat.png);
-    expect(pngData, isNotNull);
+    expect(pngData.lengthInBytes, greaterThan(0));
   });
 }
 

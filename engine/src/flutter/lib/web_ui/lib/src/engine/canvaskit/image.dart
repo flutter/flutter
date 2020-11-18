@@ -8,20 +8,17 @@ part of engine;
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
 void skiaInstantiateImageCodec(Uint8List list, Callback<ui.Codec> callback,
     [int? width, int? height, int? format, int? rowBytes]) {
-  final SkAnimatedImage skAnimatedImage =
-      canvasKit.MakeAnimatedImageFromEncoded(list);
-  final CkAnimatedImage animatedImage = CkAnimatedImage(skAnimatedImage);
-  final CkAnimatedImageCodec codec = CkAnimatedImageCodec(animatedImage);
+  final CkAnimatedImage codec = CkAnimatedImage.decodeFromBytes(list);
   callback(codec);
 }
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after
 /// requesting from URI.
 Future<ui.Codec> skiaInstantiateWebImageCodec(
-    String src, WebOnlyImageCodecChunkCallback? chunkCallback) {
+    String uri, WebOnlyImageCodecChunkCallback? chunkCallback) {
   Completer<ui.Codec> completer = Completer<ui.Codec>();
   //TODO: Switch to using MakeImageFromCanvasImageSource when animated images are supported.
-  html.HttpRequest.request(src, responseType: "arraybuffer",
+  html.HttpRequest.request(uri, responseType: "arraybuffer",
       onProgress: (html.ProgressEvent event) {
     if (event.lengthComputable) {
       chunkCallback?.call(event.loaded!, event.total!);
@@ -33,10 +30,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
     }
     final Uint8List list =
         new Uint8List.view((response.response as ByteBuffer));
-    final SkAnimatedImage skAnimatedImage =
-        canvasKit.MakeAnimatedImageFromEncoded(list);
-    final CkAnimatedImage animatedImage = CkAnimatedImage(skAnimatedImage);
-    final CkAnimatedImageCodec codec = CkAnimatedImageCodec(animatedImage);
+    final CkAnimatedImage codec = CkAnimatedImage.decodeFromBytes(list);
     completer.complete(codec);
   }, onError: (dynamic error) {
     completer.completeError(error);
@@ -44,123 +38,115 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
   return completer.future;
 }
 
-/// A wrapper for `SkAnimatedImage`.
-class CkAnimatedImage implements ui.Image {
-  // Use a box because `SkImage` may be deleted either due to this object
-  // being garbage-collected, or by an explicit call to [delete].
-  late final SkiaObjectBox<SkAnimatedImage> box;
-
-  SkAnimatedImage get _skAnimatedImage => box.skObject;
-
-  CkAnimatedImage(SkAnimatedImage skAnimatedImage) {
-    box = SkiaObjectBox<SkAnimatedImage>(this, skAnimatedImage);
+/// The CanvasKit implementation of [ui.Codec].
+///
+/// Wraps `SkAnimatedImage`.
+class CkAnimatedImage implements ui.Codec, StackTraceDebugger {
+  /// Decodes an image from a list of encoded bytes.
+  CkAnimatedImage.decodeFromBytes(Uint8List bytes) {
+    if (assertionsEnabled) {
+      _debugStackTrace = StackTrace.current;
+    }
+    final SkAnimatedImage skAnimatedImage =
+        canvasKit.MakeAnimatedImageFromEncoded(bytes);
+    box = SkiaObjectBox<CkAnimatedImage, SkAnimatedImage>(this, skAnimatedImage);
   }
 
-  CkAnimatedImage.cloneOf(SkiaObjectBox<SkAnimatedImage> boxToClone) {
-    box = boxToClone.clone(this);
-  }
+  // Use a box because `CkAnimatedImage` may be deleted either due to this
+  // object being garbage-collected, or by an explicit call to [dispose].
+  late final SkiaObjectBox<CkAnimatedImage, SkAnimatedImage> box;
+
+  @override
+  StackTrace get debugStackTrace => _debugStackTrace!;
+  StackTrace? _debugStackTrace;
 
   bool _disposed = false;
+  bool get debugDisposed => _disposed;
+
+  bool _debugCheckIsNotDisposed() {
+    assert(!_disposed, 'This image has been disposed.');
+    return true;
+  }
+
   @override
   void dispose() {
-    box.delete();
+    assert(
+      !_disposed,
+      'Cannot dispose a codec that has already been disposed.',
+    );
     _disposed = true;
+
+    // This image is no longer usable. Bump the ref count.
+    box.unref(this);
   }
 
   @override
-  bool get debugDisposed {
-    if (assertionsEnabled) {
-      return _disposed;
-    }
-    throw StateError(
-        'Image.debugDisposed is only available when asserts are enabled.');
-  }
-
-  ui.Image clone() => CkAnimatedImage.cloneOf(box);
-
-  @override
-  bool isCloneOf(ui.Image other) {
-    return other is CkAnimatedImage &&
-        other._skAnimatedImage.isAliasOf(_skAnimatedImage);
+  int get frameCount {
+    assert(_debugCheckIsNotDisposed());
+    return box.skiaObject.getFrameCount();
   }
 
   @override
-  List<StackTrace>? debugGetOpenHandleStackTraces() =>
-      box.debugGetStackTraces();
-
-  int get frameCount => _skAnimatedImage.getFrameCount();
-
-  /// Decodes the next frame and returns the frame duration.
-  Duration decodeNextFrame() {
-    final int durationMillis = _skAnimatedImage.decodeNextFrame();
-    return Duration(milliseconds: durationMillis);
-  }
-
-  int get repetitionCount => _skAnimatedImage.getRepetitionCount();
-
-  CkImage get currentFrameAsImage {
-    return CkImage(_skAnimatedImage.getCurrentFrame());
+  int get repetitionCount {
+    assert(_debugCheckIsNotDisposed());
+    return box.skiaObject.getRepetitionCount();
   }
 
   @override
-  int get width => _skAnimatedImage.width();
-
-  @override
-  int get height => _skAnimatedImage.height();
-
-  @override
-  Future<ByteData> toByteData(
-      {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
-    Uint8List bytes;
-
-    if (format == ui.ImageByteFormat.rawRgba) {
-      final SkImageInfo imageInfo = SkImageInfo(
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-        width: width,
-        height: height,
-      );
-      bytes = _skAnimatedImage.readPixels(imageInfo, 0, 0);
-    } else {
-      // Defaults to PNG 100%.
-      final SkData skData = _skAnimatedImage.encodeToData();
-      // Make a copy that we can return.
-      bytes = Uint8List.fromList(canvasKit.getDataBytes(skData));
-    }
-
-    final ByteData data = bytes.buffer.asByteData(0, bytes.length);
-    return Future<ByteData>.value(data);
+  Future<ui.FrameInfo> getNextFrame() {
+    assert(_debugCheckIsNotDisposed());
+    final int durationMillis = box.skiaObject.decodeNextFrame();
+    final Duration duration = Duration(milliseconds: durationMillis);
+    final CkImage image = CkImage(box.skiaObject.getCurrentFrame());
+    return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
   }
-
-  @override
-  String toString() => '[$width\u00D7$height]';
 }
 
 /// A [ui.Image] backed by an `SkImage` from Skia.
-class CkImage implements ui.Image {
+class CkImage implements ui.Image, StackTraceDebugger {
+  CkImage(SkImage skImage) {
+    if (assertionsEnabled) {
+      _debugStackTrace = StackTrace.current;
+    }
+    box = SkiaObjectBox<CkImage, SkImage>(this, skImage);
+  }
+
+  CkImage.cloneOf(this.box) {
+    if (assertionsEnabled) {
+      _debugStackTrace = StackTrace.current;
+    }
+    box.ref(this);
+  }
+
+  @override
+  StackTrace get debugStackTrace => _debugStackTrace!;
+  StackTrace? _debugStackTrace;
+
   // Use a box because `SkImage` may be deleted either due to this object
   // being garbage-collected, or by an explicit call to [delete].
-  late final SkiaObjectBox<SkImage> box;
+  late final SkiaObjectBox<CkImage, SkImage> box;
 
-  SkImage get skImage => box.skObject;
-
-  CkImage(SkImage skImage) {
-    box = SkiaObjectBox<SkImage>(this, skImage);
-  }
-
-  CkImage.cloneOf(SkiaObjectBox<SkImage> boxToClone) {
-    box = boxToClone.clone(this);
-  }
+  /// The underlying Skia image object.
+  ///
+  /// Do not store the returned value. It is memory-managed by [SkiaObjectBox].
+  /// Storing it may result in use-after-free bugs.
+  SkImage get skImage => box.skiaObject;
 
   bool _disposed = false;
+
+  bool _debugCheckIsNotDisposed() {
+    assert(!_disposed, 'This image has been disposed.');
+    return true;
+  }
+
   @override
   void dispose() {
-    box.delete();
-    assert(() {
-      _disposed = true;
-      return true;
-    }());
+    assert(
+      !_disposed,
+      'Cannot dispose an image that has already been disposed.',
+    );
+    _disposed = true;
+    box.unref(this);
   }
 
   @override
@@ -173,10 +159,14 @@ class CkImage implements ui.Image {
   }
 
   @override
-  ui.Image clone() => CkImage.cloneOf(box);
+  ui.Image clone() {
+    assert(_debugCheckIsNotDisposed());
+    return CkImage.cloneOf(box);
+  }
 
   @override
   bool isCloneOf(ui.Image other) {
+    assert(_debugCheckIsNotDisposed());
     return other is CkImage && other.skImage.isAliasOf(skImage);
   }
 
@@ -185,14 +175,21 @@ class CkImage implements ui.Image {
       box.debugGetStackTraces();
 
   @override
-  int get width => skImage.width();
+  int get width {
+    assert(_debugCheckIsNotDisposed());
+    return skImage.width();
+  }
 
   @override
-  int get height => skImage.height();
+  int get height {
+    assert(_debugCheckIsNotDisposed());
+    return skImage.height();
+  }
 
   @override
   Future<ByteData> toByteData(
       {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
+    assert(_debugCheckIsNotDisposed());
     Uint8List bytes;
 
     if (format == ui.ImageByteFormat.rawRgba) {
@@ -208,6 +205,7 @@ class CkImage implements ui.Image {
       final SkData skData = skImage.encodeToData(); //defaults to PNG 100%
       // make a copy that we can return
       bytes = Uint8List.fromList(canvasKit.getDataBytes(skData));
+      skData.delete();
     }
 
     final ByteData data = bytes.buffer.asByteData(0, bytes.length);
@@ -215,31 +213,9 @@ class CkImage implements ui.Image {
   }
 
   @override
-  String toString() => '[$width\u00D7$height]';
-}
-
-/// A [Codec] that wraps an `SkAnimatedImage`.
-class CkAnimatedImageCodec implements ui.Codec {
-  CkAnimatedImage animatedImage;
-
-  CkAnimatedImageCodec(this.animatedImage);
-
-  @override
-  void dispose() {
-    animatedImage.dispose();
-  }
-
-  @override
-  int get frameCount => animatedImage.frameCount;
-
-  @override
-  int get repetitionCount => animatedImage.repetitionCount;
-
-  @override
-  Future<ui.FrameInfo> getNextFrame() {
-    final Duration duration = animatedImage.decodeNextFrame();
-    final CkImage image = animatedImage.currentFrameAsImage;
-    return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
+  String toString() {
+    assert(_debugCheckIsNotDisposed());
+    return '[$width\u00D7$height]';
   }
 }
 
