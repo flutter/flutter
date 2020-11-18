@@ -17,7 +17,9 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../web/compile.dart';
 
-/// A build_runner specific implementation of the [WebCompilationProxy].
+// TODO(jonahwilliams): this class was kept around to reduce the diff in the migration
+// from build_runner to the frontend_server, but should be removed/refactored to be
+// similar to the test_compiler pattern used for regular flutter tests
 class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   BuildRunnerWebCompilationProxy();
 
