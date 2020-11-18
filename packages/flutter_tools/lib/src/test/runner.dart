@@ -121,14 +121,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         .absolute
         .uri
         .toFilePath();
-      final bool result = await webCompilationProxy.initialize(
+      final WebVirtualFS result = await webCompilationProxy.initialize(
         projectDirectory: flutterProject.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
-        projectName: flutterProject.manifest.appName,
-        initializePlatform: true,
+        buildInfo: buildInfo,
       );
-      if (!result) {
+      if (result == null) {
         throwToolExit('Failed to compile tests');
       }
       testArgs
@@ -146,6 +145,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
             buildInfo: buildInfo,
+            webVirtualFS: result,
           );
         },
       );

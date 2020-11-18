@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -96,19 +98,19 @@ class WebCompilationProxy {
   const WebCompilationProxy();
 
   /// Initialize the web compiler from the `projectDirectory`.
-  ///
-  /// Returns whether or not the build was successful.
-  ///
-  /// `release` controls whether we build the bundle for dartdevc or only
-  /// the entry points for dart2js to later take over.
-  Future<bool> initialize({
+  Future<WebVirtualFS> initialize({
     @required Directory projectDirectory,
-    @required String projectName,
-    String testOutputDir,
-    List<String> testFiles,
-    BuildMode mode,
-    bool initializePlatform,
+    @required String testOutputDir,
+    @required List<String> testFiles,
+    @required BuildInfo buildInfo,
   }) async {
     throw UnimplementedError();
   }
+}
+
+
+class WebVirtualFS {
+  final Map<String, Uint8List> metadataFiles = <String, Uint8List>{};
+  final Map<String, Uint8List> files = <String, Uint8List>{};
+  final Map<String, Uint8List> sourcemaps = <String, Uint8List>{};
 }

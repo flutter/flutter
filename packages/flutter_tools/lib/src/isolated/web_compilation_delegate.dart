@@ -2,266 +2,261 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:build_daemon/client.dart';
-import 'package:build_daemon/constants.dart' as daemon;
-import 'package:build_daemon/data/build_status.dart';
-import 'package:build_daemon/data/build_target.dart';
-import 'package:build_daemon/data/server_log.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
-import '../dart/pub.dart';
+import '../bundle.dart';
+import '../compile.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
-import '../platform_plugins.dart';
-import '../plugins.dart';
-import '../project.dart';
 import '../web/compile.dart';
 
-/// A build_runner specific implementation of the [WebCompilationProxy].
+// TODO(jonahwilliams): this class was kept around to reduce the diff in the migration
+// from build_runner to the frontend_server, but should be removed/refactored to be
+// similar to the test_compiler pattern used for regular flutter tests
 class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   BuildRunnerWebCompilationProxy();
 
   @override
-  Future<bool> initialize({
-    Directory projectDirectory,
-    String testOutputDir,
-    List<String> testFiles,
-    BuildMode mode,
-    String projectName,
-    bool initializePlatform,
+  Future<WebVirtualFS> initialize({
+    @required Directory projectDirectory,
+    @required String testOutputDir,
+    @required List<String> testFiles,
+    @required BuildInfo buildInfo,
   }) async {
-    // Create the .dart_tool directory if it doesn't exist.
-    projectDirectory
-      .childDirectory('.dart_tool')
-      .createSync();
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
-    final bool hasWebPlugins = (await findPlugins(flutterProject))
-      .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-    final BuildDaemonClient client = await const BuildDaemonCreator().startBuildDaemon(
-      projectDirectory.path,
-      release: mode == BuildMode.release,
-      profile: mode == BuildMode.profile,
-      hasPlugins: hasWebPlugins,
-      initializePlatform: initializePlatform,
-      testTargets: WebTestTargetManifest(
-        testFiles
-          .map<String>((String absolutePath) {
-            final String relativePath = path.relative(absolutePath, from: projectDirectory.path);
-            return '${path.withoutExtension(relativePath)}.*';
-          })
-          .toList(),
-      ),
-    );
-    client.startBuild();
-    bool success = true;
-    await for (final BuildResults results in client.buildResults) {
-      final BuildResult result = results.results.firstWhere((BuildResult result) {
-        return result.target == 'web';
-      }, orElse: () {
-        // Assume build failed if we lack any results.
-        return DefaultBuildResult((DefaultBuildResultBuilder b) => b.status == BuildStatus.failed);
-      });
-      if (result.status == BuildStatus.failed) {
-        success = false;
-        break;
-      }
-      if (result.status == BuildStatus.succeeded) {
-        break;
-      }
+    if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
+      throwToolExit('flutter test --platform=chrome does not currently support sound mode');
     }
-    if (!success || testOutputDir == null) {
-      return success;
+    final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
+    if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+      extraFrontEndOptions.add('--no-sound-null-safety');
     }
-    final Directory rootDirectory = projectDirectory
-      .childDirectory('.dart_tool')
-      .childDirectory('build')
-      .childDirectory('flutter_web');
+    final Directory outputDirectory = globals.fs.directory(testOutputDir)
+      ..createSync(recursive: true);
+    final List<File> generatedFiles = <File>[];
+    for (final String testFilePath in testFiles) {
+      final List<String> relativeTestSegments = globals.fs.path.split(
+        globals.fs.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path));
+      final File generatedFile = globals.fs.file(
+        globals.fs.path.join(outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
+      generatedFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateEntrypoint(relativeTestSegments.join('/'), testFilePath));
+      generatedFiles.add(generatedFile);
+    }
+    // Generate a fake main file that imports all tests to be executed. This will force
+    // each of them to be compiled.
+    final StringBuffer buffer = StringBuffer('// @dart=2.8\n');
+    for (final File generatedFile in generatedFiles) {
+      buffer.writeln('import "${globals.fs.path.basename(generatedFile.path)}";');
+    }
+    buffer.writeln('void main() {}');
+    globals.fs.file(globals.fs.path.join(outputDirectory.path, 'main.dart'))
+      ..createSync()
+      ..writeAsStringSync(buffer.toString());
 
-    final Iterable<Directory> childDirectories = rootDirectory
-      .listSync()
-      .whereType<Directory>();
-    for (final Directory childDirectory in childDirectories) {
-      final String path = globals.fs.path.join(
+    final ResidentCompiler residentCompiler = ResidentCompiler(
+      globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
+      buildMode: buildInfo.mode,
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
+      fileSystemRoots: <String>[
+        projectDirectory.childDirectory('test').path,
         testOutputDir,
-        'packages',
-        globals.fs.path.basename(childDirectory.path),
-      );
-      globals.fsUtils.copyDirectorySync(
-        childDirectory.childDirectory('lib'),
-        globals.fs.directory(path),
-      );
-    }
-    final Directory outputDirectory = rootDirectory
-      .childDirectory(projectName)
-      .childDirectory('test');
-    globals.fsUtils.copyDirectorySync(
-      outputDirectory,
-      globals.fs.directory(globals.fs.path.join(testOutputDir)),
+      ],
+      // Override the filesystem scheme so that the frontend_server can find
+      // the generated entrypoint code.
+      fileSystemScheme: 'org-dartlang-app',
+      initializeFromDill: getDefaultCachedKernelPath(
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
+        dartDefines: buildInfo.dartDefines,
+        extraFrontEndOptions: extraFrontEndOptions,
+      ),
+      targetModel: TargetModel.dartdevc,
+      extraFrontEndOptions: extraFrontEndOptions,
+      platformDill: globals.fs.file(globals.artifacts
+        .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildInfo.mode))
+        .absolute.uri.toString(),
+      dartDefines: buildInfo.dartDefines,
+      librariesSpec: globals.fs.file(globals.artifacts
+        .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
+      packagesPath: buildInfo.packagesPath,
+      artifacts: globals.artifacts,
+      processManager: globals.processManager,
+      logger: globals.logger,
+      platform: globals.platform,
     );
-    return success;
-  }
-}
 
-class WebTestTargetManifest {
-  WebTestTargetManifest(this.buildFilters);
-
-  WebTestTargetManifest.all() : buildFilters = null;
-
-  final List<String> buildFilters;
-
-  bool get hasBuildFilters => buildFilters != null && buildFilters.isNotEmpty;
-}
-
-/// A testable interface for starting a build daemon.
-class BuildDaemonCreator {
-  const BuildDaemonCreator();
-
-  // TODO(jonahwilliams): find a way to get build checks working for flutter for web.
-  static const String _ignoredLine1 = 'Warning: Interpreting this as package URI';
-  static const String _ignoredLine2 = 'build_script.dart was not found in the asset graph, incremental builds will not work';
-  static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
-
-  /// Start a build daemon and register the web targets.
-  ///
-  /// [initializePlatform] controls whether we should invoke [webOnlyInitializePlatform].
-  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {
-    bool release = false,
-    bool profile = false,
-    bool hasPlugins = false,
-    bool initializePlatform = true,
-    WebTestTargetManifest testTargets,
-  }) async {
-    try {
-      final BuildDaemonClient client = await _connectClient(
-        workingDirectory,
-        release: release,
-        profile: profile,
-        hasPlugins: hasPlugins,
-        initializePlatform: initializePlatform,
-        testTargets: testTargets,
-      );
-      _registerBuildTargets(client, testTargets);
-      return client;
-    } on OptionsSkew {
-      throwToolExit(
-        'Incompatible options with current running build daemon.\n\n'
-        'Please stop other flutter_tool instances running in this directory '
-        'before starting a new instance with these options.'
-      );
+    final CompilerOutput output = await residentCompiler.recompile(
+      Uri.parse('org-dartlang-app:///main.dart'),
+      <Uri>[],
+      outputPath: outputDirectory.childFile('out').path,
+      packageConfig: buildInfo.packageConfig,
+    );
+    if (output.errorCount > 0) {
+      throwToolExit('Failed to compile');
     }
-    return null;
+    final File codeFile = outputDirectory.childFile('${output.outputFilename}.sources');
+    final File manifestFile = outputDirectory.childFile('${output.outputFilename}.json');
+    final File sourcemapFile = outputDirectory.childFile('${output.outputFilename}.map');
+    final File metadataFile = outputDirectory.childFile('${output.outputFilename}.metadata');
+    final WebVirtualFS webVirtualFS = WebVirtualFS();
+    _write(
+      codeFile,
+      manifestFile,
+      sourcemapFile,
+      metadataFile,
+      webVirtualFS,
+    );
+    return webVirtualFS;
   }
 
-  void _registerBuildTargets(
-    BuildDaemonClient client,
-    WebTestTargetManifest testTargets,
+  void _write(
+    File codeFile,
+    File manifestFile,
+    File sourcemapFile,
+    File metadataFile,
+    WebVirtualFS webVirtualFS,
   ) {
-    final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
-      ..output = ''
-      ..useSymlinks = true
-      ..hoist = false);
-    client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-      ..target = 'web'
-      ..outputLocation = outputLocation?.toBuilder()));
-    if (testTargets != null) {
-      client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) {
-        b.target = 'test';
-        b.outputLocation = outputLocation?.toBuilder();
-        if (testTargets.hasBuildFilters) {
-          b.buildFilters.addAll(testTargets.buildFilters);
-        }
-      }));
+    final Uint8List codeBytes = codeFile.readAsBytesSync();
+    final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
+    final Uint8List metadataBytes = metadataFile.readAsBytesSync();
+    final Map<String, dynamic> manifest =
+        castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
+    for (final String filePath in manifest.keys) {
+      if (filePath == null) {
+        globals.printTrace('Invalid manifest file: $filePath');
+        continue;
+      }
+      final Map<String, dynamic> offsets =
+          castStringKeyedMap(manifest[filePath]);
+      final List<int> codeOffsets =
+          (offsets['code'] as List<dynamic>).cast<int>();
+      final List<int> sourcemapOffsets =
+          (offsets['sourcemap'] as List<dynamic>).cast<int>();
+      final List<int> metadataOffsets =
+          (offsets['metadata'] as List<dynamic>).cast<int>();
+      if (codeOffsets.length != 2 ||
+          sourcemapOffsets.length != 2 ||
+          metadataOffsets.length != 2) {
+        globals.printTrace('Invalid manifest byte offsets: $offsets');
+        continue;
+      }
+
+      final int codeStart = codeOffsets[0];
+      final int codeEnd = codeOffsets[1];
+      if (codeStart < 0 || codeEnd > codeBytes.lengthInBytes) {
+        globals.printTrace('Invalid byte index: [$codeStart, $codeEnd]');
+        continue;
+      }
+      final Uint8List byteView = Uint8List.view(
+        codeBytes.buffer,
+        codeStart,
+        codeEnd - codeStart,
+      );
+      final String fileName =
+          filePath.startsWith('/') ? filePath.substring(1) : filePath;
+      webVirtualFS.files[fileName] = byteView;
+
+      final int sourcemapStart = sourcemapOffsets[0];
+      final int sourcemapEnd = sourcemapOffsets[1];
+      if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
+        globals.printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
+        continue;
+      }
+      final Uint8List sourcemapView = Uint8List.view(
+        sourcemapBytes.buffer,
+        sourcemapStart,
+        sourcemapEnd - sourcemapStart,
+      );
+      final String sourcemapName = '$fileName.map';
+      webVirtualFS.sourcemaps[sourcemapName] = sourcemapView;
+
+      final int metadataStart = metadataOffsets[0];
+      final int metadataEnd = metadataOffsets[1];
+      if (metadataStart < 0 || metadataEnd > metadataBytes.lengthInBytes) {
+        globals
+            .printTrace('Invalid byte index: [$metadataStart, $metadataEnd]');
+        continue;
+      }
+      final Uint8List metadataView = Uint8List.view(
+        metadataBytes.buffer,
+        metadataStart,
+        metadataEnd - metadataStart,
+      );
+      final String metadataName = '$fileName.metadata';
+      webVirtualFS.metadataFiles[metadataName] = metadataView;
     }
   }
 
-  Future<BuildDaemonClient> _connectClient(
-    String workingDirectory, {
-    bool release,
-    bool profile,
-    bool hasPlugins,
-    bool initializePlatform,
-    WebTestTargetManifest testTargets,
-  }) async {
-    // The build script is stored in an auxiliary package to reduce
-    // dependencies of the main tool.
-    final String buildScriptPackages = globals.fs.path.join(
-      Cache.flutterRoot,
-      'packages',
-      '_flutter_web_build_script',
-      '.packages',
-    );
-    final String buildScript = globals.fs.path.join(
-      Cache.flutterRoot,
-      'packages',
-      '_flutter_web_build_script',
-      'lib',
-      'build_script.dart',
-    );
-    if (!globals.fs.isFileSync(buildScript)) {
-      throwToolExit('Expected a file $buildScript to exist in the Flutter SDK.');
-    }
-    // If we're missing the .packages file, perform a pub get.
-    if (!globals.fs.isFileSync(buildScriptPackages)) {
-      await pub.get(
-        context: PubContext.pubGet,
-        directory: globals.fs.file(buildScriptPackages).parent.path,
-        generateSyntheticPackage: false,
-      );
-    }
-    final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
+  String _generateEntrypoint(String relativeTestPath, String absolutePath) {
+    return '''
+  // @dart = 2.8
+  import 'org-dartlang-app:///$relativeTestPath' as test;
+  import 'dart:ui' as ui;
+  import 'dart:html';
+  import 'dart:js';
+  import 'package:stream_channel/stream_channel.dart';
+  import 'package:flutter_test/flutter_test.dart';
+  import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
+  import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
+  import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
 
-    // On Windows we need to call the snapshot directly otherwise
-    // the process will start in a disjoint cmd without access to
-    // STDIO.
-    final List<String> args = <String>[
-      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-      '--disable-dart-dev',
-      '--packages=$buildScriptPackages',
-      buildScript,
-      'daemon',
-      '--enable-experiment=non-nullable',
-      '--skip-build-script-check',
-      '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
-      // The following will cause build runner to only build tests that were requested.
-      if (testTargets != null && testTargets.hasBuildFilters)
-        for (final String buildFilter in testTargets.buildFilters)
-          '--build-filter=$buildFilter',
-    ];
+  // Extra initialization for flutter_web.
+  // The following parameters are hard-coded in Flutter's test embedder. Since
+  // we don't have an embedder yet this is the lowest-most layer we can put
+  // this stuff in.
+  Future<void> main() async {
+    ui.debugEmulateFlutterTesterEnvironment = true;
+    await ui.webOnlyInitializePlatform();
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$absolutePath'));
+    (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
+    (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
+    internalBootstrapBrowserTest(() => test.main);
+  }
 
-    return BuildDaemonClient.connect(
-      workingDirectory,
-      args,
-      logHandler: (ServerLog serverLog) {
-        switch (serverLog.level) {
-          case Level.SEVERE:
-          case Level.SHOUT:
-            // Ignore certain non-actionable messages on startup.
-            if (serverLog.message.contains(_ignoredLine1) ||
-                serverLog.message.contains(_ignoredLine2) ||
-                serverLog.message.contains(_ignoredLine3)) {
-              return;
-            }
-            globals.printError(serverLog.message);
-            if (serverLog.error != null) {
-              globals.printError(serverLog.error);
-            }
-            if (serverLog.stackTrace != null) {
-              globals.printTrace(serverLog.stackTrace);
-            }
-            break;
-          default:
-            if (serverLog.message.contains('Skipping compiling')) {
-              globals.printError(serverLog.message);
-            } else {
-              globals.printTrace(serverLog.message);
-            }
-        }
-      },
-      buildMode: daemon.BuildMode.Manual,
-    );
+  void internalBootstrapBrowserTest(Function getMain()) {
+    var channel = serializeSuite(getMain, hidePrints: false);
+    postMessageChannel().pipe(channel);
+  }
+
+  StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true, Future beforeLoad()}) => RemoteListener.start(getMain, hidePrints: hidePrints, beforeLoad: beforeLoad);
+
+  StreamChannel suiteChannel(String name) {
+    var manager = SuiteChannelManager.current;
+    if (manager == null) {
+      throw StateError('suiteChannel() may only be called within a test worker.');
+    }
+    return manager.connectOut(name);
+  }
+
+  StreamChannel postMessageChannel() {
+    var controller = StreamChannelController(sync: true);
+    window.onMessage.firstWhere((message) {
+      return message.origin == window.location.origin && message.data == "port";
+    }).then((message) {
+      var port = message.ports.first;
+      var portSubscription = port.onMessage.listen((message) {
+        controller.local.sink.add(message.data);
+      });
+      controller.local.stream.listen((data) {
+        port.postMessage({"data": data});
+      }, onDone: () {
+        port.postMessage({"event": "done"});
+        portSubscription.cancel();
+      });
+    });
+    context['parent'].callMethod('postMessage', [
+      JsObject.jsify({"href": window.location.href, "ready": true}),
+      window.location.origin,
+    ]);
+    return controller.foreign;
+  }
+  ''';
   }
 }
