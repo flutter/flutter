@@ -674,11 +674,24 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     if (!_canComputeIntrinsics) {
-      assert(debugDryLayoutNotSupported(
-        'Dry layout cannot be computed for CrossAxisAlignment.baseline, which requires a full layout.'
+      assert(debugCannotComputeDryLayout(
+        reason: 'Dry layout cannot be computed for CrossAxisAlignment.baseline, which requires a full layout.'
       ));
       return const Size(0, 0);
     }
+    FlutterError? constraintsError;
+    assert(() {
+      constraintsError = _debugCheckConstraints(
+        constraints: constraints,
+        reportParentConstraints: false,
+      );
+      return true;
+    }());
+    if (constraintsError != null) {
+      assert(debugCannotComputeDryLayout(error: constraintsError));
+      return const Size(0, 0);
+    }
+
     final _LayoutSizes sizes = _computeSizes(
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
@@ -692,30 +705,21 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    assert(_debugHasNecessaryDirections);
-    assert(constraints != null);
-
-    // Determine used flex factor, size inflexible items, calculate free space.
-    int totalFlex = 0;
-    final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
-    final bool canFlex = maxMainSize < double.infinity;
-
-    double crossSize = 0.0;
-    double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
-    RenderBox? child = firstChild;
-    RenderBox? lastFlexChild;
-    while (child != null) {
-      final FlexParentData childParentData = child.parentData! as FlexParentData;
-      final int flex = _getFlex(child);
-      if (flex > 0) {
-        assert(() {
+  FlutterError? _debugCheckConstraints({required BoxConstraints constraints, required bool reportParentConstraints}) {
+    FlutterError? result;
+    assert(() {
+      final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
+      final bool canFlex = maxMainSize < double.infinity;
+      RenderBox? child = firstChild;
+      while (child != null) {
+        final int flex = _getFlex(child);
+        if (flex > 0) {
           final String identity = _direction == Axis.horizontal ? 'row' : 'column';
           final String axis = _direction == Axis.horizontal ? 'horizontal' : 'vertical';
           final String dimension = _direction == Axis.horizontal ? 'width' : 'height';
           DiagnosticsNode error, message;
           final List<DiagnosticsNode> addendum = <DiagnosticsNode>[];
-          if (!canFlex && (mainAxisSize == MainAxisSize.max || _getFit(child!) == FlexFit.tight)) {
+          if (!canFlex && (mainAxisSize == MainAxisSize.max || _getFit(child) == FlexFit.tight)) {
             error = ErrorSummary('RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.');
             message = ErrorDescription(
               'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
@@ -723,29 +727,31 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               'axis. Setting a flex on a child (e.g. using Expanded) indicates that the child is to '
               'expand to fill the remaining space in the $axis direction.'
             );
-            RenderBox? node = this;
-            switch (_direction) {
-              case Axis.horizontal:
-                while (!node!.constraints.hasBoundedWidth && node.parent is RenderBox)
-                  node = node.parent! as RenderBox;
-                if (!node.constraints.hasBoundedWidth)
-                  node = null;
-                break;
-              case Axis.vertical:
-                while (!node!.constraints.hasBoundedHeight && node.parent is RenderBox)
-                  node = node.parent! as RenderBox;
-                if (!node.constraints.hasBoundedHeight)
-                  node = null;
-                break;
-            }
-            if (node != null) {
-              addendum.add(node.describeForError('The nearest ancestor providing an unbounded width constraint is'));
+            if (reportParentConstraints) { // Constraints of parents are unavailable in dry layout.
+              RenderBox? node = this;
+              switch (_direction) {
+                case Axis.horizontal:
+                  while (!node!.constraints.hasBoundedWidth && node.parent is RenderBox)
+                    node = node.parent! as RenderBox;
+                  if (!node.constraints.hasBoundedWidth)
+                    node = null;
+                  break;
+                case Axis.vertical:
+                  while (!node!.constraints.hasBoundedHeight && node.parent is RenderBox)
+                    node = node.parent! as RenderBox;
+                  if (!node.constraints.hasBoundedHeight)
+                    node = null;
+                  break;
+              }
+              if (node != null) {
+                addendum.add(node.describeForError('The nearest ancestor providing an unbounded width constraint is'));
+              }
             }
             addendum.add(ErrorHint('See also: https://flutter.dev/layout/'));
           } else {
             return true;
           }
-          throw FlutterError.fromParts(<DiagnosticsNode>[
+          result = FlutterError.fromParts(<DiagnosticsNode>[
             error,
             message,
             ErrorDescription(
@@ -772,7 +778,32 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
             ),
           ]);
-        }());
+          return true;
+        }
+        child = childAfter(child);
+      }
+      return true;
+    }());
+    return result;
+  }
+
+  _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    assert(_debugHasNecessaryDirections);
+    assert(constraints != null);
+
+    // Determine used flex factor, size inflexible items, calculate free space.
+    int totalFlex = 0;
+    final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
+    final bool canFlex = maxMainSize < double.infinity;
+
+    double crossSize = 0.0;
+    double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
+    RenderBox? child = firstChild;
+    RenderBox? lastFlexChild;
+    while (child != null) {
+      final FlexParentData childParentData = child.parentData! as FlexParentData;
+      final int flex = _getFlex(child);
+      if (flex > 0) {
         totalFlex += flex;
         lastFlexChild = child;
       } else {
@@ -887,6 +918,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   void performLayout() {
     assert(_debugHasNecessaryDirections);
     final BoxConstraints constraints = this.constraints;
+    assert(() {
+      final FlutterError? constraintsError = _debugCheckConstraints(
+        constraints: constraints,
+        reportParentConstraints: true,
+      );
+      if (constraintsError != null) {
+        throw constraintsError;
+      }
+      return true;
+    }());
 
     final _LayoutSizes sizes = _computeSizes(
       layoutChild: ChildLayoutHelper.layoutChild,

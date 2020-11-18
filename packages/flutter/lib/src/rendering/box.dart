@@ -1826,45 +1826,53 @@ abstract class RenderBox extends RenderObject {
   ///
   /// In such cases, it may be impossible (or at least impractical) to actually
   /// return a valid answer. In such cases, the function should call
-  /// [debugDryLayoutNotSupported] from within an assert and and return a dummy
+  /// [debugCannotComputeDryLayout] from within an assert and and return a dummy
   /// value of `const Size(0, 0)`.
   @protected
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(debugDryLayoutNotSupported(
-      'The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".',
-      <DiagnosticsNode>[
+    assert(debugCannotComputeDryLayout(
+      error: FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),
         ErrorHint(
           'If you are not writing your own RenderBox subclass, then this is not\n'
           'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
         ),
-      ],
+      ]),
     ));
     return const Size(0, 0);
   }
 
-  static bool _dryLayoutSupported = true;
+  static bool _dryLayoutCalculationValid = true;
 
   /// Called from [computeDryLayout] within an assert if the given [RenderBox]
   /// subclass does not support calculating a dry layout.
   ///
   /// When asserts are enabled and [debugCheckingIntrinsics] is not true, this
-  /// method will throw a [FlutterError] with the provided `reason` for not
-  /// supporting dry layout. Otherwise, it will simply return true.
+  /// method will either throw the provided [FlutterError] or it will create and
+  /// throw a [FlutterError] with the provided `reason`. Otherwise, it will
+  /// simply return true.
+  ///
+  /// One of the arguments has to be provided.
   ///
   /// See also:
   ///
   ///  * [computeDryLayout], which lists some reasons why it may not be feasible
   ///    to compute the dry layout.
-  bool debugDryLayoutNotSupported(String reason, [List<DiagnosticsNode> additionalDiagnostics = const <DiagnosticsNode>[]]) {
+  bool debugCannotComputeDryLayout({String? reason, FlutterError? error}) {
+    assert((reason == null) != (error == null));
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not support dry layout.'),
-          if (reason.isNotEmpty) ErrorDescription(reason),
-          ...additionalDiagnostics,
-        ]);
+        if (reason != null) {
+          assert(error ==null);
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not support dry layout.'),
+            if (reason.isNotEmpty) ErrorDescription(reason),
+          ]);
+        }
+        assert(error != null);
+        throw error!;
       }
-      _dryLayoutSupported = false;
+      _dryLayoutCalculationValid = false;
       return true;
     }());
     return true;
@@ -2227,7 +2235,7 @@ abstract class RenderBox extends RenderObject {
         }
 
         // Checking that getDryLayout computes the same size.
-        _dryLayoutSupported = true;
+        _dryLayoutCalculationValid = true;
         RenderObject.debugCheckingIntrinsics = true;
         late Size dryLayoutSize;
         try {
@@ -2235,7 +2243,7 @@ abstract class RenderBox extends RenderObject {
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
-        if (_dryLayoutSupported && dryLayoutSize != size) {
+        if (_dryLayoutCalculationValid && dryLayoutSize != size) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The size given to the ${objectRuntimeType(this, 'RenderBox')} class differs from the size computed by computeDryLayout.'),
             ErrorDescription(

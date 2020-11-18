@@ -347,7 +347,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(debugDryLayoutNotSupported(
+    assert(debugCannotComputeDryLayout(reason:
       'Calculating the dry layout would require running the layout callback '
       'speculatively, which might mutate the live render object tree.',
     ));
