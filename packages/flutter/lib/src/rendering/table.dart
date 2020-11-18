@@ -1017,8 +1017,8 @@ class RenderTable extends RenderBox {
           assert(childParentData != null);
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
-              assert(debugDryLayoutNotSupported(
-                'TableCellVerticalAlignment.baseline requires a full layout for baseline metrics to be available.'
+              assert(debugCannotComputeDryLayout(
+                reason: 'TableCellVerticalAlignment.baseline requires a full layout for baseline metrics to be available.'
               ));
               return const Size(0 ,0);
             case TableCellVerticalAlignment.top:

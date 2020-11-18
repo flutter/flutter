@@ -637,7 +637,9 @@ class RenderParagraph extends RenderBox
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     if (!_canComputeDryLayout()) {
-      assert(debugDryLayoutNotSupported('Dry layout not available for alignments that require baseline.'));
+      assert(debugCannotComputeDryLayout(
+        reason: 'Dry layout not available for alignments that require baseline.',
+      ));
       return const Size(0, 0);
     }
     _textPainter.setPlaceholderDimensions(_layoutChildren(constraints, dry: true));

@@ -1284,7 +1284,9 @@ class RenderBaseline extends RenderShiftedBox {
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     if (child != null) {
-      assert(debugDryLayoutNotSupported('Baseline metrics are only available after a full layout.'));
+      assert(debugCannotComputeDryLayout(
+        reason: 'Baseline metrics are only available after a full layout.',
+      ));
       return const Size(0, 0);
     }
     return constraints.smallest;
