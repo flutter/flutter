@@ -24,7 +24,7 @@ enum _CupertinoFormSectionType { base, centered }
 ///
 /// [children] sets the list of rows shown in the section. It is type-agnostic
 /// but recommended that only [CupertinoSplitFormRow] and
-/// [CupertinoTextFormField] widgets be included, to retain the iOS look.
+/// [CupertinoTextFormFieldRow] widgets be included, to retain the iOS look.
 ///
 /// [rowsPadding] sets the padding for [children].
 ///
@@ -45,7 +45,7 @@ class CupertinoFormSection extends StatefulWidget {
   ///
   /// [children] sets the list of rows shown in the section. It is type-agnostic
   /// but recommended that only [CupertinoSplitFormRow] and
-  /// [CupertinoTextFormField] widgets be included, to retain the iOS look.
+  /// [CupertinoTextFormFieldRow] widgets be included, to retain the iOS look.
   ///
   /// [rowsPadding] sets the padding for the [Column] encapsulating [children],
   /// and defaults to zero padding.
@@ -78,7 +78,7 @@ class CupertinoFormSection extends StatefulWidget {
   ///
   /// [children] sets the list of rows shown in the section. It is type-agnostic
   /// but recommended that only [CupertinoSplitFormRow] and
-  /// [CupertinoTextFormField] widgets be included, to retain the iOS look.
+  /// [CupertinoTextFormFieldRow] widgets be included, to retain the iOS look.
   ///
   /// [rowsPadding] sets the padding for the [Column] encapsulating [children],
   /// and defaults to the standard notched-style iOS padding, which is

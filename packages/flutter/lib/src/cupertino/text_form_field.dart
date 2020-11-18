@@ -32,7 +32,7 @@ export 'text_form_field.dart';
 /// of the scrolling container.
 ///
 /// A [leadingText] is required. This string is displayed in a [Text] widget
-/// leading to the side of the [CupertinoTextFormField]. It can be set to
+/// leading to the side of the [CupertinoTextFormFieldRow]. It can be set to
 /// an empty string, although it is encouraged to set the [leadingText] in
 /// order to follow standard iOS practices.
 ///
@@ -43,18 +43,18 @@ export 'text_form_field.dart';
 /// when it is no longer needed. This will ensure we discard any resources used
 /// by the object.
 ///
-/// By default, the [CupertinoTextFormField] will use a [CupertinoTextField] in
+/// By default, the [CupertinoTextFormFieldRow] will use a [CupertinoTextField] in
 /// combination with a [CupertinoSplitFormRow] to replicate iOS-styled forms.
-/// Unlike Material's [TextFormField], [CupertinoTextFormField] takes no
+/// Unlike Material's [TextFormField], [CupertinoTextFormFieldRow] takes no
 /// `decoration` and does not apply an [InputDecoration.helperText] on the
-/// widget. [CupertinoTextFormField] utilizes [CupertinoSplitFormRow.errorText]
+/// widget. [CupertinoTextFormFieldRow] utilizes [CupertinoSplitFormRow.errorText]
 /// to display [validator]'s response.
 ///
 /// For a documentation about the various parameters, see [CupertinoTextField].
 ///
 /// {@tool snippet}
 ///
-/// Creates a [CupertinoTextFormField] with a leading text and validator
+/// Creates a [CupertinoTextFormFieldRow] with a leading text and validator
 /// function.
 ///
 /// If the user enters valid text, the CupertinoTextField appears normally
@@ -64,7 +64,7 @@ export 'text_form_field.dart';
 /// validator function is displayed in dark red underneath the input.
 ///
 /// ```dart
-/// CupertinoTextFormField(
+/// CupertinoTextFormFieldRow(
 ///   leadingText: 'Username',
 ///   onSaved: (String value) {
 ///     // This optional block of code can be used to run
@@ -106,7 +106,7 @@ export 'text_form_field.dart';
 ///                   padding: const EdgeInsets.all(8.0),
 ///                   child: ConstrainedBox(
 ///                     constraints: BoxConstraints.tight(const Size(200, 50)),
-///                     child: CupertinoTextFormField(
+///                     child: CupertinoTextFormFieldRow(
 ///                       leadingText: 'Input',
 ///                       onSaved: (String value) {
 ///                         print('Value for field $index saved as "$value"');
