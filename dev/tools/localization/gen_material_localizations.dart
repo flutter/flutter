@@ -16,7 +16,6 @@ HeaderGenerator generateMaterialHeader = (String regenerateInstructions) {
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -40,18 +39,24 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalization${locale.camelCase()}({
     String localeName = '$localeName',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat compactDateFormat,
+    required intl.DateFormat shortDateFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat longDateFormat,
+    required intl.DateFormat yearMonthFormat,
+    required intl.DateFormat shortMonthDayFormat,
+    required intl.NumberFormat decimalFormat,
+    required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );''';
@@ -60,18 +65,21 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
 const String materialFactoryName = 'getMaterialTranslation';
 
 const String materialFactoryDeclaration = '''
-GlobalMaterialLocalizations getMaterialTranslation(
+GlobalMaterialLocalizations? getMaterialTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
+  intl.DateFormat compactDateFormat,
+  intl.DateFormat shortDateFormat,
   intl.DateFormat mediumDateFormat,
   intl.DateFormat longDateFormat,
   intl.DateFormat yearMonthFormat,
+  intl.DateFormat shortMonthDayFormat,
   intl.NumberFormat decimalFormat,
   intl.NumberFormat twoDigitZeroPaddedFormat,
 ) {''';
 
 const String materialFactoryArguments =
-    'fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat';
+    'fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat';
 
 const String materialSupportedLanguagesConstant = 'kMaterialSupportedLanguages';
 

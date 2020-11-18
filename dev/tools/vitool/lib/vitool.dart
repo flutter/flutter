@@ -8,7 +8,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'package:xml/xml.dart' as xml show parse;
 import 'package:xml/xml.dart' hide parse;
 
 // String to use for a single indentation.
@@ -190,7 +189,7 @@ class PathCommandAnimation {
 FrameData interpretSvg(String svgFilePath) {
   final File file = File(svgFilePath);
   final String fileData = file.readAsStringSync();
-  final XmlElement svgElement = _extractSvgElement(xml.parse(fileData));
+  final XmlElement svgElement = _extractSvgElement(XmlDocument.parse(fileData));
   final double width = parsePixels(_extractAttr(svgElement, 'width')).toDouble();
   final double height = parsePixels(_extractAttr(svgElement, 'height')).toDouble();
 
@@ -260,6 +259,7 @@ List<Point<double>> parsePoints(String points) {
 }
 
 /// Data for a single animation frame.
+@immutable
 class FrameData {
   const FrameData(this.size, this.paths);
 
@@ -285,6 +285,7 @@ class FrameData {
 }
 
 /// Represents an SVG path element.
+@immutable
 class SvgPath {
   const SvgPath(this.id, this.commands, {this.opacity = 1.0});
 
@@ -348,6 +349,7 @@ class SvgPath {
 ///   * "Z" => SvgPathCommand('Z', [])
 ///   * "C 1.0, 1.0 2.0, 2.0 3.0, 3.0" SvgPathCommand('C', [Point(1.0, 1.0),
 ///      Point(2.0, 2.0), Point(3.0, 3.0)])
+@immutable
 class SvgPathCommand {
   const SvgPathCommand(this.type, this.points);
 

@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -21,7 +20,14 @@ void main() {
     tempDir = createResolvedTempDirectorySync('attach_test.');
     await _project.setUpIn(tempDir);
     _flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
-    _flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH  ');
+    _flutterAttach = FlutterRunTestDriver(
+      tempDir,
+      logPrefix: 'ATTACH  ',
+      // Only one DDS instance can be connected to the VM service at a time.
+      // DDS can also only initialize if the VM service doesn't have any existing
+      // clients, so we'll just let _flutterRun be responsible for spawning DDS.
+      spawnDdsInstance: false,
+    );
   });
 
   tearDown(() async {
@@ -30,7 +36,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('writes pid-file', () async {
+  testWithoutContext('writes pid-file', () async {
     final File pidFile = tempDir.childFile('test.pid');
     await _flutterRun.run(withDebugger: true);
     await _flutterAttach.attach(
@@ -40,13 +46,13 @@ void main() {
     expect(pidFile.existsSync(), isTrue);
   });
 
-  test('can hot reload', () async {
+  testWithoutContext('can hot reload', () async {
     await _flutterRun.run(withDebugger: true);
     await _flutterAttach.attach(_flutterRun.vmServicePort);
     await _flutterAttach.hotReload();
   });
 
-  test('can detach, reattach, hot reload', () async {
+  testWithoutContext('can detach, reattach, hot reload', () async {
     await _flutterRun.run(withDebugger: true);
     await _flutterAttach.attach(_flutterRun.vmServicePort);
     await _flutterAttach.detach();
@@ -54,11 +60,15 @@ void main() {
     await _flutterAttach.hotReload();
   });
 
-  test('killing process behaves the same as detach ', () async {
+  testWithoutContext('killing process behaves the same as detach ', () async {
     await _flutterRun.run(withDebugger: true);
     await _flutterAttach.attach(_flutterRun.vmServicePort);
     await _flutterAttach.quit();
-    _flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH-2');
+    _flutterAttach = FlutterRunTestDriver(
+      tempDir,
+      logPrefix: 'ATTACH-2',
+      spawnDdsInstance: false,
+    );
     await _flutterAttach.attach(_flutterRun.vmServicePort);
     await _flutterAttach.hotReload();
   });

@@ -195,7 +195,7 @@
 			buildConfigurationList = 24E221CB21A28A0C008ADF09 /* Build configuration list for PBXNativeTarget "ios_add2app" */;
 			buildPhases = (
 				4375EE880A727341E9C9A57D /* [CP] Check Pods Manifest.lock */,
-				CE6831C2A33C6C5C84521FDE /* [CP-User] Run Flutter Build Script */,
+				76B7AB396D25C19F6CCF750F /* [CP-User] Run Flutter Build ios_add2app_life_cycle_flutter Script */,
 				24E221B121A28A0B008ADF09 /* Sources */,
 				24E221B221A28A0B008ADF09 /* Frameworks */,
 				24E221B321A28A0B008ADF09 /* Resources */,
@@ -289,6 +289,22 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		76B7AB396D25C19F6CCF750F /* [CP-User] Run Flutter Build ios_add2app_life_cycle_flutter Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/flutterapp/.metadata",
+				"${SRCROOT}/flutterapp/.ios/Flutter/App.framework/App",
+				"${SRCROOT}/flutterapp/.ios/Flutter/engine/Flutter.framework/Flutter",
+				"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh",
+			);
+			name = "[CP-User] Run Flutter Build ios_add2app_life_cycle_flutter Script";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh\"\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
+		};
 		7FADF19EC61F97E525982780 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -305,22 +321,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ios_add2app/Pods-ios_add2app-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
-		};
-		CE6831C2A33C6C5C84521FDE /* [CP-User] Run Flutter Build Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/flutterapp/.metadata",
-				"${SRCROOT}/flutterapp/.ios/Flutter/App.framework/App",
-				"${SRCROOT}/flutterapp/.ios/Flutter/engine/Flutter.framework/Flutter",
-				"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh",
-			);
-			name = "[CP-User] Run Flutter Build Script";
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh\"\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
 		};
 		DE5CDCD8B3565EAB9F38F455 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

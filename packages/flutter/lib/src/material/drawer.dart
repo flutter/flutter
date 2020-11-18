@@ -49,6 +49,8 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// A material design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=WRj86iHihgY}
+///
 /// Drawers are typically used with the [Scaffold.drawer] property. The child of
 /// the drawer is usually a [ListView] whose first child is a [DrawerHeader]
 /// that displays status information about the current user. The remaining
@@ -137,7 +139,7 @@ class Drawer extends StatelessWidget {
   ///
   /// The [elevation] must be non-negative.
   const Drawer({
-    Key key,
+    Key? key,
     this.elevation = 16.0,
     this.child,
     this.semanticLabel,
@@ -156,8 +158,8 @@ class Drawer extends StatelessWidget {
   ///
   /// Typically a [SliverList].
   ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
 
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the drawer is opened and closed.
@@ -169,22 +171,21 @@ class Drawer extends StatelessWidget {
   ///
   ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
-  final String semanticLabel;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    String label = semanticLabel;
+    String? label = semanticLabel;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        label = semanticLabel;
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        label = semanticLabel ?? MaterialLocalizations.of(context)?.drawerLabel;
+        label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
     return Semantics(
       scopesRoute: true,
@@ -211,7 +212,7 @@ typedef DrawerCallback = void Function(bool isOpened);
 /// Rarely used directly. Drawer controllers are typically created automatically
 /// by [Scaffold] widgets.
 ///
-/// The draw controller provides the ability to open and close a drawer, either
+/// The drawer controller provides the ability to open and close a drawer, either
 /// via an animation or via user interaction. When closed, the drawer collapses
 /// to a translucent gesture detector that can be used to listen for edge
 /// swipes.
@@ -227,9 +228,9 @@ class DrawerController extends StatefulWidget {
   ///
   /// The [child] argument must not be null and is typically a [Drawer].
   const DrawerController({
-    GlobalKey key,
-    @required this.child,
-    @required this.alignment,
+    GlobalKey? key,
+    required this.child,
+    required this.alignment,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
@@ -252,9 +253,9 @@ class DrawerController extends StatefulWidget {
   final DrawerAlignment alignment;
 
   /// Optional callback that is called when a [Drawer] is opened or closed.
-  final DrawerCallback drawerCallback;
+  final DrawerCallback? drawerCallback;
 
-  /// {@template flutter.material.drawer.dragStartBehavior}
+  /// {@template flutter.material.DrawerController.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used for opening
@@ -279,7 +280,7 @@ class DrawerController extends StatefulWidget {
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
   /// By default, the color used is [Colors.black54]
-  final Color scrimColor;
+  final Color? scrimColor;
 
   /// Determines if the [Drawer] can be opened with a drag gesture.
   ///
@@ -295,7 +296,7 @@ class DrawerController extends StatefulWidget {
   /// example, if [alignment] is set to [DrawerAlignment.start] and
   /// `TextDirection.of(context)` is set to [TextDirection.ltr],
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
-  final double edgeDragWidth;
+  final double? edgeDragWidth;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -334,15 +335,15 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     });
   }
 
-  LocalHistoryEntry _historyEntry;
+  LocalHistoryEntry? _historyEntry;
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
 
   void _ensureHistoryEntry() {
     if (_historyEntry == null) {
-      final ModalRoute<dynamic> route = ModalRoute.of(context);
+      final ModalRoute<dynamic>? route = ModalRoute.of(context);
       if (route != null) {
         _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
-        route.addLocalHistoryEntry(_historyEntry);
+        route.addLocalHistoryEntry(_historyEntry!);
         FocusScope.of(context).setFirstFocus(_focusScopeNode);
       }
     }
@@ -369,7 +370,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     close();
   }
 
-  AnimationController _controller;
+  late AnimationController _controller;
 
   void _handleDragDown(DragDownDetails details) {
     _controller.stop();
@@ -389,7 +390,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox box = _drawerKey.currentContext?.findRenderObject() as RenderBox;
+    final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
     if (box != null)
       return box.size.width;
     return _kWidth; // drawer not being shown currently
@@ -398,7 +399,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   bool _previouslyOpened = false;
 
   void _move(DragUpdateDetails details) {
-    double delta = details.primaryDelta / _width;
+    double delta = details.primaryDelta! / _width;
     switch (widget.alignment) {
       case DrawerAlignment.start:
         break;
@@ -417,7 +418,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
     final bool opened = _controller.value > 0.5;
     if (opened != _previouslyOpened && widget.drawerCallback != null)
-      widget.drawerCallback(opened);
+      widget.drawerCallback!(opened);
     _previouslyOpened = opened;
   }
 
@@ -436,9 +437,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
+          if (widget.drawerCallback != null)
+            widget.drawerCallback!(visualVelocity < 0.0);
           break;
         case TextDirection.ltr:
           _controller.fling(velocity: visualVelocity);
+          if (widget.drawerCallback != null)
+            widget.drawerCallback!(visualVelocity > 0.0);
           break;
       }
     } else if (_controller.value < 0.5) {
@@ -454,17 +459,17 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   void open() {
     _controller.fling(velocity: 1.0);
     if (widget.drawerCallback != null)
-      widget.drawerCallback(true);
+      widget.drawerCallback!(true);
   }
 
   /// Starts an animation to close the drawer.
   void close() {
     _controller.fling(velocity: -1.0);
     if (widget.drawerCallback != null)
-      widget.drawerCallback(false);
+      widget.drawerCallback!(false);
   }
 
-  ColorTween _scrimColorTween;
+  late ColorTween _scrimColorTween;
   final GlobalKey _gestureDetectorKey = GlobalKey();
 
   ColorTween _buildScrimColorTween() {
@@ -479,7 +484,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       case DrawerAlignment.end:
         return AlignmentDirectional.centerEnd;
     }
-    return null;
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
@@ -490,7 +494,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       case DrawerAlignment.end:
         return AlignmentDirectional.centerStart;
     }
-    return null;
   }
 
   Widget _buildDrawer(BuildContext context) {
@@ -498,7 +501,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     final EdgeInsets padding = MediaQuery.of(context).padding;
     final TextDirection textDirection = Directionality.of(context);
 
-    double dragAreaWidth = widget.edgeDragWidth;
+    double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
       switch (textDirection) {
         case TextDirection.ltr:
@@ -530,7 +533,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         return const SizedBox.shrink();
       }
     } else {
-      bool platformHasBackButton;
+      final bool platformHasBackButton;
       switch (Theme.of(context).platform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
@@ -562,7 +565,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   child: GestureDetector(
                     onTap: close,
                     child: Semantics(
-                      label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
+                      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: MouseRegion(
                         opaque: true,
                         child: Container( // The drawer's "scrim"
@@ -593,6 +596,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));

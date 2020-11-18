@@ -199,6 +199,18 @@ dev/tools/localization/bin/encode_kn_arb_files.dart. The localizations code
 generator uses generateEncodedString()
 from dev/tools/localization/localizations_utils.dart.
 
+### Support for Pashto (ps) translations
+
+When Flutter first set up i18n for the Material library, Pashto (ps)
+translations were included for the first set of Material widgets.
+However, Pashto was never set up to be continuously maintained in
+Flutter by Google, so material_ps.arb was never updated beyond the
+initial commit.
+
+To prevent breaking applications that rely on these original Pashto
+translations, they will be kept. However, all new strings will have
+the English translation until support for Pashto is provided.
+See https://github.com/flutter/flutter/issues/60598.
 
 ### Translations Status, Reporting Errors
 
@@ -208,7 +220,7 @@ Google contributes translations for all the languages supported by
 this package. (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
-[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=BUG.md).
+[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=2_bug.md).
 
 
 ### See Also

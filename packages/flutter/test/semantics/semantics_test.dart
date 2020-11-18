@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 
-
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -30,7 +29,7 @@ void main() {
       expect(node.isTagged(tag1), isTrue);
       expect(node.isTagged(tag2), isFalse);
 
-      node.tags.add(tag2);
+      node.tags!.add(tag2);
       expect(node.isTagged(tag1), isTrue);
       expect(node.isTagged(tag2), isTrue);
     });
@@ -88,7 +87,7 @@ void main() {
       );
 
       {
-        FlutterError error;
+        late FlutterError error;
         try {
           node.updateWith(
             config: config,
@@ -97,7 +96,6 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         }
-        expect(error, isNotNull);
         expect(error.toString(), equalsIgnoringHashCodes(
           'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
@@ -111,7 +109,7 @@ void main() {
       }
 
       {
-        FlutterError error;
+        late FlutterError error;
         final List<SemanticsNode> modifiedChildren = <SemanticsNode>[
           SemanticsNode()
             ..isMergedIntoParent = true
@@ -138,7 +136,6 @@ void main() {
         } on FlutterError catch (e) {
           error = e;
         }
-        expect(error, isNotNull);
         expect(error.toStringDeep(), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   Failed to replace child semantics nodes because the list of\n'
@@ -193,7 +190,7 @@ void main() {
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       int expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollLeft.index | SemanticsAction.scrollRight.index;
-      expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
+      expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
 
       middle
         ..hasScrollLeftAction = false
@@ -203,7 +200,7 @@ void main() {
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollDown.index | SemanticsAction.scrollRight.index;
-      expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
+      expect(root.debugSemantics!.getSemanticsData().actions, expectedActions);
     });
   });
 
@@ -681,8 +678,8 @@ class TestRender extends RenderProxyBox {
     this.hasScrollRightAction = false,
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
-    this.isSemanticBoundary,
-    RenderBox child,
+    this.isSemanticBoundary = false,
+    RenderBox? child,
   }) : super(child);
 
   bool hasTapAction;
@@ -692,7 +689,6 @@ class TestRender extends RenderProxyBox {
   bool hasScrollUpAction;
   bool hasScrollDownAction;
   bool isSemanticBoundary;
-
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -715,5 +711,5 @@ class TestRender extends RenderProxyBox {
 }
 
 class CustomSortKey extends OrdinalSortKey {
-  const CustomSortKey(double order, {String name}) : super(order, name: name);
+  const CustomSortKey(double order, {String? name}) : super(order, name: name);
 }

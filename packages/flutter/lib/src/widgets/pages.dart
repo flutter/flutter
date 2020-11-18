@@ -11,16 +11,18 @@ import 'routes.dart';
 abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
-    RouteSettings settings,
+    RouteSettings? settings,
     this.fullscreenDialog = false,
   }) : super(settings: settings);
 
+  /// {@template flutter.widgets.PageRoute.fullscreenDialog}
   /// Whether this page route is a full-screen dialog.
   ///
   /// In Material and Cupertino, being fullscreen has the effects of making
   /// the app bars have a close button instead of a back button. On
   /// iOS, dialogs transitions animate differently and are also not closeable
   /// with the back swipe gesture.
+  /// {@endtemplate}
   final bool fullscreenDialog;
 
   @override
@@ -50,10 +52,11 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
   /// [maintainState], and [fullscreenDialog] arguments must not be null.
   PageRouteBuilder({
-    RouteSettings settings,
-    @required this.pageBuilder,
+    RouteSettings? settings,
+    required this.pageBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
+    this.reverseTransitionDuration = const Duration(milliseconds: 300),
     this.opaque = true,
     this.barrierDismissible = false,
     this.barrierColor,
@@ -68,18 +71,25 @@ class PageRouteBuilder<T> extends PageRoute<T> {
        assert(fullscreenDialog != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
+  /// {@template flutter.widgets.pageRouteBuilder.pageBuilder}
   /// Used build the route's primary contents.
   ///
   /// See [ModalRoute.buildPage] for complete definition of the parameters.
+  /// {@endtemplate}
   final RoutePageBuilder pageBuilder;
 
+  /// {@template flutter.widgets.pageRouteBuilder.transitionsBuilder}
   /// Used to build the route's transitions.
   ///
   /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
+  /// {@endtemplate}
   final RouteTransitionsBuilder transitionsBuilder;
 
   @override
   final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
 
   @override
   final bool opaque;
@@ -88,10 +98,10 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   final bool barrierDismissible;
 
   @override
-  final Color barrierColor;
+  final Color? barrierColor;
 
   @override
-  final String barrierLabel;
+  final String? barrierLabel;
 
   @override
   final bool maintainState;
@@ -105,5 +115,4 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return transitionsBuilder(context, animation, secondaryAnimation, child);
   }
-
 }

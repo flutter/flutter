@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../test_utils.dart';
 
@@ -26,16 +22,25 @@ abstract class Project {
 
   String get pubspec;
   String get main;
+  String get test => null;
+  String get generatedFile => null;
 
   Uri get mainDart => Uri.parse('package:test/main.dart');
 
   Future<void> setUpIn(Directory dir) async {
     this.dir = dir;
-    writeFile(globals.fs.path.join(dir.path, 'pubspec.yaml'), pubspec);
+    writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspec);
     if (main != null) {
-      writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), main);
+      writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), main);
     }
-    writeFile(globals.fs.path.join(dir.path, 'web', 'index.html'), _kDefaultHtml);
+    if (test != null) {
+      writeFile(fileSystem.path.join(dir.path, 'test', 'test.dart'), test);
+    }
+    if (generatedFile != null) {
+      writeFile(fileSystem.path.join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'), generatedFile);
+    }
+    writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), _kDefaultHtml);
+    writePackages(dir.path);
     await getPackages(dir.path);
   }
 

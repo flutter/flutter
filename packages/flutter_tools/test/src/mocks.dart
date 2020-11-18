@@ -6,66 +6,37 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
-import 'package:platform/platform.dart';
-
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
 import 'common.dart';
 
+// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
 final Generator kNoColorTerminalPlatform = () {
   return FakePlatform.fromPlatform(
     const LocalPlatform()
   )..stdoutSupportsAnsi = false;
 };
 
-class MockApplicationPackageStore extends ApplicationPackageStore {
-  MockApplicationPackageStore() : super(
-    android: AndroidApk(
-      id: 'io.flutter.android.mock',
-      file: globals.fs.file('/mock/path/to/android/SkyShell.apk'),
-      versionCode: 1,
-      launchActivity: 'io.flutter.android.mock.MockActivity',
-    ),
-    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId),
-  );
-}
-
-class MockApplicationPackageFactory extends Mock implements ApplicationPackageFactory {
-  final MockApplicationPackageStore _store = MockApplicationPackageStore();
-
-  @override
-  Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform, {
-    File applicationBinary,
-  }) async {
-    return _store.getPackageForPlatform(platform);
-  }
-}
-
 /// An SDK installation with several SDK levels (19, 22, 23).
 class MockAndroidSdk extends Mock implements AndroidSdk {
   static Directory createSdkDirectory({
     bool withAndroidN = false,
-    String withNdkDir,
-    int ndkVersion = 16,
-    bool withNdkSysroot = false,
     bool withSdkManager = true,
     bool withPlatformTools = true,
     bool withBuildTools = true,
@@ -98,41 +69,6 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
 
     if (withSdkManager) {
       _createSdkFile(dir, 'tools/bin/sdkmanager$bat');
-    }
-
-    if (withNdkDir != null) {
-      final String ndkToolchainBin = globals.fs.path.join(
-        'ndk-bundle',
-        'toolchains',
-        'arm-linux-androideabi-4.9',
-        'prebuilt',
-        withNdkDir,
-        'bin',
-      );
-      final String ndkCompiler = globals.fs.path.join(
-        ndkToolchainBin,
-        'arm-linux-androideabi-gcc',
-      );
-      final String ndkLinker = globals.fs.path.join(
-        ndkToolchainBin,
-        'arm-linux-androideabi-ld',
-      );
-      _createSdkFile(dir, ndkCompiler);
-      _createSdkFile(dir, ndkLinker);
-      _createSdkFile(dir, globals.fs.path.join('ndk-bundle', 'source.properties'), contents: '''
-Pkg.Desc = Android NDK[]
-Pkg.Revision = $ndkVersion.1.5063045
-
-''');
-    }
-    if (withNdkSysroot) {
-      final String armPlatform = globals.fs.path.join(
-        'ndk-bundle',
-        'platforms',
-        'android-9',
-        'arch-arm',
-      );
-      _createDir(dir, armPlatform);
     }
 
     return dir;
@@ -281,11 +217,11 @@ class FakeProcess implements Process {
   FakeProcess({
     this.pid = 1,
     Future<int> exitCode,
-    Stream<List<int>> stdin,
+    IOSink stdin,
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin as IOSink ?? MemoryIOSink();
+       stdin = stdin ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -518,8 +454,8 @@ class MockStdio extends Stdio {
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
-class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
-  MockPollingDeviceDiscovery() : super('mock');
+class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
+  FakePollingDeviceDiscovery() : super('mock');
 
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
@@ -563,14 +499,57 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   Stream<Device> get onRemoved => _onRemovedController.stream;
 }
 
+class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  LongPollingDeviceDiscovery() : super('forever');
+
+  final Completer<List<Device>> _completer = Completer<List<Device>>();
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    return _completer.future;
+  }
+
+  @override
+  Future<void> stopPolling() async {
+    _completer.complete();
+  }
+
+  @override
+  Future<void> dispose() async {
+    _completer.complete();
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}
+
+class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  ThrowingPollingDeviceDiscovery() : super('throw');
+
+  @override
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    throw const ProcessException('fake-discovery', <String>[]);
+  }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+}
+
 class MockIosProject extends Mock implements IosProject {
   static const String bundleId = 'com.example.test';
+  static const String appBundleName = 'My Super Awesome App.app';
 
   @override
-  Future<String> get productBundleIdentifier async => bundleId;
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => bundleId;
 
   @override
-  String get hostAppBundleName => 'Runner.app';
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => appBundleName;
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
@@ -612,50 +591,12 @@ class MockIOSSimulator extends Mock implements IOSSimulator {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
-class MockDeviceLogReader extends DeviceLogReader {
-  @override
-  String get name => 'MockLogReader';
-
-  StreamController<String> _cachedLinesController;
-
-  final List<String> _lineQueue = <String>[];
-  StreamController<String> get _linesController {
-    _cachedLinesController ??= StreamController<String>
-      .broadcast(onListen: () {
-        _lineQueue.forEach(_linesController.add);
-        _lineQueue.clear();
-     });
-    return _cachedLinesController;
-  }
-
-  @override
-  Stream<String> get logLines => _linesController.stream;
-
-  void addLine(String line) {
-    if (_linesController.hasListener) {
-      _linesController.add(line);
-    } else {
-      _lineQueue.add(line);
-    }
-  }
-
-  @override
-  Future<void> dispose() async {
-    _lineQueue.clear();
-    await _linesController.close();
-  }
-}
-
-void applyMocksToCommand(FlutterCommand command) {
-  command.applicationPackages = MockApplicationPackageStore();
-}
-
-/// Common functionality for tracking mock interaction
+/// Common functionality for tracking mock interaction.
 class BasicMock {
   final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
-    final List<String> actualMessages = List<String>.from(messages);
+    final List<String> actualMessages = List<String>.of(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
@@ -666,31 +607,6 @@ class BasicMock {
     final bool result = messages.contains(match);
     messages.clear();
     return result;
-  }
-}
-
-class MockDevFSOperations extends BasicMock implements DevFSOperations {
-  Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
-
-  @override
-  Future<Uri> create(String fsName) async {
-    messages.add('create $fsName');
-    return Uri.parse('file:///$fsName');
-  }
-
-  @override
-  Future<dynamic> destroy(String fsName) async {
-    messages.add('destroy $fsName');
-  }
-
-  @override
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    String message = 'writeFile $fsName $deviceUri';
-    if (content is DevFSFileContent) {
-      message += ' ${content.file.path}';
-    }
-    messages.add(message);
-    devicePathToContent[deviceUri] = content;
   }
 }
 
@@ -718,8 +634,26 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   ) async {
     return null;
   }
+
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
+  Future<CompilerOutput> compileExpressionToJs(
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
+  ) async {
+    return null;
+  }
+
+  @override
+  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, {
+    String outputPath,
+    PackageConfig packageConfig,
+    bool suppressErrors = false,
+  }) async {
     globals.fs.file(outputPath).createSync(recursive: true);
     globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);
@@ -775,6 +709,9 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
+
+class MockDevToolsServer extends Mock implements HttpServer {}
+class MockInternetAddress extends Mock implements InternetAddress {}
 
 class AlwaysTrueBotDetector implements BotDetector {
   const AlwaysTrueBotDetector();

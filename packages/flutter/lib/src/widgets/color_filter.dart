@@ -10,12 +10,14 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
 /// Applies a [ColorFilter] to its child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a [ColorFilter] to its child.
   ///
   /// The [colorFilter] must not be null.
-  const ColorFiltered({@required this.colorFilter, Widget child, Key key})
+  const ColorFiltered({required this.colorFilter, Widget? child, Key? key})
       : assert(colorFilter != null),
         super(key: key, child: child);
 
@@ -55,6 +57,6 @@ class _ColorFilterRenderObject extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    layer = context.pushColorFilter(offset, colorFilter, super.paint, oldLayer: layer as ColorFilterLayer);
+    layer = context.pushColorFilter(offset, colorFilter, super.paint, oldLayer: layer as ColorFilterLayer?);
   }
 }

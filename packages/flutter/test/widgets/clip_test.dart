@@ -40,24 +40,16 @@ class ValueClipper<T> extends CustomClipper<T> {
   }
 }
 
-class _UpdateCountedClipRect extends ClipRect {
-  const _UpdateCountedClipRect({Clip clipBehavior = Clip.antiAlias})
-    : super(clipBehavior: clipBehavior);
-}
+class NotifyClipper<T> extends CustomClipper<T> {
+  NotifyClipper({required this.clip}) : super(reclip: clip);
 
-class _UpdateCountedClipRRect extends ClipRRect {
-  _UpdateCountedClipRRect({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior, borderRadius: BorderRadius.circular(1.0));
-}
+  final ValueNotifier<T> clip;
 
-class _UpdateCountedClipOval extends ClipOval {
-  const _UpdateCountedClipOval({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior);
-}
+  @override
+  T getClip(Size size) => clip.value;
 
-class _UpdateCountedClipPath extends ClipPath {
-  const _UpdateCountedClipPath({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior);
+  @override
+  bool shouldReclip(NotifyClipper<T> oldClipper) => clip != oldClipper.clip;
 }
 
 void main() {
@@ -81,15 +73,15 @@ void main() {
   });
 
   testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    await tester.pumpWidget(const _UpdateCountedClipRect());
+    await tester.pumpWidget(const ClipRect());
 
     final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
 
-    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
-
-    await tester.pumpWidget(const _UpdateCountedClipRect(clipBehavior: Clip.hardEdge));
-
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(const ClipRect(clipBehavior: Clip.antiAlias));
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
   });
 
   test('ClipRRect constructs with the right default values', () {
@@ -99,37 +91,37 @@ void main() {
   });
 
   testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    await tester.pumpWidget(_UpdateCountedClipRRect());
+    await tester.pumpWidget(const ClipRRect());
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
-    await tester.pumpWidget(_UpdateCountedClipRRect(clipBehavior: Clip.hardEdge));
+    await tester.pumpWidget(const ClipRRect(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
   });
 
   testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    await tester.pumpWidget(const _UpdateCountedClipOval());
+    await tester.pumpWidget(const ClipOval());
 
     final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
-    await tester.pumpWidget(const _UpdateCountedClipOval(clipBehavior: Clip.hardEdge));
+    await tester.pumpWidget(const ClipOval(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
   });
 
   testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    await tester.pumpWidget(const _UpdateCountedClipPath());
+    await tester.pumpWidget(const ClipPath());
 
     final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
-    await tester.pumpWidget(const _UpdateCountedClipPath(clipBehavior: Clip.hardEdge));
+    await tester.pumpWidget(const ClipPath(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
   });
@@ -383,7 +375,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipRect.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -423,7 +415,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipRectOverlay.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('ClipRRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -472,7 +464,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipRRect.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('ClipOval painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -515,7 +507,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipOval.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('ClipPath painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -563,7 +555,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipPath.png'),
     );
-  }, skip: isBrowser);
+  });
 
   Center genPhysicalModel(Clip clipBehavior) {
     return Center(
@@ -608,7 +600,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.antiAlias.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
@@ -616,7 +608,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.hardEdge.png'),
     );
-  }, skip: isBrowser);
+  });
 
   // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
   // round corners.
@@ -626,7 +618,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.antiAliasWithSaveLayer.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Default PhysicalModel painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -668,7 +660,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.default.png'),
     );
-  }, skip: isBrowser);
+  });
 
   Center genPhysicalShape(Clip clipBehavior) {
     return Center(
@@ -717,7 +709,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.antiAlias.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
@@ -725,7 +717,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.hardEdge.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
@@ -733,7 +725,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.antiAliasWithSaveLayer.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('PhysicalShape painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -779,7 +771,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.default.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('ClipPath.shape', (WidgetTester tester) async {
     final List<String> logs = <String>[];
@@ -836,5 +828,38 @@ void main() {
       '--5',
       'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
     ]);
+  });
+
+  testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
+    final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+
+    await tester.pumpWidget(
+      ClipRect(
+        child: const Placeholder(),
+        clipper: NotifyClipper<Rect>(clip: clip),
+      ),
+    );
+
+    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
+      ..save()
+      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
+      ..save()
+      ..path() // Placeholder
+      ..restore()
+      ..restore(),
+    );
+
+    expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isFalse);
+    clip.value = const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0);
+    expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isTrue);
+
+    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
+      ..save()
+      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
+      ..save()
+      ..path() // Placeholder
+      ..restore()
+      ..restore(),
+    );
   });
 }

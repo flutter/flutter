@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -31,7 +31,7 @@ import 'platform_channel.dart';
   'This feature was deprecated after v1.6.5.'
 )
 class BinaryMessages {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   BinaryMessages._();
@@ -42,7 +42,7 @@ class BinaryMessages {
   /// Calls the handler registered for the given channel.
   ///
   /// Typically called by [ServicesBinding] to handle platform messages received
-  /// from [Window.onPlatformMessage].
+  /// from [dart:ui.PlatformDispatcher.onPlatformMessage].
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
   @Deprecated(
@@ -65,7 +65,7 @@ class BinaryMessages {
     'Use defaultBinaryMessenger.send instead. '
     'This feature was deprecated after v1.6.5.'
   )
-  static Future<ByteData> send(String channel, ByteData message) {
+  static Future<ByteData?>? send(String channel, ByteData? message) {
     return _binaryMessenger.send(channel, message);
   }
 
@@ -81,7 +81,7 @@ class BinaryMessages {
     'Use defaultBinaryMessenger.setMessageHandler instead. '
     'This feature was deprecated after v1.6.5.'
   )
-  static void setMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
+  static void setMessageHandler(String channel, Future<ByteData?> Function(ByteData? message) handler) {
     _binaryMessenger.setMessageHandler(channel, handler);
   }
 
@@ -100,7 +100,7 @@ class BinaryMessages {
     'Use defaultBinaryMessenger.setMockMessageHandler instead. '
     'This feature was deprecated after v1.6.5.'
   )
-  static void setMockMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
+  static void setMockMessageHandler(String channel, Future<ByteData?> Function(ByteData? message) handler) {
     _binaryMessenger.setMockMessageHandler(channel, handler);
   }
 }

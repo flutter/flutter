@@ -2,31 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../base/utils.dart';
-import '../cache.dart';
 import '../dart/analysis.dart';
-import '../dart/sdk.dart' as sdk;
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, List<String> repoRoots, List<Directory> repoPackages, {
+  AnalyzeContinuously(
+    ArgResults argResults,
+    List<String> repoRoots,
+    List<Directory> repoPackages, {
     @required FileSystem fileSystem,
     @required Logger logger,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Platform platform,
     @required ProcessManager processManager,
+    @required Artifacts artifacts,
   }) : super(
         argResults,
         repoPackages: repoPackages,
@@ -36,6 +36,7 @@ class AnalyzeContinuously extends AnalyzeBase {
         platform: platform,
         terminal: terminal,
         processManager: processManager,
+        artifacts: artifacts,
       );
 
   String analysisTarget;
@@ -50,7 +51,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   Future<void> analyze() async {
     List<String> directories;
 
-    if (argResults['flutter-repo'] as bool) {
+    if (isFlutterRepo) {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
@@ -66,9 +67,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fileSystem.currentDirectory.path;
     }
 
-    final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
-
-    final AnalysisServer server = AnalysisServer(sdkPath, directories,
+    final AnalysisServer server = AnalysisServer(
+      sdkPath,
+      directories,
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
@@ -77,8 +78,6 @@ class AnalyzeContinuously extends AnalyzeBase {
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
-
-    Cache.releaseLockEarly();
 
     await server.start();
     final int exitCode = await server.onExit;
@@ -100,7 +99,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       if (!firstAnalysis) {
         logger.printStatus('\n');
       }
-      analysisStatus = logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
+      analysisStatus = logger.startProgress('Analyzing $analysisTarget...');
       analyzedPaths.clear();
       analysisTimer = Stopwatch()..start();
     } else {
@@ -123,10 +122,8 @@ class AnalyzeContinuously extends AnalyzeBase {
       int issueCount = errors.length;
 
       // count missing dartdocs
-      final int undocumentedMembers = errors.where((AnalysisError error) {
-        return error.code == 'public_member_api_docs';
-      }).length;
-      if (!(argResults['dartdocs'] as bool)) {
+      final int undocumentedMembers = AnalyzeBase.countMissingDartDocs(errors);
+      if (!isDartDocs) {
         errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
         issueCount -= undocumentedMembers;
       }
@@ -142,37 +139,20 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
-      // Print an analysis summary.
-      String errorsMessage;
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
-
-      if (firstAnalysis) {
-        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
-      } else if (issueDiff > 0) {
-        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found ($issueDiff new)';
-      } else if (issueDiff < 0) {
-        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found (${-issueDiff} fixed)';
-      } else if (issueCount != 0) {
-        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
-      } else {
-        errorsMessage = 'no issues found';
-      }
-
-      String dartdocMessage;
-      if (undocumentedMembers == 1) {
-        dartdocMessage = 'one public member lacks documentation';
-      } else {
-        dartdocMessage = '$undocumentedMembers public members lack documentation';
-      }
-
-      final String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
       final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
-      if (undocumentedMembers > 0) {
-        logger.printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
-      } else {
-        logger.printStatus('$errorsMessage • analyzed $files in $seconds seconds');
-      }
+      final String dartDocMessage = AnalyzeBase.generateDartDocMessage(undocumentedMembers);
+      final String errorsMessage = AnalyzeBase.generateErrorsMessage(
+        issueCount: issueCount,
+        issueDiff: issueDiff,
+        files: analyzedPaths.length,
+        seconds: seconds,
+        undocumentedMembers: undocumentedMembers,
+        dartDocMessage: dartDocMessage,
+      );
+
+      logger.printStatus(errorsMessage);
 
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount, undocumentedMembers);

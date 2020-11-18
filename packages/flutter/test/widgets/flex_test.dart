@@ -61,18 +61,6 @@ void main() {
     expect(box.size.width, 100.0);
   });
 
-  testWidgets('Can pass null for flex', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Row(
-        textDirection: TextDirection.ltr,
-        children: const <Widget>[
-          Expanded(flex: null, child: Text('one', textDirection: TextDirection.ltr)),
-          Flexible(flex: null, child: Text('two', textDirection: TextDirection.ltr)),
-        ],
-      ),
-    );
-  });
-
   testWidgets("Doesn't overflow because of floating point accumulated error", (WidgetTester tester) async {
     // both of these cases have failed in the past due to floating point issues
     await tester.pumpWidget(
@@ -139,5 +127,14 @@ void main() {
     );
     final String message = tester.takeException().toString();
     expect(message, contains('\nSee also:'));
+  });
+
+  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(Flex(direction: Axis.vertical));
+    final RenderFlex renderObject = tester.allRenderObjects.whereType<RenderFlex>().first;
+    expect(renderObject.clipBehavior, equals(Clip.none));
+
+    await tester.pumpWidget(Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 }

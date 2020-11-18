@@ -60,7 +60,7 @@ void main() {
       find.byType(ImageFiltered),
       matchesGoldenFile('image_filter_matrix.png'),
     );
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/45213
 
   testWidgets('Image filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithSigma(double sigma) async {
@@ -76,8 +76,7 @@ void main() {
 
     await pumpWithSigma(5.0);
     final RenderObject renderObject = tester.firstRenderObject(find.byType(ImageFiltered));
-    final ImageFilterLayer originalLayer = renderObject.debugLayer as ImageFilterLayer;
-    expect(originalLayer, isNotNull);
+    final ImageFilterLayer originalLayer = renderObject.debugLayer! as ImageFilterLayer;
 
     // Change blur sigma to force a repaint.
     await pumpWithSigma(10.0);

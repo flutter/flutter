@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 void main() {
-  testWidgets('Sliver with keep alive without key - should dispose after reodering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive without key - should dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0', keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
@@ -30,7 +30,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver without keep alive without key - should dispose after reodering', (WidgetTester tester) async {
+  testWidgets('Sliver without keep alive without key - should dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0'),
       const WidgetTest1(text: 'child 1'),
@@ -53,7 +53,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver without keep alive with key - should dispose after reodering', (WidgetTester tester) async {
+  testWidgets('Sliver without keep alive with key - should dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey()),
       WidgetTest1(text: 'child 1', key: GlobalKey()),
@@ -76,7 +76,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver with keep alive with key - should not dispose after reodering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with key - should not dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey(), keepAlive: true),
@@ -98,7 +98,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver with keep alive with Unique key - should not dispose after reodering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with Unique key - should not dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey(), keepAlive: true),
@@ -120,7 +120,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver with keep alive with Value key - should not dispose after reodering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with Value key - should not dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0', key: ValueKey<int>(0), keepAlive: true),
       const WidgetTest1(text: 'child 1', key: ValueKey<int>(1), keepAlive: true),
@@ -402,8 +402,8 @@ List<Widget> createSwitchedChildList(List<Widget> childList, int i, int j) {
 
 class SwitchingChildBuilderTest extends StatefulWidget {
   const SwitchingChildBuilderTest({
-    this.children,
-    Key key,
+    required this.children,
+    Key? key,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -413,8 +413,8 @@ class SwitchingChildBuilderTest extends StatefulWidget {
 }
 
 class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
-  List<Widget> children;
-  Map<Key, int> _mapKeyToIndex;
+  late List<Widget> children;
+  late Map<Key, int> _mapKeyToIndex;
 
   @override
   void initState() {
@@ -422,7 +422,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
     children = widget.children;
     _mapKeyToIndex = <Key, int>{};
     for (int index = 0; index < children.length; index += 1) {
-      final Key key = children[index].key;
+      final Key? key = children[index].key;
       if (key != null) {
         _mapKeyToIndex[key] = index;
       }
@@ -436,7 +436,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
       children = widget.children;
       _mapKeyToIndex = <Key, int>{};
       for (int index = 0; index < children.length; index += 1) {
-        final Key key = children[index].key;
+        final Key? key = children[index].key;
         if (key != null) {
           _mapKeyToIndex[key] = index;
         }
@@ -473,9 +473,9 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
 
 class SwitchingChildListTest extends StatefulWidget {
   const SwitchingChildListTest({
-    this.children,
+    required this.children,
     this.viewportFraction = 1.0,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -510,9 +510,9 @@ class _SwitchingChildListTest extends State<SwitchingChildListTest> {
 
 class SwitchingSliverListTest extends StatefulWidget {
   const SwitchingSliverListTest({
-    this.children,
+    required this.children,
     this.viewportFraction = 1.0,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -546,9 +546,9 @@ class _SwitchingSliverListTest extends State<SwitchingSliverListTest> {
 
 class WidgetTest0 extends StatefulWidget {
   const WidgetTest0({
-    this.text,
+    required this.text,
     this.keepAlive = false,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final String text;
@@ -579,9 +579,9 @@ class _WidgetTest0State extends State<WidgetTest0> with AutomaticKeepAliveClient
 
 class WidgetTest1 extends StatefulWidget {
   const WidgetTest1({
-    this.text,
+    required this.text,
     this.keepAlive = false,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final String text;
@@ -612,9 +612,9 @@ class _WidgetTest1State extends State<WidgetTest1> with AutomaticKeepAliveClient
 
 class WidgetTest2 extends StatefulWidget {
   const WidgetTest2({
-    this.text,
+    required this.text,
     this.keepAlive = false,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final String text;

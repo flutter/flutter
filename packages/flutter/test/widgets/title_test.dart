@@ -26,18 +26,6 @@ void main() {
     expect(widget.color, equals(const Color(0xFF00FF00)));
   });
 
-  testWidgets('should not allow null title or color', (WidgetTester tester) async {
-    expect(() => Title(
-      title: null,
-      color: const Color(0xFF00FF00),
-      child: Container(),
-    ), throwsAssertionError);
-    expect(() => Title(
-      color: null,
-      child: Container(),
-    ), throwsAssertionError);
-  });
-
   testWidgets('should not allow non-opaque color', (WidgetTester tester) async {
     expect(() => Title(
       color: const Color(0x00000000),

@@ -5,11 +5,11 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -29,62 +29,149 @@ const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
   },
 };
 
+const Map<String, dynamic> macStudioInfoPlist4_1 = <String, dynamic>{
+  'CFBundleGetInfoString': 'Android Studio 4.1, build AI-201.8743.12.41.6858069. Copyright JetBrains s.r.o., (c) 2000-2020',
+  'CFBundleShortVersionString': '4.1',
+  'CFBundleVersion': 'AI-201.8743.12.41.6858069',
+  'JVMOptions': <String, dynamic>{
+    'Properties': <String, dynamic>{
+      'idea.vendor.name' : 'Google',
+      'idea.paths.selector': 'AndroidStudio4.1',
+      'idea.platform.prefix': 'AndroidStudio',
+    },
+  },
+};
+
+final Platform linuxPlatform = FakePlatform(
+  operatingSystem: 'linux',
+  environment: <String, String>{'HOME': homeLinux},
+);
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'LOCALAPPDATA': r'C:\Users\Dash\AppData\Local',
+  }
+);
+
 class MockPlistUtils extends Mock implements PlistParser {}
 
-Platform linuxPlatform() {
-  return FakePlatform.fromPlatform(const LocalPlatform())
-    ..operatingSystem = 'linux'
-    ..environment = <String, String>{'HOME': homeLinux};
-}
-
 Platform macPlatform() {
-  return FakePlatform.fromPlatform(const LocalPlatform())
-    ..operatingSystem = 'macos'
-    ..environment = <String, String>{'HOME': homeMac};
+  return FakePlatform(
+    operatingSystem: 'macos',
+    environment: <String, String>{'HOME': homeMac},
+  );
 }
 
 void main() {
-  MemoryFileSystem fs;
-  MockPlistUtils plistUtils;
+  FileSystem fileSystem;
 
   setUp(() {
-    fs = MemoryFileSystem();
-    plistUtils = MockPlistUtils();
+    fileSystem = MemoryFileSystem.test();
   });
 
-  group('pluginsPath on Linux', () {
-    testUsingContext('extracts custom paths from home dir', () {
-      const String installPath = '/opt/android-studio-with-cheese-5.0';
-      const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
-      const String homeFile = '$studioHome/system/.home';
-      globals.fs.directory(installPath).createSync(recursive: true);
-      globals.fs.file(homeFile).createSync(recursive: true);
-      globals.fs.file(homeFile).writeAsStringSync(installPath);
+  testUsingContext('pluginsPath on Linux extracts custom paths from home dir', () {
+    const String installPath = '/opt/android-studio-with-cheese-5.0';
+    const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
+    const String homeFile = '$studioHome/system/.home';
+    globals.fs.directory(installPath).createSync(recursive: true);
+    globals.fs.file(homeFile).createSync(recursive: true);
+    globals.fs.file(homeFile).writeAsStringSync(installPath);
 
-      final AndroidStudio studio =
+    final AndroidStudio studio =
       AndroidStudio.fromHomeDot(globals.fs.directory(studioHome));
-      expect(studio, isNotNull);
-      expect(studio.pluginsPath,
-          equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      // Custom home paths are not supported on macOS nor Windows yet,
-      // so we force the platform to fake Linux here.
-      Platform: () => linuxPlatform(),
-    });
+    expect(studio, isNotNull);
+    expect(studio.pluginsPath,
+        equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    // Custom home paths are not supported on macOS nor Windows yet,
+    // so we force the platform to fake Linux here.
+    Platform: () => linuxPlatform,
+    FileSystemUtils: () => FileSystemUtils(
+      fileSystem: fileSystem,
+      platform: linuxPlatform,
+    ),
   });
 
   group('pluginsPath on Mac', () {
     FileSystemUtils fsUtils;
     Platform platform;
+    MockPlistUtils plistUtils;
 
     setUp(() {
+      plistUtils = MockPlistUtils();
       platform = macPlatform();
       fsUtils = FileSystemUtils(
-        fileSystem: fs,
+        fileSystem: fileSystem,
         platform: platform,
       );
+    });
+
+    testUsingContext('Can discover Android Studio >=4.1 location on Mac', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist4_1);
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
+      );
+
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'Google',
+        'AndroidStudio4.1',
+      )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
+    testUsingContext('Can discover Android Studio <4.1 location on Mac', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path,
+      );
+
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals(globals.fs.path.join(
+        homeMac,
+        'Library',
+        'Application Support',
+        'AndroidStudio3.3',
+      )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
     });
 
     testUsingContext('extracts custom paths for directly downloaded Android Studio on Mac', () {
@@ -109,7 +196,7 @@ void main() {
         'AndroidStudio3.3',
       )));
     }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
+      FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       ProcessManager: () => FakeProcessManager.any(),
       // Custom home paths are not supported on macOS nor Windows yet,
@@ -167,7 +254,7 @@ void main() {
         'AndroidStudio3.3',
       )));
     }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
+      FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       ProcessManager: () => FakeProcessManager.any(),
       // Custom home paths are not supported on macOS nor Windows yet,
@@ -175,6 +262,29 @@ void main() {
       Platform: () => platform,
       PlistParser: () => plistUtils,
     });
+  });
 
+  FileSystem windowsFileSystem;
+
+  setUp(() {
+    windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+  });
+
+  testUsingContext('Can discover Android Studio 4.1 location on Windows', () {
+    windowsFileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.1\.home')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+    windowsFileSystem
+      .directory(r'C:\Program Files\AndroidStudio')
+      .createSync(recursive: true);
+
+    final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+    expect(studio.version, Version(4, 1, 0));
+    expect(studio.studioAppName, 'Android Studio 4.1');
+  }, overrides: <Type, Generator>{
+    Platform: () => windowsPlatform,
+    FileSystem: () => windowsFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

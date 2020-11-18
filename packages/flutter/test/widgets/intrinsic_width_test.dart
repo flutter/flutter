@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Intrinsic stepWidth, stepHeight', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25224
-    Widget buildFrame(double stepWidth, double stepHeight) {
+    Widget buildFrame(double? stepWidth, double? stepHeight) {
       return Center(
         child: IntrinsicWidth(
           stepWidth: stepWidth,

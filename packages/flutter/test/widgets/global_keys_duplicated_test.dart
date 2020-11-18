@@ -59,7 +59,7 @@ void main() {
   });
 
   testWidgets('GlobalKey children of two nodes', (WidgetTester tester) async {
-    StateSetter nestedSetState;
+    late StateSetter nestedSetState;
     bool flag = false;
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_driver/src/common/wait.dart';
 
 import '../../common.dart';
@@ -41,6 +43,17 @@ void main() {
       expect(waitForCondition.condition, equals(const NoTransientCallbacks()));
       expect(waitForCondition.timeout, equals(const Duration(milliseconds: 10)));
     });
+
+    test('WaitForCondition requiresRootWidget', () {
+        expect(
+            const WaitForCondition(NoTransientCallbacks())
+                .requiresRootWidgetAttached,
+            isTrue);
+        expect(
+            const WaitForCondition(FirstFrameRasterized())
+                .requiresRootWidgetAttached,
+            isFalse);
+      });
   });
 
   group('NoTransientCallbacksCondition', () {
@@ -112,6 +125,10 @@ void main() {
           () => FirstFrameRasterized.deserialize(<String, String>{'conditionName': 'Unknown'}),
           throwsA(predicate<SerializationException>((SerializationException e) =>
               e.message == 'Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: {conditionName: Unknown}')));
+    });
+
+    test('FirstFrameRasterizedCondition requiresRootWidget', () {
+      expect(const FirstFrameRasterized().requiresRootWidgetAttached, isFalse);
     });
   });
 

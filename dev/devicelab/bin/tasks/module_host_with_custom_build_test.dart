@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-
-final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
 /// Tests that the Android app containing a Flutter module can be built when
 /// it has custom build types and flavors.
@@ -30,6 +28,11 @@ Future<void> main() async {
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create Flutter module project');
+
+    await flutter(
+      'precache',
+      options: <String>['--android', '--no-ios'],
+    );
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
     final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
@@ -60,7 +63,7 @@ Future<void> main() async {
             flutterDirectory.path,
             'dev',
             'integration_tests',
-             useAndroidEmbeddingV2 ? 'module_host_with_custom_build_v2_embedding' : 'module_host_with_custom_build',
+            'module_host_with_custom_build_v2_embedding',
           ),
         ),
         hostAppDir,

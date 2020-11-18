@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+import 'package:args/args.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
+import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -18,7 +21,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('get', false));
     addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(PackagesPublishCommand());
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
@@ -26,6 +29,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
     addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
     addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
+    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
     addSubcommand(PackagesPassthroughCommand());
   }
 
@@ -88,14 +92,34 @@ class PackagesGetCommand extends FlutterCommand {
     return usageValues;
   }
 
-  Future<void> _runPubGet(String directory) async {
+  Future<void> _runPubGet(String directory, FlutterProject flutterProject) async {
+    if (flutterProject.manifest.generateSyntheticPackage) {
+      final Environment environment = Environment(
+        artifacts: globals.artifacts,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        projectDir: flutterProject.directory,
+      );
+
+      await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+      );
+    }
+
     final Stopwatch pubGetTimer = Stopwatch()..start();
     try {
-      await pub.get(context: PubContext.pubGet,
+      await pub.get(
+        context: PubContext.pubGet,
         directory: directory,
-        upgrade: upgrade ,
+        upgrade: upgrade,
         offline: boolArg('offline'),
-        checkLastModified: false,
+        generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
@@ -121,16 +145,16 @@ class PackagesGetCommand extends FlutterCommand {
        '${ workingDirectory ?? "current working directory" }.'
       );
     }
-
-    await _runPubGet(target);
     final FlutterProject rootProject = FlutterProject.fromPath(target);
-    await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+
+    await _runPubGet(target, rootProject);
+    await rootProject.regeneratePlatformSpecificTooling();
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {
       final FlutterProject exampleProject = rootProject.example;
-      await _runPubGet(exampleProject.directory.path);
-      await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+      await _runPubGet(exampleProject.directory.path, exampleProject);
+      await exampleProject.regeneratePlatformSpecificTooling();
     }
 
     return FlutterCommandResult.success();
@@ -162,49 +186,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     await pub.batch(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
-    return FlutterCommandResult.success();
-  }
-}
-
-class PackagesPublishCommand extends FlutterCommand {
-  PackagesPublishCommand() {
-    requiresPubspecYaml();
-    argParser.addFlag('dry-run',
-      abbr: 'n',
-      negatable: false,
-      help: 'Validate but do not publish the package.',
-    );
-    argParser.addFlag('force',
-      abbr: 'f',
-      negatable: false,
-      help: 'Publish without confirmation if there are no errors.',
-    );
-  }
-
-  @override
-  String get name => 'publish';
-
-  @override
-  String get description {
-    return 'Publish the current package to pub.dev';
-  }
-
-  @override
-  String get invocation {
-    return '${runner.executableName} pub publish [--dry-run]';
-  }
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    final List<String> args = <String>[
-      ...argResults.rest,
-      if (boolArg('dry-run')) '--dry-run',
-      if (boolArg('force')) '--force',
-    ];
-    Cache.releaseLockEarly();
-    await pub.interactively(<String>['publish', ...args]);
     return FlutterCommandResult.success();
   }
 }
@@ -215,6 +197,10 @@ class PackagesForwardCommand extends FlutterCommand {
       requiresPubspecYaml();
     }
   }
+
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
+
   final String _commandName;
   final String _description;
 
@@ -234,11 +220,11 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-    await pub.interactively(<String>[_commandName, ...argResults.rest]);
+    final List<String> subArgs = argResults.rest.toList()
+      ..removeWhere((String arg) => arg == '--');
+    await pub.interactively(<String>[_commandName, ...subArgs], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
-
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
@@ -262,8 +248,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-    await pub.interactively(argResults.rest);
+    await pub.interactively(argResults.rest, stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
 }

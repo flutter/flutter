@@ -106,7 +106,7 @@ void main() {
 typedef GestureAcceptedCallback = void Function();
 
 class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
-  GestureAcceptedCallback onGestureAccepted;
+  GestureAcceptedCallback? onGestureAccepted;
 
   @override
   void addPointer(PointerDownEvent event) {
@@ -131,7 +131,7 @@ class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void acceptGesture(int pointer) {
     if (onGestureAccepted != null) {
-      onGestureAccepted();
+      onGestureAccepted!();
     }
   }
 

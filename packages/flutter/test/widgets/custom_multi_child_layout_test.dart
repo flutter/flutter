@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
-  BoxConstraints getSizeConstraints;
+  late BoxConstraints getSizeConstraints;
 
   @override
   Size getSize(BoxConstraints constraints) {
@@ -17,10 +17,10 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
     return const Size(200.0, 300.0);
   }
 
-  Size performLayoutSize;
-  Size performLayoutSize0;
-  Size performLayoutSize1;
-  bool performLayoutIsChild;
+  Size? performLayoutSize;
+  late Size performLayoutSize0;
+  late Size performLayoutSize1;
+  late bool performLayoutIsChild;
 
   @override
   void performLayout(Size size) {
@@ -49,8 +49,8 @@ Widget buildFrame(MultiChildLayoutDelegate delegate) {
   return Center(
     child: CustomMultiChildLayout(
       children: <Widget>[
-        LayoutId(id: 0, child: Container(width: 150.0, height: 100.0)),
-        LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
+        LayoutId(id: 0, child: const SizedBox(width: 150.0, height: 100.0)),
+        LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
       ],
       delegate: delegate,
     ),
@@ -58,7 +58,7 @@ Widget buildFrame(MultiChildLayoutDelegate delegate) {
 }
 
 class PreferredSizeDelegate extends MultiChildLayoutDelegate {
-  PreferredSizeDelegate({ this.preferredSize });
+  PreferredSizeDelegate({ required this.preferredSize });
 
   final Size preferredSize;
 
@@ -132,18 +132,6 @@ class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
 }
 
-// Used in the 'performLayout error control test' test case
-//  to trigger an error when positioning with null offset
-class NullOffsetPositionDelegate extends MultiChildLayoutDelegate {
-  @override
-  void performLayout(Size size) {
-    positionChild(0, null);
-  }
-
-  @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
-}
-
 // Used in the 'performLayout error control test' test case for triggering
 //  to layout child more than once
 class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
@@ -162,8 +150,8 @@ class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
 
 class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   const LayoutWithMissingId({
-    Key key,
-    @required Widget child,
+    Key? key,
+    required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
 
@@ -184,8 +172,8 @@ void main() {
     expect(delegate.getSizeConstraints.minHeight, 0.0);
     expect(delegate.getSizeConstraints.maxHeight, 600.0);
 
-    expect(delegate.performLayoutSize.width, 200.0);
-    expect(delegate.performLayoutSize.height, 300.0);
+    expect(delegate.performLayoutSize!.width, 200.0);
+    expect(delegate.performLayoutSize!.height, 300.0);
     expect(delegate.performLayoutSize0.width, 150.0);
     expect(delegate.performLayoutSize0.height, 100.0);
     expect(delegate.performLayoutSize1.width, 100.0);
@@ -225,13 +213,13 @@ void main() {
             id: 0,
             child: CustomMultiChildLayout(
               children: <Widget>[
-                LayoutId(id: 0, child: Container(width: 150.0, height: 100.0)),
-                LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
+                LayoutId(id: 0, child: const SizedBox(width: 150.0, height: 100.0)),
+                LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
               ],
               delegate: delegate,
             ),
           ),
-          LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
+          LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
         ],
         delegate: delegate,
       ),
@@ -295,23 +283,23 @@ void main() {
     }
 
     Future<void> expectFlutterErrorMessage({
-      Widget widget,
-      MultiChildLayoutDelegate delegate,
-      @required WidgetTester tester,
-      @required String message,
+      Widget? widget,
+      MultiChildLayoutDelegate? delegate,
+      required WidgetTester tester,
+      required String message,
     }) async {
-      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
       final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
       try {
-        await tester.pumpWidget(widget ?? buildSingleChildFrame(delegate));
+        await tester.pumpWidget(widget ?? buildSingleChildFrame(delegate!));
       } finally {
         FlutterError.onError = oldHandler;
       }
       expect(errors.length, isNonZero);
       expect(errors.first, isNotNull);
       expect(errors.first.exception, isFlutterError);
-      expect(errors.first.exception.toStringDeep(), equalsIgnoringHashCodes(message));
+      expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(message));
     }
 
     testWidgets('layoutChild on non existent child', (WidgetTester tester) async {
@@ -366,17 +354,6 @@ void main() {
           '   The NonExistentPositionDelegate custom multichild layout delegate\n'
           '   tried to position out a non-existent child:\n'
           '   There is no child with the id "1".\n'
-      );
-    });
-
-    testWidgets('positionChild on non existent child', (WidgetTester tester) async {
-      expectFlutterErrorMessage(
-        tester: tester,
-        delegate: NullOffsetPositionDelegate(),
-        message:
-          'FlutterError\n'
-          '   The NullOffsetPositionDelegate custom multichild layout delegate\n'
-          '   provided a null position for the child with id "0".\n',
       );
     });
 

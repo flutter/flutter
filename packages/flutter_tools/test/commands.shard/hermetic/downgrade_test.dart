@@ -15,7 +15,6 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -53,7 +52,6 @@ void main() {
       flutterVersion: flutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
       throwsToolExit(message: 'Flutter is not currently on a known channel.'));
@@ -79,7 +77,6 @@ void main() {
       flutterVersion: flutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
       throwsToolExit(message:
@@ -108,7 +105,6 @@ void main() {
       flutterVersion: flutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
       throwsToolExit(message: 'Failed to parse version for downgrade'));
@@ -127,7 +123,6 @@ void main() {
       flutterVersion: flutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     when(terminal.promptForCharInput(
       const <String>['y', 'n'],
@@ -158,7 +153,6 @@ void main() {
       flutterVersion: flutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     when(terminal.promptForCharInput(
       const <String>['y', 'n'],
@@ -192,7 +186,6 @@ void main() {
       flutterVersion: flutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 
@@ -237,7 +230,6 @@ void main() {
       flutterVersion: flutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 

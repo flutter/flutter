@@ -12,17 +12,17 @@ bool cancelCalled = false;
 
 class TestInkSplash extends InkSplash {
   TestInkSplash({
-    MaterialInkController controller,
-    RenderBox referenceBox,
-    Offset position,
-    Color color,
+    required MaterialInkController controller,
+    required RenderBox referenceBox,
+    Offset? position,
+    required Color color,
     bool containedInkWell = false,
-    RectCallback rectCallback,
-    BorderRadius borderRadius,
-    ShapeBorder customBorder,
-    double radius,
-    VoidCallback onRemoved,
-    TextDirection textDirection,
+    RectCallback? rectCallback,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    double? radius,
+    VoidCallback? onRemoved,
+    required TextDirection textDirection,
   }) : super(
     controller: controller,
     referenceBox: referenceBox,
@@ -55,17 +55,17 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
 
   @override
   InteractiveInkFeature create({
-    MaterialInkController controller,
-    RenderBox referenceBox,
-    Offset position,
-    Color color,
+    required MaterialInkController controller,
+    required RenderBox referenceBox,
+    Offset? position,
+    required Color color,
     bool containedInkWell = false,
-    RectCallback rectCallback,
-    BorderRadius borderRadius,
-    ShapeBorder customBorder,
-    double radius,
-    VoidCallback onRemoved,
-    TextDirection textDirection,
+    RectCallback? rectCallback,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    double? radius,
+    VoidCallback? onRemoved,
+    required TextDirection textDirection,
   }) {
     return TestInkSplash(
       controller: controller,

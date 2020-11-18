@@ -22,20 +22,16 @@ class XcodeBuildSystemMigration extends IOSMigrator {
   @override
   bool migrate() {
     if (!_xcodeWorkspaceSharedSettings.existsSync()) {
-      logger.printTrace('Xcode workspace settings not found, skipping migration');
+      logger.printTrace('Xcode workspace settings not found, skipping build system migration');
       return true;
     }
 
     final String contents = _xcodeWorkspaceSharedSettings.readAsStringSync();
 
-    // Only delete this file when it matches the original Flutter template.
+    // Only delete this file when it is pointing to the legacy build system.
     const String legacyBuildSettingsWorkspace = '''
-<plist version="1.0">
-<dict>
 	<key>BuildSystemType</key>
-	<string>Original</string>
-</dict>
-</plist>''';
+	<string>Original</string>''';
 
     // contains instead of equals to ignore newline file ending variance.
     if (contents.contains(legacyBuildSettingsWorkspace)) {

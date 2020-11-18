@@ -15,7 +15,7 @@ class Item {
 List<Item> items = <Item>[Item(), Item()];
 
 class StatefulLeaf extends StatefulWidget {
-  const StatefulLeaf({ GlobalKey key }) : super(key: key);
+  const StatefulLeaf({ GlobalKey? key }) : super(key: key);
 
   @override
   StatefulLeafState createState() => StatefulLeafState();
@@ -29,7 +29,7 @@ class StatefulLeafState extends State<StatefulLeaf> {
 }
 
 class KeyedWrapper extends StatelessWidget {
-  const KeyedWrapper(this.key1, this.key2, { Key key }) : super(key: key);
+  const KeyedWrapper(this.key1, this.key2, { Key? key }) : super(key: key);
 
   final Key key1;
   final GlobalKey key2;

@@ -27,8 +27,8 @@ import 'sliver.dart';
 class SliverFillViewport extends StatelessWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
-    Key key,
-    @required this.delegate,
+    Key? key,
+    required this.delegate,
     this.viewportFraction = 1.0,
     this.padEnds = true,
   }) : assert(viewportFraction != null),
@@ -52,11 +52,11 @@ class SliverFillViewport extends StatelessWidget {
   /// widget along this main axis, such as in a [CustomScrollView] with multiple
   /// children.
   ///
-  /// This option cannot be [null]. If [viewportFraction] >= 1.0, this option has no
-  /// effect. Defaults to [true].
+  /// This option cannot be null. If [viewportFraction] >= 1.0, this option has no
+  /// effect. Defaults to true.
   final bool padEnds;
 
-  /// {@macro flutter.widgets.sliverMultiBoxAdaptor.delegate}
+  /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   final SliverChildDelegate delegate;
 
   @override
@@ -73,8 +73,8 @@ class SliverFillViewport extends StatelessWidget {
 
 class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
   const _SliverFillViewportRenderObjectWidget({
-    Key key,
-    @required SliverChildDelegate delegate,
+    Key? key,
+    required SliverChildDelegate delegate,
     this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
       assert(viewportFraction > 0.0),
@@ -97,7 +97,7 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
 class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   const _SliverFractionalPadding({
     this.viewportFraction = 0,
-    Widget sliver,
+    Widget? sliver,
   }) : assert(viewportFraction != null),
       assert(viewportFraction >= 0),
       assert(viewportFraction <= 0.5),
@@ -122,7 +122,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
       assert(viewportFraction >= 0),
       _viewportFraction = viewportFraction;
 
-  SliverConstraints _lastResolvedConstraints;
+  SliverConstraints? _lastResolvedConstraints;
 
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
@@ -135,8 +135,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   @override
-  EdgeInsets get resolvedPadding => _resolvedPadding;
-  EdgeInsets _resolvedPadding;
+  EdgeInsets? get resolvedPadding => _resolvedPadding;
+  EdgeInsets? _resolvedPadding;
 
   void _markNeedsResolution() {
     _resolvedPadding = null;
@@ -186,7 +186,10 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// The [hasScrollBody] flag indicates whether the sliver's child has a
 /// scrollable body. This value is never null, and defaults to true. A common
 /// example of this use is a [NestedScrollView]. In this case, the sliver will
-/// size its child to fill the maximum available extent.
+/// size its child to fill the maximum available extent. [SliverFillRemaining]
+/// will not constrain the scrollable area, as it could potentially have an
+/// infinite depth. This is also true for use cases such as a [ScrollView] when
+/// [ScrollView.shrinkWrap] is true.
 ///
 /// ### When [SliverFillRemaining] does not have a scrollable child
 ///
@@ -196,9 +199,9 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// account in deciding how to layout this sliver.
 ///
 /// [SliverFillRemaining] will size its [child] to fill the viewport in the
-/// main axis if that space is larger than the child's extent, and the
-/// the amount of space that has been scrolled beforehand has not exceeded the
-/// main axis extent of the viewport.
+/// main axis if that space is larger than the child's extent, and the amount
+/// of space that has been scrolled beforehand has not exceeded the main axis
+/// extent of the viewport.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
@@ -276,12 +279,12 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// {@end-tool}
 ///
 /// [SliverFillRemaining] will defer to the size of its [child] if the
-/// [precedingScrollExtent] exceeded the length of the viewport's main axis.
+/// [SliverConstraints.precedingScrollExtent] exceeded the length of the viewport's main axis.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
-/// because the [precedingScrollExtent] of the [SliverConstraints] has gone
+/// because the [SliverConstraints.precedingScrollExtent] has gone
 /// beyond that of the viewport's main axis.
 ///
 /// ```dart
@@ -345,7 +348,10 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///     // fillOverscroll only changes the behavior of your layout when applied
 ///     // to Scrollables that allow for overscroll. BouncingScrollPhysics are
 ///     // one example, which are provided by default on the iOS platform.
-///     physics: BouncingScrollPhysics(),
+///     // BouncingScrollPhysics is combined with AlwaysScrollableScrollPhysics
+///     // to allow for the overscroll, regardless of the depth of the
+///     // scrollable.
+///     physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///     slivers: <Widget>[
 ///       SliverToBoxAdapter(
 ///         child: Container(
@@ -365,7 +371,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///             alignment: Alignment.bottomCenter,
 ///             child: Padding(
 ///               padding: const EdgeInsets.all(16.0),
-///               child: RaisedButton(
+///               child: ElevatedButton(
 ///                 onPressed: () {
 ///                   /* Place your onPressed code here! */
 ///                 },
@@ -391,7 +397,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 class SliverFillRemaining extends StatelessWidget {
   /// Creates a sliver that fills the remaining space in the viewport.
   const SliverFillRemaining({
-    Key key,
+    Key? key,
     this.child,
     this.hasScrollBody = true,
     this.fillOverscroll = false,
@@ -399,8 +405,10 @@ class SliverFillRemaining extends StatelessWidget {
        assert(fillOverscroll != null),
        super(key: key);
 
-  /// Doc
-  final Widget child;
+  /// Box child widget that fills the remaining space in the viewport.
+  ///
+  /// The main [SliverFillRemaining] documentation contains more details.
+  final Widget? child;
 
   /// Indicates whether the child has a scrollable body, this value cannot be
   /// null.
@@ -410,7 +418,7 @@ class SliverFillRemaining extends StatelessWidget {
   ///
   /// Setting this value to false will allow the child to fill the remainder of
   /// the viewport and not extend further. However, if the
-  /// [precedingScrollExtent] of the [SliverConstraints] and/or the [child]'s
+  /// [SliverConstraints.precedingScrollExtent] and/or the [child]'s
   /// extent exceeds the size of the viewport, the sliver will defer to the
   /// child's size rather than overriding it.
   final bool hasScrollBody;
@@ -454,8 +462,8 @@ class SliverFillRemaining extends StatelessWidget {
 
 class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingWithScrollable({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
   }) : super(key: key, child: child);
 
   @override
@@ -464,8 +472,8 @@ class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
 
 class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingWithoutScrollable({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
   }) : super(key: key, child: child);
 
   @override
@@ -474,8 +482,8 @@ class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidge
 
 class _SliverFillRemainingAndOverscroll extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingAndOverscroll({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
   }) : super(key: key, child: child);
 
   @override

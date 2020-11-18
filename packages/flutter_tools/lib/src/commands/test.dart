@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import '../asset.dart';
@@ -11,8 +10,6 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
-import '../codegen.dart';
-import '../dart/pub.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -31,6 +28,9 @@ class TestCommand extends FlutterCommand {
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
@@ -41,6 +41,14 @@ class TestCommand extends FlutterCommand {
         help: 'A plain-text substring of the names of tests to run.',
         valueHelp: 'substring',
         splitCommas: false,
+      )
+      ..addOption('tags',
+        abbr: 't',
+        help: 'Run only tests associated with tags',
+      )
+      ..addOption('exclude-tags',
+        abbr: 'x',
+        help: 'Run only tests WITHOUT given tags',
       )
       ..addFlag('start-paused',
         defaultsTo: false,
@@ -100,10 +108,14 @@ class TestCommand extends FlutterCommand {
         help: 'Whether to build the assets bundle for testing.\n'
               'Consider using --no-test-assets if assets are not required.',
       )
+      // --platform is not supported to be used by Flutter developers. It only
+      // exists to test the Flutter framework itself and may be removed entirely
+      // in the future. Developers should either use plain `flutter test`, or
+      // `package:integration_test` instead.
       ..addOption('platform',
         allowed: const <String>['tester', 'chrome'],
+        hide: true,
         defaultsTo: 'tester',
-        help: 'The platform to run the unit tests on. Defaults to "tester".',
       )
       ..addOption('test-randomize-ordering-seed',
         help: 'The seed to randomize the execution order of test cases.\n'
@@ -119,8 +131,19 @@ class TestCommand extends FlutterCommand {
               'interact with the vmservice at runtime.\n'
               'This flag is ignored if --start-paused or coverage are requested. '
               'The vmservice will be enabled no matter what in those cases.'
+      )
+      ..addOption('reporter',
+        abbr: 'r',
+        defaultsTo: 'compact',
+        help: 'Set how to print test results.\n'
+        '[compact] (default)         A single line, updated continuously.\n'
+        '[expanded]                  A separate line for each update.\n'
+        '[json]                      A machine-readable format (see https://dart.dev/go/test-docs/json_reporter.md).\n')
+      ..addOption('timeout',
+        help: 'The default test timeout. For example: 15s, 2x, none. Defaults to "30s"',
+        defaultsTo: '30s',
       );
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+      addDdsOptions(verboseHelp: verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
@@ -146,7 +169,6 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await globals.cache.updateAll(await requiredArtifacts);
     if (!globals.fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -154,13 +176,13 @@ class TestCommand extends FlutterCommand {
         "called *_test.dart and must reside in the package's 'test' "
         'directory (or one of its subdirectories).');
     }
-    if (shouldRunPub) {
-      await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
-    }
+    final FlutterProject flutterProject = FlutterProject.current();
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
-    final FlutterProject flutterProject = FlutterProject.current();
+    final String tags = stringArg('tags');
+    final String excludeTags = stringArg('exclude-tags');
+    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -211,10 +233,12 @@ class TestCommand extends FlutterCommand {
     final bool machine = boolArg('machine');
     CoverageCollector collector;
     if (boolArg('coverage') || boolArg('merge-coverage')) {
-      final String projectName = FlutterProject.current().manifest.appName;
+      final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
+        // TODO(jonahwilliams): file bug for incorrect URI handling on windows
+        packagesPath: globals.fs.path.absolute('.packages'),
       );
     }
 
@@ -225,24 +249,7 @@ class TestCommand extends FlutterCommand {
       watcher = collector;
     }
 
-    Cache.releaseLockEarly();
-
-    // Run builders once before all tests.
-    if (flutterProject.hasBuilders) {
-      final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
-      codegenDaemon.startBuild();
-      await for (final CodegenStatus status in codegenDaemon.buildResults) {
-        if (status == CodegenStatus.Succeeded) {
-          break;
-        }
-        if (status == CodegenStatus.Failed) {
-          throwToolExit('Code generation failed.');
-        }
-      }
-    }
-
-    final bool disableServiceAuthCodes =
-      boolArg('disable-service-auth-codes');
+    final bool disableServiceAuthCodes = boolArg('disable-service-auth-codes');
 
     final int result = await testRunner.runTests(
       testWrapper,
@@ -250,20 +257,25 @@ class TestCommand extends FlutterCommand {
       workDir: workDir,
       names: names,
       plainNames: plainNames,
+      tags: tags,
+      excludeTags: excludeTags,
       watcher: watcher,
       enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
+      disableDds: disableDds,
       ipv6: boolArg('ipv6'),
       machine: machine,
-      buildMode: BuildMode.debug,
-      trackWidgetCreation: boolArg('track-widget-creation'),
+      buildInfo: buildInfo,
       updateGoldens: boolArg('update-goldens'),
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      reporter: stringArg('reporter'),
+      timeout: stringArg('timeout'),
     );
 
     if (collector != null) {
@@ -284,7 +296,7 @@ class TestCommand extends FlutterCommand {
 
   Future<void> _buildTestAsset() async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build();
+    final int build = await assetBundle.build(packagesPath: '.packages');
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }

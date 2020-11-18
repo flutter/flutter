@@ -11,6 +11,8 @@ import 'value_listenable_builder.dart';
 /// [Widget] builder that animates a property of a [Widget] to a target value
 /// whenever the target value changes.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=l9uHB8VXZOg}
+///
 /// The type of the animated property ([Color], [Rect], [double], etc.) is
 /// defined via the type of the provided [tween] (e.g. [ColorTween],
 /// [RectTween], [Tween<double>], etc.).
@@ -111,7 +113,7 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
-class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
+class TweenAnimationBuilder<T extends Object> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///
   /// The properties [tween], [duration], and [builder] are required. The values
@@ -122,12 +124,12 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   /// [TweenAnimationBuilder], its properties should not be accessed or changed
   /// anymore to avoid interference with the [TweenAnimationBuilder].
   const TweenAnimationBuilder({
-    Key key,
-    @required this.tween,
-    @required Duration duration,
+    Key? key,
+    required this.tween,
+    required Duration duration,
     Curve curve = Curves.linear,
-    @required this.builder,
-    VoidCallback onEnd,
+    required this.builder,
+    VoidCallback? onEnd,
     this.child,
   }) : assert(tween != null),
        assert(curve != null),
@@ -184,7 +186,7 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   ///
   /// Using this pre-built child is entirely optional, but can improve
   /// performance significantly in some cases and is therefore a good practice.
-  final Widget child;
+  final Widget? child;
 
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState() {
@@ -192,16 +194,16 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
-  Tween<T> _currentTween;
+class _TweenAnimationBuilderState<T extends Object> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
+  Tween<T>? _currentTween;
 
   @override
   void initState() {
     _currentTween = widget.tween;
-    _currentTween.begin ??= _currentTween.end;
+    _currentTween!.begin ??= _currentTween!.end;
     super.initState();
-    if (_currentTween.begin != _currentTween.end) {
-      controller.forward();
+    if (_currentTween!.begin != _currentTween!.end) {
+      controller!.forward();
     }
   }
 
@@ -212,14 +214,13 @@ class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimat
       'Tween provided to TweenAnimationBuilder must have non-null Tween.end value.',
     );
     _currentTween = visitor(_currentTween, widget.tween.end, (dynamic value) {
-      // Constructor will never be called because null is never provided as current tween.
       assert(false);
-      return null;
-    }) as Tween<T>;
+      throw StateError('Constructor will never be called because null is never provided as current tween.');
+    }) as Tween<T>?;
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, _currentTween.evaluate(animation), widget.child);
+    return widget.builder(context, _currentTween!.evaluate(animation!), widget.child);
   }
 }

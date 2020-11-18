@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -38,7 +37,7 @@ class FuchsiaKernelCompiler {
       mode: buildInfo.mode,
     );
     if (!globals.fs.isFileSync(kernelCompiler)) {
-      throwToolExit('Fuchisa kernel compiler not found at "$kernelCompiler"');
+      throwToolExit('Fuchsia kernel compiler not found at "$kernelCompiler"');
     }
     final String platformDill = globals.artifacts.getArtifactPath(
       Artifact.platformKernelDill,
@@ -46,7 +45,7 @@ class FuchsiaKernelCompiler {
       mode: buildInfo.mode,
     );
     if (!globals.fs.isFileSync(platformDill)) {
-      throwToolExit('Fuchisa platform file not found at "$platformDill"');
+      throwToolExit('Fuchsia platform file not found at "$platformDill"');
     }
     List<String> flags = <String>[
       '--target', 'flutter_runner',
@@ -56,28 +55,7 @@ class FuchsiaKernelCompiler {
       '--packages', '$multiRootScheme:///$relativePackagesFile',
       '--output', globals.fs.path.join(outDir, '$appName.dil'),
       '--component-name', appName,
-
-      // AOT/JIT:
-      if (buildInfo.usesAot) ...<String>['--aot', '--tfa']
-      else ...<String>[
-        '--no-link-platform',
-        '--split-output-by-packages',
-        '--manifest', manifestPath
-      ],
-
-      // debug, profile, jit release, release:
-      if (buildInfo.isDebug) '--embed-sources'
-      else '--no-embed-sources',
-
-      if (buildInfo.isProfile) '-Ddart.vm.profile=true',
-      if (buildInfo.mode.isRelease) '-Ddart.vm.release=true',
-      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
-
-      // Use bytecode and drop the ast in JIT release mode.
-      if (buildInfo.isJitRelease) ...<String>[
-        '--gen-bytecode',
-        '--drop-ast',
-      ],
+      ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath)
     ];
 
     flags += <String>[
@@ -86,21 +64,61 @@ class FuchsiaKernelCompiler {
 
     final List<String> command = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       kernelCompiler,
       ...flags,
     ];
     final Status status = globals.logger.startProgress(
       'Building Fuchsia application...',
-      timeout: null,
     );
     int result;
     try {
-      result = await processUtils.stream(command, trace: true);
+      result = await globals.processUtils.stream(command, trace: true);
     } finally {
       status.cancel();
     }
     if (result != 0) {
       throwToolExit('Build process failed');
     }
+  }
+
+  /// Provide flags that are affected by [BuildInfo]
+  @visibleForTesting
+  static List<String> getBuildInfoFlags({
+    @required BuildInfo buildInfo,
+    @required String manifestPath,
+  }) {
+    return <String>[
+      // AOT/JIT:
+      if (buildInfo.usesAot) ...<String>[
+        '--aot',
+        '--tfa'
+      ] else ...<String>[
+        '--no-link-platform',
+        '--split-output-by-packages',
+        '--manifest',
+        manifestPath
+      ],
+
+      // debug, profile, jit release, release:
+      if (buildInfo.isDebug)
+        '--embed-sources'
+      else
+        '--no-embed-sources',
+
+      if (buildInfo.isProfile) ...<String>[
+        '-Ddart.vm.profile=true',
+        '-Ddart.vm.product=false',
+      ],
+
+      if (buildInfo.mode.isRelease) ...<String>[
+        '-Ddart.vm.profile=false',
+        '-Ddart.vm.product=true',
+      ],
+      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
+
+      for (final String dartDefine in buildInfo.dartDefines)
+        '-D$dartDefine',
+    ];
   }
 }

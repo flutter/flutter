@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-{{#withDriverTest}}
-import 'package:flutter_driver/driver_extension.dart';
-{{/withDriverTest}}
 {{#withPluginHook}}
 import 'dart:async';
 
@@ -10,11 +7,6 @@ import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPluginHook}}
 
 void main() {
-{{#withDriverTest}}
-  // Enable integration testing with the Flutter Driver extension.
-  // See https://flutter.dev/testing/ for more info.
-  enableFlutterDriverExtension();
-{{/withDriverTest}}
   runApp(MyApp());
 }
 

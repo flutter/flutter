@@ -26,7 +26,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 100.0,
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
+                    color: index.isEven ? Colors.blue : Colors.red,
                     child: Text('Tile $index'),
                   );
                 },
@@ -70,7 +70,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 100.0,
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
+                    color: index.isEven ? Colors.blue : Colors.red,
                     child: Text('Tile $index'),
                   );
                 },
@@ -114,7 +114,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 100.0,
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
+                    color: index.isEven ? Colors.blue : Colors.red,
                     child: Text('Tile $index'),
                   );
                 },
@@ -156,7 +156,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                     height: 100.0,
-                    color: index % 2 == 0 ? Colors.blue : Colors.red,
+                    color: index.isEven ? Colors.blue : Colors.red,
                     child: Text('Tile $index'),
                   );
                 },
@@ -214,5 +214,5 @@ void main() {
     // coordinate space of the screen, the scroll view actually moved far more
     // pixels in its local coordinate system due to the perspective transform.
     expect(controller.offset, greaterThan(100));
-  }, skip: isBrowser);
+  });
 }

@@ -3,22 +3,27 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 class TestIcon extends StatefulWidget {
-  const TestIcon({ Key key }) : super(key: key);
+  const TestIcon({ Key? key }) : super(key: key);
 
   @override
   TestIconState createState() => TestIconState();
 }
 
 class TestIconState extends State<TestIcon> {
-  IconThemeData iconTheme;
+  late IconThemeData iconTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +33,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  const TestText(this.text, { Key key }) : super(key: key);
+  const TestText(this.text, { Key? key }) : super(key: key);
 
   final String text;
 
@@ -37,7 +42,7 @@ class TestText extends StatefulWidget {
 }
 
 class TestTextState extends State<TestText> {
-  TextStyle textStyle;
+  late TextStyle textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +57,11 @@ void main() {
 
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
-    bool hasSubtitle;
+    late bool hasSubtitle;
 
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
-    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double subtitleScaleFactor }) {
+    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double? subtitleScaleFactor }) {
       hasSubtitle = isTwoLine || isThreeLine;
       subtitleScaleFactor ??= textScaleFactor;
       return MaterialApp(
@@ -190,7 +195,7 @@ void main() {
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(128.0);
-  }, skip: isBrowser);
+  });
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
     const double leftPadding = 10.0;
@@ -253,21 +258,23 @@ void main() {
     final Key subtitleKey = UniqueKey();
     final Key leadingKey = UniqueKey();
     final Key trailingKey = UniqueKey();
-    ThemeData theme;
+    late ThemeData theme;
 
     Widget buildFrame({
       bool enabled = true,
       bool dense = false,
       bool selected = false,
-      Color selectedColor,
-      Color iconColor,
-      Color textColor,
+      ShapeBorder? shape,
+      Color? selectedColor,
+      Color? iconColor,
+      Color? textColor,
     }) {
       return MaterialApp(
         home: Material(
           child: Center(
             child: ListTileTheme(
               dense: dense,
+              shape: shape,
               selectedColor: selectedColor,
               iconColor: iconColor,
               textColor: textColor,
@@ -292,9 +299,13 @@ void main() {
 
     const Color green = Color(0xFF00FF00);
     const Color red = Color(0xFFFF0000);
+    const ShapeBorder roundedShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+    );
 
-    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color;
-    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+    ShapeBorder inkWellBorder() => tester.widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell))).customBorder!;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
     await tester.pumpWidget(buildFrame(selected: true));
@@ -337,6 +348,10 @@ void main() {
     expect(iconColor(trailingKey), theme.disabledColor);
     expect(textColor(titleKey), theme.disabledColor);
     expect(textColor(subtitleKey), theme.disabledColor);
+
+    // A selected ListTile's InkWell gets the ListTileTheme's shape
+    await tester.pumpWidget(buildFrame(selected: true, shape: roundedShape));
+    expect(inkWellBorder(), roundedShape);
   });
 
   testWidgets('ListTile semantics', (WidgetTester tester) async {
@@ -802,7 +817,7 @@ void main() {
     expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
     expect(tester.getRect(find.byType(Placeholder).at(2)),  const Rect.fromLTWH(               16.0, 216.0 + 16.0,  24.0,  12.0));
     expect(tester.getRect(find.byType(Placeholder).at(3)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/28765
@@ -1137,6 +1152,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 56.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
   });
+
   testWidgets('ListTile only accepts focus when enabled', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
@@ -1158,10 +1174,10 @@ void main() {
     );
     await tester.pump(); // Let the focus take effect.
 
-    final FocusNode tileNode = Focus.of(childKey.currentContext);
+    final FocusNode tileNode = Focus.of(childKey.currentContext!);
     tileNode.requestFocus();
     await tester.pump(); // Let the focus take effect.
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
 
     expect(tileNode.hasPrimaryFocus, isTrue);
     await tester.pumpWidget(
@@ -1182,6 +1198,889 @@ void main() {
     );
 
     expect(tester.binding.focusManager.primaryFocus, isNot(equals(tileNode)));
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('ListTile can autofocus unless disabled.', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: true,
+                autofocus: true,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text('A', key: childKey),
+                dense: true,
+                enabled: false,
+                autofocus: true,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('ListTile is focusable and has correct focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'ListTile');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Key tileKey = Key('listTile');
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 100,
+                height: 100,
+                color: Colors.white,
+                child: ListTile(
+                  key: tileKey,
+                  onTap: enabled ? () {} : null,
+                  focusColor: Colors.orange[500],
+                  autofocus: true,
+                  focusNode: focusNode,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byKey(tileKey))),
+      paints
+        ..rect(
+          color: Colors.orange[500],
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+        )
+        ..rect(
+          color: const Color(0xffffffff),
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+        ),
+    );
+
+    // Check when the list tile is disabled.
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      Material.of(tester.element(find.byKey(tileKey))),
+      paints
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+    );
+  });
+
+  testWidgets('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Key tileKey = Key('ListTile');
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 100,
+                height: 100,
+                color: Colors.white,
+                child: ListTile(
+                  key: tileKey,
+                  onTap: enabled ? () {} : null,
+                  hoverColor: Colors.orange[500],
+                  autofocus: true,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(tileKey))),
+      paints
+        ..rect(
+            color: const Color(0x1f000000),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byKey(tileKey)));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+        Material.of(tester.element(find.byKey(tileKey))),
+        paints
+          ..rect(
+              color: const Color(0x1f000000),
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+          ..rect(
+              color: Colors.orange[500],
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+          ..rect(
+              color: const Color(0xffffffff),
+              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+    );
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byKey(tileKey))),
+      paints
+        ..rect(
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+    );
+  });
+
+  testWidgets('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Key tileKey = Key('ListTile');
+    bool tapped = false;
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: 200,
+                height: 100,
+                color: Colors.white,
+                child: ListTile(
+                  key: tileKey,
+                  onTap: enabled ? () {
+                    setState((){
+                      tapped = true;
+                    });
+                  } : null,
+                  hoverColor: Colors.orange[500],
+                  autofocus: true,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('ListTile responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: ListTile(
+                key: key,
+                onTap: () {},
+                autofocus: true,
+                visualDensity: visualDensity,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 56)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 68)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 44)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(800, 44)));
+  });
+
+  testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test ListTile() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                onTap: () {},
+                mouseCursor: SystemMouseCursors.text,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                enabled: false,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test default cursor when onTap or onLongPress is null
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
+    bool isSelected = false;
+    const Color selectedTileColor = Colors.red;
+    const Color tileColor = Colors.green;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListTile(
+                  selected: isSelected,
+                  selectedTileColor: selectedTileColor,
+                  tileColor: tileColor,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initially, when isSelected is false, the ListTile should respect tileColor.
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    // When isSelected is true, the ListTile should respect selectedTileColor.
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, selectedTileColor);
+  });
+
+  testWidgets('ListTile default tile color', (WidgetTester tester) async {
+    bool isSelected = false;
+    const Color defaultColor = Colors.transparent;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListTile(
+                  selected: isSelected,
+                  onTap: () {
+                    setState(()=> isSelected = !isSelected);
+                  },
+                  title: const Text('Title'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, defaultColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(isSelected, isTrue);
+    expect(coloredBox.color, defaultColor);
+  });
+
+  testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
+    late ListTileTheme theme;
+    bool isSelected = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            selectedTileColor: Colors.green,
+            tileColor: Colors.red,
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  theme = ListTileTheme.of(context);
+                  return ListTile(
+                    selected: isSelected,
+                    onTap: () {
+                      setState(()=> isSelected = !isSelected);
+                    },
+                    title: const Text('Title'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, theme.tileColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, theme.selectedTileColor);
+  });
+
+  testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
+    bool isSelected = false;
+    const Color tileColor = Colors.brown;
+    const Color selectedTileColor = Colors.purple;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            selectedTileColor: Colors.green,
+            tileColor: Colors.red,
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return ListTile(
+                    tileColor: tileColor,
+                    selectedTileColor: selectedTileColor,
+                    selected: isSelected,
+                    onTap: () {
+                      setState(()=> isSelected = !isSelected);
+                    },
+                    title: const Text('Title'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
+
+    // Tap on tile to change isSelected.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    coloredBox = tester.widget(find.byType(ColoredBox));
+    expect(coloredBox.color, selectedTileColor);
+  });
+
+  testWidgets('ListTile layout at zero size', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66636
+    const Key key = Key('key');
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 0.0,
+          height: 0.0,
+          child: ListTile(
+            key: key,
+            tileColor: Colors.green,
+          ),
+        ),
+      ),
+    ));
+
+    final RenderBox renderBox = tester.renderObject(find.byKey(key));
+    expect(renderBox.size.width, equals(0.0));
+    expect(renderBox.size.height, equals(0.0));
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    testWidgets('ListTile with disabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTile(
+              title: const Text('Title'),
+              onTap: () {},
+              enableFeedback: enableFeedback,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile with enabled feedback', (WidgetTester tester) async {
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTile(
+              title: const Text('Title'),
+              onTap: () {},
+              enableFeedback: enableFeedback,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile with enabled feedback by default', (WidgetTester tester) async {
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTile(
+              title: const Text('Title'),
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile with disabled feedback using ListTileTheme', (WidgetTester tester) async {
+      const bool enableFeedbackTheme = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTileTheme(
+              enableFeedback: enableFeedbackTheme,
+              child: ListTile(
+                title: const Text('Title'),
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('ListTile.enableFeedback overrides ListTileTheme.enableFeedback', (WidgetTester tester) async {
+      const bool enableFeedbackTheme = false;
+      const bool enableFeedback = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ListTileTheme(
+              enableFeedback: enableFeedbackTheme,
+              child: ListTile(
+                enableFeedback: enableFeedback,
+                title: const Text('Title'),
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+  });
+
+  testWidgets('ListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? themeHorizontalTitleGap, double? widgetHorizontalTitleGap }) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              horizontalTitleGap: themeHorizontalTitleGap,
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: ListTile(
+                  horizontalTitleGap: widgetHorizontalTitleGap,
+                  leading: const Text('L'),
+                  title: const Text('title'),
+                  trailing: const Text('T'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 56.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 56.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeHorizontalTitleGap: 10, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 56.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeHorizontalTitleGap: 10, widgetHorizontalTitleGap: 0));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 744.0);
+  });
+
+  testWidgets('ListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: const ListTile(
+                leading: Text('L'),
+                title: Text('title'),
+                trailing: Text('T'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // horizontalTitleGap: ListTileDefaultValue.horizontalTitleGap (16.0)
+    expect(left('title'), 72.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // horizontalTitleGap: ListTileDefaultValue.horizontalTitleGap (16.0)
+    expect(right('title'), 728.0);
+  });
+
+  testWidgets('ListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
+    Widget buildFrame({
+      double? horizontalTitleGap,
+      VisualDensity? visualDensity
+    }) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: ListTile(
+                visualDensity: visualDensity,
+                horizontalTitleGap: horizontalTitleGap,
+                leading: const Text('L'),
+                title: const Text('title'),
+                trailing: const Text('T'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(
+      horizontalTitleGap: 10.0,
+      visualDensity: const VisualDensity(horizontal: VisualDensity.minimumDensity),
+    ));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 58.0);
+
+    // Pump another frame of the same widget to ensure the underlying render
+    // object did not cache the original horizontalTitleGap calculation based on the
+    // visualDensity
+    await tester.pumpWidget(buildFrame(
+      horizontalTitleGap: 10.0,
+      visualDensity: const VisualDensity(horizontal: VisualDensity.minimumDensity),
+    ));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 58.0);
+  });
+
+  testWidgets('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              minVerticalPadding: themeMinVerticalPadding,
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: ListTile(
+                  minVerticalPadding: widgetMinVerticalPadding,
+                  leading: const Text('L'),
+                  title: const Text('title'),
+                  trailing: const Text('T'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinVerticalPadding: 80));
+    // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinVerticalPadding: 80));
+    // 80 + 80 + 16(Title) = 176
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 0, widgetMinVerticalPadding: 80));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 176.0));
+  });
+
+  testWidgets('ListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? themeMinLeadingWidth, double? widgetMinLeadingWidth }) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: ListTileTheme(
+              minLeadingWidth: themeMinLeadingWidth,
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: ListTile(
+                  minLeadingWidth: widgetMinLeadingWidth,
+                  leading: const Text('L'),
+                  title: const Text('title'),
+                  trailing: const Text('T'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // 92.0 = 16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 92.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 92.0);
+
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    // 708.0 = 800.0 - (16.0(Default contentPadding) + 16.0(Default horizontalTitleGap) + 60.0)
+    expect(right('title'), 708.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 708.0);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinLeadingWidth: 0, widgetMinLeadingWidth: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(right('title'), 708.0);
   });
 }

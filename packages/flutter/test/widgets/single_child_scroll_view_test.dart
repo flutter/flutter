@@ -8,14 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 
 class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
-    ScrollPhysics physics,
-    ScrollContext state,
+    required ScrollPhysics physics,
+    required ScrollContext state,
     double initialPixels = 0.0,
-    ScrollPosition oldPosition,
+    ScrollPosition? oldPosition,
   }) : super(
     physics: physics,
     context: state,
@@ -26,7 +27,7 @@ class TestScrollPosition extends ScrollPositionWithSingleContext {
 
 class TestScrollController extends ScrollController {
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
     return TestScrollPosition(
       physics: physics,
       state: context,
@@ -37,6 +38,90 @@ class TestScrollController extends ScrollController {
 }
 
 void main() {
+  testWidgets('SingleChildScrollView overflow and clipRect test', (WidgetTester tester) async {
+    // the test widowSize is Size(800.0, 600.0)
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Container(height: 600.0,)
+        )
+      )
+    );
+
+    // 1st, check that the render object has received the default clip behavior.
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
+    TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    // 3rd, height overflow test: check that the painting context call pushClipRect.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Container(height: 600.1,)
+        )
+      )
+    );
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    // 4th, width == widow.width test: check that the painting context do not call pushClipRect.
+    context = TestClipPaintingContext();
+    expect(context.clipBehavior, equals(Clip.none)); // initial value
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Container(width: 800.0,)
+        )
+      )
+    );
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    // 5th, width overflow test: check that the painting context call pushClipRect.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Container(width: 800.1,)
+        )
+      )
+    );
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
+
+    // 1st, check that the render object has received the default clip behavior.
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first; // ignore: unnecessary_nullable_for_final_variable_declarations
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, check that the painting context has received the default clip behavior.
+    final TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    // 3rd, pump a new widget to check that the render object can update its clip behavior.
+    await tester.pumpWidget(SingleChildScrollView(clipBehavior: Clip.antiAlias, child: Container(height: 2000.0)));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+
+    // 4th, check that a non-default clip behavior can be sent to the painting context.
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.antiAlias));
+  });
+
   testWidgets('SingleChildScrollView control test', (WidgetTester tester) async {
     await tester.pumpWidget(SingleChildScrollView(
       child: Container(
@@ -543,7 +628,15 @@ void main() {
   });
 
   testWidgets('Nested SingleChildScrollView showOnScreen', (WidgetTester tester) async {
-    final List<List<Widget>> children = List<List<Widget>>(10);
+    final List<List<Widget>> children = List<List<Widget>>.generate(10, (int x) {
+      return List<Widget>.generate(10, (int y) {
+        return SizedBox(
+          key: UniqueKey(),
+          height: 100.0,
+          width: 100.0,
+        );
+      });
+    });
     ScrollController controllerX;
     ScrollController controllerY;
 
@@ -578,16 +671,11 @@ void main() {
                 controller: controllerX = ScrollController(initialScrollOffset: 400.0),
                 scrollDirection: Axis.horizontal,
                 child: Column(
-                  children: List<Widget>.generate(10, (int y) {
+                  children: children.map((List<Widget> widgets) {
                     return Row(
-                      children: children[y] = List<Widget>.generate(10, (int x) {
-                        return Container(
-                          height: 100.0,
-                          width: 100.0,
-                        );
-                      }),
+                      children: widgets,
                     );
-                  }),
+                  }).toList(),
                 ),
               ),
             ),
@@ -704,9 +792,9 @@ void main() {
   });
 
   group('Nested SingleChildScrollView (same orientation) showOnScreen', () {
-    List<Widget> children;
+    late List<Widget> children;
 
-    Future<void> buildNestedScroller({ WidgetTester tester, ScrollController inner, ScrollController outer }) {
+    Future<void> buildNestedScroller({ required WidgetTester tester, ScrollController? inner, ScrollController? outer }) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

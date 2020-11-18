@@ -26,7 +26,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    Offset startGlobalPosition;
+    Offset? startGlobalPosition;
 
     void onStart(ForcePressDetails details) {
       startGlobalPosition = details.globalPosition;
@@ -409,7 +409,7 @@ void main() {
     int updated = 0;
     int ended = 0;
 
-    Offset startGlobalPosition;
+    Offset? startGlobalPosition;
 
     void onStart(ForcePressDetails details) {
       startGlobalPosition = details.globalPosition;

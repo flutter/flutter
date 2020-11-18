@@ -13,7 +13,7 @@ void main() {
         primarySwatch: Colors.green,
       ),
       home: const Placeholder(),
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         log.add('build');
         expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
@@ -52,10 +52,10 @@ void main() {
             return const Placeholder();
           },
         ),
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Directionality(
             textDirection: TextDirection.rtl,
-            child: child,
+            child: child!,
           );
         },
       ),

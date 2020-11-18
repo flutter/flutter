@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget wrap({ Widget child, ThemeData theme }) {
+Widget wrap({ required Widget child, ThemeData? theme }) {
   return MaterialApp(
     theme: theme,
     home: Center(

@@ -15,11 +15,12 @@ void main() {
 
   test('Semantic announcement', () async {
     final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
-
-    SystemChannels.accessibility.setMockMessageHandler((Object mockMessage) async {
+    Future<dynamic> handleMessage(dynamic mockMessage) async {
       final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
       log.add(message);
-    });
+    }
+
+    SystemChannels.accessibility.setMockMessageHandler(handleMessage);
 
     await SemanticsService.announce('announcement 1', TextDirection.ltr);
     await SemanticsService.announce('announcement 2', TextDirection.rtl);

@@ -26,7 +26,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, const Color(0xdd000000));
+      expect(raw.textStyle!.color, const Color(0xdd000000));
       expect(raw.fillColor, const Color(0xffe0e0e0));
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
@@ -54,7 +54,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, const Color(0x61000000));
+      expect(raw.textStyle!.color, const Color(0x61000000));
       expect(raw.fillColor, const Color(0x61000000));
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash
@@ -84,7 +84,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, const Color(0xdd000000));
+      expect(raw.textStyle!.color, const Color(0xdd000000));
       expect(raw.fillColor, null);
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
@@ -112,7 +112,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, const Color(0x61000000));
+      expect(raw.textStyle!.color, const Color(0x61000000));
       expect(raw.fillColor, null);
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash
@@ -146,7 +146,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, const Color(0xdd000000));
+      expect(raw.textStyle!.color, const Color(0xdd000000));
       expect(raw.fillColor, const Color(0x00fafafa));
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
@@ -155,7 +155,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
@@ -173,7 +173,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, const Color(0xdd000000));
+      expect(raw.textStyle!.color, const Color(0xdd000000));
       expect(raw.fillColor, Colors.transparent);
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
@@ -182,7 +182,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
@@ -200,7 +200,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, const Color(0x61000000));
+      expect(raw.textStyle!.color, const Color(0x61000000));
       expect(raw.fillColor, const Color(0x00000000));
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash
@@ -209,7 +209,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
   });
@@ -234,7 +234,7 @@ void main() {
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
       expect(raw.enabled, true);
-      expect(raw.textStyle.color, const Color(0xffffffff));
+      expect(raw.textStyle!.color, const Color(0xffffffff));
       expect(raw.fillColor, const Color(0xff2196f3));
       expect(raw.elevation, 6.0);
       expect(raw.highlightElevation, 12.0);
@@ -261,7 +261,7 @@ void main() {
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
       expect(raw.enabled, false);
-      expect(raw.textStyle.color, const Color(0xffffffff));
+      expect(raw.textStyle!.color, const Color(0xffffffff));
       expect(raw.fillColor, const Color(0xff2196f3));
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash

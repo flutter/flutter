@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../framework/framework.dart';
+import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 /// Run each benchmark this many times and compute average, min, max.

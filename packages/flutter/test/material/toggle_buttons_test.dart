@@ -4,13 +4,14 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
 const double _defaultBorderWidth = 1.0;
 
-Widget boilerplate({Widget child}) {
+Widget boilerplate({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -167,50 +168,6 @@ void main() {
     },
   );
 
-  testWidgets('children property cannot be null', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[false, true],
-              onPressed: (int index) {},
-              children: null,
-            ),
-          ),
-        ),
-      );
-      fail('Should not be possible to create a toggle button with no children.');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children != null'));
-    }
-  });
-
-  testWidgets(
-    'isSelected property cannot be null',
-    (WidgetTester tester) async {
-      try {
-        await tester.pumpWidget(
-          Material(
-            child: boilerplate(
-              child: ToggleButtons(
-                isSelected: null,
-                onPressed: (int index) {},
-                children: const <Widget>[
-                  Text('First child'),
-                  Text('Second child'),
-                ],
-              ),
-            ),
-          ),
-        );
-        fail('Should not be possible to create a toggle button with no isSelected.');
-      } on AssertionError catch (e) {
-        expect(e.toString(), contains('isSelected != null'));
-      }
-    },
-  );
-
   testWidgets(
     'children and isSelected properties have to be the same length',
     (WidgetTester tester) async {
@@ -259,15 +216,15 @@ void main() {
         of: find.widgetWithText(RawMaterialButton, 'First child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
         of: find.widgetWithText(RawMaterialButton, 'Second child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
   });
 
   testWidgets('Custom text style except color is applied', (WidgetTester tester) async {
@@ -750,6 +707,7 @@ void main() {
     await hoverGesture.addPointer();
     await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
+    await hoverGesture.moveTo(const Offset(0, 0));
 
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
@@ -758,7 +716,6 @@ void main() {
       inkFeatures,
       paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
     );
-    await hoverGesture.removePointer();
 
     // focusColor
     focusNode.requestFocus();
@@ -767,6 +724,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets('Default InkWell colors - selected', (WidgetTester tester) async {
@@ -822,7 +781,7 @@ void main() {
       inkFeatures,
       paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
     );
-    await hoverGesture.removePointer();
+    await hoverGesture.moveTo(const Offset(0, 0));
 
     // focusColor
     focusNode.requestFocus();
@@ -831,6 +790,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets('Custom InkWell colors', (WidgetTester tester) async {
@@ -891,7 +852,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.removePointer();
+    await hoverGesture.moveTo(const Offset(0, 0));
 
     // focusColor
     focusNode.requestFocus();
@@ -900,6 +861,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    await hoverGesture.removePointer();
   });
 
   testWidgets(
@@ -1307,8 +1270,8 @@ void main() {
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
-    expect(firstToggleButtonDy, closeTo(materialButtonDy - 2.0, 0.001));
-    expect(firstToggleButtonDy, closeTo(textDy - 4.0, 0.001));
+    expect(firstToggleButtonDy, moreOrLessEquals(materialButtonDy - 2.0, epsilon: 0.001));
+    expect(firstToggleButtonDy, moreOrLessEquals(textDy - 4.0, epsilon: 0.001));
   });
 
   testWidgets('Directionality test', (WidgetTester tester) async {
@@ -1434,4 +1397,74 @@ void main() {
       );
     },
   );
+
+  testWidgets('ToggleButtons changes mouse cursor when the button is hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: ToggleButtons(
+              mouseCursor: SystemMouseCursors.text,
+              onPressed: (int index) {},
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('First child')));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: ToggleButtons(
+              onPressed: (int index) {},
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: ToggleButtons(
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
 }

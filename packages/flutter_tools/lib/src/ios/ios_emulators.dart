@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -19,10 +17,13 @@ class IOSEmulators extends EmulatorDiscovery {
 
   @override
   Future<List<Emulator>> get emulators async => getEmulators();
+
+  @override
+  bool get canLaunchAnything => canListAnything;
 }
 
 class IOSEmulator extends Emulator {
-  IOSEmulator(String id) : super(id, true);
+  const IOSEmulator(String id) : super(id, true);
 
   @override
   String get name => 'iOS Simulator';
@@ -46,7 +47,7 @@ class IOSEmulator extends Emulator {
         globals.xcode.getSimulatorPath(),
       ];
 
-      final RunResult launchResult = await processUtils.run(args);
+      final RunResult launchResult = await globals.processUtils.run(args);
       if (launchResult.exitCode != 0) {
         globals.printError('$launchResult');
         return false;
@@ -72,5 +73,5 @@ List<IOSEmulator> getEmulators() {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[IOSEmulator(iosSimulatorId)];
+  return <IOSEmulator>[const IOSEmulator(iosSimulatorId)];
 }

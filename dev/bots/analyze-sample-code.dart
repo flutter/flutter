@@ -186,6 +186,7 @@ class SampleChecker {
   /// Computes the headers needed for each sample file.
   List<Line> get headers {
     return _headers ??= <String>[
+      '// @dart = 2.9',
       '// generated code',
       "import 'dart:async';",
       "import 'dart:convert';",
@@ -490,6 +491,8 @@ class SampleChecker {
     final File analysisOptions = File(path.join(directory.path, 'analysis_options.yaml'))..createSync(recursive: true);
     pubSpec.writeAsStringSync('''
 name: analyze_sample_code
+environment:
+  sdk: '>=2.10.0 <3.0.0'
 dependencies:
   flutter:
     sdk: flutter
@@ -529,6 +532,10 @@ linter:
     );
     final List<String> stderr = result.stderr.toString().trim().split('\n');
     final List<String> stdout = result.stdout.toString().trim().split('\n');
+    // Remove output from building the flutter tool.
+    stderr.removeWhere((String line) {
+      return line.startsWith('Building flutter tool...');
+    });
     // Check out the stderr to see if the analyzer had it's own issues.
     if (stderr.isNotEmpty && (stderr.first.contains(' issues found. (ran in ') || stderr.first.contains(' issue found. (ran in '))) {
       // The "23 issues found" message goes onto stderr, which is concatenated first.

@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert' show json;
 
 import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/driver/common.dart';
+import 'package:flutter_driver/src/driver/profiling_summarizer.dart';
+import 'package:flutter_driver/src/driver/scene_display_lag_summarizer.dart';
 import 'package:path/path.dart' as path;
 
 import '../../common.dart';
@@ -42,6 +46,43 @@ void main() {
       'name': 'GPURasterizer::Draw',
       'ph': 'E',
       'ts': timeStamp,
+    };
+
+    Map<String, dynamic> lagBegin(int timeStamp, int vsyncsMissed) => <String, dynamic>{
+      'name': 'SceneDisplayLag',
+      'ph': 'b',
+      'ts': timeStamp,
+      'args': <String, String>{
+        'vsync_transitions_missed': vsyncsMissed.toString()
+      }
+    };
+
+    Map<String, dynamic> lagEnd(int timeStamp, int vsyncsMissed) => <String, dynamic>{
+      'name': 'SceneDisplayLag',
+      'ph': 'e',
+      'ts': timeStamp,
+      'args': <String, String>{
+        'vsync_transitions_missed': vsyncsMissed.toString()
+      }
+    };
+
+    Map<String, dynamic> cpuUsage(int timeStamp, double cpuUsage) => <String, dynamic>{
+      'cat': 'embedder',
+      'name': 'CpuUsage',
+      'ts': timeStamp,
+      'args': <String, String>{
+        'total_cpu_usage': cpuUsage.toString()
+      }
+    };
+
+    Map<String, dynamic> memoryUsage(int timeStamp, double dirty, double shared) => <String, dynamic>{
+      'cat': 'embedder',
+      'name': 'MemoryUsage',
+      'ts': timeStamp,
+      'args': <String, String>{
+        'owned_shared_memory_usage': shared.toString(),
+        'dirty_memory_usage': dirty.toString(),
+      }
     };
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
@@ -102,6 +143,31 @@ void main() {
             frameBegin(5000),
           ]).computeAverageFrameBuildTimeMillis(),
           2.0,
+        );
+      });
+
+      // see https://github.com/flutter/flutter/issues/54095.
+      test('ignore multiple "end" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameBegin(2000), frameEnd(4000),
+            frameEnd(4300), // rogue frame end.
+            frameBegin(5000), frameEnd(6000),
+          ]).computeAverageFrameBuildTimeMillis(),
+          1.5,
+        );
+      });
+
+      test('pick latest when there are multiple "begin" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameBegin(1000), // rogue frame begin.
+            frameBegin(2000), frameEnd(4000),
+            frameEnd(4300), // rogue frame end.
+            frameBegin(4400), // rogue frame begin.
+            frameBegin(5000), frameEnd(6000),
+          ]).computeAverageFrameBuildTimeMillis(),
+          1.5,
         );
       });
     });
@@ -328,8 +394,14 @@ void main() {
             'worst_frame_rasterizer_time_millis': 20.0,
             'missed_frame_rasterizer_budget_count': 2,
             'frame_count': 3,
+            'frame_rasterizer_count': 3,
             'frame_build_times': <int>[17000, 9000, 19000],
             'frame_rasterizer_times': <int>[18000, 10000, 20000],
+            'frame_begin_times': <int>[0, 18000, 28000],
+            'frame_rasterizer_begin_times': <int>[0, 18000, 28000],
+            'average_vsync_transitions_missed': 0.0,
+            '90th_percentile_vsync_transitions_missed': 0.0,
+            '99th_percentile_vsync_transitions_missed': 0.0
           },
         );
       });
@@ -365,6 +437,11 @@ void main() {
           frameBegin(1000), frameEnd(18000),
           frameBegin(19000), frameEnd(28000),
           frameBegin(29000), frameEnd(48000),
+          lagBegin(1000, 4), lagEnd(2000, 4),
+          lagBegin(1200, 12), lagEnd(2400, 12),
+          lagBegin(4200, 8), lagEnd(9400, 8),
+          cpuUsage(5000, 20), cpuUsage(5010, 60),
+          memoryUsage(6000, 20, 40), memoryUsage(6100, 30, 45),
         ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
@@ -380,9 +457,111 @@ void main() {
           'worst_frame_rasterizer_time_millis': 20.0,
           'missed_frame_rasterizer_budget_count': 2,
           'frame_count': 3,
+          'frame_rasterizer_count': 3,
           'frame_build_times': <int>[17000, 9000, 19000],
           'frame_rasterizer_times': <int>[18000, 10000, 20000],
+          'frame_begin_times': <int>[0, 18000, 28000],
+          'frame_rasterizer_begin_times': <int>[0, 18000, 28000],
+          'average_vsync_transitions_missed': 8.0,
+          '90th_percentile_vsync_transitions_missed': 12.0,
+          '99th_percentile_vsync_transitions_missed': 12.0,
+          'average_cpu_usage': 40.0,
+          '90th_percentile_cpu_usage': 60.0,
+          '99th_percentile_cpu_usage': 60.0,
+          'average_memory_usage': 67.5,
+          '90th_percentile_memory_usage': 75.0,
+          '99th_percentile_memory_usage': 75.0,
         });
+      });
+    });
+
+    group('SceneDisplayLagSummarizer tests', () {
+      SceneDisplayLagSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
+          final Timeline timeline = Timeline.fromJson(<String, dynamic>{
+          'traceEvents': traceEvents,
+          });
+          return SceneDisplayLagSummarizer(timeline.events);
+      }
+
+      test('average_vsyncs_missed', () async {
+        final SceneDisplayLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          lagBegin(1000, 4), lagEnd(2000, 4),
+          lagBegin(1200, 12), lagEnd(2400, 12),
+          lagBegin(4200, 8), lagEnd(9400, 8),
+        ]);
+        expect(summarizer.computeAverageVsyncTransitionsMissed(), 8.0);
+      });
+
+      test('all stats are 0 for 0 missed transitions', () async {
+        final SceneDisplayLagSummarizer summarizer = summarize(<Map<String, dynamic>>[]);
+        expect(summarizer.computeAverageVsyncTransitionsMissed(), 0.0);
+        expect(summarizer.computePercentileVsyncTransitionsMissed(90.0), 0.0);
+        expect(summarizer.computePercentileVsyncTransitionsMissed(99.0), 0.0);
+      });
+
+      test('90th_percentile_vsyncs_missed', () async {
+        final SceneDisplayLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          lagBegin(1000, 4), lagEnd(2000, 4),
+          lagBegin(1200, 12), lagEnd(2400, 12),
+          lagBegin(4200, 8), lagEnd(9400, 8),
+          lagBegin(6100, 14), lagEnd(11000, 14),
+          lagBegin(7100, 16), lagEnd(11500, 16),
+          lagBegin(7400, 11), lagEnd(13000, 11),
+          lagBegin(8200, 27), lagEnd(14100, 27),
+          lagBegin(8700, 7), lagEnd(14300, 7),
+          lagBegin(24200, 4187), lagEnd(39400, 4187),
+        ]);
+        expect(summarizer.computePercentileVsyncTransitionsMissed(90), 27.0);
+      });
+
+      test('99th_percentile_vsyncs_missed', () async {
+        final SceneDisplayLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          lagBegin(1000, 4), lagEnd(2000, 4),
+          lagBegin(1200, 12), lagEnd(2400, 12),
+          lagBegin(4200, 8), lagEnd(9400, 8),
+          lagBegin(6100, 14), lagEnd(11000, 14),
+          lagBegin(24200, 4187), lagEnd(39400, 4187),
+        ]);
+        expect(summarizer.computePercentileVsyncTransitionsMissed(99), 4187.0);
+      });
+    });
+
+    group('ProfilingSummarizer tests', () {
+      ProfilingSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
+          final Timeline timeline = Timeline.fromJson(<String, dynamic>{
+            'traceEvents': traceEvents,
+          });
+          return ProfilingSummarizer.fromEvents(timeline.events);
+      }
+
+      test('has_both_cpu_and_memory_usage', () async {
+        final ProfilingSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          cpuUsage(0, 10),
+          memoryUsage(0, 6, 10),
+          cpuUsage(0, 12),
+          memoryUsage(0, 8, 40),
+        ]);
+        expect(summarizer.computeAverage(ProfileType.CPU), 11.0);
+        expect(summarizer.computeAverage(ProfileType.Memory), 32.0);
+      });
+
+      test('has_only_memory_usage', () async {
+        final ProfilingSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          memoryUsage(0, 6, 10),
+          memoryUsage(0, 8, 40),
+        ]);
+        expect(summarizer.computeAverage(ProfileType.Memory), 32.0);
+        expect(summarizer.summarize().containsKey('average_cpu_usage'), false);
+      });
+
+      test('90th_percentile_cpu_usage', () async {
+        final ProfilingSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          cpuUsage(0, 10), cpuUsage(1, 20),
+          cpuUsage(2, 20), cpuUsage(3, 80),
+          cpuUsage(4, 70), cpuUsage(4, 72),
+          cpuUsage(4, 85), cpuUsage(4, 100),
+        ]);
+        expect(summarizer.computePercentile(ProfileType.CPU, 90), 85.0);
       });
     });
   });

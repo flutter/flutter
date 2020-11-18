@@ -7,14 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('debugInstrumentAction', () {
-    DebugPrintCallback originalDebugPrintCallback;
-    StringBuffer printBuffer;
+    late DebugPrintCallback originalDebugPrintCallback;
+    late StringBuffer printBuffer;
 
     setUp(() {
       debugInstrumentationEnabled = true;
       printBuffer = StringBuffer();
       originalDebugPrintCallback = debugPrint;
-      debugPrint = (String message, { int wrapWidth }) {
+      debugPrint = (String? message, { int? wrapWidth }) {
         printBuffer.writeln(message);
       };
     });

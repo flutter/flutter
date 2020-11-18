@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('service_protocol discovery', () {
-    MockDeviceLogReader logReader;
+    FakeDeviceLogReader logReader;
     ProtocolDiscovery discoverer;
 
     /// Performs test set-up functionality that must be performed as part of
@@ -37,7 +35,7 @@ void main() {
       int devicePort,
       Duration throttleDuration = const Duration(milliseconds: 200),
     }) {
-      logReader = MockDeviceLogReader();
+      logReader = FakeDeviceLogReader();
       discoverer = ProtocolDiscovery.observatory(
         logReader,
         ipv6: false,
@@ -197,6 +195,18 @@ void main() {
         expect('$uri', 'http://127.0.0.1:12345/PTwjm8Ii8qg=/');
       });
 
+      testUsingContext('protocol discovery does not crash if the log reader is closed while delaying', () async {
+        initialize(devicePort: 12346, throttleDuration: const Duration(milliseconds: 10));
+        final Future<List<Uri>> results = discoverer.uris.toList();
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:12346/PTwjm8Ii8qg=/');
+        await logReader.dispose();
+
+        // Give time for throttle to finish.
+        await Future<void>.delayed(const Duration(milliseconds: 11));
+        expect(await results, isEmpty);
+      });
+
       testUsingContext('uris in the stream are throttled', () async {
         const Duration kThrottleDuration = Duration(milliseconds: 10);
 
@@ -261,7 +271,7 @@ void main() {
 
     group('port forwarding', () {
       testUsingContext('default port', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
@@ -282,7 +292,7 @@ void main() {
       });
 
       testUsingContext('specified port', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
@@ -303,7 +313,7 @@ void main() {
       });
 
       testUsingContext('specified port zero', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
@@ -324,7 +334,7 @@ void main() {
       });
 
       testUsingContext('ipv6', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
@@ -345,7 +355,7 @@ void main() {
       });
 
       testUsingContext('ipv6 with Ascii Escape code', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),

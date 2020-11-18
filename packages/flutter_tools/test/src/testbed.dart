@@ -58,7 +58,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 /// Example:
 ///
-/// Testing that a filesystem operation works as expected
+/// Testing that a filesystem operation works as expected:
 ///
 ///     void main() {
 ///       group('Example', () {
@@ -377,6 +377,11 @@ class FakeHttpClientRequest implements HttpClientRequest {
 
   @override
   void writeln([Object obj = '']) {}
+
+  // TODO(zichangguo): remove the ignore after the change in dart:io lands.
+  @override
+  // ignore: override_on_non_overriding_member
+  void abort([Object exception, StackTrace stackTrace]) {}
 }
 
 class FakeHttpClientResponse implements HttpClientResponse {
@@ -705,9 +710,6 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  bool get isMaster => true;
-
-  @override
   String get repositoryUrl => null;
 
   @override
@@ -724,7 +726,10 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isAndroidEmbeddingV2Enabled = false,
+    this.isSingleWidgetReloadEnabled = false,
+    this.isAndroidEnabled = true,
+    this.isIOSEnabled = true,
+    this.isFuchsiaEnabled = false,
 });
 
   @override
@@ -740,7 +745,16 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowsEnabled;
 
   @override
-  final bool isAndroidEmbeddingV2Enabled;
+  final bool isSingleWidgetReloadEnabled;
+
+  @override
+  final bool isAndroidEnabled;
+
+  @override
+  final bool isIOSEnabled;
+
+  @override
+  final bool isFuchsiaEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -753,81 +767,37 @@ class TestFeatureFlags implements FeatureFlags {
         return isMacOSEnabled;
       case flutterWindowsDesktopFeature:
         return isWindowsEnabled;
-      case flutterAndroidEmbeddingV2Feature:
-        return isAndroidEmbeddingV2Enabled;
+      case singleWidgetReload:
+        return isSingleWidgetReloadEnabled;
+      case flutterAndroidFeature:
+        return isAndroidEnabled;
+      case flutterIOSFeature:
+        return isIOSEnabled;
+      case flutterFuchsiaFeature:
+        return isFuchsiaEnabled;
     }
     return false;
   }
 }
 
-class DelegateLogger implements Logger {
-  DelegateLogger(this.delegate);
+class FakeStatusLogger extends DelegatingLogger {
+  FakeStatusLogger(Logger delegate) : super(delegate);
 
-  final Logger delegate;
   Status status;
-
-  @override
-  bool get quiet => delegate.quiet;
-
-  @override
-  set quiet(bool value) => delegate.quiet;
-
-  @override
-  bool get hasTerminal => delegate.hasTerminal;
-
-  @override
-  bool get isVerbose => delegate.isVerbose;
-
-  @override
-  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
-    delegate.printError(
-      message,
-      stackTrace: stackTrace,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
-    delegate.printStatus(message,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printTrace(String message) {
-    delegate.printTrace(message);
-  }
-
-  @override
-  void sendEvent(String name, [Map<String, dynamic> args]) {
-    delegate.sendEvent(name, args);
-  }
 
   @override
   Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
     return status;
   }
-
-  @override
-  bool get supportsColor => delegate.supportsColor;
-
-  @override
-  void clear() => delegate.clear();
 }
 
 /// An implementation of the Cache which does not download or require locking.
 class FakeCache implements Cache {
   @override
   bool includeAllPlatforms;
+
+  @override
+  Set<String> platformOverrideArtifacts;
 
   @override
   bool useUnsignedMacBinaries;
@@ -844,7 +814,7 @@ class FakeCache implements Cache {
   String get storageBaseUrl => null;
 
   @override
-  MapEntry<String, String> get dyLdLibEntry => null;
+  MapEntry<String, String> get dyLdLibEntry => const MapEntry<String, String>('DYLD_LIBRARY_PATH', '');
 
   @override
   String get engineRevision => null;
@@ -890,11 +860,6 @@ class FakeCache implements Cache {
   }
 
   @override
-  Future<String> getThirdPartyFile(String urlStr, String serviceName) {
-    throw UnsupportedError('Not supported in the fake Cache');
-  }
-
-  @override
   String getVersionFor(String artifactName) {
     throw UnsupportedError('Not supported in the fake Cache');
   }
@@ -910,7 +875,7 @@ class FakeCache implements Cache {
   }
 
   @override
-  bool isUpToDate() {
+  Future<bool> isUpToDate() async {
     return true;
   }
 
@@ -924,11 +889,19 @@ class FakeCache implements Cache {
   }
 
   @override
-  Future<void> downloadFile(Uri url, File location) async {
-  }
-
-  @override
   Future<bool> doesRemoteExist(String message, Uri url) async {
     return true;
   }
+
+  @override
+  void clearStampFiles() { }
+
+  @override
+  void checkLockAcquired() { }
+
+  @override
+  Future<void> lock() async { }
+
+  @override
+  void releaseLock() { }
 }

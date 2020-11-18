@@ -2,97 +2,127 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
-final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockFile extends Mock implements File {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockIosProject extends Mock implements IosProject {}
 
 void main() {
+  BufferLogger logger;
+
+  setUp(() {
+    logger = BufferLogger.test();
+  });
+
   group('IMobileDevice', () {
-    final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
-      ..operatingSystem = 'macos';
-    final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
-    final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
-    MockArtifacts mockArtifacts;
-    MockCache mockCache;
+    Artifacts artifacts;
+    Cache cache;
 
     setUp(() {
-      mockCache = MockCache();
-      mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
-      when(mockCache.dyLdLibEntry).thenReturn(
-        MapEntry<String, String>('DYLD_LIBRARY_PATH', libimobiledevicePath)
-      );
+      artifacts = Artifacts.test();
+      cache = Cache.test(
+        artifacts: <ArtifactSet>[
+          FakeDyldEnvironmentArtifact(),
+        ]);
     });
 
     group('screenshot', () {
-      final String outputPath = globals.fs.path.join('some', 'test', 'path', 'image.png');
       MockProcessManager mockProcessManager;
-      MockFile mockOutputFile;
+      File outputFile;
 
       setUp(() {
         mockProcessManager = MockProcessManager();
-        mockOutputFile = MockFile();
-        when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
+        outputFile = MemoryFileSystem.test().file('image.png');
       });
 
-      testUsingContext('error if idevicescreenshot is not installed', () async {
-        when(mockOutputFile.path).thenReturn(outputPath);
-
+      testWithoutContext('error if idevicescreenshot is not installed', () async {
         // Let `idevicescreenshot` fail with exit code 1.
-        when(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
-            environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+        when(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path],
+            environment: <String, String>{'DYLD_LIBRARY_PATH': 'Artifact.idevicescreenshot.TargetPlatform.ios'},
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
-        expect(() async => await globals.iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Platform: () => osx,
-        Cache: () => mockCache,
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: artifacts,
+          cache: cache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
+        expect(() async => await iMobileDevice.takeScreenshot(
+          outputFile,
+          '1234',
+          IOSDeviceInterface.usb,
+        ), throwsA(anything));
       });
 
-      testUsingContext('idevicescreenshot captures and returns screenshot', () async {
-        when(mockOutputFile.path).thenReturn(outputPath);
+      testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
-        await globals.iMobileDevice.takeScreenshot(mockOutputFile);
-        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
-            environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: artifacts,
+          cache: cache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.takeScreenshot(
+          outputFile,
+          '1234',
+          IOSDeviceInterface.usb,
+        );
+        verify(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234'],
+            environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
             workingDirectory: null,
         ));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Cache: () => mockCache,
-        Artifacts: () => mockArtifacts,
+      });
+
+      testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
+        when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
+            (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
+
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: artifacts,
+          cache: cache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.takeScreenshot(
+          outputFile,
+          '1234',
+          IOSDeviceInterface.network,
+        );
+        verify(mockProcessManager.run(<String>['Artifact.idevicescreenshot.TargetPlatform.ios', outputFile.path, '--udid', '1234', '--network'],
+          environment: <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
+          workingDirectory: null,
+        ));
       });
     });
   });
@@ -121,7 +151,7 @@ void main() {
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       verify(mockUsage.sendEvent('build',
         any,
         label: 'xcode-bitcode-failure',
@@ -129,8 +159,6 @@ void main() {
           cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
           cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
       })).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
 
     testUsingContext('No provisioning profile shows message', () async {
@@ -199,9 +227,9 @@ Error launching application on iPhone.''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
       );
     }, overrides: noColorTerminalOverride);
@@ -280,9 +308,9 @@ Could not build the precompiled application for the device.''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
     }, overrides: noColorTerminalOverride);
@@ -317,9 +345,9 @@ Exited (sigterm)''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains('Your Xcode project requires migration.'),
       );
     }, overrides: noColorTerminalOverride);
@@ -354,69 +382,101 @@ Exited (sigterm)''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains('Your Xcode project requires migration.'),
       );
     }, overrides: noColorTerminalOverride);
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {
-    const List<String> flutterAssetPbxProjLines = <String>[
-      '/* flutter_assets */',
-      '/* App.framework',
-      'another line',
-    ];
+    const String flutterAssetPbxProjLines =
+      '/* flutter_assets */\n'
+      '/* App.framework\n'
+      'another line';
 
-    const List<String> appFlxPbxProjLines = <String>[
-      '/* app.flx',
-      '/* App.framework',
-      'another line',
-    ];
+    const String appFlxPbxProjLines =
+      '/* app.flx\n'
+      '/* App.framework\n'
+      'another line';
 
-    const List<String> cleanPbxProjLines = <String>[
-      '/* App.framework',
-      'another line',
-    ];
+    const String cleanPbxProjLines =
+      '/* App.framework\n'
+      'another line';
 
-    testUsingContext('upgradePbxProjWithFlutterAssets', () async {
+    testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
       final MockIosProject project = MockIosProject();
-      final MockFile pbxprojFile = MockFile();
+      final File pbxprojFile = MemoryFileSystem.test().file('project.pbxproj')
+        ..writeAsStringSync(flutterAssetPbxProjLines);
 
       when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
-      when(project.hostAppBundleName).thenReturn('UnitTestRunner.app');
-      when(pbxprojFile.readAsLinesSync())
-          .thenAnswer((_) => flutterAssetPbxProjLines);
-      when(pbxprojFile.existsSync())
-          .thenAnswer((_) => true);
+      when(project.hostAppBundleName(any)).thenAnswer((_) => Future<String>.value('UnitTestRunner.app'));
 
-      bool result = upgradePbxProjWithFlutterAssets(project);
+      bool result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Removing obsolete reference to flutter_assets'),
       );
-      testLogger.clear();
+      logger.clear();
 
-      when(pbxprojFile.readAsLinesSync())
-          .thenAnswer((_) => appFlxPbxProjLines);
-      result = upgradePbxProjWithFlutterAssets(project);
+      pbxprojFile.writeAsStringSync(appFlxPbxProjLines);
+      result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Removing obsolete reference to app.flx'),
       );
-      testLogger.clear();
+      logger.clear();
 
-      when(pbxprojFile.readAsLinesSync())
-          .thenAnswer((_) => cleanPbxProjLines);
-      result = upgradePbxProjWithFlutterAssets(project);
+      pbxprojFile.writeAsStringSync(cleanPbxProjLines);
+      result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         isEmpty,
       );
+    });
+  });
+
+  group('remove Finder extended attributes', () {
+    Directory iosProjectDirectory;
+    setUp(() {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      iosProjectDirectory = fs.directory('ios');
+    });
+
+    testWithoutContext('removes xattr', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'xattr',
+          '-r',
+          '-d',
+          'com.apple.FinderInfo',
+          iosProjectDirectory.path,
+        ])
+      ]);
+
+      await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
+      expect(processManager.hasRemainingExpectations, false);
+    });
+
+    testWithoutContext('ignores errors', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'xattr',
+          '-r',
+          '-d',
+          'com.apple.FinderInfo',
+          iosProjectDirectory.path,
+        ], exitCode: 1,
+        )
+      ]);
+
+      await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
+      expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
+      expect(processManager.hasRemainingExpectations, false);
     });
   });
 }

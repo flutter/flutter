@@ -39,10 +39,13 @@ enum StretchMode {
 /// The part of a material design [AppBar] that expands, collapses, and
 /// stretches.
 ///
-/// Most commonly used in in the [SliverAppBar.flexibleSpace] field, a flexible
+/// Most commonly used in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]
 /// reaches from the top of the app to the top of the scrolling contents of the
-/// app. Furthermore is included functionality for stretch behavior. When
+/// app. When using [SliverAppBar.flexibleSpace], the [SliverAppBar.expandedHeight]
+/// must be large enough to accommodate the [SliverAppBar.flexibleSpace] widget.
+///
+/// Furthermore is included functionality for stretch behavior. When
 /// [SliverAppBar.stretch] is true, and your [ScrollPhysics] allow for
 /// overscroll, this space will stretch with the overscroll.
 ///
@@ -143,7 +146,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Most commonly used in the [AppBar.flexibleSpace] field.
   const FlexibleSpaceBar({
-    Key key,
+    Key? key,
     this.title,
     this.background,
     this.centerTitle,
@@ -156,25 +159,25 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// The primary contents of the flexible space bar when expanded.
   ///
   /// Typically a [Text] widget.
-  final Widget title;
+  final Widget? title;
 
   /// Shown behind the [title] when expanded.
   ///
   /// Typically an [Image] widget with [Image.fit] set to [BoxFit.cover].
-  final Widget background;
+  final Widget? background;
 
   /// Whether the title should be centered.
   ///
   /// By default this property is true if the current target platform
   /// is [TargetPlatform.iOS] or [TargetPlatform.macOS], false otherwise.
-  final bool centerTitle;
+  final bool? centerTitle;
 
   /// Collapse effect while scrolling.
   ///
   /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
 
-  /// Stretch effect while over-scrolling,
+  /// Stretch effect while over-scrolling.
   ///
   /// Defaults to include [StretchMode.zoomBackground].
   final List<StretchMode> stretchModes;
@@ -189,7 +192,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// By default the value of this property is
   /// `EdgeInsetsDirectional.only(start: 72, bottom: 16)` if the title is
   /// not centered, `EdgeInsetsDirectional.only(start: 0, bottom: 16)` otherwise.
-  final EdgeInsetsGeometry titlePadding;
+  final EdgeInsetsGeometry? titlePadding;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
   /// to the [FlexibleSpaceBar].
@@ -209,11 +212,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///  * [FlexibleSpaceBarSettings] which creates a settings object that can be
   ///    used to specify these settings to a [FlexibleSpaceBar].
   static Widget createSettings({
-    double toolbarOpacity,
-    double minExtent,
-    double maxExtent,
-    @required double currentExtent,
-    @required Widget child,
+    double? toolbarOpacity,
+    double? minExtent,
+    double? maxExtent,
+    required double currentExtent,
+    required Widget child,
   }) {
     assert(currentExtent != null);
     return FlexibleSpaceBarSettings(
@@ -232,7 +235,7 @@ class FlexibleSpaceBar extends StatefulWidget {
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
     if (widget.centerTitle != null)
-      return widget.centerTitle;
+      return widget.centerTitle!;
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -244,7 +247,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case TargetPlatform.macOS:
         return true;
     }
-    return null;
   }
 
   Alignment _getTitleAlignment(bool effectiveCenterTitle) {
@@ -258,7 +260,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case TextDirection.ltr:
         return Alignment.bottomLeft;
     }
-    return null;
   }
 
   double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
@@ -271,14 +272,13 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final double deltaExtent = settings.maxExtent - settings.minExtent;
         return -Tween<double>(begin: 0.0, end: deltaExtent / 4.0).transform(t);
     }
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+        final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
         assert(
           settings != null,
           'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().',
@@ -290,7 +290,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // 0.0 -> Expanded
         // 1.0 -> Collapsed to toolbar
-        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0) as double;
+        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
 
         // background
         if (widget.background != null) {
@@ -298,42 +298,42 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           const double fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
           final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
-          if (opacity > 0.0) {
-            double height = settings.maxExtent;
+          double height = settings.maxExtent;
 
-            // StretchMode.zoomBackground
-            if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
-              constraints.maxHeight > height) {
-              height = constraints.maxHeight;
-            }
+          // StretchMode.zoomBackground
+          if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
+            constraints.maxHeight > height) {
+            height = constraints.maxHeight;
+          }
+          children.add(Positioned(
+            top: _getCollapsePadding(t, settings),
+            left: 0.0,
+            right: 0.0,
+            height: height,
+            child: Opacity(
+              // IOS is relying on this semantics node to correctly traverse
+              // through the app bar when it is collapsed.
+              alwaysIncludeSemantics: true,
+              opacity: opacity,
+              child: widget.background,
+            ),
+          ));
 
-            children.add(Positioned(
-              top: _getCollapsePadding(t, settings),
-              left: 0.0,
-              right: 0.0,
-              height: height,
-              child: Opacity(
-                opacity: opacity,
-                child: widget.background,
-              ),
-            ));
-
-            // StretchMode.blurBackground
-            if (widget.stretchModes.contains(StretchMode.blurBackground) &&
-              constraints.maxHeight > settings.maxExtent) {
-              final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
-              children.add(Positioned.fill(
-                child: BackdropFilter(
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
-                  filter: ui.ImageFilter.blur(
-                    sigmaX: blurAmount,
-                    sigmaY: blurAmount,
-                  )
+          // StretchMode.blurBackground
+          if (widget.stretchModes.contains(StretchMode.blurBackground) &&
+            constraints.maxHeight > settings.maxExtent) {
+            final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
+            children.add(Positioned.fill(
+              child: BackdropFilter(
+                child: Container(
+                  color: Colors.transparent,
+                ),
+                filter: ui.ImageFilter.blur(
+                  sigmaX: blurAmount,
+                  sigmaY: blurAmount,
                 )
-              ));
-            }
+              )
+            ));
           }
         }
 
@@ -341,7 +341,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         if (widget.title != null) {
           final ThemeData theme = Theme.of(context);
 
-          Widget title;
+          Widget? title;
           switch (theme.platform) {
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:
@@ -362,7 +362,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           if (widget.stretchModes.contains(StretchMode.fadeTitle) &&
             constraints.maxHeight > settings.maxExtent) {
             final double stretchOpacity = 1 -
-              (((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0) as double);
+              (((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0));
             title = Opacity(
               opacity: stretchOpacity,
               child: title,
@@ -371,9 +371,9 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
           final double opacity = settings.toolbarOpacity;
           if (opacity > 0.0) {
-            TextStyle titleStyle = theme.primaryTextTheme.headline6;
+            TextStyle titleStyle = theme.primaryTextTheme.headline6!;
             titleStyle = titleStyle.copyWith(
-              color: titleStyle.color.withOpacity(opacity)
+              color: titleStyle.color!.withOpacity(opacity)
             );
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
             final EdgeInsetsGeometry padding = widget.titlePadding ??
@@ -430,12 +430,12 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// The required [toolbarOpacity], [minExtent], [maxExtent], [currentExtent],
   /// and [child] parameters must not be null.
   const FlexibleSpaceBarSettings({
-    Key key,
-    @required this.toolbarOpacity,
-    @required this.minExtent,
-    @required this.maxExtent,
-    @required this.currentExtent,
-    @required Widget child,
+    Key? key,
+    required this.toolbarOpacity,
+    required this.minExtent,
+    required this.maxExtent,
+    required this.currentExtent,
+    required Widget child,
   }) : assert(toolbarOpacity != null),
        assert(minExtent != null && minExtent >= 0),
        assert(maxExtent != null && maxExtent >= 0),

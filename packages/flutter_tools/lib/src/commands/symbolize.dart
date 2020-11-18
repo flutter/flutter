@@ -14,10 +14,10 @@ import '../base/io.dart';
 import '../convert.dart';
 import '../runner/flutter_command.dart';
 
-/// Support for symbolicating a Dart stack trace.
+/// Support for symbolizing a Dart stack trace.
 ///
 /// This command accepts either paths to an input file containing the
-/// stack trace and an output file for the symbolicated trace to be
+/// stack trace and an output file for the symbolizing trace to be
 /// written, or it accepts a stack trace over stdin and outputs it
 /// over stdout.
 class SymbolizeCommand extends FlutterCommand {
@@ -43,7 +43,7 @@ class SymbolizeCommand extends FlutterCommand {
     argParser.addOption(
       'output',
       abbr: 'o',
-      valueHelp: 'A file path for a symbolicated stack trace to be written to.'
+      valueHelp: 'A file path for a symbolized stack trace to be written to.'
     );
   }
 
@@ -52,7 +52,7 @@ class SymbolizeCommand extends FlutterCommand {
   final DwarfSymbolizationService _dwarfSymbolizationService;
 
   @override
-  String get description => 'Symbolize a stack trace from an AOT compiled flutter application.';
+  String get description => 'Symbolize a stack trace from an AOT-compiled Flutter app.';
 
   @override
   String get name => 'symbolize';
@@ -63,7 +63,7 @@ class SymbolizeCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (!argResults.wasParsed('debug-info')) {
-      throwToolExit('"--debug-info" is required to symbolicate stack traces.');
+      throwToolExit('"--debug-info" is required to symbolize stack traces.');
     }
     if (!_fileSystem.isFileSync(stringArg('debug-info'))) {
       throwToolExit('${stringArg('debug-info')} does not exist.');
@@ -113,9 +113,46 @@ class SymbolizeCommand extends FlutterCommand {
   }
 }
 
+typedef SymbolsTransformer = StreamTransformer<String, String> Function(Uint8List);
+
+StreamTransformer<String, String> _defaultTransformer(Uint8List symbols) {
+  final Dwarf dwarf = Dwarf.fromBytes(symbols);
+  if (dwarf == null) {
+    throwToolExit('Failed to decode symbols file');
+  }
+  return DwarfStackTraceDecoder(dwarf, includeInternalFrames: true);
+}
+
+// A no-op transformer for `DwarfSymbolizationService.test`
+StreamTransformer<String, String> _testTransformer(Uint8List buffer) {
+  return StreamTransformer<String, String>.fromHandlers(
+    handleData: (String data, EventSink<String> sink) {
+      sink.add(data);
+    },
+    handleDone: (EventSink<String> sink) {
+      sink.close();
+    },
+    handleError: (dynamic error, StackTrace stackTrace, EventSink<String> sink) {
+      sink.addError(error, stackTrace);
+    }
+  );
+}
+
 /// A service which decodes stack traces from Dart applications.
 class DwarfSymbolizationService {
-  const DwarfSymbolizationService();
+  const DwarfSymbolizationService({
+    SymbolsTransformer symbolsTransformer = _defaultTransformer,
+  }) : _transformer = symbolsTransformer;
+
+  /// Create a DwarfSymbolizationService with a no-op transformer for testing.
+  @visibleForTesting
+  factory DwarfSymbolizationService.test() {
+    return const DwarfSymbolizationService(
+      symbolsTransformer: _testTransformer
+    );
+  }
+
+  final SymbolsTransformer _transformer;
 
   /// Decode a stack trace from [input] and place the results in [output].
   ///
@@ -129,17 +166,13 @@ class DwarfSymbolizationService {
     @required IOSink output,
     @required Uint8List symbols,
   }) async {
-    final Dwarf dwarf = Dwarf.fromBytes(symbols);
-    if (dwarf == null) {
-      throwToolExit('Failed to decode symbols file');
-    }
-
     final Completer<void> onDone = Completer<void>();
     StreamSubscription<void> subscription;
     subscription = input
+      .cast<List<int>>()
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
-      .transform(DwarfStackTraceDecoder(dwarf, includeInternalFrames: true))
+      .transform(_transformer(symbols))
       .listen((String line) {
         try {
           output.writeln(line);

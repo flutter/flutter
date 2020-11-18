@@ -39,7 +39,7 @@ StatefulBuilder setupSimpleSegmentedControl() {
   );
 }
 
-Widget boilerplate({ Widget child }) {
+Widget boilerplate({ required Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -130,18 +130,18 @@ void main() {
       child: Text('Child 2'),
     ) ;
 
-    Future<void> verifyPadding({ EdgeInsets padding }) async {
+    Future<void> verifyPadding({ EdgeInsets? padding }) async {
       final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 16);
       final Rect segmentedControlRect = tester.getRect(find.byKey(key));
       expect(
-          tester.getTopLeft(find.byWidget(children[0])),
+          tester.getTopLeft(find.byWidget(children[0]!)),
           segmentedControlRect.topLeft.translate(
             effectivePadding.topLeft.dx,
             effectivePadding.topLeft.dy,
           ),
       );
       expect(
-        tester.getBottomLeft(find.byWidget(children[0])),
+        tester.getBottomLeft(find.byWidget(children[0]!)),
         segmentedControlRect.bottomLeft.translate(
           effectivePadding.bottomLeft.dx,
           effectivePadding.bottomLeft.dy,
@@ -149,14 +149,14 @@ void main() {
       );
 
       expect(
-        tester.getTopRight(find.byWidget(children[1])),
+        tester.getTopRight(find.byWidget(children[1]!)),
         segmentedControlRect.topRight.translate(
           effectivePadding.topRight.dx,
           effectivePadding.topRight.dy,
         ),
       );
       expect(
-        tester.getBottomRight(find.byWidget(children[1])),
+        tester.getBottomRight(find.byWidget(children[1]!)),
         segmentedControlRect.bottomRight.translate(
           effectivePadding.bottomRight.dx,
           effectivePadding.bottomRight.dy,
@@ -223,40 +223,6 @@ void main() {
           'value is not the key of one of the children widgets');
     } on AssertionError catch (e) {
       expect(e.toString(), contains('children'));
-    }
-  });
-
-  testWidgets('Children and onValueChanged arguments can not be null', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSegmentedControl<int>(
-            children: null,
-            onValueChanged: (int newValue) { },
-          ),
-        ),
-      );
-      fail('Should not be possible to create segmented control with null children');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('children'));
-    }
-
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
-
-    try {
-      await tester.pumpWidget(
-        boilerplate(
-          child: CupertinoSegmentedControl<int>(
-            children: children,
-            onValueChanged: null,
-          ),
-        ),
-      );
-      fail('Should not be possible to create segmented control with null onValueChanged');
-    } on AssertionError catch (e) {
-      expect(e.toString(), contains('onValueChanged'));
     }
   });
 
@@ -560,7 +526,7 @@ void main() {
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
 
-    int sharedValue;
+    int? sharedValue;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -924,6 +890,84 @@ void main() {
     );
 
     expect(sharedValue, 0);
+  });
+
+  testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    late TapDownDetails tapDownDetails;
+    children[0] = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
+      child: const SizedBox(width: 200, height: 200),
+    );
+    children[1] = const Text('Child 2');
+
+    int sharedValue = 1;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              onValueChanged: (int newValue) {
+                setState(() {
+                  sharedValue = newValue;
+                });
+              },
+              groupValue: sharedValue,
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(sharedValue, 1);
+
+    final Offset segment0GlobalOffset = tester.getTopLeft(find.byWidget(children[0]!));
+    await tester.tapAt(segment0GlobalOffset + const Offset(7, 11));
+
+    expect(tapDownDetails.localPosition, const Offset(7, 11));
+    expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
+  });
+
+  testWidgets(
+    'Segment still hittable with a child that has no hitbox',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/57326.
+      final Map<int, Widget> children = <int, Widget>{};
+      children[0] = const Text('Child 1');
+      children[1] = const SizedBox();
+      int sharedValue = 0;
+
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return boilerplate(
+              child: CupertinoSegmentedControl<int>(
+                key: const ValueKey<String>('Segmented Control'),
+                children: children,
+                onValueChanged: (int newValue) {
+                  setState(() {
+                    sharedValue = newValue;
+                  });
+                },
+                groupValue: sharedValue,
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(sharedValue, 0);
+
+      final Offset centerOfTwo = tester.getCenter(find.byWidget(children[1]!));
+      // Tap within the bounds of children[1], but not at the center.
+      // children[1] is a SizedBox thus not hittable by itself.
+      await tester.tapAt(centerOfTwo + const Offset(10, 0));
+
+      expect(sharedValue, 1);
   });
 
   testWidgets('Animation is correct when the selected segment changes', (WidgetTester tester) async {
@@ -1338,7 +1382,7 @@ void main() {
     children[0] = const Text('A');
     children[1] = const Text('B');
     children[2] = const Text('C');
-    int sharedValue = 0;
+    int? sharedValue = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(

@@ -3,19 +3,19 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/net.dart';
-
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -25,13 +25,31 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:quiver/testing/async.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  isolateFlags: <vm_service.IsolateFlag>[],
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+);
 
 void main() {
   group('attach', () {
@@ -54,19 +72,17 @@ void main() {
       const int devicePort = 499;
       const int hostPort = 42;
 
-      MockDeviceLogReader mockLogReader;
+      FakeDeviceLogReader mockLogReader;
       MockPortForwarder portForwarder;
+      MockDartDevelopmentService mockDds;
       MockAndroidDevice device;
-      MockProcessManager mockProcessManager;
       MockHttpClient httpClient;
-      Completer<void> vmServiceDoneCompleter;
 
       setUp(() {
-        mockProcessManager = MockProcessManager();
-        mockLogReader = MockDeviceLogReader();
+        mockLogReader = FakeDeviceLogReader();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
-        vmServiceDoneCompleter = Completer<void>();
+        mockDds = MockDartDevelopmentService();
         when(device.portForwarder)
           .thenReturn(portForwarder);
         when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
@@ -74,8 +90,12 @@ void main() {
         when(portForwarder.forwardedPorts)
           .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any))
-          .thenAnswer((_) async => null);
-
+          .thenAnswer((_) async {});
+        when(device.dds).thenReturn(mockDds);
+        final Completer<void> noopCompleter = Completer<void>();
+        when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
+        when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
+        when(mockDds.done).thenAnswer((_) => noopCompleter.future);
         final HttpClientRequest httpClientRequest = MockHttpClientRequest();
         httpClient = MockHttpClient();
         when(httpClient.putUrl(any))
@@ -96,12 +116,13 @@ void main() {
       });
 
       testUsingContext('finds observatory port and forwards', () async {
-        when(device.getLogReader()).thenAnswer((_) {
-          // Now that the reader is used, start writing messages to it.
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-          return mockLogReader;
-        });
+        when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+          .thenAnswer((_) {
+            // Now that the reader is used, start writing messages to it.
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return mockLogReader;
+          });
         testDeviceManager.addDevice(device);
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
@@ -124,120 +145,15 @@ void main() {
         Logger: () => logger,
       });
 
-      testUsingContext('finds all observatory ports and forwards them', () async {
-        testFileSystem.file(testFileSystem.path.join('.packages')).createSync();
-        testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
-        testFileSystem
-          .file(testFileSystem.path.join('build', 'flutter_assets', 'AssetManifest.json'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{}');
-
-        when(device.name).thenReturn('MockAndroidDevice');
-        when(device.getLogReader()).thenReturn(mockLogReader);
-
-        final Process dartProcess = MockProcess();
-        final StreamController<List<int>> compilerStdoutController = StreamController<List<int>>();
-
-        when(dartProcess.stdout).thenAnswer((_) => compilerStdoutController.stream);
-        when(dartProcess.stderr)
-          .thenAnswer((_) => Stream<List<int>>.fromFuture(Future<List<int>>.value(const <int>[])));
-
-        when(dartProcess.stdin).thenAnswer((_) => MockStdIn());
-
-        final Completer<int> dartProcessExitCode = Completer<int>();
-        when(dartProcess.exitCode).thenAnswer((_) => dartProcessExitCode.future);
-        when(mockProcessManager.start(any)).thenAnswer((_) => Future<Process>.value(dartProcess));
-
-        testDeviceManager.addDevice(device);
-
-        final List<String> observatoryLogs = <String>[];
-
-        await FakeAsync().run((FakeAsync time) {
-          unawaited(runZoned(() async {
-            final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-              // The "Observatory URL on device" message is output by the ProtocolDiscovery when it found the observatory.
-              if (message.startsWith('[verbose] Observatory URL on device')) {
-                observatoryLogs.add(message);
-              }
-              if (message == '[stdout] Waiting for a connection from Flutter on MockAndroidDevice...') {
-                observatoryLogs.add(message);
-              }
-              if (message == '[stdout] Lost connection to device.') {
-                observatoryLogs.add(message);
-              }
-              if (message.contains('Hot reload.')) {
-                observatoryLogs.add(message);
-              }
-              if (message.contains('Hot restart.')) {
-                observatoryLogs.add(message);
-              }
-            });
-
-            final TestHotRunnerFactory testHotRunnerFactory = TestHotRunnerFactory();
-            final Future<void> task = createTestCommandRunner(
-                AttachCommand(hotRunnerFactory: testHotRunnerFactory)
-              ).run(<String>['attach']);
-
-            // First iteration of the attach loop.
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:0001');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:1234');
-
-            time.elapse(const Duration(milliseconds: 200));
-
-            compilerStdoutController
-              .add(utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'));
-            time.flushMicrotasks();
-
-            // Second iteration of the attach loop.
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:0002');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:1235');
-
-            time.elapse(const Duration(milliseconds: 200));
-
-            compilerStdoutController
-              .add(utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'));
-            time.flushMicrotasks();
-
-            dartProcessExitCode.complete(0);
-
-            await loggerSubscription.cancel();
-            await testHotRunnerFactory.exitApp();
-            await task;
-          }));
-        });
-
-        expect(observatoryLogs.length, 9);
-        expect(observatoryLogs[0], '[stdout] Waiting for a connection from Flutter on MockAndroidDevice...');
-        expect(observatoryLogs[1], '[verbose] Observatory URL on device: http://127.0.0.1:1234');
-        expect(observatoryLogs[2], '[stdout] Lost connection to device.');
-        expect(observatoryLogs[3].contains('Hot reload.'), isTrue);
-        expect(observatoryLogs[4].contains('Hot restart.'), isTrue);
-        expect(observatoryLogs[5], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
-        expect(observatoryLogs[6], '[stdout] Lost connection to device.');
-        expect(observatoryLogs[7].contains('Hot reload.'), isTrue);
-        expect(observatoryLogs[8].contains('Hot restart.'), isTrue);
-
-        verify(portForwarder.forward(1234, hostPort: anyNamed('hostPort'))).called(1);
-        verify(portForwarder.forward(1235, hostPort: anyNamed('hostPort'))).called(1);
-
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        HttpClientFactory: () => () => httpClient,
-        ProcessManager: () => mockProcessManager,
-        Logger: () => logger,
-        VMServiceConnector: () => getFakeVmServiceFactory(
-          vmServiceDoneCompleter: vmServiceDoneCompleter,
-        ),
-      });
-
       testUsingContext('Fails with tool exit on bad Observatory uri', () async {
-        when(device.getLogReader()).thenAnswer((_) {
-          // Now that the reader is used, start writing messages to it.
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
-          mockLogReader.dispose();
-          return mockLogReader;
-        });
+        when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+          .thenAnswer((_) {
+            // Now that the reader is used, start writing messages to it.
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
+            mockLogReader.dispose();
+            return mockLogReader;
+          });
         testDeviceManager.addDevice(device);
         expect(createTestCommandRunner(AttachCommand()).run(<String>['attach']),
                throwsToolExit());
@@ -248,12 +164,13 @@ void main() {
       });
 
       testUsingContext('accepts filesystem parameters', () async {
-        when(device.getLogReader()).thenAnswer((_) {
-          // Now that the reader is used, start writing messages to it.
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-          return mockLogReader;
-        });
+        when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+          .thenAnswer((_) {
+            // Now that the reader is used, start writing messages to it.
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return mockLogReader;
+          });
         testDeviceManager.addDevice(device);
 
         const String filesystemScheme = 'foo';
@@ -327,12 +244,13 @@ void main() {
       });
 
       testUsingContext('exits when ipv6 is specified and debug-port is not', () async {
-        when(device.getLogReader()).thenAnswer((_) {
-          // Now that the reader is used, start writing messages to it.
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-          return mockLogReader;
-        });
+        when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+          .thenAnswer((_) {
+            // Now that the reader is used, start writing messages to it.
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return mockLogReader;
+          });
         testDeviceManager.addDevice(device);
 
         final AttachCommand command = AttachCommand();
@@ -349,12 +267,13 @@ void main() {
       },);
 
       testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
-        when(device.getLogReader()).thenAnswer((_) {
-          // Now that the reader is used, start writing messages to it.
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-          return mockLogReader;
-        });
+        when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+          .thenAnswer((_) {
+            // Now that the reader is used, start writing messages to it.
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return mockLogReader;
+          });
         testDeviceManager.addDevice(device);
 
         final AttachCommand command = AttachCommand();
@@ -374,19 +293,24 @@ void main() {
     testUsingContext('selects specified target', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+      final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
+      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockAndroidDevice device = MockAndroidDevice();
       final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
       when(device.portForwarder)
         .thenReturn(portForwarder);
+      when(device.dds)
+        .thenReturn(mockDds);
+      final Completer<void> noopCompleter = Completer<void>();
+      when(mockDds.done).thenAnswer((_) => noopCompleter.future);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
         .thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts)
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
-        .thenAnswer((_) async => null);
+        .thenAnswer((_) async {});
       when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
         .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
@@ -399,9 +323,11 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
+      when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
+      when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
 
       testDeviceManager.addDevice(device);
-      when(device.getLogReader())
+      when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
         .thenAnswer((_) {
           // Now that the reader is used, start writing messages to it.
           mockLogReader.addLine('Foo');
@@ -416,16 +342,31 @@ void main() {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
-      await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
+      await createTestCommandRunner(command).run(<String>[
+        'attach',
+        '-t',
+        foo.path,
+        '-v',
+        '--device-user',
+        '10',
+        '--device-timeout',
+        '15',
+      ]);
+      final VerificationResult verificationResult = verify(
+        mockHotRunnerFactory.build(
+          captureAny,
+          target: foo.path,
+          debuggingOptions: anyNamed('debuggingOptions'),
+          packagesFilePath: anyNamed('packagesFilePath'),
+          flutterProject: anyNamed('flutterProject'),
+          ipv6: false,
+        ),
+      )..called(1);
 
-      verify(mockHotRunnerFactory.build(
-        any,
-        target: foo.path,
-        debuggingOptions: anyNamed('debuggingOptions'),
-        packagesFilePath: anyNamed('packagesFilePath'),
-        flutterProject: anyNamed('flutterProject'),
-        ipv6: false,
-      )).called(1);
+      final List<FlutterDevice> flutterDevices = verificationResult.captured.first as List<FlutterDevice>;
+      expect(flutterDevices, hasLength(1));
+      final FlutterDevice flutterDevice = flutterDevices.first;
+      expect(flutterDevice.userIdentifier, '10');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -434,19 +375,26 @@ void main() {
     testUsingContext('fallbacks to protocol observatory if MDNS failed on iOS', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+      final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
+      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockIOSDevice device = MockIOSDevice();
       final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
-      when(device.portForwarder).thenReturn(portForwarder);
-      when(device.getLogReader()).thenAnswer((_) => mockLogReader);
+      when(device.portForwarder)
+        .thenReturn(portForwarder);
+      when(device.dds)
+        .thenReturn(mockDds);
+      final Completer<void> noopCompleter = Completer<void>();
+      when(mockDds.done).thenAnswer((_) => noopCompleter.future);
+      when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+        .thenAnswer((_) => mockLogReader);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
         .thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts)
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
-        .thenAnswer((_) async => null);
+        .thenAnswer((_) async {});
       when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
         .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
@@ -459,6 +407,8 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
+      when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
+      when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
 
       testDeviceManager.addDevice(device);
 
@@ -481,7 +431,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-    });
+    }, skip: Platform.isWindows); // mDNS does not work on Windows.
 
     group('forwarding to given port', () {
       const int devicePort = 499;
@@ -491,6 +441,7 @@ void main() {
 
       setUp(() {
         portForwarder = MockPortForwarder();
+        final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
         device = MockAndroidDevice();
 
         when(device.portForwarder)
@@ -500,7 +451,14 @@ void main() {
         when(portForwarder.forwardedPorts)
           .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any))
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
+        when(device.dds)
+          .thenReturn(mockDds);
+        when(mockDds.startDartDevelopmentService(any, any, any, any))
+          .thenReturn(null);
+        when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
+        final Completer<void> noopCompleter = Completer<void>();
+        when(mockDds.done).thenAnswer((_) => noopCompleter.future);
       });
 
       testUsingContext('succeeds in ipv4 mode', () async {
@@ -569,6 +527,9 @@ void main() {
             '$devicePort',
             '--observatory-port',
             '$hostPort',
+            // Ensure DDS doesn't use hostPort by binding to a random port.
+            '--dds-port',
+            '0',
           ],
         );
         await completer.future;
@@ -601,6 +562,9 @@ void main() {
             '--observatory-port',
             '$hostPort',
             '--ipv6',
+            // Ensure DDS doesn't use hostPort by binding to a random port.
+            '--dds-port',
+            '0',
           ],
         );
         await completer.future;
@@ -621,7 +585,20 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
       );
-      expect(testLogger.statusText, contains('No supported devices connected'));
+      expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('fails when targeted device is not Android with --device-user', () async {
+      final MockIOSDevice device = MockIOSDevice();
+      testDeviceManager.addDevice(device);
+      expect(createTestCommandRunner(AttachCommand()).run(<String>[
+        'attach',
+        '--device-user',
+        '10',
+      ]), throwsToolExit(message: '--device-user is only supported for Android'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -634,6 +611,9 @@ void main() {
         when(device.id).thenReturn(id);
         when(device.isLocalEmulator).thenAnswer((_) async => false);
         when(device.sdkNameAndVersion).thenAnswer((_) async => 'Android 46');
+        when(device.targetPlatformDisplayName)
+            .thenAnswer((_) async => 'android');
+
         return device;
       }
 
@@ -644,7 +624,7 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
       );
-      expect(testLogger.statusText, contains('More than one device'));
+      expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
       expect(testLogger.statusText, contains('yy2'));
     }, overrides: <Type, Generator>{
@@ -705,8 +685,6 @@ class StreamLogger extends Logger {
   }) {
     _log('[progress] $message');
     return SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     )..start();
   }
@@ -766,27 +744,55 @@ VMServiceConnector getFakeVmServiceFactory({
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     CompressionOptions compression,
     Device device,
   }) async {
-    final VMService vmService = VMServiceMock();
-    final VM vm = VMMock();
-
-    when(vmService.vm).thenReturn(vm);
-    when(vmService.isClosed).thenReturn(false);
-    when(vmService.done).thenAnswer((_) {
-      return Future<void>.value(null);
-    });
-
-    when(vm.refreshViews(waitForViews: anyNamed('waitForViews')))
-      .thenAnswer((_) => Future<void>.value(null));
-    when(vm.views)
-      .thenReturn(<FlutterView>[FlutterViewMock()]);
-    when(vm.createDevFS(any))
-      .thenAnswer((_) => Future<Map<String, dynamic>>.value(<String, dynamic>{'uri': '/',}));
-
-    return vmService;
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: kListViewsMethod,
+          args: null,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              <String, Object>{
+                'id': '1',
+                'isolate': fakeUnpausedIsolate.toJson()
+              },
+            ],
+          },
+        ),
+        FakeVmServiceRequest(
+          method: 'getVM',
+          args: null,
+          jsonResponse: vm_service.VM.parse(<String, Object>{})
+            .toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: '_createDevFS',
+          args: <String, Object>{
+            'fsName': globals.fs.currentDirectory.absolute.path,
+          },
+          jsonResponse: <String, Object>{
+            'uri': globals.fs.currentDirectory.absolute.path,
+          },
+        ),
+        FakeVmServiceRequest(
+          method: kListViewsMethod,
+          args: null,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              <String, Object>{
+                'id': '1',
+                'isolate': fakeUnpausedIsolate.toJson()
+              },
+            ],
+          },
+        ),
+      ],
+    );
+    return fakeVmServiceHost.vmService;
   };
 }
 
@@ -816,7 +822,6 @@ class TestHotRunnerFactory extends HotRunnerFactory {
       applicationBinary: applicationBinary,
       hostIsIde: hostIsIde,
       projectRootPath: projectRootPath,
-      packagesFilePath: packagesFilePath,
       dillOutputPath: dillOutputPath,
       stayResident: stayResident,
       ipv6: ipv6,
@@ -830,11 +835,7 @@ class TestHotRunnerFactory extends HotRunnerFactory {
   }
 }
 
-class VMMock extends Mock implements VM {}
-class VMServiceMock extends Mock implements VMService {}
-class FlutterViewMock extends Mock implements FlutterView {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
+class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}

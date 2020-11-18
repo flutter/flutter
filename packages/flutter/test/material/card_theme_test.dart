@@ -55,6 +55,7 @@ void main() {
   testWidgets('Card widget properties take priority over theme', (WidgetTester tester) async {
     const Clip clip = Clip.hardEdge;
     const Color color = Colors.orange;
+    const Color shadowColor = Colors.pink;
     const double elevation = 7.0;
     const EdgeInsets margin = EdgeInsets.all(3.0);
     const ShapeBorder shape = RoundedRectangleBorder(
@@ -67,6 +68,7 @@ void main() {
         body: Card(
           clipBehavior: clip,
           color: color,
+          shadowColor: shadowColor,
           elevation: elevation,
           margin: margin,
           shape: shape,
@@ -79,6 +81,7 @@ void main() {
 
     expect(material.clipBehavior, clip);
     expect(material.color, color);
+    expect(material.shadowColor, shadowColor);
     expect(material.elevation, elevation);
     expect(container.margin, margin);
     expect(material.shape, shape);

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
@@ -59,11 +60,10 @@ void main() {
   });
 
   test('setApplicationSwitcherDescription missing plugin', () async {
-    final List<ByteData> log = <ByteData>[];
+    final List<ByteData?> log = <ByteData>[];
 
-    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData message) {
+    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
       log.add(message);
-      return null;
     });
 
     await SystemChrome.setApplicationSwitcherDescription(

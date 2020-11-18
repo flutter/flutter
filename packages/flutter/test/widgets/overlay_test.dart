@@ -21,8 +21,7 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 didBuild = true;
-                final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>();
-                expect(overlay, isNotNull);
+                final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>()!;
                 expect(overlay.key, equals(overlayKey));
                 return Container();
               },
@@ -35,7 +34,7 @@ void main() {
       ),
     );
     expect(didBuild, isTrue);
-    final RenderObject theater = overlayKey.currentContext.findRenderObject();
+    final RenderObject theater = overlayKey.currentContext!.findRenderObject()!;
 
     expect(theater, hasAGoodToStringDeep);
     expect(
@@ -108,7 +107,7 @@ void main() {
         ),
       ),
     );
-    final RenderObject theater = overlayKey.currentContext.findRenderObject();
+    final RenderObject theater = overlayKey.currentContext!.findRenderObject()!;
 
     expect(theater, hasAGoodToStringDeep);
     expect(
@@ -187,7 +186,7 @@ void main() {
     expect(buildOrder, <String>['Base']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
         builder: (BuildContext context) {
@@ -225,7 +224,7 @@ void main() {
     expect(buildOrder, <String>['Base']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
           builder: (BuildContext context) {
@@ -270,7 +269,7 @@ void main() {
     expect(buildOrder, <String>['Base', 'Top']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insert(
       OverlayEntry(
           builder: (BuildContext context) {
@@ -323,7 +322,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries);
     await tester.pump();
 
@@ -369,7 +368,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries, below: base);
     await tester.pump();
 
@@ -421,7 +420,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.insertAll(entries, above: base);
     await tester.pump();
 
@@ -484,7 +483,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged);
     await tester.pump();
 
@@ -547,7 +546,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged, above: initialEntries[2]);
     await tester.pump();
 
@@ -610,11 +609,89 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState as OverlayState;
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
     overlay.rearrange(rearranged, below: initialEntries[2]);
     await tester.pump();
 
     expect(buildOrder, <int>[3, 4, 1, 2, 0]);
+  });
+
+  testWidgets('debugVerifyInsertPosition', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    OverlayEntry base;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            base = OverlayEntry(
+              builder: (BuildContext context) {
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final OverlayState overlay = overlayKey.currentState! as OverlayState;
+
+    try {
+      overlay.insert(
+        OverlayEntry(builder: (BuildContext context) {
+          return Container();
+        }),
+        above: OverlayEntry(
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+        below: OverlayEntry(
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+      );
+    } on AssertionError catch (e) {
+      expect(e.message, 'Only one of `above` and `below` may be specified.');
+    }
+
+    expect(() => overlay.insert(
+      OverlayEntry(builder: (BuildContext context) {
+        return Container();
+      }),
+      above: base,
+    ), isNot(throwsAssertionError));
+
+    try {
+      overlay.insert(
+        OverlayEntry(builder: (BuildContext context) {
+          return Container();
+        }),
+        above: OverlayEntry(
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+      );
+    } on AssertionError catch (e) {
+      expect(e.message, 'The provided entry used for `above` must be present in the Overlay.');
+    }
+
+    try {
+      overlay.rearrange(<OverlayEntry>[base], above: OverlayEntry(
+        builder: (BuildContext context) {
+          return Container();
+        },
+      ));
+
+    } on AssertionError catch (e) {
+      expect(e.message, 'The provided entry used for `above` must be present in the Overlay and in the `newEntriesList`.');
+    }
+
+    await tester.pump();
   });
 
   testWidgets('OverlayState.of() called without Overlay being exist', (WidgetTester tester) async {
@@ -623,7 +700,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Builder(
           builder: (BuildContext context) {
-            FlutterError error;
+            late FlutterError error;
             final Widget debugRequiredFor = Container();
             try {
               Overlay.of(context, debugRequiredFor: debugRequiredFor);
@@ -695,7 +772,7 @@ void main() {
     expect(newEntry.opaque, isTrue);
 
     // The new opaqueness is honored when inserted into an overlay.
-    overlayKey.currentState.insert(newEntry);
+    overlayKey.currentState!.insert(newEntry);
     await tester.pumpAndSettle();
 
     expect(find.byKey(root), findsNothing);
@@ -809,7 +886,7 @@ void main() {
     expect(tester.state<StatefulTestState>(find.byKey(bottom)).rebuildCount, 1);
     expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
 
-    overlayKey.currentState.rearrange(<OverlayEntry>[
+    overlayKey.currentState!.rearrange(<OverlayEntry>[
       bottomEntry, middleEntry, topEntry,
     ]);
     await tester.pump();
@@ -849,7 +926,7 @@ void main() {
     await tester.tap(find.byKey(overlayKey));
     expect(bottomTapCount, 1);
 
-    overlayKey.currentState.insert(OverlayEntry(
+    overlayKey.currentState!.insert(OverlayEntry(
       maintainState: true,
       opaque: true,
       builder: (BuildContext context) {
@@ -865,7 +942,7 @@ void main() {
     expect(bottomTapCount, 1);
 
     int topTapCount = 0;
-    overlayKey.currentState.insert(OverlayEntry(
+    overlayKey.currentState!.insert(OverlayEntry(
       maintainState: true,
       opaque: true,
       builder: (BuildContext context) {
@@ -919,7 +996,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can used Positioned within OverlayEntry', (WidgetTester tester) async {
+  testWidgets('Can use Positioned within OverlayEntry', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -941,10 +1018,48 @@ void main() {
 
     expect(tester.getTopLeft(find.text('positioned child')), const Offset(145, 123));
   });
+
+  testWidgets('Overlay can set and update clipBehavior', (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) => Container(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // By default, clipBehavior should be Clip.hardEdge
+    // ignore: unnecessary_nullable_for_final_variable_declarations
+    final dynamic renderObject = tester.renderObject(find.byType(Overlay));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    for(final Clip clip in Clip.values) {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) => Container(),
+              ),
+            ],
+            clipBehavior: clip,
+          ),
+        ),
+      );
+      expect(renderObject.clipBehavior, clip);
+    }
+  });
 }
 
 class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key key}) : super(key: key);
+  const StatefulTestWidget({Key? key}) : super(key: key);
 
   @override
   State<StatefulTestWidget> createState() => StatefulTestState();

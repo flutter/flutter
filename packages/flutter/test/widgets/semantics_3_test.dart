@@ -123,7 +123,7 @@ void main() {
     ));
 
     int changeCount = 0;
-    tester.binding.pipelineOwner.semanticsOwner.addListener(() {
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       changeCount += 1;
     });
 

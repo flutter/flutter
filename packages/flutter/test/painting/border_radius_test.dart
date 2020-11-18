@@ -363,10 +363,10 @@ void main() {
       bottomLeft: Radius.elliptical(95.0, 105.0), // 50,60 -> 140,150
       bottomRight: Radius.elliptical(60.0, 65.0), // 0,0 -> 120,130
     );
-    expect(BorderRadiusGeometry.lerp(a, b, 0.5).resolve(TextDirection.ltr), ltr);
-    expect(BorderRadiusGeometry.lerp(a, b, 0.5).resolve(TextDirection.rtl), rtl);
-    expect(BorderRadiusGeometry.lerp(a, b, 0.0).resolve(TextDirection.ltr), a);
-    expect(BorderRadiusGeometry.lerp(a, b, 1.0).resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
+    expect(BorderRadiusGeometry.lerp(a, b, 0.5)!.resolve(TextDirection.ltr), ltr);
+    expect(BorderRadiusGeometry.lerp(a, b, 0.5)!.resolve(TextDirection.rtl), rtl);
+    expect(BorderRadiusGeometry.lerp(a, b, 0.0)!.resolve(TextDirection.ltr), a);
+    expect(BorderRadiusGeometry.lerp(a, b, 1.0)!.resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
   });
 
   test('BorderRadiusGeometry subtract', () {

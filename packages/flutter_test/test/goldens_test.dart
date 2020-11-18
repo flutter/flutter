@@ -7,6 +7,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
+import 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticsNode, DiagnosticPropertiesBuilder, FlutterError;
 import 'package:flutter_test/flutter_test.dart' hide test;
 import 'package:flutter_test/flutter_test.dart' as test_package;
 
@@ -32,7 +33,7 @@ const List<int> _kSizeFailurePngBytes =
     0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
 
 void main() {
-  MemoryFileSystem fs;
+  late MemoryFileSystem fs;
 
   setUp(() {
     final FileSystemStyle style = io.Platform.isWindows
@@ -52,8 +53,8 @@ void main() {
   }
 
   void test(String description, FutureOr<void> body()) {
-    test_package.test(description, () {
-      io.IOOverrides.runZoned<FutureOr<void>>(
+    test_package.test(description, () async {
+      await io.IOOverrides.runZoned<FutureOr<void>>(
         body,
         createDirectory: (String path) => fs.directory(path),
         createFile: (String path) => fs.file(path),
@@ -83,7 +84,7 @@ void main() {
   });
 
   group('LocalFileComparator', () {
-    LocalFileComparator comparator;
+    late LocalFileComparator comparator;
 
     setUp(() {
       comparator = LocalFileComparator(fs.file(fix('/golden_test.dart')).uri, pathStyle: fs.path.style);
@@ -98,6 +99,36 @@ void main() {
     test('can be instantiated with uri that represents file in same folder', () {
       comparator = LocalFileComparator(Uri.parse('foo_test.dart'), pathStyle: fs.path.style);
       expect(comparator.basedir, Uri.parse('./'));
+    });
+
+    test('throws if local output is not awaited', () {
+      try {
+        comparator.generateFailureOutput(
+          ComparisonResult(passed: false),
+          Uri.parse('foo_test.dart'),
+          Uri.parse('/foo/bar/'),
+        );
+        TestAsyncUtils.verifyAllScopesClosed();
+        throw 'unexpectedly did not throw';
+      } on FlutterError catch (e) {
+        final List<String> lines = e.message.split('\n');
+        expectSync(lines[0], 'Asynchronous call to guarded function leaked.');
+        expectSync(lines[1], 'You must use "await" with all Future-returning test APIs.');
+        expectSync(
+          lines[2],
+          matches(r'^The guarded method "generateFailureOutput" from class '
+            r'LocalComparisonOutput was called from .*goldens_test.dart on line '
+            r'[0-9]+, but never completed before its parent scope closed\.$'),
+        );
+        expectSync(lines.length, 3);
+        final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
+        e.debugFillProperties(propertiesBuilder);
+        final List<DiagnosticsNode> information = propertiesBuilder.properties;
+        expectSync(information.length, 3);
+        expectSync(information[0].level, DiagnosticLevel.summary);
+        expectSync(information[1].level, DiagnosticLevel.hint);
+        expectSync(information[2].level, DiagnosticLevel.info);
+      }
     });
 
     group('compare', () {
@@ -155,7 +186,7 @@ void main() {
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('% diff detected'));
             final io.File master = fs.file(
               fix('/failures/golden_masterImage.png')
@@ -180,11 +211,11 @@ void main() {
           comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
           fs.file(fix('subdir/golden.png'))
             ..createSync(recursive:true)
-            ..writeAsBytes(_kColorFailurePngBytes);
+            ..writeAsBytesSync(_kColorFailurePngBytes);
           try {
             await doComparison('subdir/golden.png');
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('% diff detected'));
             final io.File master = fs.file(
               fix('/failures/golden_masterImage.png')
@@ -219,7 +250,7 @@ void main() {
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('image sizes do not match'));
           }
         });
@@ -229,7 +260,7 @@ void main() {
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('% diff detected'));
           }
         });
@@ -239,7 +270,7 @@ void main() {
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
-          } on TestFailure catch (error) {
+          } on FlutterError catch (error) {
             expect(error.message, contains('null image provided'));
           }
         });

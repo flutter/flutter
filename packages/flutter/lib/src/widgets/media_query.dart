@@ -9,6 +9,7 @@ import 'dart:ui' show Brightness;
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 /// Whether in portrait or landscape.
@@ -85,7 +86,7 @@ class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
-  /// [Window].
+  /// [dart:ui.PlatformDispatcher].
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -95,22 +96,37 @@ class MediaQueryData {
     this.viewInsets = EdgeInsets.zero,
     this.systemGestureInsets = EdgeInsets.zero,
     this.viewPadding = EdgeInsets.zero,
-    this.physicalDepth = double.maxFinite,
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
     this.invertColors = false,
     this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
-  });
+    this.navigationMode = NavigationMode.traditional,
+  }) : assert(size != null),
+       assert(devicePixelRatio != null),
+       assert(textScaleFactor != null),
+       assert(platformBrightness != null),
+       assert(padding != null),
+       assert(viewInsets != null),
+       assert(systemGestureInsets != null),
+       assert(viewPadding != null),
+       assert(alwaysUse24HourFormat != null),
+       assert(accessibleNavigation != null),
+       assert(invertColors != null),
+       assert(highContrast != null),
+       assert(disableAnimations != null),
+       assert(boldText != null),
+       assert(navigationMode != null);
 
   /// Creates data for a media query based on the given window.
   ///
   /// If you use this, you should ensure that you also register for
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
-  /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.Window window)
+  /// [WidgetsBindingObserver.didChangeMetrics] or
+  /// [dart:ui.PlatformDispatcher.onMetricsChanged].
+  MediaQueryData.fromWindow(ui.SingletonFlutterWindow window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
@@ -119,13 +135,13 @@ class MediaQueryData {
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
-      physicalDepth = window.physicalDepth,
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
       highContrast = window.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.alwaysUse24HourFormat;
+      alwaysUse24HourFormat = window.alwaysUse24HourFormat,
+      navigationMode = NavigationMode.traditional;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -237,7 +253,7 @@ class MediaQueryData {
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
-  /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
+  /// navigation enabled, use [systemGestureInsets] with [Padding]
   /// to avoid having the left and right edges of the [Slider] from appearing
   /// within the area reserved for system gesture navigation.
   ///
@@ -272,19 +288,6 @@ class MediaQueryData {
   /// {@end-tool}
   final EdgeInsets systemGestureInsets;
 
-  /// The physical depth is the maximum elevation that the Window allows.
-  ///
-  /// Physical layers drawn at or above this elevation will have their elevation
-  /// clamped to this value. This can happen if the physical layer itself has
-  /// an elevation larger than the available depth, or if some ancestor of the
-  /// layer causes it to have a cumulative elevation that is larger than the
-  /// available depth.
-  ///
-  /// The default value is [double.maxFinite], which is used for platforms that
-  /// do not specify a maximum elevation. This property is currently only
-  /// expected to be set to a non-default value on Fuchsia.
-  final double physicalDepth;
-
   /// Whether to use 24-hour format when formatting time.
   ///
   /// The behavior of this flag is different across platforms:
@@ -306,7 +309,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting originates.
   final bool accessibleNavigation;
 
   /// Whether the device is inverting the colors of the platform.
@@ -315,7 +318,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool invertColors;
 
   /// Whether the user requested a high contrast between foreground and background
@@ -330,7 +334,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool disableAnimations;
 
   /// Whether the platform is requesting that text be drawn with a bold font
@@ -338,8 +343,26 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool boldText;
+
+  /// Describes the navigation mode requested by the platform.
+  ///
+  /// Some user interfaces are better navigated using a directional pad (DPAD)
+  /// or arrow keys, and for those interfaces, some widgets need to handle these
+  /// directional events differently. In order to know when to do that, these
+  /// widgets will look for the navigation mode in effect for their context.
+  ///
+  /// For instance, in a television interface, [NavigationMode.directional]
+  /// should be set, so that directional navigation is used to navigate away
+  /// from a text field using the DPAD. In contrast, on a regular desktop
+  /// application with the `navigationMode` set to [NavigationMode.traditional],
+  /// the arrow keys are used to move the cursor instead of navigating away.
+  ///
+  /// The [NavigationMode] values indicate the type of navigation to be used in
+  /// a widget subtree for those widgets sensitive to it.
+  final NavigationMode navigationMode;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
@@ -350,21 +373,21 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given fields replaced
   /// with the new values.
   MediaQueryData copyWith({
-    Size size,
-    double devicePixelRatio,
-    double textScaleFactor,
-    Brightness platformBrightness,
-    EdgeInsets padding,
-    EdgeInsets viewPadding,
-    EdgeInsets viewInsets,
-    EdgeInsets systemGestureInsets,
-    double physicalDepth,
-    bool alwaysUse24HourFormat,
-    bool highContrast,
-    bool disableAnimations,
-    bool invertColors,
-    bool accessibleNavigation,
-    bool boldText,
+    Size? size,
+    double? devicePixelRatio,
+    double? textScaleFactor,
+    Brightness? platformBrightness,
+    EdgeInsets? padding,
+    EdgeInsets? viewPadding,
+    EdgeInsets? viewInsets,
+    EdgeInsets? systemGestureInsets,
+    bool? alwaysUse24HourFormat,
+    bool? highContrast,
+    bool? disableAnimations,
+    bool? invertColors,
+    bool? accessibleNavigation,
+    bool? boldText,
+    NavigationMode? navigationMode,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -375,13 +398,13 @@ class MediaQueryData {
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      physicalDepth: physicalDepth ?? this.physicalDepth,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
+      navigationMode: navigationMode ?? this.navigationMode,
     );
   }
 
@@ -543,13 +566,13 @@ class MediaQueryData {
         && other.padding == padding
         && other.viewPadding == viewPadding
         && other.viewInsets == viewInsets
-        && other.physicalDepth == physicalDepth
         && other.alwaysUse24HourFormat == alwaysUse24HourFormat
         && other.highContrast == highContrast
         && other.disableAnimations == disableAnimations
         && other.invertColors == invertColors
         && other.accessibleNavigation == accessibleNavigation
-        && other.boldText == boldText;
+        && other.boldText == boldText
+        && other.navigationMode == navigationMode;
   }
 
   @override
@@ -562,13 +585,13 @@ class MediaQueryData {
       padding,
       viewPadding,
       viewInsets,
-      physicalDepth,
       alwaysUse24HourFormat,
       highContrast,
       disableAnimations,
       invertColors,
       accessibleNavigation,
       boldText,
+      navigationMode,
     );
   }
 
@@ -582,13 +605,13 @@ class MediaQueryData {
       'padding: $padding',
       'viewPadding: $viewPadding',
       'viewInsets: $viewInsets',
-      'physicalDepth: $physicalDepth',
       'alwaysUse24HourFormat: $alwaysUse24HourFormat',
       'accessibleNavigation: $accessibleNavigation',
       'highContrast: $highContrast',
       'disableAnimations: $disableAnimations',
       'invertColors: $invertColors',
       'boldText: $boldText',
+      'navigationMode: ${describeEnum(navigationMode)}',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -621,9 +644,9 @@ class MediaQuery extends InheritedWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const MediaQuery({
-    Key key,
-    @required this.data,
-    @required Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(child != null),
        assert(data != null),
        super(key: key, child: child);
@@ -655,13 +678,13 @@ class MediaQuery extends InheritedWidget {
   ///  * [removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
   factory MediaQuery.removePadding({
-    Key key,
-    @required BuildContext context,
+    Key? key,
+    required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    @required Widget child,
+    required Widget child,
   }) {
     return MediaQuery(
       key: key,
@@ -700,13 +723,13 @@ class MediaQuery extends InheritedWidget {
   ///  * [removeViewPadding], the same thing but for
   ///    [MediaQueryData.viewPadding].
   factory MediaQuery.removeViewInsets({
-    Key key,
-    @required BuildContext context,
+    Key? key,
+    required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    @required Widget child,
+    required Widget child,
   }) {
     return MediaQuery(
       key: key,
@@ -744,13 +767,13 @@ class MediaQuery extends InheritedWidget {
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   factory MediaQuery.removeViewPadding({
-    Key key,
-    @required BuildContext context,
+    Key? key,
+    required BuildContext context,
     bool removeLeft = false,
     bool removeTop = false,
     bool removeRight = false,
     bool removeBottom = false,
-    @required Widget child,
+    required Widget child,
   }) {
     return MediaQuery(
       key: key,
@@ -773,9 +796,10 @@ class MediaQuery extends InheritedWidget {
   /// The data from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// You can use this function to query the size an orientation of the screen.
-  /// When that information changes, your widget will be scheduled to be
-  /// rebuilt, keeping your widget up-to-date.
+  /// You can use this function to query the size and orientation of the screen,
+  /// as well as other media parameters (see [MediaQueryData] for more
+  /// examples). When that information changes, your widget will be scheduled to
+  /// be rebuilt, keeping your widget up-to-date.
   ///
   /// Typical usage is as follows:
   ///
@@ -783,35 +807,56 @@ class MediaQuery extends InheritedWidget {
   /// MediaQueryData media = MediaQuery.of(context);
   /// ```
   ///
-  /// If there is no [MediaQuery] in scope, then this will throw an exception.
-  /// To return null if there is no [MediaQuery], then pass `nullOk: true`.
+  /// If there is no [MediaQuery] in scope, this will throw a [TypeError]
+  /// exception in release builds, and throw a descriptive [FlutterError] in
+  /// debug builds.
   ///
-  /// If you use this from a widget (e.g. in its build function), consider
-  /// calling [debugCheckHasMediaQuery].
-  static MediaQueryData of(BuildContext context, { bool nullOk = false }) {
+  /// See also:
+  ///
+  ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
+  ///    [MediaQuery] ancestor, it returns null instead.
+  static MediaQueryData of(BuildContext context) {
     assert(context != null);
-    assert(nullOk != null);
-    final MediaQuery query = context.dependOnInheritedWidgetOfExactType<MediaQuery>();
-    if (query != null)
-      return query.data;
-    if (nullOk)
-      return null;
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('MediaQuery.of() called with a context that does not contain a MediaQuery.'),
-      ErrorDescription(
-        'No MediaQuery ancestor could be found starting from the context that was passed '
-        'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
-        'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
-        'if the context you use comes from a widget above those widgets.'
-      ),
-      context.describeElement('The context used was')
-    ]);
+    assert(debugCheckHasMediaQuery(context));
+    return context.dependOnInheritedWidgetOfExactType<MediaQuery>()!.data;
+  }
+
+  /// The data from the closest instance of this class that encloses the given
+  /// context, if any.
+  ///
+  /// Use this function if you want to allow situations where no [MediaQuery] is
+  /// in scope. Prefer using [MediaQuery.of] in situations where a media query
+  /// is always expected to exist.
+  ///
+  /// If there is no [MediaQuery] in scope, then this function will return null.
+  ///
+  /// You can use this function to query the size and orientation of the screen,
+  /// as well as other media parameters (see [MediaQueryData] for more
+  /// examples). When that information changes, your widget will be scheduled to
+  /// be rebuilt, keeping your widget up-to-date.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
+  /// if (mediaQuery == null) {
+  ///   // Do something else instead.
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [of], which will throw if it doesn't find a [MediaQuery] ancestor,
+  ///    instead of returning null.
+  static MediaQueryData? maybeOf(BuildContext context) {
+    assert(context != null);
+    return context.dependOnInheritedWidgetOfExactType<MediaQuery>()?.data;
   }
 
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if
   /// no such ancestor exists.
   static double textScaleFactorOf(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+    return MediaQuery.maybeOf(context)?.textScaleFactor ?? 1.0;
   }
 
   /// Returns platformBrightness for the nearest MediaQuery ancestor or
@@ -820,13 +865,24 @@ class MediaQuery extends InheritedWidget {
   /// Use of this method will cause the given [context] to rebuild any time that
   /// any property of the ancestor [MediaQuery] changes.
   static Brightness platformBrightnessOf(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.platformBrightness ?? Brightness.light;
+    return MediaQuery.maybeOf(context)?.platformBrightness ?? Brightness.light;
+  }
+
+  /// Returns highContrast for the nearest MediaQuery ancestor or false, if no
+  /// such ancestor exists.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.highContrast], which indicates the platform's
+  ///    desire to increase contrast.
+  static bool highContrastOf(BuildContext context) {
+    return MediaQuery.maybeOf(context)?.highContrast ?? false;
   }
 
   /// Returns the boldText accessibility setting for the nearest MediaQuery
   /// ancestor, or false if no such ancestor exists.
   static bool boldTextOverride(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.boldText ?? false;
+    return MediaQuery.maybeOf(context)?.boldText ?? false;
   }
 
   @override
@@ -837,4 +893,32 @@ class MediaQuery extends InheritedWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
+}
+
+/// Describes the navigation mode to be set by a [MediaQuery] widget.
+///
+/// The different modes indicate the type of navigation to be used in a widget
+/// subtree for those widgets sensitive to it.
+///
+/// Use `MediaQuery.of(context).navigationMode` to determine the navigation mode
+/// in effect for the given context. Use a [MediaQuery] widget to set the
+/// navigation mode for its descendant widgets.
+enum NavigationMode {
+  /// This indicates a traditional keyboard-and-mouse navigation modality.
+  ///
+  /// This navigation mode is where the arrow keys can be used for secondary
+  /// modification operations, like moving sliders or cursors, and disabled
+  /// controls will lose focus and not be traversable.
+  traditional,
+
+  /// This indicates a directional-based navigation mode.
+  ///
+  /// This navigation mode indicates that arrow keys should be reserved for
+  /// navigation operations, and secondary modifications operations, like moving
+  /// sliders or cursors, will use alternative bindings or be disabled.
+  ///
+  /// Some behaviors are also affected by this mode. For instance, disabled
+  /// controls will retain focus when disabled, and will be able to receive
+  /// focus (although they remain disabled) when traversed.
+  directional,
 }

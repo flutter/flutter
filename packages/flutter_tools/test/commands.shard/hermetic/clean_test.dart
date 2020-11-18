@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:platform/platform.dart';
-
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -31,7 +31,7 @@ void main() {
       FlutterProject projectUnderTest;
 
       setUp(() {
-        fs = MemoryFileSystem();
+        fs = MemoryFileSystem.test();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
 
         final Directory currentDirectory = fs.currentDirectory;
@@ -48,11 +48,14 @@ void main() {
         projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.ios.generatedXcodePropertiesFile.createSync(recursive: true);
         projectUnderTest.ios.generatedEnvironmentVariableExportScript.createSync(recursive: true);
-        projectUnderTest.ios.compiledDartFramework.createSync(recursive: true);
+        projectUnderTest.ios.deprecatedCompiledDartFramework.createSync(recursive: true);
+        projectUnderTest.ios.deprecatedProjectFlutterFramework.createSync(recursive: true);
 
         projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
+        projectUnderTest.flutterPluginsFile.createSync(recursive: true);
+        projectUnderTest.flutterPluginsDependenciesFile.createSync(recursive: true);
       });
 
       testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
@@ -66,13 +69,28 @@ void main() {
         expect(projectUnderTest.ios.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.ios.generatedXcodePropertiesFile.existsSync(), isFalse);
         expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript.existsSync(), isFalse);
-        expect(projectUnderTest.ios.compiledDartFramework.existsSync(), isFalse);
+        expect(projectUnderTest.ios.deprecatedCompiledDartFramework.existsSync(), isFalse);
+        expect(projectUnderTest.ios.deprecatedProjectFlutterFramework.existsSync(), isFalse);
 
         expect(projectUnderTest.linux.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.windows.ephemeralDirectory.existsSync(), isFalse);
 
-        verify(xcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
+        expect(projectUnderTest.flutterPluginsFile.existsSync(), isFalse);
+        expect(projectUnderTest.flutterPluginsDependenciesFile.existsSync(), isFalse);
+
+        verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: false)).called(2);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Xcode: () => mockXcode,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      });
+
+      testUsingContext('$CleanCommand cleans Xcode verbosely', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+        await CleanCommand(verbose: true).runCommand();
+        verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: true)).called(2);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -130,6 +148,6 @@ class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
   @override
   Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
-    return XcodeProjectInfo(null, null, <String>['Runner']);
+    return XcodeProjectInfo(null, null, <String>['Runner'], BufferLogger.test());
   }
 }

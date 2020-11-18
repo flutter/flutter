@@ -142,7 +142,7 @@ void main() {
         await tester.pump(Duration(milliseconds: millis));
       }
 
-      void verify({ double size, RenderAnimatedSizeState state }) {
+      void verify({ double? size, RenderAnimatedSizeState? state }) {
         assert(size != null || state != null);
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         if (size != null) {
@@ -277,6 +277,42 @@ void main() {
         expect(box.state, RenderAnimatedSizeState.stable);
         expect(box.isAnimating, false);
         await tester.pump(const Duration(milliseconds: 10));
+      }
+    });
+
+    testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            vsync: tester,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      // By default, clipBehavior should be Clip.hardEdge
+      final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
+      expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+      for(final Clip clip in Clip.values) {
+        await tester.pumpWidget(
+          Center(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              vsync: tester,
+              clipBehavior: clip,
+              child: const SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ),
+        );
+        expect(renderObject.clipBehavior, clip);
       }
     });
   });

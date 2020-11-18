@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
+import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -27,9 +26,15 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesDartDefineOption();
-    argParser
-      ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
-      ..addMultiOption('target-platform',
+    usesExtraDartFlagOptions();
+    addBundleSkSLPathOption(hide: !verboseHelp);
+    addBuildPerformanceFile(hide: !verboseHelp);
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
+    usesAnalyzeSizeFlag();
+    addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    argParser.addMultiOption('target-platform',
         splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -74,13 +79,14 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (androidSdk == null) {
+    if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
     }
-    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
+    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
       shrink: boolArg('shrink'),
     );
+    validateBuild(androidBuildInfo);
     await androidBuilder.buildAab(
       project: FlutterProject.current(),
       target: targetFile,

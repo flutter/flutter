@@ -9,7 +9,7 @@ import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
-  const TestState({ Key key, this.child, this.log }) : super(key: key);
+  const TestState({ Key? key, required this.child, required this.log }) : super(key: key);
   final Widget child;
   final List<String> log;
   @override
@@ -429,5 +429,5 @@ void main() {
     log.clear();
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -40,7 +39,7 @@ void main() {
 
     expect(bundle.loadCallCount['one'], 1);
 
-    Object loadException;
+    late Object loadException;
     try {
       await bundle.loadString('foo');
     } catch (e) {
@@ -60,7 +59,7 @@ void main() {
   test('NetworkAssetBundle control test', () async {
     final Uri uri = Uri.http('example.org', '/path');
     final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
-    FlutterError error;
+    late FlutterError error;
     try {
       await bundle.load('key');
     } on FlutterError catch (e) {
@@ -75,5 +74,5 @@ void main() {
       '   Unable to load asset: key\n'
       '   HTTP status code: 404\n',
     );
-  }, skip: true);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }

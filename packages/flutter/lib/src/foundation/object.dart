@@ -9,7 +9,7 @@
 /// negatively impact performance. If asserts are enabled, this method will
 /// return `object.runtimeType.toString()`; otherwise, it will return the
 /// [optimizedValue], which must be a simple constant string.
-String objectRuntimeType(Object object, String optimizedValue) {
+String objectRuntimeType(Object? object, String optimizedValue) {
   assert(() {
     optimizedValue = object.runtimeType.toString();
     return true;

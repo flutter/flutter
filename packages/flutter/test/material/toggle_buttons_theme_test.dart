@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
-Widget boilerplate({Widget child}) {
+Widget boilerplate({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -40,7 +40,7 @@ void main() {
     expect(themeData.borderRadius, null);
     expect(themeData.borderWidth, null);
 
-    const ToggleButtonsTheme theme = ToggleButtonsTheme(data: ToggleButtonsThemeData());
+    const ToggleButtonsTheme theme = ToggleButtonsTheme(data: ToggleButtonsThemeData(), child: SizedBox());
     expect(theme.data.textStyle, null);
     expect(theme.data.constraints, null);
     expect(theme.data.color, null);
@@ -427,7 +427,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.removePointer();
+    await hoverGesture.moveTo(const Offset(0, 0));
 
     // focusColor
     focusNode.requestFocus();
@@ -436,6 +436,8 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    await hoverGesture.removePointer();
   });
 
 

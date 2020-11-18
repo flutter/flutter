@@ -19,7 +19,7 @@ const BoxDecoration kBoxDecorationC = BoxDecoration(
 );
 
 class TestBuildCounter extends StatelessWidget {
-  const TestBuildCounter({ Key key }) : super(key: key);
+  const TestBuildCounter({ Key? key }) : super(key: key);
 
   static int buildCount = 0;
 
@@ -32,7 +32,7 @@ class TestBuildCounter extends StatelessWidget {
 
 
 class FlipWidget extends StatefulWidget {
-  const FlipWidget({ Key key, this.left, this.right }) : super(key: key);
+  const FlipWidget({ Key? key, required this.left, required this.right }) : super(key: key);
 
   final Widget left;
   final Widget right;

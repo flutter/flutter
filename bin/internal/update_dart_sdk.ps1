@@ -29,14 +29,15 @@ $psMajorVersionLocal = $PSVersionTable.PSVersion.Major
 if ($psMajorVersionLocal -lt $psMajorVersionRequired) {
     Write-Host "Flutter requires PowerShell $psMajorVersionRequired.0 or newer."
     Write-Host "See https://flutter.dev/docs/get-started/install/windows for more."
-    return
+    Write-Host "Current version is $psMajorVersionLocal."
+    # Use exit code 2 to signal that shared.bat should exit immediately instead of retrying.
+    exit 2
 }
 
 if ((Test-Path $engineStamp) -and ($engineVersion -eq (Get-Content $engineStamp))) {
     return
 }
 
-Write-Host "Downloading Dart SDK from Flutter engine $engineVersion..."
 $dartSdkBaseUrl = $Env:FLUTTER_STORAGE_BASE_URL
 if (-not $dartSdkBaseUrl) {
     $dartSdkBaseUrl = "https://storage.googleapis.com"
@@ -55,7 +56,7 @@ $dartSdkZip = "$cachePath\$dartZipName"
 
 Try {
     Import-Module BitsTransfer
-    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip -ErrorAction Stop
 }
 Catch {
     Write-Host "Downloading the Dart SDK using the BITS service failed, retrying with WebRequest..."
@@ -69,16 +70,15 @@ Catch {
     $ProgressPreference = $OriginalProgressPreference
 }
 
-Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {
     # The built-in unzippers are painfully slow. Use 7-Zip, if available.
     & 7z x $dartSdkZip "-o$cachePath" -bd | Out-Null
 } ElseIf (Get-Command 7za -errorAction SilentlyContinue) {
     # Use 7-Zip's standalone version 7za.exe, if available.
     & 7za x $dartSdkZip "-o$cachePath" -bd | Out-Null
-} ElseIf (Get-Command Expand-Archive -errorAction SilentlyContinue) {
+} ElseIf (Get-Command Microsoft.PowerShell.Archive\Expand-Archive -errorAction SilentlyContinue) {
     # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
-    Expand-Archive $dartSdkZip -DestinationPath $cachePath
+    Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $cachePath
 } Else {
     # As last resort: fall back to the Windows GUI.
     $shell = New-Object -com shell.application

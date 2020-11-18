@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -18,7 +17,8 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/build_runner/mustache_template.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/github_template.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -109,7 +108,7 @@ void testUsingContext(
           AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
-          Doctor: () => FakeDoctor(),
+          Doctor: () => FakeDoctor(globals.logger),
           FlutterVersion: () => MockFlutterVersion(),
           HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
@@ -120,19 +119,18 @@ void testUsingContext(
           OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(
             terminal: globals.terminal,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
           ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
           SimControl: () => MockSimControl(),
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
-          FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
-          TimeoutConfiguration: () => const TimeoutConfiguration(),
+          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
-          GitHubTemplateCreator: () => MockGitHubTemplateCreator(),
+          CrashReporter: () => MockCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
         },
         body: () {
@@ -158,9 +156,9 @@ void testUsingContext(
               _printBufferedErrors(context);
               rethrow;
             }
-          }, onError: (dynamic error, StackTrace stackTrace) {
-            io.stdout.writeln(error);
-            io.stdout.writeln(stackTrace);
+          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
+            print(error);
+            print(stackTrace);
             _printBufferedErrors(context);
             throw error;
           });
@@ -250,7 +248,7 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
     return devices;
   }
 }
@@ -261,6 +259,8 @@ class FakeAndroidLicenseValidator extends AndroidLicenseValidator {
 }
 
 class FakeDoctor extends Doctor {
+  FakeDoctor(Logger logger) : super(logger: logger);
+
   // True for testing.
   @override
   bool get canListAnything => true;
@@ -295,6 +295,9 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
   ProcessResult makeExecutable(File file) => null;
 
   @override
+  HostPlatform hostPlatform = HostPlatform.linux_x64;
+
+  @override
   void chmod(FileSystemEntity entity, String mode) { }
 
   @override
@@ -307,19 +310,13 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
   File makePipe(String path) => null;
 
   @override
-  void zip(Directory data, File zipFile) { }
-
-  @override
   void unzip(File file, Directory targetDirectory) { }
-
-  @override
-  bool verifyZip(File file) => true;
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) { }
 
   @override
-  bool verifyGzip(File gzippedFile) => true;
+  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;
 
   @override
   String get name => 'fake OS name and version';
@@ -392,16 +389,19 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   int get minorVersion => 0;
 
   @override
+  int get patchVersion => 0;
+
+  @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath,
-    String target, {
+    String projectPath, {
+    String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme) {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) {
     return null;
   }
 
@@ -411,24 +411,21 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
       <String>['Runner'],
       <String>['Debug', 'Release'],
       <String>['Runner'],
+      BufferLogger.test(),
     );
   }
-}
-
-class MockFlutterVersion extends Mock implements FlutterVersion {
-  MockFlutterVersion({bool isStable = false}) : _isStable = isStable;
-
-  final bool _isStable;
 
   @override
-  bool get isMaster => !_isStable;
+  List<String> xcrunCommand() => <String>['xcrun'];
 }
+
+class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-class MockGitHubTemplateCreator extends Mock implements GitHubTemplateCreator {}
+class MockCrashReporter extends Mock implements CrashReporter {}
 
 class FakePlistParser implements PlistParser {
   @override
@@ -439,7 +436,9 @@ class FakePlistParser implements PlistParser {
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
-  const LocalFileSystemBlockingSetCurrentDirectory();
+  LocalFileSystemBlockingSetCurrentDirectory() : super.test(
+    signals: LocalSignals.instance,
+  );
 
   @override
   set currentDirectory(dynamic value) {

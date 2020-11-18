@@ -15,10 +15,10 @@ void main() {
   // the rendering_test.dart dependency of this test uses the bindings in not
   // compatible with existing tests in object_test.dart.
   test('reentrant paint error', () {
-    FlutterErrorDetails errorDetails;
+    late FlutterErrorDetails errorDetails;
     final RenderBox root = TestReentrantPaintingErrorRenderBox();
     layout(root, onErrors: () {
-      errorDetails = renderer.takeFlutterErrorDetails();
+      errorDetails = renderer.takeFlutterErrorDetails()!;
     });
     pumpFrame(phase: EnginePhase.paint);
 
@@ -62,7 +62,7 @@ void main() {
   });
 
   test('needsCompositingBitsUpdate paint error', () {
-    FlutterError flutterError;
+    late FlutterError flutterError;
     final RenderBox root = RenderRepaintBoundary(child: RenderSizedBox(const Size(100, 100)));
     try {
       layout(root);

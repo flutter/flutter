@@ -2,17 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:collection/collection.dart' show SetEquality;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-int buildCount;
-CupertinoThemeData actualTheme;
-IconThemeData actualIconTheme;
+int buildCount = 0;
+CupertinoThemeData? actualTheme;
+IconThemeData? actualIconTheme;
 
 final Widget singletonThemeSubtree = Builder(
   builder: (BuildContext context) {
@@ -30,7 +27,7 @@ Future<CupertinoThemeData> testTheme(WidgetTester tester, CupertinoThemeData the
       child: singletonThemeSubtree,
     ),
   );
-  return actualTheme;
+  return actualTheme!;
 }
 
 Future<IconThemeData> testIconTheme(WidgetTester tester, CupertinoThemeData theme) async {
@@ -40,13 +37,14 @@ Future<IconThemeData> testIconTheme(WidgetTester tester, CupertinoThemeData them
       child: singletonThemeSubtree,
     ),
   );
-  return actualIconTheme;
+  return actualIconTheme!;
 }
 
 void main() {
   setUp(() {
     buildCount = 0;
     actualTheme = null;
+    actualIconTheme = null;
   });
 
   testWidgets('Default theme has defaults', (WidgetTester tester) async {
@@ -151,7 +149,7 @@ void main() {
     final Color darkColor = (await testIconTheme(
       tester,
       themeData.copyWith(brightness: Brightness.dark),
-    )).color;
+    )).color!;
 
     expect(darkColor, isSameColorAs(primaryColor.darkColor));
   });
@@ -176,7 +174,7 @@ void main() {
       .toSet();
 
     expect(
-      const SetEquality<String>().equals(
+      setEquals(
         description,
         <String>{ 'brightness',
           'primaryColor',
@@ -208,8 +206,8 @@ void main() {
     );
   });
 
-  Brightness currentBrightness;
-  void colorMatches(Color componentColor, CupertinoDynamicColor expectedDynamicColor) {
+  late Brightness currentBrightness;
+  void colorMatches(Color? componentColor, CupertinoDynamicColor expectedDynamicColor) {
     switch (currentBrightness) {
       case Brightness.light:
         expect(componentColor, isSameColorAs(expectedDynamicColor.color));

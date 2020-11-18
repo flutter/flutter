@@ -99,7 +99,7 @@ class _IconsDemoCard extends StatelessWidget {
   TableRow _buildIconRow(double size) {
     return TableRow(
       children: <Widget> [
-        _centeredText(size.floor().toString()),
+        _centeredText('${size.floor().toString()} ${icon.toString()}'),
         _buildIconButton(size, icon, true),
         _buildIconButton(size, icon, false),
       ],
@@ -109,7 +109,7 @@ class _IconsDemoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = theme.textTheme.subtitle1.copyWith(color: theme.textTheme.caption.color);
+    final TextStyle textStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
     return Card(
       child: DefaultTextStyle(
         style: textStyle,
@@ -120,9 +120,9 @@ class _IconsDemoCard extends StatelessWidget {
             children: <TableRow> [
               TableRow(
                 children: <Widget> [
-                  _centeredText('Size'),
-                  _centeredText('Enabled'),
-                  _centeredText('Disabled'),
+                  _centeredText('Size ${icon.toString()}'),
+                  _centeredText('Enabled ${icon.toString()}'),
+                  _centeredText('Disabled ${icon.toString()}'),
                 ]
               ),
               _buildIconRow(18.0),

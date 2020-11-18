@@ -9,6 +9,7 @@ class TestValueKey<T> extends ValueKey<T> {
   const TestValueKey(T value) : super(value);
 }
 
+@immutable
 class NotEquals {
   const NotEquals();
   @override

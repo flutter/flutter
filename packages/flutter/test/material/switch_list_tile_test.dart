@@ -8,7 +8,113 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
+import '../widgets/semantics_tester.dart';
+
+Widget wrap({ required Widget child }) {
+  return MediaQuery(
+    data: const MediaQueryData(),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
+  );
+}
+
 void main() {
+  testWidgets('SwitchListTile control test', (WidgetTester tester) async {
+    final List<dynamic> log = <dynamic>[];
+    await tester.pumpWidget(wrap(
+      child: SwitchListTile(
+        value: true,
+        onChanged: (bool value) { log.add(value); },
+        title: const Text('Hello'),
+      ),
+    ));
+    await tester.tap(find.text('Hello'));
+    log.add('-');
+    await tester.tap(find.byType(Switch));
+    expect(log, equals(<dynamic>[false, '-', false]));
+  });
+
+  testWidgets('SwitchListTile control test', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(wrap(
+      child: Column(
+        children: <Widget>[
+          SwitchListTile(
+            value: true,
+            onChanged: (bool value) { },
+            title: const Text('AAA'),
+            secondary: const Text('aaa'),
+          ),
+          CheckboxListTile(
+            value: true,
+            onChanged: (bool? value) { },
+            title: const Text('BBB'),
+            secondary: const Text('bbb'),
+          ),
+          RadioListTile<bool>(
+            value: true,
+            groupValue: false,
+            onChanged: (bool? value) { },
+            title: const Text('CCC'),
+            secondary: const Text('ccc'),
+          ),
+        ],
+      ),
+    ));
+
+    // This test verifies that the label and the control get merged.
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          transform: null,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.hasToggledState,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+            SemanticsFlag.isToggled,
+          ],
+          actions: SemanticsAction.tap.index,
+          label: 'aaa\nAAA',
+        ),
+        TestSemantics.rootChild(
+          id: 3,
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          transform: Matrix4.translationValues(0.0, 56.0, 0.0),
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isChecked,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+          ],
+          actions: SemanticsAction.tap.index,
+          label: 'bbb\nBBB',
+        ),
+        TestSemantics.rootChild(
+          id: 5,
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          transform: Matrix4.translationValues(0.0, 112.0, 0.0),
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+            SemanticsFlag.isInMutuallyExclusiveGroup,
+          ],
+          actions: SemanticsAction.tap.index,
+          label: 'CCC\nccc',
+        ),
+      ],
+    )));
+
+    semantics.dispose();
+  });
+
   testWidgets('SwitchListTile has the right colors', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
@@ -148,4 +254,149 @@ void main() {
     expect(tester.getTopLeft(find.byType(Switch)).dx, 20.0); // contentPadding.end = 20
     expect(tester.getTopRight(find.text('L')).dx, 790.0); // 800 - contentPadding.start
   });
+
+  testWidgets('SwitchListTile can autofocus unless disabled.', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              SwitchListTile(
+                value: true,
+                onChanged: (_) {},
+                title: Text('A', key: childKey),
+                autofocus: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              SwitchListTile(
+                value: true,
+                onChanged: null,
+                title: Text('A', key: childKey),
+                autofocus: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('SwitchListTile controlAffinity test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: SwitchListTile(
+          value: true,
+          onChanged: null,
+          secondary: Icon(Icons.info),
+          title: Text('Title'),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    // When controlAffinity is ListTileControlAffinity.leading, the position of
+    // Switch is at leading edge and SwitchListTile.secondary at trailing edge.
+    expect(listTile.leading.runtimeType, Switch);
+    expect(listTile.trailing.runtimeType, Icon);
+  });
+
+  testWidgets('SwitchListTile controlAffinity default value test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: SwitchListTile(
+          value: true,
+          onChanged: null,
+          secondary: Icon(Icons.info),
+          title: Text('Title'),
+        ),
+      ),
+    ));
+
+    final ListTile listTile = tester.widget(find.byType(ListTile));
+    // By default, value of controlAffinity is ListTileControlAffinity.platform,
+    // where the position of SwitchListTile.secondary is at leading edge and Switch
+    // at trailing edge. This also covers test for ListTileControlAffinity.trailing.
+    expect(listTile.leading.runtimeType, Icon);
+    expect(listTile.trailing.runtimeType, Switch);
+  });
+
+  testWidgets('SwitchListTile respects shape', (WidgetTester tester) async {
+    const ShapeBorder shapeBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100))
+    );
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: SwitchListTile(
+          value: true,
+          onChanged: null,
+          title: Text('Title'),
+          shape: shapeBorder,
+        ),
+      ),
+    ));
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+  });
+
+  testWidgets('SwitchListTile respects tileColor', (WidgetTester tester) async {
+    const Color tileColor = Colors.red;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: SwitchListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            tileColor: tileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
+  });
+
+  testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
+    const Color selectedTileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: SwitchListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            selected: true,
+            selectedTileColor: selectedTileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
+  });
+
 }

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Offset;
+
+import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 
@@ -22,7 +23,7 @@ class DragDownDetails {
   /// The [globalPosition] argument must not be null.
   DragDownDetails({
     this.globalPosition = Offset.zero,
-    Offset localPosition,
+    Offset? localPosition,
   }) : assert(globalPosition != null),
        localPosition = localPosition ?? globalPosition;
 
@@ -69,7 +70,8 @@ class DragStartDetails {
   DragStartDetails({
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
-    Offset localPosition,
+    Offset? localPosition,
+    this.kind,
   }) : assert(globalPosition != null),
        localPosition = localPosition ?? globalPosition;
 
@@ -77,7 +79,7 @@ class DragStartDetails {
   /// event.
   ///
   /// Could be null if triggered from proxied events such as accessibility.
-  final Duration sourceTimeStamp;
+  final Duration? sourceTimeStamp;
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -94,6 +96,9 @@ class DragStartDetails {
   ///
   /// Defaults to [globalPosition] if not specified in the constructor.
   final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
 
   // TODO(ianh): Expose the current position, so that you can have a no-jump
   // drag even when disambiguating (though of course it would lag the finger
@@ -132,8 +137,8 @@ class DragUpdateDetails {
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
-    @required this.globalPosition,
-    Offset localPosition,
+    required this.globalPosition,
+    Offset? localPosition,
   }) : assert(delta != null),
        assert(primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
@@ -144,7 +149,7 @@ class DragUpdateDetails {
   /// event.
   ///
   /// Could be null if triggered from proxied events such as accessibility.
-  final Duration sourceTimeStamp;
+  final Duration? sourceTimeStamp;
 
   /// The amount the pointer has moved in the coordinate space of the event
   /// receiver since the previous update.
@@ -167,7 +172,7 @@ class DragUpdateDetails {
   /// two-dimensional drag (e.g., a pan), then this value is null.
   ///
   /// Defaults to null if not specified in the constructor.
-  final double primaryDelta;
+  final double? primaryDelta;
 
   /// The pointer's global position when it triggered this update.
   ///
@@ -231,7 +236,7 @@ class DragEndDetails {
   /// two-dimensional drag (e.g., a pan), then this value is null.
   ///
   /// Defaults to null if not specified in the constructor.
-  final double primaryVelocity;
+  final double? primaryVelocity;
 
   @override
   String toString() => '${objectRuntimeType(this, 'DragEndDetails')}($velocity)';

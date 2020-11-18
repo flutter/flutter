@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 
+import 'gesture_utils.dart';
 
 void main() {
   testWidgets('Events bubble up the tree', (WidgetTester tester) async {
@@ -43,6 +44,34 @@ void main() {
       'bottom',
       'middle',
       'top',
+    ]));
+  });
+
+  testWidgets('Detects hover events from touch devices', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 300,
+          height: 300,
+          child: Listener(
+            onPointerHover: (_) {
+              log.add('bottom');
+            },
+            child: const Text('X', textDirection: TextDirection.ltr),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Listener)));
+
+    expect(log, equals(<String>[
+      'bottom',
     ]));
   });
 
@@ -397,12 +426,4 @@ void main() {
       'listeners: down, move, up, cancel, signal',
     ]);
   });
-}
-
-Future<void> scrollAt(Offset position, WidgetTester tester) {
-  final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
-  // Create a hover event so that |testPointer| has a location when generating the scroll.
-  testPointer.hover(position);
-  final HitTestResult result = tester.hitTestOnBinding(position);
-  return tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
 }

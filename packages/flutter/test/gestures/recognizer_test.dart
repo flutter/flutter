@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
 class TestGestureRecognizer extends GestureRecognizer {
-  TestGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  TestGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
 
   @override
   String get debugDescription => 'debugDescription content';

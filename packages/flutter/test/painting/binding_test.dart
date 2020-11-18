@@ -2,30 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show Uint8List;
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 
-import 'image_data.dart';
-import 'painting_utils.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  final PaintingBindingSpy binding = PaintingBindingSpy();
+Future<void> main() async {
+  final ui.Image image = await createTestImage();
 
-  test('instantiateImageCodec used for loading images', () async {
-    expect(binding.instantiateImageCodecCalledCount, 0);
+  testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
+    imageCache!.putIfAbsent(1, () => OneFrameImageStreamCompleter(
+      Future<ImageInfo>.value(ImageInfo(
+        image: image,
+        scale: 1.0,
+      ),
+    )));
 
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage memoryImage = MemoryImage(bytes);
-    memoryImage.load(memoryImage, (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-    });
-    expect(binding.instantiateImageCodecCalledCount, 1);
+    await tester.idle();
+    expect(imageCache!.currentSize, 1);
+    final ByteData message = const JSONMessageCodec().encodeMessage(
+      <String, dynamic>{'type': 'memoryPressure'})!;
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    expect(imageCache!.currentSize, 0);
   });
 
   test('evict clears live references', () async {
@@ -66,28 +69,31 @@ class TestBindingBase implements BindingBase {
   }
 
   @override
-  void registerBoolServiceExtension({String name, AsyncValueGetter<bool> getter, AsyncValueSetter<bool> setter}) {}
+  void registerBoolServiceExtension({required String name, required AsyncValueGetter<bool> getter, required AsyncValueSetter<bool> setter}) {}
 
   @override
-  void registerNumericServiceExtension({String name, AsyncValueGetter<double> getter, AsyncValueSetter<double> setter}) {}
+  void registerNumericServiceExtension({required String name, required AsyncValueGetter<double> getter, required AsyncValueSetter<double> setter}) {}
 
   @override
-  void registerServiceExtension({String name, ServiceExtensionCallback callback}) {}
+  void registerServiceExtension({required String name, required ServiceExtensionCallback callback}) {}
 
   @override
-  void registerSignalServiceExtension({String name, AsyncCallback callback}) {}
+  void registerSignalServiceExtension({required String name, required AsyncCallback callback}) {}
 
   @override
-  void registerStringServiceExtension({String name, AsyncValueGetter<String> getter, AsyncValueSetter<String> setter}) {}
+  void registerStringServiceExtension({required String name, required AsyncValueGetter<String> getter, required AsyncValueSetter<String> setter}) {}
 
   @override
   void unlocked() {}
 
   @override
-  Window get window => throw UnimplementedError();
+  ui.SingletonFlutterWindow get window => throw UnimplementedError();
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
 }
 
-class TestPaintingBinding extends TestBindingBase with ServicesBinding, PaintingBinding {
+class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
 
   @override
   final FakeImageCache imageCache = FakeImageCache();

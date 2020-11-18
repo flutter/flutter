@@ -66,7 +66,7 @@ void main() {
 List<String> _getChildOrder(RenderFlex flex) {
   final List<String> childOrder = <String>[];
   flex.visitChildren((RenderObject child) {
-    childOrder.add(((child as RenderParagraph).text as TextSpan).text);
+    childOrder.add(((child as RenderParagraph).text as TextSpan).text!);
   });
   return childOrder;
 }

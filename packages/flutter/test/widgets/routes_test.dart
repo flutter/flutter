@@ -6,15 +6,18 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+
+import '../flutter_test_alternative.dart' show Fake;
+import 'semantics_tester.dart';
 
 final List<String> results = <String>[];
 
 Set<TestRoute> routes = HashSet<TestRoute>();
 
-class TestRoute extends Route<String> with LocalHistoryRoute<String> {
+class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   TestRoute(this.name);
   final String name;
 
@@ -52,19 +55,19 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   }
 
   @override
-  void didReplace(Route<dynamic> oldRoute) {
+  void didReplace(Route<dynamic>? oldRoute) {
     expect(oldRoute, isA<TestRoute>());
-    final TestRoute castRoute = oldRoute as TestRoute;
+    final TestRoute castRoute = oldRoute! as TestRoute;
     log('didReplace ${castRoute.name}');
     super.didReplace(castRoute);
   }
 
   @override
-  bool didPop(String result) {
+  bool didPop(String? result) {
     log('didPop $result');
     bool returnValue;
     if (returnValue = super.didPop(result))
-      navigator.finalizeRoute(this);
+      navigator!.finalizeRoute(this);
     return returnValue;
   }
 
@@ -77,9 +80,9 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   }
 
   @override
-  void didChangeNext(Route<dynamic> nextRoute) {
+  void didChangeNext(Route<dynamic>? nextRoute) {
     expect(nextRoute, anyOf(isNull, isA<TestRoute>()));
-    final TestRoute castRoute = nextRoute as TestRoute;
+    final TestRoute? castRoute = nextRoute as TestRoute?;
     log('didChangeNext ${castRoute?.name}');
     super.didChangeNext(castRoute);
   }
@@ -98,13 +101,16 @@ Future<void> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   VoidCallback test,
-  List<String> expectations,
-) async {
+  List<String> expectations, [
+  List<String> expectationsAfterAnotherPump = const <String>[],
+]) async {
   expect(host, isNotNull);
   test();
   expect(results, equals(expectations));
   results.clear();
   await tester.pump();
+  expect(results, equals(expectationsAfterAnotherPump));
+  results.clear();
 }
 
 void main() {
@@ -143,7 +149,7 @@ void main() {
         ),
       ),
     );
-    final NavigatorState host = navigatorKey.currentState;
+    final NavigatorState host = navigatorKey.currentState!;
     await runNavigatorTest(
       tester,
       host,
@@ -154,7 +160,7 @@ void main() {
         'initial: didChangeNext null',
       ],
     );
-    TestRoute second;
+    late TestRoute second;
     await runNavigatorTest(
       tester,
       host,
@@ -196,6 +202,8 @@ void main() {
       <String>[ // stack is: initial, two
         'third: didPop hello',
         'two: didPopNext third',
+      ],
+      <String>[
         'third: dispose',
       ],
     );
@@ -206,6 +214,8 @@ void main() {
       <String>[ // stack is: initial
         'two: didPop good bye',
         'initial: didPopNext two',
+      ],
+      <String>[
         'two: dispose',
       ],
     );
@@ -226,7 +236,7 @@ void main() {
         ),
       ),
     );
-    final NavigatorState host = navigatorKey.currentState;
+    final NavigatorState host = navigatorKey.currentState!;
     await runNavigatorTest(
       tester,
       host,
@@ -237,7 +247,7 @@ void main() {
         'first: didChangeNext null',
       ],
     );
-    TestRoute second;
+    late TestRoute second;
     await runNavigatorTest(
       tester,
       host,
@@ -275,6 +285,8 @@ void main() {
       <String>[
         'third: didPop good bye',
         'second: didPopNext third',
+      ],
+      <String>[
         'third: dispose',
       ],
     );
@@ -289,7 +301,7 @@ void main() {
         'second: didChangeNext three',
       ],
     );
-    TestRoute four;
+    late TestRoute four;
     await runNavigatorTest(
       tester,
       host,
@@ -317,6 +329,8 @@ void main() {
       <String>[
         'four: didPop the end',
         'second: didPopNext four',
+      ],
+      <String>[
         'four: dispose',
       ],
     );
@@ -337,7 +351,7 @@ void main() {
         ),
       ),
     );
-    final NavigatorState host = navigatorKey.currentState;
+    final NavigatorState host = navigatorKey.currentState!;
     await runNavigatorTest(
       tester,
       host,
@@ -359,7 +373,7 @@ void main() {
         'A: didChangeNext B',
       ],
     );
-    TestRoute routeC;
+    late TestRoute routeC;
     await runNavigatorTest(
       tester,
       host,
@@ -372,7 +386,7 @@ void main() {
       ],
     );
     expect(routeC.isActive, isTrue);
-    TestRoute routeB;
+    late TestRoute routeB;
     await runNavigatorTest(
       tester,
       host,
@@ -392,6 +406,8 @@ void main() {
       <String>[
         'C: didPop null',
         'b: didPopNext C',
+      ],
+      <String>[
         'C: dispose',
       ],
     );
@@ -419,7 +435,7 @@ void main() {
         ),
       ),
     );
-    final NavigatorState host = navigatorKey.currentState;
+    final NavigatorState host = navigatorKey.currentState!;
     await runNavigatorTest(
       tester,
       host,
@@ -447,60 +463,64 @@ void main() {
   group('PageRouteObserver', () {
     test('calls correct listeners', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware1 = MockRouteAware();
+      final MockRouteAware pageRouteAware1 = MockRouteAware();
       final MockPageRoute route1 = MockPageRoute();
       observer.subscribe(pageRouteAware1, route1);
-      verify(pageRouteAware1.didPush()).called(1);
+      expect(pageRouteAware1.didPushCount, 1);
 
-      final RouteAware pageRouteAware2 = MockRouteAware();
+      final MockRouteAware pageRouteAware2 = MockRouteAware();
       final MockPageRoute route2 = MockPageRoute();
       observer.didPush(route2, route1);
-      verify(pageRouteAware1.didPushNext()).called(1);
+      expect(pageRouteAware1.didPushNextCount, 1);
 
       observer.subscribe(pageRouteAware2, route2);
-      verify(pageRouteAware2.didPush()).called(1);
+      expect(pageRouteAware2.didPushCount, 1);
 
       observer.didPop(route2, route1);
-      verify(pageRouteAware2.didPop()).called(1);
-      verify(pageRouteAware1.didPopNext()).called(1);
+      expect(pageRouteAware2.didPopCount, 1);
+      expect(pageRouteAware1.didPopNextCount, 1);
     });
 
     test('does not call listeners for non-PageRoute', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       final MockRoute route = MockRoute();
       observer.subscribe(pageRouteAware, pageRoute);
-      verify(pageRouteAware.didPush());
+      expect(pageRouteAware.didPushCount, 1);
 
       observer.didPush(route, pageRoute);
       observer.didPop(route, pageRoute);
-      verifyNoMoreInteractions(pageRouteAware);
+
+      expect(pageRouteAware.didPushCount, 1);
+      expect(pageRouteAware.didPopCount, 0);
     });
 
     test('does not call listeners when already subscribed', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       observer.subscribe(pageRouteAware, pageRoute);
-      verify(pageRouteAware.didPush()).called(1);
+      expect(pageRouteAware.didPushCount, 1);
     });
 
     test('does not call listeners when unsubscribed', () {
       final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = MockRouteAware();
+      final MockRouteAware pageRouteAware = MockRouteAware();
       final MockPageRoute pageRoute = MockPageRoute();
       final MockPageRoute nextPageRoute = MockPageRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       observer.subscribe(pageRouteAware, nextPageRoute);
-      verify(pageRouteAware.didPush()).called(2);
+      expect(pageRouteAware.didPushCount, 2);
 
       observer.unsubscribe(pageRouteAware);
 
       observer.didPush(nextPageRoute, pageRoute);
       observer.didPop(nextPageRoute, pageRoute);
-      verifyNoMoreInteractions(pageRouteAware);
+
+      expect(pageRouteAware.didPushCount, 2);
+      expect(pageRouteAware.didPopCount, 0);
     });
   });
 
@@ -533,6 +553,109 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
+  group('PageRouteBuilder', () {
+    testWidgets('reverseTransitionDuration defaults to 300ms', (WidgetTester tester) async {
+      // Default PageRouteBuilder reverse transition duration should be 300ms.
+      await tester.pumpWidget(
+        MaterialApp(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context)!.push<void>(
+                      PageRouteBuilder<void>(
+                        settings: settings,
+                        pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+                          return const Text('Page Two');
+                        },
+                      )
+                    );
+                  },
+                  child: const Text('Open page'),
+                );
+              },
+            );
+          },
+        )
+      );
+
+      // Open the new route.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present halfway through the reverse transition.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present at the very end of the reverse transition.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') have transitioned out after 300ms.
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(find.text('Page Two'), findsNothing);
+      expect(find.text('Open page'), findsOneWidget);
+    });
+
+    testWidgets('reverseTransitionDuration can be customized', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context)!.push<void>(
+                    PageRouteBuilder<void>(
+                      settings: settings,
+                      pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+                        return const Text('Page Two');
+                      },
+                      // modified value, default PageRouteBuilder reverse transition duration should be 300ms.
+                      reverseTransitionDuration: const Duration(milliseconds: 150),
+                    )
+                  );
+                },
+                child: const Text('Open page'),
+              );
+            },
+          );
+        })
+      );
+
+      // Open the new route.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present halfway through the reverse transition.
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') should be present at the very end of the reverse transition.
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(find.text('Page Two'), findsOneWidget);
+
+      // Text('Page Two') have transitioned out after 500ms.
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(find.text('Page Two'), findsNothing);
+      expect(find.text('Open page'), findsOneWidget);
+    });
+  });
+
   group('TransitionRoute', () {
     testWidgets('secondary animation is kDismissed when next route finishes pop', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
@@ -544,9 +667,9 @@ void main() {
       );
 
       // Push page one, its secondary animation is kAlwaysDismissedAnimation.
-      ProxyAnimation secondaryAnimationProxyPageOne;
-      ProxyAnimation animationPageOne;
-      navigator.currentState.push(
+      late ProxyAnimation secondaryAnimationProxyPageOne;
+      late ProxyAnimation animationPageOne;
+      navigator.currentState!.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
@@ -557,15 +680,15 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent as ProxyAnimation;
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
       // Push page two, the secondary animation of page one is the primary
       // animation of page two.
-      ProxyAnimation secondaryAnimationProxyPageTwo;
-      ProxyAnimation animationPageTwo;
-      navigator.currentState.push(
+      late ProxyAnimation secondaryAnimationProxyPageTwo;
+      late ProxyAnimation animationPageTwo;
+      navigator.currentState!.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageTwo = secondaryAnimation as ProxyAnimation;
@@ -576,14 +699,14 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent as ProxyAnimation;
+      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent! as ProxyAnimation;
       expect(animationPageTwo.value, 1.0);
       expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
       expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
 
       // Pop page two, the secondary animation of page one becomes
       // kAlwaysDismissedAnimation.
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
@@ -602,9 +725,9 @@ void main() {
       );
 
       // Push page one, its secondary animation is kAlwaysDismissedAnimation.
-      ProxyAnimation secondaryAnimationProxyPageOne;
-      ProxyAnimation animationPageOne;
-      navigator.currentState.push(
+      late ProxyAnimation secondaryAnimationProxyPageOne;
+      late ProxyAnimation animationPageOne;
+      navigator.currentState!.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
@@ -615,16 +738,16 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent as ProxyAnimation;
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
       // Push page two, the secondary animation of page one is the primary
       // animation of page two.
-      ProxyAnimation secondaryAnimationProxyPageTwo;
-      ProxyAnimation animationPageTwo;
+      late ProxyAnimation secondaryAnimationProxyPageTwo;
+      late ProxyAnimation animationPageTwo;
       Route<void> secondRoute;
-      navigator.currentState.push(
+      navigator.currentState!.push(
         secondRoute = PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageTwo = secondaryAnimation as ProxyAnimation;
@@ -635,14 +758,14 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent as ProxyAnimation;
+      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent! as ProxyAnimation;
       expect(animationPageTwo.value, 1.0);
       expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
       expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
 
       // Remove the second route, the secondary animation of page one is
       // kAlwaysDismissedAnimation again.
-      navigator.currentState.removeRoute(secondRoute);
+      navigator.currentState!.removeRoute(secondRoute);
       await tester.pump();
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
@@ -657,9 +780,9 @@ void main() {
       );
 
       // Push page one, its secondary animation is kAlwaysDismissedAnimation.
-      ProxyAnimation secondaryAnimationProxyPageOne;
-      ProxyAnimation animationPageOne;
-      navigator.currentState.push(
+      late ProxyAnimation secondaryAnimationProxyPageOne;
+      late ProxyAnimation animationPageOne;
+      navigator.currentState!.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
@@ -670,14 +793,14 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent as ProxyAnimation;
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
       // Push page two, the secondary animation of page one is the primary
       // animation of page two.
-      ProxyAnimation animationPageTwo;
-      navigator.currentState.push(
+      late ProxyAnimation animationPageTwo;
+      navigator.currentState!.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             animationPageTwo = animation as ProxyAnimation;
@@ -691,8 +814,8 @@ void main() {
 
       // Replace with a different route while push is ongoing to trigger
       // TrainHopping.
-      ProxyAnimation animationPageThree;
-      navigator.currentState.pushReplacement(
+      late ProxyAnimation animationPageThree;
+      navigator.currentState!.pushReplacement(
         TestPageRouteBuilder(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             animationPageThree = animation as ProxyAnimation;
@@ -703,7 +826,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1));
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent as TrainHoppingAnimation;
+      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
       expect(trainHopper.currentTrain, animationPageTwo.parent);
       await tester.pump(const Duration(milliseconds: 100));
       expect(secondaryAnimationPageOne.parent, isNot(isA<TrainHoppingAnimation>()));
@@ -713,7 +836,7 @@ void main() {
       expect(secondaryAnimationPageOne.parent, animationPageThree.parent);
 
       // Pop page three.
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pump();
       await tester.pumpAndSettle();
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
@@ -729,9 +852,9 @@ void main() {
       );
 
       // Push page one, its secondary animation is kAlwaysDismissedAnimation.
-      ProxyAnimation secondaryAnimationProxyPageOne;
-      ProxyAnimation animationPageOne;
-      navigator.currentState.push(
+      late ProxyAnimation secondaryAnimationProxyPageOne;
+      late ProxyAnimation animationPageOne;
+      navigator.currentState!.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
@@ -742,14 +865,14 @@ void main() {
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent as ProxyAnimation;
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent! as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
       // Push page two, the secondary animation of page one is the primary
       // animation of page two.
-      ProxyAnimation animationPageTwo;
-      navigator.currentState.push(
+      late ProxyAnimation animationPageTwo;
+      navigator.currentState!.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             animationPageTwo = animation as ProxyAnimation;
@@ -763,7 +886,7 @@ void main() {
 
       // Replace with a different route while push is ongoing to trigger
       // TrainHopping.
-      navigator.currentState.pushReplacement(
+      navigator.currentState!.pushReplacement(
         TestPageRouteBuilder(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             return const Text('Page Three');
@@ -773,14 +896,14 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent as TrainHoppingAnimation;
+      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
       expect(trainHopper.currentTrain, animationPageTwo.parent);
 
       // Pop page three while replacement push is ongoing.
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pump();
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final TrainHoppingAnimation trainHopper2 = secondaryAnimationPageOne.parent as TrainHoppingAnimation;
+      final TrainHoppingAnimation trainHopper2 = secondaryAnimationPageOne.parent! as TrainHoppingAnimation;
       expect(trainHopper2.currentTrain, animationPageTwo.parent);
       expect(trainHopper.currentTrain, isNull); // Has been disposed.
       await tester.pumpAndSettle();
@@ -790,8 +913,8 @@ void main() {
 
     testWidgets('secondary animation is triggered when pop initial route', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
-      Animation<double> secondaryAnimationOfRouteOne;
-      Animation<double> primaryAnimationOfRouteTwo;
+      late Animation<double> secondaryAnimationOfRouteOne;
+      late Animation<double> primaryAnimationOfRouteTwo;
       await tester.pumpWidget(
         MaterialApp(
           navigatorKey: navigator,
@@ -815,7 +938,7 @@ void main() {
       expect(secondaryAnimationOfRouteOne.value, 1.0);
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
       // Pops the top most route and verifies two routes are still chained.
-      navigator.currentState.pop();
+      navigator.currentState!.pop();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 30));
       expect(secondaryAnimationOfRouteOne.value, 0.9);
@@ -823,6 +946,76 @@ void main() {
       await tester.pumpAndSettle();
       expect(secondaryAnimationOfRouteOne.value, 0.0);
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+    });
+
+    testWidgets('showGeneralDialog handles transparent barrier color', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              onPressed: () {
+                showGeneralDialog<void>(
+                  context: context,
+                  barrierDismissible: true,
+                  barrierLabel: 'barrier_label',
+                  barrierColor: const Color(0x00000000),
+                  transitionDuration: Duration.zero,
+                  pageBuilder: (BuildContext innerContext, _, __) {
+                    return const SizedBox();
+                  },
+                );
+              },
+              child: const Text('Show Dialog'),
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pump();
+      expect(find.byType(ModalBarrier), findsNWidgets(2));
+
+      // Close the dialog.
+      await tester.tapAt(Offset.zero);
+      await tester.pump();
+      expect(find.byType(ModalBarrier), findsNWidgets(1));
+    });
+
+    testWidgets('showGeneralDialog adds non-dismissable barrier when barrierDismissable is false', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              onPressed: () {
+                showGeneralDialog<void>(
+                  context: context,
+                  barrierDismissible: false,
+                  transitionDuration: Duration.zero,
+                  pageBuilder: (BuildContext innerContext, _, __) {
+                    return const SizedBox();
+                  },
+                );
+              },
+              child: const Text('Show Dialog'),
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pump();
+      expect(find.byType(ModalBarrier), findsNWidgets(2));
+      final ModalBarrier barrier = find.byType(ModalBarrier).evaluate().last.widget as ModalBarrier;
+      expect(barrier.dismissible, isFalse);
+
+      // Close the dialog.
+      final StatefulElement navigatorElement = find.byType(Navigator).evaluate().last as StatefulElement;
+      final NavigatorState navigatorState = navigatorElement.state as NavigatorState;
+      navigatorState.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
     testWidgets('showGeneralDialog uses root navigator by default', (WidgetTester tester) async {
@@ -836,7 +1029,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<dynamic>(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     showGeneralDialog<void>(
                       context: context,
@@ -856,7 +1049,7 @@ void main() {
       ));
 
       // Open the dialog.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
 
       expect(rootObserver.dialogCount, 1);
       expect(nestedObserver.dialogCount, 0);
@@ -873,7 +1066,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<dynamic>(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   onPressed: () {
                     showGeneralDialog<void>(
                       useRootNavigator: false,
@@ -894,10 +1087,45 @@ void main() {
       ));
 
       // Open the dialog.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
 
       expect(rootObserver.dialogCount, 0);
       expect(nestedObserver.dialogCount, 1);
+    });
+
+    testWidgets('showGeneralDialog default argument values', (WidgetTester tester) async {
+      final DialogObserver rootObserver = DialogObserver();
+
+      await tester.pumpWidget(MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    showGeneralDialog<void>(
+                      context: context,
+                      pageBuilder: (BuildContext innerContext, _, __) {
+                        return const SizedBox();
+                      },
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            );
+          },
+        ),
+      ));
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      expect(rootObserver.dialogRoutes.length, equals(1));
+      final ModalRoute<dynamic> route = rootObserver.dialogRoutes.last;
+      expect(route.barrierDismissible, isNotNull);
+      expect(route.barrierColor, isNotNull);
+      expect(route.transitionDuration, isNotNull);
     });
 
     testWidgets('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
@@ -908,9 +1136,9 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push<void>(
+                  Navigator.of(context)!.push<void>(
                     MaterialPageRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -929,7 +1157,7 @@ void main() {
       ));
 
       // Open the new route.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text('Open page'), findsNothing);
       expect(find.byKey(containerKey), findsOneWidget);
@@ -958,9 +1186,9 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push<void>(
+                  Navigator.of(context)!.push<void>(
                     ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -981,7 +1209,7 @@ void main() {
       ));
 
       // Open the new route.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
       expect(find.text('Open page'), findsNothing);
       expect(find.byKey(containerKey), findsOneWidget);
@@ -1017,9 +1245,9 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
             builder: (BuildContext context) {
-              return RaisedButton(
+              return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push<void>(
+                  Navigator.of(context)!.push<void>(
                     ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -1040,7 +1268,7 @@ void main() {
       ));
 
       // Open the new route.
-      await tester.tap(find.byType(RaisedButton));
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200)); // jump partway through the forward transition
       expect(find.byKey(containerKey), findsOneWidget);
@@ -1078,10 +1306,10 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context).push<void>(
+                    Navigator.of(context)!.push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                       )
@@ -1104,29 +1332,29 @@ void main() {
       final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
       expect(animatedModalBarrier, findsOneWidget);
 
-      Animation<Color> modalBarrierAnimation;
+      Animation<Color?> modalBarrierAnimation;
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(modalBarrierAnimation.value, Colors.transparent);
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1.0),
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1.0),
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1.0),
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1140,10 +1368,10 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Center(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context).push<void>(
+                    Navigator.of(context)!.push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                         barrierCurve: Curves.linear,
@@ -1167,29 +1395,29 @@ void main() {
       final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
       expect(animatedModalBarrier, findsOneWidget);
 
-      Animation<Color> modalBarrierAnimation;
+      Animation<Color?> modalBarrierAnimation;
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(modalBarrierAnimation.value, Colors.transparent);
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1.0),
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1.0),
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
-        modalBarrierAnimation.value.alpha,
-        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1.0),
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
       );
 
       await tester.pumpAndSettle();
@@ -1197,7 +1425,80 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
-    testWidgets('focus traverse correct when pop mutiple page simultaneously', (WidgetTester tester) async {
+    testWidgets('modal route semantics order', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/46625.
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context)!.push<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
+                        child: const Text('Hello World'),
+                        barrierLabel: 'test label',
+                        barrierCurve: Curves.linear,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Hello World'), findsOneWidget);
+
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            id: 1,
+            rect: TestSemantics.fullScreen,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 6,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 7,
+                    rect: TestSemantics.fullScreen,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 8,
+                        label: 'Hello World',
+                        rect: TestSemantics.fullScreen,
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              // Modal barrier is put after modal scope
+              TestSemantics(
+                id: 5,
+                rect: TestSemantics.fullScreen,
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'test label',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      )
+      ;
+
+      expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
+
+    testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(
@@ -1209,7 +1510,7 @@ void main() {
       expect(focusNodeOnPageOne.hasFocus, isTrue);
 
       // Pushes one page.
-      navigatorKey.currentState.push<void>(
+      navigatorKey.currentState!.push<void>(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('dummy2'),
         )
@@ -1223,7 +1524,7 @@ void main() {
       expect(focusNodeOnPageTwo.hasFocus, isTrue);
 
       // Pushes another page.
-      navigatorKey.currentState.push<void>(
+      navigatorKey.currentState!.push<void>(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('dummy3'),
         )
@@ -1237,13 +1538,13 @@ void main() {
       expect(focusNodeOnPageThree.hasFocus, isTrue);
 
       // Pops two pages simultaneously.
-      navigatorKey.currentState.popUntil((Route<void> route) => route.isFirst);
+      navigatorKey.currentState!.popUntil((Route<void> route) => route.isFirst);
       await tester.pumpAndSettle();
       // It should refocus page one after pops.
       expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
 
-    testWidgets('focus traversal is correct when popping mutiple pages simultaneously - with focused children', (WidgetTester tester) async {
+    testWidgets('focus traversal is correct when popping multiple pages simultaneously - with focused children', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(
@@ -1255,7 +1556,7 @@ void main() {
       expect(focusNodeOnPageOne.hasFocus, isTrue);
 
       // Pushes one page.
-      navigatorKey.currentState.push<void>(
+      navigatorKey.currentState!.push<void>(
           MaterialPageRoute<void>(
             builder: (BuildContext context) => const Material(child: TextField()),
           )
@@ -1275,7 +1576,7 @@ void main() {
       expect(focusNodeOnPageTwo.hasPrimaryFocus, isFalse);
 
       // Pushes another page.
-      navigatorKey.currentState.push<void>(
+      navigatorKey.currentState!.push<void>(
           MaterialPageRoute<void>(
             builder: (BuildContext context) => const Text('dummy3'),
           )
@@ -1289,11 +1590,100 @@ void main() {
       expect(focusNodeOnPageThree.hasFocus, isTrue);
 
       // Pops two pages simultaneously.
-      navigatorKey.currentState.popUntil((Route<void> route) => route.isFirst);
+      navigatorKey.currentState!.popUntil((Route<void> route) => route.isFirst);
       await tester.pumpAndSettle();
       // It should refocus page one after pops.
       expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
+
+    testWidgets('child with local history can be disposed', (WidgetTester tester) async {
+      // Regression test: https://github.com/flutter/flutter/issues/52478
+      await tester.pumpWidget(MaterialApp(
+        home: WidgetWithLocalHistory(),
+      ));
+
+      final WidgetWithLocalHistoryState state = tester.state(find.byType(WidgetWithLocalHistory));
+      state.addLocalHistory();
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+
+      // Pumps a new widget to dispose WidgetWithLocalHistory. This should cause
+      // it to remove the local history entry from modal route during
+      // finalizeTree.
+      await tester.pumpWidget(const MaterialApp(
+        home: Text('dummy'),
+      ));
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+      expect(tester.takeException(), null);
+    });
+  });
+
+  testWidgets('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      home: const Text('dummy1'),
+    ));
+    final Element textOnPageOne = tester.element(find.text('dummy1'));
+
+    // Show a simple dialog
+    showDialog<void>(
+      context: textOnPageOne,
+      builder: (BuildContext context) => const Text('dialog1'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
+
+    // Try to dismiss the dialog with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsNothing);
+  });
+
+  testWidgets('can not be dismissed with escape keyboard shortcut if barrier not dismissible', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      home: const Text('dummy1'),
+    ));
+    final Element textOnPageOne = tester.element(find.text('dummy1'));
+
+    // Show a simple dialog
+    showDialog<void>(
+      context: textOnPageOne,
+      barrierDismissible: false,
+      builder: (BuildContext context) => const Text('dialog1'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
+
+    // Try to dismiss the dialog with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
+  });
+
+  testWidgets('ModalRoute.of works for void routes', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      home: const Text('home'),
+    ));
+    expect(find.text('page2'), findsNothing);
+
+    navigatorKey.currentState!.push<void>(MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return const Text('page2');
+      }
+    ));
+
+    await tester.pumpAndSettle();
+    expect(find.text('page2'), findsOneWidget);
+
+    final ModalRoute<void>? parentRoute = ModalRoute.of<void>(tester.element(find.text('page2')));
+    expect(parentRoute, isNotNull);
+    expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
 }
 
@@ -1310,9 +1700,9 @@ double _getOpacity(GlobalKey key, WidgetTester tester) {
 
 class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   ModifiedReverseTransitionDurationRoute({
-    @required WidgetBuilder builder,
-    RouteSettings settings,
-    this.reverseTransitionDuration,
+    required WidgetBuilder builder,
+    RouteSettings? settings,
+    required this.reverseTransitionDuration,
     bool fullscreenDialog = false,
   }) : super(
          builder: builder,
@@ -1324,14 +1714,39 @@ class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   final Duration reverseTransitionDuration;
 }
 
-class MockPageRoute extends Mock implements PageRoute<dynamic> { }
+class MockPageRoute extends Fake implements PageRoute<dynamic> { }
 
-class MockRoute extends Mock implements Route<dynamic> { }
+class MockRoute extends Fake implements Route<dynamic> { }
 
-class MockRouteAware extends Mock implements RouteAware { }
+class MockRouteAware extends Fake implements RouteAware {
+  int didPushCount = 0;
+  int didPushNextCount = 0;
+  int didPopCount = 0;
+  int didPopNextCount = 0;
+
+  @override
+  void didPush() {
+    didPushCount += 1;
+  }
+
+  @override
+  void didPushNext() {
+    didPushNextCount += 1;
+  }
+
+  @override
+  void didPop() {
+    didPopCount += 1;
+  }
+
+  @override
+  void didPopNext() {
+    didPopNextCount += 1;
+  }
+}
 
 class TestPageRouteBuilder extends PageRouteBuilder<void> {
-  TestPageRouteBuilder({RoutePageBuilder pageBuilder}) : super(pageBuilder: pageBuilder);
+  TestPageRouteBuilder({required RoutePageBuilder pageBuilder}) : super(pageBuilder: pageBuilder);
 
   @override
   Animation<double> createAnimation() {
@@ -1340,21 +1755,33 @@ class TestPageRouteBuilder extends PageRouteBuilder<void> {
 }
 
 class DialogObserver extends NavigatorObserver {
+  final List<ModalRoute<dynamic>> dialogRoutes = <ModalRoute<dynamic>>[];
   int dialogCount = 0;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.toString().contains('_DialogRoute')) {
+      dialogRoutes.add(route as ModalRoute<dynamic>);
       dialogCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      dialogRoutes.removeLast();
+      dialogCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }
 
 class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
-    @required Widget child,
-    Curve barrierCurve,
+    required Widget child,
+    this.barrierLabel,
+    Curve? barrierCurve,
   }) : _barrierCurve = barrierCurve,
        _child = child;
 
@@ -1364,7 +1791,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  String get barrierLabel => null;
+  final String? barrierLabel;
 
   @override
   Color get barrierColor => Colors.black; // easier value to test against
@@ -1374,9 +1801,9 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
     if (_barrierCurve == null) {
       return super.barrierCurve;
     }
-    return _barrierCurve;
+    return _barrierCurve!;
   }
-  final Curve _barrierCurve;
+  final Curve? _barrierCurve;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 100); // easier value to test against
@@ -1389,4 +1816,74 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
       explicitChildNodes: true,
     );
   }
+}
+
+class WidgetWithLocalHistory extends StatefulWidget {
+  @override
+  WidgetWithLocalHistoryState createState() => WidgetWithLocalHistoryState();
+}
+
+class WidgetWithLocalHistoryState extends State<WidgetWithLocalHistory> {
+  late LocalHistoryEntry _localHistory;
+
+  void addLocalHistory() {
+    final ModalRoute<dynamic> route = ModalRoute.of(context)!;
+    _localHistory = LocalHistoryEntry();
+    route.addLocalHistoryEntry(_localHistory);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _localHistory.remove();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('dummy');
+  }
+}
+
+class TransitionDetector extends DefaultTransitionDelegate<void> {
+  bool hasTransition = false;
+  @override
+  Iterable<RouteTransitionRecord> resolve({
+    required List<RouteTransitionRecord> newPageRouteHistory,
+    required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
+  }) {
+    hasTransition = true;
+    return super.resolve(
+      newPageRouteHistory: newPageRouteHistory,
+      locationToExitingPageRoute: locationToExitingPageRoute,
+      pageRouteToPagelessRoutes: pageRouteToPagelessRoutes
+    );
+  }
+}
+
+Widget buildNavigator({
+  required List<Page<dynamic>> pages,
+  required PopPageCallback onPopPage,
+  GlobalKey<NavigatorState>? key,
+  TransitionDelegate<dynamic>? transitionDelegate
+}) {
+  return MediaQuery(
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+    child: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: key,
+          pages: pages,
+          onPopPage: onPopPage,
+          transitionDelegate: transitionDelegate ?? const DefaultTransitionDelegate<dynamic>(),
+        ),
+      ),
+    ),
+  );
 }

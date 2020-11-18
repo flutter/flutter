@@ -262,7 +262,7 @@ void main() {
   });
 
   testWidgets('ListView.separated', (WidgetTester tester) async {
-    Widget buildFrame({ int itemCount }) {
+    Widget buildFrame({ required int itemCount }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.separated(
@@ -307,7 +307,7 @@ void main() {
 
 
   testWidgets('ListView.separated uses correct semanticChildCount', (WidgetTester tester) async {
-    Widget buildFrame({int itemCount}) {
+    Widget buildFrame({ required int itemCount}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.separated(

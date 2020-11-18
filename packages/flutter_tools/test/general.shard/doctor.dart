@@ -44,7 +44,7 @@ void main() {
 
   test('doctor validators includes web when feature is enabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        contains(isA<WebValidator>()));
+        contains(isA<ChromiumValidator>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isWebEnabled: true,
@@ -53,7 +53,7 @@ void main() {
 
   test('doctor validators does not include web when feature is disabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        isNot(contains(isA<WebValidator>())));
+        isNot(contains(isA<ChromiumValidator>())));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isWebEnabled: false,

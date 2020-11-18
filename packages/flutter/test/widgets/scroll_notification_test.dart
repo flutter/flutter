@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Scroll notification basics', (WidgetTester tester) async {
-    ScrollNotification notification;
+    late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
@@ -28,7 +28,7 @@ void main() {
     expect(notification.depth, equals(0));
     final ScrollStartNotification start = notification as ScrollStartNotification;
     expect(start.dragDetails, isNotNull);
-    expect(start.dragDetails.globalPosition, equals(const Offset(100.0, 100.0)));
+    expect(start.dragDetails!.globalPosition, equals(const Offset(100.0, 100.0)));
 
     await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
@@ -36,8 +36,8 @@ void main() {
     expect(notification.depth, equals(0));
     final ScrollUpdateNotification update = notification as ScrollUpdateNotification;
     expect(update.dragDetails, isNotNull);
-    expect(update.dragDetails.globalPosition, equals(const Offset(90.0, 90.0)));
-    expect(update.dragDetails.delta, equals(const Offset(0.0, -10.0)));
+    expect(update.dragDetails!.globalPosition, equals(const Offset(90.0, 90.0)));
+    expect(update.dragDetails!.delta, equals(const Offset(0.0, -10.0)));
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
@@ -45,7 +45,7 @@ void main() {
     expect(notification.depth, equals(0));
     final ScrollEndNotification end = notification as ScrollEndNotification;
     expect(end.dragDetails, isNotNull);
-    expect(end.dragDetails.velocity, equals(Velocity.zero));
+    expect(end.dragDetails!.velocity, equals(Velocity.zero));
   });
 
   testWidgets('Scroll notification depth', (WidgetTester tester) async {

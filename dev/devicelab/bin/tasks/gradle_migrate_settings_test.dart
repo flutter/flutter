@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -117,7 +117,7 @@ plugins.each { name, path ->
 
       section('Override settings.gradle with custom logic');
 
-      const String customDeprecatedFileContent = '''
+      const String customDeprecatedFileContent = r'''
 include ':app'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
@@ -130,8 +130,8 @@ if (pluginsFile.exists()) {
 
 plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":\$name"
-    project(":\$name").projectDir = pluginDirectory
+    include ":$name"
+    project(":$name").projectDir = pluginDirectory
 }
 // some custom logic
 ''';

@@ -38,7 +38,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isFalse);
 
-    Navigator.of(tester.element(find.text('Dialog'))).pop();
+    Navigator.of(tester.element(find.text('Dialog')))!.pop();
     await tester.pump();
 
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -175,7 +175,7 @@ void main() {
   testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    Widget makeTest(String prefix) {
+    Widget makeTest(String? prefix) {
       return MaterialApp(
         home: Material(
           child: ListView(

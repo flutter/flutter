@@ -23,6 +23,7 @@ import 'theme.dart';
 ///  * [TabBar], a widget that displays a horizontal row of tabs.
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+@immutable
 class TabBarTheme with Diagnosticable {
   /// Creates a tab bar theme that can be used with [ThemeData.tabBarTheme].
   const TabBarTheme({
@@ -36,36 +37,36 @@ class TabBarTheme with Diagnosticable {
   });
 
   /// Default value for [TabBar.indicator].
-  final Decoration indicator;
+  final Decoration? indicator;
 
   /// Default value for [TabBar.indicatorSize].
-  final TabBarIndicatorSize indicatorSize;
+  final TabBarIndicatorSize? indicatorSize;
 
   /// Default value for [TabBar.labelColor].
-  final Color labelColor;
+  final Color? labelColor;
 
   /// Default value for [TabBar.labelPadding].
-  final EdgeInsetsGeometry labelPadding;
+  final EdgeInsetsGeometry? labelPadding;
 
   /// Default value for [TabBar.labelStyle].
-  final TextStyle labelStyle;
+  final TextStyle? labelStyle;
 
   /// Default value for [TabBar.unselectedLabelColor].
-  final Color unselectedLabelColor;
+  final Color? unselectedLabelColor;
 
   /// Default value for [TabBar.unselectedLabelStyle].
-  final TextStyle unselectedLabelStyle;
+  final TextStyle? unselectedLabelStyle;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarTheme copyWith({
-    Decoration indicator,
-    TabBarIndicatorSize indicatorSize,
-    Color labelColor,
-    EdgeInsetsGeometry labelPadding,
-    TextStyle labelStyle,
-    Color unselectedLabelColor,
-    TextStyle unselectedLabelStyle,
+    Decoration? indicator,
+    TabBarIndicatorSize? indicatorSize,
+    Color? labelColor,
+    EdgeInsetsGeometry? labelPadding,
+    TextStyle? labelStyle,
+    Color? unselectedLabelColor,
+    TextStyle? unselectedLabelStyle,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,

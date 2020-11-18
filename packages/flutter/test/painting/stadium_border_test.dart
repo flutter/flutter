@@ -9,6 +9,18 @@ import '../rendering/mock_canvas.dart';
 import 'common_matchers.dart';
 
 void main() {
+  test('StadiumBorder defaults', () {
+    const StadiumBorder border = StadiumBorder();
+    expect(border.side, BorderSide.none);
+  });
+
+  test('StadiumBorder copyWith, ==, hashCode', () {
+    expect(const StadiumBorder(), const StadiumBorder().copyWith());
+    expect(const StadiumBorder().hashCode, const StadiumBorder().copyWith().hashCode);
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    expect(const StadiumBorder().copyWith(side: side), const StadiumBorder(side: side));
+  });
+
   test('StadiumBorder', () {
     const StadiumBorder c10 = StadiumBorder(side: BorderSide(width: 10.0));
     const StadiumBorder c15 = StadiumBorder(side: BorderSide(width: 15.0));
@@ -49,18 +61,18 @@ void main() {
     );
     expect(stadium.getOuterPath(rect), looksLikeS);
     expect(circle.getOuterPath(rect), looksLikeC);
-    expect(ShapeBorder.lerp(stadium, circle, 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(stadium, circle, 0.9).getOuterPath(rect), looksLikeC);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.9), stadium, 0.1).getOuterPath(rect), looksLikeC);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.9), stadium, 0.9).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), circle, 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), circle, 0.9).getOuterPath(rect), looksLikeC);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.9), 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.9), 0.9).getOuterPath(rect), looksLikeC);
-    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, circle, 0.9), 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, circle, 0.9), 0.9).getOuterPath(rect), looksLikeC);
-    expect(ShapeBorder.lerp(circle, ShapeBorder.lerp(stadium, circle, 0.1), 0.1).getOuterPath(rect), looksLikeC);
-    expect(ShapeBorder.lerp(circle, ShapeBorder.lerp(stadium, circle, 0.1), 0.9).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, circle, 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, circle, 0.9)!.getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.9), stadium, 0.1)!.getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.9), stadium, 0.9)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), circle, 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), circle, 0.9)!.getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.9), 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.9), 0.9)!.getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, circle, 0.9), 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, circle, 0.9), 0.9)!.getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(circle, ShapeBorder.lerp(stadium, circle, 0.1), 0.1)!.getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(circle, ShapeBorder.lerp(stadium, circle, 0.1), 0.9)!.getOuterPath(rect), looksLikeS);
 
     expect(ShapeBorder.lerp(stadium, circle, 0.1).toString(),
         'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), 10.0% of the way to being a CircleBorder)');
@@ -79,12 +91,12 @@ void main() {
     expect(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.1));
     expect(ShapeBorder.lerp(stadium, circle, 0.1).hashCode, ShapeBorder.lerp(stadium, circle, 0.1).hashCode);
 
-    final ShapeBorder direct50 = ShapeBorder.lerp(stadium, circle, 0.5);
-    final ShapeBorder indirect50 = ShapeBorder.lerp(ShapeBorder.lerp(circle, stadium, 0.1), ShapeBorder.lerp(circle, stadium, 0.9), 0.5);
+    final ShapeBorder direct50 = ShapeBorder.lerp(stadium, circle, 0.5)!;
+    final ShapeBorder indirect50 = ShapeBorder.lerp(ShapeBorder.lerp(circle, stadium, 0.1), ShapeBorder.lerp(circle, stadium, 0.9), 0.5)!;
     expect(direct50, indirect50);
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());
-  }, skip: isBrowser);
+  });
 
   test('StadiumBorder and RoundedRectBorder', () {
     const StadiumBorder stadium = StadiumBorder(side: BorderSide.none);
@@ -116,18 +128,18 @@ void main() {
     );
     expect(stadium.getOuterPath(rect), looksLikeS);
     expect(rrect.getOuterPath(rect), looksLikeR);
-    expect(ShapeBorder.lerp(stadium, rrect, 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(stadium, rrect, 0.9).getOuterPath(rect), looksLikeR);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.9), stadium, 0.1).getOuterPath(rect), looksLikeR);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.9), stadium, 0.9).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), rrect, 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), rrect, 0.9).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.9), 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.9), 0.9).getOuterPath(rect), looksLikeR);
-    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, rrect, 0.9), 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, rrect, 0.9), 0.9).getOuterPath(rect), looksLikeR);
-    expect(ShapeBorder.lerp(rrect, ShapeBorder.lerp(stadium, rrect, 0.1), 0.1).getOuterPath(rect), looksLikeS);
-    expect(ShapeBorder.lerp(rrect, ShapeBorder.lerp(stadium, rrect, 0.1), 0.9).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, rrect, 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, rrect, 0.9)!.getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.9), stadium, 0.1)!.getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.9), stadium, 0.9)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), rrect, 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), rrect, 0.9)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.9), 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.9), 0.9)!.getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, rrect, 0.9), 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, rrect, 0.9), 0.9)!.getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(rrect, ShapeBorder.lerp(stadium, rrect, 0.1), 0.1)!.getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(rrect, ShapeBorder.lerp(stadium, rrect, 0.1), 0.9)!.getOuterPath(rect), looksLikeS);
 
     expect(ShapeBorder.lerp(stadium, rrect, 0.1).toString(),
         'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), '
@@ -152,8 +164,8 @@ void main() {
     expect(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.1));
     expect(ShapeBorder.lerp(stadium, rrect, 0.1).hashCode, ShapeBorder.lerp(stadium, rrect, 0.1).hashCode);
 
-    final ShapeBorder direct50 = ShapeBorder.lerp(stadium, rrect, 0.5);
-    final ShapeBorder indirect50 = ShapeBorder.lerp(ShapeBorder.lerp(rrect, stadium, 0.1), ShapeBorder.lerp(rrect, stadium, 0.9), 0.5);
+    final ShapeBorder direct50 = ShapeBorder.lerp(stadium, rrect, 0.5)!;
+    final ShapeBorder indirect50 = ShapeBorder.lerp(ShapeBorder.lerp(rrect, stadium, 0.1), ShapeBorder.lerp(rrect, stadium, 0.9), 0.5)!;
     expect(direct50, indirect50);
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());

@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
- import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart';
 
- import 'binding.dart';
+import 'binding.dart';
 
  /// Ensure the [WidgetsBinding] is initialized.
-WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {
+WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
   if (WidgetsBinding.instance == null) {
     AutomatedTestWidgetsFlutterBinding();
   }
   assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
-  return WidgetsBinding.instance;
+  return WidgetsBinding.instance!;
 }
 
  /// This method is a noop on the web.

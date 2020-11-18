@@ -54,7 +54,7 @@ void main() {
       overflowDirection: VerticalDirection.up,
     );
 
-    final ButtonBarThemeData lerp = ButtonBarThemeData.lerp(barThemePrimary, barThemeAccent, 0.5);
+    final ButtonBarThemeData lerp = ButtonBarThemeData.lerp(barThemePrimary, barThemeAccent, 0.5)!;
     expect(lerp.alignment, equals(MainAxisAlignment.center));
     expect(lerp.mainAxisSize, equals(MainAxisSize.max));
     expect(lerp.buttonTextTheme, equals(ButtonTextTheme.accent));
@@ -112,7 +112,7 @@ void main() {
 
   testWidgets('ButtonBarTheme.of falls back to ThemeData.buttonBarTheme', (WidgetTester tester) async {
     const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
-    BuildContext capturedContext;
+    late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(buttonBarTheme: buttonBarTheme),
@@ -131,7 +131,7 @@ void main() {
   testWidgets('ButtonBarTheme overrides ThemeData.buttonBarTheme', (WidgetTester tester) async {
     const ButtonBarThemeData defaultBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
     const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 84.0);
-    BuildContext capturedContext;
+    late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(buttonBarTheme: defaultBarTheme),

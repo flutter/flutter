@@ -43,8 +43,8 @@ void main() {
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    TextSpan textSpan = painter.text as TextSpan;
-    expect(textSpan.text.length, 28);
+    TextSpan textSpan = painter.text! as TextSpan;
+    expect(textSpan.text!.length, 28);
     painter.layout();
 
     // The skips here are because the old rendering code considers the bidi formatting characters
@@ -127,9 +127,9 @@ void main() {
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
     );
 
-    textSpan = painter.text as TextSpan;
+    textSpan = painter.text! as TextSpan;
     final List<List<TextBox>> list = <List<TextBox>>[
-      for (int index = 0; index < textSpan.text.length; index += 1)
+      for (int index = 0; index < textSpan.text!.length; index += 1)
         painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
     ];
     expect(list, const <List<TextBox>>[
@@ -175,8 +175,8 @@ void main() {
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    final TextSpan textSpan = painter.text as TextSpan;
-    expect(textSpan.text.length, 28);
+    final TextSpan textSpan = painter.text! as TextSpan;
+    expect(textSpan.text!.length, 28);
     painter.layout();
 
     final TextRange hebrew1 = painter.getWordBoundary(const TextPosition(offset: 4, affinity: TextAffinity.downstream));
@@ -265,8 +265,8 @@ void main() {
       text: 'A\u05D0', // A, Alef
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    final TextSpan textSpan = painter.text as TextSpan;
-    expect(textSpan.text.length, 2);
+    final TextSpan textSpan = painter.text! as TextSpan;
+    expect(textSpan.text!.length, 2);
     painter.layout(maxWidth: 10.0);
 
     for (int index = 0; index <= 2; index += 1) {
@@ -322,9 +322,7 @@ void main() {
         TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  },
-  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: !isLinux);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/32238
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = TextPainter()

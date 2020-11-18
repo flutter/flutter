@@ -5,4 +5,9 @@ load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 target 'Host' do
   install_all_flutter_pods flutter_application_path
+
+  target 'FlutterUITests' do
+    inherit! :search_paths
+    install_all_flutter_pods flutter_application_path
+  end
 end

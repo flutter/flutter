@@ -9,8 +9,8 @@ import 'framework.dart';
 
 class _PlaceholderPainter extends CustomPainter {
   const _PlaceholderPainter({
-    this.color,
-    this.strokeWidth,
+    required this.color,
+    required this.strokeWidth,
   });
 
   final Color color;
@@ -54,7 +54,7 @@ class _PlaceholderPainter extends CustomPainter {
 class Placeholder extends StatelessWidget {
   /// Creates a widget which draws a box.
   const Placeholder({
-    Key key,
+    Key? key,
     this.color = const Color(0xFF455A64), // Blue Grey 700
     this.strokeWidth = 2.0,
     this.fallbackWidth = 400.0,

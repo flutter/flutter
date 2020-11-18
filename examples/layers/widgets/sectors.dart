@@ -54,9 +54,9 @@ class SectorAppState extends State<SectorApp> {
     int index = 0;
     while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index])
       index += 1;
-    final RenderSectorRing ring = sectors.child as RenderSectorRing;
+    final RenderSectorRing ring = sectors.child! as RenderSectorRing;
     while (index < actualSectorSizes.length) {
-      ring.remove(ring.lastChild);
+      ring.remove(ring.lastChild!);
       actualSectorSizes.removeLast();
     }
     while (index < wantedSectorSizes.length) {
@@ -96,7 +96,7 @@ class SectorAppState extends State<SectorApp> {
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 25.0),
           child: Row(
             children: <Widget>[
-              RaisedButton(
+              ElevatedButton(
                 onPressed: _enabledAdd ? addSector : null,
                 child: IntrinsicWidth(
                   child: Row(
@@ -111,7 +111,7 @@ class SectorAppState extends State<SectorApp> {
                   ),
                 ),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: _enabledRemove ? removeSector : null,
                 child: IntrinsicWidth(
                   child: Row(

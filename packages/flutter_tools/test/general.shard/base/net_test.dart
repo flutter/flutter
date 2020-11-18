@@ -11,9 +11,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:platform/platform.dart';
-import 'package:quiver/testing/async.dart';
+import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart' show MockStdio;
@@ -25,7 +25,7 @@ void main() {
     testLogger = BufferLogger(
       terminal: AnsiTerminal(
         stdio: MockStdio(),
-        platform: FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+        platform: FakePlatform(stdoutSupportsAnsi: false),
       ),
       outputPreferences: OutputPreferences.test(),
     );
@@ -35,7 +35,7 @@ void main() {
     return Net(
       httpClientFactory: () => client,
       logger: testLogger,
-      platform: FakePlatform.fromPlatform(const LocalPlatform()),
+      platform: FakePlatform(),
     );
   }
 
@@ -55,7 +55,7 @@ void main() {
 
     testWithoutContext('fetchUrl(destFile) writes the data to a file', () async {
       final Net net = createNet(FakeHttpClient(200, data: responseString));
-      final MemoryFileSystem fs = MemoryFileSystem();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       final File destFile = fs.file('dest_file')..createSync();
       final List<int> data = await net.fetchUrl(
         Uri.parse('http://example.invalid/'),
@@ -160,10 +160,11 @@ void main() {
         ArgumentError('test exception handling'),
       ),
       logger: testLogger,
-      platform: FakePlatform.fromPlatform(const LocalPlatform())
-        ..environment = <String, String>{
+      platform: FakePlatform(
+        environment: <String, String>{
           'FLUTTER_STORAGE_BASE_URL': 'example.invalid',
         },
+      ),
     );
     String error;
     FakeAsync().run((FakeAsync time) {

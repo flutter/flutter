@@ -39,13 +39,13 @@ class TestTree {
       ),
     );
   }
-  RenderBox root;
-  RenderConstrainedBox child;
+  late RenderBox root;
+  late RenderConstrainedBox child;
   bool painted = false;
 }
 
 class MutableCompositor extends RenderProxyBox {
-  MutableCompositor({ RenderBox child }) : super(child);
+  MutableCompositor({ required RenderBox child }) : super(child);
   bool _alwaysComposite = false;
   @override
   bool get alwaysNeedsCompositing => _alwaysComposite;
@@ -75,9 +75,9 @@ class TestCompositingBitsTree {
       ),
     );
   }
-  RenderBox root;
-  MutableCompositor compositor;
-  RenderConstrainedBox child;
+  late RenderBox root;
+  late MutableCompositor compositor;
+  late RenderConstrainedBox child;
   bool painted = false;
 }
 

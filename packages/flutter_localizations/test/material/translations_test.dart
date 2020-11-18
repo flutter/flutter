@@ -2,9 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:path/path.dart' as path;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../test_utils.dart';
+
+final String rootDirectoryPath = Directory.current.parent.path;
 
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
@@ -461,5 +470,34 @@ void main() {
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');
     expect(localizations.okButtonLabel, '確定');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/36704.
+  testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
+    final File file = File(
+      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_kn.arb'),
+    );
+
+    final Map<String, dynamic> bundle = json.decode(
+      file.readAsStringSync(),
+    ) as Map<String, dynamic>;
+
+    // Encodes the arb resource values if they have not already been
+    // encoded.
+    encodeBundleTranslations(bundle);
+
+    // Generates the encoded arb output file in as a string.
+    final String encodedArbFile = generateArbString(bundle);
+
+    // After encoding the bundles, the generated string should match
+    // the existing material_kn.arb.
+    if (Platform.isWindows) {
+      // On Windows, the character '\n' can output the two-character sequence
+      // '\r\n' (and when reading the file back, '\r\n' is translated back
+      // into a single '\n' character).
+      expect(file.readAsStringSync().replaceAll('\r\n', '\n'), encodedArbFile);
+    } else {
+      expect(file.readAsStringSync(), encodedArbFile);
+    }
   });
 }

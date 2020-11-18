@@ -11,7 +11,7 @@ const Size _kTestViewSize = Size(800.0, 600.0);
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView() : super(
     configuration: const ViewConfiguration(size: _kTestViewSize),
-    window: WidgetsBinding.instance.window,
+    window: WidgetsBinding.instance!.window,
   );
 
   @override
@@ -30,7 +30,7 @@ class OffscreenWidgetTree {
   final RenderView renderView = OffscreenRenderView();
   final BuildOwner buildOwner = BuildOwner();
   final PipelineOwner pipelineOwner = PipelineOwner();
-  RenderObjectToWidgetElement<RenderBox> root;
+  RenderObjectToWidgetElement<RenderBox>? root;
 
   void pumpWidget(Widget app) {
     root = RenderObjectToWidgetAdapter<RenderBox>(
@@ -42,7 +42,7 @@ class OffscreenWidgetTree {
   }
 
   void pumpFrame() {
-    buildOwner.buildScope(root);
+    buildOwner.buildScope(root!);
     pipelineOwner.flushLayout();
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
@@ -58,18 +58,18 @@ class Counter {
 }
 
 class Trigger {
-  VoidCallback callback;
+  VoidCallback? callback;
   void fire() {
     if (callback != null)
-      callback();
+      callback!();
   }
 }
 
 class TriggerableWidget extends StatefulWidget {
   const TriggerableWidget({
-    Key key,
-    this.trigger,
-    this.counter,
+    Key? key,
+    required this.trigger,
+    required this.counter,
   }) : super(key: key);
 
   final Trigger trigger;
@@ -108,8 +108,8 @@ class TriggerableState extends State<TriggerableWidget> {
 
 class TestFocusable extends StatefulWidget {
   const TestFocusable({
-    Key key,
-    this.focusNode,
+    Key? key,
+    required this.focusNode,
     this.autofocus = true,
   }) : super(key: key);
 

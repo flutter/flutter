@@ -24,71 +24,68 @@ void main() {
 
     await tester.pumpWidget(
       const Align(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: Alignment.topLeft,
       ),
     );
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Align(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: AlignmentDirectional.topStart,
       ),
     ));
     await tester.pumpWidget(
       const Align(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: Alignment.topLeft,
       ),
     );
   });
 
   testWidgets('Align control test (LTR)', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
-        child: Container(width: 100.0, height: 80.0),
+        child: SizedBox(width: 100.0, height: 80.0),
         alignment: AlignmentDirectional.topStart,
       ),
     ));
 
-    expect(tester.getTopLeft(find.byType(Container)).dx, 0.0);
-    expect(tester.getBottomRight(find.byType(Container)).dx, 100.0);
+    expect(tester.getTopLeft(find.byType(SizedBox)).dx, 0.0);
+    expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
 
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
-        child: Container(width: 100.0, height: 80.0),
+        child: SizedBox(width: 100.0, height: 80.0),
         alignment: Alignment.topLeft,
       ),
     ));
 
-    expect(tester.getTopLeft(find.byType(Container)).dx, 0.0);
-    expect(tester.getBottomRight(find.byType(Container)).dx, 100.0);
+    expect(tester.getTopLeft(find.byType(SizedBox)).dx, 0.0);
+    expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
   });
 
   testWidgets('Align control test (RTL)', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Align(
-        child: Container(width: 100.0, height: 80.0),
+        child: SizedBox(width: 100.0, height: 80.0),
         alignment: AlignmentDirectional.topStart,
       ),
     ));
 
-    expect(tester.getTopLeft(find.byType(Container)).dx, 700.0);
-    expect(tester.getBottomRight(find.byType(Container)).dx, 800.0);
+    expect(tester.getTopLeft(find.byType(SizedBox)).dx, 700.0);
+    expect(tester.getBottomRight(find.byType(SizedBox)).dx, 800.0);
 
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
-        child: Container(width: 100.0, height: 80.0),
+        child: SizedBox(width: 100.0, height: 80.0),
         alignment: Alignment.topLeft,
       ),
     ));
 
-    expect(tester.getTopLeft(find.byType(Container)).dx, 0.0);
-    expect(tester.getBottomRight(find.byType(Container)).dx, 100.0);
+    expect(tester.getTopLeft(find.byType(SizedBox)).dx, 0.0);
+    expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
   });
 
   testWidgets('Shrink wraps in finite space', (WidgetTester tester) async {
@@ -97,7 +94,7 @@ void main() {
       SingleChildScrollView(
         child: Align(
           key: alignKey,
-          child: Container(
+          child: const SizedBox(
             width: 10.0,
             height: 10.0,
           ),
@@ -106,8 +103,55 @@ void main() {
       ),
     );
 
-    final Size size = alignKey.currentContext.size;
+    final Size size = alignKey.currentContext!.size!;
     expect(size.width, equals(800.0));
     expect(size.height, equals(10.0));
+  });
+
+  testWidgets('Align widthFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Align(
+              widthFactor: 0.5,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Align));
+    expect(box.size.width, equals(50.0));
+  });
+
+  testWidgets('Align heightFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Align(
+              alignment: Alignment.center,
+              heightFactor: 0.5,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Align));
+    expect(box.size.height, equals(50.0));
   });
 }

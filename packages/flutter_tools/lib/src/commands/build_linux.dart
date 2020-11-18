@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
+import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -16,10 +15,8 @@ import 'build.dart';
 
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
-  BuildLinuxCommand() {
-    addTreeShakeIconsFlag();
-    addBuildModeFlags();
-    usesTargetOption();
+  BuildLinuxCommand({ bool verboseHelp = false }) {
+    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
   }
 
   @override
@@ -34,12 +31,11 @@ class BuildLinuxCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the Linux desktop target.';
+  String get description => 'Build a Linux desktop application.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isLinuxEnabled) {
       throwToolExit('"build linux" is not currently supported.');
@@ -47,7 +43,16 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
-    await buildLinux(flutterProject.linux, buildInfo, target: targetFile);
+    await buildLinux(
+      flutterProject.linux,
+      buildInfo,
+      target: targetFile,
+      sizeAnalyzer: SizeAnalyzer(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
+      ),
+    );
     return FlutterCommandResult.success();
   }
 }

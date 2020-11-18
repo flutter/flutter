@@ -9,7 +9,7 @@ import 'package:device_info/device_info.dart';
 import './image_page.dart';
 import './page.dart';
 
-final List<Page> _allPages = <Page>[
+final List<PageWidget> _allPages = <PageWidget>[
   const ImagePage(),
 ];
 
@@ -62,7 +62,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     );
   }
 
-  void _pushPage(BuildContext context, Page page) {
+  void _pushPage(BuildContext context, PageWidget page) {
     Navigator.of(context).push(MaterialPageRoute<void>(
       builder: (_) => page,
     ));

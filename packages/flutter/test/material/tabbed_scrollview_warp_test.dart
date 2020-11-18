@@ -24,7 +24,7 @@ class MySliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({ Key key }) : super(key: key);
+  const MyHomePage({ Key? key }) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -32,7 +32,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   static const int tabCount = 3;
-  TabController tabController;
+  late TabController tabController;
 
   @override
   void initState() {

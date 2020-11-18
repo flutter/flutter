@@ -58,11 +58,11 @@ void main() {
       final NavigatorState navigator = tester.state(find.byType(Navigator));
       final List<String> log = <String>[];
       observer
-        ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
-          log.add('${route.settings.name} pushed, previous route: ${previousRoute.settings.name}');
+        ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+          log.add('${route!.settings.name} pushed, previous route: ${previousRoute!.settings.name}');
         }
-        ..onRemoved = (Route<dynamic> route, Route<dynamic> previousRoute) {
-          log.add('${route.settings.name} removed, previous route: ${previousRoute?.settings?.name}');
+        ..onRemoved = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+          log.add('${route!.settings.name} removed, previous route: ${previousRoute?.settings.name}');
         };
 
 

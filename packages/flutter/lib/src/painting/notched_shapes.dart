@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:math' as math;
 
 import 'basic_types.dart';
@@ -28,7 +29,7 @@ abstract class NotchedShape {
   ///
   /// The `guest` is the bounding rectangle of the shape for which a notch will
   /// be made. It is null when there is no guest.
-  Path getOuterPath(Rect host, Rect guest);
+  Path getOuterPath(Rect host, Rect? guest);
 }
 
 /// A rectangle with a smooth circular notch.
@@ -55,7 +56,7 @@ class CircularNotchedRectangle extends NotchedShape {
   /// the guest circle.
   // TODO(amirh): add an example diagram here.
   @override
-  Path getOuterPath(Rect host, Rect guest) {
+  Path getOuterPath(Rect host, Rect? guest) {
     if (guest == null || !host.overlaps(guest))
       return Path()..addRect(host);
 
@@ -84,7 +85,7 @@ class CircularNotchedRectangle extends NotchedShape {
     final double p2yA = math.sqrt(r * r - p2xA * p2xA);
     final double p2yB = math.sqrt(r * r - p2xB * p2xB);
 
-    final List<Offset> p = List<Offset>(6);
+    final List<Offset?> p = List<Offset?>.filled(6, null, growable: false);
 
     // p0, p1, and p2 are the control points for segment A.
     p[0] = Offset(a - s1, b);
@@ -94,24 +95,24 @@ class CircularNotchedRectangle extends NotchedShape {
 
     // p3, p4, and p5 are the control points for segment B, which is a mirror
     // of segment A around the y axis.
-    p[3] = Offset(-1.0 * p[2].dx, p[2].dy);
-    p[4] = Offset(-1.0 * p[1].dx, p[1].dy);
-    p[5] = Offset(-1.0 * p[0].dx, p[0].dy);
+    p[3] = Offset(-1.0 * p[2]!.dx, p[2]!.dy);
+    p[4] = Offset(-1.0 * p[1]!.dx, p[1]!.dy);
+    p[5] = Offset(-1.0 * p[0]!.dx, p[0]!.dy);
 
     // translate all points back to the absolute coordinate system.
     for (int i = 0; i < p.length; i += 1)
-      p[i] += guest.center;
+      p[i] = p[i]! + guest.center;
 
     return Path()
       ..moveTo(host.left, host.top)
-      ..lineTo(p[0].dx, p[0].dy)
-      ..quadraticBezierTo(p[1].dx, p[1].dy, p[2].dx, p[2].dy)
+      ..lineTo(p[0]!.dx, p[0]!.dy)
+      ..quadraticBezierTo(p[1]!.dx, p[1]!.dy, p[2]!.dx, p[2]!.dy)
       ..arcToPoint(
-        p[3],
+        p[3]!,
         radius: Radius.circular(notchRadius),
         clockwise: false,
       )
-      ..quadraticBezierTo(p[4].dx, p[4].dy, p[5].dx, p[5].dy)
+      ..quadraticBezierTo(p[4]!.dx, p[4]!.dy, p[5]!.dx, p[5]!.dy)
       ..lineTo(host.right, host.top)
       ..lineTo(host.right, host.bottom)
       ..lineTo(host.left, host.bottom)
@@ -147,16 +148,16 @@ class AutomaticNotchedShape extends NotchedShape {
   /// is available to [NotchedShape]s.
   ///
   /// If this is null, [getOuterPath] ignores the guest rectangle.
-  final ShapeBorder guest;
+  final ShapeBorder? guest;
 
   @override
-  Path getOuterPath(Rect hostRect, Rect guestRect) { // ignore: avoid_renaming_method_parameters, the
+  Path getOuterPath(Rect hostRect, Rect? guestRect) { // ignore: avoid_renaming_method_parameters, the
     // parameters are renamed over the baseclass because they would clash
     // with properties of this object, and the use of all four of them in
     // the code below is really confusing if they have the same names.
     final Path hostPath = host.getOuterPath(hostRect);
     if (guest != null && guestRect != null) {
-      final Path guestPath = guest.getOuterPath(guestRect);
+      final Path guestPath = guest!.getOuterPath(guestRect);
       return Path.combine(PathOperation.difference, hostPath, guestPath);
     }
     return hostPath;

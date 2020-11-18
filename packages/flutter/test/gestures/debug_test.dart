@@ -12,7 +12,7 @@ void main() {
     debugPrintGestureArenaDiagnostics = true;
     final DebugPrintCallback oldCallback = debugPrint;
     final List<String> log = <String>[];
-    debugPrint = (String s, { int wrapWidth }) { log.add(s); };
+    debugPrint = (String? s, { int? wrapWidth }) { log.add(s ?? ''); };
 
     final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
@@ -28,19 +28,19 @@ void main() {
     expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Adding: TapGestureRecognizer#00000(state: ready, button: 1)'));
     log.clear();
 
-    GestureBinding.instance.gestureArena.close(1);
+    GestureBinding.instance!.gestureArena.close(1);
     expect(log, hasLength(1));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ Closing with 1 member.'));
     log.clear();
 
-    GestureBinding.instance.pointerRouter.route(event);
+    GestureBinding.instance!.pointerRouter.route(event);
     expect(log, isEmpty);
 
     event = const PointerUpEvent(pointer: 1, position: Offset(12.0, 8.0));
-    GestureBinding.instance.pointerRouter.route(event);
+    GestureBinding.instance!.pointerRouter.route(event);
     expect(log, isEmpty);
 
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(log, hasLength(2));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ Sweeping with 1 member.'));
     expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Winner: TapGestureRecognizer#00000(state: ready, finalPosition: Offset(12.0, 8.0), button: 1)'));
@@ -58,7 +58,7 @@ void main() {
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
     final List<String> log = <String>[];
-    debugPrint = (String s, { int wrapWidth }) { log.add(s); };
+    debugPrint = (String? s, { int? wrapWidth }) { log.add(s ?? ''); };
 
     final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
@@ -71,17 +71,17 @@ void main() {
     tap.addPointer(event as PointerDownEvent);
     expect(log, isEmpty);
 
-    GestureBinding.instance.gestureArena.close(1);
+    GestureBinding.instance!.gestureArena.close(1);
     expect(log, isEmpty);
 
-    GestureBinding.instance.pointerRouter.route(event);
+    GestureBinding.instance!.pointerRouter.route(event);
     expect(log, isEmpty);
 
     event = const PointerUpEvent(pointer: 1, position: Offset(12.0, 8.0));
-    GestureBinding.instance.pointerRouter.route(event);
+    GestureBinding.instance!.pointerRouter.route(event);
     expect(log, isEmpty);
 
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(log, hasLength(3));
     expect(log[0], equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready, finalPosition: Offset(12.0, 8.0), button: 1) calling onTapDown callback.'));
     expect(log[1], equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready, won arena, finalPosition: Offset(12.0, 8.0), button: 1, sent tap down) calling onTapUp callback.'));
@@ -101,7 +101,7 @@ void main() {
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
     final List<String> log = <String>[];
-    debugPrint = (String s, { int wrapWidth }) { log.add(s); };
+    debugPrint = (String? s, { int? wrapWidth }) { log.add(s ?? ''); };
 
     final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
@@ -117,19 +117,19 @@ void main() {
     expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Adding: TapGestureRecognizer#00000(state: ready, button: 1)'));
     log.clear();
 
-    GestureBinding.instance.gestureArena.close(1);
+    GestureBinding.instance!.gestureArena.close(1);
     expect(log, hasLength(1));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ Closing with 1 member.'));
     log.clear();
 
-    GestureBinding.instance.pointerRouter.route(event);
+    GestureBinding.instance!.pointerRouter.route(event);
     expect(log, isEmpty);
 
     event = const PointerUpEvent(pointer: 1, position: Offset(12.0, 8.0));
-    GestureBinding.instance.pointerRouter.route(event);
+    GestureBinding.instance!.pointerRouter.route(event);
     expect(log, isEmpty);
 
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(log, hasLength(5));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ Sweeping with 1 member.'));
     expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Winner: TapGestureRecognizer#00000(state: ready, finalPosition: Offset(12.0, 8.0), button: 1)'));

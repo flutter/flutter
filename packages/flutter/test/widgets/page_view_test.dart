@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
+import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 import 'states.dart';
 
@@ -330,7 +331,7 @@ void main() {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
 
-    Widget build(PageController controller, { Size size }) {
+    Widget build(PageController controller, { Size? size }) {
       final Widget pageView = Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
@@ -392,7 +393,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index % 2 == 0
+              color: index.isEven
                 ? const Color(0xFF0000FF)
                 : const Color(0xFF00FF00),
               child: Text(kStates[index]),
@@ -426,7 +427,7 @@ void main() {
   testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
-    Widget build({ bool pageSnapping }) {
+    Widget build({ required bool pageSnapping }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
@@ -498,7 +499,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index % 2 == 0
+              color: index.isEven
                 ? const Color(0xFF0000FF)
                 : const Color(0xFF00FF00),
               child: Text(kStates[index]),
@@ -542,7 +543,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index % 2 == 0
+              color: index.isEven
                 ? const Color(0xFF0000FF)
                 : const Color(0xFF00FF00),
               child: Text(kStates[index]),
@@ -575,7 +576,7 @@ void main() {
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 height: 200.0,
-                color: index % 2 == 0
+                color: index.isEven
                   ? const Color(0xFF0000FF)
                   : const Color(0xFF00FF00),
                 child: Text(kStates[index]),
@@ -614,7 +615,7 @@ void main() {
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 height: 200.0,
-                color: index % 2 == 0
+                color: index.isEven
                   ? const Color(0xFF0000FF)
                   : const Color(0xFF00FF00),
                   child: Text(index.toString()),
@@ -640,7 +641,7 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/23873.
       final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
-      int tappedIndex;
+      late int tappedIndex;
 
       Widget build() {
         return Directionality(
@@ -948,5 +949,41 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
 
     semantics.dispose();
+  });
+
+  testWidgets('PageView respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          children: <Widget>[Container(height: 2000.0)],
+        ),
+      ),
+    );
+
+    // 1st, check that the render object has received the default clip behavior.
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // 2nd, check that the painting context has received the default clip behavior.
+    final TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    // 3rd, pump a new widget to check that the render object can update its clip behavior.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          children: <Widget>[Container(height: 2000.0)],
+          clipBehavior: Clip.antiAlias,
+        ),
+      ),
+    );
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+
+    // 4th, check that a non-default clip behavior can be sent to the painting context.
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 }

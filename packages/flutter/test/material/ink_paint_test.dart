@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -67,7 +66,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(
       box,
       paints
@@ -119,7 +118,7 @@ void main() {
     await tester.tapAt(tapDownOffset);
     await tester.pump(); // start gesture
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
 
     bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
     bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
@@ -195,7 +194,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(
       box,
       paints
@@ -251,7 +250,7 @@ void main() {
     expect(box, isNot(paints..circle()));
 
     await gesture.up();
-  }, skip: isBrowser);
+  });
 
   testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
@@ -259,11 +258,11 @@ void main() {
     final BorderRadius borderRadius = BorderRadius.circular(6.0);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-    Future<void> buildTest(LocalKey actionKey) async {
+    Future<void> buildTest(Intent intent) async {
       return await tester.pumpWidget(
         Shortcuts(
           shortcuts: <LogicalKeySet, Intent>{
-            LogicalKeySet(LogicalKeyboardKey.space): Intent(actionKey),
+            LogicalKeySet(LogicalKeyboardKey.space): intent,
           },
           child: Directionality(
             textDirection: TextDirection.ltr,
@@ -289,7 +288,7 @@ void main() {
       );
     }
 
-    await buildTest(ActivateAction.key);
+    await buildTest(const ActivateIntent());
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
@@ -322,12 +321,12 @@ void main() {
         );
     }
 
-    await buildTest(ActivateAction.key);
+    await buildTest(const ActivateIntent());
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
 
     // ripplePattern always add a translation of topLeft.
     expect(box, ripplePattern(30.0, 0));
@@ -423,7 +422,7 @@ void main() {
     await gesture.moveTo(const Offset(0.0, 0.0));
     await gesture.up(); // generates a tap cancel
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
       if (method != #drawCircle)
         return true;

@@ -78,7 +78,7 @@ void main() {
     );
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
-    expect(list.geometry.scrollExtent, equals(100.0));
+    expect(list.geometry!.scrollExtent, equals(100.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -91,7 +91,7 @@ void main() {
         ),
       ),
     );
-    expect(list.geometry.scrollExtent, equals(300.0));
+    expect(list.geometry!.scrollExtent, equals(300.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -101,7 +101,7 @@ void main() {
         ),
       ),
     );
-    expect(list.geometry.scrollExtent, equals(0.0));
+    expect(list.geometry!.scrollExtent, equals(0.0));
   });
 
   testWidgets('Overflowing ListView should relayout for missing children', (WidgetTester tester) async {

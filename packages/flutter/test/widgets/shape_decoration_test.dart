@@ -8,7 +8,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/image_data.dart';
+import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/mock_canvas.dart';
 import 'test_border.dart' show TestBorder;
@@ -59,7 +59,7 @@ Future<void> main() async {
         ..rect(color: Colors.black)
         ..rect(color: Colors.white),
     );
-  }, skip: isBrowser);
+  });
 
   test('ShapeDecoration with BorderDirectional', () {
     const ShapeDecoration decoration = ShapeDecoration(
@@ -112,5 +112,22 @@ Future<void> main() async {
         'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
       ],
     );
+  });
+
+  test('ShapeDecoration equality', () {
+    const ShapeDecoration a = ShapeDecoration(
+      color: Color(0xFFFFFFFF),
+      shadows: <BoxShadow>[BoxShadow()],
+      shape: Border(),
+    );
+
+    const ShapeDecoration b = ShapeDecoration(
+      color: Color(0xFFFFFFFF),
+      shadows: <BoxShadow>[BoxShadow()],
+      shape: Border(),
+    );
+
+    expect(a.hashCode, equals(b.hashCode));
+    expect(a, equals(b));
   });
 }

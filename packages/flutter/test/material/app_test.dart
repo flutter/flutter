@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mockito/mockito.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ Key key, this.child }) : super(key: key);
+  const StateMarker({ Key? key, this.child }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
 
   @override
   StateMarkerState createState() => StateMarkerState();
 }
 
 class StateMarkerState extends State<StateMarker> {
-  String marker;
+  late String marker;
 
   @override
   Widget build(BuildContext context) {
     if (widget.child != null)
-      return widget.child;
+      return widget.child!;
     return Container();
   }
 }
@@ -97,9 +98,9 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Material(
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: const Text('X'),
-                onPressed: () { Navigator.of(context).pushNamed('/next'); },
+                onPressed: () { Navigator.of(context)!.pushNamed('/next'); },
               ),
             );
           }
@@ -248,16 +249,16 @@ void main() {
   });
 
   testWidgets('Return value from pop is correct', (WidgetTester tester) async {
-    Future<Object> result;
+    late Future<Object?> result;
     await tester.pumpWidget(
         MaterialApp(
           home: Builder(
               builder: (BuildContext context) {
                 return Material(
-                  child: RaisedButton(
+                  child: ElevatedButton(
                       child: const Text('X'),
                       onPressed: () async {
-                        result = Navigator.of(context).pushNamed('/a');
+                        result = Navigator.of(context)!.pushNamed<Object?>('/a');
                       },
                   ),
                 );
@@ -266,10 +267,10 @@ void main() {
           routes: <String, WidgetBuilder>{
             '/a': (BuildContext context) {
               return Material(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('Y'),
                   onPressed: () {
-                    Navigator.of(context).pop('all done');
+                    Navigator.of(context)!.pop('all done');
                   },
                 ),
               );
@@ -381,13 +382,17 @@ void main() {
     );
     expect(tester.takeException(), isFlutterError);
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
+
+    // Work-around for https://github.com/flutter/flutter/issues/65655.
+    await tester.pumpWidget(Container());
+    expect(tester.takeException(), isAssertionError);
   });
 
   testWidgets('MaterialApp with builder and no route information works.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/18904
     await tester.pumpWidget(
       MaterialApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return const SizedBox();
         },
       ),
@@ -456,7 +461,7 @@ void main() {
   });
 
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {
-    double textScaleFactor;
+    double? textScaleFactor;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
         textScaleFactor = MediaQuery.of(context).textScaleFactor;
@@ -505,7 +510,7 @@ void main() {
     );
 
     // Default US "select all" text.
-    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('Select all'), findsOneWidget);
     // Default Cupertino US "select all" text.
     expect(find.text('Select All'), findsOneWidget);
   });
@@ -514,7 +519,7 @@ void main() {
     // Mock the Window to explicitly report a light platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
 
-    ThemeData appliedTheme;
+    late ThemeData appliedTheme;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -560,7 +565,7 @@ void main() {
     // Mock the Window to explicitly report a light platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
 
-    ThemeData appliedTheme;
+    late ThemeData appliedTheme;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -607,7 +612,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 
-    ThemeData appliedTheme;
+    late ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -634,7 +639,7 @@ void main() {
     // Mock the Window to explicitly report a dark platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
 
-    ThemeData appliedTheme;
+    late ThemeData appliedTheme;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -660,7 +665,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
-    ThemeData appliedTheme;
+    late ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -684,7 +689,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
-    ThemeData appliedTheme;
+    late ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -705,7 +710,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 
-    ThemeData appliedTheme;
+    late ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -729,7 +734,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
-    ThemeData appliedTheme;
+    late ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -751,13 +756,101 @@ void main() {
     expect(appliedTheme.brightness, Brightness.dark);
   });
 
+  testWidgets('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.light;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        highContrastTheme: ThemeData(
+          primaryColor: Colors.blue,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.blue);
+    tester.binding.window.clearAccessibilityFeaturesTestValue();
+  });
+
+  testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        darkTheme: ThemeData(
+          primaryColor: Colors.lightGreen,
+        ),
+        highContrastTheme: ThemeData(
+          primaryColor: Colors.blue,
+        ),
+        highContrastDarkTheme: ThemeData(
+          primaryColor: Colors.green,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.green);
+    tester.binding.window.clearAccessibilityFeaturesTestValue();
+  });
+
+  testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.lightBlue,
+        ),
+        darkTheme: ThemeData(
+          primaryColor: Colors.lightGreen,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.lightGreen);
+    tester.binding.window.clearAccessibilityFeaturesTestValue();
+    tester.binding.window.clearPlatformBrightnessTestValue();
+  });
+
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
     // Mock the Window to explicitly report a light platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 
-    ThemeData themeBeforeBrightnessChange;
-    ThemeData themeAfterBrightnessChange;
+    ThemeData? themeBeforeBrightnessChange;
+    ThemeData? themeAfterBrightnessChange;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -785,8 +878,8 @@ void main() {
     binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpAndSettle();
 
-    expect(themeBeforeBrightnessChange.brightness, Brightness.light);
-    expect(themeAfterBrightnessChange.brightness, Brightness.dark);
+    expect(themeBeforeBrightnessChange!.brightness, Brightness.light);
+    expect(themeAfterBrightnessChange!.brightness, Brightness.dark);
   });
 
   testWidgets('MaterialApp can customize initial routes', (WidgetTester tester) async {
@@ -826,13 +919,164 @@ void main() {
     expect(find.text('non-regular page one'), findsNothing);
     expect(find.text('regular page one'), findsNothing);
     expect(find.text('regular page two'), findsNothing);
-    navigatorKey.currentState.pop();
+    navigatorKey.currentState!.pop();
     await tester.pumpAndSettle();
     expect(find.text('non-regular page two'), findsNothing);
     expect(find.text('non-regular page one'), findsOneWidget);
     expect(find.text('regular page one'), findsNothing);
     expect(find.text('regular page two'), findsNothing);
   });
+
+  testWidgets('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
+    final HeroController controller = MaterialApp.createMaterialHeroController();
+    final Tween<Rect?> tween = controller.createRectTween!(
+      const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+      const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)
+    );
+    expect(tween, isA<MaterialRectArcTween>());
+  });
+
+  testWidgets('MaterialApp.navigatorKey can be updated', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: key1,
+      home: const Placeholder(),
+    ));
+    expect(key1.currentState, isA<NavigatorState>());
+    final GlobalKey<NavigatorState> key2 = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: key2,
+      home: const Placeholder(),
+    ));
+    expect(key2.currentState, isA<NavigatorState>());
+    expect(key1.currentState, isNull);
+  });
+
+  testWidgets('MaterialApp.router works', (WidgetTester tester) async {
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: const RouteInformation(
+        location: 'initial',
+      ),
+    );
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.location!);
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = const RouteInformation(
+          location: 'popped',
+        );
+        return route.didPop(result);
+      }
+    );
+    await tester.pumpWidget(MaterialApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+  });
+
+  testWidgets('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
+    Widget? builderChild;
+    await tester.pumpWidget(MaterialApp(
+      builder: (BuildContext context, Widget? child) {
+        builderChild = child;
+        return Container();
+      },
+    ));
+    expect(builderChild, isNull);
+  });
 }
 
-class MockAccessibilityFeature extends Mock implements AccessibilityFeatures {}
+class MockAccessibilityFeature implements AccessibilityFeatures {
+  @override
+  bool get accessibleNavigation => true;
+
+  @override
+  bool get boldText => true;
+
+  @override
+  bool get disableAnimations => true;
+
+  @override
+  bool get highContrast => true;
+
+  @override
+  bool get invertColors => true;
+
+  @override
+  bool get reduceMotion => true;
+}
+
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+
+class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
+  SimpleRouteInformationParser();
+
+  @override
+  Future<RouteInformation> parseRouteInformation(RouteInformation information) {
+    return SynchronousFuture<RouteInformation>(information);
+  }
+
+  @override
+  RouteInformation restoreRouteInformation(RouteInformation configuration) {
+    return configuration;
+  }
+}
+
+class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
+  SimpleNavigatorRouterDelegate({
+    required this.builder,
+    required this.onPopPage,
+  });
+
+  @override
+  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  RouteInformation get routeInformation => _routeInformation;
+  late RouteInformation _routeInformation;
+  set routeInformation(RouteInformation newValue) {
+    _routeInformation = newValue;
+    notifyListeners();
+  }
+
+  SimpleRouterDelegateBuilder builder;
+  SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
+
+  @override
+  Future<void> setNewRoutePath(RouteInformation configuration) {
+    _routeInformation = configuration;
+    return SynchronousFuture<void>(null);
+  }
+
+  bool _handlePopPage(Route<void> route, void data) {
+    return onPopPage(route, data, this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: navigatorKey,
+      onPopPage: _handlePopPage,
+      pages: <Page<void>>[
+        // We need at least two pages for the pop to propagate through.
+        // Otherwise, the navigator will bubble the pop to the system navigator.
+        const MaterialPage<void>(
+          child: Text('base'),
+        ),
+        MaterialPage<void>(
+          key: ValueKey<String>(routeInformation.location!),
+          child: builder(context, routeInformation),
+        )
+      ],
+    );
+  }
+}

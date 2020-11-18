@@ -15,10 +15,20 @@
 #
 # This script expects `pm`, `device-finder`, and `fuchsia_ctl` to all be in the
 # same directory as the script.
+#
+# This script also expects a private key available at:
+# "/etc/botanist/keys/id_rsa_infra".
 
 set -Eex
 
 script_dir=$(dirname "$(readlink -f "$0")")
+
+# Bot key to pave and ssh the device.
+pkey="/etc/botanist/keys/id_rsa_infra"
+
+# This is longer than the test timeout as dumping the
+# logs can sometimes take longer.
+ssh_timeout_seconds=360
 
 # The nodes are named blah-blah--four-word-fuchsia-id
 device_name=${SWARMING_BOT_ID#*--}
@@ -31,18 +41,58 @@ else
   echo "Connecting to device $device_name"
 fi
 
+# Wrapper function to pass common args to fuchsia_ctl.
+fuchsia_ctl() {
+  $script_dir/fuchsia_ctl -d $device_name \
+      --device-finder-path $script_dir/device-finder "$@"
+}
+
 reboot() {
+  echo "$(date) START:DEVICE_LOGS ------------------------------------------"
+  fuchsia_ctl ssh \
+      --timeout-seconds $ssh_timeout_seconds \
+      --identity-file $pkey \
+      -c "log_listener --dump_logs yes --file /tmp/log.txt"
+  # As we are not using recipes we don't have a way to know the location
+  # to upload the log to isolated. We are saving the log to a file to avoid dart
+  # hanging when running the process and then just using printing the content to
+  # the console.
+  fuchsia_ctl ssh \
+       --timeout-seconds $ssh_timeout_seconds \
+       --identity-file $pkey \
+       -c "cat /tmp/log.txt"
+  echo "$(date) END:DEVICE_LOGS ------------------------------------------"
+  echo "$(date) START:REBOOT ------------------------------------------"
   # note: this will set an exit code of 255, which we can ignore.
-  $script_dir/fuchsia_ctl -d $device_name --dev-finder-path $script_dir/dev_finder ssh --identity-file $script_dir/.ssh/pkey -c "dm reboot-recovery" || true
+  fuchsia_ctl ssh \
+      --identity-file $pkey \
+      -c "dm reboot-recovery" || true
+  echo "$(date) END:REBOOT --------------------------------------------"
 }
 
 trap reboot EXIT
 
-$script_dir/fuchsia_ctl -d $device_name pave  -i $1
-$script_dir/fuchsia_ctl push-packages -d $device_name --repoArchive generic-x64.tar.gz -p tiles -p tiles_ctl
+echo "$(date) START:PAVING ------------------------------------------"
+ssh-keygen -y -f $pkey > key.pub
+fuchsia_ctl pave -i $1 --public-key "key.pub"
+echo "$(date) END:PAVING --------------------------------------------"
+
+echo "$(date) START:WAIT_DEVICE_READY -------------------------------"
+for i in {1..10}; do
+  fuchsia_ctl ssh \
+      --identity-file $pkey \
+      -c "echo up" && break || sleep 15;
+done
+echo "$(date) END:WAIT_DEVICE_READY ---------------------------------"
+
+echo "$(date) START:PUSH_PACKAGES -------------------------------"
+fuchsia_ctl push-packages \
+    --identity-file $pkey \
+    --repoArchive generic-x64.tar.gz \
+    -p tiles -p tiles_ctl
+echo "$(date) END:PUSH_PACKAGES ---------------------------------"
 
 # set fuchsia ssh config
-export FUCHSIA_SSH_PKEY=$script_dir/.ssh/pkey
 cat > $script_dir/fuchsia_ssh_config << EOF
 Host *
   CheckHostIP no
@@ -53,7 +103,7 @@ Host *
   UserKnownHostsFile /dev/null
   User fuchsia
   IdentitiesOnly yes
-  IdentityFile $FUCHSIA_SSH_PKEY
+  IdentityFile $pkey
   ControlPersist yes
   ControlMaster auto
   ControlPath /tmp/fuchsia--%r@%h:%p
@@ -66,13 +116,13 @@ EOF
 export FUCHSIA_SSH_CONFIG=$script_dir/fuchsia_ssh_config
 
 # Run the driver test
+echo "$(date) START:DRIVER_TEST -------------------------------------"
 flutter_dir=$script_dir/flutter
 flutter_bin=$flutter_dir/bin/flutter
 
 # remove all out dated .packages references
 find $flutter_dir -name ".packages" | xargs rm
-
 cd $flutter_dir/dev/benchmarks/test_apps/stocks/
-
 $flutter_bin pub get
 $flutter_bin drive -v -d $device_name --target=test_driver/stock_view.dart
+echo "$(date) END:DRIVER_TEST ---------------------------------------"

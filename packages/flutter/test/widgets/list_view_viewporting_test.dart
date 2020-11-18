@@ -180,7 +180,7 @@ void main() {
 
   testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
     final List<int> callbackTracker = <int>[];
-    final List<String> text = <String>[];
+    final List<String?> text = <String?>[];
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
@@ -230,7 +230,7 @@ void main() {
   });
 
   testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
-    StateSetter setState;
+    late StateSetter setState;
     ThemeData themeData = ThemeData.light();
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
@@ -317,10 +317,10 @@ void main() {
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
 
-    expect(list.indexOf(list.firstChild), equals(0));
-    expect(list.indexOf(list.lastChild), equals(2));
-    expect(list.childScrollOffset(list.firstChild), equals(0.0));
-    expect(list.geometry.scrollExtent, equals(300.0));
+    expect(list.indexOf(list.firstChild!), equals(0));
+    expect(list.indexOf(list.lastChild!), equals(2));
+    expect(list.childScrollOffset(list.firstChild!), equals(0.0));
+    expect(list.geometry!.scrollExtent, equals(300.0));
 
     expect(list, hasAGoodToStringDeep);
     expect(
@@ -509,7 +509,7 @@ void main() {
               itemBuilder: (_, int i) => Container(
                 height: 200.0,
                 width: 200.0,
-                color: i % 2 == 0 ? Colors.black : Colors.red,
+                color: i.isEven ? Colors.black : Colors.red,
               ),
             ),
           ),

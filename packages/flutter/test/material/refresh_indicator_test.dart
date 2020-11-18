@@ -225,12 +225,39 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 50.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     expect(refreshCalled, false);
+  });
+
+  testWidgets('RefreshIndicator - just enough', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
   });
 
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
@@ -358,35 +385,6 @@ void main() {
     expect(completed2, true);
   });
 
-  testWidgets('RefreshIndicator - onRefresh asserts', (WidgetTester tester) async {
-    refreshCalled = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: RefreshIndicator(
-          onRefresh: () {
-            refreshCalled = true;
-            return null; // Missing a returned Future value here, should cause framework to throw.
-          },
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-              return SizedBox(
-                height: 200.0,
-                child: Text(item),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
-    );
-
-    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-    expect(refreshCalled, true);
-    expect(tester.takeException(), isFlutterError);
-  });
-
   testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
     refreshCalled = false;
     double lastScrollOffset;
@@ -420,4 +418,87 @@ void main() {
     expect(controller.offset, lessThan(0.0));
     expect(refreshCalled, isTrue);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('RefreshIndicator does not force child to relayout', (WidgetTester tester) async {
+    int layoutCount = 0;
+
+    Widget layoutCallback(BuildContext context, BoxConstraints constraints) {
+      layoutCount++;
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+          return SizedBox(
+            height: 200.0,
+            child: Text(item),
+          );
+        }).toList(),
+      );
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: LayoutBuilder(builder: layoutCallback),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0); // trigger refresh
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+
+    expect(layoutCount, 1);
+  });
+
+  testWidgets('RefreshIndicator responds to strokeWidth', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: () async {},
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                return SizedBox(
+                  height: 200.0,
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        )
+    );
+
+    //By default the value of strokeWidth is 2.0
+    expect(
+        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
+        2.0,
+    );
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: () async {},
+            strokeWidth: 4.0,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                return SizedBox(
+                  height: 200.0,
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        )
+    );
+
+    expect(
+        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
+        4.0,
+    );
+  });
 }

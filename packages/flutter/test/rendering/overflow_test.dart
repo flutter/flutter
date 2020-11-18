@@ -11,7 +11,7 @@ import 'rendering_tester.dart';
 void main() {
   test('overflow should not affect baseline', () {
     RenderBox root, child, text;
-    double baseline1, baseline2, height1, height2;
+    late double baseline1, baseline2, height1, height2;
 
     root = RenderPositionedBox(
       child: RenderCustomPaint(
@@ -21,7 +21,7 @@ void main() {
         ),
         painter: TestCallbackPainter(
           onPaint: () {
-            baseline1 = child.getDistanceToBaseline(TextBaseline.alphabetic);
+            baseline1 = child.getDistanceToBaseline(TextBaseline.alphabetic)!;
             height1 = text.size.height;
           },
         ),
@@ -41,7 +41,7 @@ void main() {
         ),
         painter: TestCallbackPainter(
           onPaint: () {
-            baseline2 = child.getDistanceToBaseline(TextBaseline.alphabetic);
+            baseline2 = child.getDistanceToBaseline(TextBaseline.alphabetic)!;
             height2 = text.size.height;
           },
         ),

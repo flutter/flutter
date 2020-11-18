@@ -2,7 +2,7 @@
 
 An older copy of the Flutter gallery demo application used for integration testing.
 
-For the current Flutter gallery app sample, see this repo:
+For the current Flutter Gallery app sample, see this repo:
 https://github.com/flutter/gallery
 
 ## Icon

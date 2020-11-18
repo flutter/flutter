@@ -69,11 +69,11 @@ void main() {
       expect(box.size.height, 16.0);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration as BoxDecoration;
-      expect(decoration.border.bottom.width, 0.0);
+      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      expect(decoration.border!.bottom.width, 0.0);
 
       final ThemeData theme = ThemeData();
-      expect(decoration.border.bottom.color, theme.dividerColor);
+      expect(decoration.border!.bottom.color, theme.dividerColor);
 
       final Rect dividerRect = tester.getRect(find.byType(Divider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -94,14 +94,14 @@ void main() {
       expect(box.size.height, dividerTheme.space);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration as BoxDecoration;
-      expect(decoration.border.bottom.width, dividerTheme.thickness);
-      expect(decoration.border.bottom.color, dividerTheme.color);
+      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      expect(decoration.border!.bottom.width, dividerTheme.thickness);
+      expect(decoration.border!.bottom.color, dividerTheme.color);
 
       final Rect dividerRect = tester.getRect(find.byType(Divider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
-      expect(lineRect.left, dividerRect.left + dividerTheme.indent);
-      expect(lineRect.right, dividerRect.right - dividerTheme.endIndent);
+      expect(lineRect.left, dividerRect.left + dividerTheme.indent!);
+      expect(lineRect.right, dividerRect.right - dividerTheme.endIndent!);
     });
 
     testWidgets('Widget properties take priority over theme', (WidgetTester tester) async {
@@ -129,9 +129,9 @@ void main() {
       expect(box.size.height, height);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration as BoxDecoration;
-      expect(decoration.border.bottom.width, thickness);
-      expect(decoration.border.bottom.color, color);
+      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      expect(decoration.border!.bottom.width, thickness);
+      expect(decoration.border!.bottom.color, color);
 
       final Rect dividerRect = tester.getRect(find.byType(Divider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -152,8 +152,8 @@ void main() {
       expect(box.size.width, 16.0);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration as BoxDecoration;
-      final Border border = decoration.border as Border;
+      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      final Border border = decoration.border! as Border;
       expect(border.left.width, 0.0);
 
       final ThemeData theme = ThemeData();
@@ -178,15 +178,15 @@ void main() {
       expect(box.size.width, dividerTheme.space);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration as BoxDecoration;
-      final Border border = decoration.border as Border;
+      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      final Border border = decoration.border! as Border;
       expect(border.left.width, dividerTheme.thickness);
       expect(border.left.color, dividerTheme.color);
 
       final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
-      expect(lineRect.top, dividerRect.top + dividerTheme.indent);
-      expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent);
+      expect(lineRect.top, dividerRect.top + dividerTheme.indent!);
+      expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent!);
     });
 
     testWidgets('Widget properties take priority over theme', (WidgetTester tester) async {
@@ -214,8 +214,8 @@ void main() {
       expect(box.size.width, width);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration as BoxDecoration;
-      final Border border = decoration.border as Border;
+      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      final Border border = decoration.border! as Border;
       expect(border.left.width, thickness);
       expect(border.left.color, color);
 

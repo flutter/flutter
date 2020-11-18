@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,140 @@ class TestDragData {
 }
 
 void main() {
+  group('getSemanticsData', () {
+    testWidgets('throws when there are no semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Text('hello'),
+          ),
+        ),
+      );
+
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
+    }, semanticsEnabled: false);
+
+    testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Row(
+              children: const <Widget>[
+                Text('hello'),
+                Text('hello'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: OutlinedButton(
+                  onPressed: () { },
+                  child: const Text('hello'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.text('hello'));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'hello');
+      expect(semantics.hasAction(SemanticsAction.tap), true);
+      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Can enable semantics for tests via semanticsEnabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: OutlinedButton(
+                  onPressed: () { },
+                  child: const Text('hello'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.text('hello'));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'hello');
+      expect(semantics.hasAction(SemanticsAction.tap), true);
+      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+    }, semanticsEnabled: true);
+
+    testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      const Key key = Key('test');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              label: 'A',
+              child: Semantics(
+                label: 'B',
+                child: Semantics(
+                  key: key,
+                  label: 'C',
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'A\nB\nC');
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Does not return partial semantics', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      final Key key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MergeSemantics(
+              child: Semantics(
+                container: true,
+                label: 'A',
+                child: Semantics(
+                  container: true,
+                  key: key,
+                  label: 'B',
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'A\nB');
+      semanticsHandle.dispose();
+    });
+  });
+
   testWidgets(
     'WidgetTester.drag must break the offset into multiple parallel components if '
     'the drag goes outside the touch slop values',
@@ -414,4 +549,262 @@ void main() {
       }
     },
   );
+
+  testWidgets(
+    'WidgetTester.fling produces strictly monotonically increasing timestamps, '
+    'when given a large velocity',
+    (WidgetTester tester) async {
+      // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
+      // same timestamp. This is more likely to happen when the velocity tracker
+      // has a small sample size.
+      final List<Duration> logs = <Duration>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerMove: (PointerMoveEvent event) => logs.add(event.timeStamp),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.fling(find.text('test'), const Offset(0.0, -50.0), 10000.0);
+      await tester.pumpAndSettle();
+
+      for (int i = 0; i + 1 < logs.length; i += 1) {
+        expect(logs[i + 1],  greaterThan(logs[i]));
+      }
+  });
+
+  testWidgets(
+    'WidgetTester.timedDrag must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(-200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.timedDrag uses correct pointer',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.pointer}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(-200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.timedDrag(
+        find.text('test'),
+        const Offset(200.0, 0.0),
+        const Duration(seconds: 1),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+
+      expect(logs.length, 2);
+      expect(logs[0], isNotNull);
+      expect(logs[1], isNotNull);
+      expect(logs[1] != logs[0], isTrue);
+    },
+  );
+
+  testWidgets(
+    'ensureVisible: scrolls to make widget visible',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ListView.builder(
+              itemCount: 20,
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+            ),
+          ),
+        ),
+      );
+
+      // Make sure widget isn't on screen
+      expect(find.text('Item 15', skipOffstage: true), findsNothing);
+
+      await tester.ensureVisible(find.text('Item 15', skipOffstage: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
+    },
+  );
+
+  group('scrollUntilVisible: scrolls to make unbuilt widget visible', () {
+    testWidgets(
+      'Vertical',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        // Make sure widget isn't built yet.
+        expect(find.text('Item 45', skipOffstage: false), findsNothing);
+
+        await tester.scrollUntilVisible(
+          find.text('Item 45', skipOffstage: false),
+          100,
+        );
+        await tester.pumpAndSettle();
+
+        // Now the widget is on screen.
+        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Horizontal',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                // ListTile does not support horizontal list
+                itemBuilder: (BuildContext context, int i) => Container(child: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        // Make sure widget isn't built yet.
+        expect(find.text('Item 45', skipOffstage: false), findsNothing);
+
+        await tester.scrollUntilVisible(
+          find.text('Item 45', skipOffstage: false),
+          100,
+        );
+        await tester.pumpAndSettle();
+
+        // Now the widget is on screen.
+        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ListView.builder(
+                itemCount: 50,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+
+        try {
+          await tester.scrollUntilVisible(
+            find.text('Item 55', skipOffstage: false),
+            100,
+          );
+        } on StateError catch (e) {
+          expect(e.message, 'No element');
+        }
+      },
+    );
+
+    testWidgets('Drag Until Visible', (WidgetTester tester) async {
+      // when there are two implicit [Scrollable], `scrollUntilVisible` is hard
+      // to use.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                Container(height: 200, child: ListView.builder(
+                  key: const Key('listView-a'),
+                  itemCount: 50,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
+                )),
+                const Divider(thickness: 5),
+                Expanded(child: ListView.builder(
+                  key: const Key('listView-b'),
+                  itemCount: 50,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item b-$i')),
+                )),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollable), findsNWidgets(2));
+
+      // Make sure widget isn't built yet.
+      expect(find.text('Item b-45', skipOffstage: false), findsNothing);
+
+      await tester.dragUntilVisible(
+        find.text('Item b-45', skipOffstage: false),
+        find.byKey(const ValueKey<String>('listView-b')),
+        const Offset(0, -100),
+      );
+      await tester.pumpAndSettle();
+
+      // Now the widget is on screen.
+      expect(find.text('Item b-45', skipOffstage: true), findsOneWidget);
+    });
+  });
 }

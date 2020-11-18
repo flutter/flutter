@@ -2,22 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:async/async.dart';
-import '../base/context.dart';
 import '../base/io.dart';
 import '../convert.dart';
 
 /// Default factory that creates a real Android console connection.
-final AndroidConsoleSocketFactory _kAndroidConsoleSocketFactory = (String host, int port) => Socket.connect( host,  port);
+///
+/// The default implementation will create real connections to a device.
+/// Override this in tests with an implementation that returns mock responses.
+Future<Socket> kAndroidConsoleSocketFactory(String host, int port) => Socket.connect(host, port);
 
 /// Currently active implementation of the AndroidConsoleFactory.
 ///
 /// The default implementation will create real connections to a device.
 /// Override this in tests with an implementation that returns mock responses.
-AndroidConsoleSocketFactory get androidConsoleSocketFactory => context.get<AndroidConsoleSocketFactory>() ?? _kAndroidConsoleSocketFactory;
-
 typedef AndroidConsoleSocketFactory = Future<Socket> Function(String host, int port);
 
 /// Creates a console connection to an Android emulator that can be used to run

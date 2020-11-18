@@ -371,7 +371,7 @@ class _TickerWatchingWidget extends StatefulWidget {
 }
 
 class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with SingleTickerProviderStateMixin {
-  Ticker ticker;
+  late Ticker ticker;
 
   @override
   void initState() {

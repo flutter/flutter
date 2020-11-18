@@ -5,67 +5,100 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/commands/analyze_base.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 const String _kFlutterRoot = '/data/flutter';
 
-/// Return true if [fileList] contains a path that resides inside the Flutter repository.
-/// If [fileList] is empty, then return true if the current directory resides inside the Flutter repository.
-bool inRepo(List<String> fileList) {
+void main() {
+  testWithoutContext('analyze generate correct DartDoc message', () async {
+    expect(AnalyzeBase.generateDartDocMessage(0), 'all public member have documentation');
+    expect(AnalyzeBase.generateDartDocMessage(1), 'one public member lacks documentation');
+    expect(AnalyzeBase.generateDartDocMessage(2), '2 public members lack documentation');
+  });
+
+  testWithoutContext('analyze generate correct errors message', () async {
+    expect(
+      AnalyzeBase.generateErrorsMessage(
+        issueCount: 0,
+        seconds: '0.1',
+        undocumentedMembers: 1,
+        dartDocMessage: 'one public member lacks documentation',
+      ),
+      'No issues found! (ran in 0.1s; one public member lacks documentation)',
+    );
+
+    expect(
+      AnalyzeBase.generateErrorsMessage(
+        issueCount: 3,
+        issueDiff: 2,
+        files: 1,
+        seconds: '0.1',
+        undocumentedMembers: 1,
+        dartDocMessage: 'one public member lacks documentation',
+      ),
+      '3 issues found. (2 new) • analyzed 1 file (ran in 0.1s; one public member lacks documentation)',
+    );
+  });
+
+  testWithoutContext('analyze inRepo', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
+    final Directory tempDir = fileSystem.systemTempDirectory
+      .createTempSync('flutter_analysis_test.');
+    Cache.flutterRoot = _kFlutterRoot;
+
+    // Absolute paths
+    expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
+    expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
+    expect(inRepo(<String>[Cache.flutterRoot], fileSystem), isTrue);
+    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot, 'foo')], fileSystem), isTrue);
+
+    // Relative paths
+    fileSystem.currentDirectory = Cache.flutterRoot;
+    expect(inRepo(<String>['.'], fileSystem), isTrue);
+    expect(inRepo(<String>['foo'], fileSystem), isTrue);
+    fileSystem.currentDirectory = tempDir.path;
+    expect(inRepo(<String>['.'], fileSystem), isFalse);
+    expect(inRepo(<String>['foo'], fileSystem), isFalse);
+
+    // Ensure no exceptions
+    inRepo(null, fileSystem);
+    inRepo(<String>[], fileSystem);
+  });
+
+  testWithoutContext('AnalysisError from json write correct', () {
+    final Map<String, dynamic> json = <String, dynamic>{
+      'severity': 'INFO',
+      'type': 'TODO',
+      'location': <String, dynamic>{
+        'file': '/Users/.../lib/test.dart',
+        'offset': 362,
+        'length': 72,
+        'startLine': 15,
+        'startColumn': 4,
+      },
+      'message': 'Prefer final for variable declarations if they are not reassigned.',
+      'hasFix': false,
+    };
+    expect(WrittenError.fromJson(json).toString(),
+        '[info] Prefer final for variable declarations if they are not reassigned (/Users/.../lib/test.dart:15:4)');
+  });
+}
+
+bool inRepo(List<String> fileList, FileSystem fileSystem) {
   if (fileList == null || fileList.isEmpty) {
-    fileList = <String>[globals.fs.path.current];
+    fileList = <String>[fileSystem.path.current];
   }
-  final String root = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot));
-  final String prefix = root + globals.fs.path.separator;
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot));
+  final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
-    file = globals.fs.path.normalize(globals.fs.path.absolute(file));
+    file = fileSystem.path.normalize(fileSystem.path.absolute(file));
     if (file == root || file.startsWith(prefix)) {
       return true;
     }
   }
   return false;
-}
-
-void main() {
-  FileSystem fs;
-  Directory tempDir;
-
-  setUp(() {
-    fs = MemoryFileSystem();
-    fs.directory(_kFlutterRoot).createSync(recursive: true);
-    Cache.flutterRoot = _kFlutterRoot;
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
-  });
-
-  tearDown(() {
-    tryToDelete(tempDir);
-  });
-
-  group('analyze', () {
-    testUsingContext('inRepo', () {
-      // Absolute paths
-      expect(inRepo(<String>[tempDir.path]), isFalse);
-      expect(inRepo(<String>[globals.fs.path.join(tempDir.path, 'foo')]), isFalse);
-      expect(inRepo(<String>[Cache.flutterRoot]), isTrue);
-      expect(inRepo(<String>[globals.fs.path.join(Cache.flutterRoot, 'foo')]), isTrue);
-
-      // Relative paths
-      globals.fs.currentDirectory = Cache.flutterRoot;
-      expect(inRepo(<String>['.']), isTrue);
-      expect(inRepo(<String>['foo']), isTrue);
-      globals.fs.currentDirectory = tempDir.path;
-      expect(inRepo(<String>['.']), isFalse);
-      expect(inRepo(<String>['foo']), isFalse);
-
-      // Ensure no exceptions
-      inRepo(null);
-      inRepo(<String>[]);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-  });
 }

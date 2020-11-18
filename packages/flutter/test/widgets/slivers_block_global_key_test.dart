@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 int globalGeneration = 0;
 
 class GenerationText extends StatefulWidget {
-  const GenerationText(this.value, { Key key }) : super(key: key);
+  const GenerationText(this.value, { Key? key }) : super(key: key);
   final int value;
   @override
   _GenerationTextState createState() => _GenerationTextState();
@@ -53,7 +53,7 @@ void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   expect(testAnswers, equals(answerKey));
   final String foundText =
     tester.widgetList<Text>(find.byType(Text))
-        .map<String>((Text widget) => widget.data)
+        .map<String>((Text widget) => widget.data!)
         .reduce((String value, String element) => value + element);
   expect(foundText, equals(text));
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
@@ -15,9 +13,13 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class CleanCommand extends FlutterCommand {
-  CleanCommand() {
+  CleanCommand({
+    bool verbose = false,
+  }) : _verbose = verbose {
     requiresPubspecYaml();
   }
+
+  final bool _verbose;
 
   @override
   final String name = 'clean';
@@ -48,11 +50,14 @@ class CleanCommand extends FlutterCommand {
     deleteFile(flutterProject.ios.ephemeralDirectory);
     deleteFile(flutterProject.ios.generatedXcodePropertiesFile);
     deleteFile(flutterProject.ios.generatedEnvironmentVariableExportScript);
-    deleteFile(flutterProject.ios.compiledDartFramework);
+    deleteFile(flutterProject.ios.deprecatedCompiledDartFramework);
+    deleteFile(flutterProject.ios.deprecatedProjectFlutterFramework);
 
     deleteFile(flutterProject.linux.ephemeralDirectory);
     deleteFile(flutterProject.macos.ephemeralDirectory);
     deleteFile(flutterProject.windows.ephemeralDirectory);
+    deleteFile(flutterProject.flutterPluginsDependenciesFile);
+    deleteFile(flutterProject.flutterPluginsFile);
 
     return const FlutterCommandResult(ExitStatus.success);
   }
@@ -63,13 +68,12 @@ class CleanCommand extends FlutterCommand {
     }
     final Status xcodeStatus = globals.logger.startProgress(
       'Cleaning Xcode workspace...',
-      timeout: timeoutConfiguration.slowOperation,
     );
     try {
       final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
-      final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
+      final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
       for (final String scheme in projectInfo.schemes) {
-        await xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme);
+        await globals.xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
       }
     } on Exception catch (error) {
       globals.printTrace('Could not clean Xcode workspace: $error');
@@ -91,7 +95,6 @@ class CleanCommand extends FlutterCommand {
     }
     final Status deletionStatus = globals.logger.startProgress(
       'Deleting ${file.basename}...',
-      timeout: timeoutConfiguration.fastOperation,
     );
     try {
       file.deleteSync(recursive: true);

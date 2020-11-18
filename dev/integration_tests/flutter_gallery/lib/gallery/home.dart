@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:developer';
 import 'dart:math' as math;
 
@@ -19,7 +18,7 @@ const double _kDemoItemHeight = 64.0;
 const Duration _kFrontLayerSwitchDuration = Duration(milliseconds: 300);
 
 class _FlutterLogo extends StatelessWidget {
-  const _FlutterLogo({ Key key }) : super(key: key);
+  const _FlutterLogo({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +41,13 @@ class _FlutterLogo extends StatelessWidget {
 
 class _CategoryItem extends StatelessWidget {
   const _CategoryItem({
-    Key key,
+    Key? key,
     this.category,
     this.onTap,
   }) : super (key: key);
 
-  final GalleryDemoCategory category;
-  final VoidCallback onTap;
+  final GalleryDemoCategory? category;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +70,7 @@ class _CategoryItem extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(6.0),
               child: Icon(
-                category.icon,
+                category!.icon,
                 size: 60.0,
                 color: isDark ? Colors.white : _kFlutterBlue,
               ),
@@ -81,9 +80,9 @@ class _CategoryItem extends StatelessWidget {
               height: 48.0,
               alignment: Alignment.center,
               child: Text(
-                category.name,
+                category!.name,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.subtitle1.copyWith(
+                style: theme.textTheme.subtitle1!.copyWith(
                   fontFamily: 'GoogleSans',
                   color: isDark ? Colors.white : _kFlutterBlue,
                 ),
@@ -98,18 +97,18 @@ class _CategoryItem extends StatelessWidget {
 
 class _CategoriesPage extends StatelessWidget {
   const _CategoriesPage({
-    Key key,
+    Key? key,
     this.categories,
     this.onCategoryTap,
   }) : super(key: key);
 
-  final Iterable<GalleryDemoCategory> categories;
-  final ValueChanged<GalleryDemoCategory> onCategoryTap;
+  final Iterable<GalleryDemoCategory>? categories;
+  final ValueChanged<GalleryDemoCategory>? onCategoryTap;
 
   @override
   Widget build(BuildContext context) {
     const double aspectRatio = 160.0 / 180.0;
-    final List<GalleryDemoCategory> categoriesList = categories.toList();
+    final List<GalleryDemoCategory> categoriesList = categories!.toList();
     final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
     return Semantics(
@@ -123,7 +122,7 @@ class _CategoriesPage extends StatelessWidget {
           builder: (BuildContext context, BoxConstraints constraints) {
             final double columnWidth = constraints.biggest.width / columnCount.toDouble();
             final double rowHeight = math.min(225.0, columnWidth * aspectRatio);
-            final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
+            final int rowCount = (categories!.length + columnCount - 1) ~/ columnCount;
 
             // This repaint boundary prevents the inner contents of the front layer
             // from repainting when the backdrop toggle triggers a repaint on the
@@ -134,7 +133,7 @@ class _CategoriesPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: List<Widget>.generate(rowCount, (int rowIndex) {
                   final int columnCountForRow = rowIndex == rowCount - 1
-                    ? categories.length - columnCount * math.max<int>(0, rowCount - 1)
+                    ? categories!.length - columnCount * math.max<int>(0, rowCount - 1)
                     : columnCount;
 
                   return Row(
@@ -148,7 +147,7 @@ class _CategoriesPage extends StatelessWidget {
                         child: _CategoryItem(
                           category: category,
                           onTap: () {
-                            onCategoryTap(category);
+                            onCategoryTap!(category);
                           },
                         ),
                       );
@@ -165,17 +164,17 @@ class _CategoriesPage extends StatelessWidget {
 }
 
 class _DemoItem extends StatelessWidget {
-  const _DemoItem({ Key key, this.demo }) : super(key: key);
+  const _DemoItem({ Key? key, this.demo }) : super(key: key);
 
-  final GalleryDemo demo;
+  final GalleryDemo? demo;
 
   void _launchDemo(BuildContext context) {
-    if (demo.routeName != null) {
+    if (demo != null) {
       Timeline.instantSync('Start Transition', arguments: <String, String>{
         'from': '/',
-        'to': demo.routeName,
+        'to': demo!.routeName,
       });
-      Navigator.pushNamed(context, demo.routeName);
+      Navigator.pushNamed(context, demo!.routeName);
     }
   }
 
@@ -200,7 +199,7 @@ class _DemoItem extends StatelessWidget {
               height: 56.0,
               alignment: Alignment.center,
               child: Icon(
-                demo.icon,
+                demo!.icon,
                 size: 24.0,
                 color: isDark ? Colors.white : _kFlutterBlue,
               ),
@@ -211,15 +210,15 @@ class _DemoItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Text(
-                    demo.title,
-                    style: theme.textTheme.subtitle1.copyWith(
+                    demo!.title,
+                    style: theme.textTheme.subtitle1!.copyWith(
                       color: isDark ? Colors.white : const Color(0xFF202124),
                     ),
                   ),
-                  if (demo.subtitle != null)
+                  if (demo!.subtitle != null)
                     Text(
-                      demo.subtitle,
-                      style: theme.textTheme.bodyText2.copyWith(
+                      demo!.subtitle!,
+                      style: theme.textTheme.bodyText2!.copyWith(
                         color: isDark ? Colors.white : const Color(0xFF60646B)
                       ),
                     ),
@@ -237,7 +236,7 @@ class _DemoItem extends StatelessWidget {
 class _DemosPage extends StatelessWidget {
   const _DemosPage(this.category);
 
-  final GalleryDemoCategory category;
+  final GalleryDemoCategory? category;
 
   @override
   Widget build(BuildContext context) {
@@ -249,13 +248,13 @@ class _DemosPage extends StatelessWidget {
       child: Semantics(
         scopesRoute: true,
         namesRoute: true,
-        label: category.name,
+        label: category!.name,
         explicitChildNodes: true,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          key: PageStorageKey<String>(category.name),
+          key: PageStorageKey<String>(category!.name),
           padding: EdgeInsets.only(top: 8.0, bottom: windowBottomPadding),
-          children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
+          children: kGalleryCategoryToDemos[category!]!.map<Widget>((GalleryDemo demo) {
             return _DemoItem(demo: demo);
           }).toList(),
         ),
@@ -266,12 +265,12 @@ class _DemosPage extends StatelessWidget {
 
 class GalleryHome extends StatefulWidget {
   const GalleryHome({
-    Key key,
+    Key? key,
     this.testMode = false,
     this.optionsPage,
   }) : super(key: key);
 
-  final Widget optionsPage;
+  final Widget? optionsPage;
   final bool testMode;
 
   // In checked mode our MaterialApp will show the default "debug" banner.
@@ -284,10 +283,10 @@ class GalleryHome extends StatefulWidget {
 
 class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
   static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  AnimationController _controller;
-  GalleryDemoCategory _category;
+  late AnimationController _controller;
+  GalleryDemoCategory? _category;
 
-  static Widget _topHomeLayout(Widget currentChild, List<Widget> previousChildren) {
+  static Widget _topHomeLayout(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       children: <Widget>[
         ...previousChildren,
@@ -358,7 +357,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               duration: _kFrontLayerSwitchDuration,
               child: _category == null
                 ? const Text('Flutter gallery')
-                : Text(_category.name),
+                : Text(_category!.name),
             ),
             frontHeading: widget.testMode ? null : Container(height: 24.0),
             frontLayer: AnimatedSwitcher(

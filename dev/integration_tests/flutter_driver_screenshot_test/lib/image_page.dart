@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import './page.dart';
 
 /// The page that shows an image.
-class ImagePage extends Page {
+class ImagePage extends PageWidget {
 
   /// Constructs the ImagePage object.
   const ImagePage()

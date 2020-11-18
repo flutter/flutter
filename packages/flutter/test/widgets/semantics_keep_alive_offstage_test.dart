@@ -81,7 +81,11 @@ void main() {
 
 final Key paddingWidget = GlobalKey();
 
-Widget _buildTestWidget({ bool extraPadding, String text, ScrollController controller }) {
+Widget _buildTestWidget({
+  required bool extraPadding,
+  required String text,
+  required ScrollController controller,
+}) {
   return MaterialApp(
     home: Scaffold(
       body: Column(
@@ -95,7 +99,7 @@ Widget _buildTestWidget({ bool extraPadding, String text, ScrollController contr
               controller: controller,
               children: List<Widget>.generate(10, (int i) {
                 return Container(
-                  color: i % 2 == 0 ? Colors.red : Colors.blue,
+                  color: i.isEven ? Colors.red : Colors.blue,
                   height: 250.0,
                   child: Text('Item $i'),
                 );
@@ -115,7 +119,11 @@ Widget _buildTestWidget({ bool extraPadding, String text, ScrollController contr
 }
 
 class ProblemWidget extends StatefulWidget {
-  const ProblemWidget({Key key, this.extraPadding, this.text}) : super(key: key);
+  const ProblemWidget({
+    Key? key,
+    required this.extraPadding,
+    required this.text,
+  }) : super(key: key);
 
   final bool extraPadding;
   final String text;

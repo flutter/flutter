@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
-import 'button_bar.dart';
-import 'button_theme.dart';
 import 'divider.dart';
 import 'theme.dart';
 
@@ -19,6 +17,30 @@ import 'theme.dart';
 /// Banners should be displayed at the top of the screen, below a top app bar.
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return MaterialBanner(
+///     padding: const EdgeInsets.all(20),
+///     content: Text("Hey, I am a Material Banner"),
+///     leading: Icon(Icons.agriculture_outlined),
+///     backgroundColor: Colors.grey[300],
+///     actions: <Widget>[
+///       FlatButton(
+///         child: Text("OPEN"),
+///         onPressed: () {},
+///       ),
+///       FlatButton(
+///         child: Text("DISMISS"),
+///         onPressed: () {},
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// The [actions] will be placed beside the [content] if there is only one.
 /// Otherwise, the [actions] will be placed below the [content]. Use
@@ -35,10 +57,10 @@ class MaterialBanner extends StatelessWidget {
   /// The [actions], [content], and [forceActionsBelow] must be non-null.
   /// The [actions.length] must be greater than 0.
   const MaterialBanner({
-    Key key,
-    @required this.content,
+    Key? key,
+    required this.content,
     this.contentTextStyle,
-    @required this.actions,
+    required this.actions,
     this.leading,
     this.backgroundColor,
     this.padding,
@@ -57,28 +79,25 @@ class MaterialBanner extends StatelessWidget {
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
-  /// also `null`, [ThemeData.textTheme.bodyText2] is used.
-  final TextStyle contentTextStyle;
+  /// also `null`, [TextTheme.bodyText2] of [ThemeData.textTheme] is used.
+  final TextStyle? contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
   /// the [MaterialBanner].
   ///
-  /// Typically this is a list of [FlatButton] widgets.
-  ///
-  /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
-  /// of padding on each side.
+  /// Typically this is a list of [TextButton] widgets.
   final List<Widget> actions;
 
   /// The (optional) leading widget of the [MaterialBanner].
   ///
   /// Typically an [Icon] widget.
-  final Widget leading;
+  final Widget? leading;
 
   /// The color of the surface of this [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
-  /// also `null`, [ThemeData.colorScheme.surface] is used.
-  final Color backgroundColor;
+  /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
+  final Color? backgroundColor;
 
   /// The amount of space by which to inset the [content].
   ///
@@ -87,20 +106,20 @@ class MaterialBanner extends StatelessWidget {
   ///
   /// If the [actions] are trailing the [content], this defaults to
   /// `EdgeInsetsDirectional.only(start: 16.0, top: 2.0)`.
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   /// The amount of space by which to inset the [leading] widget.
   ///
   /// This defaults to `EdgeInsetsDirectional.only(end: 16.0)`.
-  final EdgeInsetsGeometry leadingPadding;
+  final EdgeInsetsGeometry? leadingPadding;
 
   /// An override to force the [actions] to be below the [content] regardless of
   /// how many there are.
   ///
-  /// If this is `true`, the [actions] will be placed below the [content]. If
-  /// this is `false`, the [actions] will be placed on the trailing side of the
-  /// [content] if [actions.length] is `1` and below the [content] if greater
-  /// than `1`.
+  /// If this is true, the [actions] will be placed below the [content]. If
+  /// this is false, the [actions] will be placed on the trailing side of the
+  /// [content] if [actions]'s length is 1 and below the [content] if greater
+  /// than 1.
   final bool forceActionsBelow;
 
   @override
@@ -115,18 +134,23 @@ class MaterialBanner extends StatelessWidget {
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
         : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
     final EdgeInsetsGeometry leadingPadding = this.leadingPadding
-        ?? bannerTheme.padding
+        ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
-    final Widget buttonBar = ButtonBar(
-      layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      children: actions,
+    final Widget buttonBar = Container(
+      alignment: AlignmentDirectional.centerEnd,
+      constraints: const BoxConstraints(minHeight: 52.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: OverflowBar(
+        spacing: 8,
+        children: actions,
+      ),
     );
 
     final Color backgroundColor = this.backgroundColor
         ?? bannerTheme.backgroundColor
         ?? theme.colorScheme.surface;
-    final TextStyle textStyle = contentTextStyle
+    final TextStyle? textStyle = contentTextStyle
         ?? bannerTheme.contentTextStyle
         ?? theme.textTheme.bodyText2;
 
@@ -145,7 +169,7 @@ class MaterialBanner extends StatelessWidget {
                   ),
                 Expanded(
                   child: DefaultTextStyle(
-                    style: textStyle,
+                    style: textStyle!,
                     child: content,
                   ),
                 ),

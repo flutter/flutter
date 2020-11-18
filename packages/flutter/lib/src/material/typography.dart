@@ -39,7 +39,7 @@ enum ScriptCategory {
   tall,
 }
 
-/// The color and geometry [TextThemes] for Material apps.
+/// The color and geometry [TextTheme]s for Material apps.
 ///
 /// The text themes provided by the overall [Theme], like
 /// [ThemeData.textTheme], are based on the current locale's
@@ -54,7 +54,7 @@ enum ScriptCategory {
 /// `Theme.of(context).accentTextTheme`.
 ///
 /// The color text themes are [blackMountainView], [whiteMountainView],
-/// [blackCupertino], and [whiteCupertino]. The Mountain View theme [TextStyles]
+/// [blackCupertino], and [whiteCupertino]. The Mountain View theme [TextStyle]s
 /// are based on the Roboto fonts as used on Android. The Cupertino themes are
 /// based on the [San Francisco
 /// font](https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/)
@@ -109,18 +109,18 @@ class Typography with Diagnosticable {
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
-  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// [whiteMountainView]. If [platform] is null then both [black] and [white]
   /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2014], [dense2014], and [tall2014].
   factory Typography.material2014({
-    TargetPlatform platform = TargetPlatform.android,
-    TextTheme black,
-    TextTheme white,
-    TextTheme englishLike,
-    TextTheme dense,
-    TextTheme tall,
+    TargetPlatform? platform = TargetPlatform.android,
+    TextTheme? black,
+    TextTheme? white,
+    TextTheme? englishLike,
+    TextTheme? dense,
+    TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
     return Typography._withPlatform(
@@ -137,18 +137,18 @@ class Typography with Diagnosticable {
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
-  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// [whiteMountainView]. If [platform] is null then both [black] and [white]
   /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2018], [dense2018], and [tall2018].
   factory Typography.material2018({
-    TargetPlatform platform = TargetPlatform.android,
-    TextTheme black,
-    TextTheme white,
-    TextTheme englishLike,
-    TextTheme dense,
-    TextTheme tall,
+    TargetPlatform? platform = TargetPlatform.android,
+    TextTheme? black,
+    TextTheme? white,
+    TextTheme? englishLike,
+    TextTheme? dense,
+    TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
     return Typography._withPlatform(
@@ -161,9 +161,9 @@ class Typography with Diagnosticable {
   }
 
   factory Typography._withPlatform(
-    TargetPlatform platform,
-    TextTheme black,
-    TextTheme white,
+    TargetPlatform? platform,
+    TextTheme? black,
+    TextTheme? white,
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
@@ -191,8 +191,10 @@ class Typography with Diagnosticable {
         black ??= blackHelsinki;
         white ??= whiteHelsinki;
         break;
+      case null:
+        break;
     }
-    return Typography._(black, white, englishLike, dense, tall);
+    return Typography._(black!, white!, englishLike, dense, tall);
   }
 
   const Typography._(this.black, this.white, this.englishLike, this.dense, this.tall)
@@ -267,17 +269,16 @@ class Typography with Diagnosticable {
       case ScriptCategory.tall:
         return tall;
     }
-    return null;
   }
 
   /// Creates a copy of this [Typography] with the given fields
   /// replaced by the non-null parameter values.
   Typography copyWith({
-    TextTheme black,
-    TextTheme white,
-    TextTheme englishLike,
-    TextTheme dense,
-    TextTheme tall,
+    TextTheme? black,
+    TextTheme? white,
+    TextTheme? englishLike,
+    TextTheme? dense,
+    TextTheme? tall,
   }) {
     return Typography._(
       black ?? this.black,
@@ -526,7 +527,7 @@ class Typography with Diagnosticable {
     bodyText2 : TextStyle(debugLabel: 'englishLike bodyText2 2018', fontSize: 14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
     subtitle1 : TextStyle(debugLabel: 'englishLike subtitle1 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
     subtitle2 : TextStyle(debugLabel: 'englishLike subtitle2 2018', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
-    button    : TextStyle(debugLabel: 'englishLike button 2018',    fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.75),
+    button    : TextStyle(debugLabel: 'englishLike button 2018',    fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.25),
     caption   : TextStyle(debugLabel: 'englishLike caption 2018',   fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.4),
     overline  : TextStyle(debugLabel: 'englishLike overline 2018',  fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );

@@ -9,7 +9,7 @@ void main() {
   testWidgets('IconTheme.of works', (WidgetTester tester) async {
     const IconThemeData data = IconThemeData(color: Color(0xAAAAAAAA), opacity: 0.5, size: 16.0);
 
-    IconThemeData retrieved;
+    late IconThemeData retrieved;
     await tester.pumpWidget(
       IconTheme(data: data, child: Builder(builder: (BuildContext context) {
         retrieved = IconTheme.of(context);

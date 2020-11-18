@@ -77,7 +77,7 @@ void main() {
             PopupMenuButton<void>(
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<Object>>[
+                return <PopupMenuEntry<void>>[
                   PopupMenuItem<void>(
                     key: popupItemKey,
                     child: const Text('Example'),
@@ -137,7 +137,7 @@ void main() {
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<Object>>[
-                  PopupMenuItem<void>(
+                  PopupMenuItem<Object>(
                     key: popupItemKey,
                     child: const Text('Example'),
                   ),
@@ -204,7 +204,7 @@ void main() {
               color: color,
               shape: shape,
               itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<Object>>[
+                return <PopupMenuEntry<void>>[
                   PopupMenuItem<void>(
                     key: popupItemKey,
                     textStyle: textStyle,
@@ -268,7 +268,7 @@ void main() {
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
                 itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<Object>>[
+                  return <PopupMenuEntry<void>>[
                     PopupMenuItem<void>(
                       key: popupItemKey,
                       child: const Text('Example'),

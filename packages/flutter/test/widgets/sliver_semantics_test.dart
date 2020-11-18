@@ -78,26 +78,26 @@ void _tests() {
                 id: 2,
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 7,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 8,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
+                        label: 'Semantics Test with Slivers',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
                     id: 9,
                     flags: <SemanticsFlag>[
                       SemanticsFlag.hasImplicitScrolling,
                     ],
                     actions: <SemanticsAction>[SemanticsAction.scrollUp],
                     children: <TestSemantics>[
-                      TestSemantics(
-                        id: 7,
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 8,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'Semantics Test with Slivers',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
-                      ),
                       TestSemantics(
                         id: 3,
                         label: 'Item 0',
@@ -225,6 +225,20 @@ void _tests() {
                 id: 2,
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 7,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 8,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.namesRoute,
+                          SemanticsFlag.isHeader,
+                        ],
+                        label: 'Semantics Test with Slivers',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                  TestSemantics(
                     id: 9,
                     flags: <SemanticsFlag>[
                       SemanticsFlag.hasImplicitScrolling,
@@ -234,20 +248,6 @@ void _tests() {
                       SemanticsAction.scrollDown,
                     ],
                     children: <TestSemantics>[
-                      TestSemantics(
-                        id: 7,
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 8,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
-                            ],
-                            label: 'Semantics Test with Slivers',
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
-                      ),
                       TestSemantics(
                         id: 3,
                         label: 'Item 0',
@@ -984,13 +984,18 @@ void _tests() {
                   TestSemantics(
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
+                      TestSemantics(),
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Forward app bar',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Forward app bar',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -1094,13 +1099,18 @@ void _tests() {
                   TestSemantics(
                     tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                     children: <TestSemantics>[
+                      TestSemantics(),
                       TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Backward app bar',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Backward app bar',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),

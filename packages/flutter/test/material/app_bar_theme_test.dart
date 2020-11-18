@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -28,13 +29,14 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, Brightness.dark);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
+    expect(widget.shadowColor, Colors.black);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
-    expect(actionIconText.text.style.color, Colors.white);
-    expect(text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().white.bodyText2));
+    expect(actionIconText.text.style!.color, Colors.white);
+    expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
@@ -56,19 +58,21 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
+    expect(widget.shadowColor, appBarTheme.shadowColor);
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
-    expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
-    expect(text.style, appBarTheme.textTheme.bodyText2);
+    expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
+    expect(text.style, appBarTheme.textTheme!.bodyText2);
   });
 
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
     const Brightness brightness = Brightness.dark;
     const Color color = Colors.orange;
     const double elevation = 3.0;
+    const Color shadowColor = Colors.red;
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
     const TextTheme textTheme = TextTheme(headline6: TextStyle(color: Colors.orange), bodyText2: TextStyle(color: Colors.pink));
@@ -81,6 +85,7 @@ void main() {
         backgroundColor: color,
         brightness: brightness,
         elevation: elevation,
+        shadowColor: shadowColor,
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         textTheme: textTheme,
@@ -96,12 +101,13 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, brightness);
     expect(widget.color, color);
     expect(widget.elevation, elevation);
+    expect(widget.shadowColor, shadowColor);
     expect(iconTheme.data, iconThemeData);
     expect(actionsIconTheme.data, actionsIconThemeData);
-    expect(actionIconText.text.style.color, actionsIconThemeData.color);
+    expect(actionIconText.text.style!.color, actionsIconThemeData.color);
     expect(text.style, textTheme.bodyText2);
   });
 
@@ -124,7 +130,7 @@ void main() {
     ));
 
     final RichText actionIconText = _getAppBarIconRichText(tester);
-    expect(actionIconText.text.style.color, color);
+    expect(actionIconText.text.style!.color, color);
   });
 
   testWidgets('AppBarTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
@@ -146,13 +152,14 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
+    expect(widget.shadowColor, appBarTheme.shadowColor);
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
-    expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
-    expect(text.style, appBarTheme.textTheme.bodyText2);
+    expect(actionIconText.text.style!.color, appBarTheme.actionsIconTheme!.color);
+    expect(text.style, appBarTheme.textTheme!.bodyText2);
   });
 
   testWidgets('ThemeData properties are used when no AppBarTheme is set', (WidgetTester tester) async {
@@ -173,21 +180,187 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle.statusBarBrightness, themeData.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, themeData.brightness);
     expect(widget.color, themeData.primaryColor);
     expect(widget.elevation, 4.0);
+    expect(widget.shadowColor, Colors.black);
     expect(iconTheme.data, themeData.primaryIconTheme);
     expect(actionsIconTheme.data, themeData.primaryIconTheme);
-    expect(actionIconText.text.style.color, themeData.primaryIconTheme.color);
+    expect(actionIconText.text.style!.color, themeData.primaryIconTheme.color);
     // Default value for ThemeData.typography is Typography.material2014()
-    expect(text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().white.bodyText2).merge(themeData.primaryTextTheme.bodyText2));
+    expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2).merge(themeData.primaryTextTheme.bodyText2));
   });
+
+  testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
+      home: Scaffold(appBar: AppBar(title: const Text('Title'))),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.centerMiddle, true);
+  });
+
+  testWidgets('AppBar.centerTitle takes priority over AppBarTheme.centerTitle', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+          centerTitle: false,
+        ),
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    // The AppBar.centerTitle should be used instead of AppBarTheme.centerTitle.
+    expect(navToolBar.centerMiddle, false);
+  });
+
+  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async{
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: Scaffold(appBar: AppBar(title: const Text('Title'))),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    // When ThemeData.platform is TargetPlatform.iOS, and AppBarTheme is null,
+    // the value of NavigationToolBar.centerMiddle should be true.
+    expect(navToolBar.centerMiddle, true);
+  });
+
+  testWidgets('AppBar.shadowColor takes priority over AppBarTheme.shadowColor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+          shadowColor: Colors.yellow,
+        ),
+      ),
+    ));
+
+    final AppBar appBar = tester.widget(find.byType(AppBar));
+    // The AppBar.shadowColor should be used instead of AppBarTheme.shadowColor.
+    expect(appBar.shadowColor, Colors.yellow);
+  });
+
+  testWidgets('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, kTitleSpacing);
+  });
+
+  testWidgets('AppBar.titleSpacing takes priority over AppBarTheme.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+          titleSpacing: 40,
+        ),
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, 40);
+  });
+
+  testWidgets('SliverAppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: const CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text('Title'),
+          ),
+        ],
+      ),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolBar.middleSpacing, kTitleSpacing);
+  });
+
+  testWidgets('SliverAppBar.titleSpacing takes priority over AppBarTheme.titleSpacing ', (WidgetTester tester) async {
+    const double kTitleSpacing = 10;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
+      home: const CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text('Title'),
+            titleSpacing: 40,
+          ),
+        ],
+      ),
+    ));
+
+    final NavigationToolbar navToolbar = tester.widget(find.byType(NavigationToolbar));
+    expect(navToolbar.middleSpacing, 40);
+  });
+
+  testWidgets('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const AppBarTheme().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const AppBarTheme(
+      brightness: Brightness.dark,
+      color: Color(0xff000001),
+      elevation: 8.0,
+      shadowColor: Color(0xff000002),
+      centerTitle: true,
+      titleSpacing: 40.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'brightness: Brightness.dark',
+      'color: Color(0xff000001)',
+      'elevation: 8.0',
+      'shadowColor: Color(0xff000002)',
+      'centerTitle: true',
+      'titleSpacing: 40.0',
+    ]);
+
+    // On the web, Dart doubles and ints are backed by the same kind of object because
+    // JavaScript does not support integers. So, the Dart double "4.0" is identical
+    // to "4", which results in the web evaluating to the value "4" regardless of which
+    // one is used. This results in a difference for doubles in debugFillProperties between
+    // the web and the rest of Flutter's target platforms.
+  }, skip: kIsWeb);
 }
 
 AppBarTheme _appBarTheme() {
   const Brightness brightness = Brightness.light;
   const Color color = Colors.lightBlue;
   const double elevation = 6.0;
+  const Color shadowColor = Colors.red;
   const IconThemeData iconThemeData = IconThemeData(color: Colors.black);
   const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.pink);
   const TextTheme textTheme = TextTheme(bodyText2: TextStyle(color: Colors.yellow));
@@ -196,6 +369,7 @@ AppBarTheme _appBarTheme() {
     brightness: brightness,
     color: color,
     elevation: elevation,
+    shadowColor: shadowColor,
     iconTheme: iconThemeData,
     textTheme: textTheme,
   );
@@ -245,6 +419,7 @@ RichText _getAppBarIconRichText(WidgetTester tester) {
     ).first,
   );
 }
+
 DefaultTextStyle _getAppBarText(WidgetTester tester) {
   return tester.widget<DefaultTextStyle>(
     find.descendant(

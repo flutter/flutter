@@ -85,6 +85,18 @@ void main() {
     position: Offset(20.0, 20.0),
   );
 
+  // Down/up sequence 6: tap sequence with tertiary button
+  const PointerDownEvent down6 = PointerDownEvent(
+    pointer: 6,
+    position: Offset(20.0, 20.0),
+    buttons: kTertiaryButton,
+  );
+
+  const PointerUpEvent up6 = PointerUpEvent(
+    pointer: 6,
+    position: Offset(20.0, 20.0),
+  );
+
   testGesture('Should recognize tap', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
@@ -101,8 +113,37 @@ void main() {
 
     tester.route(up1);
     expect(tapRecognized, isTrue);
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapRecognized, isTrue);
+
+    tap.dispose();
+  });
+
+  testGesture('Details contain the correct device kind', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    TapDownDetails? lastDownDetails;
+    TapUpDetails? lastUpDetails;
+
+    tap.onTapDown = (TapDownDetails details) {
+      lastDownDetails = details;
+    };
+    tap.onTapUp = (TapUpDetails details) {
+      lastUpDetails = details;
+    };
+
+    const PointerDownEvent mouseDown =
+        PointerDownEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+    const PointerUpEvent mouseUp =
+        PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+
+    tap.addPointer(mouseDown);
+    tester.closeArena(1);
+    tester.route(mouseDown);
+    expect(lastDownDetails?.kind, PointerDeviceKind.mouse);
+
+    tester.route(mouseUp);
+    expect(lastUpDetails?.kind, PointerDeviceKind.mouse);
 
     tap.dispose();
   });
@@ -123,7 +164,7 @@ void main() {
 
     tester.route(up1);
     expect(tapsRecognized, 1);
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     tap.addPointer(down1);
@@ -134,7 +175,7 @@ void main() {
 
     tester.route(up1);
     expect(tapsRecognized, 2);
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapsRecognized, 2);
 
     tap.dispose();
@@ -163,12 +204,12 @@ void main() {
 
     tester.route(up1);
     expect(tapsRecognized, 1);
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     tester.route(up2);
     expect(tapsRecognized, 1);
-    GestureBinding.instance.gestureArena.sweep(2);
+    GestureBinding.instance!.gestureArena.sweep(2);
     expect(tapsRecognized, 1);
 
     tap.dispose();
@@ -197,12 +238,12 @@ void main() {
 
     tester.route(up2);
     expect(tapsRecognized, 0);
-    GestureBinding.instance.gestureArena.sweep(2);
+    GestureBinding.instance!.gestureArena.sweep(2);
     expect(tapsRecognized, 0);
 
     tester.route(up1);
     expect(tapsRecognized, 1);
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     tap.dispose();
@@ -234,7 +275,7 @@ void main() {
     tester.route(up3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
-    GestureBinding.instance.gestureArena.sweep(3);
+    GestureBinding.instance!.gestureArena.sweep(3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
 
@@ -267,7 +308,7 @@ void main() {
     tester.route(up4);
     expect(tapRecognized, isTrue);
     expect(tapCanceled, isFalse);
-    GestureBinding.instance.gestureArena.sweep(4);
+    GestureBinding.instance!.gestureArena.sweep(4);
     expect(tapRecognized, isTrue);
     expect(tapCanceled, isFalse);
 
@@ -292,7 +333,7 @@ void main() {
     expect(tapRecognized, isFalse);
     tester.route(up1);
     expect(tapRecognized, isTrue);
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapRecognized, isTrue);
 
     tap.dispose();
@@ -308,8 +349,8 @@ void main() {
 
     tap.addPointer(down1);
     final TestGestureArenaMember member = TestGestureArenaMember();
-    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
-    GestureBinding.instance.gestureArena.hold(1);
+    final GestureArenaEntry entry = GestureBinding.instance!.gestureArena.add(1, member);
+    GestureBinding.instance!.gestureArena.hold(1);
     tester.closeArena(1);
     expect(tapRecognized, isFalse);
     tester.route(down1);
@@ -317,7 +358,7 @@ void main() {
 
     tester.route(up1);
     expect(tapRecognized, isFalse);
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.accepted);
@@ -336,8 +377,8 @@ void main() {
 
     tap.addPointer(down1);
     final TestGestureArenaMember member = TestGestureArenaMember();
-    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
-    GestureBinding.instance.gestureArena.hold(1);
+    final GestureArenaEntry entry = GestureBinding.instance!.gestureArena.add(1, member);
+    GestureBinding.instance!.gestureArena.hold(1);
     tester.closeArena(1);
     expect(tapRecognized, isFalse);
     tester.route(down1);
@@ -345,7 +386,7 @@ void main() {
 
     tester.route(up1);
     expect(tapRecognized, isFalse);
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.rejected);
@@ -362,7 +403,7 @@ void main() {
       throw Exception(test);
     };
 
-    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    final FlutterExceptionHandler? previousErrorHandler = FlutterError.onError;
     bool gotError = false;
     FlutterError.onError = (FlutterErrorDetails details) {
       gotError = true;
@@ -387,7 +428,7 @@ void main() {
       throw Exception(test);
     };
 
-    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    final FlutterExceptionHandler? previousErrorHandler = FlutterError.onError;
     bool gotError = false;
     FlutterError.onError = (FlutterErrorDetails details) {
       expect(details.toString().contains('"spontaneous onTapCancel"') , isTrue);
@@ -431,7 +472,7 @@ void main() {
     log.add('routed 1 down');
     tester.route(up1);
     log.add('routed 1 up');
-    GestureBinding.instance.gestureArena.sweep(1);
+    GestureBinding.instance!.gestureArena.sweep(1);
     log.add('swept 1');
     tapA.addPointer(down2);
     log.add('down 2 to A');
@@ -443,7 +484,7 @@ void main() {
     log.add('routed 2 down');
     tester.route(up2);
     log.add('routed 2 up');
-    GestureBinding.instance.gestureArena.sweep(2);
+    GestureBinding.instance!.gestureArena.sweep(2);
     log.add('swept 2');
     tapA.dispose();
     log.add('disposed A');
@@ -575,7 +616,7 @@ void main() {
     drag.addPointer(down3);
     tester.closeArena(3);
     tester.route(move3);
-    GestureBinding.instance.gestureArena.sweep(3);
+    GestureBinding.instance!.gestureArena.sweep(3);
     expect(recognized, isEmpty);
 
     tap.dispose();
@@ -612,7 +653,7 @@ void main() {
     expect(recognized, isEmpty);
 
     tester.route(up1);
-    GestureBinding.instance.gestureArena.sweep(down1.pointer);
+    GestureBinding.instance!.gestureArena.sweep(down1.pointer);
     expect(recognized, <String>['down', 'up', 'tap']);
     recognized.clear();
 
@@ -621,7 +662,7 @@ void main() {
     expect(recognized, isEmpty);
 
     tester.route(up2);
-    GestureBinding.instance.gestureArena.sweep(down2.pointer);
+    GestureBinding.instance!.gestureArena.sweep(down2.pointer);
     expect(recognized, isEmpty);
 
     tap.dispose();
@@ -641,7 +682,7 @@ void main() {
     );
 
     final List<String> recognized = <String>[];
-    TapGestureRecognizer tap;
+    late TapGestureRecognizer tap;
     setUp(() {
       tap = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
@@ -722,14 +763,14 @@ void main() {
       tester.route(move1lr);
       tester.route(move1r);
       tester.route(up1);
-      GestureBinding.instance.gestureArena.sweep(1);
+      GestureBinding.instance!.gestureArena.sweep(1);
       expect(recognized, <String>['down', 'cancel']);
 
       tap.addPointer(down2);
       tester.closeArena(2);
       tester.async.elapse(const Duration(milliseconds: 1000));
       tester.route(up2);
-      GestureBinding.instance.gestureArena.sweep(2);
+      GestureBinding.instance!.gestureArena.sweep(2);
       expect(recognized, <String>['down', 'cancel', 'down', 'up']);
 
       tap.dispose();
@@ -743,9 +784,10 @@ void main() {
     // listening on different buttons do not form competition.
 
     final List<String> recognized = <String>[];
-    TapGestureRecognizer primary;
-    TapGestureRecognizer primary2;
-    TapGestureRecognizer secondary;
+    late TapGestureRecognizer primary;
+    late TapGestureRecognizer primary2;
+    late TapGestureRecognizer secondary;
+    late TapGestureRecognizer tertiary;
     setUp(() {
       primary = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
@@ -777,6 +819,16 @@ void main() {
         ..onSecondaryTapCancel = () {
           recognized.add('secondaryCancel');
         };
+      tertiary = TapGestureRecognizer()
+        ..onTertiaryTapDown = (TapDownDetails details) {
+          recognized.add('tertiaryDown');
+        }
+        ..onTertiaryTapUp = (TapUpDetails details) {
+          recognized.add('tertiaryUp');
+        }
+        ..onTertiaryTapCancel = () {
+          recognized.add('tertiaryCancel');
+        };
     });
 
     tearDown(() {
@@ -784,11 +836,25 @@ void main() {
       primary.dispose();
       primary2.dispose();
       secondary.dispose();
+      tertiary.dispose();
     });
 
     testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
       primary.addPointer(down1);
       secondary.addPointer(down1);
+      tester.closeArena(1);
+
+      tester.route(down1);
+      expect(recognized, <String>['primaryDown']);
+      recognized.clear();
+
+      tester.route(up1);
+      expect(recognized, <String>['primaryUp']);
+    });
+
+    testGesture('A primary tap recognizer does not form competition with a tertiary tap recognizer', (GestureTester tester) {
+      primary.addPointer(down1);
+      tertiary.addPointer(down1);
       tester.closeArena(1);
 
       tester.route(down1);
@@ -814,12 +880,15 @@ void main() {
 
   group('Gestures of different buttons trigger correct callbacks:', () {
     final List<String> recognized = <String>[];
-    TapGestureRecognizer tap;
+    late TapGestureRecognizer tap;
     const PointerCancelEvent cancel1 = PointerCancelEvent(
       pointer: 1,
     );
     const PointerCancelEvent cancel5 = PointerCancelEvent(
       pointer: 5,
+    );
+    const PointerCancelEvent cancel6 = PointerCancelEvent(
+      pointer: 6,
     );
 
     setUp(() {
@@ -844,6 +913,15 @@ void main() {
         }
         ..onSecondaryTapCancel = () {
           recognized.add('secondaryCancel');
+        }
+        ..onTertiaryTapDown = (TapDownDetails details) {
+          recognized.add('tertiaryDown');
+        }
+        ..onTertiaryTapUp = (TapUpDetails details) {
+          recognized.add('tertiaryUp');
+        }
+        ..onTertiaryTapCancel = () {
+          recognized.add('tertiaryCancel');
         };
     });
 
@@ -862,7 +940,7 @@ void main() {
 
       tester.route(up1);
       expect(recognized, <String>['primaryUp', 'primary']);
-      GestureBinding.instance.gestureArena.sweep(down1.pointer);
+      GestureBinding.instance!.gestureArena.sweep(down1.pointer);
     });
 
     testGesture('A primary tap cancel trigger primary callbacks', (GestureTester tester) {
@@ -875,7 +953,7 @@ void main() {
 
       tester.route(cancel1);
       expect(recognized, <String>['primaryCancel']);
-      GestureBinding.instance.gestureArena.sweep(down1.pointer);
+      GestureBinding.instance!.gestureArena.sweep(down1.pointer);
     });
 
     testGesture('A secondary tap should trigger secondary callbacks', (GestureTester tester) {
@@ -887,8 +965,21 @@ void main() {
       recognized.clear();
 
       tester.route(up5);
-      GestureBinding.instance.gestureArena.sweep(down5.pointer);
+      GestureBinding.instance!.gestureArena.sweep(down5.pointer);
       expect(recognized, <String>['secondaryUp']);
+    });
+
+    testGesture('A tertiary tap should trigger tertiary callbacks', (GestureTester tester) {
+      tap.addPointer(down6);
+      tester.closeArena(down6.pointer);
+      expect(recognized, <String>[]);
+      tester.async.elapse(const Duration(milliseconds: 500));
+      expect(recognized, <String>['tertiaryDown']);
+      recognized.clear();
+
+      tester.route(up6);
+      GestureBinding.instance!.gestureArena.sweep(down6.pointer);
+      expect(recognized, <String>['tertiaryUp']);
     });
 
     testGesture('A secondary tap cancel should trigger secondary callbacks', (GestureTester tester) {
@@ -900,8 +991,21 @@ void main() {
       recognized.clear();
 
       tester.route(cancel5);
-      GestureBinding.instance.gestureArena.sweep(down5.pointer);
+      GestureBinding.instance!.gestureArena.sweep(down5.pointer);
       expect(recognized, <String>['secondaryCancel']);
+    });
+
+    testGesture('A tertiary tap cancel should trigger tertiary callbacks', (GestureTester tester) {
+      tap.addPointer(down6);
+      tester.closeArena(down6.pointer);
+      expect(recognized, <String>[]);
+      tester.async.elapse(const Duration(milliseconds: 500));
+      expect(recognized, <String>['tertiaryDown']);
+      recognized.clear();
+
+      tester.route(cancel6);
+      GestureBinding.instance!.gestureArena.sweep(down6.pointer);
+      expect(recognized, <String>['tertiaryCancel']);
     });
   });
 

@@ -11,35 +11,33 @@ import 'rendering_tester.dart';
 
 class RealRoot extends AbstractNode {
   RealRoot(this.child) {
-    if (child != null)
-      adoptChild(child);
+    adoptChild(child);
   }
 
   final RenderObject child;
 
   @override
   void redepthChildren() {
-    if (child != null)
-      redepthChild(child);
+    redepthChild(child);
   }
 
   @override
   void attach(Object owner) {
     super.attach(owner);
-    child?.attach(owner as PipelineOwner);
+    child.attach(owner as PipelineOwner);
   }
 
   @override
   void detach() {
     super.detach();
-    child?.detach();
+    child.detach();
   }
 
   @override
-  PipelineOwner get owner => super.owner as PipelineOwner;
+  PipelineOwner? get owner => super.owner as PipelineOwner?;
 
   void layout() {
-    child?.layout(BoxConstraints.tight(const Size(500.0, 500.0)));
+    child.layout(BoxConstraints.tight(const Size(500.0, 500.0)));
   }
 }
 

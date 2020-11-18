@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+late GestureVelocityTrackerBuilder lastCreatedBuilder;
 class TestScrollBehavior extends ScrollBehavior {
   const TestScrollBehavior(this.flag);
 
@@ -19,20 +21,28 @@ class TestScrollBehavior extends ScrollBehavior {
 
   @override
   bool shouldNotify(TestScrollBehavior old) => flag != old.flag;
+
+  @override
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+      lastCreatedBuilder = flag
+        ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
+        : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
+      return lastCreatedBuilder;
+  }
 }
 
 void main() {
   testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey(debugLabel: 'scrollable');
-    TestScrollBehavior behavior;
-    ScrollPositionWithSingleContext position;
+    TestScrollBehavior? behavior;
+    late ScrollPositionWithSingleContext position;
 
     final Widget scrollView = SingleChildScrollView(
       key: key,
       child: Builder(
         builder: (BuildContext context) {
           behavior = ScrollConfiguration.of(context) as TestScrollBehavior;
-          position = Scrollable.of(context).position as ScrollPositionWithSingleContext;
+          position = Scrollable.of(context)!.position as ScrollPositionWithSingleContext;
           return Container(height: 1000.0);
         },
       ),
@@ -46,8 +56,9 @@ void main() {
     );
 
     expect(behavior, isNotNull);
-    expect(behavior.flag, isTrue);
+    expect(behavior!.flag, isTrue);
     expect(position.physics, isA<ClampingScrollPhysics>());
+    expect(lastCreatedBuilder(const PointerDownEvent()), isA<VelocityTracker>());
     ScrollMetrics metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));
     expect(metrics.viewportDimension, equals(600.0));
@@ -61,8 +72,9 @@ void main() {
     );
 
     expect(behavior, isNotNull);
-    expect(behavior.flag, isFalse);
+    expect(behavior!.flag, isFalse);
     expect(position.physics, isA<BouncingScrollPhysics>());
+    expect(lastCreatedBuilder(const PointerDownEvent()), isA<IOSScrollViewFlingVelocityTracker>());
     // Regression test for https://github.com/flutter/flutter/issues/5856
     metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));

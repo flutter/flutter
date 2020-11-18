@@ -32,12 +32,12 @@ class GestureTester {
   TestGestureArenaMember first = TestGestureArenaMember();
   TestGestureArenaMember second = TestGestureArenaMember();
 
-  GestureArenaEntry firstEntry;
+  late GestureArenaEntry firstEntry;
   void addFirst() {
     firstEntry = arena.add(primaryKey, first);
   }
 
-  GestureArenaEntry secondEntry;
+  late GestureArenaEntry secondEntry;
   void addSecond() {
     secondEntry = arena.add(primaryKey, second);
   }

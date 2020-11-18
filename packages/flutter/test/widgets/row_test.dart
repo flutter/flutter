@@ -35,7 +35,7 @@ void main() {
     const Key child1Key = Key('child1');
     const Key child2Key = Key('child2');
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
       exception ??= details.exception;
@@ -66,7 +66,7 @@ void main() {
     const Key child1Key = Key('child1');
     const Key child2Key = Key('child2');
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
       exception ??= details.exception;
@@ -96,7 +96,7 @@ void main() {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
       exception ??= details.exception;
@@ -127,7 +127,7 @@ void main() {
     const Key child1Key = Key('child1');
     const Key child2Key = Key('child2');
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
       exception ??= details.exception;
@@ -159,7 +159,7 @@ void main() {
     const Key child1Key = Key('child1');
     const Key child2Key = Key('child2');
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
       exception ??= details.exception;
@@ -192,7 +192,7 @@ void main() {
     const Key child2Key = Key('child2');
     const Key child3Key = Key('child3');
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
       exception ??= details.exception;
@@ -225,7 +225,7 @@ void main() {
     const Key child1Key = Key('child1');
     const Key child2Key = Key('child2');
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
       exception ??= details.exception;
@@ -256,7 +256,7 @@ void main() {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
     FlutterError.onError = (FlutterErrorDetails details) {
       exception ??= details.exception;
@@ -342,19 +342,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(600.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(100.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(700.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -392,19 +392,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(100.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(200.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -440,13 +440,13 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(300.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(400.0));
 
     expect(OrderPainter.log, <int>[1, 2]);
@@ -484,19 +484,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(500.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(600.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(700.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -534,19 +534,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(350.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(700.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -586,25 +586,25 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(50.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(250.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(450.0));
 
     renderBox = tester.renderObject(find.byKey(child3Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(650.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3, 4]);
@@ -642,19 +642,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(200.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(50.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(200.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(300.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(200.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(550.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -690,13 +690,13 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(150.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(100.0));
 
     expect(OrderPainter.log, <int>[1, 2]);
@@ -765,19 +765,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(700.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(600.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(100.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -815,19 +815,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(700.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(600.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(500.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -863,13 +863,13 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(400.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(300.0));
 
     expect(OrderPainter.log, <int>[1, 2]);
@@ -907,19 +907,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(200.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(100.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -957,19 +957,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(700.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(350.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -1009,25 +1009,25 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(650.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(450.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(250.0));
 
     renderBox = tester.renderObject(find.byKey(child3Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(50.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3, 4]);
@@ -1065,19 +1065,19 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(200.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(550.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(200.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(300.0));
 
     renderBox = tester.renderObject(find.byKey(child2Key));
     expect(renderBox.size.width, equals(200.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(50.0));
 
     expect(OrderPainter.log, <int>[1, 2, 3]);
@@ -1113,13 +1113,13 @@ void main() {
     renderBox = tester.renderObject(find.byKey(child0Key));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(150.0));
 
     renderBox = tester.renderObject(find.byKey(child1Key));
     expect(renderBox.size.width, equals(150.0));
     expect(renderBox.size.height, equals(100.0));
-    boxParentData = renderBox.parentData as BoxParentData;
+    boxParentData = renderBox.parentData! as BoxParentData;
     expect(boxParentData.offset.dx, equals(0.0));
 
     expect(OrderPainter.log, <int>[1, 2]);

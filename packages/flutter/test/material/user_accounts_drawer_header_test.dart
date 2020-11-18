@@ -141,7 +141,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/25801.
   testWidgets('UserAccountsDrawerHeader icon does not rotate after setState', (WidgetTester tester) async {
-    StateSetter testSetState;
+    late StateSetter testSetState;
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: StatefulBuilder(
@@ -249,12 +249,12 @@ void main() {
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({
-      Widget currentAccountPicture,
-      List<Widget> otherAccountsPictures,
-      Widget accountName,
-      Widget accountEmail,
-      VoidCallback onDetailsPressed,
-      EdgeInsets margin,
+      Widget? currentAccountPicture,
+      List<Widget>? otherAccountsPictures,
+      Widget? accountName,
+      Widget? accountEmail,
+      VoidCallback? onDetailsPressed,
+      EdgeInsets? margin,
     }) {
       return MaterialApp(
         home: Material(
@@ -357,12 +357,12 @@ void main() {
 
   testWidgets('UserAccountsDrawerHeader null parameters RTL', (WidgetTester tester) async {
     Widget buildFrame({
-      Widget currentAccountPicture,
-      List<Widget> otherAccountsPictures,
-      Widget accountName,
-      Widget accountEmail,
-      VoidCallback onDetailsPressed,
-      EdgeInsets margin,
+      Widget? currentAccountPicture,
+      List<Widget>? otherAccountsPictures,
+      Widget? accountName,
+      Widget? accountEmail,
+      VoidCallback? onDetailsPressed,
+      EdgeInsets? margin,
     }) {
       return MaterialApp(
         home: Directionality(
@@ -478,6 +478,8 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
@@ -505,6 +507,8 @@ void main() {
                         ),
                       ],
                     ),
+                  ],
+                ),
                   ],
                 ),
               ],
@@ -556,23 +560,27 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Signed in',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: r'B',
+                          label: 'Signed in',
                           textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'C',
-                          textDirection: TextDirection.ltr,
-                        ),
-                        TestSemantics(
-                          label: r'D',
-                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: r'B',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'C',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              label: r'D',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                       ],
                     ),

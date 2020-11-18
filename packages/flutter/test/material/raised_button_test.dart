@@ -34,12 +34,12 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0xffe0e0e0));
     expect(material.elevation, 2.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle.color, const Color(0xdd000000));
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0xdd000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
 
     final Offset center = tester.getCenter(find.byType(RaisedButton));
@@ -54,12 +54,12 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0xffe0e0e0));
     expect(material.elevation, 8.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle.color, const Color(0xdd000000));
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0xdd000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
 
     // Disabled RaisedButton
@@ -79,12 +79,12 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, const Color(0x61000000));
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shadowColor, null);
     expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
-    expect(material.textStyle.color, const Color(0x61000000));
-    expect(material.textStyle.fontFamily, 'Roboto');
-    expect(material.textStyle.fontSize, 14);
-    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.textStyle!.color, const Color(0x61000000));
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
   });
 
@@ -155,7 +155,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser,
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
     semanticsEnabled: true,
   );
 
@@ -196,7 +196,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
+      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style!.color!;
     }
 
     // Default, not disabled.
@@ -265,7 +265,7 @@ void main() {
       ),
     );
 
-    Color iconColor() => _iconStyle(tester, Icons.add).color;
+    Color iconColor() => _iconStyle(tester, Icons.add).color!;
     // Default, not disabled.
     expect(iconColor(), equals(defaultColor));
 
@@ -323,7 +323,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
+      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style!.color!;
     }
 
     // Disabled.
@@ -336,7 +336,7 @@ void main() {
     bool wasPressed;
     Finder raisedButton;
 
-    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
+    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RaisedButton(
@@ -430,6 +430,76 @@ void main() {
 
     await gesture.removePointer();
   });
+
+  testWidgets('RaisedButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RaisedButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Hello'),
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(1, 1));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RaisedButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RaisedButton(
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RaisedButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
 
   testWidgets('Does RaisedButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
@@ -663,5 +733,5 @@ TextStyle _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
     find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
   );
-  return iconRichText.text.style;
+  return iconRichText.text.style!;
 }

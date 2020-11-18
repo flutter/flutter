@@ -10,12 +10,12 @@
 
 I added the following tests:
 
-*Replace this with a list of the tests that you added as part of this PR. A change in behaviour with no test covering it
+*Replace this with a list of the tests that you added as part of this PR. A change in behavior with no test covering it
 will likely get reverted accidentally sooner or later. PRs must include tests for all changed/updated/fixed behaviors. See [Test Coverage].*
 
 ## Checklist
 
-Before you create this PR confirm that it meets all requirements listed below by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick review process.
+Before you create this PR, confirm that it meets all requirements listed below by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick review process.
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
 - [ ] I signed the [CLA].
@@ -34,7 +34,7 @@ Did any tests fail when you ran them? Please read [Handling breaking changes].
 - [ ] Yes, this is a breaking change. *If not, delete the remainder of this section.*
    - [ ] I wrote a design doc: https://flutter.dev/go/template *Replace this with a link to your design doc's short link*
    - [ ] I got input from the developer relations team, specifically from: *Replace with the names of who gave advice*
-   - [ ] I wrote a migration guide: *Replace with a link to your migration guide*
+   - [ ] I wrote a migration guide: https://flutter.dev/go/breaking-changes-template *Replace this with a link to a pull request that adds the migration guide to https://flutter.dev/docs/release/breaking-changes*
 
 <!-- Links -->
 [issue database]: https://github.com/flutter/flutter/issues

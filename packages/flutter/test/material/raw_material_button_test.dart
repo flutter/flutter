@@ -32,7 +32,7 @@ void main() {
     await tester.tap(find.text('BUTTON'));
     await tester.pump(const Duration(milliseconds: 10));
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(splash, paints..circle(color: splashColor));
 
     await tester.pumpAndSettle();
@@ -47,8 +47,8 @@ void main() {
     await tester.pumpWidget(
       Shortcuts(
         shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-          LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+          LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+          LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
         },
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -72,7 +72,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
 
     if (!kIsWeb) {
-      final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+      final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
       expect(splash, paints..circle(color: splashColor));
     }
 
@@ -90,7 +90,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump(const Duration(milliseconds: 10));
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(splash, paints..circle(color: splashColor));
 
     await tester.pumpAndSettle();
@@ -195,7 +195,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     // centered in material button.
     expect(box, paints..circle(x: 44.0, y: 18.0, color: splashColor));
     await gesture.up();
@@ -226,7 +226,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(top);
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     // paints above above material
     expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
     await gesture.up();
@@ -325,7 +325,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(box, isNot(paints..rect(color: focusColor)));
 
     focusNode.requestFocus();
@@ -424,7 +424,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
@@ -441,7 +441,7 @@ void main() {
     bool wasPressed;
     Finder rawMaterialButton;
 
-    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
+    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(
@@ -569,5 +569,58 @@ void main() {
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+  });
+
+  testWidgets('RawMaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RawMaterialButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RawMaterialButton(
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RawMaterialButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }

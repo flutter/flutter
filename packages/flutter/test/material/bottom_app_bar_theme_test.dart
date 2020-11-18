@@ -82,7 +82,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(

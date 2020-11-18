@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -252,7 +253,7 @@ void main() {
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
-    final Matrix4 transform = layer.transform;
+    final Matrix4 transform = layer.transform!;
     expect(transform.getTranslation(), equals(Vector3(100.0, 75.0, 0.0)));
   });
 
@@ -269,7 +270,7 @@ void main() {
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
-    final Matrix4 transform = layer.transform;
+    final Matrix4 transform = layer.transform!;
     expect(transform.storage, <dynamic>[
       moreOrLessEquals(0.0), 1.0, 0.0, 0.0,
       -1.0, moreOrLessEquals(0.0), 0.0, 0.0,
@@ -324,7 +325,7 @@ void main() {
     expect(layers.length, 2);
     // The first transform is from the render view.
     final TransformLayer layer = layers[1] as TransformLayer;
-    final Matrix4 transform = layer.transform;
+    final Matrix4 transform = layer.transform!;
     expect(transform.storage, <dynamic>[
       // These are column-major, not row-major.
       2.0, 0.0, 0.0, 0.0,
@@ -358,4 +359,45 @@ void main() {
     await tester.tap(find.byKey(key1));
     expect(_pointerDown, isTrue);
   });
+
+  Widget _generateTransform(bool needsCompositing, double angle) {
+    final Widget customPaint = CustomPaint(painter: TestRectPainter());
+    return Transform(
+      transform: MatrixUtils.createCylindricalProjectionTransform(
+        radius: 100,
+        angle: angle,
+        perspective: 0.003,
+      ),
+      // A RepaintBoundary child forces the Transform to needsCompositing
+      child: needsCompositing ? RepaintBoundary(child: customPaint) : customPaint,
+    );
+  }
+
+  testWidgets(
+    '3D transform renders the same with or without needsCompositing',
+    (WidgetTester tester) async {
+      for (double angle = 0; angle <= math.pi/4; angle += 0.01) {
+        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(true, angle)));
+        final RenderBox renderBox = tester.binding.renderView.child!;
+        final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
+        final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
+
+        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(false, angle)));
+        await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
+      }
+    },
+    skip: isBrowser, // due to https://github.com/flutter/flutter/issues/42767
+  );
+}
+
+class TestRectPainter extends CustomPainter {
+  @override
+  void paint(ui.Canvas canvas, ui.Size size) {
+    canvas.drawRect(
+      const Offset(200, 200) & const Size(10, 10),
+      Paint()..color = const Color(0xFFFF0000),
+    );
+  }
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

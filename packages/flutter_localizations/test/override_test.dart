@@ -15,9 +15,12 @@ class FooMaterialLocalizations extends MaterialLocalizationEn {
   ) : super(
     localeName: localeName.toString(),
     fullYearFormat: intl.DateFormat.y(),
+    compactDateFormat: intl.DateFormat.yMd(),
+    shortDateFormat: intl.DateFormat.yMMMd(),
     mediumDateFormat: intl.DateFormat('E, MMM\u00a0d'),
     longDateFormat: intl.DateFormat.yMMMMEEEEd(),
     yearMonthFormat: intl.DateFormat.yMMMM(),
+    shortMonthDayFormat: intl.DateFormat.MMMd(),
     decimalFormat: intl.NumberFormat.decimalPattern(),
     twoDigitZeroPaddedFormat: intl.NumberFormat('00'),
   );
@@ -50,10 +53,10 @@ class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
 }
 
 Widget buildFrame({
-  Locale locale,
+  Locale? locale,
   Iterable<LocalizationsDelegate<dynamic>> delegates = GlobalMaterialLocalizations.delegates,
-  WidgetBuilder buildContent,
-  LocaleResolutionCallback localeResolutionCallback,
+  required WidgetBuilder buildContent,
+  LocaleResolutionCallback? localeResolutionCallback,
   Iterable<Locale> supportedLocales = const <Locale>[
     Locale('en', 'US'),
     Locale('es', 'ES'),
@@ -207,7 +210,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         // Accept whatever locale we're given
-        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => locale,
         delegates: <FooMaterialLocalizationsDelegate>[
           const FooMaterialLocalizationsDelegate(supportedLanguage: 'allLanguages'),
         ],

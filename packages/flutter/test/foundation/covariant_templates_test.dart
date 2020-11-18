@@ -9,7 +9,7 @@ class X {}
 class Y extends X {}
 
 class A<U extends X> {
-  U u;
+  U? u;
 }
 
 void main() {

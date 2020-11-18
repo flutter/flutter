@@ -11,28 +11,28 @@ import 'package:flutter/material.dart';
 // valued fields: a, b, c.
 class ABCModel extends InheritedModel<String> {
   const ABCModel({
-    Key key,
+    Key? key,
     this.a,
     this.b,
     this.c,
     this.aspects,
-    Widget child,
+    required Widget child,
   }) : super(key: key, child: child);
 
-  final int a;
-  final int b;
-  final int c;
+  final int? a;
+  final int? b;
+  final int? c;
 
   // The aspects (fields) of this model that widgets can depend on with
   // inheritFrom.
   //
   // This property is null by default, which means that the model supports
   // all 3 fields.
-  final Set<String> aspects;
+  final Set<String>? aspects;
 
   @override
   bool isSupportedAspect(Object aspect) {
-    return aspect == null || aspects == null || aspects.contains(aspect);
+    return aspect == null || aspects == null || aspects!.contains(aspect);
   }
 
   @override
@@ -48,13 +48,13 @@ class ABCModel extends InheritedModel<String> {
         || (c != old.c && dependencies.contains('c'));
   }
 
-  static ABCModel of(BuildContext context, { String fieldName }) {
+  static ABCModel? of(BuildContext context, { String? fieldName }) {
     return InheritedModel.inheritFrom<ABCModel>(context, aspect: fieldName);
   }
 }
 
 class ShowABCField extends StatefulWidget {
-  const ShowABCField({ Key key, this.fieldName }) : super(key: key);
+  const ShowABCField({ Key? key, required this.fieldName }) : super(key: key);
 
   final String fieldName;
 
@@ -67,8 +67,8 @@ class _ShowABCFieldState extends State<ShowABCField> {
 
   @override
   Widget build(BuildContext context) {
-    final ABCModel abc = ABCModel.of(context, fieldName: widget.fieldName);
-    final int value = widget.fieldName == 'a' ? abc.a : (widget.fieldName == 'b' ? abc.b : abc.c);
+    final ABCModel abc = ABCModel.of(context, fieldName: widget.fieldName)!;
+    final int? value = widget.fieldName == 'a' ? abc.a : (widget.fieldName == 'b' ? abc.b : abc.c);
     return Text('${widget.fieldName}: $value [${_buildCount++}]');
   }
 }
@@ -89,7 +89,7 @@ void main() {
         // aspect of the model changes.
         final Widget showABC = Builder(
           builder: (BuildContext context) {
-            final ABCModel abc = ABCModel.of(context);
+            final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}');
           }
         );
@@ -109,7 +109,7 @@ void main() {
                       showB,
                       showC,
                       showABC,
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('Increment a'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -118,7 +118,7 @@ void main() {
                           setState(() { _a += 1; });
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('Increment b'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -127,7 +127,7 @@ void main() {
                           setState(() { _b += 1; });
                         },
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: const Text('Increment c'),
                         onPressed: () {
                           // Rebuilds the ABCModel which triggers a rebuild
@@ -190,8 +190,8 @@ void main() {
     expect(find.text('a: 2 b: 2 c: 3'), findsOneWidget);
   });
 
-  testWidgets('Looking up an non existent InherintedModel ancestor returns null', (WidgetTester tester) async {
-    ABCModel inheritedModel;
+  testWidgets('Looking up an non existent InheritedModel ancestor returns null', (WidgetTester tester) async {
+    ABCModel? inheritedModel;
 
     await tester.pumpWidget(
       Builder(
@@ -226,7 +226,7 @@ void main() {
         // Which is the inner model, for which b,c are null.
         final Widget showABC = Builder(
           builder: (BuildContext context) {
-            final ABCModel abc = ABCModel.of(context);
+            final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.headline6);
           }
         );
@@ -252,19 +252,19 @@ void main() {
                         const SizedBox(height: 24.0),
                         showABC,
                         const SizedBox(height: 24.0),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
                             setState(() { _a += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
                             setState(() { _b += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
                             setState(() { _c += 1; });
@@ -328,7 +328,7 @@ void main() {
     int _a = 0;
     int _b = 1;
     int _c = 2;
-    Set<String> _innerModelAspects = <String>{'a'};
+    Set<String>? _innerModelAspects = <String>{'a'};
 
     // Same as in abcPage in the "Inner InheritedModel shadows the outer one"
     // test except: the "Add b aspect" changes adds 'b' to the set of
@@ -343,7 +343,7 @@ void main() {
         // Which is the inner model, for which b,c are null.
         final Widget showABC = Builder(
           builder: (BuildContext context) {
-            final ABCModel abc = ABCModel.of(context);
+            final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.headline6);
           }
         );
@@ -369,25 +369,25 @@ void main() {
                         const SizedBox(height: 24.0),
                         showABC,
                         const SizedBox(height: 24.0),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment a'),
                           onPressed: () {
                             setState(() { _a += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment b'),
                           onPressed: () {
                             setState(() { _b += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('Increment c'),
                           onPressed: () {
                             setState(() { _c += 1; });
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: const Text('rebuild'),
                           onPressed: () {
                             setState(() {

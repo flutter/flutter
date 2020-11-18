@@ -10,65 +10,35 @@ class PictureCachePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: DefaultTabController(
-        length: kTabNames.length, // This is the number of tabs.
-        child: NestedScrollView(
-          key: const Key('nested-scroll'), // this key is used by the driver test
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            // These are the slivers that show up in the "outer" scroll view.
-            return <Widget>[
-              SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                sliver: SliverAppBar(
-                  title: const Text('Picture Cache'),
-                  pinned: true,
-                  expandedHeight: 50.0,
-                  forceElevated: innerBoxIsScrolled,
-                  bottom: TabBar(
-                    tabs: kTabNames.map((String name) => Tab(text: name)).toList(),
-                  ),
-                ),
-              ),
-            ];
-          },
-          body: TabBarView(
-            children: kTabNames.map((String name) {
-              return SafeArea(
-                top: false,
-                bottom: false,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return VerticalList();
-                  },
-                ),
-              );
-            }).toList(),
+    return DefaultTabController(
+      length: kTabNames.length, // This is the number of tabs.
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Picture Cache'),
+          // pinned: true,
+          // expandedHeight: 50.0,
+          // forceElevated: innerBoxIsScrolled,
+          bottom: TabBar(
+            tabs: kTabNames.map((String name) => Tab(text: name)).toList(),
           ),
+        ),
+        body: TabBarView(
+          key: const Key('tabbar_view'), // this key is used by the driver test
+          children: kTabNames.map((String name) {
+            return SafeArea(
+              top: false,
+              bottom: false,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListView.builder(
+                    itemBuilder: (BuildContext context, int index) => ListItem(index: index),
+                  );
+                },
+              ),
+            );
+          }).toList(),
         ),
       ),
-    );
-  }
-}
-
-class VerticalList extends StatelessWidget {
-  static const int kItemCount = 100;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverOverlapInjector(
-          // This is the flip side of the SliverOverlapAbsorber above.
-          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => ListItem(index: index),
-            childCount: kItemCount,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -162,7 +132,7 @@ class ListItem extends StatelessWidget {
           ),
         ),
         Image.asset(
-          index % 2 == 0 ? 'food/butternut_squash_soup.png' : 'food/cherry_pie.png',
+          index.isEven ? 'food/butternut_squash_soup.png' : 'food/cherry_pie.png',
           package: 'flutter_gallery_assets',
           fit: BoxFit.cover,
           width: 110,
@@ -263,7 +233,7 @@ class ListItem extends StatelessWidget {
           ),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 250),
-            child: Text(
+            child: const Text(
               kMockName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

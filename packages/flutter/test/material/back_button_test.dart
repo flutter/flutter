@@ -130,7 +130,7 @@ void main() {
         of: find.byType(BackButton),
         matching: find.byType(RichText)
     ));
-    expect(iconText.text.style.color, Colors.blue);
+    expect(iconText.text.style!.color, Colors.blue);
   });
 
   testWidgets('BackButton semantics', (WidgetTester tester) async {
@@ -180,7 +180,7 @@ void main() {
         of: find.byType(CloseButton),
         matching: find.byType(RichText)
     ));
-    expect(iconText.text.style.color, Colors.red);
+    expect(iconText.text.style!.color, Colors.red);
   });
 
   testWidgets('CloseButton onPressed overrides default pop behavior', (WidgetTester tester) async {

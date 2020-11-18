@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
-  testWidgets('gets local corrdinates', (WidgetTester tester) async {
+  testWidgets('gets local coordinates', (WidgetTester tester) async {
     int tapCount = 0;
     int tapCancelCount = 0;
     final List<TapDownDetails> downDetails = <TapDownDetails>[];

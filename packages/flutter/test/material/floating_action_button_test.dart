@@ -107,17 +107,15 @@ void main() {
     expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
-    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(() => gesture?.removePointer());
+    addTearDown(() => gesture.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
-    await gesture.removePointer();
-    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -144,9 +142,9 @@ void main() {
     expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
-    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(() => gesture?.removePointer());
+    addTearDown(() => gesture.removePointer());
     await tester.pumpAndSettle();
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
@@ -154,8 +152,6 @@ void main() {
     expect(find.text('Add'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
-    await gesture.removePointer();
-    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -470,7 +466,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {
-    BuildContext theContext;
+    late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -493,7 +489,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {
-    BuildContext theContext;
+    late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -517,7 +513,7 @@ void main() {
   });
 
   testWidgets('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {
-    BuildContext theContext;
+    late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -625,20 +621,24 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              flags: <SemanticsFlag>[
-                SemanticsFlag.scopesRoute,
-              ],
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Add Photo',
-                  actions: <SemanticsAction>[
-                    SemanticsAction.tap,
-                  ],
                   flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isButton,
-                    SemanticsFlag.isEnabled,
-                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.scopesRoute,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'Add Photo',
+                      actions: <SemanticsAction>[
+                        SemanticsAction.tap,
+                      ],
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasEnabledState,
+                        SemanticsFlag.isButton,
+                        SemanticsFlag.isEnabled,
+                        SemanticsFlag.isFocusable,
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -672,7 +672,7 @@ void main() {
                           onPressed: () { },
                         ),
                         body: Center(
-                          child: RaisedButton(
+                          child: ElevatedButton(
                             child: const Text('POP'),
                             onPressed: () {
                               Navigator.pop(context);
@@ -744,6 +744,84 @@ void main() {
     );
   });
 
+  testWidgets('Floating Action Button changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: FloatingActionButton.extended(
+              onPressed: () { },
+              mouseCursor: SystemMouseCursors.text,
+              label: const Text('label'),
+              icon: const Icon(Icons.android),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(FloatingActionButton)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: FloatingActionButton(
+              onPressed: () { },
+              mouseCursor: SystemMouseCursors.text,
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: FloatingActionButton(
+              onPressed: () { },
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: FloatingActionButton(
+              onPressed: null,
+              child: Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
@@ -798,7 +876,7 @@ void main() {
     final RichText iconRichText = tester.widget<RichText>(
       find.descendant(of: find.byIcon(Icons.access_alarm), matching: find.byType(RichText)),
     );
-    expect(iconRichText.text.style.color, foregroundColor);
+    expect(iconRichText.text.style!.color, foregroundColor);
   });
 
   testWidgets('FloatingActionButton uses custom splash color', (WidgetTester tester) async {

@@ -23,7 +23,7 @@ void main() {
       ),
     );
     final RichText text = tester.widget(find.byType(RichText));
-    expect(text.text.style.color, const Color(0xFF666666).withOpacity(0.5));
+    expect(text.text.style!.color, const Color(0xFF666666).withOpacity(0.5));
   });
 
   testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
@@ -123,7 +123,7 @@ void main() {
     );
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
-    expect(richText.text.style.fontFamily, equals('Roboto'));
+    expect(richText.text.style!.fontFamily, equals('Roboto'));
   });
 
   testWidgets('Icon with semantic label', (WidgetTester tester) async {

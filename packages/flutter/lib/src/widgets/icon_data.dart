@@ -30,7 +30,7 @@ class IconData {
   final int codePoint;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
-  final String fontFamily;
+  final String? fontFamily;
 
   /// The name of the package from which the font family is included.
   ///
@@ -40,7 +40,7 @@ class IconData {
   /// See also:
   ///
   ///  * [TextStyle], which describes how to use fonts from other packages.
-  final String fontPackage;
+  final String? fontPackage;
 
   /// Whether this icon should be automatically mirrored in right-to-left
   /// environments.
@@ -74,8 +74,8 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   /// The [showName], [style], and [level] arguments must not be null.
   IconDataProperty(
     String name,
-    IconData value, {
-    String ifNull,
+    IconData? value, {
+    String? ifNull,
     bool showName = true,
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
@@ -90,11 +90,11 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
        );
 
   @override
-  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object> json = super.toJsonMap(delegate);
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value != null) {
       json['valueProperties'] = <String, Object>{
-        'codePoint': value.codePoint,
+        'codePoint': value!.codePoint,
       };
     }
     return json;

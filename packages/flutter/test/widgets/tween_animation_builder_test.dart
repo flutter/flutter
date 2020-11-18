@@ -13,7 +13,7 @@ void main() {
       TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
         tween: IntTween(begin: 10, end: 110),
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -44,7 +44,7 @@ void main() {
       TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
         tween: IntTween(end: 100),
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -68,7 +68,7 @@ void main() {
       TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
         tween: IntTween(begin: 100, end: 100),
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -86,11 +86,11 @@ void main() {
 
   testWidgets('Replace tween animates new tween', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({IntTween tween}) {
+    Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
         tween: tween,
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -114,12 +114,12 @@ void main() {
 
   testWidgets('Curve is respected', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({IntTween tween, Curve curve}) {
+    Widget buildWidget({required IntTween tween, required Curve curve}) {
       return TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
         tween: tween,
         curve: curve,
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -144,11 +144,11 @@ void main() {
 
   testWidgets('Duration is respected', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({IntTween tween, Duration duration}) {
+    Widget buildWidget({required IntTween tween, required Duration duration}) {
       return TweenAnimationBuilder<int>(
         tween: tween,
         duration: duration,
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -177,8 +177,8 @@ void main() {
         child: TweenAnimationBuilder<int>(
           tween: IntTween(begin: 0, end: 100),
           duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            return child;
+          builder: (BuildContext context, int i, Widget? child) {
+            return child!;
           },
           child: const Text('Hello World'),
         ),
@@ -191,11 +191,11 @@ void main() {
   group('Change tween gapless while', () {
     testWidgets('running forward', (WidgetTester tester) async {
       final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween}) {
+      Widget buildWidget({required IntTween tween}) {
         return TweenAnimationBuilder<int>(
           tween: tween,
           duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
+          builder: (BuildContext context, int i, Widget? child) {
             values.add(i);
             return const Placeholder();
           },
@@ -226,11 +226,11 @@ void main() {
 
     testWidgets('running forward and then reverse with same tween instance', (WidgetTester tester) async {
       final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween}) {
+      Widget buildWidget({required IntTween tween}) {
         return TweenAnimationBuilder<int>(
           tween: tween,
           duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
+          builder: (BuildContext context, int i, Widget? child) {
             values.add(i);
             return const Placeholder();
           },
@@ -256,11 +256,11 @@ void main() {
 
   testWidgets('Changing tween while gapless tween change is in progress', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({IntTween tween}) {
+    Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
         tween: tween,
         duration: const Duration(seconds: 1),
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -296,12 +296,12 @@ void main() {
 
   testWidgets('Changing curve while no animation is running does not trigger animation', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({Curve curve}) {
+    Widget buildWidget({required Curve curve}) {
       return TweenAnimationBuilder<int>(
         tween: IntTween(begin: 0, end: 100),
         curve: curve,
         duration: const Duration(seconds: 1),
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -325,11 +325,11 @@ void main() {
 
   testWidgets('Setting same tween and direction does not trigger animation', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({IntTween tween}) {
+    Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
         tween: tween,
         duration: const Duration(seconds: 1),
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },
@@ -354,11 +354,11 @@ void main() {
 
   testWidgets('Setting same tween and direction while gapless animation is in progress works', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({IntTween tween}) {
+    Widget buildWidget({required IntTween tween}) {
       return TweenAnimationBuilder<int>(
         tween: tween,
         duration: const Duration(seconds: 1),
-        builder: (BuildContext context, int i, Widget child) {
+        builder: (BuildContext context, int i, Widget? child) {
           values.add(i);
           return const Placeholder();
         },

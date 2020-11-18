@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:ui';
 
 import 'message_codecs.dart';
@@ -9,7 +10,7 @@ import 'platform_channel.dart';
 
 /// Platform channels used by the Flutter system.
 class SystemChannels {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   SystemChannels._();
@@ -25,16 +26,18 @@ class SystemChannels {
   ///  * `pushRoute`, which is called with a single string argument when the
   ///    operating system instructs the application to open a particular page.
   ///
+  ///  * `pushRouteInformation`, which is called with a map, which contains a
+  ///    location string and a state object, when the operating system instructs
+  ///    the application to open a particular page. These parameters are stored
+  ///    under the key `location` and `state` in the map.
+  ///
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
-  ///  * `routePushed`, which is called when a route is pushed. (e.g. A modal
-  ///    replaces the entire screen.)
+  ///  * `routeUpdated`, which is called when current route has changed.
   ///
-  ///  * `routePopped`, which is called when a route is popped. (e.g. A dialog,
-  ///    such as time picker is closed.)
-  ///
-  ///  * `routeReplaced`, which is called when a route is replaced.
+  ///  * `routeInformationUpdated`, which is called by the [Router] when the
+  ///    application navigate to a new location.
   ///
   /// See also:
   ///
@@ -45,7 +48,7 @@ class SystemChannels {
   ///    [Navigator.push], [Navigator.pushReplacement], [Navigator.pop] and
   ///    [Navigator.replace], utilize this channel's methods to send route
   ///    change information from framework to engine.
-  static const MethodChannel navigation = MethodChannel(
+  static const MethodChannel navigation = OptionalMethodChannel(
       'flutter/navigation',
       JSONMethodCodec(),
   );
@@ -85,7 +88,7 @@ class SystemChannels {
   ///    the green channel, the next eight bits being the red channel, and the
   ///    high eight bits being set, as from [Color.value] for an opaque color).
   ///    The `primaryColor` can also be zero to indicate that the system default
-  ///    should be used. See [SystemChrome.setPreferredOrientations].
+  ///    should be used. See [SystemChrome.setApplicationSwitcherDescription].
   ///
   ///  * `SystemChrome.setEnabledSystemUIOverlays`: Specifies the set of system
   ///    overlays to have visible when the application is running. The argument
@@ -129,7 +132,7 @@ class SystemChannels {
   ///    a [List] whose first value is an integer representing a previously
   ///    unused transaction identifier, and the second is a [String] with a
   ///    JSON-encoded object with five keys, as obtained from
-  ///    [TextInputConfiguration.toJSON]. This method must be invoked before any
+  ///    [TextInputConfiguration.toJson]. This method must be invoked before any
   ///    others (except `TextInput.hide`). See [TextInput.attach].
   ///
   ///  * `TextInput.show`: Show the keyboard. See [TextInputConnection.show].
@@ -152,8 +155,8 @@ class SystemChannels {
   ///
   ///  * `TextInputClient.updateEditingState`: The user has changed the contents
   ///    of the text control. The second argument is a [String] containing a
-  ///    JSON-encoded object with seven keys, in the form expected by [new
-  ///    TextEditingValue.fromJSON].
+  ///    JSON-encoded object with seven keys, in the form expected by
+  ///    [TextEditingValue.fromJSON].
   ///
   ///  * `TextInputClient.performAction`: The user has triggered an action. The
   ///    second argument is a [String] consisting of the stringification of one
@@ -216,7 +219,7 @@ class SystemChannels {
   ///
   ///  * [WidgetsBindingObserver.didChangeAppLifecycleState], which triggers
   ///    whenever a message is received on this channel.
-  static const BasicMessageChannel<String> lifecycle = BasicMessageChannel<String>(
+  static const BasicMessageChannel<String?> lifecycle = BasicMessageChannel<String?>(
       'flutter/lifecycle',
       StringCodec(),
   );
@@ -269,5 +272,50 @@ class SystemChannels {
   static const MethodChannel skia = MethodChannel(
     'flutter/skia',
     JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for configuring mouse cursors.
+  ///
+  /// All outgoing methods defined for this channel uses a `Map<String, dynamic>`
+  /// to contain multiple parameters, including the following methods (invoked
+  /// using [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `activateSystemCursor`: Request to set the cursor of a pointer
+  ///    device to a system cursor. The parameters are
+  ///    integer `device`, and string `kind`.
+  static const MethodChannel mouseCursor = OptionalMethodChannel(
+    'flutter/mousecursor',
+    StandardMethodCodec(),
+  );
+
+  /// A [MethodChannel] for synchronizing restoration data with the engine.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `get`: Retrieves the current restoration information (e.g. provided by
+  ///    the operating system) from the engine. The method returns a map
+  ///    containing an `enabled` boolean to indicate whether collecting
+  ///    restoration data is supported by the embedder. If `enabled` is true,
+  ///    the map may also contain restoration data stored under the `data` key
+  ///    from which the state of the framework may be restored. The restoration
+  ///    data is encoded as [Uint8List].
+  ///  * `put`: Sends the current restoration data to the engine. Takes the
+  ///    restoration data encoded as [Uint8List] as argument.
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]).
+  ///
+  ///  * `push`: Called by the engine to send newly provided restoration
+  ///    information to the framework. The argument given to this method has
+  ///    the same format as the object that the `get` method returns.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which uses this channel and also describes how
+  ///    restoration data is used in Flutter.
+  static const MethodChannel restoration = OptionalMethodChannel(
+    'flutter/restoration',
+    StandardMethodCodec(),
   );
 }

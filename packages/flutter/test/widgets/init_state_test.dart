@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 List<String> ancestors = <String>[];
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({ Key key }) : super(key: key);
+  const TestWidget({ Key? key }) : super(key: key);
   @override
   TestWidgetState createState() => TestWidgetState();
 }

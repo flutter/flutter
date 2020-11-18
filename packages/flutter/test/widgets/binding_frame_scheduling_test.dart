@@ -25,8 +25,11 @@ void main() {
     expect(window.onDrawFrame, isNull);
 
     // Framework starts with detached statue. Sends resumed signal to enable frame.
-    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+
+    // A frame can only be scheduled when there is a root widget.
+    binding.attachRootWidget(const Placeholder());
 
     // Frame callbacks are registered lazily when a frame is scheduled.
     binding.scheduleFrame();

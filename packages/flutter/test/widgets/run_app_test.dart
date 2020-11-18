@@ -11,7 +11,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
-          child: RaisedButton(
+          child: ElevatedButton(
             onPressed: () {
               runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr,)));
             },

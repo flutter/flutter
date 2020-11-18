@@ -4,8 +4,10 @@
 
 import 'package:meta/meta.dart';
 
+import 'base/config.dart';
 import 'base/context.dart';
-import 'globals.dart' as globals;
+import 'base/platform.dart';
+import 'version.dart';
 
 /// The current [FeatureFlags] implementation.
 ///
@@ -19,42 +21,93 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>();
 /// flags should be provided with a default implementation here. Clients that
 /// use this class should extent instead of implement, so that new flags are
 /// picked up automatically.
-class FeatureFlags {
+abstract class FeatureFlags {
+  /// const constructor so that subclasses can be const.
   const FeatureFlags();
 
   /// Whether flutter desktop for linux is enabled.
-  bool get isLinuxEnabled => isEnabled(flutterLinuxDesktopFeature);
+  bool get isLinuxEnabled => false;
 
   /// Whether flutter desktop for macOS is enabled.
-  bool get isMacOSEnabled => isEnabled(flutterMacOSDesktopFeature);
+  bool get isMacOSEnabled => false;
 
   /// Whether flutter web is enabled.
-  bool get isWebEnabled => isEnabled(flutterWebFeature);
+  bool get isWebEnabled => false;
 
   /// Whether flutter desktop for Windows is enabled.
-  bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
+  bool get isWindowsEnabled => false;
 
-  /// Whether the Android embedding V2 is enabled.
-  bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
+  /// Whether android is enabled.
+  bool get isAndroidEnabled => true;
+
+  /// Whether iOS is enabled.
+  bool get isIOSEnabled => true;
+
+  /// Whether fuchsia is enabled.
+  bool get isFuchsiaEnabled => true;
+
+  /// Whether fast single widget reloads are enabled.
+  bool get isSingleWidgetReloadEnabled => false;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
+  bool isEnabled(Feature feature) => false;
+}
+
+class FlutterFeatureFlags implements FeatureFlags {
+  FlutterFeatureFlags({
+    @required FlutterVersion flutterVersion,
+    @required Config config,
+    @required Platform platform,
+  }) : _flutterVersion = flutterVersion,
+       _config = config,
+       _platform = platform;
+
+  final FlutterVersion _flutterVersion;
+  final Config _config;
+  final Platform _platform;
+
+  @override
+  bool get isLinuxEnabled => isEnabled(flutterLinuxDesktopFeature);
+
+  @override
+  bool get isMacOSEnabled => isEnabled(flutterMacOSDesktopFeature);
+
+  @override
+  bool get isWebEnabled => isEnabled(flutterWebFeature);
+
+  @override
+  bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
+
+  @override
+  bool get isAndroidEnabled => isEnabled(flutterAndroidFeature);
+
+  @override
+  bool get isIOSEnabled => isEnabled(flutterIOSFeature);
+
+  @override
+  bool get isFuchsiaEnabled => isEnabled(flutterFuchsiaFeature);
+
+  @override
+  bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
+
+  @override
   bool isEnabled(Feature feature) {
-    final String currentChannel = globals.flutterVersion.channel;
+    final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
       return false;
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = globals.config.getValue(feature.configSetting) as bool;
+      final bool configOverride = _config.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }
     }
     if (feature.environmentOverride != null) {
-      if (globals.platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+      if (_platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
         isEnabled = true;
       }
     }
@@ -68,7 +121,10 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  flutterAndroidEmbeddingV2Feature,
+  singleWidgetReload,
+  flutterAndroidFeature,
+  flutterIOSFeature,
+  flutterFuchsiaFeature,
 ];
 
 /// The [Feature] for flutter web.
@@ -114,6 +170,10 @@ const Feature flutterLinuxDesktopFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
 /// The [Feature] for Windows desktop.
@@ -125,14 +185,17 @@ const Feature flutterWindowsDesktopFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
-/// The [Feature] for generating projects using the new Android embedding.
-const Feature flutterAndroidEmbeddingV2Feature = Feature(
-  name: 'flutter create generates projects using the Android embedding V2',
-  environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
-  configSetting: 'enable-android-embedding-v2',
-  beta: FeatureChannelSetting(
+/// The [Feature] for Android devices.
+const Feature flutterAndroidFeature = Feature(
+  name: 'Flutter for Android',
+  configSetting: 'enable-android',
+  master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
   ),
@@ -140,13 +203,70 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
     available: true,
     enabledByDefault: true,
   ),
-  master: FeatureChannelSetting(
+  beta: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
+  ),
+);
+
+
+/// The [Feature] for iOS devices.
+const Feature flutterIOSFeature = Feature(
+  name: 'Flutter for iOS',
+  configSetting: 'enable-ios',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+);
+
+/// The [Feature] for Fuchsia support.
+const Feature flutterFuchsiaFeature = Feature(
+  name: 'Flutter for Fuchsia',
+  configSetting: 'enable-fuchsia',
+  environmentOverride: 'FLUTTER_FUCHSIA',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
+const Feature singleWidgetReload = Feature(
+  name: 'Hot reload optimization for changes to class body of a single widget',
+  configSetting: 'single-widget-reload-optimization',
+  environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
   ),
 );
 

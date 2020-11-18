@@ -2,21 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
+// Do not add package imports to this file.
+import 'dart:convert'; // ignore: dart_convert_import.
 import 'dart:io'; // ignore: dart_io_import.
-import 'package:path/path.dart' as path; // ignore: package_path_import.
 
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1].toLowerCase();
 
-  final String projectDirectory = Platform.environment['PROJECT_DIR'];
-  final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] != null;
-  final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] != null;
-  final String flutterTarget = Platform.environment['FLUTTER_TARGET'] ?? path.join('lib', 'main.dart');
+  final String dartDefines = Platform.environment['DART_DEFINES'];
+  final bool dartObfuscation = Platform.environment['DART_OBFUSCATION'] == 'true';
+  final String extraFrontEndOptions = Platform.environment['EXTRA_FRONT_END_OPTIONS'];
+  final String extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
   final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
-  final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String flutterTarget = Platform.environment['FLUTTER_TARGET']
+    ?? pathJoin(<String>['lib', 'main.dart']);
+  final String codeSizeDirectory = Platform.environment['CODE_SIZE_DIRECTORY'];
+  final String localEngine = Platform.environment['LOCAL_ENGINE'];
+  final String projectDirectory = Platform.environment['PROJECT_DIR'];
+  final String splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
+  final String bundleSkSLPath = Platform.environment['BUNDLE_SKSL_PATH'];
+  final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] == 'true';
+  final bool treeShakeIcons = Platform.environment['TREE_SHAKE_ICONS'] == 'true';
+  final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
+
   Directory.current = projectDirectory;
 
   if (localEngine != null && !localEngine.contains(buildMode)) {
@@ -32,65 +45,65 @@ or
 ''');
     exit(1);
   }
-  final String flutterExecutable = path.join(
-    flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+  final String flutterExecutable = pathJoin(<String>[
+    flutterRoot,
+    'bin',
+    if (Platform.isWindows)
+      'flutter.bat'
+    else
+      'flutter'
+  ]);
+  final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : 'linux';
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
 
-  if (targetPlatform == 'linux-x64') {
-    // TODO(jonahwilliams): currently all builds are debug builds. Remove the
-    // hardcoded mode when profile and release support is added.
-    final ProcessResult unpackResult = await Process.run(
-        flutterExecutable,
-        <String>[
-          '--suppress-analytics',
-          '--verbose',
-          if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
-          if (localEngine != null) '--local-engine=$localEngine',
-          'assemble',
-          '-dTargetPlatform=$targetPlatform',
-          '-dBuildMode=debug',
-          '-dTargetFile=$flutterTarget',
-          '--output=build',
-          'debug_bundle_linux_assets',
-        ]);
-    if (unpackResult.exitCode != 0) {
-      stderr.write(unpackResult.stderr);
-      exit(1);
-    }
-    return;
-  }
-
-  const String cacheDirectory = 'windows/flutter/ephemeral';
-  final ProcessResult unpackResult = await Process.run(
+  final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[
-      '--suppress-analytics',
-      if (verbose) '--verbose',
-      'unpack',
-      '--target-platform=$targetPlatform',
-      '--cache-dir=$cacheDirectory',
+      if (verbose)
+        '--verbose',
       if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
       if (localEngine != null) '--local-engine=$localEngine',
-    ]);
-  if (unpackResult.exitCode != 0) {
-    stderr.write(unpackResult.stderr);
+      'assemble',
+      '--output=build',
+      '-dTargetPlatform=$targetPlatform',
+      '-dTrackWidgetCreation=$trackWidgetCreation',
+      '-dBuildMode=$buildMode',
+      '-dTargetFile=$flutterTarget',
+      '-dTreeShakeIcons="$treeShakeIcons"',
+      '-dDartObfuscation=$dartObfuscation',
+      if (bundleSkSLPath != null)
+        '-iBundleSkSLPath=$bundleSkSLPath',
+      if (codeSizeDirectory != null)
+        '-dCodeSizeDirectory=$codeSizeDirectory',
+      if (splitDebugInfo != null)
+        '-dSplitDebugInfo=$splitDebugInfo',
+      if (dartDefines != null)
+        '--DartDefines=$dartDefines',
+      if (extraGenSnapshotOptions != null)
+        '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
+      if (extraFrontEndOptions != null)
+        '--ExtraFrontEndOptions=$extraFrontEndOptions',
+      target,
+    ],
+  );
+  assembleProcess.stdout
+    .transform(utf8.decoder)
+    .transform(const LineSplitter())
+    .listen(stdout.writeln);
+  assembleProcess.stderr
+    .transform(utf8.decoder)
+    .transform(const LineSplitter())
+    .listen(stderr.writeln);
+
+  if (await assembleProcess.exitCode != 0) {
     exit(1);
   }
-  final ProcessResult buildResult = await Process.run(
-    flutterExecutable,
-    <String>[
-      '--suppress-analytics',
-      if (verbose) '--verbose',
-      'build',
-      'bundle',
-      '--target=$flutterTarget',
-      '--target-platform=$targetPlatform',
-      if (trackWidgetCreation) '--track-widget-creation',
-      if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
-      if (localEngine != null) '--local-engine=$localEngine',
-    ]);
-  if (buildResult.exitCode != 0) {
-    stderr.write(buildResult.stderr);
-    exit(1);
-  }
-  exit(0);
+}
+
+/// Perform a simple path join on the segments based on the current platform.
+///
+/// Does not normalize paths that have repeated separators.
+String pathJoin(List<String> segments) {
+  final String separator = Platform.isWindows ? r'\' : '/';
+  return segments.join(separator);
 }

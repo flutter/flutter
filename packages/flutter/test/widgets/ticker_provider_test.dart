@@ -102,15 +102,15 @@ void main() {
         child: _SingleTickerTest(key: key),
       );
       await tester.pumpWidget(widget);
-      FlutterError error;
-      key.currentState.controller.repeat();
+      FlutterError? error;
+      key.currentState!.controller.repeat();
       try {
-        key.currentState.dispose();
+        key.currentState!.dispose();
       } on FlutterError catch (e) {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.diagnostics.length, 4);
+        expect(error!.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
           error.diagnostics[2].toStringDeep(),
@@ -135,7 +135,7 @@ void main() {
             '     created))\n'
             '     The stack trace when the Ticker was actually created was:'
         ));
-        key.currentState.controller.stop();
+        key.currentState!.controller.stop();
       }
     });
 
@@ -145,15 +145,15 @@ void main() {
         child: _SingleTickerTest(key: key),
       );
       await tester.pumpWidget(widget);
-      FlutterError error;
-      key.currentState.controller.repeat();
+      FlutterError? error;
+      key.currentState!.controller.repeat();
       try {
-        key.currentState.dispose();
+        key.currentState!.dispose();
       } on FlutterError catch (e) {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.diagnostics.length, 4);
+        expect(error!.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
           error.diagnostics[2].toStringDeep(),
@@ -178,7 +178,7 @@ void main() {
           '     created))\n'
           '     The stack trace when the Ticker was actually created was:'
         ));
-        key.currentState.controller.stop();
+        key.currentState!.controller.stop();
       }
     });
 
@@ -188,15 +188,15 @@ void main() {
         child: _MultipleTickerTest(key: key),
       );
       await tester.pumpWidget(widget);
-      FlutterError error;
-      key.currentState.controllers.first.repeat();
+      FlutterError? error;
+      key.currentState!.controllers.first.repeat();
       try {
-        key.currentState.dispose();
+        key.currentState!.dispose();
       } on FlutterError catch (e) {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error.diagnostics.length, 4);
+        expect(error!.diagnostics.length, 4);
         expect(error.diagnostics[2].level, DiagnosticLevel.hint);
         expect(
           error.diagnostics[2].toStringDeep(),
@@ -221,14 +221,14 @@ void main() {
           '     _MultipleTickerTestState#00000(lifecycle state: created,\n'
           '     tickers: tracking 0 tickers))'
         ));
-        key.currentState.controllers.first.stop();
+        key.currentState!.controllers.first.stop();
       }
     });
   });
 }
 
 class BoringTickerTest extends StatefulWidget {
-  const BoringTickerTest({ Key key }) : super(key: key);
+  const BoringTickerTest({ Key? key }) : super(key: key);
   @override
   _BoringTickerTestState createState() => _BoringTickerTestState();
 }
@@ -239,14 +239,14 @@ class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerPr
 }
 
 class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest({Key key}) : super(key: key);
+  const _SingleTickerTest({Key? key}) : super(key: key);
 
   @override
   _SingleTickerTestState createState() => _SingleTickerTestState();
 }
 
 class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
-  AnimationController controller;
+  late AnimationController controller;
 
   @override
   void initState() {
@@ -264,7 +264,7 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 }
 
 class _MultipleTickerTest extends StatefulWidget {
-  const _MultipleTickerTest({Key key}) : super(key: key);
+  const _MultipleTickerTest({Key? key}) : super(key: key);
 
   @override
   _MultipleTickerTestState createState() => _MultipleTickerTestState();

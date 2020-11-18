@@ -4,10 +4,10 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, Window;
+import 'dart:ui' as ui show Scene, SceneBuilder, FlutterView;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show MouseTrackerAnnotation;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -55,9 +55,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// The [configuration] must not be null.
   RenderView({
-    RenderBox child,
-    @required ViewConfiguration configuration,
-    @required ui.Window window,
+    RenderBox? child,
+    required ViewConfiguration configuration,
+    required ui.FlutterView window,
   }) : assert(configuration != null),
        _configuration = configuration,
        _window = window {
@@ -85,7 +85,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  final ui.Window _window;
+  final ui.FlutterView _window;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -118,7 +118,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   )
   void scheduleInitialFrame() {
     prepareInitialFrame();
-    owner.requestVisualUpdate();
+    owner!.requestVisualUpdate();
   }
 
   /// Bootstrap the rendering pipeline by preparing the first frame.
@@ -137,7 +137,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_rootTransform != null);
   }
 
-  Matrix4 _rootTransform;
+  Matrix4? _rootTransform;
 
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
     _rootTransform = configuration.toMatrix();
@@ -164,11 +164,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_size.isFinite);
 
     if (child != null)
-      child.layout(BoxConstraints.tight(_size));
+      child!.layout(BoxConstraints.tight(_size));
   }
 
   @override
-  void rotate({ int oldAngle, int newAngle, Duration time }) {
+  void rotate({ int? oldAngle, int? newAngle, Duration? time }) {
     assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
   }
 
@@ -182,9 +182,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// which is to say, in logical pixels. This is not necessarily the same
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(HitTestResult result, { required Offset position }) {
     if (child != null)
-      child.hitTest(BoxHitTestResult.wrap(result), position: position);
+      child!.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));
     return true;
   }
@@ -195,13 +195,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   ///  * [Layer.findAllAnnotations], which is used by this method to find all
   ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
-  Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
+  HitTestResult hitTestMouseTrackers(Offset position) {
+    assert(position != null);
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
-    return layer.findAllAnnotations<MouseTrackerAnnotation>(
-      position * configuration.devicePixelRatio
-    ).annotations;
+    final BoxHitTestResult result = BoxHitTestResult();
+    hitTest(result, position: position);
+    return result;
   }
 
   @override
@@ -210,13 +211,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChild(child, offset);
+      context.paintChild(child!, offset);
   }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     assert(_rootTransform != null);
-    transform.multiply(_rootTransform);
+    transform.multiply(_rootTransform!);
     super.applyPaintTransform(child, transform);
   }
 
@@ -224,10 +225,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
-    Timeline.startSync('Compositing', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Compositing', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
-      final ui.Scene scene = layer.buildScene(builder);
+      final ui.Scene scene = layer!.buildScene(builder);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
       _window.render(scene);
@@ -243,15 +244,53 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void _updateSystemChrome() {
+    // Take overlay style from the place where a system status bar and system
+    // navigation bar are placed to update system style overlay.
+    // The center of the system navigation bar and the center of the status bar
+    // are used to get SystemUiOverlayStyle's to update system overlay appearance.
+    //
+    //         Horizontal center of the screen
+    //                 V
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |    System status bar   |  <- Vertical center of the status bar
+    //    |                        |
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |        Content         |
+    //    ~                        ~
+    //    |                        |
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |  System navigation bar | <- Vertical center of the navigation bar
+    //    |                        |
+    //    ++++++++++++++++++++++++++ <- bounds.bottom
     final Rect bounds = paintBounds;
-    final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
-    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
+    // Center of the status bar
+    final Offset top = Offset(
+      // Horizontal center of the screen
+      bounds.center.dx,
+      // The vertical center of the system status bar. The system status bar
+      // height is kept as top window padding.
+      _window.padding.top / 2.0,
+    );
+    // Center of the navigation bar
+    final Offset bottom = Offset(
+      // Horizontal center of the screen
+      bounds.center.dx,
+      // Vertical center of the system navigation bar. The system navigation bar
+      // height is kept as bottom window padding. The "1" needs to be subtracted
+      // from the bottom because available pixels are in (0..bottom) range.
+      // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
+      // bottom drawn pixel is at 1919 position.
+      bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
+    );
+    final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
-    SystemUiOverlayStyle lowerOverlayStyle;
+    SystemUiOverlayStyle? lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
+        lowerOverlayStyle = layer!.find<SystemUiOverlayStyle>(bottom);
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -280,7 +319,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   Rect get semanticBounds {
     assert(_rootTransform != null);
-    return MatrixUtils.transformRect(_rootTransform, Offset.zero & size);
+    return MatrixUtils.transformRect(_rootTransform!, Offset.zero & size);
   }
 
   @override
@@ -295,7 +334,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.semanticsEnabled)
+    if (_window.platformDispatcher.semanticsEnabled)
       properties.add(DiagnosticsNode.message('semantics enabled'));
   }
 }

@@ -22,11 +22,11 @@ void main() {
     final double dyDelta2 = thirdPosition.dy - secondPosition.dy;
 
     // If the animation were linear, these two values would be the same.
-    expect(dyDelta1, isNot(closeTo(dyDelta2, 0.1)));
+    expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
-    BuildContext savedContext;
+    late BuildContext savedContext;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -62,7 +62,7 @@ void main() {
   });
 
   testWidgets('Tapping outside a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
-    BuildContext savedContext;
+    late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
       home: Builder(
@@ -96,7 +96,7 @@ void main() {
   });
 
   testWidgets('Tapping outside a modal BottomSheet should dismiss it when isDismissible=true', (WidgetTester tester) async {
-    BuildContext savedContext;
+    late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
       home: Builder(
@@ -131,7 +131,7 @@ void main() {
   });
 
   testWidgets('Verify that the BottomSheet animates non-linearly', (WidgetTester tester) async {
-    BuildContext savedContext;
+    late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
       home: Builder(
@@ -163,7 +163,7 @@ void main() {
   });
 
   testWidgets('Tapping outside a modal BottomSheet should not dismiss it when isDismissible=false', (WidgetTester tester) async {
-    BuildContext savedContext;
+    late BuildContext savedContext;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -200,7 +200,7 @@ void main() {
   });
 
   testWidgets('Swiping down a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
-    BuildContext savedContext;
+    late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
       home: Builder(
@@ -235,7 +235,7 @@ void main() {
   });
 
   testWidgets('Swiping down a modal BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
-    BuildContext savedContext;
+    late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
       home: Builder(
@@ -271,7 +271,7 @@ void main() {
   });
 
   testWidgets('Swiping down a modal BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
-    BuildContext savedContext;
+    late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
       home: Builder(
@@ -306,6 +306,38 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
+  testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          savedContext = context;
+          return Container();
+        },
+      ),
+    ));
+
+    int numBuilderCalls = 0;
+    showModalBottomSheet<void>(
+      context: savedContext,
+      isDismissible: false,
+      enableDrag: true,
+      builder: (BuildContext context) {
+        numBuilderCalls++;
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pumpAndSettle();
+    expect(numBuilderCalls, 1);
+
+    // Swipe the bottom sheet to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(numBuilderCalls, 1);
+  });
+
   testWidgets('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
@@ -320,7 +352,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return Container(
         margin: const EdgeInsets.all(40.0),
         child: const Text('BottomSheet'),
@@ -344,7 +376,7 @@ void main() {
 
     // The fling below must be such that the velocity estimation examines an
     // offset greater than the kTouchSlop. Too slow or too short a distance, and
-    // it won't trigger. Also, it musn't be so much that it drags the bottom
+    // it won't trigger. Also, it must not be so much that it drags the bottom
     // sheet off the screen, or we won't see it after we pump!
     await tester.fling(find.text('BottomSheet'), const Offset(0.0, 50.0), 2000.0);
     await tester.pump(); // drain the microtask queue (Future completion callback)
@@ -374,7 +406,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return Container(
         margin: const EdgeInsets.all(40.0),
         child: const Text('BottomSheet'),
@@ -394,8 +426,8 @@ void main() {
   });
 
   testWidgets('modal BottomSheet has no top MediaQuery', (WidgetTester tester) async {
-    BuildContext outerContext;
-    BuildContext innerContext;
+    late BuildContext outerContext;
+    late BuildContext innerContext;
 
     await tester.pumpWidget(Localizations(
       locale: const Locale('en', 'US'),
@@ -456,7 +488,7 @@ void main() {
     ));
 
 
-    showModalBottomSheet<void>(context: scaffoldKey.currentContext, builder: (BuildContext context) {
+    showModalBottomSheet<void>(context: scaffoldKey.currentContext!, builder: (BuildContext context) {
       return Container(
         child: const Text('BottomSheet'),
       );
@@ -470,19 +502,24 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              label: 'Dialog',
-              textDirection: TextDirection.ltr,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.scopesRoute,
-                SemanticsFlag.namesRoute,
-              ],
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'BottomSheet',
+                  label: 'Dialog',
                   textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'BottomSheet',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
+            TestSemantics(),
           ],
         ),
       ],
@@ -506,7 +543,7 @@ void main() {
     ));
 
     showModalBottomSheet<void>(
-      context: scaffoldKey.currentContext,
+      context: scaffoldKey.currentContext!,
       backgroundColor: color,
       barrierColor: barrierColor,
       elevation: elevation,
@@ -545,7 +582,7 @@ void main() {
 
 
     showModalBottomSheet<void>(
-      context: scaffoldKey.currentContext,
+      context: scaffoldKey.currentContext!,
       builder: (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -569,25 +606,30 @@ void main() {
         TestSemantics.rootChild(
           children: <TestSemantics>[
             TestSemantics(
-              label: 'Dialog',
-              textDirection: TextDirection.ltr,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.scopesRoute,
-                SemanticsFlag.namesRoute,
-              ],
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                  actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+                  label: 'Dialog',
+                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'BottomSheet',
-                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                      actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'BottomSheet',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
+            TestSemantics(),
           ],
         ),
       ],
@@ -605,11 +647,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('Item 1'),
+              label: 'Item 1',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
-              title: Text('Item 2'),
+              label: 'Item 2',
             ),
           ],
         ),
@@ -634,11 +676,11 @@ void main() {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: Text('Item 1'),
+              label: 'Item 1',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
-              title: Text('Item 2'),
+              label: 'Item 2',
             ),
           ],
         ),
@@ -652,22 +694,54 @@ void main() {
     // the BottomNavigationBar.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
   });
+
+  testWidgets('Verify that route settings can be set in the showModalBottomSheet',
+      (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const RouteSettings routeSettings =
+        RouteSettings(name: 'route_name', arguments: 'route_argument');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    late RouteSettings retrievedRouteSettings;
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      routeSettings: routeSettings,
+      builder: (BuildContext context) {
+        retrievedRouteSettings = ModalRoute.of(context)!.settings;
+        return Container(
+          child: const Text('BottomSheet'),
+        );
+      },
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(retrievedRouteSettings, routeSettings);
+  });
 }
 
 class _TestPage extends StatelessWidget {
-  const _TestPage({Key key, this.useRootNavigator}) : super(key: key);
+  const _TestPage({Key? key, this.useRootNavigator}) : super(key: key);
 
-  final bool useRootNavigator;
+  final bool? useRootNavigator;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: FlatButton(
+      child: TextButton(
         child: const Text('Show bottom sheet'),
         onPressed: () {
           if (useRootNavigator != null) {
             showModalBottomSheet<void>(
-              useRootNavigator: useRootNavigator,
+              useRootNavigator: useRootNavigator!,
               context: context,
               builder: (_) => const Text('Modal bottom sheet'),
             );

@@ -33,7 +33,7 @@ abstract class DataTableSource extends ChangeNotifier {
   ///
   /// Data returned from this method must be consistent for the lifetime of the
   /// object. If the row count changes, then a new delegate must be provided.
-  DataRow getRow(int index);
+  DataRow? getRow(int index);
 
   /// Called to obtain the number of rows to tell the user are available.
   ///

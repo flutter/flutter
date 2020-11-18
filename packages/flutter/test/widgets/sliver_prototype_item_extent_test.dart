@@ -6,10 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class TestItem extends StatelessWidget {
-  const TestItem({ Key key, this.item, this.width, this.height }) : super(key: key);
+  const TestItem({ Key? key, required this.item, this.width, this.height }) : super(key: key);
   final int item;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -21,7 +21,7 @@ class TestItem extends StatelessWidget {
   }
 }
 
-Widget buildFrame({ int count, double width, double height, Axis scrollDirection }) {
+Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirection }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: CustomScrollView(

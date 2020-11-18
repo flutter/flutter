@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class BadWidget extends StatefulWidget {
-  const BadWidget({ Key key }) : super(key: key);
+  const BadWidget({ Key? key }) : super(key: key);
   @override
   State<StatefulWidget> createState() => BadWidgetState();
 }

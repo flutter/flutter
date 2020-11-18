@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 
 const double _doubleColorPrecision = 0.01;
 
@@ -22,12 +23,12 @@ void main() {
 
     expect(color.toColor(), const Color(0xb399816b));
 
-    final HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25);
-    expect(result.alpha, 0.6);
-    expect(result.hue, 53.0);
+    final HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25)!;
+    expect(result.alpha, moreOrLessEquals(0.6));
+    expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
     expect(result.saturation, lessThan(0.4001));
-    expect(result.value, 0.5);
+    expect(result.value, moreOrLessEquals(0.5));
   });
 
   test('HSVColor hue sweep test', () {
@@ -126,7 +127,7 @@ void main() {
     const HSVColor endColor = HSVColor.fromAHSV(1.0, 360.0, 1.0, 1.0);
 
     for (double t = -0.5; t < 1.5; t += 0.1) {
-      output.add(HSVColor.lerp(startColor, endColor, t).toColor());
+      output.add(HSVColor.lerp(startColor, endColor, t)!.toColor());
     }
     final List<Color> expectedColors = <Color>[
       const Color(0xff00ffff),
@@ -159,7 +160,7 @@ void main() {
     const HSVColor endColor = HSVColor.fromAHSV(1.0, 0.0, 1.0, 1.0);
 
     for (double t = -0.1; t < 1.1; t += 0.1) {
-      output.add(HSVColor.lerp(startColor, endColor, t).toColor());
+      output.add(HSVColor.lerp(startColor, endColor, t)!.toColor());
     }
     final List<Color> expectedColors = <Color>[
       const Color(0xffffffff),
@@ -185,7 +186,7 @@ void main() {
     const HSVColor endColor = HSVColor.fromAHSV(1.0, 0.0, 1.0, 1.0);
 
     for (double t = -0.1; t < 1.1; t += 0.1) {
-      output.add(HSVColor.lerp(startColor, endColor, t).toColor());
+      output.add(HSVColor.lerp(startColor, endColor, t)!.toColor());
     }
     final List<Color> expectedColors = <Color>[
       const Color(0xff000000),
@@ -218,12 +219,12 @@ void main() {
 
     expect(color.toColor(), const Color(0xb3b8977a));
 
-    final HSLColor result = HSLColor.lerp(color, const HSLColor.fromAHSL(0.3, 128.0, 0.7, 0.2), 0.25);
-    expect(result.alpha, 0.6);
-    expect(result.hue, 53.0);
+    final HSLColor result = HSLColor.lerp(color, const HSLColor.fromAHSL(0.3, 128.0, 0.7, 0.2), 0.25)!;
+    expect(result.alpha, moreOrLessEquals(0.6));
+    expect(result.hue, moreOrLessEquals(53.0));
     expect(result.saturation, greaterThan(0.3999));
     expect(result.saturation, lessThan(0.4001));
-    expect(result.lightness, 0.5);
+    expect(result.lightness, moreOrLessEquals(0.5));
   });
 
   test('HSLColor hue sweep test', () {
@@ -321,7 +322,7 @@ void main() {
     const HSLColor endColor = HSLColor.fromAHSL(1.0, 360.0, 0.5, 0.5);
 
     for (double t = -0.5; t < 1.5; t += 0.1) {
-      output.add(HSLColor.lerp(startColor, endColor, t).toColor());
+      output.add(HSLColor.lerp(startColor, endColor, t)!.toColor());
     }
     final List<Color> expectedColors = <Color>[
       const Color(0xff40bfbf),
@@ -354,7 +355,7 @@ void main() {
     const HSLColor endColor = HSLColor.fromAHSL(1.0, 0.0, 1.0, 0.5);
 
     for (double t = -0.1; t < 1.1; t += 0.1) {
-      output.add(HSLColor.lerp(startColor, endColor, t).toColor());
+      output.add(HSLColor.lerp(startColor, endColor, t)!.toColor());
     }
     final List<Color> expectedColors = <Color>[
       const Color(0xff808080),
@@ -380,7 +381,7 @@ void main() {
     const HSLColor endColor = HSLColor.fromAHSL(1.0, 0.0, 0.5, 1.0);
 
     for (double t = -0.1; t < 1.1; t += 0.1) {
-      output.add(HSLColor.lerp(startColor, endColor, t).toColor());
+      output.add(HSLColor.lerp(startColor, endColor, t)!.toColor());
     }
     final List<Color> expectedColors = <Color>[
       const Color(0xff000000),
@@ -428,14 +429,32 @@ void main() {
 
   test('ColorDiagnosticsProperty includes valueProperties in JSON', () {
     ColorProperty property = ColorProperty('foo', const Color.fromARGB(10, 20, 30, 40));
-    final Map<String, Object> valueProperties = property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties'] as Map<String, Object>;
+    final Map<String, Object> valueProperties = property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties']! as Map<String, Object>;
     expect(valueProperties['alpha'], 10);
     expect(valueProperties['red'], 20);
     expect(valueProperties['green'], 30);
     expect(valueProperties['blue'], 40);
 
     property = ColorProperty('foo', null);
-    final Map<String, Object> json = property.toJsonMap(const DiagnosticsSerializationDelegate());
+    final Map<String, Object?> json = property.toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json.containsKey('valueProperties'), isFalse);
+  });
+
+  test('MaterialColor swatch comparison', () {
+    const Map<int, MaterialColor> sampleMap = <int, MaterialColor>{
+      0: Colors.lightBlue,
+      1: Colors.deepOrange,
+      2: Colors.blueGrey,
+    };
+    const MaterialColor first = MaterialColor(0, sampleMap);
+    const MaterialColor second = MaterialColor(0, sampleMap);
+    const MaterialColor third = MaterialColor(
+        0, <int, MaterialColor>{
+          0: Colors.lightBlue,
+          1: Colors.deepOrange,
+          2: Colors.blueGrey,
+        });
+    expect(first == second, true);
+    expect(first == third, true);
   });
 }

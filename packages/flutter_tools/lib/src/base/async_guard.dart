@@ -117,7 +117,7 @@ Future<T> asyncGuard<T>(
     } catch (e, s) { // ignore: avoid_catches_without_on_clauses
       handleError(e, s);
     }
-  }, onError: (Object e, StackTrace s) {
+  }, onError: (Object e, StackTrace s) { // ignore: deprecated_member_use
     handleError(e, s);
   });
 

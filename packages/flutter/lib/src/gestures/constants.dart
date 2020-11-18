@@ -26,7 +26,7 @@ const Duration kLongPressTimeout = Duration(milliseconds: 500);
 
 /// The maximum time from the start of the first tap to the start of the second
 /// tap in a double-tap gesture.
-// TODO(ianh): In Android, this is actually the time from the first's up event
+// In Android, this is actually the time from the first's up event
 // to the second's down event, according to the ViewConfiguration docs.
 const Duration kDoubleTapTimeout = Duration(milliseconds: 300);
 
@@ -94,3 +94,12 @@ const double kMaxFlingVelocity = 8000.0; // Logical pixels / second
 /// tap in a jump-tap gesture.
 // TODO(ianh): Implement jump-tap gestures.
 const Duration kJumpTapTimeout = Duration(milliseconds: 500);
+
+/// Like [kTouchSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerHitSlop = 1.0; // Logical pixels;
+
+/// Like [kPanSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerPanSlop = kPrecisePointerHitSlop * 2.0; // Logical pixels
+
+/// Like [kScaleSlop], but for more precise pointers like mice and trackpads.
+const double kPrecisePointerScaleSlop = kPrecisePointerHitSlop; // Logical pixels

@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../persistent_tool_state.dart';
 import 'io.dart';
 import 'net.dart';
+import 'platform.dart';
 
 class BotDetector {
   BotDetector({
@@ -95,22 +97,31 @@ class AzureDetector {
     if (_isRunningOnAzure != null) {
       return _isRunningOnAzure;
     }
+    const Duration connectionTimeout = Duration(milliseconds: 250);
+    const Duration requestTimeout = Duration(seconds: 1);
     final HttpClient client = _httpClientFactory()
-      ..connectionTimeout = const Duration(milliseconds: 250);
+      ..connectionTimeout = connectionTimeout;
     try {
       final HttpClientRequest request = await client.getUrl(
         Uri.parse(_serviceUrl),
-      );
+      ).timeout(requestTimeout);
       request.headers.add('Metadata', true);
       await request.close();
     } on SocketException {
-      // If there is an error on the socket, it probalby means that we are not
+      // If there is an error on the socket, it probably means that we are not
       // running on Azure.
       return _isRunningOnAzure = false;
     } on HttpException {
       // If the connection gets set up, but encounters an error condition, it
       // still means we're on Azure.
       return _isRunningOnAzure = true;
+    } on TimeoutException {
+      // The HttpClient connected to a host, but it did not respond in a timely
+      // fashion. Assume we are not on a bot.
+      return _isRunningOnAzure = false;
+    } on OSError {
+      // The HttpClient might be running in a WSL1 environment.
+      return _isRunningOnAzure = false;
     }
     // We got a response. We're running on Azure.
     return _isRunningOnAzure = true;

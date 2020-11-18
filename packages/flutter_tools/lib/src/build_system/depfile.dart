@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 
@@ -13,14 +13,11 @@ class DepfileService {
   DepfileService({
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Platform platform,
   }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform;
+       _fileSystem = fileSystem;
 
   final Logger _logger;
   final FileSystem _fileSystem;
-  final Platform _platform;
   static final RegExp _separatorExpr = RegExp(r'([^\\]) ');
   static final RegExp _escapeExpr = RegExp(r'\\(.)');
 
@@ -30,9 +27,7 @@ class DepfileService {
   /// exist.
   void writeToFile(Depfile depfile, File output) {
     if (depfile.inputs.isEmpty || depfile.outputs.isEmpty) {
-      if (output.existsSync()) {
-        output.deleteSync();
-      }
+      ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
     final StringBuffer buffer = StringBuffer();
@@ -82,8 +77,9 @@ class DepfileService {
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
     for (final File outputFile in files) {
-      if (_platform.isWindows) {
-        // Foward slashes and spaces in a depfile have to be escaped on windows.
+      if (_fileSystem.path.style.separator == r'\') {
+        // backslashes and spaces in a depfile have to be escaped if the
+        // platform separator is a backslash.
         final String path = outputFile.path
           .replaceAll(r'\', r'\\')
           .replaceAll(r' ', r'\ ');
@@ -105,7 +101,7 @@ class DepfileService {
         .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
     // The tool doesn't write duplicates to these lists. This call is an attempt to
-    // be resillient to the outputs of other tools which write or user edits to depfiles.
+    // be resilient to the outputs of other tools which write or user edits to depfiles.
         .toSet()
         .map(_fileSystem.file)
         .toList();

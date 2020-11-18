@@ -9,9 +9,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  DateTime firstDate;
-  DateTime lastDate;
-  DateTime initialDate;
+  late DateTime firstDate;
+  late DateTime lastDate;
+  late DateTime initialDate;
 
   setUp(() {
     firstDate = DateTime(2001, DateTime.january, 1);
@@ -19,7 +19,7 @@ void main() {
     initialDate = DateTime(2016, DateTime.january, 15);
   });
 
-  group(DayPicker, () {
+  group(CalendarDatePicker, () {
     final intl.NumberFormat arabicNumbers = intl.NumberFormat('0', 'ar');
     final Map<Locale, Map<String, dynamic>> testLocales = <Locale, Map<String, dynamic>>{
       // Tests the default.
@@ -53,19 +53,17 @@ void main() {
 
     for (final Locale locale in testLocales.keys) {
       testWidgets('shows dates for $locale', (WidgetTester tester) async {
-        final List<String> expectedDaysOfWeek = testLocales[locale]['expectedDaysOfWeek'] as List<String>;
-        final List<String> expectedDaysOfMonth = testLocales[locale]['expectedDaysOfMonth'] as List<String>;
-        final String expectedMonthYearHeader = testLocales[locale]['expectedMonthYearHeader'] as String;
-        final TextDirection textDirection = testLocales[locale]['textDirection'] as TextDirection;
+        final List<String> expectedDaysOfWeek = testLocales[locale]!['expectedDaysOfWeek'] as List<String>;
+        final List<String> expectedDaysOfMonth = testLocales[locale]!['expectedDaysOfMonth'] as List<String>;
+        final String expectedMonthYearHeader = testLocales[locale]!['expectedMonthYearHeader'] as String;
+        final TextDirection textDirection = testLocales[locale]!['textDirection'] as TextDirection;
         final DateTime baseDate = DateTime(2017, 9, 27);
 
-        await _pumpBoilerplate(tester, DayPicker(
-          selectedDate: baseDate,
-          currentDate: baseDate,
-          onChanged: (DateTime newValue) { },
+        await _pumpBoilerplate(tester, CalendarDatePicker(
+          initialDate: baseDate,
           firstDate: baseDate.subtract(const Duration(days: 90)),
           lastDate: baseDate.add(const Duration(days: 90)),
-          displayedMonth: baseDate,
+          onDateChanged: (DateTime newValue) {},
         ), locale: locale, textDirection: textDirection);
 
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
@@ -74,7 +72,7 @@ void main() {
           expect(find.text(dayOfWeek), findsWidgets);
         }
 
-        Offset previousCellOffset;
+        Offset? previousCellOffset;
         for (final String dayOfMonth in expectedDaysOfMonth) {
           final Finder dayCell = find.descendant(of: find.byType(GridView), matching: find.text(dayOfMonth));
           expect(dayCell, findsOneWidget);
@@ -106,7 +104,7 @@ void main() {
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
-            return FlatButton(
+            return TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -126,14 +124,14 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final Element dayPicker = tester.element(find.byType(DayPicker));
+    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Localizations.localeOf(dayPicker),
+      Localizations.localeOf(picker),
       const Locale('fr', 'CA'),
     );
 
     expect(
-      Directionality.of(dayPicker),
+      Directionality.of(picker),
       TextDirection.ltr,
     );
 
@@ -149,7 +147,7 @@ void main() {
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
-            return FlatButton(
+            return TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -169,9 +167,9 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final Element dayPicker = tester.element(find.byType(DayPicker));
+    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Directionality.of(dayPicker),
+      Directionality.of(picker),
       TextDirection.rtl,
     );
 
@@ -189,7 +187,7 @@ void main() {
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
-            return FlatButton(
+            return TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -210,14 +208,14 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final Element dayPicker = tester.element(find.byType(DayPicker));
+    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Localizations.localeOf(dayPicker),
+      Localizations.localeOf(picker),
       const Locale('fr', 'CA'),
     );
 
     expect(
-      Directionality.of(dayPicker),
+      Directionality.of(picker),
       TextDirection.rtl,
     );
 
@@ -234,7 +232,9 @@ void main() {
 
     Future<void> _showPicker(WidgetTester tester, Locale locale, Size size) async {
       tester.binding.window.physicalSizeTestValue = size;
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
+      addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -242,7 +242,7 @@ void main() {
               return Localizations(
                 locale: locale,
                 delegates: GlobalMaterialLocalizations.delegates,
-                child: RaisedButton(
+                child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDatePicker(
@@ -292,12 +292,16 @@ Future<void> _pumpBoilerplate(
   Locale locale = const Locale('en', 'US'),
   TextDirection textDirection = TextDirection.ltr,
 }) async {
-  await tester.pumpWidget(Directionality(
-    textDirection: TextDirection.ltr,
-    child: Localizations(
-      locale: locale,
-      delegates: GlobalMaterialLocalizations.delegates,
-      child: child,
+  await tester.pumpWidget(MaterialApp(
+    home: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Localizations(
+        locale: locale,
+        delegates: GlobalMaterialLocalizations.delegates,
+        child: Material(
+          child: child,
+        ),
+      ),
     ),
   ));
 }

@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
+
+import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
@@ -17,8 +18,9 @@ int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
 }
 
 /// Simple data class to hold parsed locale. Does not promise validity of any data.
+@immutable
 class LocaleInfo implements Comparable<LocaleInfo> {
-  LocaleInfo({
+  const LocaleInfo({
     this.languageCode,
     this.scriptCode,
     this.countryCode,
@@ -264,8 +266,6 @@ class GeneratorOptions {
   final bool cupertinoOnly;
 }
 
-const String registry = 'https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry';
-
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
@@ -297,13 +297,9 @@ const String kParentheticalPrefix = ' (';
 /// Prepares the data for the [describeLocale] method below.
 ///
 /// The data is obtained from the official IANA registry.
-Future<void> precacheLanguageAndRegionTags() async {
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(Uri.parse(registry));
-  final HttpClientResponse response = await request.close();
-  final String body = (await response.cast<List<int>>().transform<String>(utf8.decoder).toList()).join('');
-  client.close(force: true);
-  final List<Map<String, List<String>>> sections = body.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
+void precacheLanguageAndRegionTags() {
+  final List<Map<String, List<String>>> sections =
+      languageSubtagRegistry.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
   for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type'].single;
@@ -378,36 +374,34 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
+/// ```
+///
+/// This function is used by tools that take in a JSON-formatted file to
+/// generate Dart code. For this reason, characters with special meaning
+/// in JSON files are escaped. For example, the backspace character (\b)
+/// has to be properly escaped by this function so that the generated
+/// Dart code correctly represents this character:
+/// ```
 /// foo\bar => 'foo\\bar'
-/// foo\nbar => 'foo\\\\nbar'
-/// ```
-///
-/// When [shouldEscapeDollar] is set to true, the
-/// result avoids character escaping, with the
-/// exception of the dollar sign:
-///
-/// ```
+/// foo\nbar => 'foo\\nbar'
+/// foo\\nbar => 'foo\\\\nbar'
+/// foo\\bar => 'foo\\\\bar'
+/// foo\ bar => 'foo\\ bar'
 /// foo$bar = 'foo\$bar'
 /// ```
-///
-/// When [shouldEscapeDollar] is set to false, the
-/// result tries to avoid character escaping:
-///
-/// ```
-/// foo$bar => 'foo\\\$bar'
-/// ```
-///
-/// [shouldEscapeDollar] is true by default.
-///
-/// Strings with newlines are not supported.
-String generateString(String value, { bool escapeDollar = true }) {
-  assert(escapeDollar != null);
-  assert(
-    !value.contains('\n'),
-    'Since it is assumed that the input string comes '
-    'from a json/arb file source, messages cannot '
-    'contain newlines.'
-  );
+String generateString(String value) {
+  if (<String>['\n', '\f', '\t', '\r', '\b'].every((String pattern) => !value.contains(pattern))) {
+    final bool hasDollar = value.contains(r'$');
+    final bool hasBackslash = value.contains(r'\');
+    final bool hasQuote = value.contains("'");
+    final bool hasDoubleQuote = value.contains('"');
+    if (!hasQuote) {
+      return hasBackslash || hasDollar ? "r'$value'" : "'$value'";
+    }
+    if (!hasDoubleQuote) {
+      return hasBackslash || hasDollar ? 'r"$value"' : '"$value"';
+    }
+  }
 
   const String backslash = '__BACKSLASH__';
   assert(
@@ -416,15 +410,21 @@ String generateString(String value, { bool escapeDollar = true }) {
     '"__BACKSLASH__", as it is used as part of '
     'backslash character processing.'
   );
-  value = value.replaceAll('\\', backslash);
-
-  if (escapeDollar)
-    value = value.replaceAll('\$', '\\\$');
 
   value = value
-    .replaceAll("'", "\\'")
-    .replaceAll('"', '\\"')
-    .replaceAll(backslash, '\\\\');
+    // Replace backslashes with a placeholder for now to properly parse
+    // other special characters.
+    .replaceAll(r'\', backslash)
+    .replaceAll(r'$', r'\$')
+    .replaceAll("'", r"\'")
+    .replaceAll('"', r'\"')
+    .replaceAll('\n', r'\n')
+    .replaceAll('\f', r'\f')
+    .replaceAll('\t', r'\t')
+    .replaceAll('\r', r'\r')
+    .replaceAll('\b', r'\b')
+    // Reintroduce escaped backslashes into generated Dart string.
+    .replaceAll(backslash, r'\\');
 
   return "'$value'";
 }

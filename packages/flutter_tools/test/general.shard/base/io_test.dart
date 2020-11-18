@@ -15,7 +15,7 @@ import '../../src/io.dart';
 
 void main() {
   test('IOOverrides can inject a memory file system', () async {
-    final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+    final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
     final FlutterIOOverrides flutterIOOverrides = FlutterIOOverrides(fileSystem: memoryFileSystem);
     await io.IOOverrides.runWithIOOverrides(() async {
       // statics delegate correctly.

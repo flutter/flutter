@@ -6,9 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
-Widget _buildScroller({ List<String> log }) {
+Widget _buildScroller({ required List<String> log }) {
   return NotificationListener<ScrollNotification>(
     onNotification: (ScrollNotification notification) {
       if (notification is ScrollStartNotification) {
@@ -20,14 +19,14 @@ Widget _buildScroller({ List<String> log }) {
       }
       return false;
     },
-    child: SingleChildScrollView(
-      child: Container(width: 1000.0, height: 1000.0),
+    child: const SingleChildScrollView(
+      child: SizedBox(width: 1000.0, height: 1000.0),
     ),
   );
 }
 
 void main() {
-  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { @required Duration duration }) {
+  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { required Duration duration }) {
     final Completer<void> completer = Completer<void>();
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.animateTo(newScrollOffset, duration: duration, curve: Curves.linear).whenComplete(completer.complete);

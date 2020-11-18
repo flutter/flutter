@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
-  testUsingContext('StdOutHandler test', () async {
-    final StdoutHandler stdoutHandler = StdoutHandler();
+  testWithoutContext('StdoutHandler can produce output message', () async {
+    final StdoutHandler stdoutHandler = StdoutHandler(logger: BufferLogger.test());
     stdoutHandler.handler('result 12345');
     expect(stdoutHandler.boundaryKey, '12345');
     stdoutHandler.handler('12345');
@@ -19,15 +19,7 @@ void main() {
     expect(output.outputFilename, 'message');
   });
 
-  testUsingContext('StdOutHandler crash test', () async {
-    final StdoutHandler stdoutHandler = StdoutHandler();
-    final Future<CompilerOutput> output = stdoutHandler.compilerOutput.future;
-    stdoutHandler.handler('message with no result');
-
-    expect(output, throwsToolExit());
-  });
-
-  test('TargetModel values', () {
+  testWithoutContext('TargetModel values', () {
     expect(TargetModel('vm'), TargetModel.vm);
     expect(TargetModel.vm.toString(), 'vm');
 
@@ -41,5 +33,14 @@ void main() {
     expect(TargetModel.dartdevc.toString(), 'dartdevc');
 
     expect(() => TargetModel('foobar'), throwsAssertionError);
+  });
+
+  testWithoutContext('toMultiRootPath maps different URIs', () async {
+    expect(toMultiRootPath(Uri.parse('file:///a/b/c'), 'scheme', <String>['/a/b'], false), 'scheme:///c');
+    expect(toMultiRootPath(Uri.parse('file:///d/b/c'), 'scheme', <String>['/a/b'], false), 'file:///d/b/c');
+    expect(toMultiRootPath(Uri.parse('file:///a/b/c'), 'scheme', <String>['/d/b', '/a/b'], false), 'scheme:///c');
+    expect(toMultiRootPath(Uri.parse('file:///a/b/c'), null, <String>[], false), 'file:///a/b/c');
+    expect(toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), null, <String>[], false), 'org-dartlang-app:///a/b/c');
+    expect(toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), 'scheme', <String>['/d/b'], false), 'org-dartlang-app:///a/b/c');
   });
 }

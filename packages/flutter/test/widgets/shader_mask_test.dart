@@ -19,12 +19,12 @@ Shader createShader(Rect bounds) {
 
 void main() {
   testWidgets('Can be constructed', (WidgetTester tester) async {
-    final Widget child = Container(width: 100.0, height: 100.0);
-    await tester.pumpWidget(ShaderMask(child: child, shaderCallback: createShader));
-  }, skip: isBrowser);
+    const Widget child = SizedBox(width: 100.0, height: 100.0);
+    await tester.pumpWidget(const ShaderMask(child: child, shaderCallback: createShader));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 
   testWidgets('Bounds rect includes offset', (WidgetTester tester) async {
-    Rect shaderBounds;
+    late Rect shaderBounds;
     Shader recordShaderBounds(Rect bounds) {
       shaderBounds = bounds;
       return createShader(bounds);
@@ -37,7 +37,7 @@ void main() {
         height: 400.0,
         child: ShaderMask(
           shaderCallback: recordShaderBounds,
-          child: Container(width: 100.0, height: 100.0),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       ),
     );
@@ -45,7 +45,7 @@ void main() {
 
     // The shader bounds rectangle should reflect the position of the centered SizedBox.
     expect(shaderBounds, equals(const Rect.fromLTWH(0.0, 0.0, 400.0, 400.0)));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 
 
   testWidgets('Bounds rect includes offset visual inspection', (WidgetTester tester) async {
@@ -108,5 +108,5 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('shader_mask.bounds.matches_top_left.png'),
     );
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 }

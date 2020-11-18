@@ -19,7 +19,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Baseline - position test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -40,7 +40,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
     expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
            within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Chip caches baseline', (WidgetTester tester) async {
     int calls = 0;
@@ -65,7 +65,7 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
-  }, skip: isBrowser);
+  });
 
   testWidgets('ListTile caches baseline', (WidgetTester tester) async {
     int calls = 0;
@@ -91,10 +91,30 @@ void main() {
     await tester.pump();
     expect(calls, 2);
   });
+
+  testWidgets('LayoutBuilder returns child\'s baseline', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Baseline(
+            baseline: 180.0,
+            baselineType: TextBaseline.alphabetic,
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return BaselineDetector(() {});
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(BaselineDetector)).top, 160.0);
+  });
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
-  const BaselineDetector(this.callback, { Key key }) : super(key: key);
+  const BaselineDetector(this.callback, { Key? key }) : super(key: key);
 
   final VoidCallback callback;
 
@@ -131,7 +151,7 @@ class RenderBaselineDetector extends RenderBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (callback != null)
       callback();
-    return 0.0;
+    return 20.0;
   }
 
   void dirty() {

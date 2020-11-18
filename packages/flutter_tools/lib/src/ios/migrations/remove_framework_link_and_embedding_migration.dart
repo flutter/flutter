@@ -31,7 +31,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
   @override
   bool migrate() {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace('Xcode project not found, skipping migration');
+      logger.printTrace('Xcode project not found, skipping framework link and embedding migration');
       return true;
     }
 
@@ -91,9 +91,9 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
     }
 
     // Embed and thin frameworks in a script instead of using Xcode's link / embed build phases.
-    const String thinBinaryScript = 'xcode_backend.sh\\" thin';
+    const String thinBinaryScript = r'xcode_backend.sh\" thin';
     if (line.contains(thinBinaryScript) && !line.contains(' embed')) {
-      return line.replaceFirst(thinBinaryScript, 'xcode_backend.sh\\" embed_and_thin');
+      return line.replaceFirst(thinBinaryScript, r'xcode_backend.sh\" embed_and_thin');
     }
 
     if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {

@@ -27,64 +27,89 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+@immutable
 class AppBarTheme with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.AppBarTheme].
+  /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
     this.brightness,
     this.color,
     this.elevation,
+    this.shadowColor,
     this.iconTheme,
     this.actionsIconTheme,
     this.textTheme,
+    this.centerTitle,
+    this.titleSpacing,
   });
 
   /// Default value for [AppBar.brightness].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryColorBrightness].
-  final Brightness brightness;
+  final Brightness? brightness;
 
-  /// Default value for [AppBar.color].
+  /// Default value for [AppBar.backgroundColor].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryColor].
-  final Color color;
+  final Color? color;
 
   /// Default value for [AppBar.elevation].
   ///
   /// If null, [AppBar] uses a default value of 4.0.
-  final double elevation;
+  final double? elevation;
+
+  /// Default value for [AppBar.shadowColor].
+  ///
+  /// If null, [AppBar] uses a default value of fully opaque black.
+  final Color? shadowColor;
 
   /// Default value for [AppBar.iconTheme].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryIconTheme].
-  final IconThemeData iconTheme;
+  final IconThemeData? iconTheme;
 
   /// Default value for [AppBar.actionsIconTheme].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryIconTheme].
-  final IconThemeData actionsIconTheme;
+  final IconThemeData? actionsIconTheme;
 
   /// Default value for [AppBar.textTheme].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryTextTheme].
-  final TextTheme textTheme;
+  final TextTheme? textTheme;
+
+  /// Default value for [AppBar.centerTitle].
+  ///
+  /// If null, the value is adapted to current [TargetPlatform].
+  final bool? centerTitle;
+
+  /// Default value for [AppBar.titleSpacing].
+  ///
+  /// If null, [AppBar] uses default value of [NavigationToolbar.kMiddleSpacing].
+  final double? titleSpacing;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
-    IconThemeData actionsIconTheme,
-    Brightness brightness,
-    Color color,
-    double elevation,
-    IconThemeData iconTheme,
-    TextTheme textTheme,
+    IconThemeData? actionsIconTheme,
+    Brightness? brightness,
+    Color? color,
+    double? elevation,
+    Color? shadowColor,
+    IconThemeData? iconTheme,
+    TextTheme? textTheme,
+    bool? centerTitle,
+    double? titleSpacing,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
+      shadowColor: shadowColor ?? this.shadowColor,
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
+      centerTitle: centerTitle ?? this.centerTitle,
+      titleSpacing: titleSpacing ?? this.titleSpacing,
     );
   }
 
@@ -98,15 +123,18 @@ class AppBarTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static AppBarTheme lerp(AppBarTheme a, AppBarTheme b, double t) {
+  static AppBarTheme lerp(AppBarTheme? a, AppBarTheme? b, double t) {
     assert(t != null);
     return AppBarTheme(
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
+      centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
+      titleSpacing: lerpDouble(a?.titleSpacing, b?.titleSpacing, t),
     );
   }
 
@@ -116,9 +144,12 @@ class AppBarTheme with Diagnosticable {
       brightness,
       color,
       elevation,
+      shadowColor,
       iconTheme,
       actionsIconTheme,
       textTheme,
+      centerTitle,
+      titleSpacing,
     );
   }
 
@@ -132,9 +163,12 @@ class AppBarTheme with Diagnosticable {
         && other.brightness == brightness
         && other.color == color
         && other.elevation == elevation
+        && other.shadowColor == shadowColor
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
-        && other.textTheme == textTheme;
+        && other.textTheme == textTheme
+        && other.centerTitle == centerTitle
+        && other.titleSpacing == titleSpacing;
   }
 
   @override
@@ -143,8 +177,11 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
   }
 }

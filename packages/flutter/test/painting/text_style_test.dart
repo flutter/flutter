@@ -94,7 +94,7 @@ void main() {
     expect(s4.height, 123.0);
     expect(s4.color, const Color(0xFF00FF00));
 
-    final TextStyle s5 = TextStyle.lerp(s1, s3, 0.25);
+    final TextStyle s5 = TextStyle.lerp(s1, s3, 0.25)!;
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
     expect(s1.fontWeight, FontWeight.w800);
@@ -115,7 +115,7 @@ void main() {
 
     expect(TextStyle.lerp(null, null, 0.5), isNull);
 
-    final TextStyle s6 = TextStyle.lerp(null, s3, 0.25);
+    final TextStyle s6 = TextStyle.lerp(null, s3, 0.25)!;
     expect(s3.fontFamily, isNull);
     expect(s3.fontSize, 18.0);
     expect(s3.fontWeight, FontWeight.w400);
@@ -128,7 +128,7 @@ void main() {
     expect(s6.height, isNull);
     expect(s6.color, isNull);
 
-    final TextStyle s7 = TextStyle.lerp(null, s3, 0.75);
+    final TextStyle s7 = TextStyle.lerp(null, s3, 0.75)!;
     expect(s3.fontFamily, isNull);
     expect(s3.fontSize, 18.0);
     expect(s3.fontWeight, FontWeight.w400);
@@ -141,7 +141,7 @@ void main() {
     expect(s7.height, 123.0);
     expect(s7.color, isNull);
 
-    final TextStyle s8 = TextStyle.lerp(s3, null, 0.25);
+    final TextStyle s8 = TextStyle.lerp(s3, null, 0.25)!;
     expect(s3.fontFamily, isNull);
     expect(s3.fontSize, 18.0);
     expect(s3.fontWeight, FontWeight.w400);
@@ -154,7 +154,7 @@ void main() {
     expect(s8.height, 123.0);
     expect(s8.color, isNull);
 
-    final TextStyle s9 = TextStyle.lerp(s3, null, 0.75);
+    final TextStyle s9 = TextStyle.lerp(s3, null, 0.75)!;
     expect(s3.fontFamily, isNull);
     expect(s3.fontSize, 18.0);
     expect(s3.fontWeight, FontWeight.w400);
@@ -178,7 +178,7 @@ void main() {
     expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-  }, skip: isBrowser);
+  });
 
 
   test('TextStyle with text direction', () {
@@ -199,28 +199,28 @@ void main() {
     expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
 
     const TextStyle s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
-    expect(s8.fontFamilyFallback[0], 'packages/p/test');
-    expect(s8.fontFamilyFallback[1], 'packages/p/test2');
-    expect(s8.fontFamilyFallback.length, 2);
+    expect(s8.fontFamilyFallback![0], 'packages/p/test');
+    expect(s8.fontFamilyFallback![1], 'packages/p/test2');
+    expect(s8.fontFamilyFallback!.length, 2);
 
     const TextStyle s9 = TextStyle(package: 'p');
     expect(s9.fontFamilyFallback, null);
 
     const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
-  }, skip: isBrowser);
+  });
 
   test('TextStyle font family fallback', () {
     const TextStyle s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
-    expect(s1.fontFamilyFallback[0], 'Roboto');
-    expect(s1.fontFamilyFallback[1], 'test');
-    expect(s1.fontFamilyFallback.length, 2);
+    expect(s1.fontFamilyFallback![0], 'Roboto');
+    expect(s1.fontFamilyFallback![1], 'test');
+    expect(s1.fontFamilyFallback!.length, 2);
 
     const TextStyle s2 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>['Roboto', 'test']);
-    expect(s2.fontFamilyFallback[0], 'Roboto');
-    expect(s2.fontFamilyFallback[1], 'test');
+    expect(s2.fontFamilyFallback![0], 'Roboto');
+    expect(s2.fontFamilyFallback![1], 'test');
     expect(s2.fontFamily, 'foo');
-    expect(s2.fontFamilyFallback.length, 2);
+    expect(s2.fontFamilyFallback!.length, 2);
 
     const TextStyle s3 = TextStyle(fontFamily: 'foo');
     expect(s3.fontFamily, 'foo');
@@ -229,11 +229,16 @@ void main() {
     const TextStyle s4 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>[]);
     expect(s4.fontFamily, 'foo');
     expect(s4.fontFamilyFallback, <String>[]);
-    expect(s4.fontFamilyFallback.isEmpty, true);
+    expect(s4.fontFamilyFallback!.isEmpty, true);
 
     final ui.TextStyle uis1 = s2.getTextStyle();
     expect(uis1.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
-  }, skip: isBrowser);
+
+    expect(s2.apply().fontFamily, 'foo');
+    expect(s2.apply().fontFamilyFallback, const <String>['Roboto', 'test']);
+    expect(s2.apply(fontFamily: 'bar').fontFamily, 'bar');
+    expect(s2.apply(fontFamilyFallback: const <String>['Banana']).fontFamilyFallback, const <String>['Banana']);
+  });
 
   test('TextStyle.debugLabel', () {
     const TextStyle unknown = TextStyle();
@@ -252,8 +257,8 @@ void main() {
     expect(foo.merge(bar).merge(baz).debugLabel, '((foo).merge(bar)).merge(baz)');
     expect(foo.copyWith().debugLabel, '(foo).copyWith');
     expect(foo.apply().debugLabel, '(foo).apply');
-    expect(TextStyle.lerp(foo, bar, 0.5).debugLabel, 'lerp(foo ⎯0.5→ bar)');
-    expect(TextStyle.lerp(foo.merge(bar), baz, 0.51).copyWith().debugLabel, '(lerp((foo).merge(bar) ⎯0.5→ baz)).copyWith');
+    expect(TextStyle.lerp(foo, bar, 0.5)!.debugLabel, 'lerp(foo ⎯0.5→ bar)');
+    expect(TextStyle.lerp(foo.merge(bar), baz, 0.51)!.copyWith().debugLabel, '(lerp((foo).merge(bar) ⎯0.5→ baz)).copyWith');
   });
 
   test('TextStyle.hashCode', () {
@@ -290,18 +295,18 @@ void main() {
 
     // apply
     expect(redPaintTextStyle.apply(color: blue).color, isNull);
-    expect(redPaintTextStyle.apply(color: blue).foreground.color, red);
+    expect(redPaintTextStyle.apply(color: blue).foreground!.color, red);
     expect(redTextStyle.apply(color: blue).color, blue);
 
     // lerp
-    expect(TextStyle.lerp(redTextStyle, blueTextStyle, .25).color, Color.lerp(red, blue, .25));
-    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).color, isNull);
-    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).foreground.color, red);
-    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .75).foreground.color, blue);
+    expect(TextStyle.lerp(redTextStyle, blueTextStyle, .25)!.color, Color.lerp(red, blue, .25));
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25)!.color, isNull);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25)!.foreground!.color, red);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .75)!.foreground!.color, blue);
 
-    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).color, isNull);
-    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).foreground.color, red);
-    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).foreground.color, blue);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25)!.color, isNull);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25)!.foreground!.color, red);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75)!.foreground!.color, blue);
   });
 
   test('backgroundColor', () {
@@ -344,18 +349,18 @@ void main() {
 
     // apply
     expect(redPaintTextStyle.apply(backgroundColor: blue).backgroundColor, isNull);
-    expect(redPaintTextStyle.apply(backgroundColor: blue).background.color, red);
+    expect(redPaintTextStyle.apply(backgroundColor: blue).background!.color, red);
     expect(redTextStyle.apply(backgroundColor: blue).backgroundColor, blue);
 
     // lerp
-    expect(TextStyle.lerp(redTextStyle, blueTextStyle, .25).backgroundColor, Color.lerp(red, blue, .25));
-    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).backgroundColor, isNull);
-    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).background.color, red);
-    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .75).background.color, blue);
+    expect(TextStyle.lerp(redTextStyle, blueTextStyle, .25)!.backgroundColor, Color.lerp(red, blue, .25));
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25)!.backgroundColor, isNull);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25)!.background!.color, red);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .75)!.background!.color, blue);
 
-    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).backgroundColor, isNull);
-    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).background.color, red);
-    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).background.color, blue);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25)!.backgroundColor, isNull);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25)!.background!.color, red);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75)!.background!.color, blue);
   });
 
   test('TextStyle strut textScaleFactor', () {
@@ -366,5 +371,19 @@ void main() {
     final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle(textScaleFactor: 1);
 
     expect(paragraphStyle0 == paragraphStyle1, true);
+  });
+
+  test('TextStyle apply', () {
+    const TextStyle style = TextStyle(fontSize: 10, shadows: <ui.Shadow>[], fontStyle: FontStyle.normal, fontFeatures: <ui.FontFeature>[], textBaseline: TextBaseline.alphabetic);
+    expect(style.apply().shadows, const <ui.Shadow>[]);
+    expect(style.apply(shadows: const <ui.Shadow>[ui.Shadow(blurRadius: 2.0)]).shadows, const <ui.Shadow>[ui.Shadow(blurRadius: 2.0)]);
+    expect(style.apply().fontStyle, FontStyle.normal);
+    expect(style.apply(fontStyle: FontStyle.italic).fontStyle, FontStyle.italic);
+    expect(style.apply().locale, isNull);
+    expect(style.apply(locale: const Locale.fromSubtags(languageCode: 'es')).locale, const Locale.fromSubtags(languageCode: 'es'));
+    expect(style.apply().fontFeatures, const <ui.FontFeature>[]);
+    expect(style.apply(fontFeatures: const <ui.FontFeature>[ui.FontFeature.enable('test')]).fontFeatures, const <ui.FontFeature>[ui.FontFeature.enable('test')]);
+    expect(style.apply().textBaseline, TextBaseline.alphabetic);
+    expect(style.apply(textBaseline: TextBaseline.ideographic).textBaseline, TextBaseline.ideographic);
   });
 }

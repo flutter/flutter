@@ -10,6 +10,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      SemanticsDebugger(
+        child: Container(),
+      ),
+    );
+
+    expect(tester.binding.hasScheduledFrame, isTrue);
+  });
+
   testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
 
     // This is a smoketest to verify that adding a debugger doesn't crash.
@@ -149,13 +159,13 @@ void main() {
           child: Material(
             child: ListView(
               children: <Widget>[
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('top');
                   },
                   child: const Text('TOP'),
                 ),
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('bottom');
                   },
@@ -187,14 +197,14 @@ void main() {
           child: Material(
             child: ListView(
               children: <Widget>[
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     log.add('top');
                   },
                   child: const Text('TOP', textDirection: TextDirection.ltr),
                 ),
                 ExcludeSemantics(
-                  child: RaisedButton(
+                  child: ElevatedButton(
                     onPressed: () {
                       log.add('bottom');
                     },
@@ -322,8 +332,7 @@ void main() {
     final Key keyTop = UniqueKey();
     final Key keyBottom = UniqueKey();
 
-    bool valueTop = false;
-    const bool valueBottom = true;
+    bool? valueTop = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -335,13 +344,13 @@ void main() {
                 Checkbox(
                   key: keyTop,
                   value: valueTop,
-                  onChanged: (bool newValue) {
+                  onChanged: (bool? newValue) {
                     valueTop = newValue;
                   },
                 ),
                 Checkbox(
                   key: keyBottom,
-                  value: valueBottom,
+                  value: false,
                   onChanged: null,
                 ),
               ],
@@ -352,14 +361,11 @@ void main() {
     );
 
     await tester.tap(find.byKey(keyTop));
-
     expect(valueTop, isTrue);
     valueTop = false;
     expect(valueTop, isFalse);
 
     await tester.tap(find.byKey(keyBottom));
-
-    expect(valueTop, isFalse);
     expect(valueTop, isFalse);
   });
 
@@ -383,7 +389,7 @@ void main() {
                   key: checkbox,
                   child: Checkbox(
                     value: true,
-                    onChanged: (bool _) { },
+                    onChanged: (bool? _) { },
                   ),
                 ),
                 Semantics(
@@ -391,7 +397,7 @@ void main() {
                   key: checkboxUnchecked,
                   child: Checkbox(
                     value: false,
-                    onChanged: (bool _) { },
+                    onChanged: (bool? _) { },
                   ),
                 ),
                 Semantics(
@@ -483,17 +489,17 @@ void main() {
 }
 
 String _getMessageShownInSemanticsDebugger({
-  @required Key widgetKey,
-  @required Key debuggerKey,
-  @required WidgetTester tester,
+  required Key widgetKey,
+  required Key debuggerKey,
+  required WidgetTester tester,
 }) {
   final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
   return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics) as String;
 }
 
 dynamic _getSemanticsDebuggerPainter({
-  @required Key debuggerKey,
-  @required WidgetTester tester,
+  required Key debuggerKey,
+  required WidgetTester tester,
 }) {
   final CustomPaint customPaint = tester.widgetList(find.descendant(
     of: find.byKey(debuggerKey),

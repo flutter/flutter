@@ -124,7 +124,7 @@ void main() {
       expect(layer.find<int>(const Offset(100.0, 100.0)), 1);
     });
 
-    test('handles non-invertable transforms', () {
+    test('handles non-invertible transforms', () {
       final AnnotatedRegionLayer<int> child = AnnotatedRegionLayer<int>(1);
       final TransformLayer parent = TransformLayer(transform: Matrix4.diagonal3Values(0.0, 1.0, 1.0));
       parent.append(child);
@@ -274,7 +274,7 @@ void main() {
       expect(layer.findAllAnnotations<int>(const Offset(100.0, 100.0)).annotations.toList(), equals(<int>[1]));
     });
 
-    test('handles non-invertable transforms', () {
+    test('handles non-invertible transforms', () {
       final AnnotatedRegionLayer<int> child = AnnotatedRegionLayer<int>(1);
       final TransformLayer parent = TransformLayer(transform: Matrix4.diagonal3Values(0.0, 1.0, 1.0));
       parent.append(child);

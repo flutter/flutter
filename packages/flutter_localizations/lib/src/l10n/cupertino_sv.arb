@@ -18,5 +18,8 @@
   "cutButtonLabel": "Klipp ut",
   "copyButtonLabel": "Kopiera",
   "pasteButtonLabel": "Klistra in",
-  "selectAllButtonLabel": "Markera alla"
+  "selectAllButtonLabel": "Markera alla",
+  "tabSemanticsLabel": "Flik $tabIndex av $tabCount",
+  "modalBarrierDismissLabel": "Stäng",
+  "searchTextFieldPlaceholderLabel": "Sök"
 }

@@ -9,7 +9,7 @@ void main() {
   group('TimeOfDay.format', () {
     testWidgets('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
       Future<String> pumpTest(bool alwaysUse24HourFormat) async {
-        String formattedValue;
+        late String formattedValue;
         await tester.pumpWidget(MaterialApp(
           home: MediaQuery(
             data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),

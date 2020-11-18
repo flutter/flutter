@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
+
 import 'dart:io';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service/vm_service.dart' as vms;
+import 'package:webdriver/async_io.dart' as async_io;
 
 import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
@@ -41,6 +42,9 @@ enum TimelineStream {
   /// Marks events from the Dart VM's JIT compiler.
   compiler,
 
+  /// The verbose version of compiler.
+  compilerVerbose,
+
   /// Marks events emitted using the `dart:developer` API.
   dart,
 
@@ -62,7 +66,7 @@ enum TimelineStream {
 
 /// How long to wait before showing a message saying that
 /// things seem to be taking a long time.
-@visibleForTesting
+@internal
 const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
 
 /// A convenient accessor to frequently used finders.
@@ -87,49 +91,50 @@ abstract class FlutterDriver {
   FlutterDriver();
 
   /// Creates a driver that uses a connection provided by either the combination
-  /// of [webConnection], or the combination of [serviceClient],
-  /// [peer] and [appIsolate]
+  /// of [webConnection], or the combination of [serviceClient] and [appIsolate]
+  /// for the VM.
   @visibleForTesting
   factory FlutterDriver.connectedTo({
     FlutterWebConnection webConnection,
-    VMServiceClient serviceClient,
-    rpc.Peer peer,
-    VMIsolate appIsolate,
+    vms.VmService serviceClient,
+    vms.Isolate appIsolate,
   }) {
     if (webConnection != null) {
       return WebFlutterDriver.connectedTo(webConnection);
     }
-    return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
+    return VMServiceFlutterDriver.connectedTo(serviceClient, appIsolate);
   }
 
   /// Connects to a Flutter application.
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
-  /// `dartVmServiceUrl` is the URL to Dart observatory (a.k.a. VM service). If
-  /// not specified, the URL specified by the `VM_SERVICE_URL` environment
-  /// variable is used. One or the other must be specified.
+  /// The `dartVmServiceUrl` parameter is the URL to Dart observatory
+  /// (a.k.a. VM service). If not specified, the URL specified by the
+  /// `VM_SERVICE_URL` environment variable is used. One or the other must be
+  /// specified.
   ///
-  /// `printCommunication` determines whether the command communication between
-  /// the test and the app should be printed to stdout.
+  /// The `printCommunication` parameter determines whether the command
+  /// communication between the test and the app should be printed to stdout.
   ///
-  /// `logCommunicationToFile` determines whether the command communication
-  /// between the test and the app should be logged to `flutter_driver_commands.log`.
+  /// The `logCommunicationToFile` parameter determines whether the command
+  /// communication between the test and the app should be logged to
+  /// `flutter_driver_commands.log`.
   ///
-  /// `isolateNumber` determines the specific isolate to connect to.
-  /// If this is left as `null`, will connect to the first isolate found
+  /// The `isolateNumber` parameter determines the specific isolate to connect
+  /// to. If this is left as `null`, will connect to the first isolate found
   /// running on `dartVmServiceUrl`.
   ///
-  /// `fuchsiaModuleTarget` specifies the pattern for determining which mod to
-  /// control. When running on a Fuchsia device, either this or the environment
-  /// variable `FUCHSIA_MODULE_TARGET` must be set (the environment variable is
-  /// treated as a substring pattern). This field will be ignored if
+  /// The `fuchsiaModuleTarget` parameter specifies the pattern for determining
+  /// which mod to control. When running on a Fuchsia device, either this or the
+  /// environment variable `FUCHSIA_MODULE_TARGET` must be set (the environment
+  /// variable is treated as a substring pattern). This field will be ignored if
   /// `isolateNumber` is set, as this is already enough information to connect
-  /// to an isolate.
+  /// to an isolate. This parameter is ignored on non-fuchsia devices.
   ///
-  /// `browser` specifies which FlutterDriver implementation to use. If not
-  /// speicifed or set to false, [VMServiceFlutterDriver] implementation
-  /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
+  /// The `headers` parameter optionally specifies HTTP headers to be included
+  /// in the [WebSocket] connection. This is only used for
+  /// [VMServiceFlutterDriver] connections.
   ///
   /// The return value is a future. This method never times out, though it may
   /// fail (completing with an error). A timeout can be applied by the caller
@@ -141,24 +146,34 @@ abstract class FlutterDriver {
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
     Duration timeout,
+    Map<String, dynamic> headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
       return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
     }
     return VMServiceFlutterDriver.connect(
-              dartVmServiceUrl: dartVmServiceUrl,
-              printCommunication: printCommunication,
-              logCommunicationToFile: logCommunicationToFile,
-              isolateNumber: isolateNumber,
-              fuchsiaModuleTarget: fuchsiaModuleTarget,
+      dartVmServiceUrl: dartVmServiceUrl,
+      printCommunication: printCommunication,
+      logCommunicationToFile: logCommunicationToFile,
+      isolateNumber: isolateNumber,
+      fuchsiaModuleTarget: fuchsiaModuleTarget,
+      headers: headers,
     );
   }
 
-  /// Getter of appIsolate
-  VMIsolate get appIsolate => throw UnimplementedError();
+  /// Getter of appIsolate.
+  vms.Isolate get appIsolate => throw UnimplementedError();
 
-  /// Getter of serviceClient
-  VMServiceClient get serviceClient => throw UnimplementedError();
+  /// Getter of serviceClient.
+  vms.VmService get serviceClient => throw UnimplementedError();
+
+  /// Getter of webDriver.
+  async_io.WebDriver get webDriver => throw UnimplementedError();
+
+  /// Enables accessibility feature.
+  Future<void> enableAccessibility() async {
+    throw UnimplementedError();
+  }
 
   /// Sends [command] to the Flutter Driver extensions.
   /// This must be implemented by subclass.
@@ -167,7 +182,7 @@ abstract class FlutterDriver {
   ///
   ///  * [VMServiceFlutterDriver], which uses vmservice to implement.
   ///  * [WebFlutterDriver], which uses webdriver to implement.
-  Future<Map<String, dynamic>> sendCommand(Command command) => throw UnimplementedError();
+  Future<Map<String, dynamic>> sendCommand(Command command) async => throw UnimplementedError();
 
   /// Checks the status of the Flutter Driver extension.
   Future<Health> checkHealth({ Duration timeout }) async {
@@ -212,7 +227,8 @@ abstract class FlutterDriver {
     await sendCommand(WaitForCondition(const NoTransientCallbacks(), timeout: timeout));
   }
 
-  /// Waits until the next [Window.onReportTimings] is called.
+  /// Waits until the next [dart:ui.PlatformDispatcher.onReportTimings] is
+  /// called.
   ///
   /// Use this method to wait for the first frame to be rasterized during the
   /// app launch.
@@ -231,7 +247,7 @@ abstract class FlutterDriver {
   /// Returns the point at the top left of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
   Future<DriverOffset> getTopLeft(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.topLeft, timeout: timeout);
   }
@@ -239,7 +255,7 @@ abstract class FlutterDriver {
   /// Returns the point at the top right of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
   Future<DriverOffset> getTopRight(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.topRight, timeout: timeout);
   }
@@ -247,7 +263,7 @@ abstract class FlutterDriver {
   /// Returns the point at the bottom left of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
   Future<DriverOffset> getBottomLeft(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.bottomLeft, timeout: timeout);
   }
@@ -255,7 +271,7 @@ abstract class FlutterDriver {
   /// Returns the point at the bottom right of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
   Future<DriverOffset> getBottomRight(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.bottomRight, timeout: timeout);
   }
@@ -263,7 +279,7 @@ abstract class FlutterDriver {
   /// Returns the point at the center of the widget identified by `finder`.
   ///
   /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [Window.devicePixelRatio].
+  /// device pixels via [dart:ui.FlutterView.devicePixelRatio].
   Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.center, timeout: timeout);
   }
@@ -515,15 +531,16 @@ abstract class FlutterDriver {
   ///
   ///  HACK: There will be a 2-second artificial delay before screenshotting,
   ///        the delay here is to deal with a race between the driver script and
-  ///        the GPU thread. The issue is that driver API synchronizes with the
-  ///        framework based on transient callbacks, which are out of sync with
-  ///        the GPU thread. Here's the timeline of events in ASCII art:
+  ///        the raster thread (formerly known as the GPU thread). The issue is
+  ///        that driver API synchronizes with the framework based on transient
+  ///        callbacks, which are out of sync with the raster thread.
+  ///        Here's the timeline of events in ASCII art:
   ///
   ///        -------------------------------------------------------------------
   ///        Without this delay:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize -->
+  ///        Raster:               <-- rasterize -->
   ///        Gap   :              | random |
   ///        Driver:                        <-- screenshot -->
   ///
@@ -532,7 +549,7 @@ abstract class FlutterDriver {
   ///        `screenshot()`. The gap is random because it is determined by the
   ///        unpredictable network communication between the driver process and
   ///        the application. If this gap is too short, which it typically will
-  ///        be, the screenshot is taken before the GPU thread is done
+  ///        be, the screenshot is taken before the raster thread is done
   ///        rasterizing the frame, so the screenshot of the previous frame is
   ///        taken, which is wrong.
   ///
@@ -540,11 +557,11 @@ abstract class FlutterDriver {
   ///        With this delay, if we're lucky:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize -->
+  ///        Raster:               <-- rasterize -->
   ///        Gap   :              |    2 seconds or more   |
   ///        Driver:                                        <-- screenshot -->
   ///
-  ///        The two-second gap should be long enough for the GPU thread to
+  ///        The two-second gap should be long enough for the raster thread to
   ///        finish rasterizing the frame, but not longer than necessary to keep
   ///        driver tests as fast a possible.
   ///
@@ -552,14 +569,14 @@ abstract class FlutterDriver {
   ///        With this delay, if we're not lucky:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize randomly slow today -->
+  ///        Raster:               <-- rasterize randomly slow today -->
   ///        Gap   :              |    2 seconds or more   |
   ///        Driver:                                        <-- screenshot -->
   ///
   ///        In practice, sometimes the device gets really busy for a while and
   ///        even two seconds isn't enough, which means that this is still racy
   ///        and a source of flakes.
-  Future<List<int>> screenshot() {
+  Future<List<int>> screenshot() async {
     throw UnimplementedError();
   }
 
@@ -584,7 +601,7 @@ abstract class FlutterDriver {
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
-  Future<List<Map<String, dynamic>>> getVmFlags() {
+  Future<List<Map<String, dynamic>>> getVmFlags() async {
     throw UnimplementedError();
   }
   /// Starts recording performance traces.
@@ -597,7 +614,7 @@ abstract class FlutterDriver {
   Future<void> startTracing({
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     Duration timeout = kUnusuallyLongTimeout,
-  }) {
+  }) async {
     throw UnimplementedError();
   }
 
@@ -610,7 +627,7 @@ abstract class FlutterDriver {
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<Timeline> stopTracingAndDownloadTimeline({
     Duration timeout = kUnusuallyLongTimeout,
-  }) {
+  }) async {
     throw UnimplementedError();
   }
   /// Runs [action] and outputs a performance trace for it.
@@ -636,7 +653,7 @@ abstract class FlutterDriver {
     Future<dynamic> action(), {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     bool retainPriorEvents = false,
-  }) {
+  }) async {
     throw UnimplementedError();
   }
 
@@ -649,7 +666,7 @@ abstract class FlutterDriver {
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<void> clearTimeline({
     Duration timeout = kUnusuallyLongTimeout,
-  }) {
+  }) async {
     throw UnimplementedError();
   }
   /// [action] will be executed with the frame sync mechanism disabled.
@@ -682,14 +699,14 @@ abstract class FlutterDriver {
   /// Force a garbage collection run in the VM.
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
-  Future<void> forceGC() {
+  Future<void> forceGC() async {
     throw UnimplementedError();
   }
 
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
-  Future<void> close() {
+  Future<void> close() async {
     throw UnimplementedError();
   }
 }
@@ -748,6 +765,7 @@ class CommonFinders {
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.
+@immutable
 class DriverOffset {
   /// Creates an offset.
   const DriverOffset(this.dx, this.dy);
@@ -759,7 +777,7 @@ class DriverOffset {
   final double dy;
 
   @override
-  String toString() => '$runtimeType($dx, $dy)';
+  String toString() => '$runtimeType($dx, $dy)'; // ignore: no_runtimetype_tostring, can't access package:flutter here to use objectRuntimeType
 
   @override
   bool operator ==(Object other) {

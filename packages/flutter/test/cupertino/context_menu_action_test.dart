@@ -13,7 +13,7 @@ void main() {
   const Color _kDestructiveActionColor = CupertinoColors.destructiveRed;
   const FontWeight _kDefaultActionWeight = FontWeight.w600;
 
-  Widget _getApp({VoidCallback onPressed, bool isDestructiveAction = false, bool isDefaultAction = false}) {
+  Widget _getApp({VoidCallback? onPressed, bool isDestructiveAction = false, bool isDefaultAction = false}) {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
       key: actionKey,
@@ -40,7 +40,7 @@ void main() {
     );
     expect(finder, findsOneWidget);
     final Container container = tester.widget(finder);
-    return container.decoration as BoxDecoration;
+    return container.decoration! as BoxDecoration;
   }
 
   TextStyle _getTextStyle(WidgetTester tester) {

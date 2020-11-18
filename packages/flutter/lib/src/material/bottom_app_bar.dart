@@ -48,7 +48,7 @@ class BottomAppBar extends StatefulWidget {
   /// If the corresponding [BottomAppBarTheme] property is null, then the default
   /// specified in the property's documentation will be used.
   const BottomAppBar({
-    Key key,
+    Key? key,
     this.color,
     this.elevation,
     this.shape,
@@ -62,17 +62,18 @@ class BottomAppBar extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   ///
   /// Typically this the child will be a [Row], with the first child
   /// being an [IconButton] with the [Icons.menu] icon.
-  final Widget child;
+  final Widget? child;
 
   /// The bottom app bar's background color.
   ///
-  /// If this property is null then [ThemeData.bottomAppBarTheme.color] is used,
-  /// if that's null then [ThemeData.bottomAppBarColor] is used.
-  final Color color;
+  /// If this property is null then [BottomAppBarTheme.color] of
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null then
+  /// [ThemeData.bottomAppBarColor] is used.
+  final Color? color;
 
   /// The z-coordinate at which to place this bottom app bar relative to its
   /// parent.
@@ -80,17 +81,19 @@ class BottomAppBar extends StatefulWidget {
   /// This controls the size of the shadow below the bottom app bar. The
   /// value is non-negative.
   ///
-  /// If this property is null then [ThemeData.bottomAppBarTheme.elevation] is used,
-  /// if that's null, the default value is 8.
-  final double elevation;
+  /// If this property is null then [BottomAppBarTheme.elevation] of
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null, the default value
+  /// is 8.
+  final double? elevation;
 
   /// The notch that is made for the floating action button.
   ///
-  /// If this property is null then [ThemeData.bottomAppBarTheme.shape] is used,
-  /// if that's null then the shape will be rectangular with no notch.
-  final NotchedShape shape;
+  /// If this property is null then [BottomAppBarTheme.shape] of
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
+  /// be rectangular with no notch.
+  final NotchedShape? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -106,7 +109,7 @@ class BottomAppBar extends StatefulWidget {
 }
 
 class _BottomAppBarState extends State<BottomAppBar> {
-  ValueListenable<ScaffoldGeometry> geometryListenable;
+  late ValueListenable<ScaffoldGeometry> geometryListenable;
   static const double _defaultElevation = 8.0;
 
   @override
@@ -118,7 +121,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
   @override
   Widget build(BuildContext context) {
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
-    final NotchedShape notchedShape = widget.shape ?? babTheme.shape;
+    final NotchedShape? notchedShape = widget.shape ?? babTheme.shape;
     final CustomClipper<Path> clipper = notchedShape != null
       ? _BottomAppBarClipper(
         geometry: geometryListenable,
@@ -138,7 +141,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
         type: MaterialType.transparency,
         child: widget.child == null
           ? null
-          : SafeArea(child: widget.child),
+          : SafeArea(child: widget.child!),
       ),
     );
   }
@@ -146,9 +149,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
 class _BottomAppBarClipper extends CustomClipper<Path> {
   const _BottomAppBarClipper({
-    @required this.geometry,
-    @required this.shape,
-    @required this.notchMargin,
+    required this.geometry,
+    required this.shape,
+    required this.notchMargin,
   }) : assert(geometry != null),
        assert(shape != null),
        assert(notchMargin != null),
@@ -163,9 +166,9 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     // button is the floating action button's bounding rectangle in the
     // coordinate system whose origin is at the appBar's top left corner,
     // or null if there is no floating action button.
-    final Rect button = geometry.value.floatingActionButtonArea?.translate(
+    final Rect? button = geometry.value.floatingActionButtonArea?.translate(
       0.0,
-      geometry.value.bottomNavigationBarTop * -1.0,
+      geometry.value.bottomNavigationBarTop! * -1.0,
     );
     return shape.getOuterPath(Offset.zero & size, button?.inflate(notchMargin));
   }

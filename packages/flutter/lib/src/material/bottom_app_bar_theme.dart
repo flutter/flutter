@@ -25,8 +25,9 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+@immutable
 class BottomAppBarTheme with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.BottomAppBarTheme].
+  /// Creates a theme that can be used for [ThemeData.bottomAppBarTheme].
   const BottomAppBarTheme({
     this.color,
     this.elevation,
@@ -36,20 +37,20 @@ class BottomAppBarTheme with Diagnosticable {
   /// Default value for [BottomAppBar.color].
   ///
   /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
-  final Color color;
+  final Color? color;
 
   /// Default value for [BottomAppBar.elevation].
-  final double elevation;
+  final double? elevation;
 
   /// Default value for [BottomAppBar.shape].
-  final NotchedShape shape;
+  final NotchedShape? shape;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomAppBarTheme copyWith({
-    Color color,
-    double elevation,
-    NotchedShape shape,
+    Color? color,
+    double? elevation,
+    NotchedShape? shape,
   }) {
     return BottomAppBarTheme(
       color: color ?? this.color,
@@ -68,7 +69,7 @@ class BottomAppBarTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomAppBarTheme lerp(BottomAppBarTheme a, BottomAppBarTheme b, double t) {
+  static BottomAppBarTheme lerp(BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {
     assert(t != null);
     return BottomAppBarTheme(
       color: Color.lerp(a?.color, b?.color, t),

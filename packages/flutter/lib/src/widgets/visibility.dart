@@ -53,8 +53,8 @@ class Visibility extends StatelessWidget {
   /// The [maintainAnimation] argument can only be set if [maintainState] is
   /// set.
   const Visibility({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.replacement = const SizedBox.shrink(),
     this.visible = true,
     this.maintainState = false,
@@ -88,7 +88,7 @@ class Visibility extends StatelessWidget {
 
   /// The widget to show or hide, as controlled by [visible].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The widget to use when the child is not [visible], assuming that none of
@@ -159,7 +159,7 @@ class Visibility extends StatelessWidget {
 
   /// Whether to maintain space for where the widget would have been.
   ///
-  /// To set this, [maintainAnimation] must also be set.
+  /// To set this, [maintainAnimation] and [maintainState] must also be set.
   ///
   /// Maintaining the size when the widget is not [visible] is not notably more
   /// expensive than just keeping animations running without maintaining the
@@ -298,8 +298,8 @@ class SliverVisibility extends StatelessWidget {
   /// The [maintainAnimation] argument can only be set if [maintainState] is
   /// set.
   const SliverVisibility({
-    Key key,
-    @required this.sliver,
+    Key? key,
+    required this.sliver,
     this.replacementSliver = const SliverToBoxAdapter(),
     this.visible = true,
     this.maintainState = false,

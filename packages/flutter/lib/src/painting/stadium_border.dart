@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -24,14 +25,11 @@ import 'rounded_rectangle_border.dart';
 /// See also:
 ///
 ///  * [BorderSide], which is used to describe the border of the stadium.
-class StadiumBorder extends ShapeBorder {
+class StadiumBorder extends OutlinedBorder {
   /// Create a stadium border.
   ///
   /// The [side] argument must not be null.
-  const StadiumBorder({this.side = BorderSide.none}) : assert(side != null);
-
-  /// The style of this border.
-  final BorderSide side;
+  const StadiumBorder({ BorderSide side = BorderSide.none }) : assert(side != null), super(side: side);
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -42,7 +40,7 @@ class StadiumBorder extends ShapeBorder {
   ShapeBorder scale(double t) => StadiumBorder(side: side.scale(t));
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     assert(t != null);
     if (a is StadiumBorder)
       return StadiumBorder(side: BorderSide.lerp(a.side, side, t));
@@ -63,7 +61,7 @@ class StadiumBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     assert(t != null);
     if (b is StadiumBorder)
       return StadiumBorder(side: BorderSide.lerp(side, b.side, t));
@@ -84,21 +82,26 @@ class StadiumBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  StadiumBorder copyWith({ BorderSide? side }) {
+    return StadiumBorder(side: side ?? this.side);
+  }
+
+  @override
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     final Radius radius = Radius.circular(rect.shortestSide / 2.0);
     return Path()
       ..addRRect(RRect.fromRectAndRadius(rect, radius).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     final Radius radius = Radius.circular(rect.shortestSide / 2.0);
     return Path()
       ..addRRect(RRect.fromRectAndRadius(rect, radius));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -129,14 +132,13 @@ class StadiumBorder extends ShapeBorder {
 }
 
 // Class to help with transitioning to/from a CircleBorder.
-class _StadiumToCircleBorder extends ShapeBorder {
+class _StadiumToCircleBorder extends OutlinedBorder {
   const _StadiumToCircleBorder({
-    this.side = BorderSide.none,
+    BorderSide side = BorderSide.none,
     this.circleness = 0.0,
   }) : assert(side != null),
-       assert(circleness != null);
-
-  final BorderSide side;
+       assert(circleness != null),
+       super(side: side);
 
   final double circleness;
 
@@ -154,7 +156,7 @@ class _StadiumToCircleBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     assert(t != null);
     if (a is StadiumBorder) {
       return _StadiumToCircleBorder(
@@ -171,14 +173,14 @@ class _StadiumToCircleBorder extends ShapeBorder {
     if (a is _StadiumToCircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        circleness: ui.lerpDouble(a.circleness, circleness, t),
+        circleness: ui.lerpDouble(a.circleness, circleness, t)!,
       );
     }
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     assert(t != null);
     if (b is StadiumBorder) {
       return _StadiumToCircleBorder(
@@ -195,7 +197,7 @@ class _StadiumToCircleBorder extends ShapeBorder {
     if (b is _StadiumToCircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        circleness: ui.lerpDouble(circleness, b.circleness, t),
+        circleness: ui.lerpDouble(circleness, b.circleness, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -228,19 +230,27 @@ class _StadiumToCircleBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(_adjustBorderRadius(rect).toRRect(_adjustRect(rect)).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(_adjustBorderRadius(rect).toRRect(_adjustRect(rect)));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  _StadiumToCircleBorder copyWith({ BorderSide? side, double? circleness }) {
+    return _StadiumToCircleBorder(
+      side: side ?? this.side,
+      circleness: circleness ?? this.circleness,
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -278,16 +288,15 @@ class _StadiumToCircleBorder extends ShapeBorder {
 }
 
 // Class to help with transitioning to/from a RoundedRectBorder.
-class _StadiumToRoundedRectangleBorder extends ShapeBorder {
+class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
   const _StadiumToRoundedRectangleBorder({
-    this.side = BorderSide.none,
+    BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
     this.rectness = 0.0,
   }) : assert(side != null),
        assert(borderRadius != null),
-       assert(rectness != null);
-
-  final BorderSide side;
+       assert(rectness != null),
+       super(side: side);
 
   final BorderRadius borderRadius;
 
@@ -308,7 +317,7 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     assert(t != null);
     if (a is StadiumBorder) {
       return _StadiumToRoundedRectangleBorder(
@@ -327,15 +336,15 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
     if (a is _StadiumToRoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
-        rectness: ui.lerpDouble(a.rectness, rectness, t),
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t)!,
+        rectness: ui.lerpDouble(a.rectness, rectness, t)!,
       );
     }
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     assert(t != null);
     if (b is StadiumBorder) {
       return _StadiumToRoundedRectangleBorder(
@@ -354,8 +363,8 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
     if (b is _StadiumToRoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
-        rectness: ui.lerpDouble(rectness, b.rectness, t),
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t)!,
+        rectness: ui.lerpDouble(rectness, b.rectness, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -366,23 +375,32 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
       borderRadius,
       BorderRadius.all(Radius.circular(rect.shortestSide / 2.0)),
       1.0 - rectness,
-    );
+    )!;
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(_adjustBorderRadius(rect).toRRect(rect).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(_adjustBorderRadius(rect).toRRect(rect));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  _StadiumToRoundedRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius, double? rectness }) {
+    return _StadiumToRoundedRectangleBorder(
+      side: side ?? this.side,
+      borderRadius: borderRadius ?? this.borderRadius,
+      rectness: rectness ?? this.rectness
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;

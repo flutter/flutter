@@ -18,12 +18,11 @@ void main() {
     final double dyDelta2 = thirdPosition.dy - secondPosition.dy;
 
     // If the animation were linear, these two values would be the same.
-    expect(dyDelta1, isNot(closeTo(dyDelta2, 0.1)));
+    expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
   testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    PersistentBottomSheetController<void> bottomSheet;
     int buildCount = 0;
 
     await tester.pumpWidget(MaterialApp(
@@ -33,7 +32,7 @@ void main() {
       ),
     ));
 
-    bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
@@ -44,7 +43,7 @@ void main() {
 
     await tester.pump();
     expect(buildCount, equals(1));
-    bottomSheet.setState(() { });
+    bottomSheet.setState!(() { });
     await tester.pump();
     expect(buildCount, equals(2));
   });
@@ -90,7 +89,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -122,7 +121,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -157,7 +156,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState.showBottomSheet<void>(
+    scaffoldKey.currentState!.showBottomSheet<void>(
       (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -311,7 +310,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState.showBottomSheet<void>(
+    scaffoldKey.currentState!.showBottomSheet<void>(
       (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -361,7 +360,7 @@ void main() {
 
     int buildCount = 0;
     showBottomSheet<void>(
-      context: key.currentContext,
+      context: key.currentContext!,
       builder: (BuildContext context) {
         return Builder(
           builder: (BuildContext context) {
@@ -376,8 +375,8 @@ void main() {
   });
 
   testWidgets('Scaffold removes top MediaQuery padding', (WidgetTester tester) async {
-    BuildContext scaffoldContext;
-    BuildContext bottomSheetContext;
+    late BuildContext scaffoldContext;
+    late BuildContext bottomSheetContext;
 
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
@@ -431,7 +430,7 @@ void main() {
             height: 200.0,
             child: Builder(
               builder: (BuildContext context) {
-                return RaisedButton(
+                return ElevatedButton(
                   child: const Text('showModalBottomSheet'),
                   onPressed: () {
                     showModalBottomSheet<void>(
@@ -490,7 +489,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -520,7 +519,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);

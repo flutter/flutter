@@ -76,7 +76,7 @@ class FuchsiaPM {
   /// When successful, creates a file `app_name-0.far` under [buildPath], which
   /// is the Fuchsia package.
   ///
-  /// [buildPath] should be the same path passed to [init], and [manfiestPath]
+  /// [buildPath] should be the same path passed to [init], and [manifestPath]
   /// should be the same manifest passed to [build].
   Future<bool> archive(String buildPath, String keyPath, String manifestPath) {
     return _runPMCommand(<String>[
@@ -111,7 +111,7 @@ class FuchsiaPM {
       throwToolExit('Fuchsia pm tool not found');
     }
     if (isIPv6Address(host.split('%').first)) {
-      host = '[${host.replaceAll('%', '%25')}]';
+      host = '[$host]';
     }
     final List<String> command = <String>[
       globals.fuchsiaArtifacts.pm.path,
@@ -121,7 +121,7 @@ class FuchsiaPM {
       '-l',
       '$host:$port',
     ];
-    final Process process = await processUtils.start(command);
+    final Process process = await globals.processUtils.start(command);
     process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -155,7 +155,7 @@ class FuchsiaPM {
       throwToolExit('Fuchsia pm tool not found');
     }
     final List<String> command = <String>[globals.fuchsiaArtifacts.pm.path, ...args];
-    final RunResult result = await processUtils.run(command);
+    final RunResult result = await globals.processUtils.run(command);
     return result.exitCode == 0;
   }
 }
@@ -164,7 +164,7 @@ class FuchsiaPM {
 ///
 /// [FuchsiaPackageServer] takes care of initializing the package repository,
 /// spinning up the package server, publishing packages, and shutting down the
-/// the server.
+/// server.
 ///
 /// Example usage:
 /// var server = FuchsiaPackageServer(
@@ -180,7 +180,11 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  FuchsiaPackageServer(this._repo, this.name, this._host, this._port);
+  factory FuchsiaPackageServer(String repo, String name, String host, int port) {
+    return FuchsiaPackageServer._(repo, name, host, port);
+  }
+
+  FuchsiaPackageServer._(this._repo, this.name, this._host, this._port);
 
   static const String deviceHost = 'fuchsia.com';
   static const String toolHost = 'flutter_tool';
@@ -191,11 +195,10 @@ class FuchsiaPackageServer {
 
   Process _process;
 
-  /// The URL that can be used by the device to access this package server.
-  String get url => 'http://$_host:$_port';
-
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;
+
+  int get port => _port;
 
   /// Uses [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.

@@ -4,17 +4,18 @@
 
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:meta/meta.dart';
+import 'package:uuid/uuid.dart';
 
+import '../android/android_workflow.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -26,7 +27,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../web/web_runner.dart';
 
-const String protocolVersion = '0.5.3';
+const String protocolVersion = '0.6.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -49,28 +50,14 @@ class DaemonCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
-    isRunningFromDaemon = true;
-
-    final NotifyingLogger notifyingLogger = NotifyingLogger();
-
-    Cache.releaseLockEarly();
-
-    await context.run<void>(
-      body: () async {
-        final Daemon daemon = Daemon(
-          stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: notifyingLogger,
-        );
-
-        final int code = await daemon.onExit;
-        if (code != 0) {
-          throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
-        }
-      },
-      overrides: <Type, Generator>{
-        Logger: () => notifyingLogger,
-      },
+    final Daemon daemon = Daemon(
+      stdinCommandStream, stdoutCommandResponse,
+      notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
     );
+    final int code = await daemon.onExit;
+    if (code != 0) {
+      throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
+    }
     return FlutterCommandResult.success();
   }
 }
@@ -91,6 +78,7 @@ class Daemon {
     _registerDomain(appDomain = AppDomain(this));
     _registerDomain(deviceDomain = DeviceDomain(this));
     _registerDomain(emulatorDomain = EmulatorDomain(this));
+    _registerDomain(devToolsDomain = DevToolsDomain(this));
 
     // Start listening.
     _commandSubscription = commandStream.listen(
@@ -107,6 +95,7 @@ class Daemon {
   AppDomain appDomain;
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
+  DevToolsDomain devToolsDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
   int _outgoingRequestId = 1;
   final Map<String, Completer<dynamic>> _outgoingRequestCompleters = <String, Completer<dynamic>>{};
@@ -190,10 +179,11 @@ class Daemon {
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
-  void shutdown({ dynamic error }) {
-    _commandSubscription?.cancel();
+  Future<void> shutdown({ dynamic error }) async {
+    await devToolsDomain?.dispose();
+    await _commandSubscription?.cancel();
     for (final Domain domain in _domainMap.values) {
-      domain.dispose();
+      await domain.dispose();
     }
     if (!_onExitCompleter.isCompleted) {
       if (error == null) {
@@ -284,7 +274,7 @@ abstract class Domain {
     return val as int;
   }
 
-  void dispose() { }
+  Future<void> dispose() async { }
 }
 
 /// This domain responds to methods like [version] and [shutdown].
@@ -362,8 +352,8 @@ class DaemonDomain extends Domain {
   }
 
   @override
-  void dispose() {
-    _subscription?.cancel();
+  Future<void> dispose() async {
+    await _subscription?.cancel();
   }
 
   /// Enumerates the platforms supported by the provided project.
@@ -431,7 +421,6 @@ typedef _RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
-    registerHandler('reloadMethod', reloadMethod);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
@@ -439,9 +428,11 @@ class AppDomain extends Domain {
 
   static final Uuid _uuidGenerator = Uuid();
 
-  static String _getNewAppId() => _uuidGenerator.generateV4();
+  static String _getNewAppId() => _uuidGenerator.v4();
 
   final List<AppInstance> _apps = <AppInstance>[];
+
+  final DebounceOperationQueue<OperationResult, OperationType> operationQueue = DebounceOperationQueue<OperationResult, OperationType>();
 
   Future<AppInstance> startApp(
     Device device,
@@ -457,10 +448,15 @@ class AppDomain extends Domain {
     String dillOutputPath,
     bool ipv6 = false,
     String isolateFilter,
+    bool machine = true,
   }) async {
-    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw Exception('${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.');
+    if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
+      throw Exception(
+        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        'mode is not supported for ${device.name}.',
+      );
     }
+
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = globals.fs.currentDirectory;
     globals.fs.currentDirectory = globals.fs.directory(projectDirectory);
@@ -468,10 +464,9 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      flutterProject: flutterProject,
-      viewFilter: isolateFilter,
       target: target,
       buildInfo: options.buildInfo,
+      platform: globals.platform,
     );
 
     ResidentRunner runner;
@@ -485,6 +480,7 @@ class AppDomain extends Domain {
         ipv6: ipv6,
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
+        machine: machine,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -493,10 +489,10 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
-        packagesFilePath: packagesFilePath,
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
+        machine: machine,
       );
     } else {
       runner = ColdRunner(
@@ -505,6 +501,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
+        machine: machine,
       );
     }
 
@@ -525,6 +522,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
+      asLogger<AppRunLogger>(globals.logger),
     );
   }
 
@@ -536,10 +534,17 @@ class AppDomain extends Domain {
     bool enableHotReload,
     Directory cwd,
     LaunchMode launchMode,
+    AppRunLogger logger,
   ) async {
     final AppInstance app = AppInstance(_getNewAppId(),
-        runner: runner, logToStdout: daemon.logToStdout);
+        runner: runner, logToStdout: daemon.logToStdout, logger: logger);
     _apps.add(app);
+
+    // Set the domain and app for the given AppRunLogger. This allows the logger
+    // to log messages containing the app ID to the host.
+    logger.domain = this;
+    logger.app = app;
+
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
       'directory': projectDirectory,
@@ -587,7 +592,9 @@ class AppDomain extends Domain {
           'trace': '$trace',
         });
       } finally {
-        globals.fs.currentDirectory = cwd;
+        // If the full directory is used instead of the path then this causes
+        // a TypeError with the ErrorHandlingFileSystem.
+        globals.fs.currentDirectory = cwd.path;
         _apps.remove(app);
       }
     });
@@ -597,51 +604,59 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotRestart;
 
-  Future<OperationResult> _inProgressHotReload;
+  final int _hotReloadDebounceDurationMs = 50;
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
     final bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
     final String restartReason = _getStringArg(args, 'reason');
+    final bool debounce = _getBoolArg(args, 'debounce') ?? false;
+    // This is an undocumented parameter used for integration tests.
+    final int debounceDurationOverrideMs = _getIntArg(args, 'debounceDurationOverrideMs');
 
     final AppInstance app = _getApp(appId);
     if (app == null) {
       throw "app '$appId' not found";
     }
 
-    if (_inProgressHotReload != null) {
-      throw 'hot restart already in progress';
-    }
-
-    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.restart(fullRestart: fullRestart, pause: pauseAfterRestart, reason: restartReason);
-    });
-    return _inProgressHotReload.whenComplete(() {
-      _inProgressHotReload = null;
-    });
+    return _queueAndDebounceReloadAction(
+      app,
+      fullRestart ? OperationType.restart: OperationType.reload,
+      debounce,
+      debounceDurationOverrideMs,
+      () {
+        return app.restart(
+            fullRestart: fullRestart,
+            pause: pauseAfterRestart,
+            reason: restartReason);
+      },
+    );
   }
 
-  Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
-    final String appId = _getStringArg(args, 'appId', required: true);
-    final String classId = _getStringArg(args, 'class', required: true);
-    final String libraryId =  _getStringArg(args, 'library', required: true);
+  /// Debounce and queue reload actions.
+  ///
+  /// Only one reload action will run at a time. Actions requested in quick
+  /// succession (within [_hotReloadDebounceDuration]) will be merged together
+  /// and all return the same result. If an action is requested after an identical
+  /// action has already started, it will be queued and run again once the first
+  /// action completes.
+  Future<OperationResult> _queueAndDebounceReloadAction(
+    AppInstance app,
+    OperationType operationType,
+    bool debounce,
+    int debounceDurationOverrideMs,
+    Future<OperationResult> Function() action,
+  ) {
+    final Duration debounceDuration = debounce
+        ? Duration(milliseconds: debounceDurationOverrideMs ?? _hotReloadDebounceDurationMs)
+        : Duration.zero;
 
-    final AppInstance app = _getApp(appId);
-    if (app == null) {
-      throw "app '$appId' not found";
-    }
-
-    if (_inProgressHotReload != null) {
-      throw 'hot restart already in progress';
-    }
-
-    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.reloadMethod(classId: classId, libraryId: libraryId);
-    });
-    return _inProgressHotReload.whenComplete(() {
-      _inProgressHotReload = null;
-    });
+    return operationQueue.queueAndDebounce(
+      operationType,
+      debounceDuration,
+      () => app._runInZone<OperationResult>(this, action),
+    );
   }
 
   /// Returns an error, or the service extension result (a map with two fixed
@@ -742,7 +757,7 @@ class DeviceDomain extends Domain {
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
-    deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
+    globals.deviceManager.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
   void addDeviceDiscoverer(DeviceDiscovery discoverer) {
@@ -785,19 +800,17 @@ class DeviceDomain extends Domain {
   }
 
   /// Enable device events.
-  Future<void> enable(Map<String, dynamic> args) {
+  Future<void> enable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.startPolling();
     }
-    return Future<void>.value();
   }
 
   /// Disable device events.
-  Future<void> disable(Map<String, dynamic> args) {
+  Future<void> disable(Map<String, dynamic> args) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.stopPolling();
     }
-    return Future<void>.value();
   }
 
   /// Forward a host port to a device port.
@@ -831,10 +844,11 @@ class DeviceDomain extends Domain {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.dispose();
     }
+    return Future<void>.value();
   }
 
   /// Return the device matching the deviceId field in the args.
@@ -846,6 +860,29 @@ class DeviceDomain extends Domain {
       }
     }
     return null;
+  }
+}
+
+class DevToolsDomain extends Domain {
+  DevToolsDomain(Daemon daemon) : super(daemon, 'devtools') {
+    registerHandler('serve', serve);
+  }
+
+  DevtoolsLauncher _devtoolsLauncher;
+
+  Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    final DevToolsServerAddress server = await _devtoolsLauncher.serve();
+
+    return<String, dynamic>{
+      'host': server?.host,
+      'port': server?.port,
+    };
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _devtoolsLauncher?.close();
   }
 }
 
@@ -920,8 +957,23 @@ dynamic _toJsonable(dynamic obj) {
   return '$obj';
 }
 
-class NotifyingLogger extends Logger {
-  final StreamController<LogMessage> _messageController = StreamController<LogMessage>.broadcast();
+class NotifyingLogger extends DelegatingLogger {
+  NotifyingLogger({ @required this.verbose, @required Logger parent }) : super(parent) {
+    _messageController = StreamController<LogMessage>.broadcast(
+      onListen: _onListen,
+    );
+  }
+
+  final bool verbose;
+  final List<LogMessage> messageBuffer = <LogMessage>[];
+  StreamController<LogMessage> _messageController;
+
+  void _onListen() {
+    if (messageBuffer.isNotEmpty) {
+      messageBuffer.forEach(_messageController.add);
+      messageBuffer.clear();
+    }
+  }
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 
@@ -935,7 +987,7 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('error', message, stackTrace));
+    _sendMessage(LogMessage('error', message, stackTrace));
   }
 
   @override
@@ -948,12 +1000,15 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('status', message));
+    _sendMessage(LogMessage('status', message));
   }
 
   @override
   void printTrace(String message) {
-    // This is a lot of traffic to send over the wire.
+    if (!verbose) {
+      return;
+    }
+    super.printError(message);
   }
 
   @override
@@ -967,10 +1022,15 @@ class NotifyingLogger extends Logger {
     assert(timeout != null);
     printStatus(message);
     return SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     );
+  }
+
+  void _sendMessage(LogMessage logMessage) {
+    if (_messageController.hasListener) {
+      return _messageController.add(logMessage);
+    }
+    messageBuffer.add(logMessage);
   }
 
   void dispose() {
@@ -993,20 +1053,16 @@ class NotifyingLogger extends Logger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(this.id, { this.runner, this.logToStdout = false });
+  AppInstance(this.id, { this.runner, this.logToStdout = false, @required AppRunLogger logger })
+    : _logger = logger;
 
   final String id;
   final ResidentRunner runner;
   final bool logToStdout;
-
-  _AppRunLogger _logger;
+  final AppRunLogger _logger;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
-  }
-
-  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
-    return runner.reloadMethod(classId: classId, libraryId: libraryId);
   }
 
   Future<void> stop() => runner.exit();
@@ -1016,15 +1072,8 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
-    _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? globals.logger : null);
-
-    return context.run<T>(
-      body: method,
-      overrides: <Type, Generator>{
-        Logger: () => _logger,
-      },
-    );
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) async {
+    return method();
   }
 }
 
@@ -1036,7 +1085,13 @@ class EmulatorDomain extends Domain {
     registerHandler('create', create);
   }
 
-  EmulatorManager emulators = EmulatorManager();
+  EmulatorManager emulators = EmulatorManager(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    androidSdk: globals.androidSdk,
+    processManager: globals.processManager,
+    androidWorkflow: androidWorkflow,
+  );
 
   Future<List<Map<String, dynamic>>> getEmulators([ Map<String, dynamic> args ]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
@@ -1075,82 +1130,12 @@ class EmulatorDomain extends Domain {
 //
 // TODO(devoncarew): To simplify this code a bit, we could choose to specialize
 // this class into two, one for each of the above use cases.
-class _AppRunLogger extends Logger {
-  _AppRunLogger(this.domain, this.app, { this.parent });
+class AppRunLogger extends DelegatingLogger {
+  AppRunLogger({ @required Logger parent }) : super(parent);
 
   AppDomain domain;
-  final AppInstance app;
-  final Logger parent;
+  AppInstance app;
   int _nextProgressId = 0;
-
-  @override
-  void printError(
-    String message, {
-    StackTrace stackTrace,
-    bool emphasis,
-    TerminalColor color,
-    int indent,
-    int hangingIndent,
-    bool wrap,
-  }) {
-    if (parent != null) {
-      parent.printError(
-        message,
-        stackTrace: stackTrace,
-        emphasis: emphasis,
-        indent: indent,
-        hangingIndent: hangingIndent,
-        wrap: wrap,
-      );
-    } else {
-      if (stackTrace != null) {
-        _sendLogEvent(<String, dynamic>{
-          'log': message,
-          'stackTrace': stackTrace.toString(),
-          'error': true,
-        });
-      } else {
-        _sendLogEvent(<String, dynamic>{
-          'log': message,
-          'error': true,
-        });
-      }
-    }
-  }
-
-  @override
-  void printStatus(
-    String message, {
-    bool emphasis = false,
-    TerminalColor color,
-    bool newline = true,
-    int indent,
-    int hangingIndent,
-    bool wrap,
-  }) {
-    if (parent != null) {
-      parent.printStatus(
-        message,
-        emphasis: emphasis,
-        color: color,
-        newline: newline,
-        indent: indent,
-        hangingIndent: hangingIndent,
-        wrap: wrap,
-      );
-    } else {
-      _sendLogEvent(<String, dynamic>{'log': message});
-    }
-  }
-
-  @override
-  void printTrace(String message) {
-    if (parent != null) {
-      parent.printTrace(message);
-    } else {
-      _sendLogEvent(<String, dynamic>{'log': message, 'trace': true});
-    }
-  }
 
   Status _status;
 
@@ -1162,25 +1147,22 @@ class _AppRunLogger extends Logger {
     bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(timeout != null);
     final int id = _nextProgressId++;
 
-    _sendProgressEvent(<String, dynamic>{
-      'id': id.toString(),
-      'progressId': progressId,
-      'message': message,
-    });
+    _sendProgressEvent(
+      eventId: id.toString(),
+      eventType: progressId,
+      message: message,
+    );
 
     _status = SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       onFinish: () {
         _status = null;
-        _sendProgressEvent(<String, dynamic>{
-          'id': id.toString(),
-          'progressId': progressId,
-          'finished': true,
-        });
+        _sendProgressEvent(
+          eventId: id.toString(),
+          eventType: progressId,
+          finished: true,
+        );
       }, stopwatch: Stopwatch())..start();
     return _status;
   }
@@ -1189,18 +1171,26 @@ class _AppRunLogger extends Logger {
     domain = null;
   }
 
-  void _sendLogEvent(Map<String, dynamic> event) {
+  void _sendProgressEvent({
+    @required String eventId,
+    @required String eventType,
+    bool finished = false,
+    String message,
+  }) {
     if (domain == null) {
-      printStatus('event sent after app closed: $event');
+      // If we're sending progress events before an app has started, send the
+      // progress messages as plain status messages.
+      if (message != null) {
+        printStatus(message);
+      }
     } else {
-      domain._sendAppEvent(app, 'log', event);
-    }
-  }
+      final Map<String, dynamic> event = <String, dynamic>{
+        'id': eventId,
+        'progressId': eventType,
+        if (message != null) 'message': message,
+        if (finished != null) 'finished': finished,
+      };
 
-  void _sendProgressEvent(Map<String, dynamic> event) {
-    if (domain == null) {
-      printStatus('event sent after app closed: $event');
-    } else {
       domain._sendAppEvent(app, 'progress', event);
     }
   }
@@ -1247,4 +1237,57 @@ class LaunchMode {
 
   @override
   String toString() => _value;
+}
+
+enum OperationType {
+  reload,
+  restart
+}
+
+/// A queue that debounces operations for a period and merges operations of the same type.
+/// Only one action (or any type) will run at a time. Actions of the same type requested
+/// in quick succession will be merged together and all return the same result. If an action
+/// is requested after an identical action has already started, it will be queued
+/// and run again once the first action completes.
+class DebounceOperationQueue<T, K> {
+  final Map<K, RestartableTimer> _debounceTimers = <K, RestartableTimer>{};
+  final Map<K, Future<T>> _operationQueue = <K, Future<T>>{};
+  Future<void> _inProgressAction;
+
+  Future<T> queueAndDebounce(
+    K operationType,
+    Duration debounceDuration,
+    Future<T> Function() action,
+  ) {
+    // If there is already an operation of this type waiting to run, reset its
+    // debounce timer and return its future.
+    if (_operationQueue[operationType] != null) {
+      _debounceTimers[operationType]?.reset();
+      return _operationQueue[operationType];
+    }
+
+    // Otherwise, put one in the queue with a timer.
+    final Completer<T> completer = Completer<T>();
+    _operationQueue[operationType] = completer.future;
+    _debounceTimers[operationType] = RestartableTimer(
+      debounceDuration,
+      () async {
+        // Remove us from the queue so we can't be reset now we've started.
+        unawaited(_operationQueue.remove(operationType));
+        _debounceTimers.remove(operationType);
+
+        // No operations should be allowed to run concurrently even if they're
+        // different types.
+        while (_inProgressAction != null) {
+          await _inProgressAction;
+        }
+
+        _inProgressAction = action()
+            .then(completer.complete, onError: completer.completeError)
+            .whenComplete(() => _inProgressAction = null);
+      },
+    );
+
+    return completer.future;
+  }
 }

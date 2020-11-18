@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-class MockOnEndFunction implements Function {
+class MockOnEndFunction {
   int called = 0;
 
-  void call() {
+  void handler() {
     called++;
   }
 }
@@ -18,7 +18,7 @@ const Duration animationDuration = Duration(milliseconds:1000);
 const Duration additionalDelay = Duration(milliseconds:1);
 
 void main() {
-  MockOnEndFunction mockOnEndFunction;
+  late MockOnEndFunction mockOnEndFunction;
   const Key switchKey = Key('switchKey');
 
   setUp(() {
@@ -70,7 +70,7 @@ void main() {
   testWidgets('AnimatedContainer onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedContainerWidgetState(),
       )
@@ -91,7 +91,7 @@ void main() {
   testWidgets('AnimatedPadding onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedPaddingWidgetState(),
       )
@@ -112,7 +112,7 @@ void main() {
   testWidgets('AnimatedAlign onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedAlignWidgetState(),
       )
@@ -133,7 +133,7 @@ void main() {
   testWidgets('AnimatedPositioned onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedPositionedWidgetState(),
       )
@@ -154,7 +154,7 @@ void main() {
   testWidgets('AnimatedPositionedDirectional onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedPositionedDirectionalWidgetState(),
       )
@@ -175,7 +175,7 @@ void main() {
   testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedOpacityWidgetState(),
       )
@@ -223,7 +223,7 @@ void main() {
 
   testWidgets('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(TestAnimatedWidget(
-      callback: mockOnEndFunction,
+      callback: mockOnEndFunction.handler,
       switchKey: switchKey,
       state: _TestSliverAnimatedOpacityWidgetState(),
     ));
@@ -271,7 +271,7 @@ void main() {
   testWidgets('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedDefaultTextStyleWidgetState(),
       )
@@ -292,7 +292,7 @@ void main() {
   testWidgets('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedPhysicalModelWidgetState(),
       )
@@ -313,7 +313,7 @@ void main() {
   testWidgets('TweenAnimationBuilder onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestTweenAnimationBuilderWidgetState(),
       )
@@ -334,7 +334,7 @@ void main() {
   testWidgets('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
+        callback: mockOnEndFunction.handler,
         switchKey: switchKey,
         state: _TestAnimatedThemeWidgetState(),
       )
@@ -353,7 +353,7 @@ void main() {
   });
 }
 
-Widget wrap({Widget child}) {
+Widget wrap({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Material(
@@ -364,20 +364,17 @@ Widget wrap({Widget child}) {
 
 class TestAnimatedWidget extends StatefulWidget {
   const TestAnimatedWidget({
-    Key key,
+    Key? key,
     this.callback,
-    this.switchKey,
-    this.state,
+    required this.switchKey,
+    required this.state,
   }) : super(key: key);
-  @required
-  final VoidCallback callback;
-  @required
+  final VoidCallback? callback;
   final Key switchKey;
-  @required
   final State<StatefulWidget> state;
 
   @override
-  State<StatefulWidget> createState() => state;
+  State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
 }
 
 abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
@@ -405,7 +402,6 @@ abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
     );
   }
 }
-
 
 class _TestAnimatedContainerWidgetState extends _TestAnimatedWidgetState {
   @override
@@ -551,7 +547,7 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
       tween: Tween<double>(begin: 1, end: 2),
       duration: duration,
       onEnd: widget.callback,
-      builder: (BuildContext context, double size, Widget child) {
+      builder: (BuildContext context, double? size, Widget? child) {
         return Container(
           child: child,
           width: size,

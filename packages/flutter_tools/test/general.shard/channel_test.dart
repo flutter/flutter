@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io' hide File;
 
 import 'package:args/command_runner.dart';
@@ -35,7 +34,10 @@ void main() {
       // The bots may return an empty list of channels (network hiccup?)
       // and when run locally the list of branches might be different
       // so we check for the header text rather than any specific channel name.
-      expect(testLogger.statusText, contains('Flutter channels:'));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('Flutter channels:'),
+      );
     }
 
     testUsingContext('list', () async {
@@ -84,7 +86,7 @@ void main() {
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
         .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
-      expect(rows, containsAllInOrder(FlutterVersion.officialChannels));
+      expect(rows, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
       testLogger.clear();
@@ -105,7 +107,7 @@ void main() {
       final Iterable<String> rows2 = testLogger.statusText
         .split('\n')
         .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
-      expect(rows2, containsAllInOrder(FlutterVersion.officialChannels));
+      expect(rows2, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
       testLogger.clear();
@@ -125,7 +127,7 @@ void main() {
       // check if available official channels are in order of stability
       int prev = -1;
       int next = -1;
-      for (final String branch in FlutterVersion.officialChannels) {
+      for (final String branch in kOfficialChannels) {
         next = testLogger.statusText.indexOf(branch);
         if (next != -1) {
           expect(prev < next, isTrue);
@@ -212,7 +214,10 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, contains("Switching to flutter channel 'beta'..."));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
+      );
       expect(testLogger.errorText, hasLength(0));
 
       when(mockProcessManager.start(
@@ -249,7 +254,7 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => mockProcessManager,
     });
 
@@ -290,11 +295,19 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, contains("Successfully switched to flutter channel 'beta'."));
-      expect(testLogger.statusText, contains("To ensure that you're on the latest build from this channel, run 'flutter upgrade'"));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Successfully switched to flutter channel 'beta'."),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace(
+          "To ensure that you're on the latest build "
+          "from this channel, run 'flutter upgrade'"),
+      );
       expect(testLogger.errorText, hasLength(0));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => mockProcessManager,
     });
 
@@ -355,7 +368,7 @@ void main() {
       expect(testLogger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => mockProcessManager,
     });
   });

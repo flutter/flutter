@@ -38,5 +38,8 @@
   "cutButtonLabel": "قص",
   "copyButtonLabel": "نسخ",
   "pasteButtonLabel": "لصق",
-  "selectAllButtonLabel": "اختيار الكل"
+  "selectAllButtonLabel": "اختيار الكل",
+  "tabSemanticsLabel": "علامة التبويب $tabIndex من $tabCount",
+  "modalBarrierDismissLabel": "رفض",
+  "searchTextFieldPlaceholderLabel": "بحث"
 }

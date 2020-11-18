@@ -29,6 +29,7 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+@immutable
 class PopupMenuThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [PopupMenuTheme].
   const PopupMenuThemeData({
@@ -39,24 +40,24 @@ class PopupMenuThemeData with Diagnosticable {
   });
 
   /// The background color of the popup menu.
-  final Color color;
+  final Color? color;
 
   /// The shape of the popup menu.
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// The elevation of the popup menu.
-  final double elevation;
+  final double? elevation;
 
   /// The text style of items in the popup menu.
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
-    Color color,
-    ShapeBorder shape,
-    double elevation,
-    TextStyle textStyle,
+    Color? color,
+    ShapeBorder? shape,
+    double? elevation,
+    TextStyle? textStyle,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
@@ -71,7 +72,7 @@ class PopupMenuThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static PopupMenuThemeData lerp(PopupMenuThemeData a, PopupMenuThemeData b, double t) {
+  static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -127,9 +128,9 @@ class PopupMenuTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const PopupMenuTheme({
-    Key key,
-    @required this.data,
-    Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(data != null), super(key: key, child: child);
 
   /// The properties for descendant popup menu widgets.
@@ -145,14 +146,13 @@ class PopupMenuTheme extends InheritedTheme {
   /// PopupMenuThemeData theme = PopupMenuTheme.of(context);
   /// ```
   static PopupMenuThemeData of(BuildContext context) {
-    final PopupMenuTheme popupMenuTheme = context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
+    final PopupMenuTheme? popupMenuTheme = context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
     return popupMenuTheme?.data ?? Theme.of(context).popupMenuTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final PopupMenuTheme ancestorTheme = context.findAncestorWidgetOfExactType<PopupMenuTheme>();
-    return identical(this, ancestorTheme) ? child : PopupMenuTheme(data: data, child: child);
+    return PopupMenuTheme(data: data, child: child);
   }
 
   @override

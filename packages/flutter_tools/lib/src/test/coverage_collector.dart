@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:coverage/coverage.dart' as coverage;
+import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../vmservice.dart';
 
@@ -18,9 +17,10 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryPredicate, this.verbose = true});
+  CoverageCollector({this.libraryPredicate, this.verbose = true, @required this.packagesPath});
 
   final bool verbose;
+  final String packagesPath;
   Map<String, Map<int, int>> _globalHitmap;
   bool Function(String) libraryPredicate;
 
@@ -65,7 +65,11 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     _logMessage('($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
+    _addHitmap(await coverage.createHitmap(
+      data['coverage'] as List<Map<String, dynamic>>,
+      packagesPath: packagesPath,
+      checkIgnoredLines: true,
+    ));
     _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -97,7 +101,11 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     _logMessage('pid $pid ($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
+    _addHitmap(await coverage.createHitmap(
+      data['coverage'] as List<Map<String, dynamic>>,
+      packagesPath: packagesPath,
+      checkIgnoredLines: true,
+    ));
     _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -109,12 +117,13 @@ class CoverageCollector extends TestWatcher {
   Future<String> finalizeCoverage({
     coverage.Formatter formatter,
     Directory coverageDirectory,
+    String packagesPath,
   }) async {
     if (_globalHitmap == null) {
       return null;
     }
     if (formatter == null) {
-      final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
+      final coverage.Resolver resolver = coverage.Resolver(packagesPath: packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
         ? <String>[globals.fs.path.join(packagePath, 'lib')]
@@ -161,7 +170,7 @@ class CoverageCollector extends TestWatcher {
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
         final File sourceFile = coverageFile.copySync(globals.fs.path.join(tempDir.path, 'lcov.source.info'));
-        final RunResult result = processUtils.runSync(<String>[
+        final RunResult result = globals.processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
@@ -176,32 +185,42 @@ class CoverageCollector extends TestWatcher {
     }
     return true;
   }
+
+  @override
+  Future<void> handleTestCrashed(ProcessEvent event) async { }
+
+  @override
+  Future<void> handleTestTimedOut(ProcessEvent event) async { }
 }
 
-Future<VMService> _defaultConnect(Uri serviceUri) {
-  return VMService.connect(
+Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
+  return connectToVmService(
       serviceUri, compression: CompressionOptions.compressionOff);
 }
 
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
   bool waitPaused = false,
   String debugName,
-  Future<VMService> Function(Uri) connector = _defaultConnect,
+  Future<vm_service.VmService> Function(Uri) connector = _defaultConnect,
 }) async {
-  final VMService vmService = await connector(serviceUri);
-  await vmService.getVM();
+  final vm_service.VmService vmService = await connector(serviceUri);
   final Map<String, dynamic> result = await _getAllCoverage(
       vmService, libraryPredicate);
-  await vmService.close();
+  vmService.dispose();
   return result;
 }
 
-Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
-  await service.getVM();
+Future<Map<String, dynamic>> _getAllCoverage(vm_service.VmService service, bool Function(String) libraryPredicate) async {
+  final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
-  for (final Isolate isolateRef in service.vm.isolates) {
-    await isolateRef.load();
-    final Map<String, dynamic> scriptList = await isolateRef.invokeRpcRaw('getScripts', params: <String, dynamic>{'isolateId': isolateRef.id});
+  for (final vm_service.IsolateRef isolateRef in vm.isolates) {
+    Map<String, Object> scriptList;
+    try {
+      final vm_service.ScriptList actualScriptList = await service.getScripts(isolateRef.id);
+      scriptList = actualScriptList.json;
+    } on vm_service.SentinelException {
+      continue;
+    }
     final List<Future<void>> futures = <Future<void>>[];
 
     final Map<String, Map<String, dynamic>> scripts = <String, Map<String, dynamic>>{};
@@ -209,36 +228,28 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
     // For each ScriptRef loaded into the VM, load the corresponding Script and
     // SourceReport object.
 
-    // We may receive such objects as
-    // {type: Sentinel, kind: Collected, valueAsString: <collected>}
-    // that need to be skipped.
-    if (scriptList['scripts'] == null) {
-      continue;
-    }
     for (final Map<String, dynamic> script in (scriptList['scripts'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       if (!libraryPredicate(script['uri'] as String)) {
         continue;
       }
       final String scriptId = script['id'] as String;
       futures.add(
-        isolateRef.invokeRpcRaw('getSourceReport', params: <String, dynamic>{
-          'forceCompile': true,
-          'scriptId': scriptId,
-          'isolateId': isolateRef.id,
-          'reports': <String>['Coverage'],
-        })
-        .then((Map<String, dynamic> report) {
-          sourceReports[scriptId] = report;
+        service.getSourceReport(
+          isolateRef.id,
+          <String>['Coverage'],
+          scriptId: scriptId,
+          forceCompile: true,
+        )
+        .then((vm_service.SourceReport report) {
+          sourceReports[scriptId] = report.json;
         })
       );
       futures.add(
-        isolateRef.invokeRpcRaw('getObject', params: <String, dynamic>{
-          'isolateId': isolateRef.id,
-          'objectId': scriptId,
-        })
-        .then((Map<String, dynamic> script) {
-          scripts[scriptId] = script;
-        })
+        service
+          .getObject(isolateRef.id, scriptId)
+          .then((vm_service.Obj script) {
+            scripts[scriptId] = script.json;
+          })
       );
     }
     await Future.wait(futures);
@@ -270,7 +281,7 @@ void _buildCoverageMap(
       final List<int> hits = (coverage['hits'] as List<dynamic>).cast<int>();
       final List<int> misses = (coverage['misses'] as List<dynamic>).cast<int>();
       final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'] as List<dynamic>;
-      // The token positions can be null if the script has no coverable lines.
+      // The token positions can be null if the script has no lines that may be covered.
       if (tokenPositions == null) {
         continue;
       }

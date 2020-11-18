@@ -3,16 +3,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+set -e
+
 # The tests to run on Firebase Test Lab.
 # Currently, the test consists on building an Android App Bundle and ensuring
 # that the app doesn't crash upon startup.
 #
 # When adding a test, ensure that there's at least a `print()` statement under lib/*.dart.
-tests=(
-  "dev/integration_tests/release_smoke_test"
-  "dev/integration_tests/abstract_method_smoke_test"
-  "dev/integration_tests/android_embedding_v2_smoke_test"
-)
+#
+# The first and only parameter should be the path to an integration test.
 
 # The devices where the tests are run.
 #
@@ -21,13 +20,13 @@ tests=(
 devices=(
   # Pixel 3
   "model=blueline,version=28"
-  "model=blueline,version=29"
+
+  # Pixel 4
+  "model=flame,version=29"
 
   # Moto Z XT1650
   "model=griffin,version=24"
 )
-
-set -e
 
 GIT_REVISION=$(git rev-parse HEAD)
 
@@ -35,6 +34,12 @@ DEVICE_FLAG=""
 for device in ${devices[*]}; do
   DEVICE_FLAG+="--device $device "
 done
+
+# If running tests locally, the key env var needs to be set.
+if [[ -z $GCLOUD_FIREBASE_TESTLAB_KEY ]]; then
+  echo "Not running firebase test lab tests because GCLOUD_FIREBASE_TESTLAB_KEY isn't set."
+  exit 0
+fi
 
 # New contributors will not have permissions to run this test - they won't be
 # able to access the service account information. We should just mark the test
@@ -79,6 +84,4 @@ function test_app_bundle() {
   popd
 }
 
-for test in ${tests[*]}; do
-  test_app_bundle $test
-done
+test_app_bundle "$1"

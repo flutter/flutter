@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -40,7 +39,6 @@ void main() {
 
       testbed = Testbed(overrides: <Type, Generator>{
         ProcessManager: () {
-          print('in get process manager');
           return mockProcessManager;
         }
       });

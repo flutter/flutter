@@ -6,16 +6,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton, PointerDeviceKind;
 
 import 'semantics_tester.dart';
 
 void main() {
-  bool tapped;
-  bool hovered;
-  Widget tapTarget;
-  Widget hoverTarget;
+  late bool tapped;
+  late bool hovered;
+  late Widget tapTarget;
+  late Widget hoverTarget;
 
   setUp(() {
     tapped = false;
@@ -163,7 +164,33 @@ void main() {
     hovered = false;
   });
 
-  testWidgets('ModalBarrier pops the Navigator when dismissed by primay tap', (WidgetTester tester) async {
+  testWidgets('ModalBarrier plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
+    final List<String> playedSystemSounds = <String>[];
+    try {
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'SystemSound.play')
+          playedSystemSounds.add(methodCall.arguments as String);
+      });
+
+      final Widget subject = Stack(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          tapTarget,
+          const ModalBarrier(dismissible: false),
+        ],
+      );
+
+      await tester.pumpWidget(subject);
+      await tester.tap(find.text('target'));
+      await tester.pumpWidget(subject);
+    } finally {
+      SystemChannels.platform.setMockMethodCallHandler(null);
+    }
+    expect(playedSystemSounds, hasLength(1));
+    expect(playedSystemSounds[0], SystemSoundType.alert.toString());
+  });
+
+  testWidgets('ModalBarrier pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const FirstWidget(),
       '/modal': (BuildContext context) => const SecondWidget(),
@@ -373,10 +400,28 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('ModalBarrier uses default mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(Stack(
+      textDirection: TextDirection.ltr,
+      children: const <Widget>[
+        MouseRegion(cursor: SystemMouseCursors.click),
+        ModalBarrier(dismissible: false),
+      ],
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(ModalBarrier)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
 }
 
 class FirstWidget extends StatelessWidget {
-  const FirstWidget({ Key key }) : super(key: key);
+  const FirstWidget({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -391,7 +436,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatelessWidget {
-  const SecondWidget({ Key key }) : super(key: key);
+  const SecondWidget({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return const ModalBarrier(
@@ -402,7 +447,7 @@ class SecondWidget extends StatelessWidget {
 }
 
 class SecondWidgetWithCompetence extends StatelessWidget {
-  const SecondWidgetWithCompetence({ Key key }) : super(key: key);
+  const SecondWidgetWithCompetence({ Key? key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Stack(

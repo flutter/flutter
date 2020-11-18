@@ -8,20 +8,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget _boilerplate(VoidCallback onButtonPressed, {
+  Widget _boilerplate(VoidCallback? onButtonPressed, {
     int itemCount = 100,
     double initialChildSize = .5,
     double maxChildSize = 1.0,
     double minChildSize = .25,
-    double itemExtent,
-    Key containerKey,
-    NotificationListenerCallback<ScrollNotification> onScrollNotification,
+    double? itemExtent,
+    Key? containerKey,
+    NotificationListenerCallback<ScrollNotification>? onScrollNotification,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Stack(
         children: <Widget>[
-          FlatButton(
+          TextButton(
             child: const Text('TapHere'),
             onPressed: onButtonPressed,
           ),
@@ -105,7 +105,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
         expect(find.text('Item 31'), findsOneWidget);
-      }, skip: isBrowser, variant: TargetPlatformVariant.all());
+      }, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged down when not full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null));
@@ -118,7 +118,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser, variant: TargetPlatformVariant.all());
+      }, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged down when list is shorter than full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null, itemCount: 30, initialChildSize: .25));
@@ -135,7 +135,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Item 1').hitTestable(), findsOneWidget);
         expect(find.text('Item 29').hitTestable(), findsNothing);
-      }, skip: isBrowser, variant: TargetPlatformVariant.all());
+      }, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged up and cover its container and scroll in single motion, and then dragged back down', (WidgetTester tester) async {
         int taps = 0;
@@ -164,7 +164,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 18'), findsOneWidget);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser, variant: TargetPlatformVariant.all());
+      }, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up gently', (WidgetTester tester) async {
         int taps = 0;
@@ -187,7 +187,7 @@ void main() {
         expect(find.text('Item 21'), findsOneWidget);
         expect(find.text('Item 36'), findsOneWidget);
         expect(find.text('Item 70'), findsNothing);
-      }, skip: isBrowser, variant: TargetPlatformVariant.all());
+      }, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up', (WidgetTester tester) async {
         int taps = 0;
@@ -208,7 +208,7 @@ void main() {
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 70'), findsOneWidget);
-      }, skip: isBrowser, variant: TargetPlatformVariant.all());
+      }, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null));
@@ -221,7 +221,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser, variant: TargetPlatformVariant.all());
+      }, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up and then back down', (WidgetTester tester) async {
         int taps = 0;
@@ -260,7 +260,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 70'), findsNothing);
-      }, skip: isBrowser, variant: TargetPlatformVariant.all());
+      }, variant: TargetPlatformVariant.all());
 
       debugDefaultTargetPlatformOverride = null;
     });
@@ -309,4 +309,149 @@ void main() {
       expect(notificationTypes, types);
     });
   }
+
+  testWidgets('Builder is not called excessively', (WidgetTester tester) async {
+    int buildCount = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          DraggableScrollableSheet(
+            builder: (BuildContext context, ScrollController scrollController) {
+              buildCount += 1;
+              return Container(
+                color: const Color(0xFFABCDEF),
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemExtent: 100,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
+    expect(buildCount, 1);
+    await tester.flingFrom(const Offset(0, 325), const Offset(0, -325), 200);
+    expect(buildCount, 1);
+    await tester.pumpAndSettle();
+    expect(buildCount, 1);
+  });
+
+  testWidgets('Builder is called if widget updates', (WidgetTester tester) async {
+    int buildCount = 0;
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          DraggableScrollableSheet(
+            key: key,
+            builder: (BuildContext context, ScrollController scrollController) {
+              buildCount += 1;
+              return Container(
+                color: const Color(0xFFABCDEF),
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemExtent: 100,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
+    expect(buildCount, 1);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          DraggableScrollableSheet(
+            key: key,
+            builder: (BuildContext context, ScrollController scrollController) {
+              buildCount += 1;
+              return Container(
+                color: const Color(0xFFFEDCBA),
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemExtent: 50,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('New Item $index'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
+    expect(buildCount, 2);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('New Item 1'), findsOneWidget);
+  });
+
+  testWidgets('Changes to min/max/initial child size are respected', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final Key childKey = UniqueKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          DraggableScrollableSheet(
+            key: key,
+            minChildSize: .25,
+            maxChildSize: 1.0,
+            initialChildSize: .5,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                key: childKey,
+                color: const Color(0xFFABCDEF),
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemExtent: 100,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(tester.getRect(find.byKey(childKey)), const Rect.fromLTRB(0, 300, 800, 600));
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          DraggableScrollableSheet(
+            key: key,
+            minChildSize: .5,
+            maxChildSize: .75,
+            initialChildSize: .6,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                key: childKey,
+                color: const Color(0xFFFEDCBA),
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemExtent: 50,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('New Item $index'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
+    expect(find.text('New Item 1'), findsOneWidget);
+    expect(tester.getRect(find.byKey(childKey)), const Rect.fromLTRB(0, 240, 800, 600));
+  });
 }

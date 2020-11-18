@@ -10,6 +10,8 @@
 # for performing pushes to production, and so this image is quite a bit larger
 # than strictly needed for just building Flutter apps.
 
+# Last manual update 2020-10-05 (changing this comment will re-build image)
+
 # Note: updating past stretch (Debian 9) will bump Java past version 8,
 # which will break the Android SDK.
 FROM debian:stretch
@@ -78,7 +80,7 @@ RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
 # (it prints install progress WAY too often).
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-28" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-30" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
@@ -96,10 +98,6 @@ RUN dpkg-query -L nodejs
 # Install Firebase
 # This is why we need nodejs installed.
 RUN /usr/bin/npm --verbose install -g firebase-tools
-# TODO(dnfield): Remove this once Firebase has a fix upstream for
-# https://github.com/flutter/flutter/issues/34435
-COPY ci/docker_linux/patch_firebase.sh /root/patch_firebase.sh
-RUN /root/patch_firebase.sh
 
 # Install golang more recent than in repo (necessary for dashing to build)
 RUN curl 'https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz' | tar xvz
@@ -125,9 +123,3 @@ COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 
 RUN bundle config set system 'true' && \
   bundle install --system
-
-# Install goldctl, for Golden testing
-# Last updated 2020-02-04 (update to rebuild Dockerfile with latest goldctl)
-COPY bots/download_goldctl.sh /download_goldctl.sh
-ENV GOLDCTL '/depot_tools/goldctl'
-RUN /download_goldctl.sh

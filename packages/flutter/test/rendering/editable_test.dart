@@ -14,10 +14,7 @@ import 'rendering_tester.dart';
 
 class FakeEditableTextState with TextSelectionDelegate {
   @override
-  TextEditingValue get textEditingValue { return const TextEditingValue(); }
-
-  @override
-  set textEditingValue(TextEditingValue value) { }
+  TextEditingValue textEditingValue = const TextEditingValue();
 
   @override
   void hideToolbar() { }
@@ -27,6 +24,44 @@ class FakeEditableTextState with TextSelectionDelegate {
 }
 
 void main() {
+  test('RenderEditable respects clipBehavior', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    final String longString = 'a' * 10000;
+
+    // By default, clipBehavior should be Clip.none
+    final RenderEditable defaultEditable = RenderEditable(
+      text: TextSpan(text: longString),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: FakeEditableTextState(),
+      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+    );
+    layout(defaultEditable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultEditable.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    context.clipBehavior = Clip.none; // Reset as Clip.none won't write into clipBehavior.
+    for (final Clip clip in Clip.values) {
+      final RenderEditable editable = RenderEditable(
+        text: TextSpan(text: longString),
+        textDirection: TextDirection.ltr,
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: FakeEditableTextState(),
+        selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+        clipBehavior: clip,
+      );
+      layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      editable.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
+  });
+
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
@@ -74,7 +109,7 @@ void main() {
         '   ╚═══════════\n'
       ),
     );
-  }, skip: isBrowser);
+  });
 
   // Test that clipping will be used even when the text fits within the visible
   // region if the start position of the text is offset (e.g. during scrolling
@@ -177,7 +212,7 @@ void main() {
     pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  }, skip: isBrowser);
+  });
 
   test('Can change textAlign', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -276,7 +311,7 @@ void main() {
     pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61024
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -366,12 +401,64 @@ void main() {
         ..paragraph(),
     );
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
-  }, skip: isBrowser);
+  });
+
+  test('ignore key event from web platform', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      // This makes the scroll axis vertical.
+      maxLines: 2,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: 'test\ntest',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    expect(
+      editable,
+      paints..paragraph(offset: Offset.zero),
+    );
+
+    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    editable.selection = const TextSelection.collapsed(offset: 0);
+    pumpFrame();
+
+    if(kIsWeb) {
+      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'web');
+      expect(currentSelection.isCollapsed, true);
+      expect(currentSelection.baseOffset, 0);
+    } else {
+      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+      expect(currentSelection.isCollapsed, true);
+      expect(currentSelection.baseOffset, 1);
+    }
+  });
 
   test('selects correct place with offsets', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -451,12 +538,12 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61026
 
   test('selects correct place when offsets are flipped', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
-    TextSelection currentSelection;
+    late TextSelection currentSelection;
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -485,11 +572,11 @@ void main() {
     expect(currentSelection.isCollapsed, isFalse);
     expect(currentSelection.baseOffset, 1);
     expect(currentSelection.extentOffset, 3);
-  }, skip: isBrowser);
+  });
 
   test('selection does not flicker as user is dragging', () {
     int selectionChangedCount = 0;
-    TextSelection updatedSelection;
+    TextSelection? updatedSelection;
     final TextSelectionDelegate delegate = FakeEditableTextState();
     const TextSpan text = TextSpan(
       text: 'abc def ghi',
@@ -541,10 +628,48 @@ void main() {
     editable2.selectPositionAt(from: const Offset(30, 2), to: const Offset(48, 2), cause: SelectionChangedCause.drag);
     pumpFrame();
 
-    expect(updatedSelection.baseOffset, 3);
-    expect(updatedSelection.extentOffset, 5);
+    expect(updatedSelection!.baseOffset, 3);
+    expect(updatedSelection!.extentOffset, 5);
     expect(selectionChangedCount, 1);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61028
+
+  test('promptRect disappears when promptRectColor is set to null', () {
+    const Color promptRectColor = Color(0x12345678);
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        text: 'ABCDEFG',
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      locale: const Locale('en', 'US'),
+      offset: ViewportOffset.fixed(10.0),
+      textSelectionDelegate: delegate,
+      selection: const TextSelection.collapsed(offset: 0),
+      promptRectColor: promptRectColor,
+      promptRectRange: const TextRange(start: 0, end: 1),
+    );
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+
+    expect(
+      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      paints..rect(color: promptRectColor),
+    );
+
+    editable.promptRectColor = null;
+
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    pumpFrame();
+
+    expect(editable.promptRectColor, promptRectColor);
+    expect(
+      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      isNot(paints..rect(color: promptRectColor)),
+    );
+  });
 
   test('editable hasFocus correctly initialized', () {
     // Regression test for https://github.com/flutter/flutter/issues/21640
@@ -610,5 +735,666 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42772
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42772
+
+  test('arrow keys and delete handle simple text correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    editable.selection = const TextSelection.collapsed(offset: 0);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 1);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, 'est');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+  test('arrow keys and delete handle surrogate pairs correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: '0123😆6789',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selection = const TextSelection.collapsed(offset: 4);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 6);
+    editable.selection = currentSelection;
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 4);
+    editable.selection = currentSelection;
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, '01236789');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+  test('arrow keys and delete handle grapheme clusters correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: '0123👨‍👩‍👦2345',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selection = const TextSelection.collapsed(offset: 4);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 12);
+    editable.selection = currentSelection;
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 4);
+    editable.selection = currentSelection;
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, '01232345');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+  test('arrow keys and delete handle surrogate pairs correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: '\u{1F44D}',  // Thumbs up
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    editable.selection = const TextSelection.collapsed(offset: 0);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 2);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, '');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+  test('arrow keys with selection text', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: '012345',  // Thumbs up
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 4);
+
+    editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 4);
+
+    editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 2);
+
+    editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 2);
+
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
+
+  group('delete', () {
+    test('handles selection', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState();
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'test',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection(baseOffset: 1, extentOffset: 3),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+      expect(delegate.textEditingValue.text, 'tt');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 1);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('is a no-op at the end of the text', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState();
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'test',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: 4),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+      expect(delegate.textEditingValue.text, 'test');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 4);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+  });
+
+  group('backspace', () {
+    test('handles selection', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState();
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'test',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection(baseOffset: 1, extentOffset: 3),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      expect(delegate.textEditingValue.text, 'tt');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 1);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('handles simple text', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState();
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'test',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      expect(delegate.textEditingValue.text, 'tet');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 2);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('handles surrogate pairs', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState();
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: '\u{1F44D}',  // Thumbs up
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: 2),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      expect(delegate.textEditingValue.text, '');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 0);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('handles grapheme clusters', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState();
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: '0123👨‍👩‍👦2345',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: 12),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      expect(delegate.textEditingValue.text, '01232345');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 4);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('is a no-op at the start of the text', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState();
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'test',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      expect(delegate.textEditingValue.text, 'test');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 0);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+  });
+
+  test('getEndpointsForSelection handles empty characters', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      // This is a Unicode left-to-right mark character that will not render
+      // any glyphs.
+      text: const TextSpan(text: '\u200e'),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 1));
+    expect(endpoints[0].point.dx, 0);
+  });
+
+  group('nextCharacter', () {
+    test('handles normal strings correctly', () {
+      expect(RenderEditable.nextCharacter(0, '01234567'), 1);
+      expect(RenderEditable.nextCharacter(3, '01234567'), 4);
+      expect(RenderEditable.nextCharacter(7, '01234567'), 8);
+      expect(RenderEditable.nextCharacter(8, '01234567'), 8);
+    });
+
+    test('throws for invalid indices', () {
+      expect(() => RenderEditable.nextCharacter(-1, '01234567'), throwsAssertionError);
+      expect(() => RenderEditable.nextCharacter(9, '01234567'), throwsAssertionError);
+    });
+
+    test('skips spaces in normal strings when includeWhitespace is false', () {
+      expect(RenderEditable.nextCharacter(3, '0123 5678', false), 5);
+      expect(RenderEditable.nextCharacter(4, '0123 5678', false), 5);
+      expect(RenderEditable.nextCharacter(3, '0123      0123', false), 10);
+      expect(RenderEditable.nextCharacter(2, '0123      0123', false), 3);
+      expect(RenderEditable.nextCharacter(4, '0123      0123', false), 10);
+      expect(RenderEditable.nextCharacter(9, '0123      0123', false), 10);
+      expect(RenderEditable.nextCharacter(10, '0123      0123', false), 11);
+      // If the subsequent characters are all whitespace, it returns the length
+      // of the string.
+      expect(RenderEditable.nextCharacter(5, '0123      ', false), 10);
+    });
+
+    test('handles surrogate pairs correctly', () {
+      expect(RenderEditable.nextCharacter(3, '0123👨👩👦0123'), 4);
+      expect(RenderEditable.nextCharacter(4, '0123👨👩👦0123'), 6);
+      expect(RenderEditable.nextCharacter(5, '0123👨👩👦0123'), 6);
+      expect(RenderEditable.nextCharacter(6, '0123👨👩👦0123'), 8);
+      expect(RenderEditable.nextCharacter(7, '0123👨👩👦0123'), 8);
+      expect(RenderEditable.nextCharacter(8, '0123👨👩👦0123'), 10);
+      expect(RenderEditable.nextCharacter(9, '0123👨👩👦0123'), 10);
+      expect(RenderEditable.nextCharacter(10, '0123👨👩👦0123'), 11);
+    });
+
+    test('handles extended grapheme clusters correctly', () {
+      expect(RenderEditable.nextCharacter(3, '0123👨‍👩‍👦2345'), 4);
+      expect(RenderEditable.nextCharacter(4, '0123👨‍👩‍👦2345'), 12);
+      // Even when extent falls within an extended grapheme cluster, it still
+      // identifies the whole grapheme cluster.
+      expect(RenderEditable.nextCharacter(5, '0123👨‍👩‍👦2345'), 12);
+      expect(RenderEditable.nextCharacter(12, '0123👨‍👩‍👦2345'), 13);
+    });
+  });
+
+  group('getRectForComposingRange', () {
+    const TextSpan emptyTextSpan = TextSpan(text: '\u200e');
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      maxLines: null,
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    test('returns null when no composing range', () {
+      editable.text = const TextSpan(text: '123');
+      editable.layout(const BoxConstraints.tightFor(width: 200));
+
+      // Invalid range.
+      expect(editable.getRectForComposingRange(const TextRange(start: -1, end: 2)), isNull);
+      // Collapsed range.
+      expect(editable.getRectForComposingRange(const TextRange.collapsed(2)), isNull);
+
+      // Empty Editable.
+      editable.text = emptyTextSpan;
+      editable.layout(const BoxConstraints.tightFor(width: 200));
+
+      expect(
+        editable.getRectForComposingRange(const TextRange(start: 0, end: 1)),
+        // On web this evaluates to a zero-width Rect.
+        anyOf(isNull, (Rect rect) => rect.width == 0));
+    });
+
+    test('more than 1 run on the same line', () {
+      const TextStyle tinyText = TextStyle(fontSize: 1, fontFamily: 'Ahem');
+      const TextStyle normalText = TextStyle(fontSize: 10, fontFamily: 'Ahem');
+      editable.text = TextSpan(
+        children: <TextSpan>[
+          const TextSpan(text: 'A', style: tinyText),
+          TextSpan(text: 'A' * 20, style: normalText),
+          const TextSpan(text: 'A', style: tinyText)
+        ],
+      );
+      // Give it a width that forces the editable to wrap.
+      editable.layout(const BoxConstraints.tightFor(width: 200));
+
+      final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 0, end: 20 + 2))!;
+
+      // Since the range covers an entire line, the Rect should also be almost
+      // as wide as the entire paragraph (give or take 1 character).
+      expect(composingRect.width, greaterThan(200 - 10));
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/66089
+  });
+
+  group('previousCharacter', () {
+    test('handles normal strings correctly', () {
+      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
+      expect(RenderEditable.previousCharacter(0, '01234567'), 0);
+      expect(RenderEditable.previousCharacter(1, '01234567'), 0);
+      expect(RenderEditable.previousCharacter(5, '01234567'), 4);
+      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
+    });
+
+    test('throws for invalid indices', () {
+      expect(() => RenderEditable.previousCharacter(-1, '01234567'), throwsAssertionError);
+      expect(() => RenderEditable.previousCharacter(9, '01234567'), throwsAssertionError);
+    });
+
+    test('skips spaces in normal strings when includeWhitespace is false', () {
+      expect(RenderEditable.previousCharacter(10, '0123      0123', false), 3);
+      expect(RenderEditable.previousCharacter(11, '0123      0123', false), 10);
+      expect(RenderEditable.previousCharacter(9, '0123      0123', false), 3);
+      expect(RenderEditable.previousCharacter(4, '0123      0123', false), 3);
+      expect(RenderEditable.previousCharacter(3, '0123      0123', false), 2);
+      // If the previous characters are all whitespace, it returns zero.
+      expect(RenderEditable.previousCharacter(3, '          0123', false), 0);
+    });
+
+    test('handles surrogate pairs correctly', () {
+      expect(RenderEditable.previousCharacter(11, '0123👨👩👦0123'), 10);
+      expect(RenderEditable.previousCharacter(10, '0123👨👩👦0123'), 8);
+      expect(RenderEditable.previousCharacter(9, '0123👨👩👦0123'), 8);
+      expect(RenderEditable.previousCharacter(8, '0123👨👩👦0123'), 6);
+      expect(RenderEditable.previousCharacter(7, '0123👨👩👦0123'), 6);
+      expect(RenderEditable.previousCharacter(6, '0123👨👩👦0123'), 4);
+      expect(RenderEditable.previousCharacter(5, '0123👨👩👦0123'), 4);
+      expect(RenderEditable.previousCharacter(4, '0123👨👩👦0123'), 3);
+      expect(RenderEditable.previousCharacter(3, '0123👨👩👦0123'), 2);
+    });
+
+    test('handles extended grapheme clusters correctly', () {
+      expect(RenderEditable.previousCharacter(13, '0123👨‍👩‍👦2345'), 12);
+      // Even when extent falls within an extended grapheme cluster, it still
+      // identifies the whole grapheme cluster.
+      expect(RenderEditable.previousCharacter(12, '0123👨‍👩‍👦2345'), 4);
+      expect(RenderEditable.previousCharacter(11, '0123👨‍👩‍👦2345'), 4);
+      expect(RenderEditable.previousCharacter(5, '0123👨‍👩‍👦2345'), 4);
+      expect(RenderEditable.previousCharacter(4, '0123👨‍👩‍👦2345'), 3);
+    });
+  });
 }

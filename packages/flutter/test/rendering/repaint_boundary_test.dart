@@ -90,9 +90,9 @@ void main() {
       child: faultyRenderObject,
     );
 
-    FlutterErrorDetails error;
+    late FlutterErrorDetails error;
     layout(opacity, phase: EnginePhase.flushSemantics, onErrors: () {
-      error = renderer.takeFlutterErrorDetails();
+      error = renderer.takeFlutterErrorDetails()!;
     });
     expect('${error.exception}', contains('Attempted to set a layer to a repaint boundary render object.'));
   });

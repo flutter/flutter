@@ -26,7 +26,7 @@ void main() {
   MemoryFileSystem fs;
 
   setUp(() {
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem.test();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('test').childFile('some_test.dart').createSync(recursive: true);
@@ -164,8 +164,11 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
+    String tags,
+    String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
+    bool disableDds = false,
     bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     bool machine = false,
@@ -182,6 +185,11 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     Directory coverageDirectory,
     bool web = false,
     String randomSeed,
+    @override List<String> extraFrontEndOptions,
+    bool nullAssertions = false,
+    BuildInfo buildInfo,
+    String reporter,
+    String timeout,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;
