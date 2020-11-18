@@ -150,12 +150,12 @@ class FlutterPlatformViewsController {
   void PrerollCompositeEmbeddedView(int view_id,
                                     std::unique_ptr<flutter::EmbeddedViewParams> params);
 
-  // Returns the `FlutterPlatformView` object associated with the view_id.
+  // Returns the `FlutterPlatformView`'s `view` object associated with the view_id.
   //
   // If the `FlutterPlatformViewsController` does not contain any `FlutterPlatformView` object or
   // a `FlutterPlatformView` object asscociated with the view_id cannot be found, the method
   // returns nil.
-  NSObject<FlutterPlatformView>* GetPlatformViewByID(int view_id);
+  UIView* GetPlatformViewByID(int view_id);
 
   PostPrerollResult PostPrerollAction(fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger);
 
@@ -331,6 +331,9 @@ class FlutterPlatformViewsController {
 
 // Prevent the touch sequence from ever arriving to the embedded view.
 - (void)blockGesture;
+
+// Get embedded view
+- (UIView*)embeddedView;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
