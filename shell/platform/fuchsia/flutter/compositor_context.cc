@@ -4,6 +4,7 @@
 
 #include "compositor_context.h"
 
+#include <algorithm>
 #include <vector>
 
 #include "flutter/flow/layers/layer_tree.h"
@@ -65,12 +66,20 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
       // Image ops for the frame's paint tasks, then Present.
       TRACE_EVENT0("flutter", "SessionPresent");
       frame_paint_tasks = scene_update_context_->GetPaintTasks();
+
+      const SkISize& frame_size = layer_tree.frame_size();
       for (auto& task : frame_paint_tasks) {
-        SkISize physical_size =
-            SkISize::Make(layer_tree.device_pixel_ratio() * task.scale_x *
-                              task.paint_bounds.width(),
-                          layer_tree.device_pixel_ratio() * task.scale_y *
-                              task.paint_bounds.height());
+        // Clamp the logical size to the logical frame size in order to avoid
+        // huge surfaces.
+        const SkISize logical_size = SkISize::Make(
+            std::clamp(task.scale_x * task.paint_bounds.width(), 0.f,
+                       static_cast<float>(frame_size.width())),
+            std::clamp(task.scale_y * task.paint_bounds.height(), 0.f,
+                       static_cast<float>(frame_size.height())));
+
+        SkISize physical_size = SkISize::Make(
+            layer_tree.device_pixel_ratio() * logical_size.width(),
+            layer_tree.device_pixel_ratio() * logical_size.height());
         if (physical_size.width() == 0 || physical_size.height() == 0) {
           frame_surfaces.emplace_back(nullptr);
           continue;
