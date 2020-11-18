@@ -942,12 +942,18 @@ class WebDevFS implements DevFS {
     File metadataFile;
     List<String> modules;
     try {
-      final Directory parentDirectory = globals.fs.directory(outputDirectoryPath);
-      codeFile = parentDirectory.childFile('${compilerOutput.outputFilename}.sources');
-      manifestFile = parentDirectory.childFile('${compilerOutput.outputFilename}.json');
-      sourcemapFile = parentDirectory.childFile('${compilerOutput.outputFilename}.map');
-      metadataFile = parentDirectory.childFile('${compilerOutput.outputFilename}.metadata');
-      modules = webAssetServer.write(codeFile, manifestFile, sourcemapFile, metadataFile);
+      final Directory parentDirectory =
+          globals.fs.directory(outputDirectoryPath);
+      codeFile =
+          parentDirectory.childFile('${compilerOutput.outputFilename}.sources');
+      manifestFile =
+          parentDirectory.childFile('${compilerOutput.outputFilename}.json');
+      sourcemapFile =
+          parentDirectory.childFile('${compilerOutput.outputFilename}.map');
+      metadataFile =
+          parentDirectory.childFile('${compilerOutput.outputFilename}.metadata');
+      modules =
+          webAssetServer.write(codeFile, manifestFile, sourcemapFile, metadataFile);
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
