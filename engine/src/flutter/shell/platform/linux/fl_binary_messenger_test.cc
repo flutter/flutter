@@ -175,7 +175,7 @@ TEST(FlBinaryMessengerTest, ReceiveMessage) {
   fl_binary_messenger_set_message_handler_on_channel(
       messenger, "test/responses", response_cb, loop, nullptr);
 
-  // Triggger the engine to send a message.
+  // Trigger the engine to send a message.
   const char* text = "Marco!";
   g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
   fl_binary_messenger_send_on_channel(messenger, "test/send-message", message,

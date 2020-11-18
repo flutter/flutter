@@ -31,7 +31,7 @@ struct _FlMethodChannel {
   GDestroyNotify method_call_handler_destroy_notify;
 };
 
-// Added here to stop the compiler from optimising this function away.
+// Added here to stop the compiler from optimizing this function away.
 G_MODULE_EXPORT GType fl_method_channel_get_type();
 
 G_DEFINE_TYPE(FlMethodChannel, fl_method_channel, G_TYPE_OBJECT)
