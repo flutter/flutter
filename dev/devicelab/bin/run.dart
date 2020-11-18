@@ -118,9 +118,8 @@ Future<void> _runTasks() async {
 
     if (serviceAccountTokenFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-      /// Cocoon's definition of a task is more specific than [taskName], and to
-      /// upload we instead send the [luciBuilder] this is running on.
-      await cocoon.sendTaskResult(taskName: luciBuilder, result: result);
+      /// Cocoon references LUCI tasks by the [luciBuilder] instead of [taskName].
+      await cocoon.sendTaskResult(builderName: luciBuilder, result: result);
     }
 
     if (!result.succeeded) {

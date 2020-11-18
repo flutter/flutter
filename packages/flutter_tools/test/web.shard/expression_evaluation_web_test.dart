@@ -166,7 +166,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: 'https://github.com/dart-lang/sdk/issues/41480');
 }
 
 Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {

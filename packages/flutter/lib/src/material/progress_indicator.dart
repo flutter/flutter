@@ -243,6 +243,54 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// The minimum height of the indicator can be specified using [minHeight].
 /// The indicator can be made taller by wrapping the widget with a [SizedBox].
 ///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// This example shows a [LinearProgressIndicator] with a changing value.
+///
+/// ```dart
+///  AnimationController controller;
+///
+///  @override
+///  void initState() {
+///    controller = AnimationController(
+///      vsync: this,
+///      duration: const Duration(seconds: 5),
+///    )..addListener(() {
+///        setState(() {});
+///      });
+///    controller.repeat(reverse: true);
+///    super.initState();
+///  }
+///
+/// @override
+/// void dispose() {
+///   controller.dispose();
+///   super.dispose();
+/// }
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Padding(
+///       padding: const EdgeInsets.all(20.0),
+///       child: Column(
+///         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///         children: [
+///           Text(
+///             'Linear progress indicator with a fixed color',
+///             style: const TextStyle(fontSize: 20),
+///           ),
+///           LinearProgressIndicator(
+///             value: controller.value,
+///             semanticsLabel: 'Linear progress indicator',
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CircularProgressIndicator], which shows progress along a circular arc.
@@ -432,6 +480,54 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 ///
 /// The indicator arc is displayed with [valueColor], an animated value. To
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// This example shows a [CircularProgressIndicator] with a changing value.
+///
+/// ```dart
+///  AnimationController controller;
+///
+///  @override
+///  void initState() {
+///    controller = AnimationController(
+///      vsync: this,
+///      duration: const Duration(seconds: 5),
+///    )..addListener(() {
+///        setState(() {});
+///      });
+///    controller.repeat(reverse: true);
+///    super.initState();
+///  }
+///
+/// @override
+/// void dispose() {
+///   controller.dispose();
+///   super.dispose();
+/// }
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Padding(
+///       padding: const EdgeInsets.all(20.0),
+///       child: Column(
+///         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///         children: [
+///           Text(
+///             'Linear progress indicator with a fixed color',
+///             style: Theme.of(context).textTheme.headline6,
+///           ),
+///           CircularProgressIndicator(
+///             value: controller.value,
+///             semanticsLabel: 'Linear progress indicator',
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
