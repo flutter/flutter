@@ -252,6 +252,15 @@ abstract class OneShotSkiaObject<T extends Object> extends SkiaObject<T> {
   }
 }
 
+/// Interface that classes wrapping [SkiaObjectBox] must implement.
+///
+/// Used to collect stack traces in debug mode.
+abstract class StackTraceDebugger {
+  /// The stack trace pointing to code location that created or upreffed a
+  /// [SkiaObjectBox].
+  StackTrace get debugStackTrace;
+}
+
 /// Uses reference counting to manage the lifecycle of a Skia object owned by a
 /// wrapper object.
 ///
@@ -263,37 +272,47 @@ abstract class OneShotSkiaObject<T extends Object> extends SkiaObject<T> {
 ///
 /// The [delete] method may be called any number of times. The box
 /// will only delete the object once.
-class SkiaObjectBox<T> {
-  SkiaObjectBox(Object wrapper, T skObject)
-      : this._(wrapper, skObject, skObject as SkDeletable, <SkiaObjectBox>{});
-
-  SkiaObjectBox._(Object wrapper, this.skObject, this._skDeletable, this._refs) {
+class SkiaObjectBox<R extends StackTraceDebugger, T> {
+  SkiaObjectBox(R debugReferrer, this.skiaObject) : _skDeletable = skiaObject as SkDeletable {
     if (assertionsEnabled) {
-      _debugStackTrace = StackTrace.current;
+      debugReferrers.add(debugReferrer);
     }
-    _refs.add(this);
     if (browserSupportsFinalizationRegistry) {
-      boxRegistry.register(wrapper, this);
+      boxRegistry.register(this, _skDeletable);
     }
+    assert(refCount == debugReferrers.length);
   }
 
-  /// Reference handles to the same underlying [skObject].
-  final Set<SkiaObjectBox> _refs;
+  /// The number of objects sharing references to this box.
+  ///
+  /// When this count reaches zero, the underlying [skiaObject] is scheduled
+  /// for deletion.
+  int get refCount => _refCount;
+  int _refCount = 1;
 
-  late final StackTrace? _debugStackTrace;
+  /// When assertions are enabled, stores all objects that share this box.
+  ///
+  /// The length of this list is always identical to [refCount].
+  ///
+  /// This list can be used for debugging ref counting issues.
+  final Set<R> debugReferrers = <R>{};
+
   /// If asserts are enabled, the [StackTrace]s representing when a reference
   /// was created.
   List<StackTrace>? debugGetStackTraces() {
     if (assertionsEnabled) {
-      return _refs
-          .map<StackTrace>((SkiaObjectBox box) => box._debugStackTrace!)
+      return debugReferrers
+          .map<StackTrace>((R referrer) => referrer.debugStackTrace)
           .toList();
     }
     return null;
   }
 
   /// The Skia object whose lifecycle is being managed.
-  final T skObject;
+  ///
+  /// Do not store this value outside this box. It is memory-managed by
+  /// [SkiaObjectBox]. Storing it may result in use-after-free bugs.
+  final T skiaObject;
   final SkDeletable _skDeletable;
 
   /// Whether this object has been deleted.
@@ -302,17 +321,23 @@ class SkiaObjectBox<T> {
 
   /// Deletes Skia objects when their wrappers are garbage collected.
   static final SkObjectFinalizationRegistry boxRegistry =
-      SkObjectFinalizationRegistry(js.allowInterop((SkiaObjectBox box) {
-    box.delete();
+      SkObjectFinalizationRegistry(js.allowInterop((SkDeletable deletable) {
+    deletable.delete();
   }));
 
-  /// Returns a clone of this object, which increases its reference count.
+  /// Increases the reference count of this box because a new object began
+  /// sharing ownership of the underlying [skiaObject].
   ///
   /// Clones must be [dispose]d when finished.
-  SkiaObjectBox<T> clone(Object wrapper) {
-    assert(!_isDeleted, 'Cannot clone from a deleted handle.');
-    assert(_refs.isNotEmpty);
-    return SkiaObjectBox<T>._(wrapper, skObject, _skDeletable, _refs);
+  void ref(R debugReferrer) {
+    assert(!_isDeleted, 'Cannot increment ref count on a deleted handle.');
+    assert(_refCount > 0);
+    assert(
+      debugReferrers.add(debugReferrer),
+      'Attempted to increment ref count by the same referrer more than once.',
+    );
+    _refCount += 1;
+    assert(refCount == debugReferrers.length);
   }
 
   /// Decrements the reference count for the [skObject].
@@ -321,15 +346,16 @@ class SkiaObjectBox<T> {
   ///
   /// If this causes the reference count to drop to zero, deletes the
   /// [skObject].
-  void delete() {
-    if (_isDeleted) {
-      assert(!_refs.contains(this));
-      return;
-    }
-    final bool removed = _refs.remove(this);
-    assert(removed);
-    _isDeleted = true;
-    if (_refs.isEmpty) {
+  void unref(R debugReferrer) {
+    assert(!_isDeleted, 'Attempted to unref an already deleted Skia object.');
+    assert(
+      debugReferrers.remove(debugReferrer),
+      'Attempted to decrement ref count by the same referrer more than once.',
+    );
+    _refCount -= 1;
+    assert(refCount == debugReferrers.length);
+    if (_refCount == 0) {
+      _isDeleted = true;
       _scheduleSkObjectCollection(_skDeletable);
     }
   }
@@ -386,7 +412,7 @@ class SkiaObjects {
   ///
   /// Since it's expensive to resurrect, we shouldn't just delete it after every
   /// frame. Instead, add it to a cache and only delete it when the cache fills.
-  static void manageExpensive(ManagedSkiaObject object) {
+  static void manageExpensive(SkiaObject object) {
     registerCleanupCallback();
     expensiveCache.add(object);
   }
