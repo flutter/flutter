@@ -1687,6 +1687,17 @@ void main() {
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
+  
+ testWidgets('Divider color for PopupMenuDivider', (WidgetTester tester) async {
+    await tester.pumpWidget(MyDivider());
+
+    final menu = find.byIcon(Icons.more_vert);
+    expect(menu, findsOneWidget);
+    
+    await tester.tap(menu);
+  });
+  
+  
   testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
     const List<PopupMenuItem<int>> choices = <PopupMenuItem<int>>[
       PopupMenuItem<int>(value: 1, child: Text('Item 1')),
