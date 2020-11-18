@@ -43,7 +43,7 @@ void main() {
     expect(generatedConfig, exists);
     expect(generatedConfig.readAsStringSync(), allOf(
       contains('DART_OBFUSCATION=true'),
-      contains('FLUTTER_FRAMEWORK_DIR=${fileSystem.path.absolute(getFlutterRoot(), 'bin', 'cache', 'artifacts', 'engine')}'),
+      isNot(contains('FLUTTER_FRAMEWORK_DIR')),
     ));
 
     // file that only exists if app was fully built.
