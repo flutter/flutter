@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:logging/logging.dart' as logging;
@@ -36,6 +35,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
+import '../web/memory_fs.dart';
 
 /// Web rendering backend mode.
 enum WebRendererMode {
