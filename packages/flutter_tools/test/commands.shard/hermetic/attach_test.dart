@@ -40,6 +40,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   ),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
+  isolateFlags: <vm_service.IsolateFlag>[],
   libraries: <vm_service.LibraryRef>[],
   livePorts: 0,
   name: 'test',
