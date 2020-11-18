@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -20,6 +18,7 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
+import '../web/memory_fs.dart';
 
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
@@ -98,7 +97,7 @@ class WebCompilationProxy {
   const WebCompilationProxy();
 
   /// Initialize the web compiler from the `projectDirectory`.
-  Future<WebVirtualFS> initialize({
+  Future<WebMemoryFS> initialize({
     @required Directory projectDirectory,
     @required String testOutputDir,
     @required List<String> testFiles,
@@ -106,11 +105,4 @@ class WebCompilationProxy {
   }) async {
     throw UnimplementedError();
   }
-}
-
-
-class WebVirtualFS {
-  final Map<String, Uint8List> metadataFiles = <String, Uint8List>{};
-  final Map<String, Uint8List> files = <String, Uint8List>{};
-  final Map<String, Uint8List> sourcemaps = <String, Uint8List>{};
 }

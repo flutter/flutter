@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -121,7 +122,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         .absolute
         .uri
         .toFilePath();
-      final WebVirtualFS result = await webCompilationProxy.initialize(
+      final WebMemoryFS result = await webCompilationProxy.initialize(
         projectDirectory: flutterProject.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
@@ -145,7 +146,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
             buildInfo: buildInfo,
-            webVirtualFS: result,
+            webMemoryFS: result,
           );
         },
       );
