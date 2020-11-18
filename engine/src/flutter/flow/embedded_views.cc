@@ -6,8 +6,10 @@
 
 namespace flutter {
 
-void ExternalViewEmbedder::SubmitFrame(GrDirectContext* context,
-                                       std::unique_ptr<SurfaceFrame> frame) {
+void ExternalViewEmbedder::SubmitFrame(
+    GrDirectContext* context,
+    std::unique_ptr<SurfaceFrame> frame,
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disable_sync_switch) {
   frame->Submit();
 };
 

@@ -72,11 +72,14 @@ SkCanvas* IOSExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
 }
 
 // |ExternalViewEmbedder|
-void IOSExternalViewEmbedder::SubmitFrame(GrDirectContext* context,
-                                          std::unique_ptr<SurfaceFrame> frame) {
+void IOSExternalViewEmbedder::SubmitFrame(
+    GrDirectContext* context,
+    std::unique_ptr<SurfaceFrame> frame,
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disable_sync_switch) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::SubmitFrame");
   FML_CHECK(platform_views_controller_);
-  platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame));
+  platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame),
+                                          gpu_disable_sync_switch);
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 
