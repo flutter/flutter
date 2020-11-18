@@ -640,10 +640,6 @@ class PerfTest {
       final Map<String, dynamic> data = json.decode(
         file('$testDirectory/build/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
-      final List<String> detailFiles = <String>[
-        if (saveTraceFile)
-          '$testDirectory/build/$traceFilename.json',
-      ];
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -657,7 +653,10 @@ class PerfTest {
       final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
       return TaskResult.success(
         data,
-        detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
+        detailFiles: <String>[
+          if (saveTraceFile)
+            '$testDirectory/build/$traceFilename.json',
+        ],
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           ..._kCommonScoreKeys,
           'average_vsync_transitions_missed',
