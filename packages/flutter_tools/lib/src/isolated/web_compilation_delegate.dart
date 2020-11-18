@@ -48,6 +48,8 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         ..writeAsStringSync(_generateEntrypoint(relativeTestSegments.join('/'), testFilePath));
       generatedFiles.add(generatedFile);
     }
+    // Generate a fake main file that imports all tests to be executed. This will force
+    // each of them to be compiled.
     final StringBuffer buffer = StringBuffer('// @dart=2.8\n');
     for (final File generatedFile in generatedFiles) {
       buffer.writeln('import "${globals.fs.path.basename(generatedFile.path)}";');
