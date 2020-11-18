@@ -208,4 +208,31 @@ void main() {
     ProcessManager: () => processManager,
     Platform: () => macPlatform,
   });
+
+  testWithoutContext('Unpack copies Flutter.framework', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory outputDir = fileSystem.directory('output');
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: processManager,
+      artifacts: artifacts,
+      logger: logger,
+      fileSystem: fileSystem,
+      outputDir: outputDir,
+    );
+
+    processManager.addCommand(
+      FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        'Artifact.flutterFramework.TargetPlatform.ios.debug',
+        outputDir.path,
+      ]),
+    );
+
+    await const DebugUnpackIOS().build(environment);
+  });
 }

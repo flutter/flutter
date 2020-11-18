@@ -2777,11 +2777,13 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     this.onHover,
     this.onExit,
     MouseCursor cursor = MouseCursor.defer,
+    bool validForMouseTracker = true,
     bool opaque = true,
     RenderBox? child,
   }) : assert(opaque != null),
        assert(cursor != null),
        _cursor = cursor,
+       _validForMouseTracker = validForMouseTracker,
        _opaque = opaque,
        super(child);
 
@@ -2850,6 +2852,25 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   }
 
   @override
+  bool get validForMouseTracker => _validForMouseTracker;
+  bool _validForMouseTracker;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _validForMouseTracker = true;
+  }
+
+  @override
+  void detach() {
+    // It's possible that the renderObject be detached during mouse events
+    // dispatching, set the [MouseTrackerAnnotation.validForMouseTracker] false to prevent
+    // the callbacks from being called.
+    _validForMouseTracker = false;
+    super.detach();
+  }
+
+  @override
   void performResize() {
     size = constraints.biggest;
   }
@@ -2868,6 +2889,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     ));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: MouseCursor.defer));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
+    properties.add(FlagProperty('validForMouseTracker', value: validForMouseTracker, defaultValue: true, ifFalse: 'invalid for MouseTracker'));
   }
 }
 
