@@ -148,13 +148,13 @@ class FlutterWebPlatform extends PlatformPlugin {
         'dart_stack_trace_mapper.js',
       ));
 
-  /// The precompiled dart sdk.
-  File get dartSdk => globals.fs.file(globals.fs.path.join(
-        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        'kernel',
-        'amd',
-        'dart_sdk.js',
-      ));
+  File get dartSdk => globals.fs.file(globals.artifacts.getArtifactPath(kDartSdkJsArtifactMap[WebRendererMode.html][
+    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
+  ]));
+
+  File get dartSdkSourcemaps => globals.fs.file(globals.artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[WebRendererMode.html][
+    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
+  ]));
 
   /// The precompiled test javascript.
   Future<File> get testDartJs async => globals.fs.file(globals.fs.path.join(
@@ -209,6 +209,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     } else if (request.requestedUri.path.contains('ahem.ttf')) {
       return shelf.Response.ok(ahem.openRead());
     } else if (request.requestedUri.path.contains('dart_sdk.js')) {
+      return shelf.Response.ok(
+        dartSdk.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else if (request.requestedUri.path.contains('dart_sdk.js.map')) {
       return shelf.Response.ok(
         dartSdk.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
