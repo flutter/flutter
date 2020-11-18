@@ -135,7 +135,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
             return CupertinoSplitFormRow(
               text: text,
               errorText: field.errorText,
-              child: CupertinoSplitFormRow.field(
+              child: CupertinoTextField.field(
                 controller: state._effectiveController,
                 focusNode: focusNode,
                 keyboardType: keyboardType,
