@@ -90,7 +90,8 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/widgets/widget_inspector_test.dart',
   'test/painting/decoration_test.dart',
   'test/material/time_picker_test.dart',
-  'test/material/text_field_test.dart ',
+  'test/material/text_field_test.dart',
+  'test/material/floating_action_button_test.dart',
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
@@ -120,30 +121,29 @@ const List<String> kWebTestFileKnownFailures = <String>[
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
 Future<void> main(List<String> args) async {
-  await _runWebUnitTests();
-  // print('$clock STARTING ANALYSIS');
-  // try {
-  //   flutterTestArgs.addAll(args);
-  //   if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
-  //     print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
-  //   print('═' * 80);
-  //   await _runSmokeTests();
-  //   print('═' * 80);
-  //   await selectShard(const <String, ShardRunner>{
-  //     'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
-  //     'build_tests': _runBuildTests,
-  //     'framework_coverage': _runFrameworkCoverage,
-  //     'framework_tests': _runFrameworkTests,
-  //     'tool_coverage': _runToolCoverage,
-  //     'tool_tests': _runToolTests,
-  //     'web_tool_tests': _runWebToolTests,
-  //     'web_tests': _runWebUnitTests,
-  //     'web_integration_tests': _runWebIntegrationTests,
-  //     'web_long_running_tests': _runWebLongRunningTests,
-  //   });
-  // } on ExitException catch (error) {
-  //   error.apply();
-  // }
+  print('$clock STARTING ANALYSIS');
+  try {
+    flutterTestArgs.addAll(args);
+    if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
+      print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
+    print('═' * 80);
+    await _runSmokeTests();
+    print('═' * 80);
+    await selectShard(const <String, ShardRunner>{
+      'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
+      'build_tests': _runBuildTests,
+      'framework_coverage': _runFrameworkCoverage,
+      'framework_tests': _runFrameworkTests,
+      'tool_coverage': _runToolCoverage,
+      'tool_tests': _runToolTests,
+      'web_tool_tests': _runWebToolTests,
+      'web_tests': _runWebUnitTests,
+      'web_integration_tests': _runWebIntegrationTests,
+      'web_long_running_tests': _runWebLongRunningTests,
+    });
+  } on ExitException catch (error) {
+    error.apply();
+  }
   print('$clock ${bold}Test successful.$reset');
 }
 
