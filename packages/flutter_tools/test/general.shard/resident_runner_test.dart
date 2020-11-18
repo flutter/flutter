@@ -57,6 +57,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
@@ -85,6 +86,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.VM fakeVM = vm_service.VM(
@@ -2501,7 +2503,7 @@ void main() {
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+      globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());

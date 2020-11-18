@@ -14,7 +14,6 @@ import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
-import 'channel.dart';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand([UpgradeCommandRunner commandRunner])
@@ -67,7 +66,7 @@ class UpgradeCommand extends FlutterCommand {
       gitTagVersion: GitTagVersion.determine(globals.processUtils),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
-        : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
+        : FlutterVersion(clock: const SystemClock(), workingDirectory: _commandRunner.workingDirectory),
       verifyOnly: boolArg('verify-only'),
     );
   }
@@ -154,7 +153,6 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await upgradeChannel(flutterVersion);
     await attemptReset(upstreamRevision);
     if (!testFlow) {
       await flutterUpgradeContinue();
@@ -256,15 +254,6 @@ class UpgradeCommandRunner {
       }
     }
     return revision;
-  }
-
-  /// Attempts to upgrade the channel.
-  ///
-  /// If the user is on a deprecated channel, attempts to migrate them off of
-  /// it.
-  Future<void> upgradeChannel(FlutterVersion flutterVersion) async {
-    globals.printStatus('Upgrading Flutter from $workingDirectory...');
-    await ChannelCommand.upgradeChannel();
   }
 
   /// Attempts a hard reset to the given revision.

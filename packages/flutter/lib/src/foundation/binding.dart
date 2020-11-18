@@ -236,12 +236,12 @@ abstract class BindingBase {
             }
             _postExtensionStateChangedEvent(
               brightnessOverrideExtensionName,
-              (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
+              (debugBrightnessOverride ?? window.platformBrightness).toString(),
             );
             await reassembleApplication();
           }
           return <String, dynamic>{
-            'value': (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
+            'value': (debugBrightnessOverride ?? window.platformBrightness).toString(),
           };
         },
       );
