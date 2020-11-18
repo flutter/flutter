@@ -46,7 +46,7 @@ The test is run on a x86 emulator. To run the test locally, you must create an e
 
 ```
 hw.lcd.density = 480
-hw.lcd.height = 1920
+hw.lcd.height = 1680
 hw.lcd.width = 1080
 lcd.depth = 16
 ```

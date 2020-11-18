@@ -46,8 +46,6 @@ class PlatformViewScenario extends Scenario with _BasePlatformViewScenarioMixin 
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
 
-    builder.pushOffset(0, 0);
-
     finishBuilderByAddingPlatformViewAndPicture(builder, id);
   }
 }
@@ -69,8 +67,6 @@ class PlatformViewNoOverlayIntersectionScenario extends Scenario with _BasePlatf
   @override
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
 
     finishBuilderByAddingPlatformViewAndPicture(
       builder,
@@ -98,8 +94,6 @@ class PlatformViewPartialIntersectionScenario extends Scenario with _BasePlatfor
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
 
-    builder.pushOffset(0, 0);
-
     finishBuilderByAddingPlatformViewAndPicture(
       builder,
       id,
@@ -125,8 +119,6 @@ class PlatformViewTwoIntersectingOverlaysScenario extends Scenario with _BasePla
   @override
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
 
     _addPlatformViewToScene(builder, id, 500, 500);
     final PictureRecorder recorder = PictureRecorder();
@@ -166,8 +158,6 @@ class PlatformViewOneOverlayTwoIntersectingOverlaysScenario extends Scenario wit
   @override
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
 
     _addPlatformViewToScene(builder, id, 500, 500);
     final PictureRecorder recorder = PictureRecorder();
@@ -217,8 +207,6 @@ class MultiPlatformViewWithoutOverlaysScenario extends Scenario with _BasePlatfo
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
 
-    builder.pushOffset(0, 0);
-
     builder.pushOffset(0, 600);
     _addPlatformViewToScene(builder, firstId, 500, 500);
     builder.pop();
@@ -258,8 +246,6 @@ class PlatformViewMaxOverlaysScenario extends Scenario with _BasePlatformViewSce
   @override
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
 
     _addPlatformViewToScene(builder, id, 500, 500);
     final PictureRecorder recorder = PictureRecorder();
@@ -314,8 +300,6 @@ class MultiPlatformViewScenario extends Scenario with _BasePlatformViewScenarioM
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
 
-    builder.pushOffset(0, 0);
-
     builder.pushOffset(0, 600);
     _addPlatformViewToScene(builder, firstId, 500, 500);
     builder.pop();
@@ -357,13 +341,13 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario with _BaseP
   void _firstFrame() {
     final SceneBuilder builder = SceneBuilder();
 
-    builder.pushOffset(0, 0);
-
-    builder.pushOffset(0, 600);
+    builder.pushOffset(50, 600);
     _addPlatformViewToScene(builder, firstId, 500, 500);
     builder.pop();
 
+    builder.pushOffset(50, 0);
     _addPlatformViewToScene(builder, secondId, 500, 500);
+    builder.pop();
 
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
@@ -374,7 +358,6 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario with _BaseP
     final Picture picture = recorder.endRecording();
     builder.addPicture(const Offset(0, 0), picture);
 
-    builder.pop();
     final Scene scene = builder.build();
     window.render(scene);
     scene.dispose();
@@ -383,13 +366,12 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario with _BaseP
   void _secondFrame() {
     final SceneBuilder builder = SceneBuilder();
 
-    builder.pushOffset(0, 0);
-
     builder.pushOffset(0, 600);
     _addPlatformViewToScene(builder, firstId, 500, 500);
     builder.pop();
 
     _addPlatformViewToScene(builder, secondId, 500, 500);
+
     final Scene scene = builder.build();
     window.render(scene);
     scene.dispose();
@@ -430,9 +412,10 @@ class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenar
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-    builder.pushOffset(0, 0);
-    builder.pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
+    final SceneBuilder builder =
+      SceneBuilder()
+      ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
+
     finishBuilderByAddingPlatformViewAndPicture(builder, id);
   }
 }
@@ -446,8 +429,6 @@ class PlatformViewClipRRectScenario extends PlatformViewScenario {
   @override
   void onBeginFrame(Duration duration) {
     final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
     builder.pushClipRRect(
       RRect.fromLTRBAndCorners(
         100,
@@ -471,18 +452,14 @@ class PlatformViewClipPathScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
-
     final Path path = Path()
       ..moveTo(100, 100)
       ..quadraticBezierTo(50, 250, 100, 400)
       ..lineTo(350, 400)
       ..cubicTo(400, 300, 300, 200, 350, 100)
       ..close();
-    builder.pushClipPath(path);
 
+    final SceneBuilder builder = SceneBuilder()..pushClipPath(path);
     finishBuilderByAddingPlatformViewAndPicture(builder, id);
   }
 }
@@ -495,15 +472,12 @@ class PlatformViewTransformScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
     final Matrix4 matrix4 = Matrix4.identity()
       ..rotateZ(1)
       ..scale(0.5, 0.5, 1.0)
       ..translate(1000.0, 100.0, 0.0);
 
-    builder.pushTransform(matrix4.storage);
+    final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
 
     finishBuilderByAddingPlatformViewAndPicture(builder, id);
   }
@@ -517,11 +491,7 @@ class PlatformViewOpacityScenario extends PlatformViewScenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
-    builder.pushOpacity(150);
-
+    final SceneBuilder builder = SceneBuilder()..pushOpacity(150);
     finishBuilderByAddingPlatformViewAndPicture(builder, id);
   }
 }
@@ -600,15 +570,11 @@ class PlatformViewForTouchIOSScenario extends Scenario
 
   void _firstFrame() {
     final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(0, 0);
     finishBuilderByAddingPlatformViewAndPicture(builder, _viewId);
   }
 
   void _secondFrame() {
-    final SceneBuilder builder = SceneBuilder();
-
-    builder.pushOffset(5, 5);
+    final SceneBuilder builder = SceneBuilder()..pushOffset(5, 5);
     finishBuilderByAddingPlatformViewAndPicture(builder, _viewId);
   }
 }
