@@ -37,9 +37,9 @@ abstract class PreferredSizeWidget implements Widget {
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-/// This sample shows a custom AppBar with a [PreferredSize], with its height
+/// This sample shows a custom widget, similar to an [AppBar], which uses a [PreferredSize] widget, with its height
 /// set to 80 logical pixels. Changing the [PreferredSize] can be used to change
-/// the height of the AppBar.
+/// the height of the custom app bar.
 ///
 /// ```dart preamble
 /// class AppBarContent extends StatelessWidget {
