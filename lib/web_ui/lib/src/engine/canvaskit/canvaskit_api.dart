@@ -685,14 +685,11 @@ class SkAnimatedImage {
   external SkImage getCurrentFrame();
   external int width();
   external int height();
-  external Uint8List readPixels(SkImageInfo imageInfo, int srcX, int srcY);
-  external SkData encodeToData();
 
   /// Deletes the C++ object.
   ///
   /// This object is no longer usable after calling this method.
   external void delete();
-  external bool isAliasOf(SkAnimatedImage other);
   external bool isDeleted();
 }
 
@@ -1820,6 +1817,7 @@ class SkData {
   external int size();
   external bool isEmpty();
   external Uint8List bytes();
+  external void delete();
 }
 
 @JS()
