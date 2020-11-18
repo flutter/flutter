@@ -230,7 +230,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
     globals.printStatus('Frameworks written to ${outputDirectory.path}.');
 
-    if (!_project.isModule) {
+    if (!_project.isModule && hasPlugins(_project)) {
       // Apps do not generate a FlutterPluginRegistrant.framework. Users will need
       // to copy the GeneratedPluginRegistrant class to their project manually.
       final File pluginRegistrantHeader = _project.ios.pluginRegistrantHeader;
