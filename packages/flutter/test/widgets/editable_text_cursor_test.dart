@@ -322,6 +322,109 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
+  testWidgets('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
+    const String testText = 'Some text long enough to move the cursor around';
+    final TextEditingController controller = TextEditingController(text: testText);
+    late TextSelection selection;
+    final Widget widget = MaterialApp(
+      home: EditableText(
+        controller: controller,
+        focusNode: FocusNode(),
+        style: TextStyle(fontSize: 20.0),
+        maxLines: 1,
+        cursorColor: Colors.blue,
+        backgroundCursorColor: Colors.grey,
+        cursorOpacityAnimates: false,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        textAlign: TextAlign.left,
+        onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+          selection = newSelection;
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    await tester.pump();
+    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+
+    // Android cursor goes from exactly on to exactly off on the 500ms dot.
+    await tester.pump(const Duration(milliseconds: 499));
+    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 20,
+          extentOffset: 20,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on macos',
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 19,
+          extentOffset: 19,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on macos',
+    );
+
+    await tester.pump();
+    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+
+    await tester.pump(const Duration(milliseconds: 299));
+    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+
+    await tester.pump();
+    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+
+    await tester.pump(const Duration(milliseconds: 299));
+    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(renderEditable.cursorColor!.alpha, 0);
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+
   testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
       home: Material(
