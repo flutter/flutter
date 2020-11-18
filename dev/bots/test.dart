@@ -101,12 +101,13 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/cupertino/text_field_test.dart',
   'test/cupertino/route_test.dart',
   'test/foundation/error_reporting_test.dart',
+  'test/foundation/consolidate_response_test.dart',
   'test/services/message_codecs_vm_test.dart',
   'test/services/platform_messages_test.dart ',
   'test/widgets/image_resolution_test.dart ',
   'test/widgets/platform_view_test.dart',
   'test/widgets/route_notification_messages_test.dart',
-  'test/widgets/widgets/semantics_tester_generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart',
+  'test/widgets/semantics_tester_generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart',
   'test/widgets/text_golden_test.dart',
 ];
 
