@@ -829,7 +829,6 @@ class PageView extends StatefulWidget {
   final ScrollPhysics? physics;
 
   ///Setting this flag to false align pageview viewport to left.
-  ///
   final bool padEnds;
 
   /// Set to false to disable page snapping, useful for custom scroll behavior.
