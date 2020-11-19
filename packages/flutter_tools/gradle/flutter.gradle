@@ -321,13 +321,15 @@ class FlutterPlugin implements Plugin<Project> {
                 "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
             )
         }
-        pluginProject.android.buildTypes {
-            profile {
-                initWith debug
-            }
+        pluginProject.afterEvaluate {
+          pluginProject.android.buildTypes {
+              profile {
+                  initWith debug
+              }
+          }
+          pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
+          pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
         }
-        pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
-        pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
     }
 
     // Returns `true` if the given path contains an `android/build.gradle` file.
