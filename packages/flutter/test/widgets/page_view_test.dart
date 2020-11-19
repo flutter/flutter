@@ -381,6 +381,38 @@ void main() {
     expect(find.text('Arizona'), findsNothing);
   });
 
+  testWidgets('PageView viewportFraction align', (WidgetTester tester) async {
+    PageController controller = PageController(viewportFraction: 7 / 8);
+
+    Widget build(PageController controller) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView.builder(
+          controller: controller,
+          itemCount: kStates.length,
+          padEnds: false,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              height: 200.0,
+              color: index.isEven
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
+              child: Text(kStates[index]),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(controller));
+    controller.jumpToPage(10);
+    await tester.pump();
+
+    controller = PageController(viewportFraction: 39/40);
+
+    await tester.pumpWidget(build(controller));
+  });
+
   testWidgets('PageView viewportFraction', (WidgetTester tester) async {
     PageController controller = PageController(viewportFraction: 7/8);
 
