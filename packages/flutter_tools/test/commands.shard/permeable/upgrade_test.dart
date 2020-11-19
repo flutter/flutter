@@ -44,7 +44,7 @@ void main() {
       fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
         'ENV1': 'irrelevant',
         'ENV2': 'irrelevant',
-      })..version = '1.2.3-dev-4.5';
+      });
     });
 
     testUsingContext('throws on unknown tag, official branch,  noforce', () async {
