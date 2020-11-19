@@ -171,6 +171,7 @@ class HotRunner extends ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool allowExistingDdsInstance = false,
   }) async {
     _didAttach = true;
     try {
@@ -179,6 +180,7 @@ class HotRunner extends ResidentRunner {
         restart: _restartService,
         compileExpression: _compileExpressionService,
         getSkSLMethod: writeSkSL,
+        allowExistingDdsInstance: allowExistingDdsInstance,
       );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
