@@ -1222,6 +1222,22 @@ void main() {
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
+
+  testWidgets('Text does not overflow in OutlineButton label', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('this is a very long text used to check whether an overflow occurs or not'),
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+  });
 }
 
 PhysicalModelLayer _findPhysicalLayer(Element element) {
