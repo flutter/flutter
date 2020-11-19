@@ -70,7 +70,7 @@ void main() {
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
       FileSystem: () => memoryFileSystem,
@@ -111,7 +111,7 @@ void main() {
           'distributionPath=wrapper/dists\n'
           'zipStoreBase=GRADLE_USER_HOME\n'
           'zipStorePath=wrapper/dists\n'
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
       FileSystem: () => memoryFileSystem,

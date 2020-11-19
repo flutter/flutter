@@ -21,10 +21,6 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 android {
     compileSdkVersion 29
 
-    lintOptions {
-        disable 'InvalidPackage'
-    }
-
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 29

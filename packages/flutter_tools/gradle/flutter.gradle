@@ -27,7 +27,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:4.1.0'
     }
 }
 
@@ -775,6 +775,20 @@ class FlutterPlugin implements Plugin<Project> {
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all { variant ->
+                // `assemble` became `assembleProvider` in AGP 3.3.0.
+               def assembleTask = variant.hasProperty("assembleProvider")
+                        ? variant.assembleProvider.get()
+                        : variant.assemble
+                // When the linter is enabled in AGP 4.0, tasks dependencies are lost.
+                // To workaround this issue, only configure the tasks that are requested
+                // from the command line.
+                //
+                // This supports multiple tasks. e.g. ./gradlew assembleRelese assembleFooRelease
+                // https://issuetracker.google.com/issues/158060799
+                // https://issuetracker.google.com/issues/158753935
+                if (!project.gradle.startParameter.taskNames.contains(assembleTask.name)) {
+                  return;
+                }
                 addFlutterDeps(variant)
                 // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
                 // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
@@ -785,10 +799,6 @@ class FlutterPlugin implements Plugin<Project> {
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.all { output ->
-                    // `assemble` became `assembleProvider` in AGP 3.3.0.
-                    def assembleTask = variant.hasProperty("assembleProvider")
-                        ? variant.assembleProvider.get()
-                        : variant.assemble
                     assembleTask.doLast {
                         // `packageApplication` became `packageApplicationProvider` in AGP 3.3.0.
                         def outputDirectory = variant.hasProperty("packageApplicationProvider")
