@@ -6565,9 +6565,9 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// {@tool dartpad --template=stateful_widget_material}
 /// The following sample has an [IgnorePointer] widget wrapping the `Column`
 /// which contains a button. 
-/// When setting [ignoring] to `true` anything inside the `Column` will 
-/// not be pressable or tapable. When setting [ignoring] to `false` anything
-/// inside the `Column` will be pressable or tapable.
+/// When [ignoring] is set to `true` anything inside the `Column` can 
+/// not be tapped. When [ignoring] is set to `false` anything
+/// inside the `Column` can be tapped.
 ///
 /// ```dart
 /// bool ignoring = false;
@@ -6587,7 +6587,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///           setIgnoring(!ignoring);
 ///         },
 ///         child: Text(
-///           ignoring ? 'Set Ignoring To False' : 'Set Ignoring To True',
+///           ignoring ? 'Set ignoring to false' : 'Set ignoring to true',
 ///         ),
 ///       ),
 ///     ),
@@ -6598,15 +6598,12 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 ///           children: <Widget>[
 ///             Text(
-///               'Ignoring status: ${ignoring ? 'TRUE' : 'FALSE'}',
+///               'Ignoring: $ignoring',
 ///             ),
 ///             ElevatedButton(
 ///               onPressed: () {},
 ///               child: Text(
-///                 'CLICK ME!',
-///                 style: TextStyle(
-///                   fontSize: 50,
-///                 ),
+///                 'Click me!',
 ///               ),
 ///             ),
 ///           ],
