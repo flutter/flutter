@@ -100,10 +100,10 @@ public class FlutterView extends SurfaceView
     float devicePixelRatio = 1.0f;
     int physicalWidth = 0;
     int physicalHeight = 0;
-    int physicalPaddingTop = 0;
-    int physicalPaddingRight = 0;
-    int physicalPaddingBottom = 0;
-    int physicalPaddingLeft = 0;
+    int physicalViewPaddingTop = 0;
+    int physicalViewPaddingRight = 0;
+    int physicalViewPaddingBottom = 0;
+    int physicalViewPaddingLeft = 0;
     int physicalViewInsetTop = 0;
     int physicalViewInsetRight = 0;
     int physicalViewInsetBottom = 0;
@@ -603,10 +603,10 @@ public class FlutterView extends SurfaceView
         mask = mask | android.view.WindowInsets.Type.statusBars();
       }
       Insets uiInsets = insets.getInsets(mask);
-      mMetrics.physicalPaddingTop = uiInsets.top;
-      mMetrics.physicalPaddingRight = uiInsets.right;
-      mMetrics.physicalPaddingBottom = uiInsets.bottom;
-      mMetrics.physicalPaddingLeft = uiInsets.left;
+      mMetrics.physicalViewPaddingTop = uiInsets.top;
+      mMetrics.physicalViewPaddingRight = uiInsets.right;
+      mMetrics.physicalViewPaddingBottom = uiInsets.bottom;
+      mMetrics.physicalViewPaddingLeft = uiInsets.left;
 
       Insets imeInsets = insets.getInsets(android.view.WindowInsets.Type.ime());
       mMetrics.physicalViewInsetTop = imeInsets.top;
@@ -627,21 +627,21 @@ public class FlutterView extends SurfaceView
       DisplayCutout cutout = insets.getDisplayCutout();
       if (cutout != null) {
         Insets waterfallInsets = cutout.getWaterfallInsets();
-        mMetrics.physicalPaddingTop =
+        mMetrics.physicalViewPaddingTop =
             Math.max(
-                Math.max(mMetrics.physicalPaddingTop, waterfallInsets.top),
+                Math.max(mMetrics.physicalViewPaddingTop, waterfallInsets.top),
                 cutout.getSafeInsetTop());
-        mMetrics.physicalPaddingRight =
+        mMetrics.physicalViewPaddingRight =
             Math.max(
-                Math.max(mMetrics.physicalPaddingRight, waterfallInsets.right),
+                Math.max(mMetrics.physicalViewPaddingRight, waterfallInsets.right),
                 cutout.getSafeInsetRight());
-        mMetrics.physicalPaddingBottom =
+        mMetrics.physicalViewPaddingBottom =
             Math.max(
-                Math.max(mMetrics.physicalPaddingBottom, waterfallInsets.bottom),
+                Math.max(mMetrics.physicalViewPaddingBottom, waterfallInsets.bottom),
                 cutout.getSafeInsetBottom());
-        mMetrics.physicalPaddingLeft =
+        mMetrics.physicalViewPaddingLeft =
             Math.max(
-                Math.max(mMetrics.physicalPaddingLeft, waterfallInsets.left),
+                Math.max(mMetrics.physicalViewPaddingLeft, waterfallInsets.left),
                 cutout.getSafeInsetLeft());
       }
     } else {
@@ -654,16 +654,16 @@ public class FlutterView extends SurfaceView
 
       // Status bar (top), navigation bar (bottom) and left/right system insets should
       // partially obscure the content (padding).
-      mMetrics.physicalPaddingTop = statusBarVisible ? insets.getSystemWindowInsetTop() : 0;
-      mMetrics.physicalPaddingRight =
+      mMetrics.physicalViewPaddingTop = statusBarVisible ? insets.getSystemWindowInsetTop() : 0;
+      mMetrics.physicalViewPaddingRight =
           zeroSides == ZeroSides.RIGHT || zeroSides == ZeroSides.BOTH
               ? 0
               : insets.getSystemWindowInsetRight();
-      mMetrics.physicalPaddingBottom =
+      mMetrics.physicalViewPaddingBottom =
           navigationBarVisible && guessBottomKeyboardInset(insets) == 0
               ? insets.getSystemWindowInsetBottom()
               : 0;
-      mMetrics.physicalPaddingLeft =
+      mMetrics.physicalViewPaddingLeft =
           zeroSides == ZeroSides.LEFT || zeroSides == ZeroSides.BOTH
               ? 0
               : insets.getSystemWindowInsetLeft();
@@ -684,10 +684,10 @@ public class FlutterView extends SurfaceView
   protected boolean fitSystemWindows(Rect insets) {
     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
       // Status bar, left/right system insets partially obscure content (padding).
-      mMetrics.physicalPaddingTop = insets.top;
-      mMetrics.physicalPaddingRight = insets.right;
-      mMetrics.physicalPaddingBottom = 0;
-      mMetrics.physicalPaddingLeft = insets.left;
+      mMetrics.physicalViewPaddingTop = insets.top;
+      mMetrics.physicalViewPaddingRight = insets.right;
+      mMetrics.physicalViewPaddingBottom = 0;
+      mMetrics.physicalViewPaddingLeft = insets.left;
 
       // Bottom system inset (keyboard) should adjust scrollable bottom edge (inset).
       mMetrics.physicalViewInsetTop = 0;
@@ -746,10 +746,10 @@ public class FlutterView extends SurfaceView
             mMetrics.devicePixelRatio,
             mMetrics.physicalWidth,
             mMetrics.physicalHeight,
-            mMetrics.physicalPaddingTop,
-            mMetrics.physicalPaddingRight,
-            mMetrics.physicalPaddingBottom,
-            mMetrics.physicalPaddingLeft,
+            mMetrics.physicalViewPaddingTop,
+            mMetrics.physicalViewPaddingRight,
+            mMetrics.physicalViewPaddingBottom,
+            mMetrics.physicalViewPaddingLeft,
             mMetrics.physicalViewInsetTop,
             mMetrics.physicalViewInsetRight,
             mMetrics.physicalViewInsetBottom,
