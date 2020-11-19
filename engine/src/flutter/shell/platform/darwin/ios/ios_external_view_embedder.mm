@@ -37,7 +37,7 @@ void IOSExternalViewEmbedder::BeginFrame(
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::BeginFrame");
   FML_CHECK(platform_views_controller_);
-  platform_views_controller_->SetFrameSize(frame_size);
+  platform_views_controller_->BeginFrame(frame_size);
 }
 
 // |ExternalViewEmbedder|
@@ -88,7 +88,6 @@ void IOSExternalViewEmbedder::EndFrame(bool should_resubmit_frame,
                                        fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::EndFrame");
   FML_CHECK(platform_views_controller_);
-  return platform_views_controller_->EndFrame(should_resubmit_frame, raster_thread_merger);
 }
 
 // |ExternalViewEmbedder|
