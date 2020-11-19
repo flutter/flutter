@@ -239,13 +239,13 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)loadView {
-  NSOpenGLContext* mainContext = _engine.openGLRenderer.openGLContext;
-  if (!mainContext) {
-    NSLog(@"Unable to create FlutterView; no GL context available.");
+  NSOpenGLContext* resourceContext = _engine.resourceContext;
+  if (!resourceContext) {
+    NSLog(@"Unable to create FlutterView; no resource context available.");
     return;
   }
-  FlutterView* flutterView = [[FlutterView alloc] initWithMainContext:mainContext
-                                                      reshapeListener:self];
+  FlutterView* flutterView = [[FlutterView alloc] initWithShareContext:resourceContext
+                                                       reshapeListener:self];
   self.view = flutterView;
 }
 
