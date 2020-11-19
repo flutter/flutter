@@ -33,7 +33,7 @@ import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
-import '../web/compile.dart';
+import '../web/memory_fs.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
 
@@ -43,7 +43,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     String shellPath,
     this.updateGoldens,
     @required this.buildInfo,
-    @required this.webVirtualFS,
+    @required this.webMemoryFS,
   }) {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
@@ -68,7 +68,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  final WebVirtualFS webVirtualFS;
+  final WebMemoryFS webMemoryFS;
   final BuildInfo buildInfo;
 
   static Future<FlutterWebPlatform> start(String root, {
@@ -77,7 +77,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
     @required BuildInfo buildInfo,
-    @required WebVirtualFS webVirtualFS,
+    @required WebMemoryFS webMemoryFS,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return FlutterWebPlatform._(
@@ -88,7 +88,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       shellPath: shellPath,
       updateGoldens: updateGoldens,
       buildInfo: buildInfo,
-      webVirtualFS: webVirtualFS,
+      webMemoryFS: webMemoryFS,
     );
   }
 
@@ -188,12 +188,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
     if (request.url.path.endsWith('.dart.js')) {
       final String path = request.url.path.split('.dart.js')[0];
-      return shelf.Response.ok(webVirtualFS.files[path + '.dart.lib.js'], headers: <String, String>{
+      return shelf.Response.ok(webMemoryFS.files[path + '.dart.lib.js'], headers: <String, String>{
         HttpHeaders.contentTypeHeader: 'text/javascript',
       });
     }
     if (request.url.path.endsWith('.lib.js.map')) {
-      return shelf.Response.ok(webVirtualFS.sourcemaps[request.url.path], headers: <String, String>{
+      return shelf.Response.ok(webMemoryFS.sourcemaps[request.url.path], headers: <String, String>{
         HttpHeaders.contentTypeHeader: 'text/plain',
       });
     }

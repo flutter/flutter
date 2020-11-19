@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../convert.dart';
 import '../globals.dart' as globals;
 import '../web/compile.dart';
+import '../web/memory_fs.dart';
 
 // TODO(jonahwilliams): this class was kept around to reduce the diff in the migration
 // from build_runner to the frontend_server, but should be removed/refactored to be
@@ -24,7 +21,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   BuildRunnerWebCompilationProxy();
 
   @override
-  Future<WebVirtualFS> initialize({
+  Future<WebMemoryFS> initialize({
     @required Directory projectDirectory,
     @required String testOutputDir,
     @required List<String> testFiles,
@@ -105,93 +102,8 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     final File manifestFile = outputDirectory.childFile('${output.outputFilename}.json');
     final File sourcemapFile = outputDirectory.childFile('${output.outputFilename}.map');
     final File metadataFile = outputDirectory.childFile('${output.outputFilename}.metadata');
-    final WebVirtualFS webVirtualFS = WebVirtualFS();
-    _write(
-      codeFile,
-      manifestFile,
-      sourcemapFile,
-      metadataFile,
-      webVirtualFS,
-    );
-    return webVirtualFS;
-  }
-
-  void _write(
-    File codeFile,
-    File manifestFile,
-    File sourcemapFile,
-    File metadataFile,
-    WebVirtualFS webVirtualFS,
-  ) {
-    final Uint8List codeBytes = codeFile.readAsBytesSync();
-    final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
-    final Uint8List metadataBytes = metadataFile.readAsBytesSync();
-    final Map<String, dynamic> manifest =
-        castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
-    for (final String filePath in manifest.keys) {
-      if (filePath == null) {
-        globals.printTrace('Invalid manifest file: $filePath');
-        continue;
-      }
-      final Map<String, dynamic> offsets =
-          castStringKeyedMap(manifest[filePath]);
-      final List<int> codeOffsets =
-          (offsets['code'] as List<dynamic>).cast<int>();
-      final List<int> sourcemapOffsets =
-          (offsets['sourcemap'] as List<dynamic>).cast<int>();
-      final List<int> metadataOffsets =
-          (offsets['metadata'] as List<dynamic>).cast<int>();
-      if (codeOffsets.length != 2 ||
-          sourcemapOffsets.length != 2 ||
-          metadataOffsets.length != 2) {
-        globals.printTrace('Invalid manifest byte offsets: $offsets');
-        continue;
-      }
-
-      final int codeStart = codeOffsets[0];
-      final int codeEnd = codeOffsets[1];
-      if (codeStart < 0 || codeEnd > codeBytes.lengthInBytes) {
-        globals.printTrace('Invalid byte index: [$codeStart, $codeEnd]');
-        continue;
-      }
-      final Uint8List byteView = Uint8List.view(
-        codeBytes.buffer,
-        codeStart,
-        codeEnd - codeStart,
-      );
-      final String fileName =
-          filePath.startsWith('/') ? filePath.substring(1) : filePath;
-      webVirtualFS.files[fileName] = byteView;
-
-      final int sourcemapStart = sourcemapOffsets[0];
-      final int sourcemapEnd = sourcemapOffsets[1];
-      if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
-        globals.printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
-        continue;
-      }
-      final Uint8List sourcemapView = Uint8List.view(
-        sourcemapBytes.buffer,
-        sourcemapStart,
-        sourcemapEnd - sourcemapStart,
-      );
-      final String sourcemapName = '$fileName.map';
-      webVirtualFS.sourcemaps[sourcemapName] = sourcemapView;
-
-      final int metadataStart = metadataOffsets[0];
-      final int metadataEnd = metadataOffsets[1];
-      if (metadataStart < 0 || metadataEnd > metadataBytes.lengthInBytes) {
-        globals
-            .printTrace('Invalid byte index: [$metadataStart, $metadataEnd]');
-        continue;
-      }
-      final Uint8List metadataView = Uint8List.view(
-        metadataBytes.buffer,
-        metadataStart,
-        metadataEnd - metadataStart,
-      );
-      final String metadataName = '$fileName.metadata';
-      webVirtualFS.metadataFiles[metadataName] = metadataView;
-    }
+    return WebMemoryFS()
+      ..write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
 
   String _generateEntrypoint(String relativeTestPath, String absolutePath) {
