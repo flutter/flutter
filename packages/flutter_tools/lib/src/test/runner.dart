@@ -12,6 +12,7 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/compile.dart';
+import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_wrapper.dart';
@@ -121,7 +122,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         .absolute
         .uri
         .toFilePath();
-      final WebVirtualFS result = await webCompilationProxy.initialize(
+      final WebMemoryFS result = await webCompilationProxy.initialize(
         projectDirectory: flutterProject.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
@@ -145,7 +146,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
             buildInfo: buildInfo,
-            webVirtualFS: result,
+            webMemoryFS: result,
           );
         },
       );

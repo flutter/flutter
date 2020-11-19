@@ -648,11 +648,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           ephemeralDirectory,
         );
       }
-      _copyEngineArtifactToModule(BuildMode.debug);
+      copyEngineArtifactToProject(BuildMode.debug);
     }
   }
 
-  void _copyEngineArtifactToModule(BuildMode mode) {
+  void copyEngineArtifactToProject(BuildMode mode) {
     // Copy podspec and framework from engine cache. The actual build mode
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something
@@ -662,9 +662,8 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
         Artifact.flutterFramework,
         platform: TargetPlatform.ios,
         mode: mode,
-      ));
-    final Directory engineCopyDirectory =
-        ephemeralDirectory.childDirectory('Flutter').childDirectory('engine');
+      )
+    );
     if (framework.existsSync()) {
       final File podspec = framework.parent.childFile('Flutter.podspec');
       globals.fsUtils.copyDirectorySync(
@@ -710,6 +709,12 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   File get pluginRegistrantImplementation {
     final Directory registryDirectory = isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
+  }
+
+  Directory get engineCopyDirectory {
+    return isModule
+        ? ephemeralDirectory.childDirectory('Flutter').childDirectory('engine')
+        : hostAppRoot.childDirectory('Flutter');
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
