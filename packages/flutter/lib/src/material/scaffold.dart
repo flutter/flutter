@@ -1631,17 +1631,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   bool get isEndDrawerOpen => _endDrawerOpened;
 
   void _drawerOpenedCallback(bool isOpened) {
-    widget.drawerCallback?.call(isOpened);
     setState(() {
       _drawerOpened = isOpened;
     });
+    widget.drawerCallback?.call(isOpened);
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    widget.endDrawerCallback?.call(isOpened);
     setState(() {
       _endDrawerOpened = isOpened;
     });
+    widget.endDrawerCallback?.call(isOpened);
   }
 
   /// Opens the [Drawer] (if any).
