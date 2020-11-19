@@ -582,6 +582,32 @@ class FlutterPlugin implements Plugin<Project> {
         return target
     }
 
+    // In AGP 4.0, the Android linter task depends on all the JAR tasks containing `libapp.so`.
+    // When building APKs, this causes an issue where building release requires the debug JAR.
+    //
+    // To workaround this issue, only configure the JAR task that is required given the task
+    // from the command line.
+    //
+    // Tested cases:
+    // * `./gradlew assembleRelease`
+    // * `./gradlew app:assembleRelease.`
+    // * `./gradlew assemble.`
+    // * `./gradlew app:assemble.`
+    // * `./gradlew bundle.`
+    // * `./gradlew bundleRelease.`
+    // * `./gradlew app:bundleRelease.`
+    //
+    // Related issues:
+    // https://issuetracker.google.com/issues/158060799
+    // https://issuetracker.google.com/issues/158753935
+    private boolean shouldConfigureFlutterTask(Task assembleTask) {
+      def cliTasksNames = project.gradle.startParameter.taskNames
+      return cliTasksNames.size() != 1 ||
+             !cliTasksNames.first().contains("assemble") ||
+             cliTasksNames.first().split(":").last() == assembleTask.name ||
+             cliTasksNames.first().split(":").last() == "assemble"
+    }
+
     private void addFlutterTasks(Project project) {
         if (project.state.failure) {
             return
@@ -701,11 +727,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            // When the linter is enabled in AGP 4.0, tasks dependencies are lost.
-            //
-            // https://issuetracker.google.com/issues/158060799
-            // https://issuetracker.google.com/issues/158753935
-            variant.registerPreJavacGeneratedBytecode(project.files {
+            addApiDependencies(project, variant.name, project.files {
                 packFlutterAppAotTask
             })
             // We build an AAR when this property is defined.
@@ -779,6 +801,13 @@ class FlutterPlugin implements Plugin<Project> {
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all { variant ->
+                // `assemble` became `assembleProvider` in AGP 3.3.0.
+                def assembleTask = variant.hasProperty("assembleProvider")
+                        ? variant.assembleProvider.get()
+                        : variant.assemble
+                if (!shouldConfigureFlutterTask(assembleTask)) {
+                  return
+                }
                 addFlutterDeps(variant)
                 // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
                 // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
@@ -789,10 +818,6 @@ class FlutterPlugin implements Plugin<Project> {
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.all { output ->
-                    // `assemble` became `assembleProvider` in AGP 3.3.0.
-                    def assembleTask = variant.hasProperty("assembleProvider")
-                        ? variant.assembleProvider.get()
-                        : variant.assemble
                     assembleTask.doLast {
                         // `packageApplication` became `packageApplicationProvider` in AGP 3.3.0.
                         def outputDirectory = variant.hasProperty("packageApplicationProvider")
