@@ -3,6 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import argparse
 import subprocess
 import sys
@@ -223,6 +227,8 @@ def to_gn_args(args):
       gn_args['use_goma'] = True
       gn_args['goma_dir'] = depot_tools_bin_dir
     else:
+      if args.goma:
+        print("GOMA usage was specified but can't be found, falling back to local builds. Set the GOMA_DIR environment variable to fix GOMA.")
       gn_args['use_goma'] = False
       gn_args['goma_dir'] = None
 
@@ -417,11 +423,11 @@ def main(argv):
   out_dir = get_out_dir(args)
   command.append(out_dir)
   command.append('--args=%s' % ' '.join(gn_args))
-  print "Generating GN files in: %s" % out_dir
+  print("Generating GN files in: %s" % out_dir)
   try:
     gn_call_result = subprocess.call(command, cwd=SRC_ROOT)
   except subprocess.CalledProcessError as exc:
-    print "Failed to generate gn files: ", exc.returncode, exc.output
+    print("Failed to generate gn files: ", exc.returncode, exc.output)
     sys.exit(1)
 
   if gn_call_result == 0:
@@ -442,7 +448,7 @@ def main(argv):
     try:
       contents = subprocess.check_output(compile_cmd_gen_cmd, cwd=SRC_ROOT)
     except subprocess.CalledProcessError as exc:
-      print "Failed to run ninja: ", exc.returncode, exc.output
+      print("Failed to run ninja: ", exc.returncode, exc.output)
       sys.exit(1)
     compile_commands = open('%s/out/compile_commands.json' % SRC_ROOT, 'w+')
     compile_commands.write(contents)
