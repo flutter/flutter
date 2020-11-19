@@ -21,7 +21,7 @@ import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import './create_utils.dart';
+import 'create_base.dart';
 
 const List<String> _kAvailablePlatforms = <String>[
   'ios',
@@ -39,27 +39,13 @@ directory. You can also find detailed instructions on how to add platforms in th
 at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
 ''';
 
-class CreateCommand extends FlutterCommand with CreateCommandMixin {
+class CreateCommand extends CreateBase {
   CreateCommand() {
-    _addPlatformsOptions();
-    argParser.addFlag('pub',
-      defaultsTo: true,
-      help: 'Whether to run "flutter pub get" after the project has been created.',
-    );
-    argParser.addFlag('offline',
-      defaultsTo: false,
-      help: 'When "flutter pub get" is run by the create command, this indicates '
-        'whether to run it in offline mode or not. In offline mode, it will need to '
-        'have all dependencies already available in the pub cache to succeed.',
-    );
-    argParser.addFlag(
-      'with-driver-test',
-      negatable: true,
-      defaultsTo: false,
-      help: '(Deprecated) Also add a flutter_driver dependency and generate a '
-      "sample 'flutter drive' test. This flag has been deprecated, instead see "
-      'package:integration_test at https://pub.dev/packages/integration_test .',
-    );
+    addPlatformsOptions(customHelp: 'The platforms supported by this project. '
+        'This argument only works when the --template is set to app or plugin. '
+        'Platform folders (e.g. android/) will be generated in the target project. '
+        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
+        'Adding desktop platforms requires the corresponding desktop config setting to be enabled.');
     argParser.addOption(
       'template',
       abbr: 't',
@@ -93,46 +79,6 @@ class CreateCommand extends FlutterCommand with CreateCommandMixin {
       help: 'Specifies a JSON output file for a listing of Flutter code samples '
         'that can be created with --sample.',
       valueHelp: 'path',
-    );
-    argParser.addFlag(
-      'overwrite',
-      negatable: true,
-      defaultsTo: false,
-      help: 'When performing operations, overwrite existing files.',
-    );
-    argParser.addOption(
-      'description',
-      defaultsTo: 'A new Flutter project.',
-      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
-    );
-    argParser.addOption(
-      'org',
-      defaultsTo: 'com.example',
-      help: 'The organization responsible for your new Flutter project, in reverse domain name notation. '
-            'This string is used in Java package names and as prefix in the iOS bundle identifier.',
-    );
-    argParser.addOption(
-      'project-name',
-      defaultsTo: null,
-      help: 'The project name for this new Flutter project. This must be a valid dart package name.',
-    );
-    argParser.addOption(
-      'ios-language',
-      abbr: 'i',
-      defaultsTo: 'swift',
-      allowed: <String>['objc', 'swift'],
-    );
-    argParser.addOption(
-      'android-language',
-      abbr: 'a',
-      defaultsTo: 'kotlin',
-      allowed: <String>['java', 'kotlin'],
-    );
-    argParser.addFlag(
-      'skip-name-checks',
-      help: 'integration test only parameter to allow creating applications/plugins with '
-        'invalid names.',
-      hide: true,
     );
   }
 
@@ -251,7 +197,7 @@ class CreateCommand extends FlutterCommand with CreateCommandMixin {
       return FlutterCommandResult.success();
     }
 
-    validateOutoutDirectoryArg();
+    validateOutputDirectoryArg();
     final String flutterRoot = getFlutterRoot();
 
     final Directory projectDir = globals.fs.directory(argResults.rest.first);
@@ -393,17 +339,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       }
     }
     return FlutterCommandResult.success();
-  }
-
-  void _addPlatformsOptions() {
-    argParser.addMultiOption('platforms',
-      help: 'The platforms supported by this project. '
-        'This argument only works when the --template is set to app or plugin. '
-        'Platform folders (e.g. android/) will be generated in the target project. '
-        'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
-        'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
-      defaultsTo: _kAvailablePlatforms,
-      allowed: _kAvailablePlatforms);
   }
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {

@@ -20,10 +20,101 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
+const List<String> _kAvailablePlatforms = <String>[
+  'ios',
+  'android',
+  'windows',
+  'linux',
+  'macos',
+  'web',
+];
+
 /// Mixin contains methods that are shared with `flutter create` commands.
-mixin CreateCommandMixin on FlutterCommand {
+abstract class CreateBase extends FlutterCommand {
+  CreateBase() {
+    argParser.addFlag(
+      'pub',
+      defaultsTo: true,
+      help:
+          'Whether to run "flutter pub get" after the project has been created.',
+    );
+    argParser.addFlag(
+      'offline',
+      defaultsTo: false,
+      help:
+          'When "flutter pub get" is run by the create command, this indicates '
+          'whether to run it in offline mode or not. In offline mode, it will need to '
+          'have all dependencies already available in the pub cache to succeed.',
+    );
+    argParser.addFlag(
+      'with-driver-test',
+      negatable: true,
+      defaultsTo: false,
+      help: '(Deprecated) Also add a flutter_driver dependency and generate a '
+          "sample 'flutter drive' test. This flag has been deprecated, instead see "
+          'package:integration_test at https://pub.dev/packages/integration_test .',
+    );
+    argParser.addFlag(
+      'overwrite',
+      negatable: true,
+      defaultsTo: false,
+      help: 'When performing operations, overwrite existing files.',
+    );
+    argParser.addOption(
+      'description',
+      defaultsTo: 'A new Flutter project.',
+      help:
+          'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
+    );
+    argParser.addOption(
+      'org',
+      defaultsTo: 'com.example',
+      help:
+          'The organization responsible for your new Flutter project, in reverse domain name notation. '
+          'This string is used in Java package names and as prefix in the iOS bundle identifier.',
+    );
+    argParser.addOption(
+      'project-name',
+      defaultsTo: null,
+      help:
+          'The project name for this new Flutter project. This must be a valid dart package name.',
+    );
+    argParser.addOption(
+      'ios-language',
+      abbr: 'i',
+      defaultsTo: 'swift',
+      allowed: <String>['objc', 'swift'],
+    );
+    argParser.addOption(
+      'android-language',
+      abbr: 'a',
+      defaultsTo: 'kotlin',
+      allowed: <String>['java', 'kotlin'],
+    );
+    argParser.addFlag(
+      'skip-name-checks',
+      help:
+          'integration test only parameter to allow creating applications/plugins with '
+          'invalid names.',
+      hide: true,
+    );
+  }
+
+  /// Adds a `--platforms` argument.
+  ///
+  /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
+  void addPlatformsOptions({String customHelp}) {
+    argParser.addMultiOption('platforms',
+        help: customHelp ??
+            'Required: The platforms supported by this project. '
+                'Platform folders (e.g. android/) will be generated in the target project. '
+                'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
+        defaultsTo: _kAvailablePlatforms,
+        allowed: _kAvailablePlatforms);
+  }
+
   /// Throw with exit code 2 if the output directory is invalid.
-  void validateOutoutDirectoryArg() {
+  void validateOutputDirectoryArg() {
     if (argResults.rest.isEmpty) {
       throwToolExit('No option specified for the output directory.\n$usage',
           exitCode: 2);
@@ -47,8 +138,7 @@ mixin CreateCommandMixin on FlutterCommand {
   String getFlutterRoot() {
     if (Cache.flutterRoot == null) {
       throwToolExit(
-          'Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment '
-          'variable was specified. Unable to find package:flutter.',
+          'The FLUTTER_ROOT environment variable was not specified. Unable to find package:flutter.',
           exitCode: 2);
     }
     final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
@@ -281,7 +371,7 @@ mixin CreateCommandMixin on FlutterCommand {
         !_keywords.contains(name);
   }
 
-  /// Generate application project in the `directory` using `templateCnotext`.
+  /// Generate application project in the `directory` using `templateContext`.
   ///
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   Future<int> generateApp(
