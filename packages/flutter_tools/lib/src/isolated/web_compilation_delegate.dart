@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter_tools/src/dart/language_version.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -16,6 +15,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../globals.dart' as globals;
 import '../web/compile.dart';
 
