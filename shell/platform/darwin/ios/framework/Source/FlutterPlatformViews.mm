@@ -241,13 +241,13 @@ void FlutterPlatformViewsController::RegisterViewFactory(
   gesture_recognizers_blocking_policies[idString] = gestureRecognizerBlockingPolicy;
 }
 
-void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
+void FlutterPlatformViewsController::BeginFrame(SkISize frame_size) {
+  ResetFrameState();
   frame_size_ = frame_size;
 }
 
 void FlutterPlatformViewsController::CancelFrame() {
-  picture_recorders_.clear();
-  composition_order_.clear();
+  ResetFrameState();
 }
 
 // TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
@@ -603,13 +603,6 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
   }
 }
 
-void FlutterPlatformViewsController::EndFrame(
-    bool should_resubmit_frame,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  // Reset the composition order, so next frame starts empty.
-  composition_order_.clear();
-}
-
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLayer(
     GrDirectContext* gr_context,
     std::shared_ptr<IOSContext> ios_context,
@@ -703,6 +696,11 @@ void FlutterPlatformViewsController::CommitCATransactionIfNeeded() {
     [CATransaction commit];
     catransaction_added_ = false;
   }
+}
+
+void FlutterPlatformViewsController::ResetFrameState() {
+  picture_recorders_.clear();
+  composition_order_.clear();
 }
 
 }  // namespace flutter

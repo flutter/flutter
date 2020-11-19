@@ -4,6 +4,8 @@
 
 #import "GoldenPlatformViewTests.h"
 
+static const NSInteger kSecondsToWaitForPlatformView = 30;
+
 @interface PlatformViewUITests : GoldenPlatformViewTests
 
 @end
@@ -170,4 +172,35 @@
   XCUIDevice.sharedDevice.orientation = UIDeviceOrientationLandscapeLeft;
   [self checkGolden];
 }
+
+@end
+
+@interface PlatformViewWithContinuousTexture : XCTestCase
+
+@end
+
+@implementation PlatformViewWithContinuousTexture
+
+- (void)setUp {
+  self.continueAfterFailure = NO;
+}
+
+- (void)testPlatformViewWithContinuousTexture {
+  XCUIApplication* app = [[XCUIApplication alloc] init];
+  app.launchArguments =
+      @[ @"--platform-view-with-continuous-texture", @"--with-continuous-texture" ];
+  [app launch];
+
+  XCUIElement* platformView = app.textViews.firstMatch;
+  BOOL exists = [platformView waitForExistenceWithTimeout:kSecondsToWaitForPlatformView];
+  if (!exists) {
+    XCTFail(@"It took longer than %@ second to find the platform view."
+            @"There might be issues with the platform view's construction,"
+            @"or with how the scenario is built.",
+            @(kSecondsToWaitForPlatformView));
+  }
+
+  XCTAssertNotNil(platformView);
+}
+
 @end
