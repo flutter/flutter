@@ -45,12 +45,14 @@ void main() {
 
 void testMain() {
   html.Element glassPane = domRenderer.glassPaneElement;
+  double dpi = 1.0;
 
   setUp(() {
     // Touching domRenderer creates PointerBinding.instance.
     domRenderer;
 
     ui.window.onPointerDataPacket = null;
+    dpi = window.devicePixelRatio;
   });
 
   test('_PointerEventContext generates expected events', () {
@@ -472,8 +474,8 @@ void testMain() {
       expect(packets[0].data, hasLength(2));
       expect(packets[0].data[0].change, equals(ui.PointerChange.add));
       expect(packets[0].data[1].change, equals(ui.PointerChange.down));
-      expect(packets[0].data[1].physicalX, equals(10.0));
-      expect(packets[0].data[1].physicalY, equals(10.0));
+      expect(packets[0].data[1].physicalX, equals(10.0 * dpi));
+      expect(packets[0].data[1].physicalY, equals(10.0 * dpi));
       packets.clear();
 
       // Drag on the semantics placeholder.
@@ -484,8 +486,8 @@ void testMain() {
       expect(packets, hasLength(1));
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
-      expect(packets[0].data[0].physicalX, equals(12.0));
-      expect(packets[0].data[0].physicalY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(12.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(10.0 * dpi));
       packets.clear();
 
       // Keep dragging.
@@ -495,8 +497,8 @@ void testMain() {
       ));
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
-      expect(packets[0].data[0].physicalX, equals(15.0));
-      expect(packets[0].data[0].physicalY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(15.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(10.0 * dpi));
       packets.clear();
 
       // Release the pointer on the semantics placeholder.
@@ -507,11 +509,11 @@ void testMain() {
       expect(packets, hasLength(1));
       expect(packets[0].data, hasLength(2));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
-      expect(packets[0].data[0].physicalX, equals(100.0));
-      expect(packets[0].data[0].physicalY, equals(200.0));
+      expect(packets[0].data[0].physicalX, equals(100.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(200.0 * dpi));
       expect(packets[0].data[1].change, equals(ui.PointerChange.up));
-      expect(packets[0].data[1].physicalX, equals(100.0));
-      expect(packets[0].data[1].physicalY, equals(200.0));
+      expect(packets[0].data[1].physicalX, equals(100.0 * dpi));
+      expect(packets[0].data[1].physicalY, equals(200.0 * dpi));
       packets.clear();
 
       semanticsPlaceholder.remove();
@@ -635,8 +637,8 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.add));
       expect(packets[0].data[0].pointerIdentifier, equals(0));
       expect(packets[0].data[0].synthesized, equals(true));
-      expect(packets[0].data[0].physicalX, equals(10.0));
-      expect(packets[0].data[0].physicalY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(10.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(10.0 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0.0));
       expect(packets[0].data[0].physicalDeltaY, equals(0.0));
 
@@ -645,8 +647,8 @@ void testMain() {
           packets[0].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
       expect(packets[0].data[1].pointerIdentifier, equals(0));
       expect(packets[0].data[1].synthesized, equals(false));
-      expect(packets[0].data[1].physicalX, equals(10.0));
-      expect(packets[0].data[1].physicalY, equals(10.0));
+      expect(packets[0].data[1].physicalX, equals(10.0 * dpi));
+      expect(packets[0].data[1].physicalY, equals(10.0 * dpi));
       expect(packets[0].data[1].physicalDeltaX, equals(0.0));
       expect(packets[0].data[1].physicalDeltaY, equals(0.0));
 
@@ -655,18 +657,18 @@ void testMain() {
       expect(packets[1].data[0].change, equals(ui.PointerChange.hover));
       expect(packets[1].data[0].pointerIdentifier, equals(0));
       expect(packets[1].data[0].synthesized, equals(true));
-      expect(packets[1].data[0].physicalX, equals(20.0));
-      expect(packets[1].data[0].physicalY, equals(50.0));
-      expect(packets[1].data[0].physicalDeltaX, equals(10.0));
-      expect(packets[1].data[0].physicalDeltaY, equals(40.0));
+      expect(packets[1].data[0].physicalX, equals(20.0 * dpi));
+      expect(packets[1].data[0].physicalY, equals(50.0 * dpi));
+      expect(packets[1].data[0].physicalDeltaX, equals(10.0 * dpi));
+      expect(packets[1].data[0].physicalDeltaY, equals(40.0 * dpi));
 
       expect(packets[1].data[1].change, equals(ui.PointerChange.hover));
       expect(
           packets[1].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
       expect(packets[1].data[1].pointerIdentifier, equals(0));
       expect(packets[1].data[1].synthesized, equals(false));
-      expect(packets[1].data[1].physicalX, equals(20.0));
-      expect(packets[1].data[1].physicalY, equals(50.0));
+      expect(packets[1].data[1].physicalX, equals(20.0 * dpi));
+      expect(packets[1].data[1].physicalY, equals(50.0 * dpi));
       expect(packets[1].data[1].physicalDeltaX, equals(0.0));
       expect(packets[1].data[1].physicalDeltaY, equals(0.0));
 
@@ -676,8 +678,8 @@ void testMain() {
       expect(packets[2].data[0].signalKind, equals(ui.PointerSignalKind.none));
       expect(packets[2].data[0].pointerIdentifier, equals(1));
       expect(packets[2].data[0].synthesized, equals(false));
-      expect(packets[2].data[0].physicalX, equals(20.0));
-      expect(packets[2].data[0].physicalY, equals(50.0));
+      expect(packets[2].data[0].physicalX, equals(20.0 * dpi));
+      expect(packets[2].data[0].physicalY, equals(50.0 * dpi));
       expect(packets[2].data[0].physicalDeltaX, equals(0.0));
       expect(packets[2].data[0].physicalDeltaY, equals(0.0));
 
@@ -686,18 +688,18 @@ void testMain() {
       expect(packets[3].data[0].change, equals(ui.PointerChange.move));
       expect(packets[3].data[0].pointerIdentifier, equals(1));
       expect(packets[3].data[0].synthesized, equals(true));
-      expect(packets[3].data[0].physicalX, equals(30.0));
-      expect(packets[3].data[0].physicalY, equals(60.0));
-      expect(packets[3].data[0].physicalDeltaX, equals(10.0));
-      expect(packets[3].data[0].physicalDeltaY, equals(10.0));
+      expect(packets[3].data[0].physicalX, equals(30.0 * dpi));
+      expect(packets[3].data[0].physicalY, equals(60.0 * dpi));
+      expect(packets[3].data[0].physicalDeltaX, equals(10.0 * dpi));
+      expect(packets[3].data[0].physicalDeltaY, equals(10.0 * dpi));
 
       expect(packets[3].data[1].change, equals(ui.PointerChange.hover));
       expect(
           packets[3].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
       expect(packets[3].data[1].pointerIdentifier, equals(1));
       expect(packets[3].data[1].synthesized, equals(false));
-      expect(packets[3].data[1].physicalX, equals(30.0));
-      expect(packets[3].data[1].physicalY, equals(60.0));
+      expect(packets[3].data[1].physicalX, equals(30.0 * dpi));
+      expect(packets[3].data[1].physicalY, equals(60.0 * dpi));
       expect(packets[3].data[1].physicalDeltaX, equals(0.0));
       expect(packets[3].data[1].physicalDeltaY, equals(0.0));
     },
@@ -725,16 +727,16 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.add));
       expect(packets[0].data[0].pointerIdentifier, equals(0));
       expect(packets[0].data[0].synthesized, equals(true));
-      expect(packets[0].data[0].physicalX, equals(10.0));
-      expect(packets[0].data[0].physicalY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(10.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(10.0 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0.0));
       expect(packets[0].data[0].physicalDeltaY, equals(0.0));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
       expect(packets[0].data[1].pointerIdentifier, equals(0));
       expect(packets[0].data[1].synthesized, equals(false));
-      expect(packets[0].data[1].physicalX, equals(10.0));
-      expect(packets[0].data[1].physicalY, equals(10.0));
+      expect(packets[0].data[1].physicalX, equals(10.0 * dpi));
+      expect(packets[0].data[1].physicalY, equals(10.0 * dpi));
       expect(packets[0].data[1].physicalDeltaX, equals(0.0));
       expect(packets[0].data[1].physicalDeltaY, equals(0.0));
       packets.clear();
@@ -748,10 +750,10 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.hover));
       expect(packets[0].data[0].pointerIdentifier, equals(0));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20.0));
-      expect(packets[0].data[0].physicalY, equals(20.0));
-      expect(packets[0].data[0].physicalDeltaX, equals(10.0));
-      expect(packets[0].data[0].physicalDeltaY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalDeltaX, equals(10.0 * dpi));
+      expect(packets[0].data[0].physicalDeltaY, equals(10.0 * dpi));
       packets.clear();
 
       glassPane.dispatchEvent(context.primaryDown(
@@ -763,8 +765,8 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.down));
       expect(packets[0].data[0].pointerIdentifier, equals(1));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20.0));
-      expect(packets[0].data[0].physicalY, equals(20.0));
+      expect(packets[0].data[0].physicalX, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(20.0 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0.0));
       expect(packets[0].data[0].physicalDeltaY, equals(0.0));
       packets.clear();
@@ -778,10 +780,10 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
       expect(packets[0].data[0].pointerIdentifier, equals(1));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(40.0));
-      expect(packets[0].data[0].physicalY, equals(30.0));
-      expect(packets[0].data[0].physicalDeltaX, equals(20.0));
-      expect(packets[0].data[0].physicalDeltaY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(40.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(30.0 * dpi));
+      expect(packets[0].data[0].physicalDeltaX, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalDeltaY, equals(10.0 * dpi));
       packets.clear();
 
       glassPane.dispatchEvent(context.primaryUp(
@@ -793,8 +795,8 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.up));
       expect(packets[0].data[0].pointerIdentifier, equals(1));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(40.0));
-      expect(packets[0].data[0].physicalY, equals(30.0));
+      expect(packets[0].data[0].physicalX, equals(40.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(30.0 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0.0));
       expect(packets[0].data[0].physicalDeltaY, equals(0.0));
       packets.clear();
@@ -808,10 +810,10 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.hover));
       expect(packets[0].data[0].pointerIdentifier, equals(1));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20.0));
-      expect(packets[0].data[0].physicalY, equals(10.0));
-      expect(packets[0].data[0].physicalDeltaX, equals(-20.0));
-      expect(packets[0].data[0].physicalDeltaY, equals(-20.0));
+      expect(packets[0].data[0].physicalX, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(10.0 * dpi));
+      expect(packets[0].data[0].physicalDeltaX, equals(-20.0 * dpi));
+      expect(packets[0].data[0].physicalDeltaY, equals(-20.0 * dpi));
       packets.clear();
 
       glassPane.dispatchEvent(context.primaryDown(
@@ -823,8 +825,8 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.down));
       expect(packets[0].data[0].pointerIdentifier, equals(2));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20.0));
-      expect(packets[0].data[0].physicalY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(10.0 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0.0));
       expect(packets[0].data[0].physicalDeltaY, equals(0.0));
       packets.clear();
@@ -855,13 +857,13 @@ void testMain() {
       expect(packets[0].data, hasLength(2));
       expect(packets[0].data[0].change, equals(ui.PointerChange.add));
       expect(packets[0].data[0].synthesized, equals(true));
-      expect(packets[0].data[0].physicalX, equals(10));
-      expect(packets[0].data[0].physicalY, equals(11));
+      expect(packets[0].data[0].physicalX, equals(10 * dpi));
+      expect(packets[0].data[0].physicalY, equals(11 * dpi));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
       expect(packets[0].data[1].synthesized, equals(false));
-      expect(packets[0].data[1].physicalX, equals(10));
-      expect(packets[0].data[1].physicalY, equals(11));
+      expect(packets[0].data[1].physicalX, equals(10 * dpi));
+      expect(packets[0].data[1].physicalY, equals(11 * dpi));
       expect(packets[0].data[1].buttons, equals(0));
       packets.clear();
 
@@ -875,8 +877,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.down));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(10));
-      expect(packets[0].data[0].physicalY, equals(11));
+      expect(packets[0].data[0].physicalX, equals(10 * dpi));
+      expect(packets[0].data[0].physicalY, equals(11 * dpi));
       expect(packets[0].data[0].buttons, equals(1));
       packets.clear();
 
@@ -890,8 +892,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20));
-      expect(packets[0].data[0].physicalY, equals(21));
+      expect(packets[0].data[0].physicalX, equals(20 * dpi));
+      expect(packets[0].data[0].physicalY, equals(21 * dpi));
       expect(packets[0].data[0].buttons, equals(1));
       packets.clear();
 
@@ -904,8 +906,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.up));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20));
-      expect(packets[0].data[0].physicalY, equals(21));
+      expect(packets[0].data[0].physicalX, equals(20 * dpi));
+      expect(packets[0].data[0].physicalY, equals(21 * dpi));
       expect(packets[0].data[0].buttons, equals(0));
       packets.clear();
 
@@ -920,8 +922,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.down));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20));
-      expect(packets[0].data[0].physicalY, equals(21));
+      expect(packets[0].data[0].physicalX, equals(20 * dpi));
+      expect(packets[0].data[0].physicalY, equals(21 * dpi));
       expect(packets[0].data[0].buttons, equals(2));
       packets.clear();
 
@@ -935,8 +937,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(30));
-      expect(packets[0].data[0].physicalY, equals(31));
+      expect(packets[0].data[0].physicalX, equals(30 * dpi));
+      expect(packets[0].data[0].physicalY, equals(31 * dpi));
       expect(packets[0].data[0].buttons, equals(2));
       packets.clear();
 
@@ -949,8 +951,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.up));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(30));
-      expect(packets[0].data[0].physicalY, equals(31));
+      expect(packets[0].data[0].physicalX, equals(30 * dpi));
+      expect(packets[0].data[0].physicalY, equals(31 * dpi));
       expect(packets[0].data[0].buttons, equals(0));
       packets.clear();
 
@@ -965,8 +967,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.down));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(30));
-      expect(packets[0].data[0].physicalY, equals(31));
+      expect(packets[0].data[0].physicalX, equals(30 * dpi));
+      expect(packets[0].data[0].physicalY, equals(31 * dpi));
       expect(packets[0].data[0].buttons, equals(4));
       packets.clear();
 
@@ -980,8 +982,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(40));
-      expect(packets[0].data[0].physicalY, equals(41));
+      expect(packets[0].data[0].physicalX, equals(40 * dpi));
+      expect(packets[0].data[0].physicalY, equals(41 * dpi));
       expect(packets[0].data[0].buttons, equals(4));
       packets.clear();
 
@@ -994,8 +996,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.up));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(40));
-      expect(packets[0].data[0].physicalY, equals(41));
+      expect(packets[0].data[0].physicalX, equals(40 * dpi));
+      expect(packets[0].data[0].physicalY, equals(41 * dpi));
       expect(packets[0].data[0].buttons, equals(0));
       packets.clear();
     },
@@ -1093,13 +1095,13 @@ void testMain() {
       expect(packets[0].data, hasLength(2));
       expect(packets[0].data[0].change, equals(ui.PointerChange.add));
       expect(packets[0].data[0].synthesized, equals(true));
-      expect(packets[0].data[0].physicalX, equals(10));
-      expect(packets[0].data[0].physicalY, equals(11));
+      expect(packets[0].data[0].physicalX, equals(10 * dpi));
+      expect(packets[0].data[0].physicalY, equals(11 * dpi));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.down));
       expect(packets[0].data[1].synthesized, equals(false));
-      expect(packets[0].data[1].physicalX, equals(10));
-      expect(packets[0].data[1].physicalY, equals(11));
+      expect(packets[0].data[1].physicalX, equals(10 * dpi));
+      expect(packets[0].data[1].physicalY, equals(11 * dpi));
       expect(packets[0].data[1].buttons, equals(2));
       packets.clear();
 
@@ -1113,8 +1115,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20));
-      expect(packets[0].data[0].physicalY, equals(21));
+      expect(packets[0].data[0].physicalX, equals(20 * dpi));
+      expect(packets[0].data[0].physicalY, equals(21 * dpi));
       expect(packets[0].data[0].buttons, equals(2));
       packets.clear();
 
@@ -1128,8 +1130,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20));
-      expect(packets[0].data[0].physicalY, equals(21));
+      expect(packets[0].data[0].physicalX, equals(20 * dpi));
+      expect(packets[0].data[0].physicalY, equals(21 * dpi));
       expect(packets[0].data[0].buttons, equals(2));
       packets.clear();
 
@@ -1142,8 +1144,8 @@ void testMain() {
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.up));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(20));
-      expect(packets[0].data[0].physicalY, equals(21));
+      expect(packets[0].data[0].physicalX, equals(20 * dpi));
+      expect(packets[0].data[0].physicalY, equals(21 * dpi));
       expect(packets[0].data[0].buttons, equals(0));
       packets.clear();
     },
@@ -1639,8 +1641,9 @@ void testMain() {
       expect(packets, hasLength(1));
       expect(packets[0].data, hasLength(1));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
-      expect(packets[0].data[0].physicalX, equals(900.0));
-      expect(packets[0].data[0].physicalY, equals(1900.0));
+      expect(packets[0].data[0].physicalX,
+          equals(900.0  * dpi));
+      expect(packets[0].data[0].physicalY, equals(1900.0 * dpi));
       packets.clear();
 
       // Release outside the glasspane.
@@ -1651,11 +1654,11 @@ void testMain() {
       expect(packets, hasLength(1));
       expect(packets[0].data, hasLength(2));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
-      expect(packets[0].data[0].physicalX, equals(1000.0));
-      expect(packets[0].data[0].physicalY, equals(2000.0));
+      expect(packets[0].data[0].physicalX, equals(1000.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(2000.0 * dpi));
       expect(packets[0].data[1].change, equals(ui.PointerChange.up));
-      expect(packets[0].data[1].physicalX, equals(1000.0));
-      expect(packets[0].data[1].physicalY, equals(2000.0));
+      expect(packets[0].data[1].physicalX, equals(1000.0 * dpi));
+      expect(packets[0].data[1].physicalY, equals(2000.0 * dpi));
       packets.clear();
     },
   );
@@ -1697,28 +1700,28 @@ void testMain() {
       expect(data[0].change, equals(ui.PointerChange.add));
       expect(data[0].synthesized, equals(true));
       expect(data[0].device, equals(2));
-      expect(data[0].physicalX, equals(100));
-      expect(data[0].physicalY, equals(101));
+      expect(data[0].physicalX, equals(100 * dpi));
+      expect(data[0].physicalY, equals(101 * dpi));
 
       expect(data[1].change, equals(ui.PointerChange.down));
       expect(data[1].device, equals(2));
       expect(data[1].buttons, equals(1));
-      expect(data[1].physicalX, equals(100));
-      expect(data[1].physicalY, equals(101));
+      expect(data[1].physicalX, equals(100 * dpi));
+      expect(data[1].physicalY, equals(101 * dpi));
       expect(data[1].physicalDeltaX, equals(0));
       expect(data[1].physicalDeltaY, equals(0));
 
       expect(data[2].change, equals(ui.PointerChange.add));
       expect(data[2].synthesized, equals(true));
       expect(data[2].device, equals(3));
-      expect(data[2].physicalX, equals(200));
-      expect(data[2].physicalY, equals(201));
+      expect(data[2].physicalX, equals(200 * dpi));
+      expect(data[2].physicalY, equals(201 * dpi));
 
       expect(data[3].change, equals(ui.PointerChange.down));
       expect(data[3].device, equals(3));
       expect(data[3].buttons, equals(1));
-      expect(data[3].physicalX, equals(200));
-      expect(data[3].physicalY, equals(201));
+      expect(data[3].physicalX, equals(200 * dpi));
+      expect(data[3].physicalY, equals(201 * dpi));
       expect(data[3].physicalDeltaX, equals(0));
       expect(data[3].physicalDeltaY, equals(0));
       packets.clear();
@@ -1744,18 +1747,18 @@ void testMain() {
       expect(data[0].change, equals(ui.PointerChange.move));
       expect(data[0].device, equals(3));
       expect(data[0].buttons, equals(1));
-      expect(data[0].physicalX, equals(300));
-      expect(data[0].physicalY, equals(302));
-      expect(data[0].physicalDeltaX, equals(100));
-      expect(data[0].physicalDeltaY, equals(101));
+      expect(data[0].physicalX, equals(300 * dpi));
+      expect(data[0].physicalY, equals(302 * dpi));
+      expect(data[0].physicalDeltaX, equals(100 * dpi));
+      expect(data[0].physicalDeltaY, equals(101 * dpi));
 
       expect(data[1].change, equals(ui.PointerChange.move));
       expect(data[1].device, equals(2));
       expect(data[1].buttons, equals(1));
-      expect(data[1].physicalX, equals(400));
-      expect(data[1].physicalY, equals(402));
-      expect(data[1].physicalDeltaX, equals(300));
-      expect(data[1].physicalDeltaY, equals(301));
+      expect(data[1].physicalX, equals(400 * dpi));
+      expect(data[1].physicalY, equals(402 * dpi));
+      expect(data[1].physicalDeltaX, equals(300 * dpi));
+      expect(data[1].physicalDeltaY, equals(301 * dpi));
       packets.clear();
 
       // One pointer up
@@ -1767,16 +1770,16 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.up));
       expect(packets[0].data[0].device, equals(3));
       expect(packets[0].data[0].buttons, equals(0));
-      expect(packets[0].data[0].physicalX, equals(300));
-      expect(packets[0].data[0].physicalY, equals(302));
+      expect(packets[0].data[0].physicalX, equals(300 * dpi));
+      expect(packets[0].data[0].physicalY, equals(302 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0));
       expect(packets[0].data[0].physicalDeltaY, equals(0));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
       expect(packets[0].data[1].device, equals(3));
       expect(packets[0].data[1].buttons, equals(0));
-      expect(packets[0].data[1].physicalX, equals(300));
-      expect(packets[0].data[1].physicalY, equals(302));
+      expect(packets[0].data[1].physicalX, equals(300 * dpi));
+      expect(packets[0].data[1].physicalY, equals(302 * dpi));
       expect(packets[0].data[1].physicalDeltaX, equals(0));
       expect(packets[0].data[1].physicalDeltaY, equals(0));
       packets.clear();
@@ -1790,16 +1793,16 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.up));
       expect(packets[0].data[0].device, equals(2));
       expect(packets[0].data[0].buttons, equals(0));
-      expect(packets[0].data[0].physicalX, equals(400));
-      expect(packets[0].data[0].physicalY, equals(402));
+      expect(packets[0].data[0].physicalX, equals(400 * dpi));
+      expect(packets[0].data[0].physicalY, equals(402 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0));
       expect(packets[0].data[0].physicalDeltaY, equals(0));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
       expect(packets[0].data[1].device, equals(2));
       expect(packets[0].data[1].buttons, equals(0));
-      expect(packets[0].data[1].physicalX, equals(400));
-      expect(packets[0].data[1].physicalY, equals(402));
+      expect(packets[0].data[1].physicalX, equals(400 * dpi));
+      expect(packets[0].data[1].physicalY, equals(402 * dpi));
       expect(packets[0].data[1].physicalDeltaX, equals(0));
       expect(packets[0].data[1].physicalDeltaY, equals(0));
       packets.clear();
@@ -1825,28 +1828,28 @@ void testMain() {
       expect(data[0].change, equals(ui.PointerChange.add));
       expect(data[0].synthesized, equals(true));
       expect(data[0].device, equals(3));
-      expect(data[0].physicalX, equals(500));
-      expect(data[0].physicalY, equals(501));
+      expect(data[0].physicalX, equals(500 * dpi));
+      expect(data[0].physicalY, equals(501 * dpi));
 
       expect(data[1].change, equals(ui.PointerChange.down));
       expect(data[1].device, equals(3));
       expect(data[1].buttons, equals(1));
-      expect(data[1].physicalX, equals(500));
-      expect(data[1].physicalY, equals(501));
+      expect(data[1].physicalX, equals(500 * dpi));
+      expect(data[1].physicalY, equals(501 * dpi));
       expect(data[1].physicalDeltaX, equals(0));
       expect(data[1].physicalDeltaY, equals(0));
 
       expect(data[2].change, equals(ui.PointerChange.add));
       expect(data[2].synthesized, equals(true));
       expect(data[2].device, equals(2));
-      expect(data[2].physicalX, equals(600));
-      expect(data[2].physicalY, equals(601));
+      expect(data[2].physicalX, equals(600 * dpi));
+      expect(data[2].physicalY, equals(601 * dpi));
 
       expect(data[3].change, equals(ui.PointerChange.down));
       expect(data[3].device, equals(2));
       expect(data[3].buttons, equals(1));
-      expect(data[3].physicalX, equals(600));
-      expect(data[3].physicalY, equals(601));
+      expect(data[3].physicalX, equals(600 * dpi));
+      expect(data[3].physicalY, equals(601 * dpi));
       expect(data[3].physicalDeltaX, equals(0));
       expect(data[3].physicalDeltaY, equals(0));
       packets.clear();
@@ -1882,16 +1885,16 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
       expect(packets[0].data[0].device, equals(3));
       expect(packets[0].data[0].buttons, equals(0));
-      expect(packets[0].data[0].physicalX, equals(200));
-      expect(packets[0].data[0].physicalY, equals(201));
+      expect(packets[0].data[0].physicalX, equals(200 * dpi));
+      expect(packets[0].data[0].physicalY, equals(201 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0));
       expect(packets[0].data[0].physicalDeltaY, equals(0));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
       expect(packets[0].data[1].device, equals(3));
       expect(packets[0].data[1].buttons, equals(0));
-      expect(packets[0].data[1].physicalX, equals(200));
-      expect(packets[0].data[1].physicalY, equals(201));
+      expect(packets[0].data[1].physicalX, equals(200 * dpi));
+      expect(packets[0].data[1].physicalY, equals(201 * dpi));
       expect(packets[0].data[1].physicalDeltaX, equals(0));
       expect(packets[0].data[1].physicalDeltaY, equals(0));
       packets.clear();
@@ -1963,16 +1966,16 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.add));
       expect(packets[0].data[0].pointerIdentifier, equals(1));
       expect(packets[0].data[0].synthesized, equals(true));
-      expect(packets[0].data[0].physicalX, equals(20.0));
-      expect(packets[0].data[0].physicalY, equals(20.0));
+      expect(packets[0].data[0].physicalX, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(20.0 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0.0));
       expect(packets[0].data[0].physicalDeltaY, equals(0.0));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.down));
       expect(packets[0].data[1].pointerIdentifier, equals(1));
       expect(packets[0].data[1].synthesized, equals(false));
-      expect(packets[0].data[1].physicalX, equals(20.0));
-      expect(packets[0].data[1].physicalY, equals(20.0));
+      expect(packets[0].data[1].physicalX, equals(20.0 * dpi));
+      expect(packets[0].data[1].physicalY, equals(20.0 * dpi));
       expect(packets[0].data[1].physicalDeltaX, equals(0.0));
       expect(packets[0].data[1].physicalDeltaY, equals(0.0));
       packets.clear();
@@ -1985,10 +1988,10 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
       expect(packets[0].data[0].pointerIdentifier, equals(1));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(40.0));
-      expect(packets[0].data[0].physicalY, equals(30.0));
-      expect(packets[0].data[0].physicalDeltaX, equals(20.0));
-      expect(packets[0].data[0].physicalDeltaY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(40.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(30.0 * dpi));
+      expect(packets[0].data[0].physicalDeltaX, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalDeltaY, equals(10.0 * dpi));
       packets.clear();
 
       context.multiTouchUp(<_TouchDetails>[
@@ -1999,16 +2002,16 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.up));
       expect(packets[0].data[0].pointerIdentifier, equals(1));
       expect(packets[0].data[0].synthesized, equals(false));
-      expect(packets[0].data[0].physicalX, equals(40.0));
-      expect(packets[0].data[0].physicalY, equals(30.0));
+      expect(packets[0].data[0].physicalX, equals(40.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(30.0 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0.0));
       expect(packets[0].data[0].physicalDeltaY, equals(0.0));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
       expect(packets[0].data[1].pointerIdentifier, equals(1));
       expect(packets[0].data[1].synthesized, equals(true));
-      expect(packets[0].data[1].physicalX, equals(40.0));
-      expect(packets[0].data[1].physicalY, equals(30.0));
+      expect(packets[0].data[1].physicalX, equals(40.0 * dpi));
+      expect(packets[0].data[1].physicalY, equals(30.0 * dpi));
       expect(packets[0].data[1].physicalDeltaX, equals(0.0));
       expect(packets[0].data[1].physicalDeltaY, equals(0.0));
       packets.clear();
@@ -2021,16 +2024,16 @@ void testMain() {
       expect(packets[0].data[0].change, equals(ui.PointerChange.add));
       expect(packets[0].data[0].pointerIdentifier, equals(2));
       expect(packets[0].data[0].synthesized, equals(true));
-      expect(packets[0].data[0].physicalX, equals(20.0));
-      expect(packets[0].data[0].physicalY, equals(10.0));
+      expect(packets[0].data[0].physicalX, equals(20.0 * dpi));
+      expect(packets[0].data[0].physicalY, equals(10.0 * dpi));
       expect(packets[0].data[0].physicalDeltaX, equals(0.0));
       expect(packets[0].data[0].physicalDeltaY, equals(0.0));
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.down));
       expect(packets[0].data[1].pointerIdentifier, equals(2));
       expect(packets[0].data[1].synthesized, equals(false));
-      expect(packets[0].data[1].physicalX, equals(20.0));
-      expect(packets[0].data[1].physicalY, equals(10.0));
+      expect(packets[0].data[1].physicalX, equals(20.0 * dpi));
+      expect(packets[0].data[1].physicalY, equals(10.0 * dpi));
       expect(packets[0].data[1].physicalDeltaX, equals(0.0));
       expect(packets[0].data[1].physicalDeltaY, equals(0.0));
       packets.clear();
