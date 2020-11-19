@@ -928,12 +928,12 @@ void main() async {
   final commands = stdin
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .map<Object>(jsonDecode);
-  await for (final Object command in commands) {
+    .map<dynamic>(jsonDecode);
+  await for (final dynamic command in commands) {
     if (command is Map<String, dynamic>) {
-      File imageFile = File(command['imageFile']);
-      Uri goldenKey = Uri.parse(command['key']);
-      bool update = command['update'];
+      File imageFile = File(command['imageFile'] as String);
+      Uri goldenKey = Uri.parse(command['key'] as String);
+      bool update = command['update'] as bool;
 
       final bytes = await File(imageFile.path).readAsBytes();
       if (update) {
