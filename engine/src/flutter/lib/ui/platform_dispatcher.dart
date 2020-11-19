@@ -1285,8 +1285,8 @@ class Locale {
   ///
   /// The subtag values are _case sensitive_ and must be one of the valid
   /// subtags according to CLDR supplemental data:
-  /// [language](http://unicode.org/cldr/latest/common/validity/language.xml),
-  /// [region](http://unicode.org/cldr/latest/common/validity/region.xml). The
+  /// [language](https://github.com/unicode-org/cldr/blob/master/common/validity/language.xml),
+  /// [region](https://github.com/unicode-org/cldr/blob/master/common/validity/region.xml). The
   /// primary language subtag must be at least two and at most eight lowercase
   /// letters, but not four letters. The region region subtag must be two
   /// uppercase letters or three digits. See the [Unicode Language
@@ -1313,9 +1313,9 @@ class Locale {
   ///
   /// The subtag values are _case sensitive_ and must be valid subtags according
   /// to CLDR supplemental data:
-  /// [language](http://unicode.org/cldr/latest/common/validity/language.xml),
-  /// [script](http://unicode.org/cldr/latest/common/validity/script.xml) and
-  /// [region](http://unicode.org/cldr/latest/common/validity/region.xml) for
+  /// [language](https://github.com/unicode-org/cldr/blob/master/common/validity/language.xml),
+  /// [script](https://github.com/unicode-org/cldr/blob/master/common/validity/script.xml) and
+  /// [region](https://github.com/unicode-org/cldr/blob/master/common/validity/region.xml) for
   /// each of languageCode, scriptCode and countryCode respectively.
   ///
   /// The [countryCode] subtag is optional. When there is no country subtag,
@@ -1351,7 +1351,7 @@ class Locale {
   ///
   /// This must be a valid Unicode Language subtag as listed in [Unicode CLDR
   /// supplemental
-  /// data](http://unicode.org/cldr/latest/common/validity/language.xml).
+  /// data](https://github.com/unicode-org/cldr/blob/master/common/validity/language.xml).
   ///
   /// See also:
   ///
@@ -1449,7 +1449,7 @@ class Locale {
   ///
   /// This must be a valid Unicode Language Identifier script subtag as listed
   /// in [Unicode CLDR supplemental
-  /// data](http://unicode.org/cldr/latest/common/validity/script.xml).
+  /// data](https://github.com/unicode-org/cldr/blob/master/common/validity/script.xml).
   ///
   /// See also:
   ///
