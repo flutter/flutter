@@ -50,7 +50,7 @@ import java.util.Set;
         ServiceControlSurface,
         BroadcastReceiverControlSurface,
         ContentProviderControlSurface {
-  private static final String TAG = "FlutterEngineConnectionRegistry";
+  private static final String TAG = "FlutterEngineCxnRegstry";
 
   // PluginRegistry
   @NonNull
