@@ -1071,8 +1071,8 @@ public class TextInputPluginTest {
     imeSyncCallback.onApplyWindowInsets(testView, noneInsets);
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(0, viewportMetricsCaptor.getValue().paddingBottom);
-    assertEquals(0, viewportMetricsCaptor.getValue().paddingTop);
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
@@ -1084,24 +1084,24 @@ public class TextInputPluginTest {
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
     // No change, as deferredInset is stored to be passed in onEnd()
-    assertEquals(0, viewportMetricsCaptor.getValue().paddingBottom);
-    assertEquals(0, viewportMetricsCaptor.getValue().paddingTop);
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingTop);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
     imeSyncCallback.onProgress(imeInsets0, animationList);
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(40, viewportMetricsCaptor.getValue().paddingBottom);
-    assertEquals(10, viewportMetricsCaptor.getValue().paddingTop);
+    assertEquals(40, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    assertEquals(10, viewportMetricsCaptor.getValue().viewPaddingTop);
     assertEquals(60, viewportMetricsCaptor.getValue().viewInsetBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
     imeSyncCallback.onProgress(imeInsets1, animationList);
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
-    assertEquals(40, viewportMetricsCaptor.getValue().paddingBottom);
-    assertEquals(10, viewportMetricsCaptor.getValue().paddingTop);
+    assertEquals(40, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    assertEquals(10, viewportMetricsCaptor.getValue().viewPaddingTop);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom); // Cannot be negative
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
@@ -1109,8 +1109,8 @@ public class TextInputPluginTest {
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
     // Values should be of deferredInsets, not imeInsets2
-    assertEquals(0, viewportMetricsCaptor.getValue().paddingBottom);
-    assertEquals(10, viewportMetricsCaptor.getValue().paddingTop);
+    assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
+    assertEquals(10, viewportMetricsCaptor.getValue().viewPaddingTop);
     assertEquals(200, viewportMetricsCaptor.getValue().viewInsetBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
   }
