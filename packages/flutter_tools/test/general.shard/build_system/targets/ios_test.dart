@@ -24,6 +24,7 @@ final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment:
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
   '-fembed-bitcode-marker',
+  '-miphoneos-version-min=8.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -206,5 +207,32 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macPlatform,
+  });
+
+  testWithoutContext('Unpack copies Flutter.framework', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory outputDir = fileSystem.directory('output');
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: processManager,
+      artifacts: artifacts,
+      logger: logger,
+      fileSystem: fileSystem,
+      outputDir: outputDir,
+    );
+
+    processManager.addCommand(
+      FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        'Artifact.flutterFramework.TargetPlatform.ios.debug',
+        outputDir.path,
+      ]),
+    );
+
+    await const DebugUnpackIOS().build(environment);
   });
 }

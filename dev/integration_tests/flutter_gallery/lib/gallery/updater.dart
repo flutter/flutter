@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-typedef UpdateUrlFetcher = Future<String> Function();
+typedef UpdateUrlFetcher = Future<String?> Function();
 
 class Updater extends StatefulWidget {
   const Updater({ required this.updateUrlFetcher, this.child, Key? key })
@@ -35,9 +35,9 @@ class UpdaterState extends State<Updater> {
     }
     _lastUpdateCheck = DateTime.now();
 
-    final String updateUrl = await widget.updateUrlFetcher();
+    final String? updateUrl = await widget.updateUrlFetcher();
     final bool? wantsUpdate = await showDialog<bool>(context: context, builder: _buildDialog);
-    if (wantsUpdate != null && wantsUpdate)
+    if (wantsUpdate != null && updateUrl != null && wantsUpdate)
       launch(updateUrl);
   }
 

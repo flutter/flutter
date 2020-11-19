@@ -88,7 +88,10 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/examples/sector_layout_test.dart',
   // This test relies on widget tracking capability in the VM.
   'test/widgets/widget_inspector_test.dart',
-
+  'test/painting/decoration_test.dart',
+  'test/material/time_picker_test.dart',
+  'test/material/text_field_test.dart',
+  'test/material/floating_action_button_test.dart',
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
@@ -97,6 +100,16 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/cupertino/refresh_test.dart',
   'test/cupertino/text_field_test.dart',
   'test/cupertino/route_test.dart',
+  'test/foundation/error_reporting_test.dart',
+  'test/foundation/consolidate_response_test.dart',
+  'test/foundation/stack_trace_test.dart',
+  'test/services/message_codecs_vm_test.dart',
+  'test/services/platform_messages_test.dart',
+  'test/widgets/image_resolution_test.dart ',
+  'test/widgets/platform_view_test.dart',
+  'test/widgets/route_notification_messages_test.dart',
+  'test/widgets/semantics_tester_generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart',
+  'test/widgets/text_golden_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -125,6 +138,7 @@ Future<void> main(List<String> args) async {
       'framework_tests': _runFrameworkTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
+      'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
@@ -313,6 +327,7 @@ Future<void> _runToolCoverage() async {
 
 Future<void> _runToolTests() async {
   const String kDotShard = '.shard';
+  const String kWeb = 'web';
   const String kTest = 'test';
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
@@ -321,6 +336,7 @@ Future<void> _runToolTests() async {
       .listSync()
       .map<String>((FileSystemEntity entry) => entry.path)
       .where((String name) => name.endsWith(kDotShard))
+      .where((String name) => path.basenameWithoutExtension(name) != kWeb)
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
@@ -337,10 +353,27 @@ Future<void> _runToolTests() async {
       );
     },
   );
-  // Prevent web tests from running if not explicitly requested.
-  if (Platform.environment[CIRRUS_TASK_NAME] == null) {
-    subshards.remove('web');
-  }
+
+  await selectSubshard(subshards);
+}
+
+Future<void> _runWebToolTests() async {
+  const String kDotShard = '.shard';
+  const String kWeb = 'web';
+  const String kTest = 'test';
+  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+
+  final Map<String, ShardRunner> subshards = <String, ShardRunner>{
+      kWeb:
+      () async {
+        await _pubRunTest(
+          toolsPath,
+          forceSingleCore: true,
+          testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
+          enableFlutterToolAsserts: true,
+        );
+      }
+  };
 
   await selectSubshard(subshards);
 }
@@ -684,7 +717,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
@@ -762,7 +795,7 @@ Future<void> _runWebUnitTests() async {
     )
     .whereType<File>()
     .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
-    .where((String filePath) => !kWebTestFileKnownFailures.contains(filePath))
+    .where((String filePath) => !kWebTestFileKnownFailures.contains(path.split(filePath).join('/')))
     .toList()
     // Finally we shuffle the list because we want the average cost per file to be uniformly
     // distributed. If the list is not sorted then different shards and batches may have

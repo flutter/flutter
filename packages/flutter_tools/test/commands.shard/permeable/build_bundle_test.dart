@@ -39,8 +39,6 @@ void main() {
         applicationKernelFilePath: anyNamed('applicationKernelFilePath'),
         depfilePath: anyNamed('depfilePath'),
         assetDirPath: anyNamed('assetDirPath'),
-        precompiledSnapshot: anyNamed('precompiledSnapshot'),
-        reportLicensedPackages: anyNamed('reportLicensedPackages'),
         trackWidgetCreation: anyNamed('trackWidgetCreation'),
         extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
         extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),

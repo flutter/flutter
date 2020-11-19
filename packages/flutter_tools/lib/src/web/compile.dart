@@ -18,6 +18,7 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
+import '../web/memory_fs.dart';
 
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
@@ -96,18 +97,11 @@ class WebCompilationProxy {
   const WebCompilationProxy();
 
   /// Initialize the web compiler from the `projectDirectory`.
-  ///
-  /// Returns whether or not the build was successful.
-  ///
-  /// `release` controls whether we build the bundle for dartdevc or only
-  /// the entry points for dart2js to later take over.
-  Future<bool> initialize({
+  Future<WebMemoryFS> initialize({
     @required Directory projectDirectory,
-    @required String projectName,
-    String testOutputDir,
-    List<String> testFiles,
-    BuildMode mode,
-    bool initializePlatform,
+    @required String testOutputDir,
+    @required List<String> testFiles,
+    @required BuildInfo buildInfo,
   }) async {
     throw UnimplementedError();
   }
