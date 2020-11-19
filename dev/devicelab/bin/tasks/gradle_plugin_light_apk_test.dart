@@ -249,7 +249,7 @@ Future<void> main() async {
             output.contains('at org.gradle'))
           throw failure(
               'Gradle output should not contain stacktrace', result);
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
+        if (!output.contains('Build failed'))
           throw failure(
               'Gradle output should contain a readable error message',
               result);
