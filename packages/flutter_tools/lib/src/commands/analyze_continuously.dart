@@ -142,14 +142,11 @@ class AnalyzeContinuously extends AnalyzeBase {
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
       final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
-      final String dartDocMessage = AnalyzeBase.generateDartDocMessage(undocumentedMembers);
       final String errorsMessage = AnalyzeBase.generateErrorsMessage(
         issueCount: issueCount,
         issueDiff: issueDiff,
         files: analyzedPaths.length,
         seconds: seconds,
-        undocumentedMembers: undocumentedMembers,
-        dartDocMessage: dartDocMessage,
       );
 
       logger.printStatus(errorsMessage);

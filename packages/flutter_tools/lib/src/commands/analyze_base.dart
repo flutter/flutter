@@ -81,8 +81,11 @@ abstract class AnalyzeBase {
   }
 
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
+
   String get sdkPath => argResults['dart-sdk'] as String ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+
   bool get isBenchmarking => argResults['benchmark'] as bool;
+
   bool get isDartDocs => argResults['dartdocs'] as bool;
 
   static int countMissingDartDocs(List<AnalysisError> errors) {
@@ -91,32 +94,12 @@ abstract class AnalyzeBase {
     }).length;
   }
 
-  static String generateDartDocMessage(int undocumentedMembers) {
-    String dartDocMessage;
-
-    assert(undocumentedMembers >= 0);
-    switch (undocumentedMembers) {
-      case 0:
-        dartDocMessage = 'all public member have documentation';
-        break;
-      case 1:
-        dartDocMessage = 'one public member lacks documentation';
-        break;
-      default:
-        dartDocMessage = '$undocumentedMembers public members lack documentation';
-    }
-
-    return dartDocMessage;
-  }
-
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
     @required int issueCount,
     int issueDiff,
     int files,
     @required String seconds,
-    int undocumentedMembers = 0,
-    String dartDocMessage = '',
   }) {
     final StringBuffer errorsMessage = StringBuffer(issueCount > 0
       ? '$issueCount ${pluralize('issue', issueCount)} found.'
@@ -136,11 +119,8 @@ abstract class AnalyzeBase {
       errorsMessage.write(' • analyzed $files ${pluralize('file', files)}');
     }
 
-    if (undocumentedMembers > 0) {
-      errorsMessage.write(' (ran in ${seconds}s; $dartDocMessage)');
-    } else {
-      errorsMessage.write(' (ran in ${seconds}s)');
-    }
+    errorsMessage.write(' (ran in ${seconds}s)');
+
     return errorsMessage.toString();
   }
 }
@@ -150,15 +130,19 @@ class PackageDependency {
   // of places that ask for that target (.packages or pubspec.yaml files)
   Map<String, List<String>> values = <String, List<String>>{};
   String canonicalSource;
+
   void addCanonicalCase(String packagePath, String pubSpecYamlPath) {
     assert(canonicalSource == null);
     add(packagePath, pubSpecYamlPath);
     canonicalSource = pubSpecYamlPath;
   }
+
   void add(String packagePath, String sourcePath) {
     values.putIfAbsent(packagePath, () => <String>[]).add(sourcePath);
   }
+
   bool get hasConflict => values.length > 1;
+
   bool get hasConflictAffectingFlutterRepo {
     assert(globals.fs.path.isAbsolute(Cache.flutterRoot));
     for (final List<String> targetSources in values.values) {
@@ -171,6 +155,7 @@ class PackageDependency {
     }
     return false;
   }
+
   void describeConflict(StringBuffer result) {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
@@ -190,6 +175,7 @@ class PackageDependency {
       }
     }
   }
+
   String get target => values.keys.single;
 }
 
