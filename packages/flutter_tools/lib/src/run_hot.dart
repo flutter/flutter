@@ -1103,9 +1103,13 @@ class HotRunner extends ResidentRunner {
     }
     globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-      globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
+      globals.printStatus('💪 Running with sound null safety', emphasis: true);
     } else {
-      globals.printStatus('🔨 Running without sound null safety 🔨', emphasis: true);
+      globals.printStatus(
+        '🔨 Running without sound null safety '
+        '(see https://dart.dev/null-safety/unsound-null-safety)',
+        emphasis: true,
+      );
     }
   }
 
