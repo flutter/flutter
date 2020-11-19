@@ -794,7 +794,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
     final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
-    final bool canFlex = maxMainSize < double.infinity;
+    final double minMainSize = _direction == Axis.horizontal ? constraints.minWidth : constraints.minHeight;
+    final bool canFlex = maxMainSize < double.infinity || minMainSize > 0.0;
+    final double spaceToFill = canFlex ? (maxMainSize == double.infinity ? minMainSize : maxMainSize) : 0.0;
 
     double crossSize = 0.0;
     double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
@@ -836,7 +838,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Distribute free space to flexible children.
-    final double freeSpace = math.max(0.0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
+    final double freeSpace = math.max(0.0, spaceToFill - allocatedSize);
     double allocatedFlexSpace = 0.0;
     if (totalFlex > 0) {
       final double spacePerFlex = canFlex ? (freeSpace / totalFlex) : double.nan;
@@ -906,7 +908,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
     }
 
-    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
+    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max && maxMainSize < double.infinity ? maxMainSize : allocatedSize;
     return _LayoutSizes(
       mainSize: idealSize,
       crossSize: crossSize,

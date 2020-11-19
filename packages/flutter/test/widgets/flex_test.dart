@@ -141,4 +141,54 @@ void main() {
     await tester.pumpWidget(Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
+
+  testWidgets('Flex to fill min extent - horizontal', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: OverflowBox(
+          minWidth: 200,
+          maxWidth: double.infinity,
+          child: Flex(
+            direction: Axis.horizontal,
+            textDirection: TextDirection.ltr,
+            children: const <Widget>[
+              Flexible(child: SizedBox.expand()),
+              SizedBox(width: 50.0, height: 200.0)
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox flexible = tester.renderObject(find.byType(Flexible));
+    expect(flexible.size.width, 200.0 - 50.0);
+
+    final RenderBox flex = tester.renderObject(find.byType(Flex));
+    expect(flex.size.width, 200.0);
+  });
+
+  testWidgets('Flex to fill min extent - vertically', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: OverflowBox(
+          minHeight: 200,
+          maxHeight: double.infinity,
+          child: Flex(
+            direction: Axis.vertical,
+            textDirection: TextDirection.ltr,
+            children: const <Widget>[
+              Flexible(child: SizedBox.expand()),
+              SizedBox(width: 50.0, height: 50.0)
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox flexible = tester.renderObject(find.byType(Flexible));
+    expect(flexible.size.height, 200.0 - 50.0);
+
+    final RenderBox flex = tester.renderObject(find.byType(Flex));
+    expect(flex.size.height, 200.0);
+  });
 }
