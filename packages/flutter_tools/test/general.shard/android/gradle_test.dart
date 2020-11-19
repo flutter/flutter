@@ -317,7 +317,7 @@ void main() {
           any,
           label: 'gradle-expected-file-not-found',
           parameters: const <String, String> {
-            'cd37': 'androidGradlePluginVersion: 5.6.2, fileExtension: .aab',
+            'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
           },
         ),
       ).called(1);

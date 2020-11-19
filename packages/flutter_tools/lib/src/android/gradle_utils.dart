@@ -126,7 +126,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
     }
   }
 }
-const String _defaultGradleVersion = '5.6.2';
+const String _defaultGradleVersion = '6.7';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\(\d+\.\d+\.\d+\)');
 
