@@ -6564,8 +6564,8 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 /// The following sample has an [IgnorePointer] widget wrapping the `Column`
-/// which contains a button. 
-/// When [ignoring] is set to `true` anything inside the `Column` can 
+/// which contains a button.
+/// When [ignoring] is set to `true` anything inside the `Column` can
 /// not be tapped. When [ignoring] is set to `false` anything
 /// inside the `Column` can be tapped.
 ///
@@ -6576,7 +6576,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///     ignoring = newValue;
 ///   });
 /// }
-/// 
+///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
