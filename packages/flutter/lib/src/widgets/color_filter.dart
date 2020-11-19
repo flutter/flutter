@@ -10,9 +10,14 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
 /// Applies a [ColorFilter] to its child.
+///
 /// Causes the child to be modified using a color to
-/// tint the resulting rendering. Different blending modes can modify
-/// how the color is applied, and to which parts of the image.
+/// tint the resulting rendering.
+///
+/// This widget allows to generate dynamic and vibrant shades depending on the chosen blend modes
+///
+/// Different blending modes can modify how the color is applied,
+/// and to which parts of the image.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
 ///
