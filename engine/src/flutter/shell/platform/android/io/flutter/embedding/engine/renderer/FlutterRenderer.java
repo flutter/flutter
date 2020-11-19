@@ -247,13 +247,13 @@ public class FlutterRenderer implements TextureRegistry {
             + viewportMetrics.height
             + "\n"
             + "Padding - L: "
-            + viewportMetrics.paddingLeft
+            + viewportMetrics.viewPaddingLeft
             + ", T: "
-            + viewportMetrics.paddingTop
+            + viewportMetrics.viewPaddingTop
             + ", R: "
-            + viewportMetrics.paddingRight
+            + viewportMetrics.viewPaddingRight
             + ", B: "
-            + viewportMetrics.paddingBottom
+            + viewportMetrics.viewPaddingBottom
             + "\n"
             + "Insets - L: "
             + viewportMetrics.viewInsetLeft
@@ -277,10 +277,10 @@ public class FlutterRenderer implements TextureRegistry {
         viewportMetrics.devicePixelRatio,
         viewportMetrics.width,
         viewportMetrics.height,
-        viewportMetrics.paddingTop,
-        viewportMetrics.paddingRight,
-        viewportMetrics.paddingBottom,
-        viewportMetrics.paddingLeft,
+        viewportMetrics.viewPaddingTop,
+        viewportMetrics.viewPaddingRight,
+        viewportMetrics.viewPaddingBottom,
+        viewportMetrics.viewPaddingLeft,
         viewportMetrics.viewInsetTop,
         viewportMetrics.viewInsetRight,
         viewportMetrics.viewInsetBottom,
@@ -348,10 +348,10 @@ public class FlutterRenderer implements TextureRegistry {
     public float devicePixelRatio = 1.0f;
     public int width = 0;
     public int height = 0;
-    public int paddingTop = 0;
-    public int paddingRight = 0;
-    public int paddingBottom = 0;
-    public int paddingLeft = 0;
+    public int viewPaddingTop = 0;
+    public int viewPaddingRight = 0;
+    public int viewPaddingBottom = 0;
+    public int viewPaddingLeft = 0;
     public int viewInsetTop = 0;
     public int viewInsetRight = 0;
     public int viewInsetBottom = 0;
