@@ -213,6 +213,9 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
 
     if (child != null) {
       final double childExtent;
+      // Using intrinsics to figure out the natural extent of the child if we
+      // wouldn't force it to occupy the overscroll area. This is going to be
+      // the scroll extent of the child.
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
