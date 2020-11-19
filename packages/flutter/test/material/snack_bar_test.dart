@@ -806,8 +806,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750));
 
     final ThemeData comparedTheme = themeBeforeSnackBar!.copyWith(
-      brightness: themeAfterSnackBar!.brightness,
-      backgroundColor: themeAfterSnackBar!.backgroundColor,
       colorScheme: themeAfterSnackBar!.colorScheme,
     ); // Fields replaced by SnackBar.
 

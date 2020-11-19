@@ -461,8 +461,6 @@ class _SnackBarState extends State<SnackBar> {
       ? colorScheme.onSurface
       : Color.alphaBlend(colorScheme.onSurface.withOpacity(0.80), colorScheme.surface);
     final ThemeData inverseTheme = theme.copyWith(
-      brightness: brightness,
-      backgroundColor: themeBackgroundColor,
       colorScheme: ColorScheme(
         primary: colorScheme.onPrimary,
         primaryVariant: colorScheme.onPrimary,
@@ -538,7 +536,7 @@ class _SnackBarState extends State<SnackBar> {
     }
 
     final double elevation = widget.elevation ?? snackBarTheme.elevation ?? 6.0;
-    final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.backgroundColor;
+    final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.colorScheme.background;
     final ShapeBorder? shape = widget.shape
       ?? snackBarTheme.shape
       ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
