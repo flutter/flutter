@@ -101,7 +101,8 @@ class FlutterPlugin implements Plugin<Project> {
         this.project = project
 
         project.extensions.create("flutter", FlutterExtension)
-        project.afterEvaluate this.&addFlutterTasks
+        this.addFlutterTasks(project)
+
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
         // This is a noop when building a bundle.
@@ -321,15 +322,13 @@ class FlutterPlugin implements Plugin<Project> {
                 "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
             )
         }
-        pluginProject.afterEvaluate {
-            pluginProject.android.buildTypes {
-                profile {
-                    initWith debug
-                }
+        pluginProject.android.buildTypes {
+            profile {
+                initWith debug
             }
-            pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
-            pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
         }
+        pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
+        pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
     }
 
     // Returns `true` if the given path contains an `android/build.gradle` file.
@@ -363,11 +362,8 @@ class FlutterPlugin implements Plugin<Project> {
                 !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
                 return
             }
-            // Wait for the Android plugin to load and add the dependency to the plugin project.
-            pluginProject.afterEvaluate {
-                pluginProject.dependencies {
-                    implementation dependencyProject
-                }
+            pluginProject.dependencies {
+                implementation dependencyProject
             }
         }
     }
@@ -570,19 +566,34 @@ class FlutterPlugin implements Plugin<Project> {
         return "${targetArch}-release"
     }
 
-    private void addFlutterTasks(Project project) {
-        if (project.state.failure) {
-            return
-        }
+    /**
+     * Gets the directory that contains the Flutter source code.
+     * This is the the directory containing the `android/` directory.
+     */
+    private File getFlutterSourceDirectory() {
         if (project.flutter.source == null) {
             throw new GradleException("Must provide Flutter source directory")
         }
+        return project.file(project.flutter.source)
+    }
+
+    /**
+     * Gets the target file. This is typically `lib/main.dart`.
+     */
+    private String getFlutterTarget() {
         String target = project.flutter.target
         if (target == null) {
             target = 'lib/main.dart'
         }
         if (project.hasProperty('target')) {
             target = project.property('target')
+        }
+        return target
+    }
+
+    private void addFlutterTasks(Project project) {
+        if (project.state.failure) {
+            return
         }
         String[] fileSystemRootsValue = null
         if (project.hasProperty('filesystem-roots')) {
@@ -655,14 +666,14 @@ class FlutterPlugin implements Plugin<Project> {
                 buildMode variantBuildMode
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
-                targetPath target
+                targetPath getFlutterTarget()
                 verbose isVerbose()
                 fastStart isFastStart()
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
                 targetPlatformValues = targetPlatforms
-                sourceDir project.file(project.flutter.source)
+                sourceDir getFlutterSourceDirectory()
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
@@ -699,7 +710,11 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            addApiDependencies(project, variant.name, project.files {
+            // When the linter is enabled in AGP 4.0, tasks dependencies are lost.
+            //
+            // https://issuetracker.google.com/issues/158060799
+            // https://issuetracker.google.com/issues/158753935
+            variant.registerPreJavacGeneratedBytecode(project.files {
                 packFlutterAppAotTask
             })
             // We build an AAR when this property is defined.
@@ -740,55 +755,39 @@ class FlutterPlugin implements Plugin<Project> {
             String hostAppProjectName = project.rootProject.hasProperty('flutter.hostAppProjectName') ? project.rootProject.property('flutter.hostAppProjectName')  : "app"
             Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
             assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To custom the host app project name, set `org.gradle.project.flutter.hostAppProjectName=<project-name>` in gradle.properties."
-            appProject.afterEvaluate {
-                assert appProject.android != null
-                appProject.android.applicationVariants.all { appProjectVariant ->
-                    // Find a compatible application variant in the host app.
-                    //
-                    // For example, consider a host app that defines the following variants:
-                    // | ----------------- | ----------------------------- |
-                    // |   Build Variant   |   Flutter Equivalent Variant  |
-                    // | ----------------- | ----------------------------- |
-                    // |   freeRelease     |   relese                      |
-                    // |   freeDebug       |   debug                       |
-                    // |   freeDevelop     |   debug                       |
-                    // |   profile         |   profile                     |
-                    // | ----------------- | ----------------------------- |
-                    //
-                    // This mapping is based on the following rules:
-                    // 1. If the host app build variant name is `profile` then the equivalent
-                    //    Flutter variant is `profile`.
-                    // 2. If the host app build variant is debuggable
-                    //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
-                    //    variant is `debug`.
-                    // 3. Otherwise, the equivalent Flutter variant is `release`.
-                    if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
-                        return
-                    }
-                    Task mergeAssets = project
-                        .tasks
-                        .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
-                    assert mergeAssets
-                    mergeAssets.dependsOn(copyFlutterAssetsTask)
+            assert appProject.android != null
+            appProject.android.applicationVariants.all { appProjectVariant ->
+                // Find a compatible application variant in the host app.
+                //
+                // For example, consider a host app that defines the following variants:
+                // | ----------------- | ----------------------------- |
+                // |   Build Variant   |   Flutter Equivalent Variant  |
+                // | ----------------- | ----------------------------- |
+                // |   freeRelease     |   relese                      |
+                // |   freeDebug       |   debug                       |
+                // |   freeDevelop     |   debug                       |
+                // |   profile         |   profile                     |
+                // | ----------------- | ----------------------------- |
+                //
+                // This mapping is based on the following rules:
+                // 1. If the host app build variant name is `profile` then the equivalent
+                //    Flutter variant is `profile`.
+                // 2. If the host app build variant is debuggable
+                //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
+                //    variant is `debug`.
+                // 3. Otherwise, the equivalent Flutter variant is `release`.
+                if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
+                    return
                 }
+                Task mergeAssets = project
+                    .tasks
+                    .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
+                assert mergeAssets
+                mergeAssets.dependsOn(copyFlutterAssetsTask)
             }
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all { variant ->
-                // `assemble` became `assembleProvider` in AGP 3.3.0.
-               def assembleTask = variant.hasProperty("assembleProvider")
-                        ? variant.assembleProvider.get()
-                        : variant.assemble
-                // When the linter is enabled in AGP 4.0, tasks dependencies are lost.
-                // To workaround this issue, only configure the tasks that are requested
-                // from the command line.
-                //
-                // This supports multiple tasks. e.g. ./gradlew assembleRelese assembleFooRelease
-                // https://issuetracker.google.com/issues/158060799
-                // https://issuetracker.google.com/issues/158753935
-                if (!project.gradle.startParameter.taskNames.contains(assembleTask.name)) {
-                  return;
-                }
                 addFlutterDeps(variant)
                 // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
                 // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
@@ -799,6 +798,10 @@ class FlutterPlugin implements Plugin<Project> {
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.all { output ->
+                    // `assemble` became `assembleProvider` in AGP 3.3.0.
+                    def assembleTask = variant.hasProperty("assembleProvider")
+                        ? variant.assembleProvider.get()
+                        : variant.assemble
                     assembleTask.doLast {
                         // `packageApplication` became `packageApplicationProvider` in AGP 3.3.0.
                         def outputDirectory = variant.hasProperty("packageApplicationProvider")
