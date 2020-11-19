@@ -138,8 +138,10 @@ mixin CreateCommandMixin on FlutterCommand {
   void validateProjectDir(String dirPath,
       {String flutterRoot, bool overwrite = false}) {
     if (globals.fs.path.isWithin(flutterRoot, dirPath)) {
-      throwToolExit('Cannot create a project within the Flutter SDK. '
-          "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.", exitCode: 2);
+      throwToolExit(
+          'Cannot create a project within the Flutter SDK. '
+          "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.",
+          exitCode: 2);
     }
 
     // If the destination directory is actually a file, then we refuse to
@@ -147,9 +149,11 @@ mixin CreateCommandMixin on FlutterCommand {
     if (globals.fs.isFileSync(dirPath)) {
       final String message =
           "Invalid project name: '$dirPath' - refers to an existing file.";
-      throwToolExit(overwrite
-          ? '$message Refusing to overwrite a file with a directory.'
-          : message, exitCode: 2);
+      throwToolExit(
+          overwrite
+              ? '$message Refusing to overwrite a file with a directory.'
+              : message,
+          exitCode: 2);
     }
 
     if (overwrite) {
@@ -161,11 +165,13 @@ mixin CreateCommandMixin on FlutterCommand {
     switch (type) {
       case FileSystemEntityType.file:
         // Do not overwrite files.
-        throwToolExit("Invalid project name: '$dirPath' - file exists.", exitCode: 2);
+        throwToolExit("Invalid project name: '$dirPath' - file exists.",
+            exitCode: 2);
         break;
       case FileSystemEntityType.link:
         // Do not overwrite links.
-        throwToolExit("Invalid project name: '$dirPath' - refers to a link.", exitCode: 2);
+        throwToolExit("Invalid project name: '$dirPath' - refers to a link.",
+            exitCode: 2);
         break;
       default:
     }
@@ -253,7 +259,9 @@ mixin CreateCommandMixin on FlutterCommand {
   ///
   /// `templateName` should match one of directory names under flutter_tools/template/.
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
-  Future<int> renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) async {
+  Future<int> renderTemplate(
+      String templateName, Directory directory, Map<String, dynamic> context,
+      {bool overwrite = false}) async {
     final Template template = await Template.fromName(
       templateName,
       fileSystem: globals.fs,
@@ -276,9 +284,12 @@ mixin CreateCommandMixin on FlutterCommand {
   /// Generate application project in the `directory` using `templateCnotext`.
   ///
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
-  Future<int> generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false, bool pluginExampleApp = false}) async {
+  Future<int> generateApp(
+      Directory directory, Map<String, dynamic> templateContext,
+      {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
-    generatedCount += await renderTemplate('app', directory, templateContext, overwrite: overwrite);
+    generatedCount += await renderTemplate('app', directory, templateContext,
+        overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     if (templateContext['android'] == true) {
       generatedCount += _injectGradleWrapper(project);
@@ -372,7 +383,8 @@ mixin CreateCommandMixin on FlutterCommand {
     return segments.join('.');
   }
 
-  Set<Uri> get templateManifest => _templateManifest ??= _computeTemplateManifest();
+  Set<Uri> get templateManifest =>
+      _templateManifest ??= _computeTemplateManifest();
   Set<Uri> _templateManifest;
   Set<Uri> _computeTemplateManifest() {
     final String flutterToolsAbsolutePath = globals.fs.path.join(
@@ -389,10 +401,10 @@ mixin CreateCommandMixin on FlutterCommand {
       globals.fs.file(manifestPath).readAsStringSync(),
     ) as Map<String, Object>;
     return Set<Uri>.from(
-      (manifest['files'] as List<Object>)
-        .cast<String>()
-        .map<Uri>((String path) => Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
-      );
+      (manifest['files'] as List<Object>).cast<String>().map<Uri>(
+          (String path) =>
+              Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
+    );
   }
 
   int _injectGradleWrapper(FlutterProject project) {
