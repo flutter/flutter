@@ -2663,6 +2663,9 @@ class MockResidentCompiler extends Mock implements ResidentCompiler {}
 
 class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceException {
   @override
+  final int errorCode = dds.DartDevelopmentServiceException.existingDdsInstanceError;
+
+  @override
   final String message = 'A DDS instance is already connected at http://localhost:8181';
 }
 
