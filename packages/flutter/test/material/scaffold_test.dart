@@ -2044,7 +2044,7 @@ void main() {
           extendBodyBehindAppBar: false,
         ),
       ));
-      final Offset center0 = tester.getCenter(find.byType(FloatingActionButton));
+      final Offset defaultOffset = tester.getCenter(find.byType(FloatingActionButton));
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -2057,9 +2057,9 @@ void main() {
           extendBodyBehindAppBar: true,
         ),
       ));
-      final Offset center1 = tester.getCenter(find.byType(FloatingActionButton));
+      final Offset extendedBodyOffset = tester.getCenter(find.byType(FloatingActionButton));
 
-      expect(center0.dy, center1.dy);
+      expect(defaultOffset.dy, extendedBodyOffset.dy);
     });
   });
 
