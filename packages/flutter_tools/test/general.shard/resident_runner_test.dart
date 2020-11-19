@@ -57,6 +57,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
@@ -85,6 +86,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.VM fakeVM = vm_service.VM(
@@ -2574,6 +2576,33 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true)
+  });
+
+   testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag when feature is enabled', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockDevice mockDevice = MockDevice();
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+
+    final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
+      mockDevice,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        extraFrontEndOptions: <String>[],
+      ),
+      target: null, platform: null,
+    )).generator as DefaultResidentCompiler;
+
+    expect(residentCompiler.extraFrontEndOptions,
+      contains('--enable-experiment=alternative-invalidation-strategy'));
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isExperimentalInvalidationStrategyEnabled: true)
   });
 
   testUsingContext('connect sets up log reader', () => testbed.run(() async {
