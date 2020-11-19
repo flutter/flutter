@@ -88,7 +88,10 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/examples/sector_layout_test.dart',
   // This test relies on widget tracking capability in the VM.
   'test/widgets/widget_inspector_test.dart',
-
+  'test/painting/decoration_test.dart',
+  'test/material/time_picker_test.dart',
+  'test/material/text_field_test.dart',
+  'test/material/floating_action_button_test.dart',
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
@@ -97,6 +100,16 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/cupertino/refresh_test.dart',
   'test/cupertino/text_field_test.dart',
   'test/cupertino/route_test.dart',
+  'test/foundation/error_reporting_test.dart',
+  'test/foundation/consolidate_response_test.dart',
+  'test/foundation/stack_trace_test.dart',
+  'test/services/message_codecs_vm_test.dart',
+  'test/services/platform_messages_test.dart',
+  'test/widgets/image_resolution_test.dart ',
+  'test/widgets/platform_view_test.dart',
+  'test/widgets/route_notification_messages_test.dart',
+  'test/widgets/semantics_tester_generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart',
+  'test/widgets/text_golden_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -782,7 +795,7 @@ Future<void> _runWebUnitTests() async {
     )
     .whereType<File>()
     .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
-    .where((String filePath) => !kWebTestFileKnownFailures.contains(filePath))
+    .where((String filePath) => !kWebTestFileKnownFailures.contains(path.split(filePath).join('/')))
     .toList()
     // Finally we shuffle the list because we want the average cost per file to be uniformly
     // distributed. If the list is not sorted then different shards and batches may have

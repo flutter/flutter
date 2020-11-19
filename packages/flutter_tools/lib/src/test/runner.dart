@@ -12,6 +12,7 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/compile.dart';
+import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_wrapper.dart';
@@ -90,9 +91,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
-    if (!globals.processManager.canRun(shellPath)) {
-      throwToolExit('Cannot execute Flutter tester at $shellPath');
-    }
 
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = <String>[
@@ -124,14 +122,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         .absolute
         .uri
         .toFilePath();
-      final bool result = await webCompilationProxy.initialize(
+      final WebMemoryFS result = await webCompilationProxy.initialize(
         projectDirectory: flutterProject.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
-        projectName: flutterProject.manifest.appName,
-        initializePlatform: true,
+        buildInfo: buildInfo,
       );
-      if (!result) {
+      if (result == null) {
         throwToolExit('Failed to compile tests');
       }
       testArgs
@@ -149,6 +146,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
             buildInfo: buildInfo,
+            webMemoryFS: result,
           );
         },
       );

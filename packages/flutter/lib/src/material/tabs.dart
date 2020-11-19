@@ -411,29 +411,14 @@ class _IndicatorPainter extends CustomPainter {
     _needsPaint = false;
     _painter ??= indicator.createBoxPainter(markNeedsPaint);
 
-    if (controller.indexIsChanging) {
-      // The user tapped on a tab, the tab controller's animation is running.
-      final Rect targetRect = indicatorRect(size, controller.index);
-      _currentRect = Rect.lerp(targetRect, _currentRect ?? targetRect, _indexChangeProgress(controller));
-    } else {
-      // The user is dragging the TabBarView's PageView left or right.
-      final int currentIndex = controller.index;
-      final Rect? previous = currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null;
-      final Rect middle = indicatorRect(size, currentIndex);
-      final Rect? next = currentIndex < maxTabIndex ? indicatorRect(size, currentIndex + 1) : null;
-      final double index = controller.index.toDouble();
-      final double value = controller.animation!.value;
-      if (value == index - 1.0)
-        _currentRect = previous ?? middle;
-      else if (value == index + 1.0)
-        _currentRect = next ?? middle;
-      else if (value == index)
-        _currentRect = middle;
-      else if (value < index)
-        _currentRect = previous == null ? middle : Rect.lerp(middle, previous, index - value);
-      else
-        _currentRect = next == null ? middle : Rect.lerp(middle, next, value - index);
-    }
+    final double index = controller.index.toDouble();
+    final double value = controller.animation!.value;
+    final bool ltr = index > value;
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex).toInt();
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex).toInt();
+    final Rect fromRect = indicatorRect(size, from);
+    final Rect toRect = indicatorRect(size, to);
+    _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
     assert(_currentRect != null);
 
     final ImageConfiguration configuration = ImageConfiguration(

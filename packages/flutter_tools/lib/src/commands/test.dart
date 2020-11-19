@@ -31,6 +31,7 @@ class TestCommand extends FlutterCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    usesDartDefineOption();
     argParser
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
@@ -183,6 +184,18 @@ class TestCommand extends FlutterCommand {
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
+
+    if (buildInfo.packageConfig['test_api'] == null) {
+      globals.printError(
+        '\n'
+        'Error: cannot run without a dependency on either "package:flutter_test" or "package:test". '
+        'Ensure the following lines are present in your pubspec.yaml:'
+        '\n\n'
+        'dev_dependencies:\n'
+        '  flutter_test:\n'
+        '    sdk: flutter\n',
+      );
+    }
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();

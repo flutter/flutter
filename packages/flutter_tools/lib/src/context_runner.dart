@@ -134,6 +134,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+        artifacts: globals.artifacts,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
