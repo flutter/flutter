@@ -95,7 +95,6 @@ class BuildApkCommand extends BuildSubCommand {
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      shrink: boolArg('shrink'),
     );
     validateBuild(androidBuildInfo);
 
