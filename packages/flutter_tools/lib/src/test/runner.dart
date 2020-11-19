@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -139,6 +140,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       testWrapper.registerPlatformPlugin(
         <Runtime>[Runtime.chrome],
         () {
+          // TODO(jonahwilliams): refactor this into a factory that handles
+          // providing dependencies.
           return FlutterWebPlatform.start(
             flutterProject.directory.path,
             updateGoldens: updateGoldens,
@@ -147,6 +150,17 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             pauseAfterLoad: startPaused,
             buildInfo: buildInfo,
             webMemoryFS: result,
+            logger: globals.logger,
+            fileSystem: globals.fs,
+            artifacts: globals.artifacts,
+            chromiumLauncher: ChromiumLauncher(
+              fileSystem: globals.fs,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              operatingSystemUtils: globals.os,
+              browserFinder: findChromeExecutable,
+              logger: globals.logger,
+            ),
           );
         },
       );
