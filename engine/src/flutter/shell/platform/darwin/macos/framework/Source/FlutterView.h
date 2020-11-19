@@ -20,14 +20,19 @@
  */
 @interface FlutterView : NSView
 
+/**
+ * The OpenGL context of backing surface.
+ */
+@property(readwrite, nonatomic, nonnull) NSOpenGLContext* openGLContext;
+
 - (nullable instancetype)initWithFrame:(NSRect)frame
-                           mainContext:(nonnull NSOpenGLContext*)mainContext
+                          shareContext:(nonnull NSOpenGLContext*)shareContext
                        reshapeListener:(nonnull id<FlutterViewReshapeListener>)reshapeListener
     NS_DESIGNATED_INITIALIZER;
 
-- (nullable instancetype)initWithMainContext:(nonnull NSOpenGLContext*)mainContext
-                             reshapeListener:
-                                 (nonnull id<FlutterViewReshapeListener>)reshapeListener;
+- (nullable instancetype)initWithShareContext:(nonnull NSOpenGLContext*)shareContext
+                              reshapeListener:
+                                  (nonnull id<FlutterViewReshapeListener>)reshapeListener;
 
 - (nullable instancetype)initWithFrame:(NSRect)frameRect
                            pixelFormat:(nullable NSOpenGLPixelFormat*)format NS_UNAVAILABLE;

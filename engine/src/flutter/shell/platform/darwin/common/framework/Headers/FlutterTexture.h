@@ -39,7 +39,7 @@ FLUTTER_EXPORT
 /**
  * Registers a `FlutterTexture` for usage in Flutter and returns an id that can be used to reference
  * that texture when calling into Flutter with channels. Textures must be registered on the
- * platform thread. On success returns the pointer to the registered texture, else returns 0.
+ * platform thread.
  */
 - (int64_t)registerTexture:(NSObject<FlutterTexture>*)texture;
 /**
