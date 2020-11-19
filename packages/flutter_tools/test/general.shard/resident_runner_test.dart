@@ -2578,33 +2578,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true)
   });
 
-   testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag when feature is enabled', () async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final MockDevice mockDevice = MockDevice();
-    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
-      return TargetPlatform.android_arm;
-    });
-
-    final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
-      mockDevice,
-      buildInfo: const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        extraFrontEndOptions: <String>[],
-      ),
-      target: null, platform: null,
-    )).generator as DefaultResidentCompiler;
-
-    expect(residentCompiler.extraFrontEndOptions,
-      contains('--enable-experiment=alternative-invalidation-strategy'));
-  }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isExperimentalInvalidationStrategyEnabled: true)
-  });
-
   testUsingContext('connect sets up log reader', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockDevice mockDevice = MockDevice();
