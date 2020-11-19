@@ -61,6 +61,12 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// The [rowsPerPage] and [availableRowsPerPage] must not be null (they
   /// both have defaults, though, so don't have to be specified).
+  ///
+  /// The [DataTable] is themed with [DataTableTheme]. The
+  /// [DataTableThemeData.decoration] is not applied to the [DataTable] within
+  /// a [PaginatedDataTable], as it's unlikely that it blends well with the
+  /// [Card]'s own shape and border. To modify the border or background color of
+  /// the [PaginatedDataTable], use [CardTheme].
   PaginatedDataTable({
     Key? key,
     this.header,
