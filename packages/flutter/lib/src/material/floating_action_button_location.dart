@@ -60,7 +60,7 @@ const double kMiniButtonOffsetAdjustment = 4.0;
 ///
 /// ## Floating Action Button placements
 ///
-/// The following diagrams show the available common placement locations for the FloatingActionButton.
+/// The following diagrams show the available placement locations for the FloatingActionButton.
 ///
 /// * [FloatingActionButtonLocation.centerDocked]:
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_center_docked.png)
