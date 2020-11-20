@@ -17,7 +17,8 @@ class LayerScene implements ui.Scene {
 
   @override
   Future<ui.Image> toImage(int width, int height) {
-    throw UnsupportedError('LayerScene.toImage not implemented.');
+    ui.Picture picture = layerTree.flatten();
+    return picture.toImage(width, height);
   }
 }
 
