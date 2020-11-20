@@ -66,7 +66,7 @@ class CkGradientLinear extends CkShader implements ui.Gradient {
         assert(_offsetIsValid(to)),
         assert(colors != null), // ignore: unnecessary_null_comparison
         assert(tileMode != null), // ignore: unnecessary_null_comparison
-        this.matrix4 = matrix == null ? null : _FastMatrix64(matrix) {
+        this.matrix4 = matrix {
     if (assertionsEnabled) {
       _validateColorStops(colors, colorStops);
     }
@@ -77,7 +77,7 @@ class CkGradientLinear extends CkShader implements ui.Gradient {
   final List<ui.Color> colors;
   final List<double>? colorStops;
   final ui.TileMode tileMode;
-  final _FastMatrix64? matrix4;
+  final Float64List? matrix4;
 
   @override
   SkShader createDefault() {
