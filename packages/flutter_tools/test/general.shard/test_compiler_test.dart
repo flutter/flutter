@@ -114,29 +114,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     Logger: () => BufferLogger.test(),
   });
-
-  testUsingContext('TestCompiler reports an error when there is no dependency on flutter_test or test', () async {
-    final FakeTestCompiler testCompiler = FakeTestCompiler(
-      BuildInfo.debug,
-      FlutterProject.current(),
-      residentCompiler,
-    );
-
-    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), null);
-    expect(testLogger.errorText, contains('Error: cannot run without a dependency on '
-      'either "package:flutter_test" or "package:test'));
-    verifyNever(residentCompiler.recompile(
-      any,
-      <Uri>[Uri.parse('test/foo.dart')],
-      outputPath: testCompiler.outputDill.path,
-      packageConfig: anyNamed('packageConfig'),
-    ));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    Platform: () => linuxPlatform,
-    ProcessManager: () => FakeProcessManager.any(),
-    Logger: () => BufferLogger.test(),
-  });
 }
 
 /// Override the creation of the Resident Compiler to simplify testing.

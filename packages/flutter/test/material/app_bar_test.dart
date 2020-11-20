@@ -19,43 +19,32 @@ Widget buildSliverAppBarApp({
   bool snap = false,
   double toolbarHeight = kToolbarHeight,
 }) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultMaterialLocalizations.delegate,
-      DefaultWidgetsLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          body: DefaultTabController(
-            length: 3,
-            child: CustomScrollView(
-              primary: true,
-              slivers: <Widget>[
-                SliverAppBar(
-                  title: const Text('AppBar Title'),
-                  floating: floating,
-                  pinned: pinned,
-                  collapsedHeight: collapsedHeight,
-                  expandedHeight: expandedHeight,
-                  toolbarHeight: toolbarHeight,
-                  snap: snap,
-                  bottom: TabBar(
-                    tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    height: 1200.0,
-                    color: Colors.orange[400],
-                  ),
-                ),
-              ],
+  return MaterialApp(
+    home: Scaffold(
+      body: DefaultTabController(
+        length: 3,
+        child: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar(
+              title: const Text('AppBar Title'),
+              floating: floating,
+              pinned: pinned,
+              collapsedHeight: collapsedHeight,
+              expandedHeight: expandedHeight,
+              toolbarHeight: toolbarHeight,
+              snap: snap,
+              bottom: TabBar(
+                tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
+              ),
             ),
-          ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200.0,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
         ),
       ),
     ),

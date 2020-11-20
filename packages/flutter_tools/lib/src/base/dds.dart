@@ -49,11 +49,17 @@ class DartDevelopmentService {
           enableAuthCodes: !disableServiceAuthCodes,
           ipv6: ipv6,
         );
-      unawaited(_ddsInstance.done.whenComplete(_completer.complete));
+      unawaited(_ddsInstance.done.whenComplete(() {
+        if (!_completer.isCompleted) {
+          _completer.complete();
+        }
+      }));
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
-      _completer.complete();
+      if (!_completer.isCompleted) {
+        _completer.complete();
+      }
       rethrow;
     }
   }

@@ -52,7 +52,7 @@ class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizati
   }
 
   @override
-  String toString() => '$runtimeType($prefix)';
+  String toString() => '${objectRuntimeType(this, 'SyncTestLocalizationsDelegate')}($prefix)';
 }
 
 class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
@@ -74,7 +74,7 @@ class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizat
   }
 
   @override
-  String toString() => '$runtimeType($prefix)';
+  String toString() => '${objectRuntimeType(this, 'AsyncTestLocalizationsDelegate')}($prefix)';
 }
 
 class MoreLocalizations {
