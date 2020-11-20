@@ -1510,6 +1510,7 @@ void main() {
           commandHelp.P,
           commandHelp.a,
           'An Observatory debugger and profiler on null is available at: null',
+          '\n💪 Running with sound null safety 💪',
           ''
         ].join('\n')
     ));
