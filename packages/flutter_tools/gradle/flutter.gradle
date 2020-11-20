@@ -591,6 +591,9 @@ class FlutterPlugin implements Plugin<Project> {
     // To workaround this issue, only configure the JAR task that is required given the task
     // from the command line.
     //
+    // The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
+    // time of adding this code. Once released, this can be removed.
+    //
     // Tested cases:
     // * `./gradlew assembleRelease`
     // * `./gradlew app:assembleRelease.`
