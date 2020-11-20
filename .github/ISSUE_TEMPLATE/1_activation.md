@@ -39,10 +39,22 @@ assignees: ''
       the output of running "flutter --verbose create foo".
 -->
 
+<details>
+
+<summary>Command logs</summary>
+
 ```
 ```
+
+</details>
 
 <!-- If possible, paste the output of running `flutter doctor -v` here. -->
 
+<details>
+
+<summary>flutter doctor -v</summary>
+
 ```
 ```
+
+</details>
