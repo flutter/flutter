@@ -19,9 +19,7 @@ void main() {
 
 void testMain() {
   group('CanvasKit shaders', () {
-    setUpAll(() async {
-      await ui.webOnlyInitializePlatform();
-    });
+    setUpCanvasKitTest();
 
     test('Sweep gradient', () {
       final CkGradientSweep gradient = ui.Gradient.sweep(

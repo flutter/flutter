@@ -47,9 +47,7 @@ void testMain() {
   }
 
   group('ImageFilters', () {
-    setUpAll(() async {
-      await ui.webOnlyInitializePlatform();
-    });
+    setUpCanvasKitTest();
 
     test('can be constructed', () {
       final CkImageFilter imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10);

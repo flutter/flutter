@@ -20,34 +20,22 @@ void main() {
 
 void testMain() {
   group('CanvasKit image', () {
-    setUpAll(() async {
-      await ui.webOnlyInitializePlatform();
-    });
+    setUpCanvasKitTest();
 
     test('CkAnimatedImage can be explicitly disposed of', () {
       final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kTransparentImage);
-      expect(image.box.isDeleted, false);
       expect(image.debugDisposed, false);
       image.dispose();
-      expect(image.box.isDeleted, true);
       expect(image.debugDisposed, true);
+
+      // Disallow usage after disposal
+      expect(() => image.frameCount, throwsAssertionError);
+      expect(() => image.repetitionCount, throwsAssertionError);
+      expect(() => image.getNextFrame(), throwsAssertionError);
 
       // Disallow double-dispose.
       expect(() => image.dispose(), throwsAssertionError);
-    });
-
-    test('CkAnimatedImage can be cloned and explicitly disposed of', () async {
-      final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kTransparentImage);
-      final SkAnimatedImage skAnimatedImage = image.box.skiaObject;
-      final SkiaObjectBox<CkAnimatedImage, SkAnimatedImage> box = image.box;
-      expect(box.refCount, 1);
-      expect(box.debugGetStackTraces().length, 1);
-
-      image.dispose();
-      expect(box.isDeleted, true);
-      await Future<void>.delayed(Duration.zero);
-      expect(skAnimatedImage.isDeleted(), true);
-      expect(box.debugGetStackTraces().length, 0);
+      testCollector.collectNow();
     });
 
     test('CkImage toString', () {
@@ -57,6 +45,7 @@ void testMain() {
       final CkImage image = CkImage(skImage);
       expect(image.toString(), '[1×1]');
       image.dispose();
+      testCollector.collectNow();
     });
 
     test('CkImage can be explicitly disposed of', () {
@@ -65,13 +54,14 @@ void testMain() {
               .getCurrentFrame();
       final CkImage image = CkImage(skImage);
       expect(image.debugDisposed, false);
-      expect(image.box.isDeleted, false);
+      expect(image.box.isDeletedPermanently, false);
       image.dispose();
       expect(image.debugDisposed, true);
-      expect(image.box.isDeleted, true);
+      expect(image.box.isDeletedPermanently, true);
 
       // Disallow double-dispose.
       expect(() => image.dispose(), throwsAssertionError);
+      testCollector.collectNow();
     });
 
     test('CkImage can be explicitly disposed of when cloned', () async {
@@ -83,29 +73,36 @@ void testMain() {
       expect(box.refCount, 1);
       expect(box.debugGetStackTraces().length, 1);
 
-      final CkImage imageClone = image.clone();
+      final CkImage clone = image.clone();
       expect(box.refCount, 2);
       expect(box.debugGetStackTraces().length, 2);
 
-      expect(image.isCloneOf(imageClone), true);
-      expect(box.isDeleted, false);
-      await Future<void>.delayed(Duration.zero);
+      expect(image.isCloneOf(clone), true);
+      expect(box.isDeletedPermanently, false);
+
+      testCollector.collectNow();
       expect(skImage.isDeleted(), false);
       image.dispose();
-      expect(box.isDeleted, false);
-      await Future<void>.delayed(Duration.zero);
+      expect(box.refCount, 1);
+      expect(box.isDeletedPermanently, false);
+
+      testCollector.collectNow();
       expect(skImage.isDeleted(), false);
-      imageClone.dispose();
-      expect(box.isDeleted, true);
-      await Future<void>.delayed(Duration.zero);
+      clone.dispose();
+      expect(box.refCount, 0);
+      expect(box.isDeletedPermanently, true);
+
+      testCollector.collectNow();
       expect(skImage.isDeleted(), true);
       expect(box.debugGetStackTraces().length, 0);
+      testCollector.collectNow();
     });
 
     test('skiaInstantiateWebImageCodec throws exception if given invalid URL',
         () async {
       expect(skiaInstantiateWebImageCodec('invalid-url', null),
           throwsA(isA<ProgressEvent>()));
+      testCollector.collectNow();
     });
 
     test('CkImage toByteData', () async {
@@ -115,6 +112,7 @@ void testMain() {
       final CkImage image = CkImage(skImage);
       expect((await image.toByteData()).lengthInBytes, greaterThan(0));
       expect((await image.toByteData(format: ui.ImageByteFormat.png)).lengthInBytes, greaterThan(0));
+      testCollector.collectNow();
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
