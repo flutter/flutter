@@ -1806,6 +1806,13 @@ class ArtifactUpdater {
         }
         _deleteIgnoringErrors(tempFile);
         continue;
+      } on FormatException {
+        retries -= 1;
+        if (retries == 0) {
+          rethrow;
+        }
+        _deleteIgnoringErrors(tempFile);
+        continue;
       }
       return;
     }
