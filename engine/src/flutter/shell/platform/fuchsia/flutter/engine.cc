@@ -201,6 +201,12 @@ Engine::Engine(Delegate& delegate,
         });
       };
 
+  // Launch the engine in the appropriate configuration.
+  // Note: this initializes the Asset Manager on the global PersistantCache
+  // so it must be called before WarmupSkps() is called below.
+  auto run_configuration = flutter::RunConfiguration::InferFromSettings(
+      settings, task_runners.GetIOTaskRunner());
+
   // Setup the callback that will instantiate the platform view.
   flutter::Shell::CreateCallback<flutter::PlatformView>
       on_create_platform_view = fml::MakeCopyable(
@@ -374,10 +380,6 @@ Engine::Engine(Delegate& delegate,
       intl_property_provider_->GetProfile(get_profile_callback);
     };
   }
-
-  // Launch the engine in the appropriate configuration.
-  auto run_configuration = flutter::RunConfiguration::InferFromSettings(
-      shell_->GetSettings(), shell_->GetTaskRunners().GetIOTaskRunner());
 
   auto on_run_failure = [weak = weak_factory_.GetWeakPtr()]() {
     // The engine could have been killed by the caller right after the
@@ -647,7 +649,7 @@ void Engine::WarmupSkps(fml::BasicTaskRunner* concurrent_task_runner,
 
   // tell concurrent task runner to deserialize all skps available from
   // the asset manager
-  concurrent_task_runner->PostTask([&raster_task_runner, skp_warmup_surface,
+  concurrent_task_runner->PostTask([raster_task_runner, skp_warmup_surface,
                                     &surface_producer]() {
     TRACE_DURATION("flutter", "DeserializeSkps");
     std::vector<std::unique_ptr<fml::Mapping>> skp_mappings =

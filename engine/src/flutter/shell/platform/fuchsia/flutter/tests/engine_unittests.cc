@@ -34,14 +34,22 @@ class MockTaskRunner : public fml::BasicTaskRunner {
   virtual ~MockTaskRunner() {}
 
   void PostTask(const fml::closure& task) override {
-    task_count_++;
-    task();
+    outstanding_tasks_.push(task);
   }
 
   int GetTaskCount() { return task_count_; }
 
+  void Run() {
+    while (!outstanding_tasks_.empty()) {
+      outstanding_tasks_.front()();
+      outstanding_tasks_.pop();
+      task_count_++;
+    }
+  }
+
  private:
   int task_count_ = 0;
+  std::queue<const fml::closure> outstanding_tasks_;
 };
 
 class EngineTest : public ::testing::Test {
@@ -53,15 +61,16 @@ class EngineTest : public ::testing::Test {
 
     fuchsia::ui::scenic::SessionPtr session_ptr;
     scenic::Session session(std::move(session_ptr));
-    VulkanSurfaceProducer surface_producer(&session);
+    surface_producer_ = std::make_unique<VulkanSurfaceProducer>(&session);
 
     Engine::WarmupSkps(&concurrent_task_runner_, &raster_task_runner_,
-                       surface_producer);
+                       *surface_producer_);
   }
 
  protected:
   MockTaskRunner concurrent_task_runner_;
   MockTaskRunner raster_task_runner_;
+  std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
 };
 
 TEST_F(EngineTest, SkpWarmup) {
@@ -100,6 +109,8 @@ TEST_F(EngineTest, SkpWarmup) {
   PersistentCache::GetCacheForProcess()->SetAssetManager(asset_manager);
 
   WarmupSkps();
+  concurrent_task_runner_.Run();
+  raster_task_runner_.Run();
 
   EXPECT_EQ(concurrent_task_runner_.GetTaskCount(), 1);
   EXPECT_EQ(raster_task_runner_.GetTaskCount(), 1);
