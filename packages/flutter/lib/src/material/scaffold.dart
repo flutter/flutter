@@ -1199,7 +1199,7 @@ class Scaffold extends StatefulWidget {
   /// {@end-tool}
   final Widget drawer;
 
-  /// The callback when drawer is opened or closed
+  /// Optional callback that is called when the [Scaffold.drawer] is opened or closed.
   final DrawerCallback drawerCallback;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
