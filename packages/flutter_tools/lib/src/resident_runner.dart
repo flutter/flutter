@@ -1219,15 +1219,8 @@ abstract class ResidentRunner {
         ipv6: ipv6,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
       );
-      // This will wait for at least one flutter view before returning.
-      final Status status = globals.logger.startProgress(
-        'Waiting for ${device.device.name} to report its views...',
-      );
-      try {
-        await device.vmService.getFlutterViews();
-      } finally {
-        status.stop();
-      }
+      await device.vmService.getFlutterViews();
+
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
