@@ -97,7 +97,10 @@ class LineBreaker {
   // could be here but it's better for performance that it's upstream because of
   // the cost of constructing and comparing the ICU Locale object.
   // Note: caller is responsible for managing lifetime of hyphenator
-  void setLocale(const icu::Locale& locale, Hyphenator* hyphenator);
+  //
+  // libtxt extension: always use the default locale so that a cached instance
+  // of the ICU break iterator can be reused.
+  void setLocale();
 
   void resize(size_t size) {
     mTextBuf.resize(size);

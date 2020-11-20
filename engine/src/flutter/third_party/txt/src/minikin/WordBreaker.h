@@ -33,7 +33,9 @@ class WordBreaker {
  public:
   ~WordBreaker() { finish(); }
 
-  void setLocale(const icu::Locale& locale);
+  // libtxt extension: always use the default locale so that a cached instance
+  // of the ICU break iterator can be reused.
+  void setLocale();
 
   void setText(const uint16_t* data, size_t size);
 
