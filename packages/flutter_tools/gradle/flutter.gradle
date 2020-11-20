@@ -584,8 +584,9 @@ class FlutterPlugin implements Plugin<Project> {
         return target
     }
 
-    // In AGP 4.0, the Android linter task depends on all the JAR tasks containing `libapp.so`.
-    // When building APKs, this causes an issue where building release requires the debug JAR.
+    // In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
+    // When building APKs, this causes an issue where building release requires the debug JAR,
+    // but Gradle won't build debug.
     //
     // To workaround this issue, only configure the JAR task that is required given the task
     // from the command line.

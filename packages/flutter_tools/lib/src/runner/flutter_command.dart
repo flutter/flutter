@@ -589,7 +589,8 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('shrink',
       negatable: true,
       hide: true,
-      help: 'This flag is deprecated.'
+      help: 'This flag is deprecated. Code shrinking is always enabled in release builds. '
+            'To learn more, see: https://developer.android.com/studio/build/shrink-code'
     );
   }
 
