@@ -17,14 +17,7 @@ void main() {
 
 void testMain() {
   group('CkPath', () {
-    setUpAll(() async {
-      debugResetBrowserSupportsFinalizationRegistry();
-      await ui.webOnlyInitializePlatform();
-    });
-
-    tearDown(() {
-      debugResetBrowserSupportsFinalizationRegistry();
-    });
+    setUpCanvasKitTest();
 
     test('Using CanvasKit', () {
       expect(useCanvasKit, true);

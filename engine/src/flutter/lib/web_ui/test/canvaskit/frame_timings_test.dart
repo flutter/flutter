@@ -5,8 +5,6 @@
 // @dart = 2.6
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart' as ui;
 
 import 'common.dart';
 import '../frame_timings_common.dart';
@@ -17,13 +15,7 @@ void main() {
 
 void testMain() {
   group('frame timings', () {
-    setUpAll(() async {
-      await ui.webOnlyInitializePlatform();
-    });
-
-    test('Using CanvasKit', () {
-      expect(useCanvasKit, true);
-    });
+    setUpCanvasKitTest();
 
     test('collects frame timings', () async {
       await runFrameTimingsTest();

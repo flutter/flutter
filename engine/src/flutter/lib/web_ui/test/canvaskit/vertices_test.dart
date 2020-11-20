@@ -16,9 +16,7 @@ void main() {
 
 void testMain() {
   group('Vertices', () {
-    setUpAll(() async {
-      await ui.webOnlyInitializePlatform();
-    });
+    setUpCanvasKitTest();
 
     test('can be constructed, drawn, and deleted', () {
       final CkVertices vertices = _testVertices();

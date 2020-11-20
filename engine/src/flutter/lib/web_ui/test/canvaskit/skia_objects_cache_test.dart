@@ -8,7 +8,6 @@ import 'package:mockito/mockito.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
-import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
 import '../matchers.dart';
@@ -27,19 +26,13 @@ void testMain() {
 
 void _tests() {
   SkiaObjects.maximumCacheSize = 4;
-  bool originalBrowserSupportsFinalizationRegistry;
 
-  setUpAll(() async {
-    await ui.webOnlyInitializePlatform();
+  setUpCanvasKitTest();
 
+  setUp(() async {
     // Pretend the browser does not support FinalizationRegistry so we can test the
     // resurrection logic.
-    originalBrowserSupportsFinalizationRegistry = browserSupportsFinalizationRegistry;
     browserSupportsFinalizationRegistry = false;
-  });
-
-  tearDownAll(() {
-    browserSupportsFinalizationRegistry = originalBrowserSupportsFinalizationRegistry;
   });
 
   group(ManagedSkiaObject, () {
@@ -158,11 +151,12 @@ void _tests() {
   group(SkiaObjectBox, () {
     test('Records stack traces and respects refcounts', () async {
       TestSkDeletable.deleteCount = 0;
+      TestBoxWrapper.resurrectCount = 0;
       final TestBoxWrapper original = TestBoxWrapper();
 
       expect(original.box.debugGetStackTraces().length, 1);
       expect(original.box.refCount, 1);
-      expect(original.box.isDeleted, false);
+      expect(original.box.isDeletedPermanently, false);
 
       final TestBoxWrapper clone = original.clone();
       expect(clone.box, same(original.box));
@@ -170,12 +164,11 @@ void _tests() {
       expect(clone.box.refCount, 2);
       expect(original.box.debugGetStackTraces().length, 2);
       expect(original.box.refCount, 2);
-      expect(original.box.isDeleted, false);
+      expect(original.box.isDeletedPermanently, false);
 
       original.dispose();
 
-      // Let Skia object delete queue run.
-      await Future<void>.delayed(Duration.zero);
+      testCollector.collectNow();
       expect(TestSkDeletable.deleteCount, 0);
 
       expect(clone.box.debugGetStackTraces().length, 1);
@@ -184,18 +177,62 @@ void _tests() {
       expect(original.box.refCount, 1);
 
       clone.dispose();
-
-      // Let Skia object delete queue run.
-      await Future<void>.delayed(Duration.zero);
-      expect(TestSkDeletable.deleteCount, 1);
-
       expect(clone.box.debugGetStackTraces().length, 0);
       expect(clone.box.refCount, 0);
       expect(original.box.debugGetStackTraces().length, 0);
       expect(original.box.refCount, 0);
-      expect(original.box.isDeleted, true);
+      expect(original.box.isDeletedPermanently, true);
+
+      testCollector.collectNow();
+      expect(TestSkDeletable.deleteCount, 1);
+      expect(TestBoxWrapper.resurrectCount, 0);
 
       expect(() => clone.box.unref(clone), throwsAssertionError);
+    });
+
+    test('Can resurrect Skia objects', () async {
+      TestSkDeletable.deleteCount = 0;
+      TestBoxWrapper.resurrectCount = 0;
+      final TestBoxWrapper object = TestBoxWrapper();
+      expect(TestSkDeletable.deleteCount, 0);
+      expect(TestBoxWrapper.resurrectCount, 0);
+
+      // Test 3 cycles of delete/resurrect.
+      for (int i = 0; i < 3; i++) {
+        object.box.delete();
+        object.box.didDelete();
+        expect(TestSkDeletable.deleteCount, i + 1);
+        expect(TestBoxWrapper.resurrectCount, i);
+        expect(object.box.isDeletedTemporarily, true);
+        expect(object.box.isDeletedPermanently, false);
+
+        expect(object.box.skiaObject, isNotNull);
+        expect(TestSkDeletable.deleteCount, i + 1);
+        expect(TestBoxWrapper.resurrectCount, i + 1);
+        expect(object.box.isDeletedTemporarily, false);
+        expect(object.box.isDeletedPermanently, false);
+      }
+
+      object.dispose();
+      expect(object.box.isDeletedPermanently, true);
+    });
+
+    test('Can dispose temporarily deleted object', () async {
+      TestSkDeletable.deleteCount = 0;
+      TestBoxWrapper.resurrectCount = 0;
+      final TestBoxWrapper object = TestBoxWrapper();
+      expect(TestSkDeletable.deleteCount, 0);
+      expect(TestBoxWrapper.resurrectCount, 0);
+
+      object.box.delete();
+      object.box.didDelete();
+      expect(TestSkDeletable.deleteCount, 1);
+      expect(TestBoxWrapper.resurrectCount, 0);
+      expect(object.box.isDeletedTemporarily, true);
+      expect(object.box.isDeletedPermanently, false);
+
+      object.dispose();
+      expect(object.box.isDeletedPermanently, true);
     });
   });
 }
@@ -204,11 +241,20 @@ void _tests() {
 ///
 /// Can be [clone]d such that the clones share the same ref counted box.
 class TestBoxWrapper implements StackTraceDebugger {
+  static int resurrectCount = 0;
+
   TestBoxWrapper() {
     if (assertionsEnabled) {
       _debugStackTrace = StackTrace.current;
     }
-    box = SkiaObjectBox<TestBoxWrapper, TestSkDeletable>(this, TestSkDeletable());
+    box = SkiaObjectBox<TestBoxWrapper, TestSkDeletable>.resurrectable(
+      this,
+      TestSkDeletable(),
+      () {
+        resurrectCount += 1;
+        return TestSkDeletable();
+      }
+    );
   }
 
   TestBoxWrapper.cloneOf(this.box) {
@@ -236,7 +282,14 @@ class TestSkDeletable implements SkDeletable {
   static int deleteCount = 0;
 
   @override
+  bool isDeleted() => _isDeleted;
+  bool _isDeleted = false;
+
+  @override
   void delete() {
+    expect(_isDeleted, isFalse,
+      reason: 'CanvasKit does not allow deleting the same object more than once.');
+    _isDeleted = true;
     deleteCount++;
   }
 }
@@ -247,7 +300,13 @@ class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> implements SkDele
   TestOneShotSkiaObject() : super(SkPaint());
 
   @override
+  bool isDeleted() => _isDeleted;
+  bool _isDeleted = false;
+
+  @override
   void delete() {
+    expect(_isDeleted, isFalse,
+      reason: 'CanvasKit does not allow deleting the same object more than once.');
     rawSkiaObject?.delete();
     deleteCount++;
   }

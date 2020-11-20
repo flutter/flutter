@@ -41,24 +41,24 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
 /// The CanvasKit implementation of [ui.Codec].
 ///
 /// Wraps `SkAnimatedImage`.
-class CkAnimatedImage implements ui.Codec, StackTraceDebugger {
+class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage> implements ui.Codec {
   /// Decodes an image from a list of encoded bytes.
-  CkAnimatedImage.decodeFromBytes(Uint8List bytes) {
-    if (assertionsEnabled) {
-      _debugStackTrace = StackTrace.current;
-    }
-    final SkAnimatedImage skAnimatedImage =
-        canvasKit.MakeAnimatedImageFromEncoded(bytes);
-    box = SkiaObjectBox<CkAnimatedImage, SkAnimatedImage>(this, skAnimatedImage);
-  }
+  CkAnimatedImage.decodeFromBytes(this._bytes);
 
-  // Use a box because `CkAnimatedImage` may be deleted either due to this
-  // object being garbage-collected, or by an explicit call to [dispose].
-  late final SkiaObjectBox<CkAnimatedImage, SkAnimatedImage> box;
+  final Uint8List _bytes;
 
   @override
-  StackTrace get debugStackTrace => _debugStackTrace!;
-  StackTrace? _debugStackTrace;
+  SkAnimatedImage createDefault() {
+    return canvasKit.MakeAnimatedImageFromEncoded(_bytes);
+  }
+
+  @override
+  SkAnimatedImage resurrect() => createDefault();
+
+  @override
+  void delete() {
+    rawSkiaObject?.delete();
+  }
 
   bool _disposed = false;
   bool get debugDisposed => _disposed;
@@ -75,29 +75,27 @@ class CkAnimatedImage implements ui.Codec, StackTraceDebugger {
       'Cannot dispose a codec that has already been disposed.',
     );
     _disposed = true;
-
-    // This image is no longer usable. Bump the ref count.
-    box.unref(this);
+    delete();
   }
 
   @override
   int get frameCount {
     assert(_debugCheckIsNotDisposed());
-    return box.skiaObject.getFrameCount();
+    return skiaObject.getFrameCount();
   }
 
   @override
   int get repetitionCount {
     assert(_debugCheckIsNotDisposed());
-    return box.skiaObject.getRepetitionCount();
+    return skiaObject.getRepetitionCount();
   }
 
   @override
   Future<ui.FrameInfo> getNextFrame() {
     assert(_debugCheckIsNotDisposed());
-    final int durationMillis = box.skiaObject.decodeNextFrame();
+    final int durationMillis = skiaObject.decodeNextFrame();
     final Duration duration = Duration(milliseconds: durationMillis);
-    final CkImage image = CkImage(box.skiaObject.getCurrentFrame());
+    final CkImage image = CkImage(skiaObject.getCurrentFrame());
     return Future<ui.FrameInfo>.value(AnimatedImageFrameInfo(duration, image));
   }
 }
@@ -108,7 +106,35 @@ class CkImage implements ui.Image, StackTraceDebugger {
     if (assertionsEnabled) {
       _debugStackTrace = StackTrace.current;
     }
-    box = SkiaObjectBox<CkImage, SkImage>(this, skImage);
+    if (browserSupportsFinalizationRegistry) {
+      box = SkiaObjectBox<CkImage, SkImage>(this, skImage);
+    } else {
+      // If finalizers are not supported we need to be able to resurrect the
+      // image if it was temporarily deleted. To do that, we keep the original
+      // pixels and ask the SkiaObjectBox to make an image from them when
+      // resurrecting.
+      //
+      // IMPORTANT: the alphaType, colorType, and colorSpace passed to
+      // _encodeImage and to canvasKit.MakeImage must be the same. Otherwise
+      // Skia will misinterpret the pixels and corrupt the image.
+      final ByteData originalBytes = _encodeImage(
+        skImage: skImage,
+        format: ui.ImageByteFormat.rawRgba,
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+      );
+      box = SkiaObjectBox<CkImage, SkImage>.resurrectable(this, skImage, () {
+        return canvasKit.MakeImage(
+          originalBytes.buffer.asUint8List(),
+          width,
+          height,
+          canvasKit.AlphaType.Premul,
+          canvasKit.ColorType.RGBA_8888,
+          SkColorSpaceSRGB,
+        );
+      });
+    }
   }
 
   CkImage.cloneOf(this.box) {
@@ -187,18 +213,35 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 
   @override
-  Future<ByteData> toByteData(
-      {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
+  Future<ByteData> toByteData({
+    ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
+  }) {
     assert(_debugCheckIsNotDisposed());
+    return Future<ByteData>.value(_encodeImage(
+      skImage: skImage,
+      format: format,
+      alphaType: canvasKit.AlphaType.Premul,
+      colorType: canvasKit.ColorType.RGBA_8888,
+      colorSpace: SkColorSpaceSRGB,
+    ));
+  }
+
+  static ByteData _encodeImage({
+    required SkImage skImage,
+    required ui.ImageByteFormat format,
+    required SkAlphaType alphaType,
+    required SkColorType colorType,
+    required ColorSpace colorSpace,
+  }) {
     Uint8List bytes;
 
     if (format == ui.ImageByteFormat.rawRgba) {
       final SkImageInfo imageInfo = SkImageInfo(
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-        width: width,
-        height: height,
+        alphaType: alphaType,
+        colorType: colorType,
+        colorSpace: colorSpace,
+        width: skImage.width(),
+        height: skImage.height(),
       );
       bytes = skImage.readPixels(imageInfo, 0, 0);
     } else {
@@ -208,8 +251,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
       skData.delete();
     }
 
-    final ByteData data = bytes.buffer.asByteData(0, bytes.length);
-    return Future<ByteData>.value(data);
+    return bytes.buffer.asByteData(0, bytes.length);
   }
 
   @override
