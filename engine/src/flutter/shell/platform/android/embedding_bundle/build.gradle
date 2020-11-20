@@ -48,6 +48,12 @@ android {
     embedding "androidx.lifecycle:lifecycle-common:$lifecycle_version"
     embedding "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
+    // This dependency is here to allow linking to Play core in tests, but
+    // is not used in a default Flutter app. This dependency should be manually
+    // added to the user's app gradle in order to opt into using split AOT
+    // dynamic features.
+    embedding "com.google.android.play:core:1.8.0"
+
     // Testing
     // TODO(xster): remove these android-all compile time dependencies.
     // Use https://github.com/robolectric/robolectric/blob/master/robolectric/src/main/java/org/robolectric/plugins/LegacyDependencyResolver.java#L24

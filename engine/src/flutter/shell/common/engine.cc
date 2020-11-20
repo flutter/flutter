@@ -507,4 +507,21 @@ const std::string& Engine::GetLastEntrypointLibrary() const {
   return last_entry_point_library_;
 }
 
+// The Following commented out code connects into part 2 of the split AOT
+// feature. Left commented out until it lands:
+
+// // |RuntimeDelegate|
+// void Engine::RequestDartDeferredLibrary(intptr_t loading_unit_id) {
+//   return delegate_.RequestDartDeferredLibrary(loading_unit_id);
+// }
+
+void Engine::LoadDartDeferredLibrary(intptr_t loading_unit_id,
+                                     const uint8_t* snapshot_data,
+                                     const uint8_t* snapshot_instructions) {
+  if (runtime_controller_->IsRootIsolateRunning()) {
+    // runtime_controller_->LoadDartDeferredLibrary(loading_unit_id,
+    //    snapshot_data, snapshot_instructions);
+  }
+}
+
 }  // namespace flutter

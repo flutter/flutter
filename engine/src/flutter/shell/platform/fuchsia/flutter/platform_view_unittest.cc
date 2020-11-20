@@ -104,6 +104,13 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
       const std::vector<std::string>& supported_locale_data) {
     return nullptr;
   }
+  // |flutter::PlatformView::Delegate|
+  void LoadDartDeferredLibrary(intptr_t loading_unit_id,
+                               const uint8_t* snapshot_data,
+                               const uint8_t* snapshot_instructions) {}
+  // |flutter::PlatformView::Delegate|
+  void UpdateAssetManager(
+      std::shared_ptr<flutter::AssetManager> asset_manager) {}
 
   flutter::Surface* surface() const { return surface_.get(); }
   flutter::PlatformMessage* message() const { return message_.get(); }

@@ -18,6 +18,7 @@ import io.flutter.embedding.engine.LocalizationPluginTest;
 import io.flutter.embedding.engine.RenderingComponentTest;
 import io.flutter.embedding.engine.dart.DartExecutorTest;
 import io.flutter.embedding.engine.dart.DartMessengerTest;
+import io.flutter.embedding.engine.dynamicfeatures.PlayStoreDynamicFeatureManagerTest;
 import io.flutter.embedding.engine.loader.ApplicationInfoLoaderTest;
 import io.flutter.embedding.engine.loader.FlutterLoaderTest;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorViewTest;
@@ -77,6 +78,7 @@ import test.io.flutter.embedding.engine.PluginComponentTest;
   PlatformChannelTest.class,
   PlatformPluginTest.class,
   PlatformViewsControllerTest.class,
+  PlayStoreDynamicFeatureManagerTest.class,
   PluginComponentTest.class,
   PreconditionsTest.class,
   RenderingComponentTest.class,

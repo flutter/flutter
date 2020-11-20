@@ -195,6 +195,8 @@ class PlatformViewAndroidJNI {
       std::vector<std::string> supported_locales_data) = 0;
 
   virtual double GetDisplayRefreshRate() = 0;
+
+  virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
 };
 
 }  // namespace flutter
