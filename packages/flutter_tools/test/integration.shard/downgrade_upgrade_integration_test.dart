@@ -99,7 +99,6 @@ void main() {
       'describe',
       '--match',
       'v*.*.*',
-      '--first-parent',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);
@@ -123,7 +122,6 @@ void main() {
       'describe',
       '--match',
       'v*.*.*',
-      '--first-parent',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);

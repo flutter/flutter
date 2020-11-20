@@ -94,7 +94,7 @@ class _DropdownScrollBehavior extends ScrollBehavior {
   const _DropdownScrollBehavior();
 
   @override
-  TargetPlatform getPlatform(BuildContext context) => Theme.of(context)!.platform;
+  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;
@@ -270,7 +270,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
       opacity: _fadeOpacity,
       child: CustomPaint(
         painter: _DropdownMenuPainter(
-          color: widget.dropdownColor ?? Theme.of(context)!.canvasColor,
+          color: widget.dropdownColor ?? Theme.of(context).canvasColor,
           elevation: route.elevation,
           selectedIndex: route.selectedIndex,
           resize: _resize,
@@ -1175,7 +1175,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
   }
 
-  TextStyle? get _textStyle => widget.style ?? Theme.of(context)!.textTheme.subtitle1;
+  TextStyle? get _textStyle => widget.style ?? Theme.of(context).textTheme.subtitle1;
 
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject()! as RenderBox;
@@ -1239,7 +1239,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double fontSize = _textStyle!.fontSize ?? Theme.of(context)!.textTheme.subtitle1!.fontSize!;
+    final double fontSize = _textStyle!.fontSize ?? Theme.of(context).textTheme.subtitle1!.fontSize!;
     return math.max(fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
@@ -1249,7 +1249,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       if (widget.iconEnabledColor != null)
         return widget.iconEnabledColor!;
 
-      switch (Theme.of(context)!.brightness) {
+      switch (Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade700;
         case Brightness.dark:
@@ -1259,7 +1259,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       if (widget.iconDisabledColor != null)
         return widget.iconDisabledColor!;
 
-      switch (Theme.of(context)!.brightness) {
+      switch (Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade400;
         case Brightness.dark:
@@ -1318,7 +1318,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
       hintIndex = items.length;
       items.add(DefaultTextStyle(
-        style: _textStyle!.copyWith(color: Theme.of(context)!.hintColor),
+        style: _textStyle!.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
           ignoringSemantics: false,
           child: displayedHint,
@@ -1355,7 +1355,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       child: Container(
         decoration: _showHighlight
             ? BoxDecoration(
-                color: widget.focusColor ?? Theme.of(context)!.focusColor,
+                color: widget.focusColor ?? Theme.of(context).focusColor,
                 borderRadius: const BorderRadius.all(Radius.circular(4.0)),
               )
             : null,
@@ -1502,7 +1502,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
            final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
-             Theme.of(field.context)!.inputDecorationTheme,
+             Theme.of(field.context).inputDecorationTheme,
            );
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.

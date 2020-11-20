@@ -252,7 +252,7 @@ class ButtonBarTheme extends InheritedWidget {
   /// ```
   static ButtonBarThemeData of(BuildContext context) {
     final ButtonBarTheme? buttonBarTheme = context.dependOnInheritedWidgetOfExactType<ButtonBarTheme>();
-    return buttonBarTheme?.data ?? Theme.of(context)!.buttonBarTheme;
+    return buttonBarTheme?.data ?? Theme.of(context).buttonBarTheme;
   }
 
   @override

@@ -105,7 +105,7 @@ class ScaffoldMessenger extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The state from the closest instance of this class that encloses the given
@@ -1747,7 +1747,7 @@ class Scaffold extends StatefulWidget {
   /// [AppBar.primary], is true.
   final bool primary;
 
-  /// {@macro flutter.material.drawer.dragStartBehavior}
+  /// {@macro flutter.material.DrawerController.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
 
   /// The width of the area within which a horizontal swipe will open the
@@ -2670,13 +2670,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // iOS FEATURES - status bar tap, back gesture
 
   // On iOS, tapping the status bar scrolls the app's primary scrollable to the
-  // top. We implement this by providing a primary scroll controller and
+  // top. We implement this by looking up the  primary scroll controller and
   // scrolling it to the top when tapped.
-
-  final ScrollController _primaryScrollController = ScrollController();
-
   void _handleStatusBarTap() {
-    if (_primaryScrollController.hasClients) {
+    final ScrollController? _primaryScrollController = PrimaryScrollController.of(context);
+    if (_primaryScrollController != null && _primaryScrollController.hasClients) {
       _primaryScrollController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
@@ -2907,7 +2905,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
@@ -3160,30 +3158,27 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
-      child: PrimaryScrollController(
-        controller: _primaryScrollController,
-        child: Material(
-          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
-            return CustomMultiChildLayout(
-              children: children,
-              delegate: _ScaffoldLayout(
-                extendBody: _extendBody,
-                extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                minInsets: minInsets,
-                minViewPadding: minViewPadding,
-                currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                geometryNotifier: _geometryNotifier,
-                previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                textDirection: textDirection,
-                isSnackBarFloating: isSnackBarFloating,
-                snackBarWidth: snackBarWidth,
-              ),
-            );
-          }),
-        ),
+      child: Material(
+        color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+        child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
+          return CustomMultiChildLayout(
+            children: children,
+            delegate: _ScaffoldLayout(
+              extendBody: _extendBody,
+              extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+              minInsets: minInsets,
+              minViewPadding: minViewPadding,
+              currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+              floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+              floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+              geometryNotifier: _geometryNotifier,
+              previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+              textDirection: textDirection,
+              isSnackBarFloating: isSnackBarFloating,
+              snackBarWidth: snackBarWidth,
+            ),
+          );
+        }),
       ),
     );
   }

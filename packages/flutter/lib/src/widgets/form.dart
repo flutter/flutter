@@ -113,7 +113,7 @@ class Form extends StatefulWidget {
   ///
   /// This is the root of the widget hierarchy that contains this form.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
@@ -137,7 +137,7 @@ class Form extends StatefulWidget {
   /// Used to enable/disable form fields auto validation and update their error
   /// text.
   ///
-  /// {@macro flutter.widgets.form.autovalidateMode}
+  /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
 
   /// Used to enable/disable form fields auto validation and update their error
@@ -380,7 +380,7 @@ class FormField<T> extends StatefulWidget {
   /// Used to enable/disable this form field auto validation and update its
   /// error text.
   ///
-  /// {@template flutter.widgets.form.autovalidateMode}
+  /// {@template flutter.widgets.FormField.autovalidateMode}
   /// If [AutovalidateMode.onUserInteraction] this form field will only
   /// auto-validate after its content changes, if [AutovalidateMode.always] it
   /// will auto validate even without user interaction and

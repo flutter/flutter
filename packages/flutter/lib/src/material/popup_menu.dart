@@ -306,7 +306,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1!;
 
@@ -522,7 +522,7 @@ class _PopupMenu<T> extends StatelessWidget {
       Widget item = route.items[i];
       if (route.initialValue != null && route.items[i].represents(route.initialValue)) {
         item = Container(
-          color: Theme.of(context)!.highlightColor,
+          color: Theme.of(context).highlightColor,
           child: item,
         );
       }
@@ -831,7 +831,7 @@ Future<T?> showMenu<T>({
   assert(items != null && items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  switch (Theme.of(context)!.platform) {
+  switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
       break;
@@ -945,6 +945,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.enabled = true,
     this.shape,
     this.color,
+    this.enableFeedback,
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
@@ -1029,6 +1030,16 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Theme.of(context).cardColor is used.
   final Color? color;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1053,7 +1064,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(widget.offset, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero) + widget.offset, ancestor: overlay),
       ),
       Offset.zero & overlay.size,
     );
@@ -1109,6 +1120,10 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final bool enableFeedback = widget.enableFeedback
+      ?? PopupMenuTheme.of(context).enableFeedback
+      ?? true;
+
     assert(debugCheckHasMaterialLocalizations(context));
 
     if (widget.child != null)
@@ -1118,14 +1133,16 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
           child: widget.child,
+          enableFeedback: enableFeedback,
         ),
       );
 
     return IconButton(
-      icon: widget.icon ?? _getIcon(Theme.of(context)!.platform),
+      icon: widget.icon ?? _getIcon(Theme.of(context).platform),
       padding: widget.padding,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
+      enableFeedback: enableFeedback,
     );
   }
 }

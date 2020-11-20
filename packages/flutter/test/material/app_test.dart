@@ -531,7 +531,7 @@ void main() {
         themeMode: ThemeMode.light,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -552,7 +552,7 @@ void main() {
         themeMode: ThemeMode.light,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -577,7 +577,7 @@ void main() {
         themeMode: ThemeMode.dark,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -598,7 +598,7 @@ void main() {
         themeMode: ThemeMode.dark,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -625,7 +625,7 @@ void main() {
         themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -651,7 +651,7 @@ void main() {
         themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -674,7 +674,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -695,7 +695,7 @@ void main() {
       MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -719,7 +719,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -746,7 +746,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -772,7 +772,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -805,7 +805,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -832,7 +832,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),

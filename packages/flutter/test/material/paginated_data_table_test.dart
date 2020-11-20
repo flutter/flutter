@@ -229,6 +229,43 @@ void main() {
     expect(tester.getTopRight(find.text('8')).dx, tester.getTopRight(find.text('Rows per page:')).dx + 40.0); // per spec
   });
 
+  testWidgets('PaginatedDataTable with and without header and actions', (WidgetTester tester) async {
+    await binding.setSurfaceSize(const Size(800, 800));
+    const String headerText = 'HEADER';
+    final List<Widget> actions = <Widget>[
+      IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+    ];
+    Widget buildTable({String? header, List<Widget>? actions}) => MaterialApp(
+      home: PaginatedDataTable(
+        header: header != null ? Text(header) : null,
+        actions: actions,
+        source: TestDataSource(onSelectChanged: (bool? value) {}),
+        showCheckboxColumn: true,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(buildTable(header: headerText));
+    expect(find.text(headerText), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsNothing);
+
+    await tester.pumpWidget(buildTable(header: headerText, actions: actions));
+    expect(find.text(headerText), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsOneWidget);
+
+    await tester.pumpWidget(buildTable());
+    expect(find.text(headerText), findsNothing);
+    expect(find.byIcon(Icons.add), findsNothing);
+
+    expect(() => buildTable(actions: actions), throwsAssertionError);
+
+    await binding.setSurfaceSize(null);
+  });
+
   testWidgets('PaginatedDataTable with large text', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
     await tester.pumpWidget(MaterialApp(

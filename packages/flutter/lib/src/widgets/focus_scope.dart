@@ -303,7 +303,7 @@ class Focus extends StatefulWidget {
 
   /// The child widget of this [Focus].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Handler for keys pressed when this object or one of its children has
@@ -1023,7 +1023,7 @@ class ExcludeFocus extends StatelessWidget {
 
   /// The child widget of this [ExcludeFocus].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

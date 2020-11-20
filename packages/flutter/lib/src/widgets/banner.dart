@@ -256,7 +256,7 @@ class Banner extends StatelessWidget {
 
   /// The widget to show behind the banner.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The message to show in the banner.
@@ -338,7 +338,7 @@ class CheckedModeBanner extends StatelessWidget {
 
   /// The widget to show behind the banner.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

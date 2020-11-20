@@ -823,7 +823,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
 
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
     final TextStyle effectiveSelectedLabelStyle =

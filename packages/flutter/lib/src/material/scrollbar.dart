@@ -106,7 +106,7 @@ class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMix
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:

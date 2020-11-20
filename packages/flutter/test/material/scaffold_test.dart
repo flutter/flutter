@@ -1811,7 +1811,7 @@ void main() {
         late FlutterError error;
         try {
           key.currentState!.showBottomSheet<void>((BuildContext context) {
-            final ThemeData themeData = Theme.of(context)!;
+            final ThemeData themeData = Theme.of(context);
             return Container(
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: themeData.disabledColor))
@@ -2128,12 +2128,11 @@ void main() {
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'
       '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#342d0 ink renderer]\n'
+      '     _InkFeatures-[GlobalKey#00000 ink renderer]\n'
       '     NotificationListener<LayoutChangedNotification>\n'
       '     PhysicalModel\n'
       '     AnimatedPhysicalModel\n'
       '     Material\n'
-      '     PrimaryScrollController\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
       '     MediaQuery\n'

@@ -294,7 +294,7 @@ class ErrorHandlingFile
         resultFile.openSync(mode: FileMode.writeOnly).closeSync();
       },
       platform: _platform,
-      failureMessage: 'Flutter faiuled to copy $path to $newPath due to destination location error'
+      failureMessage: 'Flutter failed to copy $path to $newPath due to destination location error'
     );
     // If both of the above checks passed, attempt to copy the file and catch
     // any thrown errors.

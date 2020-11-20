@@ -103,7 +103,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// The [TickerProvider] for this widget.
   final TickerProvider vsync;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;

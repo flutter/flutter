@@ -95,7 +95,7 @@ class CardTheme with Diagnosticable {
 
   /// The [ThemeData.cardTheme] property of the ambient [Theme].
   static CardTheme of(BuildContext context) {
-    return Theme.of(context)!.cardTheme;
+    return Theme.of(context).cardTheme;
   }
 
   /// Linearly interpolate between two Card themes.
