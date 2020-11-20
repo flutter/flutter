@@ -363,8 +363,11 @@ class FlutterPlugin implements Plugin<Project> {
                 !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
                 return
             }
-            pluginProject.dependencies {
-                implementation dependencyProject
+            // Wait for the Android plugin to load and add the dependency to the plugin project.
+            pluginProject.afterEvaluate {
+                pluginProject.dependencies {
+                    implementation dependencyProject
+                }
             }
         }
     }
