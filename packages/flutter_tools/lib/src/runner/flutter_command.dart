@@ -259,12 +259,12 @@ abstract class FlutterCommand extends Command<void> {
 
   String get targetFile {
     if (argResults.wasParsed('target')) {
-      return stringArg('target');
+      return globals.fs.path.absolute(stringArg('target'));
     }
     if (argResults.rest.isNotEmpty) {
-      return argResults.rest.first;
+      return globals.fs.path.absolute(argResults.rest.first);
     }
-    return bundle.defaultMainPath;
+    return globals.fs.path.absolute(bundle.defaultMainPath);
   }
 
   void usesPubOption({bool hide = false}) {
