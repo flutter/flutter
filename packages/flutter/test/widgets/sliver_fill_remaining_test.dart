@@ -297,7 +297,7 @@ void main() {
               children: <Widget>[
                 const Flexible(
                   child: Center(child: FlutterLogo(size: 100)),
-                  fit: FlexFit.loose,
+                  fit: FlexFit.tight,
                 ),
                 ElevatedButton(
                   child: const Text('Bottom'),
