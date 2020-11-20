@@ -593,6 +593,8 @@ class FlutterPlugin implements Plugin<Project> {
     // Tested cases:
     // * `./gradlew assembleRelease`
     // * `./gradlew app:assembleRelease.`
+    // * `./gradlew assemble{flavorName}Release`
+    // * `./gradlew app:assemble{flavorName}Release`
     // * `./gradlew assemble.`
     // * `./gradlew app:assemble.`
     // * `./gradlew bundle.`
@@ -604,10 +606,26 @@ class FlutterPlugin implements Plugin<Project> {
     // https://issuetracker.google.com/issues/158753935
     private boolean shouldConfigureFlutterTask(Task assembleTask) {
       def cliTasksNames = project.gradle.startParameter.taskNames
-      return cliTasksNames.size() != 1 ||
-             !cliTasksNames.first().contains("assemble") ||
-             cliTasksNames.first().split(":").last() == assembleTask.name ||
-             cliTasksNames.first().split(":").last() == "assemble"
+      if (cliTasksNames.size() != 1 || !cliTasksNames.first().contains("assemble")) {
+        return true
+      }
+      def taskName = cliTasksNames.first().split(":").last()
+      if (taskName == "assemble") {
+        return true
+      }
+      if (taskName == assembleTask.name) {
+        return true
+      }
+      if (taskName.endsWith("Release") && assembleTask.name.endsWith("Release")) {
+        return true
+      }
+      if (taskName.endsWith("Debug") && assembleTask.name.endsWith("Debug")) {
+        return true
+      }
+      if (taskName.endsWith("Profile") && assembleTask.name.endsWith("Profile")) {
+        return true
+      }
+      return false
     }
 
     private void addFlutterTasks(Project project) {
