@@ -413,7 +413,7 @@ class RenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
-        return computeDryLayout(constraints).width;
+        return computeDryLayout(BoxConstraints(maxHeight: height)).width;
     }
   }
 
@@ -429,7 +429,7 @@ class RenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
-        return computeDryLayout(constraints).width;
+        return computeDryLayout(BoxConstraints(maxHeight: height)).width;
     }
   }
 
@@ -437,7 +437,7 @@ class RenderWrap extends RenderBox
   double computeMinIntrinsicHeight(double width) {
     switch (direction) {
       case Axis.horizontal:
-        return computeDryLayout(constraints).height;
+        return computeDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
         double height = 0.0;
         RenderBox? child = firstChild;
@@ -453,7 +453,7 @@ class RenderWrap extends RenderBox
   double computeMaxIntrinsicHeight(double width) {
     switch (direction) {
       case Axis.horizontal:
-        return computeDryLayout(constraints).height;
+        return computeDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
         double height = 0.0;
         RenderBox? child = firstChild;
