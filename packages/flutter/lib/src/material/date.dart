@@ -22,6 +22,9 @@ class DateUtils {
 
   /// Returns a [DateTimeRange] with the dates of the original, but with times
   /// set to midnight.
+  ///
+  /// See also:
+  ///  * [dateOnly], which does the same thing for a single date.
   static DateTimeRange datesOnly(DateTimeRange range) {
     return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
   }
