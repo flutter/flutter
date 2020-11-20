@@ -134,7 +134,6 @@ class WebTestCompiler {
       outputPath: outputDirectory.childFile('out').path,
       packageConfig: buildInfo.packageConfig,
     );
-    await residentCompiler.shutdown();
     if (output.errorCount > 0) {
       throwToolExit('Failed to compile');
     }
