@@ -851,7 +851,14 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         } else {
-            project.android.libraryVariants.all addFlutterDeps
+            project.android.libraryVariants.all { variant ->
+                def assembleTask = variant.hasProperty("assembleProvider")
+                        ? variant.assembleProvider.get()
+                        : variant.assemble
+                if (shouldConfigureFlutterTask(assembleTask)) {
+                  addFlutterDeps(variant)
+                }
+            }
         }
         configurePlugins()
     }

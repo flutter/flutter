@@ -228,7 +228,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
     }
     if (hasPlugins && usesAndroidX && !shouldBuildPluginAsAar) {
       globals.printStatus(
-        'The built failed likely due to AndroidX incompatibilities in a plugin. '
+        'The build failed likely due to AndroidX incompatibilities in a plugin. '
         'The tool is about to try using Jetfier to solve the incompatibility.'
       );
       BuildEvent(
