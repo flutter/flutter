@@ -160,7 +160,7 @@ class CreateCommand extends CreateBase {
       // If the project directory exists and isn't empty, then try to determine the template
       // type from the project directory.
       if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-        detectedProjectType = determineTemplateType(projectDir);
+        detectedProjectType = determineTemplateType();
         if (detectedProjectType == null && metadataExists) {
           // We can only be definitive that this is the wrong type if the .metadata file
           // exists and contains a type that we don't understand, or doesn't contain a type.
@@ -189,10 +189,6 @@ class CreateCommand extends CreateBase {
     }
 
     validateOutputDirectoryArg();
-    final String flutterRoot = getFlutterRoot();
-
-    final Directory projectDir = globals.fs.directory(argResults.rest.first);
-    final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
 
     String sampleCode;
     if (argResults['sample'] != null) {
@@ -223,11 +219,10 @@ class CreateCommand extends CreateBase {
         exitCode: 2);
     }
 
-    final String organization = await getOrganization(projectDir);
+    final String organization = await getOrganization();
 
     final bool overwrite = boolArg('overwrite');
-    validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: overwrite);
-    final String projectName = getProjectName(projectDirPath);
+    validateProjectDir(overwrite: overwrite);
 
     if (boolArg('with-driver-test')) {
       globals.printError(
