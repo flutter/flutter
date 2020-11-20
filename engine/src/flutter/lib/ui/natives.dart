@@ -4,8 +4,8 @@
 
 // TODO(dnfield): remove unused_element ignores when https://github.com/dart-lang/sdk/issues/35164 is resolved.
 
-// @dart = 2.10
 
+// @dart = 2.12
 part of dart.ui;
 
 // Corelib 'print' implementation.
