@@ -1,0 +1,54 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// @dart = 2.6
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
+
+import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
+
+import 'common.dart';
+
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+void testMain() {
+  group('LayerScene', () {
+    setUpAll(() async {
+      await ui.webOnlyInitializePlatform();
+    });
+
+    test('toImage returns an image', () async {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      expect(recorder, isA<CkPictureRecorder>());
+
+      final ui.Canvas canvas = ui.Canvas(recorder);
+      expect(canvas, isA<CanvasKitCanvas>());
+
+      final ui.Paint paint = ui.Paint();
+      expect(paint, isA<CkPaint>());
+      paint.color = ui.Color.fromARGB(255, 255, 0, 0);
+
+      // Draw a red circle.
+      canvas.drawCircle(ui.Offset(20, 20), 10, paint);
+
+      final ui.Picture picture = recorder.endRecording();
+      expect(picture, isA<CkPicture>());
+
+      final ui.SceneBuilder builder = ui.SceneBuilder();
+      expect(builder, isA<LayerSceneBuilder>());
+
+      builder.pushOffset(0, 0);
+      builder.addPicture(ui.Offset(0, 0), picture);
+
+      final ui.Scene scene = builder.build();
+
+      final ui.Image sceneImage = await scene.toImage(100, 100);
+      expect(sceneImage, isA<CkImage>());
+    });
+  // TODO: https://github.com/flutter/flutter/issues/60040
+  }, skip: isIosSafari);
+}
