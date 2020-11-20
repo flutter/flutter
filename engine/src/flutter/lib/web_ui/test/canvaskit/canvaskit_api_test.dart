@@ -20,13 +20,7 @@ void main() {
 
 void testMain() {
   group('CanvasKit API', () {
-    setUpAll(() async {
-      await ui.webOnlyInitializePlatform();
-    });
-
-    test('Using CanvasKit', () {
-      expect(useCanvasKit, true);
-    });
+    setUpCanvasKitTest();
 
     _blendModeTests();
     _paintStyleTests();

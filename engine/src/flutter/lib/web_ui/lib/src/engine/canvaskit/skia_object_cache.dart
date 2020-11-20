@@ -143,7 +143,7 @@ abstract class ManagedSkiaObject<T extends Object> extends SkiaObject<T> {
     if (browserSupportsFinalizationRegistry) {
       // If FinalizationRegistry is supported we will only ever need the
       // default object, as we know precisely when to delete it.
-      skObjectFinalizationRegistry.register(this, defaultObject);
+      Collector.instance.register(this, defaultObject as SkDeletable);
     } else {
       // If FinalizationRegistry is _not_ supported we may need to delete
       // and resurrect the object multiple times before deleting it forever.
@@ -228,7 +228,7 @@ abstract class OneShotSkiaObject<T extends Object> extends SkiaObject<T> {
 
   OneShotSkiaObject(T skObject) : this.rawSkiaObject = skObject {
     if (browserSupportsFinalizationRegistry) {
-      skObjectFinalizationRegistry.register(this, skObject);
+      Collector.instance.register(this, skObject as SkDeletable);
     } else {
       SkiaObjects.manageOneShot(this);
     }
@@ -261,24 +261,50 @@ abstract class StackTraceDebugger {
   StackTrace get debugStackTrace;
 }
 
+/// A function that restores a Skia object that was temporarily deleted.
+typedef Resurrector<T> = T Function();
+
 /// Uses reference counting to manage the lifecycle of a Skia object owned by a
 /// wrapper object.
 ///
-/// When the wrapper is garbage collected, decrements the refcount (only in
-/// browsers that support weak references).
+/// The [ref] method can be used to increment the refcount to tell this box to
+/// keep the underlying Skia object alive.
 ///
-/// The [delete] method can be used to eagerly decrement the refcount before the
-/// wrapper is garbage collected.
+/// The [unref] method can be used to decrement the refcount to tell this box
+/// that a wrapper object no longer needs it. When the refcount drops to zero
+/// the underlying Skia object is deleted permanently (see [isDeletedPermanently]).
 ///
-/// The [delete] method may be called any number of times. The box
-/// will only delete the object once.
-class SkiaObjectBox<R extends StackTraceDebugger, T> {
-  SkiaObjectBox(R debugReferrer, this.skiaObject) : _skDeletable = skiaObject as SkDeletable {
+/// In addition to ref counting, this object is also managed by GC. In browsers
+/// that support [SkFinalizationRegistry] the underlying Skia object is deleted
+/// permanently when no JavaScript objects have references to this box. In
+/// browsers that do not support [SkFinalizationRegistry] the underlying Skia
+/// object may undergo several cycles of temporary deletions and resurrections
+/// prior to being deleted permanently. A temporary deletion may effectively
+/// be permanent if this object is garbage collected. This is safe because a
+/// temporarily deleted object has no C++ resources to collect.
+class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends SkiaObject<T> {
+  /// Creates an object box that's memory-managed using [SkFinalizationRegistry].
+  ///
+  /// This constructor must only be used if [browserSupportsFinalizationRegistry] is true.
+  SkiaObjectBox(R debugReferrer, T initialValue) : _resurrector = null {
+    assert(browserSupportsFinalizationRegistry);
+    _initialize(debugReferrer, initialValue);
+    Collector.instance.register(this, _skDeletable!);
+  }
+
+  /// Creates an object box that's memory-managed using a [Resurrector].
+  ///
+  /// This constructor must only be used if [browserSupportsFinalizationRegistry] is false.
+  SkiaObjectBox.resurrectable(R debugReferrer, T initialValue, this._resurrector) {
+    assert(!browserSupportsFinalizationRegistry);
+    _initialize(debugReferrer, initialValue);
+    SkiaObjects.manageExpensive(this);
+  }
+
+  void _initialize(R debugReferrer, T initialValue) {
+    _update(initialValue);
     if (assertionsEnabled) {
       debugReferrers.add(debugReferrer);
-    }
-    if (browserSupportsFinalizationRegistry) {
-      boxRegistry.register(this, _skDeletable);
     }
     assert(refCount == debugReferrers.length);
   }
@@ -312,25 +338,57 @@ class SkiaObjectBox<R extends StackTraceDebugger, T> {
   ///
   /// Do not store this value outside this box. It is memory-managed by
   /// [SkiaObjectBox]. Storing it may result in use-after-free bugs.
-  final T skiaObject;
-  final SkDeletable _skDeletable;
+  T? rawSkiaObject;
+  SkDeletable? _skDeletable;
+  Resurrector<T>? _resurrector;
 
-  /// Whether this object has been deleted.
-  bool get isDeleted => _isDeleted;
-  bool _isDeleted = false;
+  void _update(T? newSkiaObject) {
+    rawSkiaObject = newSkiaObject;
+    _skDeletable = newSkiaObject as SkDeletable?;
+  }
 
-  /// Deletes Skia objects when their wrappers are garbage collected.
-  static final SkObjectFinalizationRegistry boxRegistry =
-      SkObjectFinalizationRegistry(js.allowInterop((SkDeletable deletable) {
-    deletable.delete();
-  }));
+  @override
+  T get skiaObject => rawSkiaObject ?? _doResurrect();
+
+  T _doResurrect() {
+    assert(!browserSupportsFinalizationRegistry);
+    assert(_resurrector != null);
+    assert(!_isDeletedPermanently, 'Cannot use deleted object.');
+    _update(_resurrector!());
+    SkiaObjects.manageExpensive(this);
+    return skiaObject;
+  }
+
+  @override
+  void delete() {
+    _skDeletable?.delete();
+  }
+
+  @override
+  void didDelete() {
+    assert(!browserSupportsFinalizationRegistry);
+    _update(null);
+  }
+
+  /// Whether this object has been deleted permanently.
+  ///
+  /// If this is true it will remain true forever, and the Skia object is no
+  /// longer resurrectable.
+  ///
+  /// See also [isDeletedTemporarily].
+  bool get isDeletedPermanently => _isDeletedPermanently;
+  bool _isDeletedPermanently = false;
+
+  /// Whether the underlying [rawSkiaObject] has been deleted, but it may still
+  /// be resurrected (see [SkiaObjectBox.resurrectable]).
+  bool get isDeletedTemporarily => rawSkiaObject == null && !_isDeletedPermanently;
 
   /// Increases the reference count of this box because a new object began
   /// sharing ownership of the underlying [skiaObject].
   ///
   /// Clones must be [dispose]d when finished.
   void ref(R debugReferrer) {
-    assert(!_isDeleted, 'Cannot increment ref count on a deleted handle.');
+    assert(!_isDeletedPermanently, 'Cannot increment ref count on a deleted handle.');
     assert(_refCount > 0);
     assert(
       debugReferrers.add(debugReferrer),
@@ -347,7 +405,7 @@ class SkiaObjectBox<R extends StackTraceDebugger, T> {
   /// If this causes the reference count to drop to zero, deletes the
   /// [skObject].
   void unref(R debugReferrer) {
-    assert(!_isDeleted, 'Attempted to unref an already deleted Skia object.');
+    assert(!_isDeletedPermanently, 'Attempted to unref an already deleted Skia object.');
     assert(
       debugReferrers.remove(debugReferrer),
       'Attempted to decrement ref count by the same referrer more than once.',
@@ -355,8 +413,19 @@ class SkiaObjectBox<R extends StackTraceDebugger, T> {
     _refCount -= 1;
     assert(refCount == debugReferrers.length);
     if (_refCount == 0) {
-      _isDeleted = true;
-      _scheduleSkObjectCollection(_skDeletable);
+      // The object may be null because it was deleted temporarily, i.e. it was
+      // expecting the possibility of resurrection.
+      if (_skDeletable != null) {
+        if (browserSupportsFinalizationRegistry) {
+          Collector.instance.collect(_skDeletable!);
+        } else {
+          _skDeletable!.delete();
+        }
+      }
+      rawSkiaObject = null;
+      _skDeletable = null;
+      _resurrector = null;
+      _isDeletedPermanently = true;
     }
   }
 }
