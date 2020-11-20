@@ -55,8 +55,14 @@ class CheckboxThemeData with Diagnosticable {
 
   /// {@macro flutter.material.checkbox.checkColor}
   ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
   /// If specified, overrides the default value of [Checkbox.checkColor].
-  final Color? checkColor;
+  final MaterialStateProperty<Color?>? checkColor;
 
   /// The color for the checkbox's [Material].
   ///
@@ -89,7 +95,7 @@ class CheckboxThemeData with Diagnosticable {
   CheckboxThemeData copyWith({
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     MaterialStateProperty<Color?>? fillColor,
-    Color? checkColor,
+    MaterialStateProperty<Color?>? checkColor,
     MaterialStateProperty<Color?>? overlayColor,
     double? splashRadius,
     MaterialTapTargetSize? materialTapTargetSize,
@@ -113,7 +119,7 @@ class CheckboxThemeData with Diagnosticable {
     return CheckboxThemeData(
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       fillColor: _lerpProperties<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
-      checkColor: Color.lerp(a?.checkColor, b?.checkColor, t),
+      checkColor: _lerpProperties<Color?>(a?.checkColor, b?.checkColor, t, Color.lerp),
       overlayColor: _lerpProperties<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
@@ -155,7 +161,7 @@ class CheckboxThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('checkColor', checkColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('checkColor', checkColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));

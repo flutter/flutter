@@ -358,6 +358,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         ?? themeData.checkboxTheme.overlayColor?.resolve(<MaterialState>{MaterialState.hovered})
         ?? themeData.hoverColor;
 
+    final Color effectiveCheckColor =  widget.checkColor
+      ?? themeData.checkboxTheme.checkColor?.resolve(_states)
+      ?? const Color(0xFFFFFFFF);
+
     return FocusableActionDetector(
       actions: _actionMap,
       focusNode: widget.focusNode,
@@ -372,7 +376,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             value: widget.value,
             tristate: widget.tristate,
             activeColor: effectiveActiveColor,
-            checkColor: widget.checkColor ?? themeData.checkboxTheme.checkColor ?? const Color(0xFFFFFFFF),
+            checkColor: effectiveCheckColor,
             inactiveColor: effectiveInactiveColor,
             focusColor: effectiveFocusOverlayColor,
             hoverColor: effectiveHoverOverlayColor,

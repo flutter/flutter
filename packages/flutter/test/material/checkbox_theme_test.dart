@@ -52,7 +52,7 @@ void main() {
     CheckboxThemeData(
       mouseCursor: MaterialStateProperty.all(SystemMouseCursors.click),
       fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
-      checkColor: const Color(0xfffffff1),
+      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
       overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
       splashRadius: 1.0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -66,7 +66,7 @@ void main() {
 
     expect(description[0], 'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(click))');
     expect(description[1], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
-    expect(description[2], 'checkColor: Color(0xfffffff1)');
+    expect(description[1], 'checkColor: MaterialStateProperty.all(Color(0xfffffff1))');
     expect(description[3], 'overlayColor: MaterialStateProperty.all(Color(0xfffffff2))');
     expect(description[4], 'splashRadius: 1.0');
     expect(description[5], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
@@ -79,9 +79,10 @@ void main() {
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color defaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff1);
-    const Color checkColor = Color(0xfffffff2);
-    const Color focusOverlayColor = Color(0xfffffff3);
-    const Color hoverOverlayColor = Color(0xfffffff4);
+    const Color defaultCheckColor = Color(0xfffffff2);
+    const Color focusedCheckColor = Color(0xfffffff3);
+    const Color focusOverlayColor = Color(0xfffffff4);
+    const Color hoverOverlayColor = Color(0xfffffff5);
     const double splashRadius = 1.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity(vertical: 1.0, horizontal: 1.0);
@@ -97,7 +98,12 @@ void main() {
               }
               return defaultFillColor;
             }),
-            checkColor: checkColor,
+            checkColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.focused)) {
+                return focusedCheckColor;
+              }
+              return defaultCheckColor;
+            }),
             overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return focusOverlayColor;
@@ -133,7 +139,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox(selected: true));
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
-    expect(_getCheckboxMaterial(tester), paints..path(color: checkColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: defaultCheckColor));
 
     // Checkbox with hover.
     await tester.pumpWidget(buildCheckbox());
@@ -143,9 +149,10 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..circle(color: hoverOverlayColor));
 
     // Checkbox with focus.
-    await tester.pumpWidget(buildCheckbox(autofocus: true));
+    await tester.pumpWidget(buildCheckbox(autofocus: true, selected: true));
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
+    expect(_getCheckboxMaterial(tester), paints..path(color: focusedCheckColor));
   });
 
   testWidgets('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
@@ -182,7 +189,7 @@ void main() {
                 }
                 return themeDefaultFillColor;
               }),
-              checkColor: themeCheckColor,
+              checkColor: MaterialStateProperty.all(themeCheckColor),
               overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.focused)) {
                   return themeFocusOverlayColor;
