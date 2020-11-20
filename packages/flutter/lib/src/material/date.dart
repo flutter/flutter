@@ -14,12 +14,14 @@ class DateUtils {
   // prevents instantiation and extension.
   DateUtils._();
 
-  /// Returns a [DateTime] with just the date of the original, but no time set.
+  /// Returns a [DateTime] with the date of the original, but time set to
+  /// midnight.
   static DateTime dateOnly(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
 
-  /// Returns a [DateTimeRange] with the dates of the original without any times set.
+  /// Returns a [DateTimeRange] with the dates of the original, but with times
+  /// set to midnight.
   static DateTimeRange datesOnly(DateTimeRange range) {
     return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
   }
@@ -33,7 +35,7 @@ class DateUtils {
       dateA?.day == dateB?.day;
   }
 
-  /// Returns true if the two [DateTime] objects have the same month, and
+  /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
   static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
     return
@@ -55,23 +57,23 @@ class DateUtils {
     return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
   }
 
-  /// Returns a [DateTime] with the added number of months and truncates any day
-  /// and time information.
+  /// Returns a [DateTime] that is [monthDate] with the added number
+  /// of months and the day set to 1 and time set to midnight.
   ///
   /// For example:
   /// ```
   /// DateTime date = DateTime(year: 2019, month: 1, day: 15);
-  /// DateTime futureDate = _addMonthsToMonthDate(date, 3);
+  /// DateTime futureDate = DateUtils.addMonthsToMonthDate(date, 3);
   /// ```
   ///
   /// `date` would be January 15, 2019.
-  /// `futureDate` would be April 1, 2019 since it adds 3 months and truncates
-  /// any additional date information.
+  /// `futureDate` would be April 1, 2019 since it adds 3 months.
   static  DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
     return DateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 
-  /// Returns a [DateTime] with the added number of days and no time set.
+  /// Returns a [DateTime] with the added number of days and time set to
+  /// midnight.
   static DateTime addDaysToDate(DateTime date, int days) {
     return DateTime(date.year, date.month, date.day + days);
   }
@@ -180,8 +182,11 @@ enum DatePickerMode {
 /// to specify allowable days in the date picker.
 typedef SelectableDayPredicate = bool Function(DateTime day);
 
-/// Encapsulates a start and end [DateTime] that represent the range of dates
-/// between them.
+/// Encapsulates a start and end [DateTime] that represent the range of dates.
+///
+/// The range includes the [start] and [end] dates. The [start] and [end] dates
+/// may be equal to indicate a date range of a single day. The [start] date must
+/// not be after the [end] date.
 ///
 /// See also:
 ///  * [showDateRangePicker], which displays a dialog that allows the user to
@@ -189,13 +194,12 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 @immutable
 class DateTimeRange {
   /// Creates a date range for the given start and end [DateTime].
-  ///
-  /// [start] and [end] must be non-null.
-  const DateTimeRange({
+  DateTimeRange({
     required this.start,
     required this.end,
   }) : assert(start != null),
-       assert(end != null);
+       assert(end != null),
+       assert(!start.isAfter(end));
 
   /// The start of the range of dates.
   final DateTime start;

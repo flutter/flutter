@@ -114,7 +114,7 @@ void main() {
       expect(find.text('April 2020'), findsOneWidget);
       expect(displayedMonth, equals(DateTime(2020, DateTime.april, 1)));
       expect(selectedDate, equals(DateTime(2020, DateTime.april, 25)));
-      // There isn't a 31 in April so there shouldn't be one if it is showing April
+      // There isn't a 31 in April so there shouldn't be one if it is showing April.
       expect(find.text('31'), findsNothing);
     });
 
@@ -188,7 +188,7 @@ void main() {
       await tester.tap(find.text('20'));
       expect(selectedDate, isNull);
 
-      // This one is just right
+      // This one is just right.
       await tester.tap(find.text('15'));
       expect(selectedDate, validDate);
     });
@@ -235,7 +235,7 @@ void main() {
 
       await tester.tap(find.text('2018'));
       await tester.pumpAndSettle();
-      // Nothing should have changed
+      // Nothing should have changed.
       expect(displayedMonth, isNull);
     });
 
@@ -252,7 +252,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('2016'));
       await tester.pumpAndSettle();
-      // Month should be clamped to June as the range starts at June 2016
+      // Month should be clamped to June as the range starts at June 2016.
       expect(find.text('June 2016'), findsOneWidget);
       expect(displayedMonth, DateTime(2016, DateTime.june, 1));
     });
@@ -270,7 +270,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('2019'));
       await tester.pumpAndSettle();
-      // Month should be clamped to January as the range ends at January 2019
+      // Month should be clamped to January as the range ends at January 2019.
       expect(find.text('January 2019'), findsOneWidget);
       expect(displayedMonth, DateTime(2019, DateTime.january, 1));
     });
@@ -313,7 +313,7 @@ void main() {
       const Color todayColor = Color(0xff2196f3); // default primary color
       expect(
           Material.of(tester.element(find.text('2'))),
-          // The current day should be painted with a circle outline
+          // The current day should be painted with a circle outline.
           paints
             ..circle(color: todayColor,
                 style: PaintingStyle.stroke,
@@ -356,7 +356,7 @@ void main() {
 
       // Month should show as January 2020
       expect(find.text('January 2020'), findsOneWidget);
-      // Selected date should be painted with a colored circle
+      // Selected date should be painted with a colored circle.
       expect(
           Material.of(tester.element(find.text('21'))),
           paints..circle(color: selectedColor, style: PaintingStyle.fill)
@@ -370,13 +370,13 @@ void main() {
         lastDate: lastDate,
         onDateChanged: (DateTime value) {},
       ));
-      // Wait for the page scroll animation to finish
+      // Wait for the page scroll animation to finish.
       await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
       // Month should show as February 1976
       expect(find.text('January 2020'), findsNothing);
       expect(find.text('February 1976'), findsOneWidget);
-      // Selected date should be painted with a colored circle
+      // Selected date should be painted with a colored circle.
       expect(
           Material.of(tester.element(find.text('23'))),
           paints..circle(color: selectedColor, style: PaintingStyle.fill)
@@ -394,7 +394,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Should be in year mode
+      // Should be in year mode.
       expect(find.text('January 2016'), findsOneWidget); // Day/year selector
       expect(find.text('15'), findsNothing); // day 15 in grid
       expect(find.text('2016'), findsOneWidget); // 2016 in year grid
@@ -405,7 +405,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Should be in day mode
+      // Should be in day mode.
       expect(find.text('January 2016'), findsOneWidget); // Day/year selector
       expect(find.text('15'), findsOneWidget); // day 15 in grid
       expect(find.text('2016'), findsNothing); // 2016 in year grid
@@ -416,11 +416,11 @@ void main() {
         await tester.pumpWidget(calendarDatePicker());
         expect(find.text('2016'), findsNothing);
         expect(find.text('January 2016'), findsOneWidget);
-        // Navigate to the year selector and activate it
+        // Navigate to the year selector and activate it.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
-        // The years should be visible
+        // The years should be visible.
         expect(find.text('2016'), findsOneWidget);
         expect(find.text('January 2016'), findsOneWidget);
       });
@@ -429,7 +429,7 @@ void main() {
           'Can navigate next/previous months', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker());
         expect(find.text('January 2016'), findsOneWidget);
-        // Navigate to the previous month button and activate it twice
+        // Navigate to the previous month button and activate it twice.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -439,7 +439,7 @@ void main() {
         // Should be showing Nov 2015
         expect(find.text('November 2015'), findsOneWidget);
 
-        // Navigate to the next month button and activate it four times
+        // Navigate to the next month button and activate it four times.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
@@ -449,7 +449,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
-        // Should be on Mar 2016
+        // Should be on Mar 2016.
         expect(find.text('March 2016'), findsOneWidget);
       });
 
@@ -459,13 +459,13 @@ void main() {
         await tester.pumpWidget(calendarDatePicker(
           onDateChanged: (DateTime date) => selectedDate = date,
         ));
-        // Navigate to the grid
+        // Navigate to the grid.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
 
-        // Navigate from Jan 15 to Jan 18 with arrow keys
+        // Navigate from Jan 15 to Jan 18 with arrow keys.
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
@@ -475,11 +475,11 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pumpAndSettle();
 
-        // Activate it
+        // Activate it.
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
 
-        // Should have selected Jan 18
+        // Should have selected Jan 18.
         expect(selectedDate, DateTime(2016, DateTime.january, 18));
       });
 
@@ -489,7 +489,7 @@ void main() {
         await tester.pumpWidget(calendarDatePicker(
           onDateChanged: (DateTime date) => selectedDate = date,
         ));
-        // Navigate to the grid
+        // Navigate to the grid.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -502,10 +502,10 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pumpAndSettle();
 
-        // Should have scrolled to Dec 2015
+        // Should have scrolled to Dec 2015.
         expect(find.text('December 2015'), findsOneWidget);
 
-        // Navigate from Dec 31 to Nov 26 with arrow keys
+        // Navigate from Dec 31 to Nov 26 with arrow keys.
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -513,14 +513,14 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pumpAndSettle();
 
-        // Should have scrolled to Nov 2015
+        // Should have scrolled to Nov 2015.
         expect(find.text('November 2015'), findsOneWidget);
 
         // Activate it
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
 
-        // Should have selected Jan 18
+        // Should have selected Jan 18.
         expect(selectedDate, DateTime(2015, DateTime.november, 26));
       });
 
@@ -532,14 +532,14 @@ void main() {
           onDateChanged: (DateTime date) => selectedDate = date,
           textDirection: TextDirection.rtl,
         ));
-        // Navigate to the grid
+        // Navigate to the grid.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pumpAndSettle();
 
-        // Navigate from Jan 15 to 19 with arrow keys
+        // Navigate from Jan 15 to 19 with arrow keys.
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -548,21 +548,21 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pumpAndSettle();
 
-        // Activate it
+        // Activate it.
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
 
-        // Navigate out of the grid and to the OK button
+        // Navigate out of the grid and to the OK button.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pumpAndSettle();
 
-        // Activate OK
+        // Activate OK.
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
 
-        // Should have selected Jan 18
+        // Should have selected Jan 18.
         expect(selectedDate, DateTime(2016, DateTime.january, 19));
       });
     });
@@ -627,13 +627,13 @@ void main() {
 
         await tester.pumpWidget(calendarDatePicker());
 
-        // Year mode drop down button
+        // Year mode drop down button.
         expect(tester.getSemantics(find.text('January 2016')), matchesSemantics(
           label: 'Select year',
           isButton: true,
         ));
 
-        // Prev/Next month buttons
+        // Prev/Next month buttons.
         expect(tester.getSemantics(previousMonthIcon), matchesSemantics(
           label: 'Previous month December 2015',
           isButton: true,
@@ -651,7 +651,7 @@ void main() {
           isFocusable: true,
         ));
 
-        // Day grid
+        // Day grid.
         expect(tester.getSemantics(find.text('1')), matchesSemantics(
           label: '1, Friday, January 1, 2016',
           hasTapAction: true,
@@ -813,13 +813,13 @@ void main() {
           initialCalendarMode: DatePickerMode.year,
         ));
 
-        // Year mode drop down button
+        // Year mode drop down button.
         expect(tester.getSemantics(find.text('January 2016')), matchesSemantics(
           label: 'Select year',
           isButton: true,
         ));
 
-        // Year grid only shows 2010 - 2024
+        // Year grid only shows 2010 - 2024.
         for (int year = 2010; year <= 2024; year++) {
           expect(tester.getSemantics(find.text('$year')), matchesSemantics(
             label: '$year',

@@ -214,26 +214,21 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return null;
   }
 
-  bool _updateDate(String? text) {
+  void _updateDate(String? text, ValueChanged<DateTime>? callback) {
     final DateTime? date = _parseDate(text);
     if (_isValidAcceptableDate(date)) {
       _selectedDate = date;
       _inputText = text;
-      return true;
+      callback?.call(_selectedDate!);
     }
-    return false;
   }
 
   void _handleSaved(String? text) {
-    if (_updateDate(text)) {
-      widget.onDateSaved?.call(_selectedDate!);
-    }
+    _updateDate(text, widget.onDateSaved);
   }
 
   void _handleSubmitted(String text) {
-    if (_updateDate(text)) {
-      widget.onDateSubmitted?.call(_selectedDate!);
-    }
+    _updateDate(text, widget.onDateSubmitted);
   }
 
   @override
