@@ -66,7 +66,7 @@ class DeviceReloadReport {
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
-    String target,
+    @required String target,
     @required DebuggingOptions debuggingOptions,
     this.benchmarkMode = false,
     this.applicationBinary,
@@ -295,15 +295,6 @@ class HotRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
   }) async {
-    if (!globals.fs.isFileSync(mainPath)) {
-      String message = 'Tried to run $mainPath, but that file does not exist.';
-      if (target == null) {
-        message += '\nConsider using the -t option to specify the Dart file to start.';
-      }
-      globals.printError(message);
-      return 1;
-    }
-
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
