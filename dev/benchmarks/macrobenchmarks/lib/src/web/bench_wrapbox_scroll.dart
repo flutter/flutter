@@ -96,7 +96,6 @@ class ProductPreview extends StatelessWidget {
       onTap: () => print('tap'),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        // crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             margin: const EdgeInsets.all(23),
@@ -167,7 +166,6 @@ class ProductOption extends StatelessWidget {
       child: Text(
         optionText,
         maxLines: 1,
-        // style: Theme.of(context).textTheme.bodyText2,
         textAlign: TextAlign.center,
         overflow: TextOverflow.ellipsis,
       ),
