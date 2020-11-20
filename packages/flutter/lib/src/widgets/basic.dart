@@ -4980,11 +4980,6 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.clipBehavior = Clip.none,
-    @Deprecated(
-      'New code should never set this to true to calculate the intrinsics correctly. '
-      'This feature was deprecated after v1.24.0-7.0.pre.'
-    )
-    this.useLegacyMethodToCalculateIntrinsics = false,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null), super(key: key, children: children);
 
@@ -5125,13 +5120,6 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
-  /// {@macro flutter.rendering.RenderWrap.useLegacyMethodToCalculateIntrinsics}
-  @Deprecated(
-    'New code should never set this to true to calculate the intrinsics correctly. '
-    'This feature was deprecated after v1.24.0-7.0.pre.'
-  )
-  final bool useLegacyMethodToCalculateIntrinsics;
-
   @override
   RenderWrap createRenderObject(BuildContext context) {
     return RenderWrap(
@@ -5144,7 +5132,6 @@ class Wrap extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.maybeOf(context),
       verticalDirection: verticalDirection,
       clipBehavior: clipBehavior,
-      useLegacyMethodToCalculateIntrinsics: useLegacyMethodToCalculateIntrinsics,
     );
   }
 
@@ -5159,8 +5146,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..verticalDirection = verticalDirection
-      ..clipBehavior = clipBehavior
-      ..useLegacyMethodToCalculateIntrinsics = useLegacyMethodToCalculateIntrinsics;
+      ..clipBehavior = clipBehavior;
   }
 
   @override
