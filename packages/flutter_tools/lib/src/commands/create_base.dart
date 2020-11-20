@@ -29,7 +29,12 @@ const List<String> _kAvailablePlatforms = <String>[
   'web',
 ];
 
-/// Mixin contains methods that are shared with `flutter create` commands.
+const String _kDefaultPlatformArgumentHelp =
+    'Required: The platforms supported by this project. '
+    'Platform folders (e.g. android/) will be generated in the target project. '
+    'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
+
+/// Common behavior for `flutter create` commands.
 abstract class CreateBase extends FlutterCommand {
   CreateBase() {
     argParser.addFlag(
@@ -103,17 +108,16 @@ abstract class CreateBase extends FlutterCommand {
   /// Adds a `--platforms` argument.
   ///
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
+  @protected
   void addPlatformsOptions({String customHelp}) {
     argParser.addMultiOption('platforms',
-        help: customHelp ??
-            'Required: The platforms supported by this project. '
-                'Platform folders (e.g. android/) will be generated in the target project. '
-                'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
+        help: customHelp ?? _kDefaultPlatformArgumentHelp,
         defaultsTo: _kAvailablePlatforms,
         allowed: _kAvailablePlatforms);
   }
 
   /// Throw with exit code 2 if the output directory is invalid.
+  @protected
   void validateOutputDirectoryArg() {
     if (argResults.rest.isEmpty) {
       throwToolExit('No option specified for the output directory.\n$usage',
@@ -135,6 +139,7 @@ abstract class CreateBase extends FlutterCommand {
   /// Gets the flutter root directory.
   ///
   /// Throw with exit code 2 if the flutter sdk installed is invalid.
+  @protected
   String getFlutterRoot() {
     if (Cache.flutterRoot == null) {
       throwToolExit(
@@ -174,6 +179,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// Throws assertion if projectDir does not exist or empty.
   /// Returns null if no project type can be determined.
+  @protected
   FlutterProjectType determineTemplateType(Directory projectDir) {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
     final File metadataFile = globals.fs
@@ -208,6 +214,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// If `--org` is specified in the command, returns that directly.
   /// If `--org` is not specified, returns the organization from the existing project.
+  @protected
   Future<String> getOrganization(Directory projectDir) async {
     String organization = stringArg('org');
     if (!argResults.wasParsed('org')) {
@@ -270,6 +277,7 @@ abstract class CreateBase extends FlutterCommand {
   /// Gets the project name based.
   ///
   /// Use the current directory path name if the `--project-name` is not specified explicitly.
+  @protected
   String getProjectName(String projectDirPath) {
     final String projectName =
         stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
@@ -282,6 +290,8 @@ abstract class CreateBase extends FlutterCommand {
     return projectName;
   }
 
+  /// Creates a template to use for [renderTemplate].
+  @protected
   Map<String, dynamic> createTemplateContext({
     String organization,
     String projectName,
@@ -349,6 +359,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// `templateName` should match one of directory names under flutter_tools/template/.
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
+  @protected
   Future<int> renderTemplate(
       String templateName, Directory directory, Map<String, dynamic> context,
       {bool overwrite = false}) async {
@@ -374,6 +385,7 @@ abstract class CreateBase extends FlutterCommand {
   /// Generate application project in the `directory` using `templateContext`.
   ///
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
+  @protected
   Future<int> generateApp(
       Directory directory, Map<String, dynamic> templateContext,
       {bool overwrite = false, bool pluginExampleApp = false}) async {
@@ -422,9 +434,12 @@ abstract class CreateBase extends FlutterCommand {
     return null;
   }
 
+  /// Creates an android identifier.
+  ///
+  /// Android application ID is specified in: https://developer.android.com/studio/build/application-id
+  /// All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
+  @protected
   String createAndroidIdentifier(String organization, String name) {
-    // Android application ID is specified in: https://developer.android.com/studio/build/application-id
-    // All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^\w\.]');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
@@ -454,8 +469,9 @@ abstract class CreateBase extends FlutterCommand {
     return camelizedName[0].toUpperCase() + camelizedName.substring(1);
   }
 
+  /// Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
+  @protected
   String createUTIIdentifier(String organization, String name) {
-    // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
     name = camelCase(name);
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
@@ -473,6 +489,7 @@ abstract class CreateBase extends FlutterCommand {
     return segments.join('.');
   }
 
+  @protected
   Set<Uri> get templateManifest =>
       _templateManifest ??= _computeTemplateManifest();
   Set<Uri> _templateManifest;
