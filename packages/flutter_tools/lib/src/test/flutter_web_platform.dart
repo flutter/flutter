@@ -32,6 +32,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
 import '../web/chrome.dart';
+import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'flutter_web_goldens.dart';
 import 'test_compiler.dart';
@@ -158,13 +159,13 @@ class FlutterWebPlatform extends PlatformPlugin {
     'dart_stack_trace_mapper.js',
   ));
 
-  /// The precompiled dart sdk.
-  File get _dartSdk => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js',
-  ));
+  File get _dartSdk => _fileSystem.file(_artifacts.getArtifactPath(kDartSdkJsArtifactMap[WebRendererMode.html][
+    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
+  ]));
+
+  File get _dartSdkSourcemaps => _fileSystem.file(_artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[WebRendererMode.html][
+    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
+  ]));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
@@ -221,6 +222,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     } else if (request.requestedUri.path.contains('dart_sdk.js')) {
       return shelf.Response.ok(
         _dartSdk.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else if (request.requestedUri.path.contains('dart_sdk.js.map')) {
+      return shelf.Response.ok(
+        _dartSdkSourcemaps.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
     } else if (request.requestedUri.path
