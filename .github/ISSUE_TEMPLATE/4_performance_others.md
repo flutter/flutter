@@ -50,7 +50,7 @@ assignees: ''
 
 <details>
 
-<summary></summary>
+<summary>Logs</summary>
 
 <!--
      Run `flutter analyze` and attach any output of that command below.
