@@ -468,16 +468,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
       globals.printStatus('This application is not configured to build on the web.');
       globals.printStatus('To add web support to a project, run `flutter create .`.');
     }
-    if (!globals.fs.isFileSync(mainPath)) {
-      String message = 'Tried to run $mainPath, but that file does not exist.';
-      if (target == null) {
-        message +=
-            '\nConsider using the -t option to specify the Dart file to start.';
-      }
-      globals.printError(message);
-      appFailedToStart();
-      return 1;
-    }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
       'Launching ${globals.fsUtils.getDisplayPath(target)} '
