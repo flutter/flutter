@@ -126,7 +126,7 @@ class _WebGlRenderer implements _GlRenderer {
     final String fragmentShader = _writeVerticesFragmentShader();
     _GlContext gl = _GlContextCache.createGlContext(widthInPixels, heightInPixels)!;
 
-    _GlProgram glProgram = gl.useAndCacheProgram(vertexShader, fragmentShader)!;
+    _GlProgram glProgram = gl.useAndCacheProgram(vertexShader, fragmentShader);
 
     Object transformUniform = gl.getUniformLocation(glProgram.program,
         'u_ctransform');
@@ -487,7 +487,7 @@ class _GlContext {
           left, top, _widthInPixels, _heightInPixels]);
   }
 
-  _GlProgram? useAndCacheProgram(
+  _GlProgram useAndCacheProgram(
       String vertexShaderSource, String fragmentShaderSource) {
     String cacheKey = '$vertexShaderSource||$fragmentShaderSource';
     _GlProgram? cachedProgram = _programCache[cacheKey];

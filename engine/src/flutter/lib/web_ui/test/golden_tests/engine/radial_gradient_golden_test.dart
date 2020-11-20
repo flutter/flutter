@@ -3,44 +3,17 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
-import 'dart:html' as html;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart';
-
-import 'package:web_engine_tester/golden_tester.dart';
+import 'screenshot.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() async {
-  const double screenWidth = 600.0;
-  const double screenHeight = 800.0;
-  const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-
-  // Commit a recording canvas to a bitmap, and compare with the expected
-  Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
-      {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
-      bool write = false}) async {
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
-    rc.endRecording();
-    rc.apply(engineCanvas, screenRect);
-
-    // Wrap in <flt-scene> so that our CSS selectors kick in.
-    final html.Element sceneElement = html.Element.tag('flt-scene');
-    try {
-      sceneElement.append(engineCanvas.rootElement);
-      html.document.body.append(sceneElement);
-      await matchGoldenFile('$fileName.png', region: region, write: write);
-    } finally {
-      // The page is reused across tests, so remove the element after taking the
-      // golden screenshot.
-      sceneElement.remove();
-    }
-  }
 
   setUp(() async {
     debugEmulateFlutterTesterEnvironment = true;
@@ -51,14 +24,17 @@ void testMain() async {
 
   Future<void> _testGradient(String fileName, Shader shader,
       {Rect paintRect = const Rect.fromLTRB(50, 50, 300, 300),
-      Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300)}) async {
-    final RecordingCanvas rc =
-        RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
+      Rect shaderRect = const Rect.fromLTRB(50, 50, 300, 300),
+      bool write = false,
+      double maxDiffRatePercent = 0,
+      Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
+    final RecordingCanvas rc = RecordingCanvas(region);
     final Paint paint = Paint()..shader = shader;
     final Path path = Path();
     path.addRect(paintRect);
     rc.drawPath(path, paint);
-    await _checkScreenshot(rc, fileName);
+    await canvasScreenshot(rc, fileName, write: write, region: region,
+        maxDiffRatePercent: maxDiffRatePercent);
   }
 
   test('Should draw centered radial gradient.', () async {
@@ -73,7 +49,8 @@ void testMain() async {
               const Color.fromARGB(255, 0, 0, 0),
               const Color.fromARGB(255, 0, 0, 255)
             ]),
-        shaderRect: shaderRect);
+        shaderRect: shaderRect,
+        maxDiffRatePercent: 0.2);
   });
 
   test('Should draw right bottom centered radial gradient.', () async {
@@ -85,7 +62,8 @@ void testMain() async {
           const Color.fromARGB(255, 0, 0, 0),
           const Color.fromARGB(255, 0, 0, 255)
         ]),
-        shaderRect: shaderRect);
+        shaderRect: shaderRect,
+        maxDiffRatePercent: 0.3);
   });
 
   test('Should draw with radial gradient with TileMode.clamp.', () async {
@@ -102,6 +80,46 @@ void testMain() async {
             ],
             <double>[0.0, 1.0],
             TileMode.clamp),
-        shaderRect: shaderRect);
+        shaderRect: shaderRect,
+        maxDiffRatePercent: 0.2);
+  });
+
+  const List<Color> colors = <Color>[
+    Color(0xFF000000),
+    Color(0xFFFF3C38),
+    Color(0xFFFF8C42),
+    Color(0xFFFFF275),
+    Color(0xFF6699CC),
+    Color(0xFF656D78),];
+  const List<double> colorStops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+
+  test('Should draw with radial gradient with TileMode.repeated.', () async {
+    Rect shaderRect = const Rect.fromLTRB(50, 50, 100, 100);
+    await _testGradient(
+        'radial_gradient_tilemode_repeated',
+        Gradient.radial(
+            Offset((shaderRect.left + shaderRect.right) / 2,
+                (shaderRect.top + shaderRect.bottom) / 2),
+            shaderRect.width / 2,
+            colors,
+            colorStops,
+            TileMode.repeated),
+        shaderRect: shaderRect,
+        region: const Rect.fromLTWH(0, 0, 600, 800));
+  });
+
+  test('Should draw with radial gradient with TileMode.mirrored.', () async {
+    Rect shaderRect = const Rect.fromLTRB(50, 50, 100, 100);
+    await _testGradient(
+        'radial_gradient_tilemode_mirror',
+        Gradient.radial(
+            Offset((shaderRect.left + shaderRect.right) / 2,
+                (shaderRect.top + shaderRect.bottom) / 2),
+            shaderRect.width / 2,
+            colors,
+            colorStops,
+            TileMode.mirror),
+        shaderRect: shaderRect,
+        region: const Rect.fromLTWH(0, 0, 600, 800));
   });
 }
