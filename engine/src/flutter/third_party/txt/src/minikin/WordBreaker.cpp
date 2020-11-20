@@ -31,9 +31,19 @@ namespace minikin {
 const uint32_t CHAR_SOFT_HYPHEN = 0x00AD;
 const uint32_t CHAR_ZWJ = 0x200D;
 
-void WordBreaker::setLocale(const icu::Locale& locale) {
+// libtxt extension: avoid the cost of initializing new ICU break iterators
+// by constructing a global iterator using the default locale and then
+// creating a clone for each WordBreaker instance.
+static std::once_flag gLibtxtBreakIteratorInitFlag;
+static icu::BreakIterator* gLibtxtDefaultBreakIterator = nullptr;
+
+void WordBreaker::setLocale() {
   UErrorCode status = U_ZERO_ERROR;
-  mBreakIterator.reset(icu::BreakIterator::createLineInstance(locale, status));
+  std::call_once(gLibtxtBreakIteratorInitFlag, [&status] {
+    gLibtxtDefaultBreakIterator =
+        icu::BreakIterator::createLineInstance(icu::Locale(), status);
+  });
+  mBreakIterator.reset(gLibtxtDefaultBreakIterator->clone());
   // TODO: handle failure status
   if (mText != nullptr) {
     mBreakIterator->setText(&mUText, status);

@@ -405,7 +405,7 @@ BENCHMARK_DEFINE_F(ParagraphFixture, AddStyleRun)(benchmark::State& state) {
   paint.wordSpacing = text_style.word_spacing;
 
   minikin::LineBreaker breaker;
-  breaker.setLocale(icu::Locale(), nullptr);
+  breaker.setLocale();
   breaker.resize(text.size());
   memcpy(breaker.buffer(), text.data(), text.size() * sizeof(text[0]));
   breaker.setText();
