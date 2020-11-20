@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show window;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -593,7 +591,14 @@ class _PopupMenu<T> extends StatelessWidget {
 
 // Positioning of the menu on the screen.
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
-  _PopupMenuRouteLayout(this.position, this.itemSizes, this.selectedItemIndex, this.textDirection, this.topPadding, this.bottomPadding);
+  _PopupMenuRouteLayout(
+    this.position,
+    this.itemSizes,
+    this.selectedItemIndex,
+    this.textDirection,
+    this.topPadding,
+    this.bottomPadding
+  );
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
   final RelativeRect position;
@@ -611,6 +616,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   // Top padding of unsafe area.
   final double topPadding;
+
   // Bottom padding of unsafe area.
   final double bottomPadding;
 
@@ -623,23 +629,22 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
     return BoxConstraints.loose(
-      constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0) as Size,
+      constraints.biggest - Offset(_kMenuScreenPadding * 2.0,
+        _kMenuScreenPadding * 2.0 + topPadding + bottomPadding) as Size,
     );
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    // size: The safe area size of the overlay.
+    // size: The size of the overlay.
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
 
-    // The safe area size has removed padding, so we should add those back
-    // to compute button size from [position].
-    final double buttonHeight = size.height + topPadding + bottomPadding - position.top - position.bottom;
+    final double buttonHeight = size.height - position.top - position.bottom;
 
     // Find the ideal vertical position.
     // Default vertical position is below the element that generates it.
-    double y = position.top - topPadding + buttonHeight;
+    double y = position.top + buttonHeight;
     if (selectedItemIndex != null && itemSizes != null) {
       double selectedItemOffset = _kMenuVerticalPadding;
       for (int index = 0; index < selectedItemIndex!; index += 1)
@@ -676,9 +681,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     else if (x + childSize.width > size.width - _kMenuScreenPadding)
       x = size.width - childSize.width - _kMenuScreenPadding;
     if (y < _kMenuScreenPadding)
-      y = _kMenuScreenPadding;
+      y = _kMenuScreenPadding + topPadding;
     else if (y + childSize.height > size.height - _kMenuScreenPadding)
-      y = size.height - childSize.height - _kMenuScreenPadding;
+      y = size.height - bottomPadding - _kMenuScreenPadding - childSize.height ;
     return Offset(x, y);
   }
 
@@ -753,23 +758,21 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
     final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
 
-    return SafeArea(
-      child: Builder(
-        builder: (BuildContext context) {
-          final MediaQueryData mediaQuery = MediaQueryData.fromWindow(ui.window);
-          return CustomSingleChildLayout(
-            delegate: _PopupMenuRouteLayout(
-              position,
-              itemSizes,
-              selectedItemIndex,
-              Directionality.of(context),
-              mediaQuery.padding.top,
-              mediaQuery.padding.bottom,
-            ),
-            child: capturedThemes.wrap(menu),
-          );
-        },
-      ),
+    return Builder(
+      builder: (BuildContext context) {
+        final MediaQueryData mediaQuery = MediaQuery.of(context);
+        return CustomSingleChildLayout(
+          delegate: _PopupMenuRouteLayout(
+            position,
+            itemSizes,
+            selectedItemIndex,
+            Directionality.of(context),
+            mediaQuery.padding.top,
+            mediaQuery.padding.bottom,
+          ),
+          child: capturedThemes.wrap(menu),
+        );
+      },
     );
   }
 }
@@ -960,6 +963,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.enabled = true,
     this.shape,
     this.color,
+    this.enableFeedback,
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
@@ -1044,6 +1048,16 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Theme.of(context).cardColor is used.
   final Color? color;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1125,6 +1139,10 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final bool enableFeedback = widget.enableFeedback
+      ?? PopupMenuTheme.of(context).enableFeedback
+      ?? true;
+
     assert(debugCheckHasMaterialLocalizations(context));
 
     if (widget.child != null)
@@ -1133,6 +1151,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
+          enableFeedback: enableFeedback,
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               return UnconstrainedBox(
@@ -1160,6 +1179,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
                 padding: widget.padding,
                 tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
                 onPressed: widget.enabled ? showButtonMenu : null,
+                enableFeedback: enableFeedback,
               ),
             ),
           );

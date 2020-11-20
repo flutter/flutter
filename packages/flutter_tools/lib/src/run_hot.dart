@@ -307,10 +307,6 @@ class HotRunner extends ResidentRunner {
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
-      logger: globals.logger,
-    );
     for (final FlutterDevice device in flutterDevices) {
       // Here we initialize the frontend_server concurrently with the platform
       // build, reducing overall initialization time. This is safe because the first
@@ -331,7 +327,7 @@ class HotRunner extends ResidentRunner {
               getDefaultApplicationKernelPath(
                 trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
               ),
-            packageConfig: packageConfig,
+            packageConfig: debuggingOptions.buildInfo.packageConfig,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
       }
@@ -366,7 +362,6 @@ class HotRunner extends ResidentRunner {
         await device.setupDevFS(
           fsName,
           globals.fs.directory(projectRootPath),
-          packagesFilePath: packagesFilePath,
         ),
     ];
   }
@@ -387,7 +382,8 @@ class HotRunner extends ResidentRunner {
       urisToMonitor: flutterDevices[0].devFS.sources,
       packagesPath: packagesFilePath,
       asyncScanning: hotRunnerConfig.asyncScanning,
-      packageConfig: flutterDevices[0].devFS.lastPackageConfig,
+      packageConfig: flutterDevices[0].devFS.lastPackageConfig
+          ?? debuggingOptions.buildInfo.packageConfig,
     );
     final File entrypointFile = globals.fs.file(mainPath);
     if (!entrypointFile.existsSync()) {
@@ -699,7 +695,6 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         fullRestart: true,
-        nullSafety: usageNullSafety,
         reason: reason,
         fastReassemble: null,
       ).send();
@@ -750,7 +745,6 @@ class HotRunner extends ResidentRunner {
           emulator: emulator,
           fullRestart: false,
           reason: reason,
-          nullSafety: usageNullSafety,
           fastReassemble: null,
         ).send();
       } else {
@@ -759,7 +753,6 @@ class HotRunner extends ResidentRunner {
           sdkName: sdkName,
           emulator: emulator,
           fullRestart: false,
-          nullSafety: usageNullSafety,
           reason: reason,
           fastReassemble: null,
         ).send();
@@ -961,7 +954,6 @@ class HotRunner extends ResidentRunner {
       syncedBytes: updatedDevFS.syncedBytes,
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: devFSTimer.elapsed.inMilliseconds,
-      nullSafety: usageNullSafety,
       fastReassemble: featureFlags.isSingleWidgetReloadEnabled
         ? updatedDevFS.fastReassembleClassName != null
         : null,
@@ -1024,7 +1016,6 @@ class HotRunner extends ResidentRunner {
         emulator: emulator,
         fullRestart: false,
         reason: reason,
-        nullSafety: usageNullSafety,
         fastReassemble: null,
       ).send();
       // Reset devFS lastCompileTime to ensure the file will still be marked
@@ -1217,7 +1208,7 @@ class ProjectFileInvalidator {
       // Initial load.
       assert(urisToMonitor.isEmpty);
       return InvalidationResult(
-        packageConfig: await _createPackageConfig(packagesPath),
+        packageConfig: packageConfig,
         uris: <Uri>[]
       );
     }

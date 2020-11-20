@@ -57,6 +57,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
@@ -85,6 +86,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.VM fakeVM = vm_service.VM(
@@ -194,7 +196,7 @@ void main() {
       compileExpression: anyNamed('compileExpression'),
       getSkSLMethod: anyNamed('getSkSLMethod'),
     )).thenAnswer((Invocation invocation) async { });
-    when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
+    when(mockFlutterDevice.setupDevFS(any, any))
       .thenAnswer((Invocation invocation) async {
         return testUri;
       });
@@ -525,7 +527,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -580,7 +581,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -645,7 +645,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'false',
-      cdKey(CustomDimensions.nullSafety): 'true',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -894,8 +893,8 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
-      listViews,
       setAssetBundlePath,
+      listViews,
       FakeVmServiceRequest(
         method: 'getVM',
         jsonResponse: vm_service.VM.parse(<String, Object>{
@@ -948,6 +947,7 @@ void main() {
       appStartedCompleter: onAppStart,
       connectionInfoCompleter: onConnectionInfo,
     ));
+    await onAppStart.future;
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, false);
@@ -969,12 +969,12 @@ void main() {
         jsonResponse: fakeVM.toJson(),
       ),
       listViews,
+      setAssetBundlePath,
       listViews,
       FakeVmServiceRequest(
         method: 'getVM',
         jsonResponse: fakeVM.toJson(),
       ),
-      setAssetBundlePath,
       const FakeVmServiceRequest(
         method: 'reloadSources',
         args: <String, Object>{
@@ -1057,6 +1057,7 @@ void main() {
       connectionInfoCompleter: onConnectionInfo,
     ));
 
+    await onAppStart.future;
     final OperationResult result = await residentRunner.restart(fullRestart: false);
 
     expect(result.fatal, false);
@@ -1398,7 +1399,6 @@ void main() {
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
       cdKey(CustomDimensions.hotEventEmulator): 'false',
       cdKey(CustomDimensions.hotEventFullRestart): 'true',
-      cdKey(CustomDimensions.nullSafety): 'false',
     })).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
@@ -2503,7 +2503,7 @@ void main() {
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+      globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());

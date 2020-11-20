@@ -360,11 +360,15 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   final VideoPlayerController butterflyController = VideoPlayerController.asset(
     'videos/butterfly.mp4',
     package: 'flutter_gallery_assets',
+    videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
   );
 
   // TODO(sigurdm): This should not be stored here.
   static const String beeUri = 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
-  final VideoPlayerController beeController = VideoPlayerController.network(beeUri);
+  final VideoPlayerController beeController = VideoPlayerController.network(
+    beeUri,
+    videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+  );
 
   final Completer<void> connectedCompleter = Completer<void>();
   bool isSupported = true;

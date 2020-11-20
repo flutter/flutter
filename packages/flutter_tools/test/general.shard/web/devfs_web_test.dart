@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
@@ -591,14 +592,12 @@ void main() {
   }));
 
   test('Can start web server with specified assets', () => testbed.run(() async {
-    globals.fs.file('.packages').writeAsStringSync('\n');
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
-    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
 
     final ResidentCompiler residentCompiler = MockResidentCompiler();
     when(residentCompiler.recompile(
@@ -629,6 +628,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -707,14 +707,12 @@ void main() {
   }));
 
   test('Can start web server with specified assets in sound null safety mode', () => testbed.run(() async {
-    globals.fs.file('.packages').writeAsStringSync('\n');
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
     outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
-    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
 
     final ResidentCompiler residentCompiler = MockResidentCompiler();
     when(residentCompiler.recompile(
@@ -738,13 +736,14 @@ void main() {
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        nullSafetyMode: NullSafetyMode.autodetect,
+        nullSafetyMode: NullSafetyMode.sound,
       ),
       enableDwds: false,
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -757,13 +756,13 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
     final String webPrecompiledSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSdk);
+      .getArtifactPath(Artifact.webPrecompiledSoundSdk);
     final String webPrecompiledSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledSdkSourcemaps);
+      .getArtifactPath(Artifact.webPrecompiledSoundSdkSourcemaps);
     final String webPrecompiledCanvaskitSdk = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdk);
+      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdk);
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts
-      .getArtifactPath(Artifact.webPrecompiledCanvaskitSdkSourcemaps);
+      .getArtifactPath(Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps);
     globals.fs.file(webPrecompiledSdk)
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
@@ -821,13 +820,11 @@ void main() {
   }));
 
   test('Can start web server with hostname any', () => testbed.run(() async {
-    globals.fs.file('.packages').writeAsStringSync('\n');
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
 
     final ResidentCompiler residentCompiler = MockResidentCompiler();
     when(residentCompiler.recompile(
@@ -853,6 +850,7 @@ void main() {
       expressionCompiler: null,
       chromiumLauncher: null,
       nullAssertions: true,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -864,13 +862,11 @@ void main() {
   }));
 
   test('Can start web server with canvaskit enabled', () => testbed.run(() async {
-    globals.fs.file('.packages').writeAsStringSync('\n');
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
 
     final ResidentCompiler residentCompiler = MockResidentCompiler();
     when(residentCompiler.recompile(
@@ -903,6 +899,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -915,13 +912,11 @@ void main() {
   }));
 
   test('Can start web server with auto detect enabled', () => testbed.run(() async {
-    globals.fs.file('.packages').writeAsStringSync('\n');
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
 
     final ResidentCompiler residentCompiler = MockResidentCompiler();
     when(residentCompiler.recompile(
@@ -954,6 +949,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -980,6 +976,7 @@ void main() {
       ),
       false,
       Uri.base,
+      null,
       null,
       testMode: true);
 

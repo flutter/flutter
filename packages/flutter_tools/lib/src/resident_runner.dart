@@ -27,8 +27,6 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
-import 'dart/language_version.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -94,37 +92,21 @@ class FlutterDevice {
     // a warning message and dump some debug information which can be
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
+      // TODO(jonahwilliams): consistently provide these flags across platforms.
       Artifact platformDillArtifact;
-      List<String> extraFrontEndOptions;
+      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
-        extraFrontEndOptions = buildInfo.extraFrontEndOptions;
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
-      } else {
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          globals.fs.file(buildInfo.packagesPath),
-          logger: globals.logger,
-        );
-        final File entrypointFile = globals.fs.file(target);
-        final LanguageVersion languageVersion = determineLanguageVersion(
-          entrypointFile,
-          packageConfig.packageOf(entrypointFile.absolute.uri),
-        );
-        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
-          platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--sound-null-safety',
-          ];
-        } else {
-          platformDillArtifact = Artifact.webPlatformKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--no-sound-null-safety',
-          ];
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
         }
+      } else {
+        assert(false);
       }
 
       generator = ResidentCompiler(
@@ -363,9 +345,8 @@ class FlutterDevice {
 
   Future<Uri> setupDevFS(
     String fsName,
-    Directory rootDirectory, {
-    String packagesFilePath,
-  }) {
+    Directory rootDirectory,
+  ) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmService,
@@ -782,11 +763,6 @@ abstract class ResidentRunner {
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   bool hotMode;
-
-  /// Whether the compiler was instructed to run with null-safety enabled.
-  @protected
-  bool get usageNullSafety => debuggingOptions?.buildInfo
-    ?.extraFrontEndOptions?.any((String option) => option.contains('non-nullable')) ?? false;
 
   /// Returns true if every device is streaming observatory URIs.
   bool get isWaitingForObservatory {

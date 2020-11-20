@@ -123,7 +123,6 @@ Future<void> _buildAssets(
     manifestPath: fuchsiaProject.project.pubspecFile.path,
     packagesPath: fuchsiaProject.project.packagesFile.path,
     assetDirPath: assetDir,
-    includeDefaultFonts: false,
   );
 
   final Map<String, DevFSContent> assetEntries =

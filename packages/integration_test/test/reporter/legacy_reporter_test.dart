@@ -7,42 +7,38 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/src/constants.dart';
 import 'package:path/path.dart' as path;
 
-final String bat = Platform.isWindows ? '.bat' : '';
-final String _flutterBin = path.join(Directory.current.parent.parent.parent.path, 'bin', 'flutter$bat');
-const String _integrationResultsPrefix =
-    'IntegrationTestWidgetsFlutterBinding test results:';
-const String _failureExcerpt = r'Expected: <false>\n  Actual: <true>';
+import 'utils.dart';
+
+final String _bat = Platform.isWindows ? '.bat' : '';
+final String _flutterBin = path.join(Directory.current.parent.parent.parent.path, 'bin', 'flutter$_bat');
+const String _integrationResultsPrefix = 'IntegrationTestWidgetsFlutterBinding test results:';
 
 Future<void> main() async {
-  group('Integration binding result', () {
-    test('when multiple tests pass', () async {
-      final Map<String, dynamic> results = await _runTest(path.join('test', 'data', 'pass_test_script.dart'));
+  test('When multiple tests pass', () async {
+    final Map<String, dynamic> results = await _runTest(path.join('test', 'reporter', 'data', 'pass_test_script.dart'));
 
-      expect(
-          results,
-          equals(<String, dynamic>{
-            'passing test 1': 'success',
-            'passing test 2': 'success',
-          }));
-    });
+    expect(results, hasLength(2));
+    expect(results, containsPair('Passing test 1', _isSuccess));
+    expect(results, containsPair('Passing test 2', _isSuccess));
+  });
 
-    test('when multiple tests fail', () async {
-      final Map<String, dynamic> results = await _runTest(path.join('test', 'data', 'fail_test_script.dart'));
+  test('When multiple tests fail', () async {
+    final Map<String, dynamic> results = await _runTest(path.join('test', 'reporter', 'data', 'fail_test_script.dart'));
 
-      expect(results, hasLength(2));
-      expect(results, containsPair('failing test 1', contains(_failureExcerpt)));
-      expect(results, containsPair('failing test 2', contains(_failureExcerpt)));
-    });
+    expect(results, hasLength(2));
+    expect(results, containsPair('Failing test 1', _isSerializedFailure));
+    expect(results, containsPair('Failing test 2', _isSerializedFailure));
+  });
 
-    test('when one test passes, then another fails', () async {
-      final Map<String, dynamic> results = await _runTest(path.join('test', 'data', 'pass_then_fail_test_script.dart'));
+  test('When one test passes, then another fails', () async {
+    final Map<String, dynamic> results = await _runTest(path.join('test', 'reporter', 'data', 'pass_then_fail_test_script.dart'));
 
-      expect(results, hasLength(2));
-      expect(results, containsPair('passing test', equals('success')));
-      expect(results, containsPair('failing test', contains(_failureExcerpt)));
-    });
+    expect(results, hasLength(2));
+    expect(results, containsPair('Passing test', _isSuccess));
+    expect(results, containsPair('Failing test', _isSerializedFailure));
   });
 }
 
@@ -50,8 +46,7 @@ Future<void> main() async {
 ///
 /// [scriptPath] is relative to the package root.
 Future<Map<String, dynamic>> _runTest(String scriptPath) async {
-  final Process process =
-      await Process.start(_flutterBin, <String>['test', '--machine', scriptPath]);
+  final Process process = await Process.start(_flutterBin, <String>['test', '--machine', scriptPath]);
 
   /// In the test [tearDownAll] block, the test results are encoded into JSON and
   /// are printed with the [_integrationResultsPrefix] prefix.
@@ -77,3 +72,7 @@ Future<Map<String, dynamic>> _runTest(String scriptPath) async {
 
   return jsonDecode(testResults) as Map<String, dynamic>;
 }
+
+bool _isSuccess(Object object) => object == success;
+
+bool _isSerializedFailure(dynamic object) => object.toString().contains(failureExcerpt);
