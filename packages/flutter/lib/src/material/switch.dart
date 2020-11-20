@@ -232,7 +232,14 @@ class Switch extends StatefulWidget {
   ///
   /// If null, then the value of [activeColor] is used in the selected
   /// state and [inactiveThumbColor] in the default state. If that is also null,
-  /// then the value of [SwitchThemeData.thumbColor] is used.
+  /// then the value of [SwitchThemeData.thumbColor] is used. If that is also
+  /// null, then the following colors are used:
+  ///
+  /// | State    | Light theme                       | Dark theme                        |
+  /// |----------|-----------------------------------|-----------------------------------|
+  /// | Default  | `Colors.grey.shade50`             | `Colors.grey.shade400`            |
+  /// | Selected | [ThemeData.toggleableActiveColor] | [ThemeData.toggleableActiveColor] |
+  /// | Disabled | `Colors.grey.shade400`            | `Colors.grey.shade800`            |
   final MaterialStateProperty<Color?>? thumbColor;
 
   /// {@template flutter.material.switch.trackColor}
@@ -247,7 +254,14 @@ class Switch extends StatefulWidget {
   ///
   /// If null, then the value of [activeTrackColor] is used in the selected
   /// state and [inactiveTrackColor] in the default state. If that is also null,
-  /// then the value of [SwitchThemeData.trackColor] is used.
+  /// then the value of [SwitchThemeData.trackColor] is used. If that is also
+  /// null, then the following colors are used:
+  ///
+  /// | State    | Light theme                     | Dark theme                      |
+  /// |----------|---------------------------------|---------------------------------|
+  /// | Default  | `Colors.grey.shade50`           | `Colors.grey.shade400`          |
+  /// | Selected | [activeColor] with alpha `0x80` | [activeColor] with alpha `0x80` |
+  /// | Disabled | `Color(0x52000000)`             | `Colors.white30`                |
   final MaterialStateProperty<Color?>? trackColor;
 
   /// {@template flutter.material.switch.materialTapTargetSize}

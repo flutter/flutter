@@ -256,8 +256,7 @@ class Radio<T> extends StatefulWidget {
   final Color? activeColor;
 
   /// {@template flutter.material.radio.fillColor}
-  /// The color that fills the checkbox when it is checked, in all
-  /// [MaterialState]s.
+  /// The color that fills the radio button, in all [MaterialState]s.
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.selected].
@@ -268,6 +267,10 @@ class Radio<T> extends StatefulWidget {
   ///
   /// If null, then the value of [activeColor] is used in the selected state. If
   /// that is also null, then the value of [RadioThemeData.fillColor] is used.
+  /// If that is also null, then [ThemeData.disabledColor] is used in
+  /// the disabled state, [ThemeData.toggleableActiveColor] is used in the
+  /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
+  /// default state.
   final MaterialStateProperty<Color?>? fillColor;
 
   /// {@template flutter.material.radio.materialTapTargetSize}

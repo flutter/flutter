@@ -146,8 +146,7 @@ class Checkbox extends StatefulWidget {
   final Color? activeColor;
 
   /// {@template flutter.material.checkbox.fillColor}
-  /// The color that fills the checkbox when it is checked, in all
-  /// [MaterialState]s.
+  /// The color that fills the checkbox, in all [MaterialState]s.
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.selected].
@@ -158,7 +157,10 @@ class Checkbox extends StatefulWidget {
   ///
   /// If null, then the value of [activeColor] is used in the selected
   /// state. If that is also null, the value of [CheckboxThemeData.fillColor]
-  /// is used.
+  /// is used. If that is also null, then [ThemeData.disabledColor] is used in
+  /// the disabled state, [ThemeData.toggleableActiveColor] is used in the
+  /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
+  /// default state.
   final MaterialStateProperty<Color?>? fillColor;
 
   /// {@template flutter.material.checkbox.checkColor}
