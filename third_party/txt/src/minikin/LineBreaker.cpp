@@ -68,10 +68,10 @@ const float SHRINKABILITY = 1.0 / 3.0;
 // not precisely match the postBreak width.
 const float LIBTXT_WIDTH_ADJUST = 0.00001;
 
-void LineBreaker::setLocale(const icu::Locale& locale, Hyphenator* hyphenator) {
-  mWordBreaker.setLocale(locale);
-  mLocale = locale;
-  mHyphenator = hyphenator;
+void LineBreaker::setLocale() {
+  mWordBreaker.setLocale();
+  mLocale = icu::Locale();
+  mHyphenator = nullptr;
 }
 
 void LineBreaker::setText() {
