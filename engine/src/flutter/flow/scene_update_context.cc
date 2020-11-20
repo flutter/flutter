@@ -171,7 +171,10 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
                                     const SkSize& size,
                                     std::optional<bool> override_hit_testable) {
   auto* view_holder = ViewHolder::FromId(view_id);
-  FML_DCHECK(view_holder);
+  if (view_holder == nullptr) {
+    FML_LOG(ERROR) << "UpdateView did not find view holder for: " << view_id;
+    return;
+  }
 
   if (size.width() > 0.f && size.height() > 0.f) {
     view_holder->SetProperties(size.width(), size.height(), 0, 0, 0, 0,
@@ -192,6 +195,7 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
 void SceneUpdateContext::CreateView(int64_t view_id,
                                     bool hit_testable,
                                     bool focusable) {
+  FML_LOG(INFO) << "CreateView for view holder: " << view_id;
   zx_handle_t handle = (zx_handle_t)view_id;
   flutter::ViewHolder::Create(handle, nullptr,
                               scenic::ToViewHolderToken(zx::eventpair(handle)),
@@ -207,7 +211,10 @@ void SceneUpdateContext::UpdateView(int64_t view_id,
                                     bool hit_testable,
                                     bool focusable) {
   auto* view_holder = ViewHolder::FromId(view_id);
-  FML_DCHECK(view_holder);
+  if (view_holder == nullptr) {
+    FML_LOG(ERROR) << "UpdateView did not find view holder for: " << view_id;
+    return;
+  }
 
   view_holder->set_hit_testable(hit_testable);
   view_holder->set_focusable(focusable);
