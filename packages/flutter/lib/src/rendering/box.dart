@@ -1781,6 +1781,10 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
+  /// This layout is called "dry" layout as opposed to the regular "wet" layout
+  /// run performed by [performLayout] because it computes the desired size for
+  /// the given constraints without changing any internal state.
+  ///
   /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement [computeDryLayout].
@@ -1814,6 +1818,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// If this algorithm depends on the size of a child, the size of that child
   /// should be obtained using its [getDryLayout] method.
+  ///
+  /// This layout is called "dry" layout as opposed to the regular "wet" layout
+  /// run performed by [performLayout] because it computes the desired size for
+  /// the given constraints without changing any internal state.
   ///
   /// ### When the size cannot be known
   ///
