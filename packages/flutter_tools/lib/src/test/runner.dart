@@ -148,6 +148,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             shellPath: shellPath,
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
+            nullAssertions: nullAssertions,
             buildInfo: buildInfo,
             webMemoryFS: result,
             logger: globals.logger,
