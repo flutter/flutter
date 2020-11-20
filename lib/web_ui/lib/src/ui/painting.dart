@@ -280,7 +280,8 @@ abstract class Gradient extends Shader {
     Float64List? matrix4,
   ]) => engine.useCanvasKit
     ? engine.CkGradientLinear(from, to, colors, colorStops, tileMode, matrix4)
-    : engine.GradientLinear(from, to, colors, colorStops, tileMode, matrix4);
+    : engine.GradientLinear(from, to, colors, colorStops, tileMode,
+        matrix4 == null ? null : engine.toMatrix32(matrix4));
   factory Gradient.radial(
     Offset center,
     double radius,
