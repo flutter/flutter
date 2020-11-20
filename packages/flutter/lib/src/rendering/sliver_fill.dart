@@ -141,24 +141,19 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
 
     if (child != null) {
-      final double childExtent;
+      child!.layout(constraints.asBoxConstraints(
+        minExtent: math.max(0.0, extent),
+        maxExtent: double.infinity,
+      ), parentUsesSize: true);
+
       switch (constraints.axis) {
         case Axis.horizontal:
-          childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
+          extent = child!.size.width;
           break;
         case Axis.vertical:
-          childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
+          extent = child!.size.height;
           break;
       }
-
-      // If the childExtent is greater than the computed extent, we want to use
-      // that instead of potentially cutting off the child. This allows us to
-      // safely specify a maxExtent.
-      extent = math.max(extent, childExtent);
-      child!.layout(constraints.asBoxConstraints(
-        minExtent: extent,
-        maxExtent: extent,
-      ));
     }
 
     assert(extent.isFinite,
@@ -218,6 +213,9 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
 
     if (child != null) {
       final double childExtent;
+      // Using intrinsics to figure out the natural extent of the child if we
+      // wouldn't force it to occupy the overscroll area. This is going to be
+      // the scroll extent of the child.
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);

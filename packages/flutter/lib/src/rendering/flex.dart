@@ -678,7 +678,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalChildren = 0;
     assert(constraints != null);
     final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
-    final bool canFlex = maxMainSize < double.infinity;
+    final double minMainSize = _direction == Axis.horizontal ? constraints.minWidth : constraints.minHeight;
+    final bool canFlex = maxMainSize < double.infinity || minMainSize > 0.0;
+    final double spaceToFill = canFlex ? (maxMainSize == double.infinity ? minMainSize : maxMainSize) : 0.0;
 
     double crossSize = 0.0;
     double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
@@ -785,7 +787,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Distribute free space to flexible children, and determine baseline.
-    final double freeSpace = math.max(0.0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
+    final double freeSpace = math.max(0.0, spaceToFill - allocatedSize);
     double allocatedFlexSpace = 0.0;
     double maxBaselineDistance = 0.0;
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
@@ -871,7 +873,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Align items along the main axis.
-    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
+    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max && maxMainSize < double.infinity ? maxMainSize : allocatedSize;
     final double actualSize;
     switch (_direction) {
       case Axis.horizontal:
