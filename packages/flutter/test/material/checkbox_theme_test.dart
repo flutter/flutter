@@ -66,7 +66,7 @@ void main() {
 
     expect(description[0], 'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(click))');
     expect(description[1], 'fillColor: MaterialStateProperty.all(Color(0xfffffff0))');
-    expect(description[1], 'checkColor: MaterialStateProperty.all(Color(0xfffffff1))');
+    expect(description[2], 'checkColor: MaterialStateProperty.all(Color(0xfffffff1))');
     expect(description[3], 'overlayColor: MaterialStateProperty.all(Color(0xfffffff2))');
     expect(description[4], 'splashRadius: 1.0');
     expect(description[5], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
