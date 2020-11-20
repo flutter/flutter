@@ -32,6 +32,10 @@ assignees: ''
 
 ## Logs
 
+<details>
+
+<summary>Logs</summary>
+
 <!--
       Include the full logs of the commands you are running between the lines
       with the backticks below. If you are running any "flutter" commands,
@@ -39,20 +43,10 @@ assignees: ''
       the output of running "flutter --verbose create foo".
 -->
 
-<details>
-
-<summary>Command logs</summary>
-
 ```
 ```
-
-</details>
 
 <!-- If possible, paste the output of running `flutter doctor -v` here. -->
-
-<details>
-
-<summary>flutter doctor -v</summary>
 
 ```
 ```
