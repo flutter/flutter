@@ -1262,7 +1262,7 @@ class Scaffold extends StatefulWidget {
   /// {@end-tool}
   final Widget endDrawer;
 
-  /// The callback when endDrawer is opened or closed
+  /// Optional callback that is called when the [Scaffold. endDrawer] is opened or closed.
   final DrawerCallback endDrawerCallback;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
