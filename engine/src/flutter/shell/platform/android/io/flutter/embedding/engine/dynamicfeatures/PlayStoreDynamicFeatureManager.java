@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.os.Build;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.play.core.splitinstall.SplitInstallException;
@@ -22,10 +24,8 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -40,14 +40,14 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
   private @NonNull Context context;
   // Each request to install a feature module gets a session ID. These maps associate
   // the session ID with the loading unit and module name that was requested.
-  private @NonNull Map<Integer, String> sessionIdToName;
-  private @NonNull Map<Integer, Integer> sessionIdToLoadingUnitId;
+  private @NonNull SparseArray<String> sessionIdToName;
+  private @NonNull SparseIntArray sessionIdToLoadingUnitId;
 
   private FeatureInstallStateUpdatedListener listener;
 
   private class FeatureInstallStateUpdatedListener implements SplitInstallStateUpdatedListener {
     public void onStateUpdate(SplitInstallSessionState state) {
-      if (sessionIdToName.containsKey(state.sessionId())) {
+      if (sessionIdToName.get(state.sessionId()) != null) {
         // TODO(garyq): Add system channel for split aot messages.
         switch (state.status()) {
           case SplitInstallSessionStatus.FAILED:
@@ -63,8 +63,8 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
                   sessionIdToLoadingUnitId.get(state.sessionId()),
                   "Module install failed with " + state.errorCode(),
                   true);
-              sessionIdToName.remove(state.sessionId());
-              sessionIdToLoadingUnitId.remove(state.sessionId());
+              sessionIdToName.delete(state.sessionId());
+              sessionIdToLoadingUnitId.delete(state.sessionId());
               break;
             }
           case SplitInstallSessionStatus.INSTALLED:
@@ -83,8 +83,8 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
               loadDartLibrary(
                   sessionIdToLoadingUnitId.get(state.sessionId()),
                   sessionIdToName.get(state.sessionId()));
-              sessionIdToName.remove(state.sessionId());
-              sessionIdToLoadingUnitId.remove(state.sessionId());
+              sessionIdToName.delete(state.sessionId());
+              sessionIdToLoadingUnitId.delete(state.sessionId());
               break;
             }
           case SplitInstallSessionStatus.CANCELED:
@@ -94,7 +94,8 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
                   String.format(
                       "Module \"%s\" (sessionId %d) install canceled.",
                       sessionIdToName.get(state.sessionId()), state.sessionId()));
-              sessionIdToName.remove(state.sessionId());
+              sessionIdToName.delete(state.sessionId());
+              sessionIdToLoadingUnitId.delete(state.sessionId());
               break;
             }
           case SplitInstallSessionStatus.CANCELING:
@@ -164,8 +165,8 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
     splitInstallManager = SplitInstallManagerFactory.create(context);
     listener = new FeatureInstallStateUpdatedListener();
     splitInstallManager.registerListener(listener);
-    sessionIdToName = new HashMap();
-    sessionIdToLoadingUnitId = new HashMap();
+    sessionIdToName = new SparseArray<String>();
+    sessionIdToLoadingUnitId = new SparseIntArray();
   }
 
   public void setJNI(@NonNull FlutterJNI flutterJNI) {
@@ -293,10 +294,10 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
     // performant and robust.
 
     // Search directly in APKs first
-    List<String> apkPaths = new ArrayList();
+    List<String> apkPaths = new ArrayList<String>();
     // If not found in APKs, we check in extracted native libs for the lib directly.
-    List<String> soPaths = new ArrayList();
-    Queue<File> searchFiles = new LinkedList();
+    List<String> soPaths = new ArrayList<String>();
+    Queue<File> searchFiles = new LinkedList<File>();
     searchFiles.add(context.getFilesDir());
     while (!searchFiles.isEmpty()) {
       File file = searchFiles.remove();
