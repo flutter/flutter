@@ -87,6 +87,7 @@ flutter:
     - packages/flutter_gallery_assets/food/butternut_squash_soup.png
     - packages/flutter_gallery_assets/food/cherry_pie.png
     - assets/999x1000.png
+    - assets/Icon-192.png
 
     # The following assets are required for running Flutter Gallery benchmarks.
     - packages/flutter_gallery_assets/assets/icons/settings/settings_light.flr
