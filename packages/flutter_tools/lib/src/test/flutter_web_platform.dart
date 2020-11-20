@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
-import 'package:flutter_tools/src/web/bootstrap.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -32,6 +31,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
+import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
