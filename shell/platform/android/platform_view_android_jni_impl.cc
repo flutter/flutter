@@ -5,7 +5,9 @@
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
 
 #include <android/native_window_jni.h>
+#include <dlfcn.h>
 #include <jni.h>
+#include <sstream>
 #include <utility>
 
 #include "unicode/uchar.h"
@@ -99,6 +101,8 @@ static jmethodID g_get_transform_matrix_method = nullptr;
 static jmethodID g_detach_from_gl_context_method = nullptr;
 
 static jmethodID g_compute_platform_resolved_locale_method = nullptr;
+
+static jmethodID g_request_dart_deferred_library_method = nullptr;
 
 // Called By Java
 static jmethodID g_on_display_platform_view_method = nullptr;
@@ -508,6 +512,108 @@ static jboolean FlutterTextUtilsIsRegionalIndicator(JNIEnv* env,
                                                     jint codePoint) {
   return u_hasBinaryProperty(codePoint, UProperty::UCHAR_REGIONAL_INDICATOR);
 }
+
+static void LoadLoadingUnitFailure(intptr_t loading_unit_id,
+                                   std::string message,
+                                   bool transient) {
+  // TODO(garyq): Implement
+}
+
+static void DynamicFeatureInstallFailure(JNIEnv* env,
+                                         jobject obj,
+                                         jint jLoadingUnitId,
+                                         jstring jError,
+                                         jboolean jTransient) {
+  LoadLoadingUnitFailure(static_cast<intptr_t>(jLoadingUnitId),
+                         fml::jni::JavaStringToString(env, jError),
+                         static_cast<bool>(jTransient));
+}
+
+static void LoadDartDeferredLibrary(JNIEnv* env,
+                                    jobject obj,
+                                    jlong shell_holder,
+                                    jint jLoadingUnitId,
+                                    jobjectArray jSearchPaths) {
+  // Convert java->c++
+  intptr_t loading_unit_id = static_cast<intptr_t>(jLoadingUnitId);
+  std::vector<std::string> search_paths =
+      fml::jni::StringArrayToVector(env, jSearchPaths);
+
+  // TODO: Switch to using the NativeLibrary class, eg:
+  //
+  //      fml::RefPtr<fml::NativeLibrary> native_lib =
+  //          fml::NativeLibrary::Create(lib_name.c_str());
+  //
+  // Find and open the shared library.
+  void* handle = nullptr;
+  while (handle == nullptr && !search_paths.empty()) {
+    std::string path = search_paths.back();
+    handle = ::dlopen(path.c_str(), RTLD_NOW);
+    search_paths.pop_back();
+  }
+  if (handle == nullptr) {
+    LoadLoadingUnitFailure(loading_unit_id,
+                           "No lib .so found for provided search paths.", true);
+    return;
+  }
+
+  // Resolve symbols.
+  uint8_t* isolate_data =
+      static_cast<uint8_t*>(::dlsym(handle, DartSnapshot::kIsolateDataSymbol));
+  if (isolate_data == nullptr) {
+    // Mac sometimes requires an underscore prefix.
+    std::stringstream underscore_symbol_name;
+    underscore_symbol_name << "_" << DartSnapshot::kIsolateDataSymbol;
+    isolate_data = static_cast<uint8_t*>(
+        ::dlsym(handle, underscore_symbol_name.str().c_str()));
+    if (isolate_data == nullptr) {
+      LoadLoadingUnitFailure(loading_unit_id,
+                             "Could not resolve data symbol in library", true);
+      return;
+    }
+  }
+  uint8_t* isolate_instructions = static_cast<uint8_t*>(
+      ::dlsym(handle, DartSnapshot::kIsolateInstructionsSymbol));
+  if (isolate_instructions == nullptr) {
+    // Mac sometimes requires an underscore prefix.
+    std::stringstream underscore_symbol_name;
+    underscore_symbol_name << "_" << DartSnapshot::kIsolateInstructionsSymbol;
+    isolate_instructions = static_cast<uint8_t*>(
+        ::dlsym(handle, underscore_symbol_name.str().c_str()));
+    if (isolate_data == nullptr) {
+      LoadLoadingUnitFailure(loading_unit_id,
+                             "Could not resolve instructions symbol in library",
+                             true);
+      return;
+    }
+  }
+
+  ANDROID_SHELL_HOLDER->GetPlatformView()->LoadDartDeferredLibrary(
+      loading_unit_id, isolate_data, isolate_instructions);
+
+  // TODO(garyq): fallback on soPath.
+}
+
+// TODO(garyq): persist additional asset resolvers by updating instead of
+// replacing with newly created asset_manager
+static void UpdateAssetManager(JNIEnv* env,
+                               jobject obj,
+                               jlong shell_holder,
+                               jobject jAssetManager,
+                               jstring jAssetBundlePath) {
+  auto asset_manager = std::make_shared<flutter::AssetManager>();
+  asset_manager->PushBack(std::make_unique<flutter::APKAssetProvider>(
+      env,                                                  // jni environment
+      jAssetManager,                                        // asset manager
+      fml::jni::JavaStringToString(env, jAssetBundlePath))  // apk asset dir
+  );
+  // Create config to set persistent cache asset manager
+  RunConfiguration config(nullptr, std::move(asset_manager));
+
+  ANDROID_SHELL_HOLDER->GetPlatformView()->UpdateAssetManager(
+      config.GetAssetManager());
+}
+
 bool RegisterApi(JNIEnv* env) {
   static const JNINativeMethod flutter_jni_methods[] = {
       // Start of methods from FlutterJNI
@@ -663,6 +769,22 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(I)Z",
           .fnPtr =
               reinterpret_cast<void*>(&FlutterTextUtilsIsRegionalIndicator),
+      },
+      {
+          .name = "nativeLoadDartDeferredLibrary",
+          .signature = "(JI[Ljava/lang/String;)V",
+          .fnPtr = reinterpret_cast<void*>(&LoadDartDeferredLibrary),
+      },
+      {
+          .name = "nativeUpdateAssetManager",
+          .signature =
+              "(JLandroid/content/res/AssetManager;Ljava/lang/String;)V",
+          .fnPtr = reinterpret_cast<void*>(&UpdateAssetManager),
+      },
+      {
+          .name = "nativeDynamicFeatureInstallFailure",
+          .signature = "(ILjava/lang/String;Z)V",
+          .fnPtr = reinterpret_cast<void*>(&DynamicFeatureInstallFailure),
       },
   };
 
@@ -904,6 +1026,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
 
   if (g_compute_platform_resolved_locale_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate computePlatformResolvedLocale method";
+    return false;
+  }
+
+  g_request_dart_deferred_library_method = env->GetMethodID(
+      g_flutter_jni_class->obj(), "requestDartDeferredLibrary", "(I)V");
+
+  if (g_request_dart_deferred_library_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate requestDartDeferredLibrary method";
     return false;
   }
 
@@ -1332,6 +1462,23 @@ double PlatformViewAndroidJNIImpl::GetDisplayRefreshRate() {
 
   jfieldID fid = env->GetStaticFieldID(clazz, "refreshRateFPS", "F");
   return static_cast<double>(env->GetStaticFloatField(clazz, fid));
+}
+
+bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
+    int loading_unit_id) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return true;
+  }
+
+  env->CallObjectMethod(java_object.obj(),
+                        g_request_dart_deferred_library_method,
+                        loading_unit_id);
+
+  FML_CHECK(CheckException(env));
+  return true;
 }
 
 }  // namespace flutter

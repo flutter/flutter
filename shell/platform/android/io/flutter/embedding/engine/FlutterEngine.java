@@ -299,6 +299,8 @@ public class FlutterEngine {
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);
     flutterJNI.setLocalizationPlugin(localizationPlugin);
+    flutterJNI.setDynamicFeatureManager(FlutterInjector.instance().dynamicFeatureManager());
+
     attachToJni();
 
     // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
@@ -374,7 +376,11 @@ public class FlutterEngine {
     platformViewsController.onDetachedFromJNI();
     dartExecutor.onDetachedFromJNI();
     flutterJNI.removeEngineLifecycleListener(engineLifecycleListener);
+    flutterJNI.setDynamicFeatureManager(null);
     flutterJNI.detachFromNativeAndReleaseResources();
+    if (FlutterInjector.instance().dynamicFeatureManager() != null) {
+      FlutterInjector.instance().dynamicFeatureManager().destroy();
+    }
   }
 
   /**
