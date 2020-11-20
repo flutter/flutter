@@ -507,6 +507,14 @@ class Shell final : public PlatformView::Delegate,
   // |PlatformView::Delegate|
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override;
 
+  // |PlatformView::Delegate|
+  void LoadDartDeferredLibrary(intptr_t loading_unit_id,
+                               const uint8_t* snapshot_data,
+                               const uint8_t* snapshot_instructions) override;
+
+  // |PlatformView::Delegate|
+  void UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager) override;
+
   // |Animator::Delegate|
   void OnAnimatorBeginFrame(fml::TimePoint frame_target_time) override;
 
@@ -547,6 +555,9 @@ class Shell final : public PlatformView::Delegate,
   // |Engine::Delegate|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) override;
+
+  // |Engine::Delegate|
+  void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
 
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;

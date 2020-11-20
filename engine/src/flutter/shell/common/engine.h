@@ -260,6 +260,21 @@ class Engine final : public RuntimeDelegate,
     virtual std::unique_ptr<std::vector<std::string>>
     ComputePlatformResolvedLocale(
         const std::vector<std::string>& supported_locale_data) = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Invoked when the Dart VM requests that a deferred library
+    ///             be loaded. Notifies the engine that the deferred library
+    ///             identified by the specified loading unit id should be
+    ///             downloaded and loaded into the Dart VM via
+    ///             `LoadDartDeferredLibrary`
+    ///
+    /// @param[in]  loading_unit_id  The unique id of the deferred library's
+    ///                              loading unit. This id is to be passed
+    ///                              back into LoadDartDeferredLibrary
+    ///                              in order to identify which deferred
+    ///                              library to load.
+    ///
+    virtual void RequestDartDeferredLibrary(intptr_t loading_unit_id) = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -767,6 +782,38 @@ class Engine final : public RuntimeDelegate,
   ///
   const std::string& InitialRoute() const { return initial_route_; }
 
+  //--------------------------------------------------------------------------
+  /// @brief      Loads the Dart shared library into the Dart VM. When the
+  ///             Dart library is loaded successfully, the Dart future
+  ///             returned by the originating loadLibrary() call completes.
+  ///
+  ///             The Dart compiler may generate separate shared libraries
+  ///             files called 'loading units' when libraries are imported
+  ///             as deferred. Each of these shared libraries are identified
+  ///             by a unique loading unit id. Callers should dlopen the
+  ///             shared library file and use dlsym to resolve the dart
+  ///             symbols. These symbols can then be passed to this method to
+  ///             be dynamically loaded into the VM.
+  ///
+  ///             This method is paired with a RequestDartDeferredLibrary
+  ///             invocation that provides the embedder with the loading unit id
+  ///             of the deferred library to load.
+  ///
+  ///
+  /// @param[in]  loading_unit_id  The unique id of the deferred library's
+  ///                              loading unit, as passed in by
+  ///                              RequestDartDeferredLibrary.
+  ///
+  /// @param[in]  snapshot_data    Dart snapshot data of the loading unit's
+  ///                              shared library.
+  ///
+  /// @param[in]  snapshot_data    Dart snapshot instructions of the loading
+  ///                              unit's shared library.
+  ///
+  void LoadDartDeferredLibrary(intptr_t loading_unit_id,
+                               const uint8_t* snapshot_data,
+                               const uint8_t* snapshot_instructions);
+
  private:
   Engine::Delegate& delegate_;
   const Settings settings_;
@@ -814,6 +861,12 @@ class Engine final : public RuntimeDelegate,
   // |RuntimeDelegate|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) override;
+
+  // The Following commented out code connects into part 2 of the split AOT
+  // feature. Left commented out until it lands:
+
+  // // |RuntimeDelegate|
+  // void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
 
   void SetNeedsReportTimings(bool value) override;
 

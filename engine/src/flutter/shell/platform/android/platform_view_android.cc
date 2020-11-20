@@ -336,6 +336,29 @@ PlatformViewAndroid::ComputePlatformResolvedLocales(
       supported_locale_data);
 }
 
+// |PlatformView|
+void PlatformViewAndroid::RequestDartDeferredLibrary(intptr_t loading_unit_id) {
+  if (jni_facade_->RequestDartDeferredLibrary(loading_unit_id)) {
+    return;
+  }
+  return;  // TODO(garyq): Call LoadDartDeferredLibraryFailure()
+}
+
+// |PlatformView|
+void PlatformViewAndroid::LoadDartDeferredLibrary(
+    intptr_t loading_unit_id,
+    const uint8_t* snapshot_data,
+    const uint8_t* snapshot_instructions) {
+  delegate_.LoadDartDeferredLibrary(loading_unit_id, snapshot_data,
+                                    snapshot_instructions);
+}
+
+// |PlatformView|
+void PlatformViewAndroid::UpdateAssetManager(
+    std::shared_ptr<AssetManager> asset_manager) {
+  delegate_.UpdateAssetManager(std::move(asset_manager));
+}
+
 void PlatformViewAndroid::InstallFirstFrameCallback() {
   // On Platform Task Runner.
   SetNextFrameCallback(
