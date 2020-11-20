@@ -12,12 +12,12 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
-import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_wrapper.dart';
 import 'watcher.dart';
+import 'web_test_compiler.dart';
 
 /// A class that abstracts launching the test process from the test runner.
 abstract class FlutterTestRunner {
@@ -123,7 +123,14 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         .absolute
         .uri
         .toFilePath();
-      final WebMemoryFS result = await webCompilationProxy.initialize(
+      final WebMemoryFS result = await WebTestCompiler(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        artifacts: globals.artifacts,
+        processManager: globals.processManager,
+        config: globals.config,
+      ).initialize(
         projectDirectory: flutterProject.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
