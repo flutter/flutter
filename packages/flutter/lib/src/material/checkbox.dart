@@ -129,6 +129,12 @@ class Checkbox extends StatefulWidget {
   ///
   /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
   /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
+  ///    `MaterialStateProperty` which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.

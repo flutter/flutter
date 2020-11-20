@@ -283,6 +283,12 @@ class Switch extends StatefulWidget {
   ///
   /// If null, then the value of [SwitchThemeData.mouseCursor] is used. If that
   /// is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
+  ///    `MaterialStateProperty` which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.
