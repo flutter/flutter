@@ -24,7 +24,7 @@ class BenchWrapBoxScroll extends WidgetRecorder {
         primarySwatch: Colors.blue,
       ),
       title: 'WrapBox Scroll Benchmark',
-      home: Scaffold(body: const MyHomePage()),
+      home: const Scaffold(body: MyHomePage()),
     );
   }
 }
@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return ListView(
         controller: scrollController,
-        children: [
+        children: <Widget>[
             Wrap(
               children: <Widget>[
                 for (int i = 0; i < 30; i++)
@@ -97,7 +97,7 @@ class ProductPreview extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         // crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Container(
             margin: const EdgeInsets.all(23),
             padding: const EdgeInsets.all(18),
@@ -119,7 +119,7 @@ class ProductPreview extends StatelessWidget {
           ),
           Wrap(
             alignment: WrapAlignment.center,
-            children: [
+            children: <Widget>[
               ProductOption(
                 optionText: '$previewIndex: option1',
               ),
@@ -144,11 +144,12 @@ class ProductPreview extends StatelessWidget {
 }
 
 class ProductOption extends StatelessWidget {
-  final String optionText;
   const ProductOption({
     Key key,
     @required this.optionText,
   }) : super(key: key);
+
+  final String optionText;
 
   @override
   Widget build(BuildContext context) {
