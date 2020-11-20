@@ -48,6 +48,10 @@ assignees: ''
 
 ## Logs
 
+<details>
+
+<summary></summary>
+
 <!--
      Run `flutter analyze` and attach any output of that command below.
      If there are any analysis errors, try resolving them before filing this issue.
@@ -60,3 +64,5 @@ assignees: ''
 
 ```
 ```
+
+</details>
