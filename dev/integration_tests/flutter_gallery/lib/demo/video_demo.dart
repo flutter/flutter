@@ -70,7 +70,7 @@ class VideoCard extends StatelessWidget {
       });
 
       controller!.setVolume(1.0);
-      Navigator.of(context)!.push(route);
+      Navigator.of(context).push(route);
     }
 
     return SafeArea(

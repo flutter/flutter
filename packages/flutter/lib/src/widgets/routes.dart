@@ -664,7 +664,7 @@ class _DismissModalAction extends DismissAction {
 
   @override
   Object invoke(DismissIntent intent) {
-    return Navigator.of(context)!.maybePop();
+    return Navigator.of(context).maybePop();
   }
 }
 
@@ -1849,7 +1849,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator)!.push<T>(_DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(_DialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,

@@ -1060,7 +1060,7 @@ Future<T?> showCupertinoModalPopup<T>({
   RouteSettings? routeSettings,
 }) {
   assert(useRootNavigator != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator)!.push(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(
     _CupertinoModalPopupRoute<T>(
       barrierColor: CupertinoDynamicColor.resolve(barrierColor, context),
       barrierDismissible: barrierDismissible,

@@ -786,4 +786,36 @@ void main() {
     await tester.pumpWidget(buildTable(false));
     expect(find.byType(Checkbox), findsNothing);
   });
+
+  testWidgets('Table should not use decoration from DataTableTheme', (WidgetTester tester) async {
+    final Size originalSize = binding.renderView.size;
+    await binding.setSurfaceSize(const Size(800, 800));
+
+    Widget buildTable() {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+            dataTableTheme: const DataTableThemeData(
+              decoration: BoxDecoration(color: Colors.white),
+            ),
+        ),
+        home: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: TestDataSource(onSelectChanged: (bool? value) {}),
+          showCheckboxColumn: true,
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTable());
+    final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container)).first;
+    expect(tester.widget<Container>(tableContainerFinder).decoration, const BoxDecoration());
+
+    // Reset the surface size.
+    await binding.setSurfaceSize(originalSize);
+  });
 }

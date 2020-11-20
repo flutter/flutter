@@ -53,6 +53,11 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// Returns the offset that would be needed to reveal the `target`
   /// [RenderObject].
   ///
+  /// This is used by [RenderViewportBase.showInViewport], which is
+  /// itself used by [RenderObject.showOnScreen] for
+  /// [RenderViewportBase], which is in turn used by the semantics
+  /// system to implement scrolling for accessibility tools.
+  ///
   /// The optional `rect` parameter describes which area of that `target` object
   /// should be revealed in the viewport. If `rect` is null, the entire
   /// `target` [RenderObject] (as defined by its [RenderObject.paintBounds])
