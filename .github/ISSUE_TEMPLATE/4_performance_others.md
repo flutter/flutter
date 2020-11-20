@@ -49,7 +49,6 @@ assignees: ''
 ## Logs
 
 <details>
-
 <summary>Logs</summary>
 
 <!--
