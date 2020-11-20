@@ -114,7 +114,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
       await runner.run(<String>['test']);
 
-      expect(fakeTargetCommand.cachedTargetFile, '/lib/main.dart');
+      expect(fakeTargetCommand.cachedTargetFile, 'lib/main.dart');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -126,7 +126,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
       await runner.run(<String>['test', '-t', 'lib/foo.dart']);
 
-      expect(fakeTargetCommand.cachedTargetFile, '/lib/foo.dart');
+      expect(fakeTargetCommand.cachedTargetFile, 'lib/foo.dart');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),

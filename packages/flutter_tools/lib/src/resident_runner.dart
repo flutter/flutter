@@ -720,7 +720,7 @@ abstract class ResidentRunner {
     this.hotMode = true,
     String dillOutputPath,
     this.machine = false,
-  }) : mainPath = target,
+  }) : mainPath = globals.fs.path.absolute(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
