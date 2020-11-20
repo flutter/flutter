@@ -23,15 +23,6 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
-const List<String> _kAvailablePlatforms = <String>[
-  'ios',
-  'android',
-  'windows',
-  'linux',
-  'macos',
-  'web',
-];
-
 const String _kNoPlatformsErrorMessage = '''
 The plugin project was generated without specifying the `--platforms` flag, no new platforms are added.
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same

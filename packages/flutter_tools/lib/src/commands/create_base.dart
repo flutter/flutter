@@ -232,6 +232,7 @@ abstract class CreateBase extends FlutterCommand {
   }
 
   /// Throws with exit 2 if the project directory is illegal.
+  @protected
   void validateProjectDir(String dirPath,
       {String flutterRoot, bool overwrite = false}) {
     if (globals.fs.path.isWithin(flutterRoot, dirPath)) {
@@ -368,18 +369,9 @@ abstract class CreateBase extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
-      templateManifest: templateManifest,
+      templateManifest: _templateManifest,
     );
     return template.render(directory, context, overwriteExisting: overwrite);
-  }
-
-  /// Whether [name] is a valid Pub package.
-  @visibleForTesting
-  bool isValidPackageName(String name) {
-    final Match match = _identifierRegExp.matchAsPrefix(name);
-    return match != null &&
-        match.end == name.length &&
-        !_keywords.contains(name);
   }
 
   /// Generate application project in the `directory` using `templateContext`.
@@ -418,20 +410,6 @@ abstract class CreateBase extends FlutterCommand {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
     return generatedCount;
-  }
-
-  // Return null if the project name is legal. Return a validation message if
-  // we should disallow the project name.
-  String _validateProjectName(String projectName) {
-    if (!isValidPackageName(projectName)) {
-      return '"$projectName" is not a valid Dart package name.\n\n'
-          'See https://dart.dev/tools/pub/pubspec#name for more information.';
-    }
-    if (_packageDependencies.contains(projectName)) {
-      return "Invalid project name: '$projectName' - this will conflict with Flutter "
-          'package dependencies.';
-    }
-    return null;
   }
 
   /// Creates an android identifier.
@@ -489,10 +467,9 @@ abstract class CreateBase extends FlutterCommand {
     return segments.join('.');
   }
 
-  @protected
-  Set<Uri> get templateManifest =>
-      _templateManifest ??= _computeTemplateManifest();
-  Set<Uri> _templateManifest;
+  Set<Uri> get _templateManifest =>
+      __templateManifest ??= _computeTemplateManifest();
+  Set<Uri> __templateManifest;
   Set<Uri> _computeTemplateManifest() {
     final String flutterToolsAbsolutePath = globals.fs.path.join(
       Cache.flutterRoot,
@@ -638,3 +615,26 @@ const Set<String> _packageDependencies = <String>{
   'watcher',
   'yaml',
 };
+
+/// Whether [name] is a valid Pub package.
+@visibleForTesting
+bool isValidPackageName(String name) {
+  final Match match = _identifierRegExp.matchAsPrefix(name);
+  return match != null &&
+      match.end == name.length &&
+      !_keywords.contains(name);
+}
+
+// Return null if the project name is legal. Return a validation message if
+// we should disallow the project name.
+String _validateProjectName(String projectName) {
+  if (!isValidPackageName(projectName)) {
+    return '"$projectName" is not a valid Dart package name.\n\n'
+        'See https://dart.dev/tools/pub/pubspec#name for more information.';
+  }
+  if (_packageDependencies.contains(projectName)) {
+    return "Invalid project name: '$projectName' - this will conflict with Flutter "
+        'package dependencies.';
+  }
+  return null;
+}
