@@ -105,6 +105,18 @@ abstract class CreateBase extends FlutterCommand {
     );
   }
 
+  /// The output directory of the command.
+  @protected
+  Directory get projectDir {
+    return globals.fs.directory(argResults.rest.first);
+  }
+
+  /// The normalized absolute path of [projectDir].
+  @protected
+  String get projectDirPath {
+    return globals.fs.path.normalize(projectDir.absolute.path);
+  }
+
   /// Adds a `--platforms` argument.
   ///
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
@@ -140,7 +152,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// Throw with exit code 2 if the flutter sdk installed is invalid.
   @protected
-  String getFlutterRoot() {
+  String get flutterRoot {
     if (Cache.flutterRoot == null) {
       throwToolExit(
           'The FLUTTER_ROOT environment variable was not specified. Unable to find package:flutter.',
@@ -177,10 +189,10 @@ abstract class CreateBase extends FlutterCommand {
   /// Otherwise, we don't presume to know what type of project it could be, since
   /// many of the files could be missing, and we can't really tell definitively.
   ///
-  /// Throws assertion if projectDir does not exist or empty.
+  /// Throws assertion if [projectDir] does not exist or empty.
   /// Returns null if no project type can be determined.
   @protected
-  FlutterProjectType determineTemplateType(Directory projectDir) {
+  FlutterProjectType determineTemplateType() {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
     final File metadataFile = globals.fs
         .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
@@ -215,7 +227,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `--org` is specified in the command, returns that directly.
   /// If `--org` is not specified, returns the organization from the existing project.
   @protected
-  Future<String> getOrganization(Directory projectDir) async {
+  Future<String> getOrganization() async {
     String organization = stringArg('org');
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
@@ -233,20 +245,19 @@ abstract class CreateBase extends FlutterCommand {
 
   /// Throws with exit 2 if the project directory is illegal.
   @protected
-  void validateProjectDir(String dirPath,
-      {String flutterRoot, bool overwrite = false}) {
-    if (globals.fs.path.isWithin(flutterRoot, dirPath)) {
+  void validateProjectDir({bool overwrite = false}) {
+    if (globals.fs.path.isWithin(flutterRoot, projectDirPath)) {
       throwToolExit(
           'Cannot create a project within the Flutter SDK. '
-          "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.",
+          "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
           exitCode: 2);
     }
 
     // If the destination directory is actually a file, then we refuse to
     // overwrite, on the theory that the user probably didn't expect it to exist.
-    if (globals.fs.isFileSync(dirPath)) {
+    if (globals.fs.isFileSync(projectDirPath)) {
       final String message =
-          "Invalid project name: '$dirPath' - refers to an existing file.";
+          "Invalid project name: '$projectDirPath' - refers to an existing file.";
       throwToolExit(
           overwrite
               ? '$message Refusing to overwrite a file with a directory.'
@@ -258,17 +269,17 @@ abstract class CreateBase extends FlutterCommand {
       return;
     }
 
-    final FileSystemEntityType type = globals.fs.typeSync(dirPath);
+    final FileSystemEntityType type = globals.fs.typeSync(projectDirPath);
 
     switch (type) {
       case FileSystemEntityType.file:
         // Do not overwrite files.
-        throwToolExit("Invalid project name: '$dirPath' - file exists.",
+        throwToolExit("Invalid project name: '$projectDirPath' - file exists.",
             exitCode: 2);
         break;
       case FileSystemEntityType.link:
         // Do not overwrite links.
-        throwToolExit("Invalid project name: '$dirPath' - refers to a link.",
+        throwToolExit("Invalid project name: '$projectDirPath' - refers to a link.",
             exitCode: 2);
         break;
       default:
@@ -279,7 +290,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// Use the current directory path name if the `--project-name` is not specified explicitly.
   @protected
-  String getProjectName(String projectDirPath) {
+  String get projectName {
     final String projectName =
         stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
     if (!boolArg('skip-name-checks')) {
