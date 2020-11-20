@@ -1126,13 +1126,13 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
         '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
+      '--sound-null-safety', // web tests do not autodetect yet.
       ...?flutterTestArgs,
       ...tests,
     ],
     workingDirectory: workingDirectory,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
-      'FLUTTER_LOW_RESOURCE_MODE': 'true',
     },
   );
 }
