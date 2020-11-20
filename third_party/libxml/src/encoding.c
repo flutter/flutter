@@ -1869,12 +1869,12 @@ xmlUconvWrapper(uconv_t *cd, int toUnicode, unsigned char *out, int *outlen,
         /* encoding => UTF-16 => UTF-8 */
         ucnv_convertEx(cd->utf8, cd->uconv, &ucv_out, ucv_out + *outlen,
                        &ucv_in, ucv_in + *inlen, NULL, NULL, NULL, NULL,
-                       0, TRUE, &err);
+                       0, 1, &err);
     } else {
         /* UTF-8 => UTF-16 => encoding */
         ucnv_convertEx(cd->uconv, cd->utf8, &ucv_out, ucv_out + *outlen,
                        &ucv_in, ucv_in + *inlen, NULL, NULL, NULL, NULL,
-                       0, TRUE, &err);
+                       0, 1, &err);
     }
     *inlen = ucv_in - (const char*) in; 
     *outlen = ucv_out - (char *) out;
