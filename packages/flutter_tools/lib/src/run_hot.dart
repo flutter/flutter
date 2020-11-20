@@ -1103,10 +1103,10 @@ class HotRunner extends ResidentRunner {
     }
     globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-      globals.printStatus('💪 Running with sound null safety', emphasis: true);
+      globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
     } else {
       globals.printStatus(
-        '🔨 Running with unsound null safety',
+        'Running with unsound null safety',
         emphasis: true,
       );
       globals.printStatus(
