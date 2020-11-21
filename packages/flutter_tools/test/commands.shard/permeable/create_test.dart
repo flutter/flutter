@@ -2102,7 +2102,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
     final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
     final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
-    expect(logger.statusText, isNot(contains('You need to update ${relativePluginPath}/pubspec.yaml to support android.\n')));
+    expect(logger.statusText, isNot(contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n')));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
   });
@@ -2117,9 +2117,9 @@ void main() {
     final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
     final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
-    expect(logger.statusText, isNot(contains('You need to update ${relativePluginPath}/pubspec.yaml to support ios.\n')));
+    expect(logger.statusText, isNot(contains('You need to update $relativePluginPath/pubspec.yaml to support ios.\n')));
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
-    expect(logger.statusText, contains('You need to update ${relativePluginPath}/pubspec.yaml to support android.\n'));
+    expect(logger.statusText, contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n'));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
   });
