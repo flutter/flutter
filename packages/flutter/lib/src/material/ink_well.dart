@@ -436,11 +436,11 @@ class InkResponse extends StatelessWidget {
   /// The custom clip border which overrides [borderRadius].
   final ShapeBorder? customBorder;
 
-  /// The color of the ink response when the this widget is focused. If this
+  /// The color of the ink response when this widget is focused. If this
   /// property is null then the focus color of the theme,
   /// [ThemeData.focusColor], will be used.
   ///
-  /// The focus highlight can only be shown when [FocusManager.highlightMode]
+  /// [focusColor] can only be shown when [FocusManager.highlightMode]
   /// returns [FocusHighlightMode.traditional]. You can set
   /// [overlayColor] to display the highlight when [FocusManager.highlightMode]
   /// returns [FocusHighlightMode.touch].
