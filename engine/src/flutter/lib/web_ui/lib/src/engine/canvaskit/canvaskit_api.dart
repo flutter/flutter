@@ -1801,6 +1801,11 @@ class ProductionCollector implements Collector {
 
   @override
   void register(Object wrapper, SkDeletable deletable) {
+    if (Instrumentation.enabled) {
+      Instrumentation.instance.incrementCounter(
+        '${deletable.constructor.name} registered',
+      );
+    }
     _skObjectFinalizationRegistry.register(wrapper, deletable);
   }
 
@@ -1859,6 +1864,11 @@ class ProductionCollector implements Collector {
         // again if the objects is worth collecting.
         continue;
       }
+      if (Instrumentation.enabled) {
+        Instrumentation.instance.incrementCounter(
+          '${deletable.constructor.name} deleted',
+        );
+      }
       try {
         deletable.delete();
       } catch (error, stackTrace) {
@@ -1907,6 +1917,21 @@ class SkDeletable {
 
   /// Returns whether the correcponding C++ object has been deleted.
   external bool isDeleted();
+
+  /// Returns the JavaScript constructor for this object.
+  ///
+  /// This is useful for debugging.
+  external JsConstructor get constructor;
+}
+
+@JS()
+@anonymous
+class JsConstructor {
+  /// The name of the "constructor", typically the function name called with
+  /// the `new` keyword, or the ES6 class name.
+  ///
+  /// This is useful for debugging.
+  external String get name;
 }
 
 /// Attaches a weakly referenced object to another object and calls a finalizer

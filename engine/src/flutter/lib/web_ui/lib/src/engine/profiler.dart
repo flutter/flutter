@@ -218,3 +218,66 @@ void _frameTimingsOnRasterFinish() {
 int _nowMicros() {
   return (html.window.performance.now() * 1000).toInt();
 }
+
+/// Counts various events that take place while the app is running.
+///
+/// This class will slow down the app, and therefore should be disabled while
+/// benchmarking. For example, avoid using it in conjunction with [Profiler].
+class Instrumentation {
+  Instrumentation._() {
+    _checkInstrumentationEnabled();
+  }
+
+  /// Whether instrumentation is enabled.
+  ///
+  /// Check this value before calling any other methods in this class.
+  static const bool enabled = const bool.fromEnvironment(
+    'FLUTTER_WEB_ENABLE_INSTRUMENTATION',
+    defaultValue: false,
+  );
+
+  /// Returns the singleton that provides instrumentation API.
+  static Instrumentation get instance {
+    _checkInstrumentationEnabled();
+    return _instance;
+  }
+
+  static late final Instrumentation _instance = Instrumentation._();
+
+  static void _checkInstrumentationEnabled() {
+    if (!enabled) {
+      throw Exception(
+        'Cannot use Instrumentation unless it is enabled. '
+        'You can enable it by setting the `FLUTTER_WEB_ENABLE_INSTRUMENTATION` '
+        'environment variable to true, or by passing '
+        '--dart-define=FLUTTER_WEB_ENABLE_INSTRUMENTATION=true to the flutter '
+        'tool.',
+      );
+    }
+  }
+
+  final Map<String, int> _counters = <String, int>{};
+  Timer? _printTimer;
+
+  /// Increments the count of a particular event by one.
+  void incrementCounter(String event) {
+    _checkInstrumentationEnabled();
+    final int currentCount = _counters[event] ?? 0;
+    _counters[event] = currentCount + 1;
+    _printTimer ??= Timer(
+      const Duration(seconds: 2),
+      () {
+        final StringBuffer message = StringBuffer('Engine counters:\n');
+        final List<MapEntry<String, int>> entries = _counters.entries.toList()
+          ..sort((MapEntry<String, int> a, MapEntry<String, int> b) {
+            return a.key.compareTo(b.key);
+          });
+        for (MapEntry<String, int> entry in entries) {
+          message.writeln('  ${entry.key}: ${entry.value}');
+        }
+        print(message);
+        _printTimer = null;
+      },
+    );
+  }
+}
