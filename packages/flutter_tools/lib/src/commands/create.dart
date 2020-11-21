@@ -290,13 +290,13 @@ class CreateCommand extends CreateBase {
       ));
       globals.printStatus('Your module code is in $relativeMainPath.');
     } else if (generatePlugin) {
-      final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-      final String platformsString = platforms.join(', ');
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
+      final List<String> platforms = _getUserRequestedPlatforms();
+      final String platformsString = platforms.join(', ');
       _printPluginDirectoryLocationMessage(relativePluginPath, projectName, platformsString);
       if (!creatingNewProject && argResults.wasParsed('platforms')) {
         _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
-      } else {
+      } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
         globals.printError(_kNoPlatformsArgMessage);
       }
     } else  {
@@ -449,6 +449,14 @@ Your $application code is in $relativeAppMain.
       if (templateContext['macos'] == true)
         'macos',
     ];
+  }
+
+  // Returns a list of platforms that are explicitly requested by user via `--platforms`.
+  List<String> _getUserRequestedPlatforms() {
+    if (!argResults.wasParsed('platforms')) {
+      return <String>[];
+    }
+    return stringsArg('platforms');
   }
 }
 
