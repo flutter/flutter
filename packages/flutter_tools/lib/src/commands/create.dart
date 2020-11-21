@@ -23,13 +23,6 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
-const String _kNoPlatformsErrorMessage = '''
-The plugin project was generated without specifying the `--platforms` flag, no new platforms are added.
-To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-directory. You can also find detailed instructions on how to add platforms in the `pubspec.yaml`
-at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
-''';
-
 class CreateCommand extends CreateBase {
   CreateCommand() {
     addPlatformsOptions(customHelp: 'The platforms supported by this project. '
