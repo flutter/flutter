@@ -26,7 +26,7 @@ class AndroidContext {
 
   AndroidRenderingAPI RenderingApi() const;
 
-  bool IsValid() const;
+  virtual bool IsValid() const;
 
  private:
   const AndroidRenderingAPI rendering_api_;
