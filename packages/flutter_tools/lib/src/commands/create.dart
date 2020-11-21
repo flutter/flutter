@@ -290,17 +290,23 @@ class CreateCommand extends CreateBase {
           'main.dart',
       ));
       globals.printStatus('Your module code is in $relativeMainPath.');
-    } else {
+    } else if (generatePlugin) {
+      final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+      final String platformsString = platforms.join(', ');
+      _printPluginDirectoryLocationMessage(relativePluginPath, projectName, platformsString);
+      if (!creatingNewProject && argResults.wasParsed('platforms')) {
+        _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
+      } else {
+        globals.printError(_kNoPlatformsArgMessage);
+      }
+    } else  {
       // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
-      final String relativePluginMain = globals.fs.path.join(relativePluginPath, 'lib', '$projectName.dart');
 
       // Let them know a summary of the state of their tooling.
-      final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-      final String platformsString = platforms.join(', ');
       globals.printStatus('''
 In order to run your $application, type:
 
@@ -309,31 +315,6 @@ In order to run your $application, type:
 
 Your $application code is in $relativeAppMain.
 ''');
-        if (generatePlugin) {
-          globals.printStatus('''
-Your plugin code is in $relativePluginMain.
-
-Host platform code is in the $platformsString directories under $relativePluginPath.
-To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
-''');
-      }
-    }
-    if (generatePlugin) {
-      if (!creatingNewProject && argResults.wasParsed('platforms')) {
-        _printUpdatePluginPubspecMessage(platforms, templateContext);
-      } else {
-        final List<String> platforms = _getSupportedPlatformsInPlugin(projectDir);
-        if (platforms.isEmpty) {
-          globals.printError('''
-Must specify at least one platform using --platforms.
-
-Run `flutter create -t plugin --platforms <platforms> .` under the $relativePluginPath/ directory.
-You can also find detailed instructions on how to add platforms in the `$relativePluginPath/pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
-
-To find out which platforms are supported, run `flutter create -h`.
-''');
-        }
-      }
     }
     return FlutterCommandResult.success();
   }
@@ -482,33 +463,33 @@ List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
   return platforms;
 }
 
-void _printUpdatePluginPubspecMessage(List<String> platformsToAdd, Map<String, dynamic> templateContext) {
-  if (platformsToAdd.isEmpty) {
-    return;
-  }
+void _printPluginDirectoryLocationMessage(String pluginPath, String projectName, String platformsString) {
+  final String relativePluginMain = globals.fs.path.join(pluginPath, 'lib', '$projectName.dart');
+final String relativeExampleMain = globals.fs.path.join(pluginPath, 'example', 'lib', 'main.dart');
+  globals.printStatus('''
 
-  // If adding new platforms to an existing plugin project, prints
-  // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
-  final YamlMap platformsMapToPrint = Plugin.createPlatformsYamlMap(platformsToAdd, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
-  if (platformsMapToPrint.isNotEmpty) {
-    String prettyYaml = '';
-    for (final String platform in platformsMapToPrint.keys.toList().cast<String>()) {
-      prettyYaml += '$platform:\n';
-      for (final String key in (platformsMapToPrint[platform] as YamlMap).keys.toList().cast<String>()) {
-        prettyYaml += ' $key: ${platformsMapToPrint[platform][key] as String}\n';
-      }
-    }
-    globals.printStatus('''
+Your plugin code is in $relativePluginMain.
 
-The `pubspec.yaml` under the project directory must be updated to support ${platformsToAdd.join(', ')},
-Add below lines to under the `platform:` key:
-''', emphasis: true);
-    globals.printStatus(prettyYaml, emphasis: true, color: TerminalColor.blue);
-    globals.printStatus('''
-If the `platforms` key does not exist in the `pubspec.yaml`, it might because that the plugin project does not
-use the multi-platforms plugin format. We highly recommend a migration to the multi-platforms plugin format.
-For detailed instructions on how to format the pubspec.yaml to support platforms using the multi-platforms format, see:
-https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
-''', emphasis: true);
-  }
+You example app code is in $relativeExampleMain.
+
+Host platform code is in the $platformsString directories under $relativePluginMain.
+To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
+''');
 }
+
+void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
+  globals.printStatus('''
+
+You need to update $pluginPath/pubspec.yaml to support $platformsString.
+See the following for details:
+https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin
+
+''', emphasis: true, color: TerminalColor.red);
+}
+
+const String _kNoPlatformsArgMessage = '''
+
+Must specify at least one platform using --platforms. See the following for details:
+https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin
+
+''';
