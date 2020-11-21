@@ -304,7 +304,6 @@ class InkResponse extends StatelessWidget {
     this.borderRadius,
     this.customBorder,
     this.focusColor,
-    this.alwaysShowFocusColor = false,
     this.hoverColor,
     this.highlightColor,
     this.overlayColor,
@@ -442,7 +441,7 @@ class InkResponse extends StatelessWidget {
   /// [ThemeData.focusColor], will be used.
   ///
   /// The focus highlight can only be shown when [FocusManager.highlightMode]
-  /// returns [FocusHighlightMode.traditional] unless [alwaysShowFocusColor] is true.
+  /// returns [FocusHighlightMode.traditional].
   ///
   /// See also:
   ///
@@ -452,15 +451,6 @@ class InkResponse extends StatelessWidget {
   ///  * [splashColor], the color of the splash.
   ///  * [splashFactory], which defines the appearance of the splash.
   final Color? focusColor;
-
-  /// Focus highlight can be shown when [FocusManager.highlightMode] returns
-  /// [FocusHighlightMode.touch].
-  ///
-  /// By default, the focus highlight can only be shown when [FocusManager.highlightMode]
-  /// returns [FocusHighlightMode.traditional]. If [alwaysShowFocusColor] is true,
-  /// the focus highlight can also be shown when [FocusManager.highlightMode] returns
-  /// [FocusHighlightMode.touch].
-  final bool alwaysShowFocusColor;
 
   /// The color of the ink response when a pointer is hovering over it. If this
   /// property is null then the hover color of the theme,
@@ -605,7 +595,6 @@ class InkResponse extends StatelessWidget {
       borderRadius: borderRadius,
       customBorder: customBorder,
       focusColor: focusColor,
-      alwaysShowFocusColor: alwaysShowFocusColor,
       hoverColor: hoverColor,
       highlightColor: highlightColor,
       overlayColor: overlayColor,
@@ -655,7 +644,6 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.borderRadius,
     this.customBorder,
     this.focusColor,
-    this.alwaysShowFocusColor = false,
     this.hoverColor,
     this.highlightColor,
     this.overlayColor,
@@ -692,7 +680,6 @@ class _InkResponseStateWidget extends StatefulWidget {
   final BorderRadius? borderRadius;
   final ShapeBorder? customBorder;
   final Color? focusColor;
-  final bool alwaysShowFocusColor;
   final Color? hoverColor;
   final Color? highlightColor;
   final MaterialStateProperty<Color?>? overlayColor;
@@ -739,6 +726,7 @@ enum _HighlightType {
   pressed,
   hover,
   focus,
+  selected,
 }
 
 class _InkResponseState extends State<_InkResponseStateWidget>
@@ -813,6 +801,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   Color getHighlightColorForType(_HighlightType type) {
     const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
     const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
+    const Set<MaterialState> selected = <MaterialState>{MaterialState.selected};
 
     switch (type) {
       // The pressed state triggers a ripple (ink splash), per the current
@@ -824,6 +813,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? Theme.of(context).focusColor;
       case _HighlightType.hover:
         return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? Theme.of(context).hoverColor;
+      case _HighlightType.selected:
+        return widget.overlayColor?.resolve(selected) ?? widget.focusColor ?? Theme.of(context).focusColor;
     }
   }
 
@@ -833,6 +824,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         return const Duration(milliseconds: 200);
       case _HighlightType.hover:
       case _HighlightType.focus:
+      case _HighlightType.selected:
         return const Duration(milliseconds: 50);
     }
   }
@@ -885,6 +877,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           widget.onHover!(value);
         break;
       case _HighlightType.focus:
+      case _HighlightType.selected:
         break;
     }
   }
@@ -946,17 +939,27 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
+  bool get _hasSelectedOverlayColor {
+    const Set<MaterialState> selected = <MaterialState>{MaterialState.selected};
+    return widget.overlayColor?.resolve(selected) != null;
+  }
+
   void _updateFocusHighlights() {
     final bool showFocus;
+    final bool showSelect;
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
-        showFocus = widget.alwaysShowFocusColor &&_shouldShowFocus;
+        showFocus = false;
+        showSelect = true;
         break;
       case FocusHighlightMode.traditional:
         showFocus = _shouldShowFocus;
+        showSelect = false;
         break;
     }
     updateHighlight(_HighlightType.focus, value: showFocus);
+    if (showSelect)
+      updateHighlight(_HighlightType.selected, value: _hasSelectedOverlayColor && _shouldShowFocus);
   }
 
   bool _hasFocus = false;
@@ -1245,7 +1248,6 @@ class InkWell extends InkResponse {
     ValueChanged<bool>? onHover,
     MouseCursor? mouseCursor,
     Color? focusColor,
-    bool alwaysShowFocusColor = false,
     Color? hoverColor,
     Color? highlightColor,
     MaterialStateProperty<Color?>? overlayColor,
@@ -1274,7 +1276,6 @@ class InkWell extends InkResponse {
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
     focusColor: focusColor,
-    alwaysShowFocusColor: alwaysShowFocusColor,
     hoverColor: hoverColor,
     highlightColor: highlightColor,
     overlayColor: overlayColor,

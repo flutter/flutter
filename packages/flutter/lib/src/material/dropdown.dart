@@ -22,6 +22,7 @@ import 'material_localizations.dart';
 import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
+import 'material_state.dart';
 
 const Duration _kDropdownMenuDuration = Duration(milliseconds: 300);
 const double _kMenuItemHeight = kMinInteractiveDimension;
@@ -175,10 +176,18 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
       opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
     }
+
+    final MaterialStateProperty<Color?> selectedOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+      (Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected))
+          return Theme.of(context).focusColor;
+        return null;
+      },
+    );
     Widget child = FadeTransition(
       opacity: opacity,
       child: InkWell(
-        alwaysShowFocusColor: true,
+        overlayColor: selectedOverlayColor,
         autofocus: widget.itemIndex == widget.route.selectedIndex,
         child: Container(
           padding: widget.padding,

@@ -192,7 +192,7 @@ void main() {
       ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
   });
 
-  testWidgets('ink response changes color on focus when on touch devices and [alwaysShowFocusColor] is true', (WidgetTester tester) async {
+  testWidgets('ink response changes color on focus when on touch devices and has selected overlayColor', (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
@@ -203,16 +203,26 @@ void main() {
             child: Container(
               width: 100,
               height: 100,
-              child: InkWell(
-                focusNode: focusNode,
-                hoverColor: const Color(0xff00ff00),
-                splashColor: const Color(0xffff0000),
-                focusColor: const Color(0xff0000ff),
-                alwaysShowFocusColor: true,
-                highlightColor: const Color(0xf00fffff),
-                onTap: () { },
-                onLongPress: () { },
-                onHover: (bool hover) { },
+              child: Builder(
+                builder: (BuildContext context){
+                  final MaterialStateProperty<Color?> selectedOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+                        (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.selected))
+                        return const Color(0xff0000ff);
+                      return null;
+                    },
+                  );
+                  return InkWell(
+                    focusNode: focusNode,
+                    hoverColor: const Color(0xff00ff00),
+                    splashColor: const Color(0xffff0000),
+                    overlayColor: selectedOverlayColor,
+                    highlightColor: const Color(0xf00fffff),
+                    onTap: () { },
+                    onLongPress: () { },
+                    onHover: (bool hover) { },
+                  );
+                },
               ),
             ),
           ),
