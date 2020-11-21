@@ -147,6 +147,11 @@ abstract class ManagedSkiaObject<T extends Object> extends SkiaObject<T> {
     } else {
       // If FinalizationRegistry is _not_ supported we may need to delete
       // and resurrect the object multiple times before deleting it forever.
+      if (Instrumentation.enabled) {
+        Instrumentation.instance.incrementCounter(
+          '${(defaultObject as SkDeletable).constructor.name} created',
+        );
+      }
       if (isResurrectionExpensive) {
         SkiaObjects.manageExpensive(this);
       } else {
@@ -161,6 +166,11 @@ abstract class ManagedSkiaObject<T extends Object> extends SkiaObject<T> {
   T _doResurrect() {
     assert(!browserSupportsFinalizationRegistry);
     final T skiaObject = resurrect();
+    if (Instrumentation.enabled) {
+      Instrumentation.instance.incrementCounter(
+        '${(skiaObject as SkDeletable).constructor.name} resurrected',
+      );
+    }
     rawSkiaObject = skiaObject;
     if (isResurrectionExpensive) {
       SkiaObjects.manageExpensive(this);
@@ -173,6 +183,11 @@ abstract class ManagedSkiaObject<T extends Object> extends SkiaObject<T> {
   @override
   void didDelete() {
     assert(!browserSupportsFinalizationRegistry);
+    if (Instrumentation.enabled) {
+      Instrumentation.instance.incrementCounter(
+        '${(rawSkiaObject as SkDeletable).constructor.name} deleted',
+      );
+    }
     rawSkiaObject = null;
   }
 
@@ -303,6 +318,11 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends Skia
 
   void _initialize(R debugReferrer, T initialValue) {
     _update(initialValue);
+    if (Instrumentation.enabled) {
+      Instrumentation.instance.incrementCounter(
+        '${_skDeletable?.constructor.name} created',
+      );
+    }
     if (assertionsEnabled) {
       debugReferrers.add(debugReferrer);
     }
@@ -355,6 +375,11 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends Skia
     assert(_resurrector != null);
     assert(!_isDeletedPermanently, 'Cannot use deleted object.');
     _update(_resurrector!());
+    if (Instrumentation.enabled) {
+      Instrumentation.instance.incrementCounter(
+        '${_skDeletable?.constructor.name} resurrected',
+      );
+    }
     SkiaObjects.manageExpensive(this);
     return skiaObject;
   }
@@ -366,6 +391,11 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends Skia
 
   @override
   void didDelete() {
+    if (Instrumentation.enabled) {
+      Instrumentation.instance.incrementCounter(
+        '${_skDeletable?.constructor.name} deleted',
+      );
+    }
     assert(!browserSupportsFinalizationRegistry);
     _update(null);
   }
@@ -419,7 +449,8 @@ class SkiaObjectBox<R extends StackTraceDebugger, T extends Object> extends Skia
         if (browserSupportsFinalizationRegistry) {
           Collector.instance.collect(_skDeletable!);
         } else {
-          _skDeletable!.delete();
+          delete();
+          didDelete();
         }
       }
       rawSkiaObject = null;
