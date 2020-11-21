@@ -1,4 +1,4 @@
-Signature: 043565e22623b30e91d586f726358bc8
+Signature: 4cfb4ff7fbb413363473aad5f17f1dc7
 
 UNUSED LICENSES:
 
@@ -445,6 +445,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.buildinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
@@ -524,6 +525,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thread/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/meta.json
@@ -1273,6 +1275,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/device_class.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/id.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/uuid.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.buildinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/hal.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
@@ -1452,6 +1455,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/secure_mem.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thread/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
@@ -2135,6 +2139,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.buildinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
@@ -2214,6 +2219,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thread/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/meta.json
@@ -2862,6 +2868,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/connection_options.fi
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/configuration.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/pairing_options.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/security_mode.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.buildinfo/buildinfo.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device_watcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/stream.fidl
@@ -2915,6 +2922,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/factory_reset.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/input.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/light.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thread/bootstrap.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
