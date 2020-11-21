@@ -1003,7 +1003,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=freeform}
-/// 
+///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
 /// ```
