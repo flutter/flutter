@@ -103,7 +103,7 @@ class AndroidContextGL : public AndroidContext {
   /// @return     Whether the current context is valid. That is, if the EGL
   ///             contexts were successfully created.
   ///
-  bool IsValid() const;
+  bool IsValid() const override;
 
   //----------------------------------------------------------------------------
   /// @return     Whether the current context was successfully clear.
