@@ -1842,7 +1842,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(53));
+      expect(location.line, equals(54));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
