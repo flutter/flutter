@@ -1,7 +1,6 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 /// Flutter widgets implementing the current iOS design language.
 ///
 /// To use, import `package:flutter/cupertino.dart`.
@@ -13,7 +12,6 @@
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3PdUaidHc-E}
 library cupertino;
-
 export 'src/cupertino/action_sheet.dart';
 export 'src/cupertino/activity_indicator.dart';
 export 'src/cupertino/app.dart';
@@ -25,6 +23,7 @@ export 'src/cupertino/context_menu.dart';
 export 'src/cupertino/context_menu_action.dart';
 export 'src/cupertino/date_picker.dart';
 export 'src/cupertino/dialog.dart';
+export 'src/cupertino/form_row.dart';
 export 'src/cupertino/form_section.dart';
 export 'src/cupertino/icon_theme_data.dart';
 export 'src/cupertino/icons.dart';
@@ -40,12 +39,11 @@ export 'src/cupertino/search_field.dart';
 export 'src/cupertino/segmented_control.dart';
 export 'src/cupertino/slider.dart';
 export 'src/cupertino/sliding_segmented_control.dart';
-export 'src/cupertino/split_form_row.dart';
 export 'src/cupertino/switch.dart';
 export 'src/cupertino/tab_scaffold.dart';
 export 'src/cupertino/tab_view.dart';
 export 'src/cupertino/text_field.dart';
-export 'src/cupertino/text_form_field.dart';
+export 'src/cupertino/text_form_field_row.dart';
 export 'src/cupertino/text_selection.dart';
 export 'src/cupertino/text_theme.dart';
 export 'src/cupertino/theme.dart';

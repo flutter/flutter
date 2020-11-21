@@ -2,22 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'split_form_row.dart';
+import 'form_row.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
-export 'text_form_field.dart';
-
-/// Creates a [FormField] that contains a [CupertinoTextField].
-///
-/// This is a convenience widget that wraps a [CupertinoTextField] widget in a
-/// [FormField].
+/// Creates a [CupertinoFormRow] containing a [FormField] that wraps
+/// a [CupertinoTextField].
 ///
 /// A [Form] ancestor is not required. The [Form] simply makes it easier to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
@@ -31,26 +26,26 @@ export 'text_form_field.dart';
 /// The controller's lifetime should be managed by a stateful widget ancestor
 /// of the scrolling container.
 ///
-/// A [leadingText] is required. This string is displayed in a [Text] widget
-/// leading to the side of the [CupertinoTextFormFieldRow]. It can be set to
-/// an empty string, although it is encouraged to set the [leadingText] in
-/// order to follow standard iOS practices.
+/// The [prefix] parameter is displayed at the start of the row. Standard iOS
+/// guidelines encourage passing a [Text] widget to [prefix] to detail the
+/// nature of the input.
+///
+/// The [margins] parameter is used to pad the contents of the row. It is
+/// directly passed to [CupertinoFormRow]. If the [margins]
+/// parameter is null, [CupertinoFormRow] constructs its own default
+/// margins (which are the standard form row margins in iOS.) If no edge
+/// insets are intended, explicitly pass [EdgeInsets.zero] to [margins].
 ///
 /// If a [controller] is not specified, [initialValue] can be used to give
 /// the automatically generated controller an initial value.
 ///
-/// Remember to call [TextEditingController.dispose] of the [TextEditingController]
-/// when it is no longer needed. This will ensure we discard any resources used
-/// by the object.
+/// Remember to call [TextEditingController.dispose] of the [controller], if one
+/// is specified, when it is no longer needed. This will ensure we discard any
+/// resources used by the object.
 ///
-/// By default, the [CupertinoTextFormFieldRow] will use a [CupertinoTextField] in
-/// combination with a [CupertinoSplitFormRow] to replicate iOS-styled forms.
-/// Unlike Material's [TextFormField], [CupertinoTextFormFieldRow] takes no
-/// `decoration` and does not apply an [InputDecoration.helperText] on the
-/// widget. [CupertinoTextFormFieldRow] utilizes [CupertinoSplitFormRow.errorText]
-/// to display [validator]'s response.
-///
-/// For a documentation about the various parameters, see [CupertinoTextField].
+/// For documentation about the various parameters, see the
+/// [CupertinoTextField] class and [new CupertinoTextField.borderless],
+/// the constructor.
 ///
 /// {@tool snippet}
 ///
@@ -65,7 +60,7 @@ export 'text_form_field.dart';
 ///
 /// ```dart
 /// CupertinoTextFormFieldRow(
-///   leadingText: 'Username',
+///   prefix: Text('Username'),
 ///   onSaved: (String value) {
 ///     // This optional block of code can be used to run
 ///     // code when the user saves the form.
@@ -82,41 +77,33 @@ export 'text_form_field.dart';
 /// presses the SPACE key.
 ///
 /// ```dart imports
+/// import 'package:flutter/cupertino.dart';
 /// import 'package:flutter/services.dart';
 /// ```
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Material(
+///   return CupertinoPageScaffold(
 ///     child: Center(
-///       child: Shortcuts(
-///         shortcuts: <LogicalKeySet, Intent>{
-///           // Pressing space in the field will now move to the next field.
-///           LogicalKeySet(LogicalKeyboardKey.space): const NextFocusIntent(),
+///       child: Form(
+///         autovalidateMode: AutovalidateMode.always,
+///         onChanged: () {
+///           Form.of(primaryFocus.context).save();
 ///         },
-///         child: FocusTraversalGroup(
-///           child: Form(
-///             autovalidateMode: AutovalidateMode.always,
-///             onChanged: () {
-///               Form.of(primaryFocus.context).save();
-///             },
-///             child: Wrap(
-///               children: List<Widget>.generate(5, (int index) {
-///                 return Padding(
-///                   padding: const EdgeInsets.all(8.0),
-///                   child: ConstrainedBox(
-///                     constraints: BoxConstraints.tight(const Size(200, 50)),
-///                     child: CupertinoTextFormFieldRow(
-///                       leadingText: 'Input',
-///                       onSaved: (String value) {
-///                         print('Value for field $index saved as "$value"');
-///                       },
-///                     ),
-///                   ),
-///                 );
-///               }),
-///             ),
-///           ),
+///         child: CupertinoFormSection.padded(
+///           header: Text('SECTION 1'),
+///           children: List<Widget>.generate(5, (int index) {
+///             return CupertinoTextFormFieldRow(
+///               prefix: Text('Enter text'),
+///               placeholder: 'Enter text',
+///               validator: (value) {
+///                 if (value.isEmpty) {
+///                   return 'Please enter a value';
+///                 }
+///                 return null;
+///               },
+///             );
+///          }),
 ///         ),
 ///       ),
 ///     ),
@@ -125,23 +112,35 @@ export 'text_form_field.dart';
 /// ```
 /// {@end-tool}
 class CupertinoTextFormFieldRow extends FormField<String> {
-  /// Creates a [FormField] that contains a [CupertinoTextField].
+  /// Creates a [CupertinoFormRow] containing a [FormField] that wraps
+  /// a [CupertinoTextField].
   ///
   /// When a [controller] is specified, [initialValue] must be null (the
   /// default). If [controller] is null, then a [TextEditingController]
   /// will be constructed automatically and its `text` will be initialized
   /// to [initialValue] or the empty string.
   ///
+  /// The [prefix] parameter is displayed at the start of the row. Standard iOS
+  /// guidelines encourage passing a [Text] widget to [prefix] to detail the
+  /// nature of the input.
+  ///
+  /// The [margins] parameter is used to pad the contents of the row. It is
+  /// directly passed to [CupertinoFormRow]. If the [margins]
+  /// parameter is null, [CupertinoFormRow] constructs its own default
+  /// margins (which are the standard form row margins in iOS.) If no edge
+  /// insets are intended, explicitly pass [EdgeInsets.zero] to [margins].
+  ///
   /// For documentation about the various parameters, see the
   /// [CupertinoTextField] class and [new CupertinoTextField.borderless],
   /// the constructor.
   CupertinoTextFormFieldRow({
     Key? key,
-    required this.leadingText,
+    this.prefix,
+    this.margins,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
-    InputDecoration? decoration = const InputDecoration(),
+    BoxDecoration? decoration,
     TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
     TextInputAction? textInputAction,
@@ -159,10 +158,6 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
-    @Deprecated('Use autoValidateMode parameter which provide more specific '
-        'behaviour related to auto validation. '
-        'This feature was deprecated after v1.19.0.')
-        bool autovalidate = false,
     bool maxLengthEnforced = true,
     int? maxLines = 1,
     int? minLines,
@@ -185,7 +180,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     TextSelectionControls? selectionControls,
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
-    AutovalidateMode? autovalidateMode,
+    AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     String? placeholder,
     TextStyle? placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w400,
@@ -199,11 +194,6 @@ class CupertinoTextFormFieldRow extends FormField<String> {
         assert(obscureText != null),
         assert(autocorrect != null),
         assert(enableSuggestions != null),
-        assert(autovalidate != null),
-        assert(
-            autovalidate == false ||
-                autovalidate == true && autovalidateMode == null,
-            'autovalidate and autovalidateMode should not be used together.'),
         assert(maxLengthEnforced != null),
         assert(scrollPadding != null),
         assert(maxLines == null || maxLines > 0),
@@ -227,10 +217,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
               controller != null ? controller.text : (initialValue ?? ''),
           onSaved: onSaved,
           validator: validator,
-          enabled: enabled ?? decoration?.enabled ?? true,
-          autovalidateMode: autovalidate
-              ? AutovalidateMode.always
-              : (autovalidateMode ?? AutovalidateMode.disabled),
+          autovalidateMode: autovalidateMode,
           builder: (FormFieldState<String> field) {
             final _CupertinoTextFormFieldRowState state =
                 field as _CupertinoTextFormFieldRowState;
@@ -242,13 +229,15 @@ class CupertinoTextFormFieldRow extends FormField<String> {
               }
             }
 
-            return CupertinoSplitFormRow(
-              leadingText: leadingText,
-              errorText: field.errorText,
+            return CupertinoFormRow(
+              prefix: prefix,
+              margins: margins,
+              error: (field.errorText == null) ? null : Text(field.errorText!),
               child: CupertinoTextField.borderless(
                 controller: state._effectiveController,
                 focusNode: focusNode,
                 keyboardType: keyboardType,
+                decoration: decoration,
                 textInputAction: textInputAction,
                 style: style,
                 strutStyle: strutStyle,
@@ -281,7 +270,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 onEditingComplete: onEditingComplete,
                 onSubmitted: onFieldSubmitted,
                 inputFormatters: inputFormatters,
-                enabled: enabled ?? decoration?.enabled ?? true,
+                enabled: enabled,
                 cursorWidth: cursorWidth,
                 cursorHeight: cursorHeight,
                 cursorColor: cursorColor,
@@ -298,13 +287,22 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           },
         );
 
-  /// Text that is shown leading the row.
+  /// A widget that is displayed at the start of the row.
   ///
-  /// A [leadingText] is required. This string is displayed in a [Text] widget
-  /// leading to the side of the [CupertinoTextFormField]. It can be set to
-  /// an empty string, although it is encouraged to set the [leadingText] in
-  /// order to follow standard iOS practices.
-  final String leadingText;
+  /// The [prefix] widget is displayed at the start of the row. Standard iOS
+  /// guidelines encourage passing a [Text] widget to [prefix] to detail the
+  /// nature of the input.
+  final Widget? prefix;
+
+  /// Margins used to pad the contents of the row.
+  ///
+  /// The [margins] widget is passed to [CupertinoFormRow]. If the [margins]
+  /// parameter is null, [CupertinoFormRow] constructs its own default
+  /// margins, which are the standard form row margins in iOS.
+  ///
+  /// If no edge insets are intended, explicitly pass [EdgeInsets.zero] to
+  /// [margins].
+  final EdgeInsetsGeometry? margins;
 
   /// Controls the text being edited.
   ///

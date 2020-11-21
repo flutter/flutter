@@ -16,6 +16,11 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
+const TextStyle _kDefaultPlaceholderStyle = TextStyle(
+  fontWeight: FontWeight.w400,
+  color: CupertinoColors.placeholderText,
+);
+
 // Value inspected from Xcode 11 & iOS 13.0 Simulator.
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
   color: CupertinoDynamicColor.withBrightness(
@@ -328,51 +333,15 @@ class CupertinoTextField extends StatefulWidget {
 
   /// Creates a borderless iOS-style text field.
   ///
-  /// To provide a prefilled text entry, pass in a [TextEditingController] with
-  /// an initial value to the [controller] parameter.
-  ///
-  /// To provide a hint placeholder text that appears when the text entry is
-  /// empty, pass a [String] to the [placeholder] parameter.
-  ///
-  /// The [maxLines] property can be set to null to remove the restriction on
-  /// the number of lines. In this mode, the intrinsic height of the widget will
-  /// grow as the number of lines of text grows. By default, it is `1`, meaning
-  /// this is a single-line text field and will scroll horizontally when
-  /// overflown. [maxLines] must not be zero.
-  ///
-  /// The text cursor is not shown if [showCursor] is false or if [showCursor]
-  /// is null (the default) and [readOnly] is true.
-  ///
-  /// If specified, the [maxLength] property must be greater than zero.
-  ///
-  /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
-  /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
-  /// must not be null.
-  ///
-  /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
-  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
-  ///
-  /// See also:
-  ///
-  ///  * [minLines], which is the minimum number of lines to occupy when the
-  ///    content spans fewer lines.
-  ///  * [expands], to allow the widget to size itself to its parent's height.
-  ///  * [maxLength], which discusses the precise meaning of "number of
-  ///    characters" and how it may differ from the intuitive meaning.
+  /// {@macro flutter.cupertino.CupertinoTextField}
   const CupertinoTextField.borderless({
     Key? key,
     this.controller,
     this.focusNode,
-    this.decoration = const BoxDecoration(),
+    this.decoration,
     this.padding = const EdgeInsets.all(6.0),
     this.placeholder,
-    this.placeholderStyle = const TextStyle(
-      fontWeight: FontWeight.w400,
-      color: CupertinoColors.placeholderText,
-    ),
+    this.placeholderStyle = _kDefaultPlaceholderStyle,
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
