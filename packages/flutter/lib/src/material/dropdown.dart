@@ -19,10 +19,10 @@ import 'ink_well.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
-import 'material_state.dart';
 
 const Duration _kDropdownMenuDuration = Duration(milliseconds: 300);
 const double _kMenuItemHeight = kMinInteractiveDimension;
