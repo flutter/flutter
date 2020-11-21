@@ -291,10 +291,10 @@ class CreateCommand extends CreateBase {
       globals.printStatus('Your module code is in $relativeMainPath.');
     } else if (generatePlugin) {
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
-      final List<String> platforms = _getUserRequestedPlatforms();
-      final String platformsString = platforms.join(', ');
+      final List<String> requestedPlatforms = _getUserRequestedPlatforms();
+      final String platformsString = requestedPlatforms.join(', ');
       _printPluginDirectoryLocationMessage(relativePluginPath, projectName, platformsString);
-      if (!creatingNewProject && argResults.wasParsed('platforms')) {
+      if (!creatingNewProject && requestedPlatforms.isNotEmpty) {
         _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
       } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
         globals.printError(_kNoPlatformsArgMessage);
