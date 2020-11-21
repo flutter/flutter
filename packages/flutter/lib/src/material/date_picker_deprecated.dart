@@ -10,11 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'date.dart';
-import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
-import 'ink_well.dart';
-import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
 
@@ -608,109 +605,4 @@ class _MonthPickerSortKey extends OrdinalSortKey {
   static const _MonthPickerSortKey previousMonth = _MonthPickerSortKey(1.0);
   static const _MonthPickerSortKey nextMonth = _MonthPickerSortKey(2.0);
   static const _MonthPickerSortKey calendar = _MonthPickerSortKey(3.0);
-}
-
-/// A scrollable list of years to allow picking a year.
-///
-/// The year picker widget is rarely used directly. Instead, consider using
-/// [showDatePicker], which creates a date picker dialog.
-///
-/// Requires one of its ancestors to be a [Material] widget.
-///
-/// See also:
-///
-///  * [showDatePicker], which shows a dialog that contains a material design
-///    date picker.
-///  * [showTimePicker], which shows a dialog that contains a material design
-///    time picker.
-///
-@Deprecated(
-  'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.15.3.'
-)
-class YearPicker extends StatefulWidget {
-  /// Creates a year picker.
-  ///
-  /// The [selectedDate] and [onChanged] arguments must not be null. The
-  /// [lastDate] must be after the [firstDate].
-  ///
-  /// Rarely used directly. Instead, typically used as part of the dialog shown
-  /// by [showDatePicker].
-  YearPicker({
-    Key? key,
-    required this.selectedDate,
-    required this.onChanged,
-    required this.firstDate,
-    required this.lastDate,
-    this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
-       super(key: key);
-
-  /// The currently selected date.
-  ///
-  /// This date is highlighted in the picker.
-  final DateTime selectedDate;
-
-  /// Called when the user picks a year.
-  final ValueChanged<DateTime> onChanged;
-
-  /// The earliest date the user is permitted to pick.
-  final DateTime firstDate;
-
-  /// The latest date the user is permitted to pick.
-  final DateTime lastDate;
-
-  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
-  final DragStartBehavior dragStartBehavior;
-
-  @override
-  _YearPickerState createState() => _YearPickerState();
-}
-
-class _YearPickerState extends State<YearPicker> {
-  static const double _itemExtent = 50.0;
-  late ScrollController scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    scrollController = ScrollController(
-      // Move the initial scroll position to the currently selected date's year.
-      initialScrollOffset: (widget.selectedDate.year - widget.firstDate.year) * _itemExtent,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context);
-    final TextStyle? style = themeData.textTheme.bodyText2;
-    return ListView.builder(
-      dragStartBehavior: widget.dragStartBehavior,
-      controller: scrollController,
-      itemExtent: _itemExtent,
-      itemCount: widget.lastDate.year - widget.firstDate.year + 1,
-      itemBuilder: (BuildContext context, int index) {
-        final int year = widget.firstDate.year + index;
-        final bool isSelected = year == widget.selectedDate.year;
-        final TextStyle? itemStyle = isSelected
-          ? themeData.textTheme.headline5!.copyWith(color: themeData.accentColor)
-          : style;
-        return InkWell(
-          key: ValueKey<int>(year),
-          onTap: () {
-            widget.onChanged(DateTime(year, widget.selectedDate.month, widget.selectedDate.day));
-          },
-          child: Center(
-            child: Semantics(
-              selected: isSelected,
-              child: Text(year.toString(), style: itemStyle),
-            ),
-          ),
-        );
-      },
-    );
-  }
 }
