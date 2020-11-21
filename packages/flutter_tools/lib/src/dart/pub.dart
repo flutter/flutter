@@ -455,7 +455,7 @@ class _DefaultPub implements Pub {
     if (!generateSyntheticPackage) {
       return;
     }
-    final Package flutterGen = Package('flutter_gen', generatedDirectory.uri, languageVersion: LanguageVersion(2, 8));
+    final Package flutterGen = Package('flutter_gen', generatedDirectory.uri, languageVersion: LanguageVersion(2, 12));
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;
     }

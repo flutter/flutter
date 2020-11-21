@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -21,6 +22,8 @@ import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabl
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
+import '../dart/language_version.dart';
+import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
@@ -338,10 +341,27 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get disableDds => boolArg('disable-dds');
 
+  bool get _hostVmServicePortProvided => argResults.wasParsed('observatory-port') ||
+                                         argResults.wasParsed('host-vmservice-port');
+
+  int _tryParseHostVmservicePort() {
+    try {
+      return int.parse(stringArg('observatory-port') ?? stringArg('host-vmservice-port'));
+    } on FormatException catch (error) {
+      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
+    }
+    return null;
+  }
+
   int get ddsPort {
-    if (argResults.wasParsed('dds-port')) {
+    if (!argResults.wasParsed('dds-port') && _hostVmServicePortProvided) {
+      // If an explicit DDS port is _not_ provided, use the host-vmservice-port for DDS.
+      return _tryParseHostVmservicePort();
+    } else if (argResults.wasParsed('dds-port')) {
+      // If an explicit DDS port is provided, use dds-port for DDS.
       return int.tryParse(stringArg('dds-port')) ?? 0;
     }
+    // Otherwise, DDS can bind to a random port.
     return 0;
   }
 
@@ -353,9 +373,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int get hostVmservicePort {
-    if (!_usesPortOption ||
-        (argResults['observatory-port'] == null &&
-      argResults['host-vmservice-port'] == null)) {
+    if (!_usesPortOption || !_hostVmServicePortProvided) {
       return null;
     }
     if (argResults.wasParsed('observatory-port') &&
@@ -363,12 +381,13 @@ abstract class FlutterCommand extends Command<void> {
       throwToolExit('Only one of "--observatory-port" and '
         '"--host-vmservice-port" may be specified.');
     }
-    try {
-      return int.parse(stringArg('observatory-port') ?? stringArg('host-vmservice-port'));
-    } on FormatException catch (error) {
-      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
+    // If DDS is enabled and no explicit DDS port is provided, use the
+    // host-vmservice-port for DDS instead and bind the VM service to a random
+    // port.
+    if (!disableDds && !argResults.wasParsed('dds-port')) {
+      return null;
     }
-    return null;
+    return _tryParseHostVmservicePort();
   }
 
   /// Gets the vmservice port provided to in the 'device-vmservice-port' option.
@@ -444,11 +463,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption('web-renderer',
       defaultsTo: 'html',
       allowed: <String>['auto', 'canvaskit', 'html'],
-      help: 'Which rendering backend to use for Flutter for Web.'
-          'auto      - Use the HTML renderer on mobile devices,'
-          '            and CanvasKit on desktop devices.'
-          'canvaskit - Always use the CanvasKit renderer.'
-          'html      - Default. Always use the HTML renderer.',
+      help: 'The renderer implementation to use when building for the web. Possible values are:\n'
+            'html - always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.\n'
+            'canvaskit - always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.\n'
+            'auto - use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
     );
   }
 
@@ -569,14 +587,10 @@ abstract class FlutterCommand extends Command<void> {
   void addShrinkingFlag() {
     argParser.addFlag('shrink',
       negatable: true,
-      defaultsTo: true,
-      help: 'Whether to enable code shrinking on release mode. '
-            'When enabling shrinking, you also benefit from obfuscation, '
-            'which shortens the names of your app’s classes and members, '
-            'and optimization, which applies more aggressive strategies to '
-            'further reduce the size of your app. '
-            'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-      );
+      hide: true,
+      help: 'This flag is deprecated. Code shrinking is always enabled in release builds. '
+            'To learn more, see: https://developer.android.com/studio/build/shrink-code'
+    );
   }
 
   void addNullSafetyModeOptions({ @required bool hide }) {
@@ -758,6 +772,11 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
+    final File packagesFile = globals.fs.file(
+      globalResults['packages'] as String ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        packagesFile, logger: globals.logger, throwOnError: false);
+
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
         ? stringsArg(FlutterOptions.kEnableExperiment).toList()
@@ -789,12 +808,28 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory = directory.path;
     }
 
-    NullSafetyMode nullSafetyMode = NullSafetyMode.unsound;
+    NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
       // Explicitly check for `true` and `false` so that `null` results in not
-      // passing a flag. This will use the automatically detected null-safety
-      // value based on the entrypoint
-      if (!argResults.wasParsed(FlutterOptions.kNullSafety)) {
+      // passing a flag. Examine the entrypoint file to determine if it
+      // is opted in or out.
+      final bool wasNullSafetyFlagParsed = argResults.wasParsed(FlutterOptions.kNullSafety);
+      if (!wasNullSafetyFlagParsed && argParser.options.containsKey('target')) {
+        final File entrypointFile = globals.fs.file(targetFile);
+        final LanguageVersion languageVersion = determineLanguageVersion(
+          entrypointFile,
+          packageConfig.packageOf(entrypointFile.absolute.uri),
+        );
+        // Extra frontend options are only provided if explicitly
+        // requested.
+        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
+          nullSafetyMode = NullSafetyMode.sound;
+        } else {
+          nullSafetyMode = NullSafetyMode.unsound;
+        }
+      } else if (!wasNullSafetyFlagParsed) {
+        // This mode is only used for commands which do not build a single target like
+        // 'flutter test'.
         nullSafetyMode = NullSafetyMode.autodetect;
       } else if (boolArg(FlutterOptions.kNullSafety)) {
         nullSafetyMode = NullSafetyMode.sound;
@@ -886,6 +921,7 @@ abstract class FlutterCommand extends Command<void> {
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
+      packageConfig: packageConfig,
     );
   }
 

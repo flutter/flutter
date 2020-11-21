@@ -113,7 +113,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   final String name = 'ios-framework';
 
   @override
-  final String description = 'Produces a .framework directory for a Flutter module '
+  final String description = 'Produces .frameworks for a Flutter project '
       'and its plugins for integration into existing, plain Xcode projects.\n'
       'This can only be run on macOS hosts.';
 
@@ -144,10 +144,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   Future<void> validateCommand() async {
     await super.validateCommand();
     _project = FlutterProject.current();
-    if (!_project.isModule) {
-      throwToolExit('Building frameworks for iOS is only supported from a module.');
-    }
-
     if (!_platform.isMacOS) {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
@@ -178,7 +174,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     }
 
     if (!_project.ios.existsSync()) {
-      throwToolExit('Module does not support iOS');
+      throwToolExit('Project does not support iOS');
     }
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
@@ -233,6 +229,23 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     }
 
     globals.printStatus('Frameworks written to ${outputDirectory.path}.');
+
+    if (!_project.isModule && hasPlugins(_project)) {
+      // Apps do not generate a FlutterPluginRegistrant.framework. Users will need
+      // to copy the GeneratedPluginRegistrant class to their project manually.
+      final File pluginRegistrantHeader = _project.ios.pluginRegistrantHeader;
+      final File pluginRegistrantImplementation =
+          _project.ios.pluginRegistrantImplementation;
+      pluginRegistrantHeader.copySync(
+          outputDirectory.childFile(pluginRegistrantHeader.basename).path);
+      pluginRegistrantImplementation.copySync(outputDirectory
+          .childFile(pluginRegistrantImplementation.basename)
+          .path);
+      globals.printStatus(
+          '\nCopy the ${globals.fs.path.basenameWithoutExtension(pluginRegistrantHeader.path)} class into your project.\n'
+          'See https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#create-a-flutterengine for more information.');
+    }
+
     return FlutterCommandResult.success();
   }
 
@@ -459,6 +472,7 @@ end
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
+        'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];
@@ -483,6 +497,7 @@ end
           '-configuration',
           xcodeBuildConfiguration,
           'SYMROOT=${simulatorBuildOutput.path}',
+          'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
           'ARCHS=x86_64',
           'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
           'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',

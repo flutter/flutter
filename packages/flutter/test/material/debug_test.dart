@@ -138,6 +138,7 @@ void main() {
       '     PrimaryScrollController\n'
       '     _ActionsMarker\n'
       '     Actions\n'
+      '     Builder\n'
       '     PageStorage\n'
       '     Offstage\n'
       '     _ModalScopeStatus\n'

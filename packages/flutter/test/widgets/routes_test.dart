@@ -563,7 +563,7 @@ void main() {
               builder: (BuildContext context) {
                 return ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       PageRouteBuilder<void>(
                         settings: settings,
                         pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
@@ -612,7 +612,7 @@ void main() {
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)!.push<void>(
+                  Navigator.of(context).push<void>(
                     PageRouteBuilder<void>(
                       settings: settings,
                       pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
@@ -1138,7 +1138,7 @@ void main() {
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)!.push<void>(
+                  Navigator.of(context).push<void>(
                     MaterialPageRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -1188,7 +1188,7 @@ void main() {
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)!.push<void>(
+                  Navigator.of(context).push<void>(
                     ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -1247,7 +1247,7 @@ void main() {
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)!.push<void>(
+                  Navigator.of(context).push<void>(
                     ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -1309,7 +1309,7 @@ void main() {
                 child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                       )
@@ -1371,7 +1371,7 @@ void main() {
                 child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                         barrierCurve: Curves.linear,
@@ -1436,7 +1436,7 @@ void main() {
                 child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                         barrierLabel: 'test label',
@@ -1639,6 +1639,29 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.text('dialog1'), findsNothing);
+  });
+
+  testWidgets('can not be dismissed with escape keyboard shortcut if barrier not dismissible', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      home: const Text('dummy1'),
+    ));
+    final Element textOnPageOne = tester.element(find.text('dummy1'));
+
+    // Show a simple dialog
+    showDialog<void>(
+      context: textOnPageOne,
+      barrierDismissible: false,
+      builder: (BuildContext context) => const Text('dialog1'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
+
+    // Try to dismiss the dialog with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
   });
 
   testWidgets('ModalRoute.of works for void routes', (WidgetTester tester) async {

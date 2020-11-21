@@ -61,6 +61,10 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// The [rowsPerPage] and [availableRowsPerPage] must not be null (they
   /// both have defaults, though, so don't have to be specified).
+  ///
+  /// Themed by [DataTableTheme]. [DataTableThemeData.decoration] is ignored.
+  /// To modify the border or background color of the [PaginatedDataTable], use
+  /// [CardTheme], since a [Card] wraps the inner [DataTable].
   PaginatedDataTable({
     Key? key,
     this.header,
@@ -471,6 +475,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     sortColumnIndex: widget.sortColumnIndex,
                     sortAscending: widget.sortAscending,
                     onSelectAll: widget.onSelectAll,
+                    // Make sure no decoration is set on the DataTable
+                    // from the theme, as its already wrapped in a Card.
+                    decoration: const BoxDecoration(),
                     dataRowHeight: widget.dataRowHeight,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
