@@ -465,7 +465,7 @@ List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
 
 void _printPluginDirectoryLocationMessage(String pluginPath, String projectName, String platformsString) {
   final String relativePluginMain = globals.fs.path.join(pluginPath, 'lib', '$projectName.dart');
-final String relativeExampleMain = globals.fs.path.join(pluginPath, 'example', 'lib', 'main.dart');
+  final String relativeExampleMain = globals.fs.path.join(pluginPath, 'example', 'lib', 'main.dart');
   globals.printStatus('''
 
 Your plugin code is in $relativePluginMain.
