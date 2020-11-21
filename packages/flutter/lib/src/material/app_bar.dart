@@ -1627,6 +1627,13 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
   }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
+    final Size childSize = child!.getDryLayout(innerConstraints);
+    return constraints.constrain(childSize);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     child!.layout(innerConstraints, parentUsesSize: true);

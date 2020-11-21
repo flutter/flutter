@@ -31,6 +31,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
+import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
@@ -42,6 +43,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     FlutterProject flutterProject,
     String shellPath,
     this.updateGoldens,
+    this.nullAssertions,
     @required this.buildInfo,
     @required this.webMemoryFS,
     @required FileSystem fileSystem,
@@ -83,12 +85,26 @@ class FlutterWebPlatform extends PlatformPlugin {
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
   final Artifacts _artifacts;
+  final bool updateGoldens;
+  final bool nullAssertions;
+  final OneOffHandler _webSocketHandler = OneOffHandler();
+  final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
+  final String _root;
+
+  /// Allows only one test suite (typically one test file) to be loaded and run
+  /// at any given point in time. Loading more than one file at a time is known
+  /// to lead to flaky tests.
+  final Pool _suiteLock = Pool(1);
+
+  BrowserManager _browserManager;
+  TestGoldenComparator _testGoldenComparator;
 
   static Future<FlutterWebPlatform> start(String root, {
     FlutterProject flutterProject,
     String shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
+    bool nullAssertions = false,
     @required BuildInfo buildInfo,
     @required WebMemoryFS webMemoryFS,
     @required FileSystem fileSystem,
@@ -121,8 +137,11 @@ class FlutterWebPlatform extends PlatformPlugin {
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       logger: logger,
+      nullAssertions: nullAssertions,
     );
   }
+
+  bool get _closed => _closeMemo.hasRun;
 
   /// Uri of the test package.
   Uri get testUri => _flutterToolPackageConfig['test'].packageUriRoot;
@@ -186,14 +205,18 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (request.url.path.endsWith('.dart.browser_test.dart.js')) {
       final String leadingPath = request.url.path.split('.browser_test.dart.js')[0];
       final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.bootstrap.js';
-      return shelf.Response.ok(bootstrapFileContents('/' + generatedFile, 'require.js', 'dart_stack_trace_mapper.js'), headers: <String, String>{
+      return shelf.Response.ok(generateTestBootstrapFileContents('/' + generatedFile, 'require.js', 'dart_stack_trace_mapper.js'), headers: <String, String>{
         HttpHeaders.contentTypeHeader: 'text/javascript',
       });
     }
     if (request.url.path.endsWith('.dart.bootstrap.js')) {
       final String leadingPath = request.url.path.split('.dart.bootstrap.js')[0];
       final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.dart.test.dart.js';
-      return shelf.Response.ok(generatedActualMain(_fileSystem.path.basename(leadingPath) + '.dart.bootstrap', '/' + generatedFile), headers: <String, String>{
+      return shelf.Response.ok(generateMainModule(
+        nullAssertions: nullAssertions,
+        bootstrapModule: _fileSystem.path.basename(leadingPath) + '.dart.bootstrap',
+        entrypoint: '/' + generatedFile
+       ), headers: <String, String>{
         HttpHeaders.contentTypeHeader: 'text/javascript',
       });
     }
@@ -276,9 +299,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     return shelf.Response.notFound('Not Found');
   }
 
-  final bool updateGoldens;
-  TestGoldenComparator _testGoldenComparator;
-
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
     if (request.url.path.contains('flutter_goldens')) {
       final Map<String, Object> body = json.decode(await request.readAsString()) as Map<String, Object>;
@@ -327,14 +347,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
   }
 
-  final OneOffHandler _webSocketHandler = OneOffHandler();
-  final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
-  final String _root;
-
-  bool get _closed => _closeMemo.hasRun;
-
-  BrowserManager _browserManager;
-
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
     final String path = _fileSystem.path.fromUri(request.url);
@@ -355,11 +367,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
     return shelf.Response.notFound('Not found.');
   }
-
-  /// Allows only one test suite (typically one test file) to be loaded and run
-  /// at any given point in time. Loading more than one file at a time is known
-  /// to lead to flaky tests.
-  final Pool _suiteLock = Pool(1);
 
   @override
   Future<RunnerSuite> load(
@@ -774,69 +781,4 @@ class _BrowserEnvironment implements Environment {
 
   @override
   CancelableOperation<dynamic> displayPause() => _manager._displayPause();
-}
-
-String bootstrapFileContents(String mainUri, String requireUrl, String mapperUrl) {
-  return '''
-(function() {
-  if (typeof document != 'undefined') {
-    var el = document.createElement("script");
-    el.defer = true;
-    el.async = false;
-    el.src = '$mapperUrl';
-    document.head.appendChild(el);
-
-    el = document.createElement("script");
-    el.defer = true;
-    el.async = false;
-    el.src = '$requireUrl';
-    el.setAttribute("data-main", '$mainUri');
-    document.head.appendChild(el);
-  } else {
-    importScripts('$mapperUrl', '$requireUrl');
-    require.config({
-      baseUrl: baseUrl,
-    });
-    window = self;
-    require(['$mainUri']);
-  }
-})();
-''';
-}
-
-String generatedActualMain(String bootstrapUrl, String mainUri) {
-  return '''
-/* ENTRYPOINT_EXTENTION_MARKER */
-// Create the main module loaded below.
-define("$bootstrapUrl", ["$mainUri", "dart_sdk"], function(app, dart_sdk) {
-  dart_sdk.dart.setStartAsyncSynchronously(true);
-  dart_sdk._debugger.registerDevtoolsFormatter();
-  if (false) {
-    dart_sdk.dart.nonNullAsserts(true);
-  }
-  // See the generateMainModule doc comment.
-  var child = {};
-  child.main = app[Object.keys(app)[0]].main;
-  /* MAIN_EXTENSION_MARKER */
-  child.main();
-  window.\$dartLoader = {};
-  window.\$dartLoader.rootDirectories = [];
-  if (window.\$requireLoader) {
-    window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
-  }
-  if (window.\$dartStackTraceUtility && !window.\$dartStackTraceUtility.ready) {
-    window.\$dartStackTraceUtility.ready = true;
-    let dart = dart_sdk.dart;
-    window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
-      var baseUrl = window.location.protocol + '//' + window.location.host;
-      url = url.replace(baseUrl + '/', '');
-      if (url == 'dart_sdk.js') {
-        return dart.getSourceMap('dart_sdk');
-      }
-      url = url.replace(".lib.js", "");
-      return dart.getSourceMap(url);
-    });
-  }
-});
-''';
 }

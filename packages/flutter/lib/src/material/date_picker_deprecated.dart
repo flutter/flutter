@@ -9,15 +9,14 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../debug.dart';
-import '../icon_button.dart';
-import '../icons.dart';
-import '../ink_well.dart';
-import '../material.dart';
-import '../material_localizations.dart';
-import '../theme.dart';
-
-import 'date_picker_common.dart';
+import 'date.dart';
+import 'debug.dart';
+import 'icon_button.dart';
+import 'icons.dart';
+import 'ink_well.dart';
+import 'material.dart';
+import 'material_localizations.dart';
+import 'theme.dart';
 
 // This is the original implementation for the Material Date Picker.
 // These classes are deprecated and the whole file can be removed after
