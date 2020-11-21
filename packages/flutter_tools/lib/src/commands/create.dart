@@ -19,9 +19,11 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
+import 'create_plugin.dart';
 
 class CreateCommand extends CreateBase {
   CreateCommand() {
+    addSubcommand(CreatePluginCommand());
     addPlatformsOptions(customHelp: 'The platforms supported by this project. '
         'This argument only works when the --template is set to app or plugin. '
         'Platform folders (e.g. android/) will be generated in the target project. '
