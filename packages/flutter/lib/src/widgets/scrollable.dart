@@ -650,6 +650,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
+      if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
+        return;
+      }
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
       if (targetScrollOffset != position.pixels) {
@@ -660,9 +663,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
-      return;
-    }
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
     if (targetScrollOffset != position.pixels) {
       position.pointerScroll(_pointerSignalEventDelta(event));
