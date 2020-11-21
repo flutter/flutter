@@ -314,6 +314,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  android_plugin_example_app_build_test:
+    description: >
+      Tests that the plugin example app can be built using the Flutter Gradle plugin.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   run_release_test:
     description: >
       Checks that `flutter run --release` does not crash.
