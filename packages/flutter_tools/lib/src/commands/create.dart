@@ -489,8 +489,7 @@ void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString)
   globals.printStatus('''
 
 You need to update $pluginPath/pubspec.yaml to support $platformsString.
-See the following for details:
-https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin
+For more information, see https://flutter.dev/go/developing-plugins.
 
 ''', emphasis: true, color: TerminalColor.red);
 }
@@ -498,7 +497,5 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
 const String _kNoPlatformsArgMessage = '''
 
 Must specify at least one platform using --platforms.
-See the following for details:
-https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin
-
+For more information, see https://flutter.dev/go/developing-plugins.
 ''';
