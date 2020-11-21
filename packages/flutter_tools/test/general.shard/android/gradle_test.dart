@@ -29,7 +29,6 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
-import '../../src/pubspec_schema.dart';
 
 void main() {
   Cache.flutterRoot = getFlutterRoot();
@@ -317,7 +316,7 @@ void main() {
           any,
           label: 'gradle-expected-file-not-found',
           parameters: const <String, String> {
-            'cd37': 'androidGradlePluginVersion: 5.6.2, fileExtension: .aab',
+            'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
           },
         ),
       ).called(1);
@@ -553,8 +552,6 @@ include ':app'
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
 
-      // write schemaData otherwise pubspec.yaml file can't be loaded
-      writeEmptySchemaFile(fs);
 
       updateLocalProperties(
         project: FlutterProject.fromPath('path/to/project'),
@@ -774,6 +771,9 @@ flutter:
 
       expect(getGradleVersionFor('3.4.0'), '5.6.2');
       expect(getGradleVersionFor('3.5.0'), '5.6.2');
+
+      expect(getGradleVersionFor('4.0.0'), '6.7');
+      expect(getGradleVersionFor('4.1.0'), '6.7');
     });
 
     testWithoutContext('throws on unsupported versions', () {
@@ -1024,7 +1024,7 @@ plugin1=${plugin1.path}
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
 
       final Directory rootDirectory = fileSystem.currentDirectory;
-      cache = Cache(
+      cache = Cache.test(
         rootOverride: rootDirectory,
         fileSystem: fileSystem,
       );
@@ -2701,7 +2701,7 @@ plugin1=${plugin1.path}
       legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
       contains(templateSettingsDotGradle.readAsStringSync().trim()),
     );
-  });
+  }, skip: true); // TODO(jonahwilliams): This is an integration test and should be moved to the integration shard.
 }
 
 /// Generates a fake app bundle at the location [directoryName]/[fileName].

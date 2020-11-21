@@ -63,7 +63,7 @@ void main() {
       )
     );
 
-    await tester.binding.setLocale('zh', null);
+    await tester.binding.setLocale('zh', '');
     await tester.pump();
     await tester.binding.setLocale('es', 'US');
     await tester.pump();
@@ -87,18 +87,18 @@ class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizatio
 class DummyLocalizations {}
 
 class LocalizationTracker extends StatefulWidget {
-  const LocalizationTracker({Key key}) : super(key: key);
+  const LocalizationTracker({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => LocalizationTrackerState();
 }
 
 class LocalizationTrackerState extends State<LocalizationTracker> {
-  double captionFontSize;
+  late double captionFontSize;
 
   @override
   Widget build(BuildContext context) {
-    captionFontSize = Theme.of(context).textTheme.caption.fontSize;
+    captionFontSize = Theme.of(context).textTheme.caption!.fontSize!;
     return Container();
   }
 }

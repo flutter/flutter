@@ -40,9 +40,6 @@ class GradleUtils {
   /// This is the `gradlew` or `gradlew.bat` script in the `android/` directory.
   String getExecutable(FlutterProject project) {
     final Directory androidDir = project.android.hostAppGradleRoot;
-    // Update the project if needed.
-    // TODO(egarciad): https://github.com/flutter/flutter/issues/40460
-    gradleUtils.migrateToR8(androidDir);
     gradleUtils.injectGradleWrapperIfNeeded(androidDir);
 
     final File gradle = androidDir.childFile(
@@ -60,37 +57,6 @@ class GradleUtils {
       'exists or that ${gradle.dirname} can be read.'
     );
     return null;
-  }
-
-  /// Migrates the Android's [directory] to R8.
-  /// https://developer.android.com/studio/build/shrink-code
-  @visibleForTesting
-  void migrateToR8(Directory directory) {
-    final File gradleProperties = directory.childFile('gradle.properties');
-    if (!gradleProperties.existsSync()) {
-      throwToolExit(
-        'Expected file ${gradleProperties.path}. '
-        'Please ensure that this file exists or that ${gradleProperties.dirname} can be read.'
-      );
-    }
-    final String propertiesContent = gradleProperties.readAsStringSync();
-    if (propertiesContent.contains('android.enableR8')) {
-      globals.printTrace('gradle.properties already sets `android.enableR8`');
-      return;
-    }
-    globals.printTrace('set `android.enableR8=true` in gradle.properties');
-    try {
-      if (propertiesContent.isNotEmpty && !propertiesContent.endsWith('\n')) {
-        // Add a new line if the file doesn't end with a new line.
-        gradleProperties.writeAsStringSync('\n', mode: FileMode.append);
-      }
-      gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
-    } on FileSystemException {
-      throwToolExit(
-        'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
-        'Please update the file manually and try this command again.'
-      );
-    }
   }
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
@@ -126,7 +92,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
     }
   }
 }
-const String _defaultGradleVersion = '5.6.2';
+const String _defaultGradleVersion = '6.7';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\(\d+\.\d+\.\d+\)');
 
@@ -224,6 +190,9 @@ String getGradleVersionFor(String androidPluginVersion) {
   }
   if (_isWithinVersionRange(androidPluginVersion, min: '3.4.0', max: '3.5.0')) {
     return '5.6.2';
+  }
+  if (_isWithinVersionRange(androidPluginVersion, min: '4.0.0', max: '4.1.0')) {
+    return '6.7';
   }
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
   return '';
