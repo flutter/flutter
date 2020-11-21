@@ -2140,10 +2140,11 @@ void main() {
       expect(
         error.message,
         'Nested Scaffolds have registered with the ScaffoldMessenger.\n'
-        'If nested Scaffolds were to share the same ScaffoldMessenger, then all would receive a '
-        'SnackBar at the same time, resulting in multiple SnackBars in your UI.\n'
-        'This is typically resolved by putting a ScaffoldMessenger in between the levels of '
-        'nested Scaffolds. Doing so will set a separate SnackBar scope for these Scaffolds.'
+        'The ScaffoldMessenger throws an assertion error when attempting to '
+        'show a SnackBar to nested Scaffolds, which would display duplicate '
+        'SnackBars if allowed.\n'
+        'To fix this, insert a ScaffoldMessenger between each nested '
+        'Scaffold to set a separate scope for each.'
       );
     }
   });

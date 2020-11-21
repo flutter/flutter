@@ -304,16 +304,16 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (parent != null && _scaffolds.contains(parent)) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
-              'Nested Scaffolds have registered with the ScaffoldMessenger.'),
+              'Nested Scaffolds have registered with the ScaffoldMessenger.'
+            ),
             ErrorDescription(
-              'If nested Scaffolds were to share the same ScaffoldMessenger, then '
-              'all would receive a SnackBar at the same time, resulting in multiple '
-              'SnackBars in your UI.'
+              'The ScaffoldMessenger throws an assertion error when attempting to '
+              'show a SnackBar to nested Scaffolds, which would display duplicate '
+              'SnackBars if allowed.'
             ),
             ErrorHint(
-              'This is typically resolved by putting a ScaffoldMessenger in '
-              'between the levels of nested Scaffolds. Doing so will set a separate '
-              'SnackBar scope for these Scaffolds.'
+              'To fix this, insert a ScaffoldMessenger between each nested '
+              'Scaffold to set a separate scope for each.'
             ),
           ]);
         }
