@@ -458,8 +458,8 @@ List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
   final String pubspecPath = globals.fs.path.join(projectDir.absolute.path, 'pubspec.yaml');
   final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
   final List<String> platforms = manifest.validSupportedPlatforms == null
-                                ? <String>[]
-                                : manifest.validSupportedPlatforms.keys.toList();
+    ? <String>[]
+    : manifest.validSupportedPlatforms.keys.toList();
   return platforms;
 }
 
