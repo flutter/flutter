@@ -292,6 +292,9 @@ class TestSkDeletable implements SkDeletable {
     _isDeleted = true;
     deleteCount++;
   }
+
+  @override
+  JsConstructor get constructor => TestJsConstructor('TestSkDeletable');
 }
 
 class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> implements SkDeletable {
@@ -310,6 +313,16 @@ class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> implements SkDele
     rawSkiaObject?.delete();
     deleteCount++;
   }
+
+  @override
+  JsConstructor get constructor => TestJsConstructor('TestOneShotSkiaObject');
+}
+
+class TestJsConstructor implements JsConstructor{
+  TestJsConstructor(this.name);
+
+  @override
+  final String name;
 }
 
 class TestSkiaObject extends ManagedSkiaObject<SkPaint> {
