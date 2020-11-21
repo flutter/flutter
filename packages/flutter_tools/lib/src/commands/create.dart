@@ -466,14 +466,14 @@ List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
   final String pubspecPath = globals.fs.path.join(projectDir.absolute.path, 'pubspec.yaml');
   final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
   final List<String> platforms = manifest.validSupportedPlatforms == null
-                                ? <String>[]
-                                : manifest.validSupportedPlatforms.keys.toList();
+    ? <String>[]
+    : manifest.validSupportedPlatforms.keys.toList();
   return platforms;
 }
 
 void _printPluginDirectoryLocationMessage(String pluginPath, String projectName, String platformsString) {
   final String relativePluginMain = globals.fs.path.join(pluginPath, 'lib', '$projectName.dart');
-final String relativeExampleMain = globals.fs.path.join(pluginPath, 'example', 'lib', 'main.dart');
+  final String relativeExampleMain = globals.fs.path.join(pluginPath, 'example', 'lib', 'main.dart');
   globals.printStatus('''
 
 Your plugin code is in $relativePluginMain.
