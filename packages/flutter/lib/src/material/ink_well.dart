@@ -441,7 +441,19 @@ class InkResponse extends StatelessWidget {
   /// [ThemeData.focusColor], will be used.
   ///
   /// The focus highlight can only be shown when [FocusManager.highlightMode]
-  /// returns [FocusHighlightMode.traditional].
+  /// returns [FocusHighlightMode.traditional]. You can set
+  /// [overlayColor] to display the highlight when [FocusManager.highlightMode]
+  /// returns [FocusHighlightMode.touch].
+  ///
+  /// ```dart
+  /// InkWell(
+  ///   overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.selected))
+  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     return null;
+  ///   }),
+  /// )
+  /// ```
   ///
   /// See also:
   ///
