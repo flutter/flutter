@@ -275,7 +275,6 @@ class CreateCommand extends CreateBase {
     globals.printStatus('Wrote $generatedFileCount files.');
     globals.printStatus('\nAll done!');
     final String application = sampleCode != null ? 'sample application' : 'application';
-    final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
     if (generatePackage) {
       final String relativeMainPath = globals.fs.path.normalize(globals.fs.path.join(
         relativeDirPath,
@@ -293,6 +292,7 @@ class CreateCommand extends CreateBase {
     } else if (generatePlugin) {
       final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
       final String platformsString = platforms.join(', ');
+      final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       _printPluginDirectoryLocationMessage(relativePluginPath, projectName, platformsString);
       if (!creatingNewProject && argResults.wasParsed('platforms')) {
         _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
@@ -489,7 +489,8 @@ https://flutter.dev/docs/development/packages-and-plugins/developing-packages#pl
 
 const String _kNoPlatformsArgMessage = '''
 
-Must specify at least one platform using --platforms. See the following for details:
+Must specify at least one platform using --platforms.
+See the following for details:
 https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin
 
 ''';
