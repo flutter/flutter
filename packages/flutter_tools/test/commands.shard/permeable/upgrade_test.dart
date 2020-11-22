@@ -287,12 +287,10 @@ void main() {
       const String upstreamRevision = 'def456';
       const String version = '1.2.3';
       const String upstreamVersion = '4.5.6';
-      const String channel = "stable";
 
       when(flutterVersion.frameworkRevision).thenReturn(revision);
       when(flutterVersion.frameworkRevisionShort).thenReturn(revision);
       when(flutterVersion.frameworkVersion).thenReturn(version);
-      when(flutterVersion.channel).thenReturn(channel);
 
       final MockFlutterVersion latestVersion = MockFlutterVersion();
 
