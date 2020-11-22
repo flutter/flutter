@@ -72,7 +72,8 @@ class Checkbox extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
-    this.borderRadius = 1.0,
+    this.shape,
+    this.textDirection,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(autofocus != null),
@@ -240,8 +241,11 @@ class Checkbox extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// The Border Radius of the checkbox.
-  final double borderRadius;
+  /// The Border of the checkbox.
+  final RoundedRectangleBorder? shape;
+
+  /// The TextDirection of the checkbox.
+  final TextDirection? textDirection;
 
   /// The width of a checkbox widget.
   static const double width = 18.0;
@@ -398,7 +402,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             vsync: this,
             hasFocus: _focused,
             hovering: _hovering,
-            borderRadius: widget.borderRadius,
+            textDirection: widget.textDirection ?? themeData.checkboxTheme.textDirection ?? TextDirection.ltr,
+            shape: widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(1.0)),
+            ),
           );
         },
       ),
@@ -422,7 +429,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     required this.additionalConstraints,
     required this.hasFocus,
     required this.hovering,
-    required this.borderRadius,
+    required this.shape,
+    required this.textDirection,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(activeColor != null),
@@ -443,7 +451,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<bool?>? onChanged;
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
-  final double borderRadius;
+  final RoundedRectangleBorder shape;
+  final TextDirection textDirection;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
@@ -460,7 +469,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     additionalConstraints: additionalConstraints,
     hasFocus: hasFocus,
     hovering: hovering,
-    borderRadius: borderRadius,
+    shape: shape,
+    textDirection: textDirection,
   );
 
   @override
@@ -481,7 +491,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..vsync = vsync
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..borderRadius = borderRadius;
+      ..shape = shape
+      ..textDirection = textDirection;
   }
 }
 
@@ -502,7 +513,8 @@ class _RenderCheckbox extends RenderToggleable {
     ValueChanged<bool?>? onChanged,
     required bool hasFocus,
     required bool hovering,
-    required this.borderRadius,
+    required this.shape,
+    required this.textDirection,
     required TickerProvider vsync,
   }) : _oldValue = value,
        super(
@@ -522,7 +534,8 @@ class _RenderCheckbox extends RenderToggleable {
 
   bool? _oldValue;
   Color checkColor;
-  double borderRadius;
+  RoundedRectangleBorder shape;
+  TextDirection textDirection;
 
   @override
   set value(bool? newValue) {
@@ -544,10 +557,15 @@ class _RenderCheckbox extends RenderToggleable {
   // At t == 1.0, .. is _kEdgeSize
   RRect _outerRectAt(Offset origin, double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
-    final Radius kEdgeRadius = Radius.circular(borderRadius);
     final double size = _kEdgeSize - inset * _kStrokeWidth;
     final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
-    return RRect.fromRectAndRadius(rect, kEdgeRadius);
+    return RRect.fromRectAndCorners(
+      rect,
+      bottomLeft: shape.borderRadius.resolve(textDirection).bottomLeft,
+      bottomRight: shape.borderRadius.resolve(textDirection).bottomRight,
+      topLeft: shape.borderRadius.resolve(textDirection).topLeft,
+      topRight: shape.borderRadius.resolve(textDirection).topRight,
+    );
   }
 
   // The checkbox's border color if value == false, or its fill color when

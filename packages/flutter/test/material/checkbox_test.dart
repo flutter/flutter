@@ -902,6 +902,10 @@ void main() {
   });
 
   testWidgets('Checkbox respects borderRadius', (WidgetTester tester) async {
+    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100))
+    );
+
     Widget buildApp() {
       return MaterialApp(
         home: Material(
@@ -910,7 +914,7 @@ void main() {
               return Checkbox(
                 value: false,
                 onChanged: (bool? newValue) {},
-                borderRadius: 2.0,
+                shape: roundedRectangleBorder,
               );
             }),
           ),
@@ -920,7 +924,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Checkbox>(find.byType(Checkbox)).borderRadius, 2.0);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape, roundedRectangleBorder);
   });
 }
 
