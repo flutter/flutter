@@ -477,9 +477,13 @@ Your plugin code is in $relativePluginMain.
 
 You example app code is in $relativeExampleMain.
 
-Host platform code is in the $platformsString directories under $relativePluginMain.
-To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
+  if (platformsString != null && platformsString.isNotEmpty) {
+    globals.printStatus('''
+Host platform code is in the $platformsString directories under $pluginPath.
+To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
+    ''');
+  }
 }
 
 void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
