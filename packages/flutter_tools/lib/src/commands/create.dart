@@ -482,6 +482,7 @@ You example app code is in $relativeExampleMain.
     globals.printStatus('''
 Host platform code is in the $platformsString directories under $pluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
+
     ''');
   }
 }
