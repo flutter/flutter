@@ -282,6 +282,45 @@ void main() {
       Platform: () => fakePlatform,
     });
 
+    testUsingContext('Show current version to the upgrade message.', () async {
+      const String revision = 'abc123';
+      const String upstreamRevision = 'def456';
+      const String version = '1.2.3';
+      const String upstreamVersion = '4.5.6';
+      const String channel = "stable";
+
+      when(flutterVersion.frameworkRevision).thenReturn(revision);
+      when(flutterVersion.frameworkRevisionShort).thenReturn(revision);
+      when(flutterVersion.frameworkVersion).thenReturn(version);
+      when(flutterVersion.channel).thenReturn(channel);
+
+      final MockFlutterVersion latestVersion = MockFlutterVersion();
+
+      when(latestVersion.frameworkRevision).thenReturn(upstreamRevision);
+      when(latestVersion.frameworkRevisionShort).thenReturn(upstreamRevision);
+      when(latestVersion.frameworkVersion).thenReturn(upstreamVersion);
+
+      fakeCommandRunner.alreadyUpToDate = false;
+      fakeCommandRunner.remoteVersion = latestVersion;
+
+      processManager.addCommand(
+        FakeCommand(
+            command: <String>[
+              globals.fs.path.join('bin', 'flutter'),
+              'upgrade',
+              '--continue',
+              '--no-version-check',
+            ],
+            environment: <String, String>{'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment}
+        ),
+      );
+      realCommandRunner.recordState(flutterVersion, latestVersion);
+      expect(testLogger.statusText, contains('Upgrading Flutter to ${latestVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in ${realCommandRunner.workingDirectory}'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
     testUsingContext('precacheArtifacts passes env variables to child process', () async {
       processManager.addCommand(
         FakeCommand(
