@@ -298,30 +298,18 @@ void main() {
 
       fakeCommandRunner.alreadyUpToDate = false;
       fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
 
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          'git', 'fetch', '--tags'
-        ]),
-        const FakeCommand(command: <String>[
-          'git', 'rev-parse', '--verify', '@{u}',
-        ],
-            stdout: upstreamRevision),
-        const FakeCommand(command: <String>[
-          'git', 'tag', '--points-at', upstreamRevision,
-        ],
-            stdout: ''),
-        const FakeCommand(command: <String>[
-          'git', 'describe', '--match', '*.*.*', '--long', '--tags', upstreamRevision,
-        ],
-            stdout: upstreamVersion),
-        const FakeCommand(command: <String>[
-          'git', 'reset', '--hard', upstreamRevision
-        ]),
-      ]);
-
-      await realCommandRunner.runCommandFirstHalf(force: true, gitTagVersion: gitTagVersion, flutterVersion: flutterVersion, testFlow: true, verifyOnly: false);
-      expect(testLogger.statusText, contains('Upgrading Flutter to 4.5.6 from 1.2.3 in null'));
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        force: true,
+        continueFlow: false,
+        testFlow: true,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(await result, FlutterCommandResult.success());
+      expect(testLogger.statusText, contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
