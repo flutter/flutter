@@ -289,31 +289,39 @@ void main() {
       const String upstreamVersion = '4.5.6';
 
       when(flutterVersion.frameworkRevision).thenReturn(revision);
-      when(flutterVersion.frameworkRevisionShort).thenReturn(revision);
       when(flutterVersion.frameworkVersion).thenReturn(version);
 
       final MockFlutterVersion latestVersion = MockFlutterVersion();
 
       when(latestVersion.frameworkRevision).thenReturn(upstreamRevision);
-      when(latestVersion.frameworkRevisionShort).thenReturn(upstreamRevision);
       when(latestVersion.frameworkVersion).thenReturn(upstreamVersion);
 
       fakeCommandRunner.alreadyUpToDate = false;
       fakeCommandRunner.remoteVersion = latestVersion;
 
-      processManager.addCommand(
-        FakeCommand(
-            command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
-              'upgrade',
-              '--continue',
-              '--no-version-check',
-            ],
-            environment: <String, String>{'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment}
-        ),
-      );
-      realCommandRunner.recordState(flutterVersion, latestVersion);
-      expect(testLogger.statusText, contains('Upgrading Flutter to ${latestVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in ${realCommandRunner.workingDirectory}'));
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'git', 'fetch', '--tags'
+        ]),
+        const FakeCommand(command: <String>[
+          'git', 'rev-parse', '--verify', '@{u}',
+        ],
+            stdout: upstreamRevision),
+        const FakeCommand(command: <String>[
+          'git', 'tag', '--points-at', upstreamRevision,
+        ],
+            stdout: ''),
+        const FakeCommand(command: <String>[
+          'git', 'describe', '--match', '*.*.*', '--long', '--tags', upstreamRevision,
+        ],
+            stdout: upstreamVersion),
+        const FakeCommand(command: <String>[
+          'git', 'reset', '--hard', upstreamRevision
+        ]),
+      ]);
+
+      await realCommandRunner.runCommandFirstHalf(force: true, gitTagVersion: gitTagVersion, flutterVersion: flutterVersion, testFlow: true, verifyOnly: false);
+      expect(testLogger.statusText, contains('Upgrading Flutter to 4.5.6 from 1.2.3 in null'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,

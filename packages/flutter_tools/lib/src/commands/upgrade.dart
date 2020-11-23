@@ -151,15 +151,15 @@ class UpgradeCommandRunner {
         'command with --force.'
       );
     }
-    recordState(flutterVersion, upstreamVersion);
+    recordState(flutterVersion);
+    globals.printStatus('Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...');
     await attemptReset(upstreamVersion.frameworkRevision);
     if (!testFlow) {
       await flutterUpgradeContinue();
     }
   }
 
-  void recordState(FlutterVersion flutterVersion, FlutterVersion upstreamVersion) {
-    globals.printStatus('Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...');
+  void recordState(FlutterVersion flutterVersion) {
     final Channel channel = getChannelForName(flutterVersion.channel);
     if (channel == null) {
       return;
