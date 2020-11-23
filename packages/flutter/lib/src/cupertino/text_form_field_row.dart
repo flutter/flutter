@@ -158,7 +158,6 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
-    bool maxLengthEnforced = true,
     int? maxLines = 1,
     int? minLines,
     bool expands = false,
@@ -194,7 +193,6 @@ class CupertinoTextFormFieldRow extends FormField<String> {
         assert(obscureText != null),
         assert(autocorrect != null),
         assert(enableSuggestions != null),
-        assert(maxLengthEnforced != null),
         assert(scrollPadding != null),
         assert(maxLines == null || maxLines > 0),
         assert(minLines == null || minLines > 0),
@@ -213,8 +211,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
         assert(enableInteractiveSelection != null),
         super(
           key: key,
-          initialValue:
-              controller != null ? controller.text : (initialValue ?? ''),
+          initialValue: controller?.text ?? initialValue ?? '',
           onSaved: onSaved,
           validator: validator,
           autovalidateMode: autovalidateMode,
@@ -251,16 +248,9 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 obscuringCharacter: obscuringCharacter,
                 obscureText: obscureText,
                 autocorrect: autocorrect,
-                smartDashesType: smartDashesType ??
-                    (obscureText
-                        ? SmartDashesType.disabled
-                        : SmartDashesType.enabled),
-                smartQuotesType: smartQuotesType ??
-                    (obscureText
-                        ? SmartQuotesType.disabled
-                        : SmartQuotesType.enabled),
+                smartDashesType: smartDashesType,
+                smartQuotesType: smartQuotesType,
                 enableSuggestions: enableSuggestions,
-                maxLengthEnforced: maxLengthEnforced,
                 maxLines: maxLines,
                 minLines: minLines,
                 expands: expands,

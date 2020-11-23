@@ -7,13 +7,19 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-// Used for iOS notched-style padding. The top edge has no padding to provide
-// more freedom to the section header.
-const EdgeInsetsDirectional _kDefaultPaddedRowsPadding =
+// Used for iOS "Inset Grouped" padding, determined from SwiftUI's Forms in
+// iOS 14.2 SDK.
+const EdgeInsetsDirectional _kDefaultInsetGroupedRowsPadding =
     EdgeInsetsDirectional.fromSTEB(16.5, 0.0, 16.5, 16.5);
 
+// Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
+// iOS 14.2 SDK.
+// TODO(edrisian): This should be a rounded rectangle once that shape is added.
+const BorderRadius _kDefaultInsetGroupedBorderRadius =
+    BorderRadius.all(Radius.circular(10.0));
+
 // Used to differentiate the edge-to-edge section with the centered section.
-enum _CupertinoFormSectionType { base, padded }
+enum _CupertinoFormSectionType { base, insetGrouped }
 
 /// An iOS-style form section.
 ///
@@ -21,7 +27,7 @@ enum _CupertinoFormSectionType { base, padded }
 /// edge-to-edge style section which includes an iOS-style header, footer, rows,
 /// the dividers between rows, and borders on top and bottom of the rows.
 ///
-/// The [CupertinoFormSection.padded] constructor creates a round-edged and
+/// The [CupertinoFormSection.insetGrouped] constructor creates a round-edged and
 /// padded section that is commonly seen in notched-displays like iPhone X and
 /// beyond. Creates an iOS-style header, footer, rows, and the dividers
 /// between rows. Does not create borders on top and bottom of the rows.
@@ -75,14 +81,13 @@ class CupertinoFormSection extends StatelessWidget {
     required this.children,
     this.header,
     this.margins = EdgeInsets.zero,
-    this.borderRadius = 0.0,
-    this.decoration =
-        const BoxDecoration(color: CupertinoColors.secondarySystemBackground),
+    this.borderRadius = BorderRadius.zero,
+    this.decoration,
   })  : _type = _CupertinoFormSectionType.base,
         assert(children.length > 0),
         super(key: key);
 
-  /// Creates a section that mimicks standard iOS forms.
+  /// Creates a section that mimicks standard "Inset Grouped" iOS forms.
   ///
   /// The [CupertinoFormSection.padded] constructor creates a round-edged and
   /// padded section that is commonly seen in notched-displays like iPhone X and
@@ -108,15 +113,14 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// The [decoration] parameter sets the decoration for the section. Defaults
   /// to a [CupertinoColors.secondarySystemBackground] background color.
-  const CupertinoFormSection.padded({
+  const CupertinoFormSection.insetGrouped({
     Key? key,
     required this.children,
     this.header,
-    this.margins = _kDefaultPaddedRowsPadding,
-    this.borderRadius = 10.0,
-    this.decoration =
-        const BoxDecoration(color: CupertinoColors.secondarySystemBackground),
-  })  : _type = _CupertinoFormSectionType.padded,
+    this.margins = _kDefaultInsetGroupedRowsPadding,
+    this.borderRadius = _kDefaultInsetGroupedBorderRadius,
+    this.decoration,
+  })  : _type = _CupertinoFormSectionType.insetGrouped,
         assert(children.length > 0),
         super(key: key);
 
@@ -130,7 +134,7 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// Defaults to zero padding if constructed with standard
   /// [CupertinoFormSection] constructor. Defaults to the standard notched-style
-  /// iOS padding when constructing with [CupertinoFormSection.padded].
+  /// iOS padding when constructing with [CupertinoFormSection.insetGrouped].
   final EdgeInsetsGeometry margins;
 
   /// The list of rows in the section.
@@ -145,30 +149,33 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// Defaults to a [CupertinoColors.secondarySystemBackground] background
   /// color.
-  final BoxDecoration decoration;
+  final BoxDecoration? decoration;
 
-  /// Sets the circular border radius for the [Column] encapsulating [children]
+  /// Sets the border radius for the [Column] encapsulating [children]
   /// rows.
   ///
-  /// Defaults to 0.0 when constructed with standard [CupertinoFormSection]
-  /// constructor. Defaults to 10.0 when constructing with
-  /// [CupertinoFormSection.centered].
-  final double borderRadius;
+  /// Defaults to zero radius when constructed with standard [CupertinoFormSection]
+  /// constructor. Defaults to 10.0 circular radius when constructing with
+  /// [CupertinoFormSection.insetGrouped].
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
+    final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
+    const double dividerHeight = 0.5;
+
     // Long divider is used for wrapping the top and bottom of rows.
     // Only used in _CupertinoFormSectionType.base mode
     final Widget longDivider = Container(
-      color: CupertinoColors.separator,
-      height: 0.5,
+      color: dividerColor,
+      height: dividerHeight,
     );
 
     // Short divider is used between rows.
     final Widget shortDivider = Container(
       margin: const EdgeInsetsDirectional.only(start: 15),
-      color: CupertinoColors.separator,
-      height: 0.5,
+      color: dividerColor,
+      height: dividerHeight,
     );
 
     // We construct childrenWithDividers as follows:
@@ -194,9 +201,11 @@ class CupertinoFormSection extends StatelessWidget {
     }
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: CupertinoColors.secondarySystemBackground,
-      ),
+      decoration: decoration ??
+          BoxDecoration(
+            color:
+                CupertinoColors.secondarySystemBackground.resolveFrom(context),
+          ),
       child: Column(
         children: <Widget>[
           Align(
@@ -204,9 +213,10 @@ class CupertinoFormSection extends StatelessWidget {
             child: (header == null)
                 ? null
                 : DefaultTextStyle(
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13.5,
-                      color: CupertinoColors.secondaryLabel,
+                      color:
+                          CupertinoColors.secondaryLabel.resolveFrom(context),
                     ),
                     child: header!,
                   ),
@@ -214,14 +224,9 @@ class CupertinoFormSection extends StatelessWidget {
           Padding(
             padding: margins,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(borderRadius),
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: CupertinoColors.systemBackground,
-                ),
-                child: Column(
-                  children: childrenWithDividers,
-                ),
+              borderRadius: borderRadius,
+              child: Column(
+                children: childrenWithDividers,
               ),
             ),
           ),

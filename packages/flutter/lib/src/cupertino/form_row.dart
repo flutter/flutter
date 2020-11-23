@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-// Prefix widget padding determined via SwiftUI's `Form` view.
+// Prefix widget padding determined via SwiftUI's `Form` view in iOS 14.2 SDK.
 const EdgeInsetsGeometry _kDefaultMargins =
     EdgeInsetsDirectional.fromSTEB(16.0, 6.0, 6.0, 6.0);
 
@@ -48,11 +48,6 @@ const EdgeInsetsGeometry _kDefaultMargins =
 ///
 /// class _FlutterDemoState extends State<FlutterDemo> {
 ///   bool toggleValue = false;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///   }
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -162,8 +157,8 @@ class CupertinoFormRow extends StatelessWidget {
     ];
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: CupertinoColors.systemBackground,
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemBackground.resolveFrom(context),
       ),
       child: Padding(
         padding: margins ?? _kDefaultMargins,
