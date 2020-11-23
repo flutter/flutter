@@ -28,10 +28,12 @@ const EdgeInsetsGeometry _kDefaultMargins =
 /// to the standard iOS padding. If no edge insets are intended, explicitly pass
 /// [EdgeInsets.zero] to [margins].
 ///
-/// The [helper] and [error] parameters are both widgets targeted at displaying
-/// more information about the row. Both widgets are placed underneath the
-/// [prefix] and [child]. When a [Text] is given to [error], it will be shown in
-/// [CupertinoColors.destructiveRed] coloring and medium-weighted font.
+/// The [helper] and [error] parameters are both optional widgets targeted at
+/// displaying more information about the row. Both widgets are placed
+/// underneath the [prefix] and [child], and will expand the row's height to
+/// accomodate for their presence. When a [Text] is given to [error], it will
+/// be shown in [CupertinoColors.destructiveRed] coloring and
+/// medium-weighted font.
 ///
 /// {@tool snippet}
 ///
@@ -92,10 +94,12 @@ class CupertinoFormRow extends StatelessWidget {
   /// to the standard iOS padding. If no edge insets are intended, explicitly
   /// pass [EdgeInsets.zero] to [margins].
   ///
-  /// The [helper] and [error] parameters are both widgets targeted at displaying
-  /// more information about the row. Both widgets are placed underneath the
-  /// [prefix] and [child]. When a [Text] is given to [error], it will be shown in
-  /// [CupertinoColors.destructiveRed] coloring and medium-weighted font.
+  /// The [helper] and [error] parameters are both optional widgets targeted at
+  /// displaying more information about the row. Both widgets are placed
+  /// underneath the [prefix] and [child], and will expand the row's height to
+  /// accomodate for their presence. When a [Text] is given to [error], it will
+  /// be shown in [CupertinoColors.destructiveRed] coloring and
+  /// medium-weighted font.
   const CupertinoFormRow({
     Key? key,
     required this.child,
@@ -109,7 +113,8 @@ class CupertinoFormRow extends StatelessWidget {
   ///
   /// The [prefix] parameter is displayed at the start of the row. Standard iOS
   /// guidelines encourage passing a [Text] widget to [prefix] to detail the
-  /// nature of the row's [child] widget.
+  /// nature of the row's [child] widget. If null, the [child] widget will take
+  /// up all horizontal space in the row.
   final Widget? prefix;
 
   /// Margins used to pad the contents of the row.
@@ -121,20 +126,25 @@ class CupertinoFormRow extends StatelessWidget {
   /// A widget that is displayed underneath the [prefix] and [child] widgets.
   ///
   /// The [helper] appears in primary label coloring, and is meant to inform the
-  /// user about interaction with the child widget.
+  /// user about interaction with the child widget. The row becomes taller in
+  /// order to display the [helper] widget underneath [prefix] and [child]. If
+  /// null, the row is shorter.
   final Widget? helper;
 
   /// A widget that is displayed underneath the [prefix] and [child] widgets.
   ///
   /// The [error] widget is primarily used to inform users of input errors. When
   /// a [Text] is given to [error], it will be shown in
-  /// [CupertinoColors.destructiveRed] coloring and medium-weighted font.
+  /// [CupertinoColors.destructiveRed] coloring and medium-weighted font. The
+  /// row becomes taller in order to display the [helper] widget underneath
+  /// [prefix] and [child]. If null, the row is shorter.
   final Widget? error;
 
   /// Child widget.
   ///
   /// The [child] widget is primarily used for input. It end-aligned and
-  /// flexible, taking up the entire space trailing past the [prefix] widget.
+  /// horizontally flexible, taking up the entire space trailing past the
+  /// [prefix] widget.
   final Widget child;
 
   @override
@@ -163,7 +173,6 @@ class CupertinoFormRow extends StatelessWidget {
       child: Padding(
         padding: margins ?? _kDefaultMargins,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -174,7 +183,6 @@ class CupertinoFormRow extends StatelessWidget {
                 alignment: AlignmentDirectional.centerStart,
                 child: DefaultTextStyle(
                   style: textStyle,
-                  textAlign: TextAlign.start,
                   child: helper!,
                 ),
               ),
@@ -186,7 +194,6 @@ class CupertinoFormRow extends StatelessWidget {
                     color: CupertinoColors.destructiveRed,
                     fontWeight: FontWeight.w500,
                   ),
-                  textAlign: TextAlign.start,
                   child: error!,
                 ),
               ),
