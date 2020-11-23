@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h"
 
 #include <OpenGL/gl.h>
 
@@ -22,7 +23,7 @@ enum {
 
   NSOpenGLContext* _openGLContext;
 
-  IOSurfaceRef _ioSurface[kFlutterSurfaceManagerBufferCount];
+  FlutterIOSurfaceHolder* _ioSurfaces[kFlutterSurfaceManagerBufferCount];
   FlutterFrameBufferProvider* _frameBuffers[kFlutterSurfaceManagerBufferCount];
 }
 @end
@@ -42,6 +43,9 @@ enum {
 
     _frameBuffers[0] = [[FlutterFrameBufferProvider alloc] initWithOpenGLContext:_openGLContext];
     _frameBuffers[1] = [[FlutterFrameBufferProvider alloc] initWithOpenGLContext:_openGLContext];
+
+    _ioSurfaces[0] = [FlutterIOSurfaceHolder alloc];
+    _ioSurfaces[1] = [FlutterIOSurfaceHolder alloc];
   }
   return self;
 }
@@ -55,38 +59,11 @@ enum {
   MacOSGLContextSwitch context_switch(_openGLContext);
 
   for (int i = 0; i < kFlutterSurfaceManagerBufferCount; ++i) {
-    if (_ioSurface[i]) {
-      CFRelease(_ioSurface[i]);
-    }
-    unsigned pixelFormat = 'BGRA';
-    unsigned bytesPerElement = 4;
+    [_ioSurfaces[i] recreateIOSurfaceWithSize:size];
 
-    size_t bytesPerRow =
-        IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, size.width * bytesPerElement);
-    size_t totalBytes = IOSurfaceAlignProperty(kIOSurfaceAllocSize, size.height * bytesPerRow);
-    NSDictionary* options = @{
-      (id)kIOSurfaceWidth : @(size.width),
-      (id)kIOSurfaceHeight : @(size.height),
-      (id)kIOSurfacePixelFormat : @(pixelFormat),
-      (id)kIOSurfaceBytesPerElement : @(bytesPerElement),
-      (id)kIOSurfaceBytesPerRow : @(bytesPerRow),
-      (id)kIOSurfaceAllocSize : @(totalBytes),
-    };
-    _ioSurface[i] = IOSurfaceCreate((CFDictionaryRef)options);
-
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, [_frameBuffers[i] glTextureId]);
-
-    CGLTexImageIOSurface2D(CGLGetCurrentContext(), GL_TEXTURE_RECTANGLE_ARB, GL_RGBA,
-                           int(size.width), int(size.height), GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,
-                           _ioSurface[i], 0 /* plane */);
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, [_frameBuffers[i] glFrameBufferId]);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB,
-                           [_frameBuffers[i] glTextureId], 0);
-
-    NSAssert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
-             @"Framebuffer status check failed");
+    GLuint fbo = [_frameBuffers[i] glFrameBufferId];
+    GLuint texture = [_frameBuffers[i] glTextureId];
+    [_ioSurfaces[i] bindSurfaceToTexture:texture fbo:fbo size:size];
   }
 }
 
@@ -96,24 +73,17 @@ enum {
   // The surface is an OpenGL texture, which means it has origin in bottom left corner
   // and needs to be flipped vertically
   _contentLayer.transform = CATransform3DMakeScale(1, -1, 1);
-  [_contentLayer setContents:(__bridge id)_ioSurface[kFlutterSurfaceManagerBackBuffer]];
+  IOSurfaceRef contentIOSurface = [_ioSurfaces[kFlutterSurfaceManagerBackBuffer] ioSurface];
+  [_contentLayer setContents:(__bridge id)contentIOSurface];
 
-  std::swap(_ioSurface[kFlutterSurfaceManagerBackBuffer],
-            _ioSurface[kFlutterSurfaceManagerFrontBuffer]);
+  std::swap(_ioSurfaces[kFlutterSurfaceManagerBackBuffer],
+            _ioSurfaces[kFlutterSurfaceManagerFrontBuffer]);
   std::swap(_frameBuffers[kFlutterSurfaceManagerBackBuffer],
             _frameBuffers[kFlutterSurfaceManagerFrontBuffer]);
 }
 
 - (uint32_t)glFrameBufferId {
   return [_frameBuffers[kFlutterSurfaceManagerBackBuffer] glFrameBufferId];
-}
-
-- (void)dealloc {
-  for (int i = 0; i < kFlutterSurfaceManagerBufferCount; ++i) {
-    if (_ioSurface[i]) {
-      CFRelease(_ioSurface[i]);
-    }
-  }
 }
 
 @end
