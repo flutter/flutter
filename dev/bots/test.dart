@@ -863,7 +863,6 @@ Future<void> _runWebLongRunningTests() async {
 
 /// Executes the test suite for the flutter/plugins repo.
 Future<void> _runFlutterPluginsTests() async {
-
   Future<void> runAnalyze() async {
     print('${green}Running analysis for flutter/plugins$reset');
     final Directory checkout = Directory.systemTemp.createTempSync('plugins');
@@ -898,7 +897,6 @@ Future<void> _runFlutterPluginsTests() async {
       workingDirectory: checkout.path,
     );
   }
-
   await selectSubshard(<String, ShardRunner>{
     'analyze': runAnalyze,
   });
