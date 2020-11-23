@@ -34,9 +34,7 @@ def install_flutter_engine_pod
     # Copy the debug engine to have something to link against if the xcode backend script has not run yet.
     # CocoaPods will not embed the framework on pod install (before any build phases can generate) if the dylib does not exist.
     debug_framework_dir = File.join(flutter_root, 'bin', 'cache', 'artifacts', 'engine', 'ios')
-    FileUtils.mkdir_p(engine_dir)
     FileUtils.cp_r(File.join(debug_framework_dir, 'Flutter.framework'), engine_dir)
-    FileUtils.cp(File.join(debug_framework_dir, 'Flutter.podspec'), engine_dir)
   end
 
   # Keep pod path relative so it can be checked into Podfile.lock.
