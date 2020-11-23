@@ -229,41 +229,30 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       return constraints.smallest;
     }
 
+    // This simplified version of performLayout only calculates the current
+    // size without modifying global state. See performLayout for comments
+    // explaining the rational behind the implementation.
     final Size childSize = child!.getDryLayout(constraints);
-    // During dry layout we cannot modify global state (namely _sizeTween and
-    // _controller). Therefore, create a copy her for local modifications.
-    final SizeTween dryTween = SizeTween(begin: _sizeTween.begin, end: _sizeTween.end);
-    late double animationValue = _controller.value;
-
-    // Same logic as in performLayout, but instead of modifying global state,
-    // modify our local copies (dryTween and animationValue).
     assert(_state != null);
     switch (_state) {
       case RenderAnimatedSizeState.start:
-        dryTween.begin = dryTween.end = childSize;
-        animationValue = 0.0;
-        break;
+        return constraints.constrain(childSize);
       case RenderAnimatedSizeState.stable:
-        if (dryTween.end != childSize) {
-          dryTween.begin = size;
-          dryTween.end = childSize;
-          animationValue = 0.0;
+        if (_sizeTween.end != childSize) {
+          return constraints.constrain(size);
         } else if (_controller.value == _controller.upperBound) {
-          dryTween.begin = dryTween.end = childSize;
-          animationValue = 1.0;
+          return constraints.constrain(childSize);
         }
         break;
       case RenderAnimatedSizeState.unstable:
       case RenderAnimatedSizeState.changed:
-        if (dryTween.end != childSize) {
-          dryTween.begin = dryTween.end = childSize;
-          animationValue = 0.0;
+        if (_sizeTween.end != childSize) {
+          return constraints.constrain(childSize);
         }
         break;
     }
-    return constraints.constrain(
-      dryTween.transform(_animation.curve.transform(animationValue))!,
-    );
+
+    return constraints.constrain(_animatedSize!);
   }
 
   void _restartAnimation() {
