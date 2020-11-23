@@ -1040,11 +1040,12 @@ TEST_F(ShellTest,
 
   // `EndFrame` changed the post preroll result to `kSuccess`.
   end_frame_latch.Wait();
-  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
 
   // Let the resubmitted frame to run and `GetSubmittedFrameCount` should be
   // called.
   end_frame_latch.Wait();
+  // 2 frames are submitted because `kSkipAndRetryFrame`, but only the 2nd frame
+  // should be submitted with `external_view_embedder`, hence the below check.
   ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
 
   PlatformViewNotifyDestroyed(shell.get());
@@ -1095,10 +1096,11 @@ TEST_F(ShellTest,
   // `external_view_embedder->GetSubmittedFrameCount()` is called.
   end_frame_latch.Wait();
   ASSERT_TRUE(raster_thread_merger_ref->IsMerged());
-  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
 
   // This is the resubmitted frame, which threads are also merged.
   end_frame_latch.Wait();
+  // 2 frames are submitted because `kResubmitFrame`, but only the 2nd frame
+  // should be submitted with `external_view_embedder`, hence the below check.
   ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
 
   PlatformViewNotifyDestroyed(shell.get());
@@ -2096,13 +2098,11 @@ TEST_F(ShellTest, DiscardLayerTreeOnResize) {
                static_cast<double>(expected_size.height()));
 
   end_frame_latch.Wait();
-  // Even the threads are merged at the end of the frame,
-  // during the frame, the threads are not merged,
-  // So no `external_view_embedder->GetSubmittedFrameCount()` is called.
   ASSERT_TRUE(raster_thread_merger_ref->IsMerged());
-  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
 
   end_frame_latch.Wait();
+  // 2 frames are submitted because `kResubmitFrame`, but only the 2nd frame
+  // should be submitted with `external_view_embedder`, hence the below check.
   ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
   ASSERT_EQ(expected_size, external_view_embedder->GetLastSubmittedFrameSize());
 
