@@ -31,6 +31,12 @@ std::vector<std::wstring> GetPreferredLanguages();
 // Parses a Windows language name into its components.
 LanguageInfo ParseLanguageName(std::wstring language_name);
 
+// Returns the user's system time format string.
+std::wstring GetUserTimeFormat();
+
+// Returns true if the time_format is set to use 24 hour time.
+bool Prefer24HourTime(std::wstring time_format);
+
 }  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_SYSTEM_UTILS_H_
