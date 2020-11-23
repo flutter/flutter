@@ -154,8 +154,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  // TODO(gspencergoog): remove the casts once https://github.com/flutter/engine/pull/22267 lands
-  ui.Locale get locale => _localeTestValue ?? ((platformDispatcher.locale as dynamic) as ui.Locale);
+  ui.Locale get locale => _localeTestValue ?? platformDispatcher.locale;
   ui.Locale? _localeTestValue;
   /// Hides the real locale and reports the given [localeTestValue] instead.
   set localeTestValue(ui.Locale localeTestValue) {
@@ -169,8 +168,7 @@ class TestWindow implements ui.SingletonFlutterWindow {
   }
 
   @override
-  // TODO(gspencergoog): remove the casts once https://github.com/flutter/engine/pull/22267 lands
-  List<ui.Locale> get locales => _localesTestValue ?? ((platformDispatcher.locales as dynamic) as List<ui.Locale>);
+  List<ui.Locale> get locales => _localesTestValue ?? platformDispatcher.locales;
   List<ui.Locale>? _localesTestValue;
   /// Hides the real locales and reports the given [localesTestValue] instead.
   set localesTestValue(List<ui.Locale> localesTestValue) {

@@ -132,23 +132,6 @@ void main() {
     expect(result.stderr, contains('Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
   });
 
-  testWithoutContext('flutter build aot is deprecated', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      '-h',
-      '-v',
-    ]);
-
-    // Deprecated.
-    expect(result.stdout, isNot(contains('aot')));
-
-    // Only printed by verbose tool.
-    expect(result.stdout, isNot(contains('exiting with code 0')));
-  });
-
   testWithoutContext('flutter --version --machine outputs JSON with flutterRoot', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[

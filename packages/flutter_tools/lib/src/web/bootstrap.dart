@@ -41,6 +41,8 @@ document.head.appendChild(requireEl);
 /// Generate a synthetic main module which captures the application's main
 /// method.
 ///
+/// If a [bootstrapModule] name is not provided, defaults to 'main_module.bootstrap'.
+///
 /// RE: Object.keys usage in app.main:
 /// This attaches the main entrypoint and hot reload functionality to the window.
 /// The app module will have a single property which contains the actual application
@@ -51,12 +53,13 @@ document.head.appendChild(requireEl);
 String generateMainModule({
   @required String entrypoint,
   @required bool nullAssertions,
+  String bootstrapModule = 'main_module.bootstrap',
 }) {
   // TODO(jonahwilliams): fix typo in dwds and update.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
 // Create the main module loaded below.
-define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
+define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
   if ($nullAssertions) {
@@ -89,5 +92,34 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
     });
   }
 });
+''';
+}
+
+/// Generate the unit test bootstrap file.
+String generateTestBootstrapFileContents(String mainUri, String requireUrl, String mapperUrl) {
+  return '''
+(function() {
+  if (typeof document != 'undefined') {
+    var el = document.createElement("script");
+    el.defer = true;
+    el.async = false;
+    el.src = '$mapperUrl';
+    document.head.appendChild(el);
+
+    el = document.createElement("script");
+    el.defer = true;
+    el.async = false;
+    el.src = '$requireUrl';
+    el.setAttribute("data-main", '$mainUri');
+    document.head.appendChild(el);
+  } else {
+    importScripts('$mapperUrl', '$requireUrl');
+    require.config({
+      baseUrl: baseUrl,
+    });
+    window = self;
+    require(['$mainUri']);
+  }
+})();
 ''';
 }

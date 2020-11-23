@@ -4481,8 +4481,8 @@ class Flex extends MultiChildRenderObjectWidget {
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSize],
-  /// [crossAxisAlignment], and [verticalDirection] arguments must not be null.
+  /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
+  /// [verticalDirection] arguments must not be null.
   /// If [crossAxisAlignment] is [CrossAxisAlignment.baseline], then
   /// [textBaseline] must not be null.
   ///
@@ -4683,8 +4683,8 @@ class Row extends Flex {
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSize],
-  /// [crossAxisAlignment], and [verticalDirection] arguments must not be null.
+  /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
+  /// [verticalDirection] arguments must not be null.
   /// If [crossAxisAlignment] is [CrossAxisAlignment.baseline], then
   /// [textBaseline] must not be null.
   ///

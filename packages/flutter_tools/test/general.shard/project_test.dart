@@ -792,10 +792,6 @@ void _testInMemory(String description, Future<void> testMethod()) {
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('templates'), testFileSystem);
-  transfer(globals.fs.directory(Cache.flutterRoot)
-      .childDirectory('packages')
-      .childDirectory('flutter_tools')
-      .childDirectory('schema'), testFileSystem);
   // Set up enough of the packages to satisfy the templating code.
   final File packagesFile = testFileSystem.directory(Cache.flutterRoot)
       .childDirectory('packages')
@@ -923,7 +919,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId '$id'
@@ -940,7 +936,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 }
 ''';
 }

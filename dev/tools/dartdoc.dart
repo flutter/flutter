@@ -188,6 +188,7 @@ Future<void> main(List<String> arguments) async {
     ].join(','),
     '--exclude',
     <String>[
+      'dart:io/network_policy.dart', // dart-lang/dartdoc#2437
       'package:Flutter/temp_doc.dart',
       'package:http/browser_client.dart',
       'package:intl/intl_browser.dart',
