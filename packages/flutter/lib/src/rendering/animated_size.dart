@@ -223,6 +223,49 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       _hasVisualOverflow = true;
   }
 
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null || constraints.isTight) {
+      return constraints.smallest;
+    }
+
+    final Size childSize = child!.getDryLayout(constraints);
+    // During dry layout we cannot modify global state (namely _sizeTween and
+    // _controller). Therefore, create a copy her for local modifications.
+    final SizeTween dryTween = SizeTween(begin: _sizeTween.begin, end: _sizeTween.end);
+    late double animationValue = _controller.value;
+
+    // Same logic as in performLayout, but instead of modifying global state,
+    // modify our local copies (dryTween and animationValue).
+    assert(_state != null);
+    switch (_state) {
+      case RenderAnimatedSizeState.start:
+        dryTween.begin = dryTween.end = childSize;
+        animationValue = 0.0;
+        break;
+      case RenderAnimatedSizeState.stable:
+        if (dryTween.end != childSize) {
+          dryTween.begin = size;
+          dryTween.end = childSize;
+          animationValue = 0.0;
+        } else if (_controller.value == _controller.upperBound) {
+          dryTween.begin = dryTween.end = childSize;
+          animationValue = 1.0;
+        }
+        break;
+      case RenderAnimatedSizeState.unstable:
+      case RenderAnimatedSizeState.changed:
+        if (dryTween.end != childSize) {
+          dryTween.begin = dryTween.end = childSize;
+          animationValue = 0.0;
+        }
+        break;
+    }
+    return constraints.constrain(
+      dryTween.transform(_animation.curve.transform(animationValue))!,
+    );
+  }
+
   void _restartAnimation() {
     _lastValue = 0.0;
     _controller.forward(from: 0.0);
