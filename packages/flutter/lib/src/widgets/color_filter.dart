@@ -11,7 +11,53 @@ import 'framework.dart';
 
 /// Applies a [ColorFilter] to its child.
 ///
+/// Causes the child to be modified using a color to tint the resulting rendering.
+/// This widget allows to generate dynamic and vibrant shades depending on the chosen blend modes.
+/// Different blending modes can modify how the color is applied,
+/// and to which parts of the image.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows how to filter images with a color
+/// and blend them using the [BlendMode.modulate] and [BlendMode.saturation] modes.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return SingleChildScrollView(
+///     child: Column(
+///       children: [
+///         ColorFiltered(
+///           colorFilter: ColorFilter.mode(
+///             Colors.red,
+///             BlendMode.modulate,
+///           ),
+///           child: Image.network(
+///               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+///         ),
+///         ColorFiltered(
+///           colorFilter: ColorFilter.mode(
+///             Colors.grey,
+///             BlendMode.saturation,
+///           ),
+///           child: Image.network(
+///               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+///{@end-tool}
+///
+/// See Also:
+///
+///  * [BlendMode], describing how to blend a source image with destination image.
+///  * [Image], the class in the [dart:ui](https://api.flutter.dev/flutter/dart-ui/dart-ui-library.html) library.
+///  * [Colors], constants which represent Material Design's [color palette](https://material.io/design/color/).
+///  * Cookbook: [Display images from the internet](https://flutter.dev/docs/cookbook/images/network-image)
+///
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a [ColorFilter] to its child.
