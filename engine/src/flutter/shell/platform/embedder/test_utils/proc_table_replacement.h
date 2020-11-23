@@ -8,7 +8,9 @@
 // FlutterEngineProcTable entries (by using statics) to facilitate mocking in
 // tests of code built on top of the embedder API.
 //
-// This should *ONLY* be used in unit tests as it is leaky by design.
+// This should *ONLY* be used in unit tests as it is leaky by design. Because it
+// uses statics for the lambdas, tests using this macro are generally not safe
+// to run multiple times (e.g., using gtest_repeat).
 //
 // |proc| should be the name of an entry in FlutterEngineProcTable, such as
 // "initialize". |mock_impl| should be a lamba that replaces its implementation,

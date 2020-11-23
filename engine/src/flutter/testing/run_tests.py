@@ -97,8 +97,11 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[], cwd=buildr
 def RunCCTests(build_dir, filter):
   print("Running Engine Unit-tests.")
 
-  shuffle_flags = [
+  # Not all of the engine unit tests are designed to be run more than once.
+  non_repeatable_shuffle_flags = [
     "--gtest_shuffle",
+  ]
+  shuffle_flags = non_repeatable_shuffle_flags + [
     "--gtest_repeat=2",
   ]
 
@@ -115,7 +118,7 @@ def RunCCTests(build_dir, filter):
     RunEngineExecutable(build_dir, 'embedder_unittests', filter, shuffle_flags)
     RunEngineExecutable(build_dir, 'embedder_proctable_unittests', filter, shuffle_flags)
   else:
-    RunEngineExecutable(build_dir, 'flutter_windows_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'flutter_windows_unittests', filter, non_repeatable_shuffle_flags)
 
     RunEngineExecutable(build_dir, 'client_wrapper_windows_unittests', filter, shuffle_flags)
 
@@ -150,14 +153,14 @@ def RunCCTests(build_dir, filter):
   # These unit-tests are Objective-C and can only run on Darwin.
   if IsMac():
     RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter, shuffle_flags)
-    RunEngineExecutable(build_dir, 'flutter_desktop_darwin_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'flutter_desktop_darwin_unittests', filter, non_repeatable_shuffle_flags)
 
   # https://github.com/flutter/flutter/issues/36296
   if IsLinux():
     RunEngineExecutable(build_dir, 'txt_unittests', filter, shuffle_flags)
 
   if IsLinux():
-    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, shuffle_flags)
+    RunEngineExecutable(build_dir, 'flutter_linux_unittests', filter, non_repeatable_shuffle_flags)
 
 
 def RunEngineBenchmarks(build_dir, filter):

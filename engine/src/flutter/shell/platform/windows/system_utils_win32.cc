@@ -90,4 +90,20 @@ LanguageInfo ParseLanguageName(std::wstring language_name) {
   return info;
 }
 
+std::wstring GetUserTimeFormat() {
+  // Rather than do the call-allocate-call-free dance, just use a sufficiently
+  // large buffer to handle any reasonable time format string.
+  const int kBufferSize = 100;
+  wchar_t buffer[kBufferSize];
+  if (::GetLocaleInfoEx(LOCALE_NAME_USER_DEFAULT, LOCALE_STIMEFORMAT, buffer,
+                        kBufferSize) == 0) {
+    return std::wstring();
+  }
+  return std::wstring(buffer, kBufferSize);
+}
+
+bool Prefer24HourTime(std::wstring time_format) {
+  return time_format.find(L"H") != std::wstring::npos;
+}
+
 }  // namespace flutter

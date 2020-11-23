@@ -20,9 +20,80 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   properties.icu_data_path = L"C:\\foo\\icudtl.dat";
   properties.aot_library_path = L"C:\\foo\\aot.so";
   FlutterProjectBundle project(properties);
-  return std::make_unique<FlutterWindowsEngine>(project);
+  auto engine = std::make_unique<FlutterWindowsEngine>(project);
+
+  EngineEmbedderApiModifier modifier(engine.get());
+  // Force the non-AOT path unless overridden by the test.
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+
+  return engine;
 }
 }  // namespace
+
+TEST(FlutterWindowsEngine, RunDoesExpectedInitialization) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineEmbedderApiModifier modifier(engine.get());
+
+  // The engine should be run with expected configuration values.
+  bool run_called = false;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&run_called, engine_instance = engine.get()](
+                size_t version, const FlutterRendererConfig* config,
+                const FlutterProjectArgs* args, void* user_data,
+                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        run_called = true;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+
+        EXPECT_EQ(version, FLUTTER_ENGINE_VERSION);
+        EXPECT_NE(config, nullptr);
+        EXPECT_EQ(user_data, engine_instance);
+        // Spot-check arguments.
+        EXPECT_STREQ(args->assets_path, "C:\\foo\\flutter_assets");
+        EXPECT_STREQ(args->icu_data_path, "C:\\foo\\icudtl.dat");
+        EXPECT_EQ(args->dart_entrypoint_argc, 0);
+        EXPECT_NE(args->platform_message_callback, nullptr);
+        EXPECT_NE(args->custom_task_runners, nullptr);
+        EXPECT_EQ(args->custom_dart_entrypoint, nullptr);
+
+        return kSuccess;
+      }));
+
+  // It should send locale info.
+  bool update_locales_called = false;
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales,
+      ([&update_locales_called](auto engine, const FlutterLocale** locales,
+                                size_t locales_count) {
+        update_locales_called = true;
+
+        EXPECT_GT(locales_count, 0);
+        EXPECT_NE(locales, nullptr);
+
+        return kSuccess;
+      }));
+
+  // And it should send initial settings info.
+  bool settings_message_sent = false;
+  modifier.embedder_api().SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&settings_message_sent](auto engine, auto message) {
+        if (std::string(message->channel) == std::string("flutter/settings")) {
+          settings_message_sent = true;
+        }
+
+        return kSuccess;
+      }));
+
+  engine->RunWithEntrypoint(nullptr);
+
+  EXPECT_TRUE(run_called);
+  EXPECT_TRUE(update_locales_called);
+  EXPECT_TRUE(settings_message_sent);
+
+  // Ensure that deallocation doesn't call the actual Shutdown with the bogus
+  // engine pointer that the overridden Run returned.
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+}
 
 TEST(FlutterWindowsEngine, SendPlatformMessageWithoutResponse) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
