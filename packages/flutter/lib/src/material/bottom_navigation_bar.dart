@@ -194,6 +194,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.mouseCursor,
+    this.showToolTip,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -329,6 +330,9 @@ class BottomNavigationBar extends StatefulWidget {
   /// If this property is null, [SystemMouseCursors.click] will be used.
   final MouseCursor? mouseCursor;
 
+  /// If true, shows the ToolTip on BottomNavigationBarItem.
+  final bool? showToolTip;
+
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
 }
@@ -353,6 +357,7 @@ class _BottomNavigationTile extends StatelessWidget {
     required this.showUnselectedLabels,
     this.indexLabel,
     required this.mouseCursor,
+    required this.showToolTip,
     }) : assert(type != null),
          assert(item != null),
          assert(animation != null),
@@ -377,6 +382,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
   final MouseCursor mouseCursor;
+  final bool showToolTip;
 
   @override
   Widget build(BuildContext context) {
@@ -488,9 +494,9 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
 
-    if (item.label != null) {
+    if (showToolTip && item.label != null) {
       result = Tooltip(
-        message: item.label!,
+        message: item.toolTip ?? item.label!,
         preferBelow: false,
         verticalOffset: selectedIconSize + selectedFontSize,
         child: result,
@@ -895,6 +901,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
         mouseCursor: effectiveMouseCursor,
+        showToolTip: widget.showToolTip ?? true,
       ));
     }
     return tiles;

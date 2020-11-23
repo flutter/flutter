@@ -1150,6 +1150,63 @@ void main() {
     expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
   });
 
+  testWidgets('BottomNavigationBar doesn\'t show tool tips if showTooltip is false', (WidgetTester tester) async {
+    const String label = 'Foo';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            showToolTip: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: label,
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(label), findsOneWidget);
+    await tester.longPress(find.text(label));
+    expect(find.text(label), findsNWidgets(1));
+  });
+
+  testWidgets('BottomNavigationBar shows custom tool tips if toolTip is provided in BottomNavigationBarItem', (WidgetTester tester) async {
+    const String label = 'Foo';
+    const String toolTip = 'Foo Tool Tip';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: label,
+                toolTip: toolTip,
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(label), findsOneWidget);
+    await tester.longPress(find.text(label));
+    expect(find.text(toolTip), findsNWidgets(1));
+  });
+
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
     final Text longTextA = Text(''.padLeft(100, 'A'));
     final Text longTextB = Text(''.padLeft(100, 'B'));

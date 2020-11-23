@@ -32,6 +32,7 @@ class BottomNavigationBarItem {
     this.label,
     Widget? activeIcon,
     this.backgroundColor,
+    this.toolTip,
   }) : activeIcon = activeIcon ?? icon,
        assert(label == null || title == null),
        assert(icon != null);
@@ -96,4 +97,7 @@ class BottomNavigationBarItem {
   ///  * [Icon.color] and [ImageIcon.color] to control the foreground color of
   ///    the icons themselves.
   final Color? backgroundColor;
+
+  /// The ToolTip message for this [BottomNavigationBarItem].
+  final String? toolTip;
 }
