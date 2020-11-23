@@ -9,12 +9,13 @@ import shutil
 import sys
 import os
 
+from create_xcframework import create_xcframework
 
 DSYMUTIL = os.path.join(os.path.dirname(__file__), '..', '..', '..',
                         'buildtools', 'mac-x64', 'clang', 'bin', 'dsymutil')
 
 def main():
-  parser = argparse.ArgumentParser(description='Creates Flutter.framework')
+  parser = argparse.ArgumentParser(description='Creates Flutter.framework and Flutter.xcframework')
 
   parser.add_argument('--dst', type=str, required=True)
   parser.add_argument('--arm64-out-dir', type=str, required=True)
@@ -66,8 +67,24 @@ def main():
   shutil.rmtree(fat_framework, True)
   shutil.copytree(arm64_framework, fat_framework)
 
-  linker_out = os.path.join(fat_framework, 'Flutter')
+  fat_framework_binary = os.path.join(fat_framework, 'Flutter')
 
+  # Create the arm-only fat framework.
+  subprocess.check_call([
+    'lipo',
+    arm64_dylib,
+    armv7_dylib,
+    '-create',
+    '-output',
+    fat_framework_binary
+  ])
+  process_framework(args, fat_framework, fat_framework_binary)
+
+  # Create XCFramework from the arm-only fat framework and the simulator framework.
+  xcframeworks = [simulator_framework, fat_framework]
+  create_xcframework(location=args.dst, name='Flutter', frameworks=xcframeworks)
+
+  # Add the simulator into the fat framework.
   subprocess.check_call([
     'lipo',
     arm64_dylib,
@@ -75,22 +92,25 @@ def main():
     simulator_dylib,
     '-create',
     '-output',
-    linker_out
+    fat_framework_binary
   ])
+  process_framework(args, fat_framework, fat_framework_binary)
 
+
+def process_framework(args, fat_framework, fat_framework_binary):
   if args.strip_bitcode:
-    subprocess.check_call(['xcrun', 'bitcode_strip', '-r', linker_out, '-o', linker_out])
+    subprocess.check_call(['xcrun', 'bitcode_strip', '-r', fat_framework_binary, '-o', fat_framework_binary])
 
   if args.dsym:
     dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
-    subprocess.check_call([DSYMUTIL, '-o', dsym_out, linker_out])
+    subprocess.check_call([DSYMUTIL, '-o', dsym_out, fat_framework_binary])
 
   if args.strip:
     # copy unstripped
     unstripped_out = os.path.join(args.dst, 'Flutter.unstripped')
-    shutil.copyfile(linker_out, unstripped_out)
+    shutil.copyfile(fat_framework_binary, unstripped_out)
 
-    subprocess.check_call(["strip", "-x", "-S", linker_out])
+    subprocess.check_call(["strip", "-x", "-S", fat_framework_binary])
 
 
 if __name__ == '__main__':

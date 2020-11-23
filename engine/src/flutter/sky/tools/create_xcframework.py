@@ -25,8 +25,11 @@ def main():
 
   args = parser.parse_args()
 
-  output_dir = os.path.abspath(args.location)
-  output_xcframework = os.path.join(output_dir, '%s.xcframework' % args.name)
+  create_xcframework(args.location, args.name, args.frameworks)
+
+def create_xcframework(location, name, frameworks):
+  output_dir = os.path.abspath(location)
+  output_xcframework = os.path.join(output_dir, '%s.xcframework' % name)
 
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
@@ -41,7 +44,7 @@ def main():
     '-quiet',
     '-create-xcframework']
 
-  for framework in args.frameworks:
+  for framework in frameworks:
     command.extend(['-framework', os.path.abspath(framework)])
 
   command.extend(['-output', output_xcframework])
