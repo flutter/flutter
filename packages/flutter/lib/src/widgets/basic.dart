@@ -6609,8 +6609,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 
 /// A widget that is invisible during hit testing.
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
-///
 /// When [ignoring] is true, this widget (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
 /// as usual. It just cannot be the target of located events, because it returns
@@ -6619,6 +6617,61 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// When [ignoringSemantics] is true, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
 /// [ignoringSemantics] is null, it uses the value of [ignoring].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// The following sample has an [IgnorePointer] widget wrapping the `Column`
+/// which contains a button.
+/// When [ignoring] is set to `true` anything inside the `Column` can
+/// not be tapped. When [ignoring] is set to `false` anything
+/// inside the `Column` can be tapped.
+///
+/// ```dart
+/// bool ignoring = false;
+/// void setIgnoring(bool newValue) {
+///   setState(() {
+///     ignoring = newValue;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       centerTitle: true,
+///       title: ElevatedButton(
+///         onPressed: () {
+///           setIgnoring(!ignoring);
+///         },
+///         child: Text(
+///           ignoring ? 'Set ignoring to false' : 'Set ignoring to true',
+///         ),
+///       ),
+///     ),
+///     body: Center(
+///       child: IgnorePointer(
+///         ignoring: ignoring,
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///           children: <Widget>[
+///             Text(
+///               'Ignoring: $ignoring',
+///             ),
+///             ElevatedButton(
+///               onPressed: () {},
+///               child: Text(
+///                 'Click me!',
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
