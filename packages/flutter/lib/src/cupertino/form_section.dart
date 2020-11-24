@@ -203,8 +203,10 @@ class CupertinoFormSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MediaQueryData media = MediaQuery.of(context);
+
     final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
-    final double dividerHeight = 1.0 / MediaQuery.of(context).devicePixelRatio;
+    final double dividerHeight = 1.0 / media.devicePixelRatio;
 
     // Long divider is used for wrapping the top and bottom of rows.
     // Only used in _CupertinoFormSectionType.base mode
@@ -244,20 +246,14 @@ class CupertinoFormSection extends StatelessWidget {
       childrenWithDividers.add(longDivider);
     }
 
-    final Color themeAwareSystemBackgroundColor =
-        CupertinoColors.systemBackground.resolveFrom(context);
-
-    final Color themeAwareSecondarySystemBackgroundColor =
-        CupertinoColors.secondarySystemBackground.resolveFrom(context);
-
     // When the background color is not provided, use the default background
     // color determined from standard SwiftUI Forms in iOS 14.2 SDK.
     // Defaults to black (systemBackground) in dark themes, and
     // gray (secondarySystemBackground) in light themes.
-    final Color themeAwareBackgroundColor = backgroundColor ??
-        (MediaQuery.of(context).platformBrightness == Brightness.dark
-            ? themeAwareSystemBackgroundColor
-            : themeAwareSecondarySystemBackgroundColor);
+    final Color sectionBackgroundColor = backgroundColor ??
+        (media.platformBrightness == Brightness.dark
+            ? CupertinoColors.systemBackground
+            : CupertinoColors.secondarySystemBackground);
 
     // When the group decoration is not provided, makes a group color with the
     // default group background color determined from standard SwiftUI Forms in
@@ -265,15 +261,16 @@ class CupertinoFormSection extends StatelessWidget {
     // The color for the row group is the reverse of themeAwareBackgroundColor.
     // Defaults to gray (secondarySystemBackground) in dark themes, and
     // black (systemBackground) in light themes.
-    final Color themeAwareGroupColor = groupDecoration?.color ??
-        (MediaQuery.of(context).platformBrightness == Brightness.dark
-            ? themeAwareSecondarySystemBackgroundColor
-            : themeAwareSystemBackgroundColor);
+    final Color childrenGroupBackgroundColor = groupDecoration?.color ??
+        (media.platformBrightness == Brightness.dark
+            ? CupertinoColors.secondarySystemBackground
+            : CupertinoColors.systemBackground);
 
     final DecoratedBox decoratedChildrenGroup = DecoratedBox(
       decoration: groupDecoration ??
           BoxDecoration(
-            color: themeAwareGroupColor,
+            color: CupertinoDynamicColor.resolve(
+                childrenGroupBackgroundColor, context),
             borderRadius: _kDefaultInsetGroupedBorderRadius,
           ),
       child: Column(
@@ -283,8 +280,7 @@ class CupertinoFormSection extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color:
-            CupertinoDynamicColor.resolve(themeAwareBackgroundColor, context),
+        color: CupertinoDynamicColor.resolve(sectionBackgroundColor, context),
       ),
       child: Column(
         children: <Widget>[
