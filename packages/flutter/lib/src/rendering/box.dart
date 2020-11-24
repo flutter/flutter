@@ -1769,7 +1769,6 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<BoxConstraints, Size>? _cachedDryLayoutSizes;
-  bool _computingThisDryLayout = false;
 
   /// Returns the [Size] that this [RenderBox] would like to be given the
   /// provided [BoxConstraints].
@@ -1801,24 +1800,9 @@ abstract class RenderBox extends RenderObject {
     }());
     if (shouldCache) {
       _cachedDryLayoutSizes ??= <BoxConstraints, Size>{};
-      return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
+      return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => computeDryLayout(constraints));
     }
-    return _computeDryLayout(constraints);
-  }
-
-  Size _computeDryLayout(BoxConstraints constraints) {
-    assert(() {
-      assert(!_computingThisDryLayout);
-      _computingThisDryLayout = true;
-      return true;
-    }());
-    final Size result =  computeDryLayout(constraints);
-    assert(() {
-      assert(_computingThisDryLayout);
-      _computingThisDryLayout = false;
-      return true;
-    }());
-    return result;
+    return computeDryLayout(constraints);
   }
 
   /// Computes the value returned by [getDryLayout]. Do not call this
@@ -1923,7 +1907,7 @@ abstract class RenderBox extends RenderObject {
         assert(_size._owner == this);
         if (RenderObject.debugActiveLayout != null) {
           assert(
-            debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
+            debugDoingThisResize || debugDoingThisLayout ||
               (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
             'RenderBox.size accessed beyond the scope of resize, layout, or '
             'permitted parent access. RenderBox can always access its own size, '
