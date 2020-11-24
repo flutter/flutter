@@ -43,7 +43,7 @@ void generateLocalizations({
 
   precacheLanguageAndRegionTags();
 
-  final String inputPathString = options?.arbDirectory?.toFilePath() ?? globals.fs.path.join('lib', 'l10n');
+  final String inputPathString = options?.arbDirectory?.path ?? globals.fs.path.join('lib', 'l10n');
   final String templateArbFileName = options?.templateArbFile?.toFilePath() ?? 'app_en.arb';
   final String outputFileString = options?.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
 
@@ -55,6 +55,7 @@ void generateLocalizations({
         inputPathString: inputPathString,
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
+        outputPathString: options?.outputDirectory?.path,
         classNameString: options.outputClass ?? 'AppLocalizations',
         preferredSupportedLocale: options.preferredSupportedLocales,
         headerString: options.header,
@@ -155,6 +156,7 @@ class LocalizationOptions {
     this.untranslatedMessagesFile,
     this.header,
     this.outputClass,
+    this.outputDirectory,
     this.preferredSupportedLocales,
     this.headerFile,
     this.deferredLoading,
@@ -164,7 +166,7 @@ class LocalizationOptions {
 
   /// The `--arb-dir` argument.
   ///
-  /// The directory where all localization files should reside.
+  /// The directory where all input localization files should reside.
   final Uri arbDirectory;
 
   /// The `--template-arb-file` argument.
@@ -189,6 +191,11 @@ class LocalizationOptions {
 
   /// The `--output-class` argument.
   final String outputClass;
+
+  /// The `--output-dir` argument.
+  ///
+  /// The directory where all output localization files should be generated.
+  final Uri outputDirectory;
 
   /// The `--preferred-supported-locales` argument.
   final List<String> preferredSupportedLocales;
@@ -244,6 +251,7 @@ LocalizationOptions parseLocalizationsOptions({
     untranslatedMessagesFile: _tryReadUri(yamlMap, 'untranslated-messages-file', logger),
     header: _tryReadString(yamlMap, 'header', logger),
     outputClass: _tryReadString(yamlMap, 'output-class', logger),
+    outputDirectory: _tryReadUri(yamlMap, 'output-dir', logger),
     preferredSupportedLocales: _tryReadStringList(yamlMap, 'preferred-supported-locales', logger),
     headerFile: _tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
