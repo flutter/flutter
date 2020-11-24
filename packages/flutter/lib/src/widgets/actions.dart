@@ -1288,3 +1288,50 @@ class DismissIntent extends Intent {
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
 abstract class DismissAction extends Action<DismissIntent> {}
+
+///
+class PrioritizedIntents extends Intent {
+  ///
+  const PrioritizedIntents({
+    required this.orderedIntents,
+  })  : assert(orderedIntents != null);
+
+  ///
+  final List<Intent> orderedIntents;
+}
+
+///
+class PrioritizedAction extends Action<PrioritizedIntents> {
+  late Action<dynamic> _selectedAction;
+  late Intent _selectedIntent;
+  
+  @override
+  bool isEnabled(PrioritizedIntents intent) {
+    final FocusNode? focus = primaryFocus;
+    if  (focus == null || focus.context == null)
+      return false;
+    print('primaryFocus $primaryFocus');
+    for (final Intent candidateIntent in intent.orderedIntents) {
+      final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
+        focus.context!,
+        intent: candidateIntent,
+      );
+      print('candidate - Intent: $candidateIntent Action: $candidateAction');
+      if (candidateAction != null && candidateAction.isEnabled(candidateIntent)) {
+        print('Accepted');
+        _selectedAction = candidateAction;
+        _selectedIntent = candidateIntent;
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  @override
+  Object? invoke(PrioritizedIntents intent) {
+    assert(_selectedAction != null);
+    assert(_selectedIntent != null);
+    _selectedAction.invoke(_selectedIntent);
+  }
+
+}

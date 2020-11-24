@@ -868,16 +868,23 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   }) {
     assert(disposition != null);
     if (!hasFocus && (_manager == null || _manager!._markedForFocus != this)) {
+      // print('out1');
       return;
     }
+    // print('parent: $_parent');
+    // for (final FocusNode ancestor in ancestors)
+      // print('ANCESTOR  $ancestor \n');
+    print(_manager?.rootScope);
     FocusScopeNode? scope = enclosingScope;
     if (scope == null) {
+      // print('out2');
       // If the scope is null, then this is either the root node, or a node that
       // is not yet in the tree, neither of which do anything when unfocused.
       return;
     }
     switch (disposition) {
       case UnfocusDisposition.scope:
+        // print('SCOPE: $scope, CHILDREN: ${scope._focusedChildren}');
         // If it can't request focus, then don't modify its focused children.
         if (scope.canRequestFocus) {
           // Clearing the focused children here prevents re-focusing the node
@@ -888,6 +895,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         }
 
         while (!scope!.canRequestFocus) {
+          // print('while, enclosing: ${scope.enclosingScope}, root: ${_manager?.rootScope}');
           scope = scope.enclosingScope ?? _manager?.rootScope;
         }
         scope._doRequestFocus(findFirstFocus: false);
@@ -1298,6 +1306,7 @@ class FocusScopeNode extends FocusNode {
 
   @override
   void _doRequestFocus({required bool findFirstFocus}) {
+    // print('_doRequestFocus');
     assert(findFirstFocus != null);
 
     // It is possible that a previously focused child is no longer focusable.

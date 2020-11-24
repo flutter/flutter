@@ -1024,7 +1024,11 @@ class WidgetsApp extends StatefulWidget {
   // Default shortcuts for the web platform.
   static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+    LogicalKeySet(LogicalKeyboardKey.space): const PrioritizedIntents(
+      orderedIntents: <Intent>[
+        ActivateIntent(),
+        ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+      ]),
 
     // Dismissal
     LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
@@ -1101,6 +1105,7 @@ class WidgetsApp extends StatefulWidget {
     PreviousFocusIntent: PreviousFocusAction(),
     DirectionalFocusIntent: DirectionalFocusAction(),
     ScrollIntent: ScrollAction(),
+    PrioritizedIntents: PrioritizedAction(),
   };
 
   @override
