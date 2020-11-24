@@ -1017,6 +1017,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///   @override
 ///   State<StatefulWidget> createState() => _MyAppState();
 /// }
+
 /// class _MyAppState extends State<MyApp> {
 ///   bool _pinned = true;
 ///   bool _snap = false;
