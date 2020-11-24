@@ -870,8 +870,15 @@ Future<void> _runWebLongRunningTests() async {
 /// by flutter/flutter for testing purposes, to assure stable tests for a given
 /// flutter commit the flutter/plugins commit hash to test against is coded in
 /// the bin/internal/flutter_plugins.version file.
-Future<String> getFlutterPluginsVersion({fs.FileSystem fileSystem = const LocalFileSystem()}) async {
-  final File versionFile = fileSystem.file(flutterPluginsVersionFile);
+///
+/// The `filesystem` parameter specified filesystem to read the plugins version file from.
+/// The `pluginsVersionFile` parameter allows specifying an alternative path for the
+/// plugins version file, when null [flutterPluginsVersionFile] is used.
+Future<String> getFlutterPluginsVersion({
+  fs.FileSystem fileSystem = const LocalFileSystem(),
+  String pluginsVersionFile,
+}) async {
+  final File versionFile = fileSystem.file(pluginsVersionFile ?? flutterPluginsVersionFile);
   final String versionFileContents = await versionFile.readAsString();
   return versionFileContents.trim();
 }
