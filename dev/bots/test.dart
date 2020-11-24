@@ -142,6 +142,7 @@ Future<void> main(List<String> args) async {
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
+      'flutter_plugins': _runFlutterPluginsTests,
     });
   } on ExitException catch (error) {
     error.apply();
@@ -858,6 +859,47 @@ Future<void> _runWebLongRunningTests() async {
   await _ensureChromeDriverIsRunning();
   await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
   await _stopChromeDriver();
+}
+
+/// Executes the test suite for the flutter/plugins repo.
+Future<void> _runFlutterPluginsTests() async {
+  Future<void> runAnalyze() async {
+    print('${green}Running analysis for flutter/plugins$reset');
+    final Directory checkout = Directory.systemTemp.createTempSync('plugins');
+    await runCommand(
+      'git',
+      <String>[
+        '-c',
+        'core.longPaths=true',
+        'clone',
+        'https://github.com/flutter/plugins.git',
+        '.'
+      ],
+      workingDirectory: checkout.path,
+    );
+    await runCommand(
+      pub,
+      <String>[
+        'global',
+        'activate',
+        'flutter_plugin_tools',
+      ],
+      workingDirectory: checkout.path,
+    );
+    await runCommand(
+      pub,
+      <String>[
+        'global',
+        'run',
+        'flutter_plugin_tools',
+        'analyze',
+      ],
+      workingDirectory: checkout.path,
+    );
+  }
+  await selectSubshard(<String, ShardRunner>{
+    'analyze': runAnalyze,
+  });
 }
 
 // The `chromedriver` process created by this test.
