@@ -148,6 +148,8 @@ void MockCanvas::onClipRect(const SkRect& rect,
                             ClipEdgeStyle style) {
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipRectData{rect, op, style}});
+  // quickReject() is handled by base class and needs accurate clip information
+  SkCanvas::onClipRect(rect, op, style);
 }
 
 void MockCanvas::onClipRRect(const SkRRect& rrect,
@@ -155,6 +157,8 @@ void MockCanvas::onClipRRect(const SkRRect& rrect,
                              ClipEdgeStyle style) {
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipRRectData{rrect, op, style}});
+  // quickReject() is handled by base class and needs accurate clip information
+  SkCanvas::onClipRRect(rrect, op, style);
 }
 
 void MockCanvas::onClipPath(const SkPath& path,
@@ -162,6 +166,8 @@ void MockCanvas::onClipPath(const SkPath& path,
                             ClipEdgeStyle style) {
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipPathData{path, op, style}});
+  // quickReject() is handled by base class and needs accurate clip information
+  SkCanvas::onClipPath(path, op, style);
 }
 
 bool MockCanvas::onDoSaveBehind(const SkRect*) {

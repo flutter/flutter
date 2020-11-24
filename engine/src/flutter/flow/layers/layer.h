@@ -195,7 +195,7 @@ class Layer {
     if (paint_bounds_.isEmpty()) {
       return false;
     }
-    return !context.internal_nodes_canvas->quickReject(paint_bounds_);
+    return !context.leaf_nodes_canvas->quickReject(paint_bounds_);
   }
 
   uint64_t unique_id() const { return unique_id_; }
