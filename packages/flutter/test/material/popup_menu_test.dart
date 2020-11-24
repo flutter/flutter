@@ -1915,7 +1915,7 @@ void main() {
     final Offset button = tester.getBottomRight(find.byKey(buttonKey));
     final Offset popupMenu = tester.getTopRight(find.byKey(firstItemKey));
 
-    // The menu should popup blew the button.
+    // The menu should popup below the button.
     // The 8.0 pixels are [_kMenuScreenPadding] and [_kMenuVerticalPadding].
     expect(popupMenu, Offset(button.dx - 8.0, button.dy + 8.0));
   });
