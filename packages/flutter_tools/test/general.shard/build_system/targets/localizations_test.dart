@@ -54,7 +54,7 @@ void main() {
     verify(
       mockLocalizationsGenerator.initialize(
         inputPathString: 'arb',
-        outputPathString: 'lib/l10n/',
+        outputPathString: fileSystem.path.join('lib', 'l10n/'),
         templateArbFileName: 'example.arb',
         outputFileString: 'bar',
         classNameString: 'Foo',
