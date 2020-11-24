@@ -1335,10 +1335,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/6751
   testWidgets('When InkWell has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
-    Widget buildApp({bool onTapDownChangeWrap = false, bool onTapChangeWrap = false, bool useKey = true}) {
+    Widget buildApp(Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
       bool wrap = false;
 
-      final GlobalKey key = GlobalKey();
       return MaterialApp(home: Scaffold(
         body: Center(
           child: StatefulBuilder(
@@ -1350,7 +1349,7 @@ void main() {
               }
 
               Widget child = InkWell(
-                key: useKey ? key : null,
+                key: key,
                 onTapDown: (_) async {
                   if (onTapDownChangeWrap)
                     changeWrap();
@@ -1379,10 +1378,20 @@ void main() {
       ));
     }
 
-    await tester.pumpWidget(buildApp(
-      onTapChangeWrap: true,
-      useKey: false,
-    ));
+    await tester.pumpWidget(buildApp(null, onTapChangeWrap: true));
+    await tester.tap(find.byType(InkWell));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      isNot(paints..circle()),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      isNot(paints..circle()),
+    );
+
+    await tester.pumpWidget(buildApp(const Key('foo'), onTapChangeWrap: true));
     await tester.tap(find.byType(InkWell));
     await tester.pump(const Duration(milliseconds: 60));
     expect(
@@ -1396,7 +1405,7 @@ void main() {
     );
 
     // Does not call setState.
-    await tester.pumpWidget(buildApp());
+    await tester.pumpWidget(buildApp(GlobalKey()));
     await tester.tap(find.byType(InkWell));
     await tester.pump(const Duration(milliseconds: 60));
     expect(
@@ -1409,7 +1418,7 @@ void main() {
       isNot(paints..circle()),
     );
 
-    await tester.pumpWidget(buildApp(onTapChangeWrap: true));
+    await tester.pumpWidget(buildApp(GlobalKey(), onTapChangeWrap: true));
     await tester.tap(find.byType(InkWell));
     await tester.pump(const Duration(milliseconds: 60));
     expect(
@@ -1422,7 +1431,7 @@ void main() {
       isNot(paints..circle()),
     );
 
-    await tester.pumpWidget(buildApp(onTapDownChangeWrap: true));
+    await tester.pumpWidget(buildApp(GlobalKey(), onTapDownChangeWrap: true));
     await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
     await tester.pump(const Duration(milliseconds: 60));
     expect(
