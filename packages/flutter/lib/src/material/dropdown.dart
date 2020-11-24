@@ -177,17 +177,21 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
     }
 
-    final MaterialStateProperty<Color?> selectedOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected))
+        if (states.contains(MaterialState.selected) || states.contains(MaterialState.focused))
           return Theme.of(context).focusColor;
+        if (states.contains(MaterialState.hovered))
+          return Theme.of(context).hoverColor;
+        if (states.contains(MaterialState.pressed))
+          return Theme.of(context).splashColor;
         return null;
       },
     );
     Widget child = FadeTransition(
       opacity: opacity,
       child: InkWell(
-        overlayColor: selectedOverlayColor,
+        overlayColor: overlayColor,
         autofocus: widget.itemIndex == widget.route.selectedIndex,
         child: Container(
           padding: widget.padding,

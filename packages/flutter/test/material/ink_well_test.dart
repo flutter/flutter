@@ -206,18 +206,20 @@ void main() {
               height: 100,
               child: Builder(
                 builder: (BuildContext context){
-                  final MaterialStateProperty<Color?> selectedOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+                  final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
                         (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.selected))
+                      if (states.contains(MaterialState.selected) || states.contains(MaterialState.focused))
                         return const Color(0xff0000ff);
+                      if (states.contains(MaterialState.hovered))
+                        return const Color(0xff00ff00);
+                      if (states.contains(MaterialState.pressed))
+                        return const Color(0xffff0000);
                       return null;
                     },
                   );
                   return InkWell(
                     focusNode: focusNode,
-                    hoverColor: const Color(0xff00ff00),
-                    splashColor: const Color(0xffff0000),
-                    overlayColor: selectedOverlayColor,
+                    overlayColor: overlayColor,
                     highlightColor: const Color(0xf00fffff),
                     onTap: () { },
                     onLongPress: () { },
@@ -236,7 +238,24 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(inkFeatures, paints
-      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff))); // Selected color.
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Container)));
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00))); // Hovered color.
+
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+
+    gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
+    expect(inkFeatures, paints..circle(x: 50, y: 50, color: const Color(0xffff0000))); // Pressed color.
+    await gesture.up();
   });
 
   testWidgets('ink response changes color on focus with overlayColor', (WidgetTester tester) async {
