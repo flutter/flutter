@@ -163,8 +163,8 @@ class CupertinoFormSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
-    const double dividerHeight = 0.5;
-
+    final double dividerHeight = 1.0 / MediaQuery.of(context).devicePixelRatio;
+    // final double dividerHeight = 0.5;
     // Long divider is used for wrapping the top and bottom of rows.
     // Only used in _CupertinoFormSectionType.base mode
     final Widget longDivider = Container(
@@ -176,8 +176,12 @@ class CupertinoFormSection extends StatelessWidget {
     // The value of the starting inset (15.0) is determined using SwiftUI's Form
     // seperators in the iOS 14.2 SDK.
     final Widget shortDivider = Container(
-      margin: const EdgeInsetsDirectional.only(start: 15.0),
-      color: dividerColor,
+      child: Container(
+        margin: const EdgeInsetsDirectional.only(start: 15.0),
+        color: dividerColor,
+        height: dividerHeight,
+      ),
+      color: CupertinoColors.systemBackground.resolveFrom(context),
       height: dividerHeight,
     );
 
