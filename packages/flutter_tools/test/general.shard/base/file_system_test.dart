@@ -180,3 +180,4 @@ void main() {
 }
 
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+class MockFile extends Mock implements File {}

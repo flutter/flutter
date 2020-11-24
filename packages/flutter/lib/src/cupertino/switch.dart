@@ -106,7 +106,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
 
-  /// {@template flutter.cupertino.switch.dragStartBehavior}
+  /// {@template flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used to move the
@@ -254,7 +254,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         ..curve = Curves.linear
         ..reverseCurve = Curves.linear;
       final double delta = details.primaryDelta! / _kTrackInnerLength;
-      switch (Directionality.of(context)!) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _positionController.value -= delta;
           break;
@@ -299,10 +299,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         activeColor: CupertinoDynamicColor.resolve(
           widget.activeColor ?? CupertinoColors.systemGreen,
           context,
-        )!,
-        trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context)!,
+        ),
+        trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
         onChanged: widget.onChanged,
-        textDirection: Directionality.of(context)!,
+        textDirection: Directionality.of(context),
         state: this,
       ),
     );
@@ -483,7 +483,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final double currentValue = _state.position.value;
     final double currentReactionValue = _state._reaction.value;
 
-    double visualPosition;
+    final double visualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - currentValue;
@@ -524,10 +524,12 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       thumbCenterY + CupertinoThumbPainter.radius,
     );
 
-    context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
+    _clipRRectLayer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
       const CupertinoThumbPainter.switchThumb().paint(innerContext.canvas, thumbBounds);
-    });
+    }, oldLayer: _clipRRectLayer);
   }
+
+  ClipRRectLayer? _clipRRectLayer;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {

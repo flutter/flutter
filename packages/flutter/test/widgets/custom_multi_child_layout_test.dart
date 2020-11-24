@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
-  BoxConstraints getSizeConstraints;
+  late BoxConstraints getSizeConstraints;
 
   @override
   Size getSize(BoxConstraints constraints) {
@@ -19,10 +17,10 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
     return const Size(200.0, 300.0);
   }
 
-  Size performLayoutSize;
-  Size performLayoutSize0;
-  Size performLayoutSize1;
-  bool performLayoutIsChild;
+  Size? performLayoutSize;
+  late Size performLayoutSize0;
+  late Size performLayoutSize1;
+  late bool performLayoutIsChild;
 
   @override
   void performLayout(Size size) {
@@ -60,7 +58,7 @@ Widget buildFrame(MultiChildLayoutDelegate delegate) {
 }
 
 class PreferredSizeDelegate extends MultiChildLayoutDelegate {
-  PreferredSizeDelegate({ this.preferredSize });
+  PreferredSizeDelegate({ required this.preferredSize });
 
   final Size preferredSize;
 
@@ -152,8 +150,8 @@ class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
 
 class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   const LayoutWithMissingId({
-    Key key,
-    @required Widget child,
+    Key? key,
+    required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
 
@@ -174,8 +172,8 @@ void main() {
     expect(delegate.getSizeConstraints.minHeight, 0.0);
     expect(delegate.getSizeConstraints.maxHeight, 600.0);
 
-    expect(delegate.performLayoutSize.width, 200.0);
-    expect(delegate.performLayoutSize.height, 300.0);
+    expect(delegate.performLayoutSize!.width, 200.0);
+    expect(delegate.performLayoutSize!.height, 300.0);
     expect(delegate.performLayoutSize0.width, 150.0);
     expect(delegate.performLayoutSize0.height, 100.0);
     expect(delegate.performLayoutSize1.width, 100.0);
@@ -285,23 +283,23 @@ void main() {
     }
 
     Future<void> expectFlutterErrorMessage({
-      Widget widget,
-      MultiChildLayoutDelegate delegate,
-      @required WidgetTester tester,
-      @required String message,
+      Widget? widget,
+      MultiChildLayoutDelegate? delegate,
+      required WidgetTester tester,
+      required String message,
     }) async {
-      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
       final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
       try {
-        await tester.pumpWidget(widget ?? buildSingleChildFrame(delegate));
+        await tester.pumpWidget(widget ?? buildSingleChildFrame(delegate!));
       } finally {
         FlutterError.onError = oldHandler;
       }
       expect(errors.length, isNonZero);
       expect(errors.first, isNotNull);
       expect(errors.first.exception, isFlutterError);
-      expect(errors.first.exception.toStringDeep(), equalsIgnoringHashCodes(message));
+      expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(message));
     }
 
     testWidgets('layoutChild on non existent child', (WidgetTester tester) async {

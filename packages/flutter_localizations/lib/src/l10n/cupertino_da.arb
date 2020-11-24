@@ -20,5 +20,6 @@
   "pasteButtonLabel": "Sæt ind",
   "selectAllButtonLabel": "Vælg alle",
   "tabSemanticsLabel": "Fane $tabIndex af $tabCount",
-  "modalBarrierDismissLabel": "Afvis"
+  "modalBarrierDismissLabel": "Afvis",
+  "searchTextFieldPlaceholderLabel": "Søg"
 }

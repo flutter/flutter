@@ -67,8 +67,9 @@ void validateEnglishLocalizations(File file) {
       continue;
     }
 
+    final bool optional = atResource.containsKey('optional');
     final String description = atResource['description'] as String;
-    if (description == null)
+    if (description == null && !optional)
       errorMessages.writeln('No description specified for $atResourceId');
 
     final String plural = atResource['plural'] as String;
@@ -78,7 +79,7 @@ void validateEnglishLocalizations(File file) {
       if (!bundle.containsKey(resourceIdOther))
         errorMessages.writeln('Default plural resource $resourceIdOther undefined');
     } else {
-      if (!bundle.containsKey(resourceId))
+      if (!optional && !bundle.containsKey(resourceId))
         errorMessages.writeln('No matching $resourceId defined for $atResourceId');
     }
   }

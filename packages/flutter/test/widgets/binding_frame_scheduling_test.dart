@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:typed_data';
 import 'dart:ui' show window;
 
@@ -27,8 +25,8 @@ void main() {
     expect(window.onDrawFrame, isNull);
 
     // Framework starts with detached statue. Sends resumed signal to enable frame.
-    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
 
     // A frame can only be scheduled when there is a root widget.
     binding.attachRootWidget(const Placeholder());

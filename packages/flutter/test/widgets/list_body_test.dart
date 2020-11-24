@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/src/foundation/assertions.dart';
 import 'package:flutter/src/painting/basic_types.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -112,7 +110,7 @@ void main() {
   });
 
   testWidgets('Limited space along main axis error', (WidgetTester tester) async {
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError!;
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
@@ -134,7 +132,7 @@ void main() {
     }
     expect(errors, isNotEmpty);
     expect(errors.first.exception, isFlutterError);
-    expect(errors.first.exception.toStringDeep(), equalsIgnoringHashCodes(
+    expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   RenderListBody must have unlimited space along its main axis.\n'
       '   RenderListBody does not clip or resize its children, so it must\n'
@@ -145,7 +143,7 @@ void main() {
   });
 
   testWidgets('Nested ListBody unbounded cross axis error', (WidgetTester tester) async {
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError!;
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
@@ -183,7 +181,7 @@ void main() {
     }
     expect(errors, isNotEmpty);
     expect(errors.first.exception, isFlutterError);
-    expect(errors.first.exception.toStringDeep(), equalsIgnoringHashCodes(
+    expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   RenderListBody must have a bounded constraint for its cross axis.\n'
       '   RenderListBody forces its children to expand to fit the\n'

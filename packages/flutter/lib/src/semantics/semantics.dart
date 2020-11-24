@@ -510,15 +510,7 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   final DebugSemanticsDumpOrder childOrder;
 
   @override
-  List<DiagnosticsNode> getChildren() {
-    if (value != null)
-      return value.debugDescribeChildren(childOrder: childOrder);
-
-    // `value` has a non-nullable return type, but might be null when
-    // running with weak checking, so we need to null check it above (and
-    // ignore the warning below that the null-handling logic is dead code).
-    return const <DiagnosticsNode>[]; // ignore: dead_code
-  }
+  List<DiagnosticsNode> getChildren() => value.debugDescribeChildren(childOrder: childOrder);
 }
 
 /// Provides hint values which override the default hints on supported
@@ -618,6 +610,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.hintOverrides,
     this.textDirection,
     this.sortKey,
+    this.tagForChildren,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -920,6 +913,22 @@ class SemanticsProperties extends DiagnosticableTree {
   /// traversed by the accessibility services on the platform (e.g. VoiceOver
   /// on iOS and TalkBack on Android).
   final SemanticsSortKey? sortKey;
+
+  /// A tag to be applied to the child [SemanticsNode]s of this widget.
+  ///
+  /// The tag is added to all child [SemanticsNode]s that pass through the
+  /// [RenderObject] corresponding to this widget while looking to be attached
+  /// to a parent SemanticsNode.
+  ///
+  /// Tags are used to communicate to a parent SemanticsNode that a child
+  /// SemanticsNode was passed through a particular RenderObject. The parent can
+  /// use this information to determine the shape of the semantics tree.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.addTagForChildren], to which the tags provided
+  ///    here will be passed.
+  final SemanticsTag? tagForChildren;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -1419,11 +1428,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       for (final SemanticsNode child in _children!)
         child._dead = true;
     }
-    if (newChildren != null) {
-      for (final SemanticsNode child in newChildren) {
-        assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
-        child._dead = false;
-      }
+    for (final SemanticsNode child in newChildren) {
+      assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
+      child._dead = false;
     }
     bool sawChange = false;
     if (_children != null) {
@@ -1438,21 +1445,19 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         }
       }
     }
-    if (newChildren != null) {
-      for (final SemanticsNode child in newChildren) {
-        if (child.parent != this) {
-          if (child.parent != null) {
-            // we're rebuilding the tree from the bottom up, so it's possible
-            // that our child was, in the last pass, a child of one of our
-            // ancestors. In that case, we drop the child eagerly here.
-            // TODO(ianh): Find a way to assert that the same node didn't
-            // actually appear in the tree in two places.
-            child.parent?.dropChild(child);
-          }
-          assert(!child.attached);
-          adoptChild(child);
-          sawChange = true;
+    for (final SemanticsNode child in newChildren) {
+      if (child.parent != this) {
+        if (child.parent != null) {
+          // we're rebuilding the tree from the bottom up, so it's possible
+          // that our child was, in the last pass, a child of one of our
+          // ancestors. In that case, we drop the child eagerly here.
+          // TODO(ianh): Find a way to assert that the same node didn't
+          // actually appear in the tree in two places.
+          child.parent?.dropChild(child);
         }
+        assert(!child.attached);
+        adoptChild(child);
+        sawChange = true;
       }
     }
     if (!sawChange && _children != null) {
@@ -1966,10 +1971,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           mergedTags ??= <SemanticsTag>{};
           mergedTags!.addAll(node.tags!);
         }
-        if (node._customSemanticsActions != null) {
-          for (final CustomSemanticsAction action in _customSemanticsActions.keys)
-            customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
-        }
+        for (final CustomSemanticsAction action in _customSemanticsActions.keys)
+          customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         if (node.hintOverrides != null) {
           if (node.hintOverrides!.onTapHint != null) {
             final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
@@ -2043,8 +2046,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   void _addToUpdate(ui.SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
-    Int32List childrenInTraversalOrder;
-    Int32List childrenInHitTestOrder;
+    final Int32List childrenInTraversalOrder;
+    final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
       childrenInTraversalOrder = _kEmptyChildList;
       childrenInHitTestOrder = _kEmptyChildList;
@@ -2608,7 +2611,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [Window.updateSemantics].
+  /// Update the semantics using [dart:ui.PlatformDispatcher.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;

@@ -226,7 +226,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
             // We have duplication reservations for the same global key.
             final Element older = keyToParent[key]!;
             final Element newer = parent;
-            FlutterError error;
+            final FlutterError error;
             if (older.toString() != newer.toString()) {
               error = FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Multiple widgets used the same GlobalKey.'),
@@ -936,7 +936,7 @@ abstract class StatefulWidget extends Widget {
   /// [State] objects.
   @protected
   @factory
-  State createState();
+  State createState(); // ignore: no_logic_in_create_state, this is the original sin
 }
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
@@ -1118,7 +1118,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// location at which this object was inserted into the tree (i.e., [context])
   /// or on the widget used to configure this object (i.e., [widget]).
   ///
-  /// {@template flutter.widgets.subscriptions}
+  /// {@template flutter.widgets.State.initState}
   /// If a [State]'s [build] method depends on an object that can itself
   /// change state, for example a [ChangeNotifier] or [Stream], or some
   /// other object to which one can subscribe to receive notifications, then
@@ -1160,7 +1160,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// The framework always calls [build] after calling [didUpdateWidget], which
   /// means any calls to [setState] in [didUpdateWidget] are redundant.
   ///
-  /// {@macro flutter.widgets.subscriptions}
+  /// {@macro flutter.widgets.State.initState}
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.didUpdateWidget(oldWidget).
@@ -1168,7 +1168,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
 
-  /// {@macro flutter.widgets.reassemble}
+  /// {@macro flutter.widgets.Element.reassemble}
   ///
   /// In addition to this method being invoked, it is guaranteed that the
   /// [build] method will be invoked when a reassemble is signaled. Most
@@ -1328,7 +1328,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Subclasses should override this method to release any resources retained
   /// by this object (e.g., stop any active animations).
   ///
-  /// {@macro flutter.widgets.subscriptions}
+  /// {@macro flutter.widgets.State.initState}
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
@@ -1506,7 +1506,7 @@ abstract class ProxyWidget extends Widget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@template flutter.widgets.child}
+  /// {@template flutter.widgets.ProxyWidget.child}
   /// This widget can only have one child. To lay out multiple children, let this
   /// widget's child be a widget such as [Row], [Column], or [Stack], which have a
   /// `children` property, and then provide the children to that widget.
@@ -1888,7 +1888,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -2112,33 +2112,52 @@ typedef ElementVisitor = void Function(Element element);
 /// widget can be used: the build context passed to the [Builder.builder]
 /// callback will be that of the [Builder] itself.
 ///
-/// For example, in the following snippet, the [ScaffoldState.showSnackBar]
+/// For example, in the following snippet, the [ScaffoldState.showBottomSheet]
 /// method is called on the [Scaffold] widget that the build method itself
 /// creates. If a [Builder] had not been used, and instead the `context`
 /// argument of the build method itself had been used, no [Scaffold] would have
 /// been found, and the [Scaffold.of] function would have returned null.
 ///
 /// ```dart
-///   @override
-///   Widget build(BuildContext context) {
-///     // here, Scaffold.of(context) returns null
-///     return Scaffold(
-///       appBar: AppBar(title: Text('Demo')),
-///       body: Builder(
-///         builder: (BuildContext context) {
-///           return TextButton(
-///             child: Text('BUTTON'),
-///             onPressed: () {
-///               // here, Scaffold.of(context) returns the locally created Scaffold
-///               Scaffold.of(context).showSnackBar(SnackBar(
-///                 content: Text('Hello.')
-///               ));
-///             }
-///           );
-///         }
-///       )
-///     );
-///   }
+/// @override
+/// Widget build(BuildContext context) {
+///   // here, Scaffold.of(context) returns null
+///   return Scaffold(
+///     appBar: const AppBar(title: Text('Demo')),
+///     body: Builder(
+///       builder: (BuildContext context) {
+///         return TextButton(
+///           child: const Text('BUTTON'),
+///           onPressed: () {
+///             Scaffold.of(context).showBottomSheet<void>(
+///               (BuildContext context) {
+///                 return Container(
+///                   alignment: Alignment.center,
+///                   height: 200,
+///                   color: Colors.amber,
+///                   child: Center(
+///                     child: Column(
+///                       mainAxisSize: MainAxisSize.min,
+///                       children: <Widget>[
+///                         const Text('BottomSheet'),
+///                         ElevatedButton(
+///                           child: const Text('Close BottomSheet'),
+///                           onPressed: () {
+///                             Navigator.pop(context),
+///                           },
+///                         )
+///                       ],
+///                     ),
+///                   ),
+///                 );
+///               },
+///             );
+///           },
+///         );
+///       },
+///     )
+///   );
+/// }
 /// ```
 ///
 /// The [BuildContext] for a particular widget can change location over time as
@@ -2586,7 +2605,7 @@ class BuildOwner {
           ErrorHint(
             'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
             'indicates a bug in the widgets framework. Please report it:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
           ),
         ]);
       }
@@ -3101,7 +3120,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   BuildOwner? get owner => _owner;
   BuildOwner? _owner;
 
-  /// {@template flutter.widgets.reassemble}
+  /// {@template flutter.widgets.Element.reassemble}
   /// Called whenever the application is reassembled during debugging, for
   /// example during hot reload.
   ///
@@ -3307,6 +3326,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// | :-----------------: | :--------------------- | :---------------------- |
   /// |  **child == null**  |  Returns null.         |  Returns new [Element]. |
   /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
+  ///
+  /// The `newSlot` argument is used only if `newWidget` is not null. If `child`
+  /// is null (or if the old child cannot be updated), then the `newSlot` is
+  /// given to the new [Element] that is created for the child, via
+  /// [inflateWidget]. If `child` is not null (and the old child _can_ be
+  /// updated), then the `newSlot` is given to [updateSlotForChild] to update
+  /// its slot, in case it has moved around since it was last built.
+  ///
+  /// See the [RenderObjectElement] documentation for more information on slots.
   @protected
   Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
     if (newWidget == null) {
@@ -3314,7 +3342,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         deactivateChild(child);
       return null;
     }
-    Element newChild;
+    final Element newChild;
     if (child != null) {
       bool hasSameSuperclass = true;
       // When the type of a widget is changed between Stateful and Stateless via
@@ -4507,7 +4535,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
       message = _stringify(details.exception) + '\nSee also: https://flutter.dev/docs/testing/errors';
       return true;
     }());
-    final dynamic exception = details.exception;
+    final Object exception = details.exception;
     return ErrorWidget.withDetails(message: message, error: exception is FlutterError ? exception : null);
   }
 
@@ -4604,7 +4632,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget? child)
 /// See also:
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel });
+typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel });
 
 /// An [Element] that composes other [Element]s.
 ///
@@ -5317,10 +5345,10 @@ class InheritedElement extends ProxyElement {
 /// class FooElement extends RenderObjectElement {
 ///
 ///   @override
-///   Foo get widget => super.widget;
+///   Foo get widget => super.widget as Foo;
 ///
 ///   @override
-///   RenderFoo get renderObject => super.renderObject;
+///   RenderFoo get renderObject => super.renderObject as RenderFoo;
 ///
 ///   // ...
 /// }
@@ -5378,13 +5406,13 @@ class InheritedElement extends ProxyElement {
 ///
 /// #### Dynamically determining the children during layout
 ///
-/// If the widgets are to be generated at layout time, then generating them when
-/// the [update] method won't work: layout of this element's render object
-/// hasn't started yet at that point. Instead, the [update] method can mark the
-/// render object as needing layout (see [RenderObject.markNeedsLayout]), and
-/// then the render object's [RenderObject.performLayout] method can call back
-/// to the element to have it generate the widgets and call [updateChild]
-/// accordingly.
+/// If the widgets are to be generated at layout time, then generating them in
+/// the [mount] and [update] methods won't work: layout of this element's render
+/// object hasn't started yet at that point. Instead, the [update] method can
+/// mark the render object as needing layout (see
+/// [RenderObject.markNeedsLayout]), and then the render object's
+/// [RenderObject.performLayout] method can call back to the element to have it
+/// generate the widgets and call [updateChild] accordingly.
 ///
 /// For a render object to call an element during layout, it must use
 /// [RenderObject.invokeLayoutCallback]. For an element to call [updateChild]
@@ -5846,7 +5874,7 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// ## Deprecation
   ///
@@ -5893,7 +5921,7 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@template flutter.widgets.slots}
+  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   /// The semantics of `slot` are determined by this element. For example, if
   /// this element has a single child, the slot should always be null. If this
   /// element has a list of children, the previous sibling element wrapped in an
@@ -5908,7 +5936,7 @@ abstract class RenderObjectElement extends Element {
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// This method is only ever called if [updateChild] can end up being called
   /// with an existing [Element] child and a `slot` that differs from the slot
@@ -5968,7 +5996,7 @@ abstract class RenderObjectElement extends Element {
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// This method is only ever called if [updateChild] can end up being called
   /// with an existing [Element] child and a `slot` that differs from the slot
@@ -6293,7 +6321,7 @@ class DebugCreator {
 
 FlutterErrorDetails _debugReportException(
   DiagnosticsNode context,
-  dynamic exception,
+  Object exception,
   StackTrace? stack, {
   InformationCollector? informationCollector,
 }) {

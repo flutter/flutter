@@ -567,7 +567,7 @@ class _AndroidMotionEventConverter {
       return null;
     }
 
-    int action;
+    final int action;
     if (event is PointerDownEvent) {
       action = numPointers == 1
           ? AndroidViewController.kActionDown
@@ -848,6 +848,10 @@ abstract class AndroidViewController extends PlatformViewController {
   /// for description of the parameters.
   @override
   Future<void> dispatchPointerEvent(PointerEvent event) async {
+    if (event is PointerHoverEvent) {
+      return;
+    }
+
     if (event is PointerDownEvent) {
       _motionEventConverter.handlePointerDownEvent(event);
     }

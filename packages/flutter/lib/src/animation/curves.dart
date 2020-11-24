@@ -578,7 +578,7 @@ class Curve2DSample {
 /// smoothly from one control point to the next, passing through the control
 /// points.
 ///
-/// {@template flutter.animation.curves.catmull_rom_description}
+/// {@template flutter.animation.CatmullRomSpline}
 /// Unlike most cubic splines, Catmull-Rom splines have the advantage that their
 /// curves pass through the control points given to them. They are cubic
 /// polynomial representations, and, in fact, Catmull-Rom splines can be
@@ -738,9 +738,9 @@ class CatmullRomSpline extends Curve2D {
   Offset transformInternal(double t) {
     _initializeIfNeeded();
     final double length = _cubicSegments.length.toDouble();
-    double position;
-    double localT;
-    int index;
+    final double position;
+    final double localT;
+    final int index;
     if (t < 1.0) {
       position = t * length;
       localT = position % 1.0;
@@ -766,7 +766,7 @@ class CatmullRomSpline extends Curve2D {
 /// smoothly from one control point to the next, passing through (0.0, 0.0), the
 /// given points, and then (1.0, 1.0).
 ///
-/// {@macro flutter.animation.curves.catmull_rom_description}
+/// {@macro flutter.animation.CatmullRomSpline}
 ///
 /// This class uses a centripetal Catmull-Rom curve (a [CatmullRomSpline]) as
 /// its internal representation. The term centripetal implies that it won't form

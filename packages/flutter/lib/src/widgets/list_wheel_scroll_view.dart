@@ -165,7 +165,7 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   /// Called lazily to build children.
   final NullableIndexedWidgetBuilder builder;
 
-  /// {@template flutter.widgets.wheelList.childCount}
+  /// {@template flutter.widgets.ListWheelChildBuilderDelegate.childCount}
   /// If non-null, [childCount] is the maximum number of children that can be
   /// provided, and children are available from 0 to [childCount] - 1.
   ///
@@ -673,29 +673,29 @@ class ListWheelScrollView extends StatefulWidget {
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
 
-  /// {@macro flutter.rendering.wheelList.diameterRatio}
+  /// {@macro flutter.rendering.RenderListWheelViewport.diameterRatio}
   final double diameterRatio;
 
-  /// {@macro flutter.rendering.wheelList.perspective}
+  /// {@macro flutter.rendering.RenderListWheelViewport.perspective}
   final double perspective;
 
-  /// {@macro flutter.rendering.wheelList.offAxisFraction}
+  /// {@macro flutter.rendering.RenderListWheelViewport.offAxisFraction}
   final double offAxisFraction;
 
-  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  /// {@macro flutter.rendering.RenderListWheelViewport.useMagnifier}
   final bool useMagnifier;
 
-  /// {@macro flutter.rendering.wheelList.magnification}
+  /// {@macro flutter.rendering.RenderListWheelViewport.magnification}
   final double magnification;
 
-  /// {@macro flutter.rendering.wheelList.overAndUnderCenterOpacity}
+  /// {@macro flutter.rendering.RenderListWheelViewport.overAndUnderCenterOpacity}
   final double overAndUnderCenterOpacity;
 
   /// Size of each child in the main axis. Must not be null and must be
   /// positive.
   final double itemExtent;
 
-  /// {@macro flutter.rendering.wheelList.squeeze}
+  /// {@macro flutter.rendering.RenderListWheelViewport.squeeze}
   ///
   /// Defaults to 1.
   final double squeeze;
@@ -703,13 +703,13 @@ class ListWheelScrollView extends StatefulWidget {
   /// On optional listener that's called when the centered item changes.
   final ValueChanged<int>? onSelectedItemChanged;
 
-  /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
+  /// {@macro flutter.rendering.RenderListWheelViewport.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
   /// A delegate that helps lazily instantiating child.
   final ListWheelChildDelegate childDelegate;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -1002,33 +1002,33 @@ class ListWheelViewport extends RenderObjectWidget {
        ),
        super(key: key);
 
-  /// {@macro flutter.rendering.wheelList.diameterRatio}
+  /// {@macro flutter.rendering.RenderListWheelViewport.diameterRatio}
   final double diameterRatio;
 
-  /// {@macro flutter.rendering.wheelList.perspective}
+  /// {@macro flutter.rendering.RenderListWheelViewport.perspective}
   final double perspective;
 
-  /// {@macro flutter.rendering.wheelList.offAxisFraction}
+  /// {@macro flutter.rendering.RenderListWheelViewport.offAxisFraction}
   final double offAxisFraction;
 
-  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  /// {@macro flutter.rendering.RenderListWheelViewport.useMagnifier}
   final bool useMagnifier;
 
-  /// {@macro flutter.rendering.wheelList.magnification}
+  /// {@macro flutter.rendering.RenderListWheelViewport.magnification}
   final double magnification;
 
-  /// {@macro flutter.rendering.wheelList.overAndUnderCenterOpacity}
+  /// {@macro flutter.rendering.RenderListWheelViewport.overAndUnderCenterOpacity}
   final double overAndUnderCenterOpacity;
 
-  /// {@macro flutter.rendering.wheelList.itemExtent}
+  /// {@macro flutter.rendering.RenderListWheelViewport.itemExtent}
   final double itemExtent;
 
-  /// {@macro flutter.rendering.wheelList.squeeze}
+  /// {@macro flutter.rendering.RenderListWheelViewport.squeeze}
   ///
   /// Defaults to 1.
   final double squeeze;
 
-  /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
+  /// {@macro flutter.rendering.RenderListWheelViewport.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
   /// [ViewportOffset] object describing the content that should be visible
@@ -1038,7 +1038,7 @@ class ListWheelViewport extends RenderObjectWidget {
   /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;

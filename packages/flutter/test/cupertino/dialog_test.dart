@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -118,7 +116,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -143,7 +141,7 @@ void main() {
     );
 
     expect(
-      cancelText.text.style.color.value,
+      cancelText.text.style!.color!.value,
       0xFF0A84FF, // dark elevated color of systemBlue.
     );
 
@@ -245,7 +243,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
@@ -256,8 +254,8 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.opacity, greaterThanOrEqualTo(127 / 255));
-    expect(widget.style.color.opacity, lessThanOrEqualTo(128 / 255));
+    expect(widget.style.color!.opacity, greaterThanOrEqualTo(127 / 255));
+    expect(widget.style.color!.opacity, lessThanOrEqualTo(128 / 255));
   });
 
   testWidgets('Dialog enabled action style', (WidgetTester tester) async {
@@ -268,7 +266,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.opacity, equals(1.0));
+    expect(widget.style.color!.opacity, equals(1.0));
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
@@ -554,7 +552,7 @@ void main() {
 
   testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -599,7 +597,7 @@ void main() {
 
   testWidgets('Actions section height for 2 stacked buttons with enough room is height of both buttons.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -807,7 +805,7 @@ void main() {
 
   testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -1195,7 +1193,9 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   return actionsSection as RenderBox;
 }
 
-Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {
+Widget createAppWithButtonThatLaunchesDialog({
+  required WidgetBuilder dialogBuilder
+}) {
   return MaterialApp(
     home: Material(
       child: Center(

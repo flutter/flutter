@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,4 +16,29 @@ void main() {
     expect(Icons.clear.fontFamily, 'MaterialIcons');
     expect(Icons.search.fontFamily, 'MaterialIcons');
   });
+
+  testWidgets('Adaptive icons are correct on cupertino platforms',
+        (WidgetTester tester) async {
+      expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);
+      expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_ios_outlined);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
+    'Adaptive icons are correct on non-cupertino platforms',
+        (WidgetTester tester) async {
+      expect(Icons.adaptive.arrow_back, Icons.arrow_back);
+      expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_outlined);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    }),
+  );
 }

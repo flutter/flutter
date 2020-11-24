@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +13,7 @@ import 'package:flutter/gestures.dart';
 import '../widgets/semantics_tester.dart';
 
 class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
+  dynamic _clipboardData = <String, dynamic>{
     'text': null,
   };
 
@@ -52,7 +50,7 @@ class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliza
   bool shouldReload(WidgetsLocalizationsDelegate old) => false;
 }
 
-Widget overlay({ Widget child }) {
+Widget overlay({ Widget? child }) {
   final OverlayEntry entry = OverlayEntry(
     builder: (BuildContext context) {
       return Center(
@@ -86,7 +84,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
   );
 }
 
-Widget boilerplate({ Widget child }) {
+Widget boilerplate({ Widget? child }) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: <LocalizationsDelegate<dynamic>>[
@@ -139,7 +137,7 @@ void main() {
     final RenderObject root = tester.renderObject(find.byType(EditableText));
     expect(root, isNotNull);
 
-    RenderEditable renderEditable;
+    late RenderEditable renderEditable;
     void recursiveFinder(RenderObject child) {
       if (child is RenderEditable) {
         renderEditable = child;
@@ -179,8 +177,8 @@ void main() {
 
   Widget selectableTextBuilder({
     String text = '',
-    int maxLines = 1,
-    int minLines,
+    int? maxLines = 1,
+    int? minLines,
   }) {
     return boilerplate(
       child: SelectableText(
@@ -625,7 +623,7 @@ void main() {
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
     // Collapse selection should not paint.
-    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     // Long press on the 't' character of text 'selectable' to show context menu.
     const int dIndex = 5;
     final Offset dPos = textOffsetToPosition(tester, dIndex);
@@ -1328,7 +1326,7 @@ void main() {
   });
 
   group('Keyboard Tests', () {
-    TextEditingController controller;
+    late TextEditingController controller;
 
     Future<void> setupWidget(WidgetTester tester, String text) async {
       final FocusNode focusNode = FocusNode();
@@ -2099,7 +2097,7 @@ void main() {
 
   testWidgets('SelectableText change selection with semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -2204,7 +2202,7 @@ void main() {
     const String testValue = 'Hello';
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -2278,7 +2276,7 @@ void main() {
     await tester.pumpWidget(selectableText);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No MediaQuery widget found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
+    expect(exception.toString(), startsWith('No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
   });
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
@@ -2772,6 +2770,93 @@ void main() {
       expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
+
+  testWidgets(
+    'long press selects word and shows custom toolbar (Android)',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+              selectionControls: cupertinoTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      // The longpressed word is selected.
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 7,
+        ),
+      );
+
+      // Toolbar shows one button.
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
+  }, variant:  TargetPlatformVariant.all());
+
+  testWidgets(
+    'long press selects word and shows custom toolbar (iOS)',
+    (WidgetTester tester) async {
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+              selectionControls: materialTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Collapsed toolbar shows 2 buttons: copy, select all
+      expect(find.byType(TextButton), findsNWidgets(2));
+  }, variant: TargetPlatformVariant.all());
+
+ testWidgets('textSelectionControls is passed to EditableText',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Scaffold(
+              body: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+                selectionControls: materialTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableText widget = tester.widget(find.byType(EditableText));
+      expect(widget.selectionControls, equals(materialTextSelectionControls));
+  });
 
   testWidgets(
     'long press tap cannot initiate a double tap',
@@ -3694,8 +3779,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
   });
 
   testWidgets('Double tap shows handles and toolbar', (WidgetTester tester) async {
@@ -3715,8 +3800,8 @@ void main() {
     await tester.pump();
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
   });
 
   testWidgets(
@@ -3743,8 +3828,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     },
   );
 
@@ -3772,8 +3857,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     },
   );
 
@@ -3805,8 +3890,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     },
   );
 
@@ -3928,7 +4013,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
   testWidgets('The handles show after pressing Select All', (WidgetTester tester) async {
@@ -3950,8 +4035,8 @@ void main() {
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
     EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
 
     await tester.tap(find.text('Select all'));
     await tester.pump();
@@ -3960,7 +4045,7 @@ void main() {
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
     editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
@@ -3991,7 +4076,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final EditableTextState state = tester.state(find.byType(EditableText));
-    expect(state.selectionOverlay.handlesAreVisible, isFalse);
+    expect(state.selectionOverlay!.handlesAreVisible, isFalse);
     expect(
       state.currentTextEditingValue.selection,
       const TextSelection.collapsed(offset: 0),
@@ -4007,7 +4092,7 @@ void main() {
         state.currentTextEditingValue.selection,
         const TextSelection(baseOffset: 2, extentOffset: 7),
       );
-      expect(state.selectionOverlay.handlesAreVisible, isFalse);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
     }
   });
 
@@ -4019,7 +4104,7 @@ void main() {
         home: Material(
           child: SelectableText(
             'abc def ghi',
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
               onSelectionChangedCallCount += 1;
             },
           ),

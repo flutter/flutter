@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -54,7 +55,7 @@ void main() {
 
     testWithoutContext('Install and uninstall are no-ops that report success', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      final FakeApplicationPackage package = FakeApplicationPackage();
 
       expect(await device.uninstallApp(package), true);
       expect(await device.isAppInstalled(package), true);
@@ -70,7 +71,7 @@ void main() {
   group('Starting and stopping application', () {
     testWithoutContext('Stop without start is a successful no-op', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
+      final FakeApplicationPackage package = FakeApplicationPackage();
 
       expect(await device.stopApp(package), true);
     });
@@ -80,7 +81,7 @@ void main() {
       final Completer<void> completer = Completer<void>();
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: const <String>['null'],
+          command: const <String>['debug'],
           stdout: 'Observatory listening on http://127.0.0.1/0\n',
           completer: completer,
         ),
@@ -88,8 +89,12 @@ void main() {
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
       final String executableName = device.executablePathForDevice(null, BuildMode.debug);
       fileSystem.file(executableName).writeAsStringSync('\n');
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
-      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
+      final FakeApplicationPackage package = FakeApplicationPackage();
+      final LaunchResult result = await device.startApp(
+        package,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
 
       expect(result.started, true);
       expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
@@ -98,8 +103,12 @@ void main() {
     testWithoutContext('Null executable path fails gracefully', () async {
       final BufferLogger logger = BufferLogger.test();
       final DesktopDevice device = setUpDesktopDevice(nullExecutablePathForDevice: true, logger: logger);
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
-      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
+      final FakeApplicationPackage package = FakeApplicationPackage();
+      final LaunchResult result = await device.startApp(
+        package,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
 
       expect(result.started, false);
       expect(logger.errorText, contains('Unable to find executable to run'));
@@ -109,18 +118,119 @@ void main() {
       final Completer<void> completer = Completer<void>();
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: const <String>['null'],
+          command: const <String>['debug'],
           stdout: 'Observatory listening on http://127.0.0.1/0\n',
           completer: completer,
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeAppplicationPackage package = FakeAppplicationPackage();
-      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
+      final FakeApplicationPackage package = FakeApplicationPackage();
+      final LaunchResult result = await device.startApp(
+        package,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
 
       expect(result.started, true);
       expect(await device.stopApp(package), true);
     });
+  });
+
+  testWithoutContext('startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables', () async {
+    final Completer<void> completer = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        completer: completer,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-background-compilation=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'enable-software-rendering=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'skia-deterministic-rendering=true',
+          'FLUTTER_ENGINE_SWITCH_6': 'trace-skia=true',
+          'FLUTTER_ENGINE_SWITCH_7': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCH_8': 'trace-systrace=true',
+          'FLUTTER_ENGINE_SWITCH_9': 'endless-trace-buffer=true',
+          'FLUTTER_ENGINE_SWITCH_10': 'dump-skp-on-shader-compilation=true',
+          'FLUTTER_ENGINE_SWITCH_11': 'cache-sksl=true',
+          'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
+          'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
+          'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
+          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
+          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '19'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      platformArgs: <String, Object>{
+        'trace-startup': true,
+      },
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        dartFlags: '',
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo,bar',
+        traceSystrace: true,
+        endlessTraceBuffer: true,
+        dumpSkpOnShaderCompilation: true,
+        cacheSkSL: true,
+        purgePersistentCache: true,
+        useTestFonts: true,
+        verboseSystemLogs: true,
+        nullAssertions: true,
+      ),
+    );
+
+    expect(result.started, true);
+  });
+
+  testWithoutContext('startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled', () async {
+    final Completer<void> completer = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        completer: completer,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-background-compilation=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCH_5': 'cache-sksl=true',
+          'FLUTTER_ENGINE_SWITCHES': '5'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      platformArgs: <String, Object>{
+        'trace-startup': true,
+      },
+      debuggingOptions: DebuggingOptions.disabled(
+        BuildInfo.debug,
+        traceAllowlist: 'foo,bar',
+        cacheSkSL: true,
+      ),
+    );
+
+    expect(result.started, true);
   });
 
   testWithoutContext('Port forwarder is a no-op', () async {
@@ -130,6 +240,35 @@ void main() {
 
     expect(result, 2);
     expect(portForwarder.forwardedPorts.isEmpty, true);
+  });
+
+  testUsingContext('createDevFSWriter returns a LocalDevFSWriter', () {
+    final FakeDesktopDevice device = setUpDesktopDevice();
+
+    expect(device.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());
+  });
+
+  testWithoutContext('startApp supports dartEntrypointArgs', () async {
+    final Completer<void> completer = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug', 'arg1', 'arg2'],
+        stdout: 'Observatory listening on http://127.0.0.1/0\n',
+        completer: completer
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final FakeApplicationPackage package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        dartEntrypointArgs: <String>['arg1', 'arg2']
+      ),
+    );
+
+    expect(result.started, true);
   });
 }
 
@@ -207,7 +346,7 @@ class FakeDesktopDevice extends DesktopDevice {
   }
 }
 
-class FakeAppplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   String get name => 'Example';

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
@@ -40,20 +38,20 @@ void main() {
 
   test('computed hit slop values are based on pointer device kind', () {
     expect(computeHitSlop(PointerDeviceKind.mouse), kPrecisePointerHitSlop);
-    expect(computeHitSlop(PointerDeviceKind.stylus), kPrecisePointerHitSlop);
-    expect(computeHitSlop(PointerDeviceKind.invertedStylus), kPrecisePointerHitSlop);
+    expect(computeHitSlop(PointerDeviceKind.stylus), kTouchSlop);
+    expect(computeHitSlop(PointerDeviceKind.invertedStylus), kTouchSlop);
     expect(computeHitSlop(PointerDeviceKind.touch), kTouchSlop);
     expect(computeHitSlop(PointerDeviceKind.unknown), kTouchSlop);
 
     expect(computePanSlop(PointerDeviceKind.mouse), kPrecisePointerPanSlop);
-    expect(computePanSlop(PointerDeviceKind.stylus), kPrecisePointerPanSlop);
-    expect(computePanSlop(PointerDeviceKind.invertedStylus), kPrecisePointerPanSlop);
+    expect(computePanSlop(PointerDeviceKind.stylus), kPanSlop);
+    expect(computePanSlop(PointerDeviceKind.invertedStylus), kPanSlop);
     expect(computePanSlop(PointerDeviceKind.touch), kPanSlop);
     expect(computePanSlop(PointerDeviceKind.unknown), kPanSlop);
 
     expect(computeScaleSlop(PointerDeviceKind.mouse), kPrecisePointerScaleSlop);
-    expect(computeScaleSlop(PointerDeviceKind.stylus), kPrecisePointerScaleSlop);
-    expect(computeScaleSlop(PointerDeviceKind.invertedStylus), kPrecisePointerScaleSlop);
+    expect(computeScaleSlop(PointerDeviceKind.stylus), kScaleSlop);
+    expect(computeScaleSlop(PointerDeviceKind.invertedStylus), kScaleSlop);
     expect(computeScaleSlop(PointerDeviceKind.touch), kScaleSlop);
     expect(computeScaleSlop(PointerDeviceKind.unknown), kScaleSlop);
   });
@@ -801,10 +799,10 @@ void main() {
 }
 
 void _expectTransformedEvent({
-  @required PointerEvent original,
-  @required Matrix4 transform,
-  Offset localDelta,
-  Offset localPosition,
+  required PointerEvent original,
+  required Matrix4 transform,
+  Offset? localDelta,
+  Offset? localPosition,
 }) {
   expect(original.position, original.localPosition);
   expect(original.delta, original.localDelta);

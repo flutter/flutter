@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -227,12 +225,39 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 50.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     expect(refreshCalled, false);
+  });
+
+  testWidgets('RefreshIndicator - just enough', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
   });
 
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
@@ -360,35 +385,6 @@ void main() {
     expect(completed2, true);
   });
 
-  testWidgets('RefreshIndicator - onRefresh asserts', (WidgetTester tester) async {
-    refreshCalled = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: RefreshIndicator(
-          onRefresh: () {
-            refreshCalled = true;
-            return null; // Missing a returned Future value here, should cause framework to throw.
-          },
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-              return SizedBox(
-                height: 200.0,
-                child: Text(item),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
-    );
-
-    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-    expect(refreshCalled, true);
-    expect(tester.takeException(), isFlutterError);
-  });
-
   testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
     refreshCalled = false;
     double lastScrollOffset;
@@ -456,31 +452,6 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
 
     expect(layoutCount, 1);
-  });
-
-  testWidgets('strokeWidth cannot be null in RefreshIndicator', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-          MaterialApp(
-            home: RefreshIndicator(
-              onRefresh: () async {},
-              strokeWidth: null,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(
-                    height: 200.0,
-                    child: Text(item),
-                  );
-                }).toList(),
-              ),
-            ),
-          )
-      );
-    } on AssertionError catch(_) {
-      return;
-    }
-    fail('The assertion was not thrown when strokeWidth was null');
   });
 
   testWidgets('RefreshIndicator responds to strokeWidth', (WidgetTester tester) async {

@@ -40,6 +40,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   ),
   breakpoints: <vm_service.Breakpoint>[],
   exceptionPauseMode: null,
+  isolateFlags: <vm_service.IsolateFlag>[],
   libraries: <vm_service.LibraryRef>[],
   livePorts: 0,
   name: 'test',
@@ -47,6 +48,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   pauseOnExit: false,
   runnable: true,
   startTime: 0,
+  isSystemIsolate: false,
 );
 
 void main() {
@@ -525,6 +527,9 @@ void main() {
             '$devicePort',
             '--observatory-port',
             '$hostPort',
+            // Ensure DDS doesn't use hostPort by binding to a random port.
+            '--dds-port',
+            '0',
           ],
         );
         await completer.future;
@@ -557,6 +562,9 @@ void main() {
             '--observatory-port',
             '$hostPort',
             '--ipv6',
+            // Ensure DDS doesn't use hostPort by binding to a random port.
+            '--dds-port',
+            '0',
           ],
         );
         await completer.future;
@@ -603,6 +611,9 @@ void main() {
         when(device.id).thenReturn(id);
         when(device.isLocalEmulator).thenAnswer((_) async => false);
         when(device.sdkNameAndVersion).thenAnswer((_) async => 'Android 46');
+        when(device.targetPlatformDisplayName)
+            .thenAnswer((_) async => 'android');
+
         return device;
       }
 
@@ -674,8 +685,6 @@ class StreamLogger extends Logger {
   }) {
     _log('[progress] $message');
     return SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     )..start();
   }
@@ -735,7 +744,6 @@ VMServiceConnector getFakeVmServiceFactory({
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     CompressionOptions compression,
@@ -828,8 +836,6 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 }
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}

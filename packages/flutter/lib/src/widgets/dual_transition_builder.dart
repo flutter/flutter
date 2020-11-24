@@ -13,7 +13,7 @@ import 'framework.dart';
 /// The `animation` provided to the builder always runs forward from 0.0 to 1.0.
 typedef AnimatedTransitionBuilder = Widget Function(
   BuildContext context,
-  Animation<double?> animation,
+  Animation<double> animation,
   Widget? child,
 );
 

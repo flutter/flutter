@@ -61,13 +61,11 @@ void generateLocalizations({
         headerFile: options?.headerFile?.toFilePath(),
         useDeferredLoading: options.deferredLoading ?? false,
         useSyntheticPackage: options.useSyntheticPackage ?? true,
+        areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
+        untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
       )
       ..loadResources()
-      ..writeOutputFiles()
-      ..outputUnimplementedMessages(
-        options?.untranslatedMessagesFile?.toFilePath(),
-        logger,
-      );
+      ..writeOutputFiles(logger);
   } on L10nException catch (e) {
     logger.printError(e.message);
     throw Exception();
@@ -119,7 +117,6 @@ class GenerateLocalizationsTarget extends Target {
       logger: environment.logger,
       fileSystem: environment.fileSystem,
     );
-
     generateLocalizations(
       logger: environment.logger,
       options: options,
@@ -162,6 +159,7 @@ class LocalizationOptions {
     this.headerFile,
     this.deferredLoading,
     this.useSyntheticPackage = true,
+    this.areResourceAttributesRequired = false,
   }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
@@ -197,7 +195,7 @@ class LocalizationOptions {
 
   /// The `--header-file` argument.
   ///
-  /// A file containing the header to preprend to the generated
+  /// A file containing the header to prepend to the generated
   /// Dart localizations.
   final Uri headerFile;
 
@@ -212,6 +210,12 @@ class LocalizationOptions {
   /// Whether to generate the Dart localization files in a synthetic package
   /// or in a custom directory.
   final bool useSyntheticPackage;
+
+  /// The `required-resource-attributes` argument.
+  ///
+  /// Whether to require all resource ids to contain a corresponding
+  /// resource attribute.
+  final bool areResourceAttributesRequired;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -244,6 +248,7 @@ LocalizationOptions parseLocalizationsOptions({
     headerFile: _tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
     useSyntheticPackage: _tryReadBool(yamlMap, 'synthetic-package', logger) ?? true,
+    areResourceAttributesRequired: _tryReadBool(yamlMap, 'required-resource-attributes', logger) ?? false,
   );
 }
 

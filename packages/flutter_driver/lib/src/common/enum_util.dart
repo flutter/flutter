@@ -31,10 +31,10 @@ class EnumIndex<E> {
   final Map<E, String> _valueToName;
 
   /// Given a [simpleName] finds the corresponding enum value.
-  E lookupBySimpleName(String simpleName) => _nameToValue[simpleName];
+  E lookupBySimpleName(String simpleName) => _nameToValue[simpleName]!;
 
   /// Returns the simple name for [enumValue].
-  String toSimpleName(E enumValue) => _valueToName[enumValue];
+  String toSimpleName(E enumValue) => _valueToName[enumValue]!;
 }
 
 String _getSimpleName(dynamic enumValue) {
