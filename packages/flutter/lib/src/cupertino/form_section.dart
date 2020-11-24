@@ -7,9 +7,9 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-// Used for iOS "Inset Grouped" padding, determined from SwiftUI's Forms in
+// Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultInsetGroupedRowsPadding =
+const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin =
     EdgeInsetsDirectional.fromSTEB(16.5, 0.0, 16.5, 16.5);
 
 // Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
@@ -42,8 +42,8 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 /// [CupertinoTextFormFieldRow] widgets be included in the [children] list in
 /// order to retain the iOS look.
 ///
-/// The [margin] parameter sets the padding for the [Column] encapsulating
-/// [children].
+/// The [margin] parameter sets the spacing around the content area of the
+/// section encapsulating [children].
 ///
 /// The [borderRadius] parameter sets the circular border radius for the
 /// [Column] encapsulating [children] rows.
@@ -67,8 +67,8 @@ class CupertinoFormSection extends StatelessWidget {
   /// [CupertinoTextFormFieldRow] widgets be included in the [children] list in
   /// order to retain the iOS look.
   ///
-  /// The [margin] parameter sets the padding for the [Column] encapsulating
-  /// [children], and defaults to zero padding.
+  /// The [margin] parameter sets the spacing around the content area of the
+  /// section encapsulating [children], and defaults to zero padding.
   ///
   /// The [borderRadius] parameter sets the circular border radius for the
   /// [Column] encapsulating [children] rows. Defaults to 0.0 for the standard
@@ -80,7 +80,7 @@ class CupertinoFormSection extends StatelessWidget {
     Key? key,
     required this.children,
     this.header,
-    this.margins = EdgeInsets.zero,
+    this.margin = EdgeInsets.zero,
     this.borderRadius = BorderRadius.zero,
     this.decoration,
   })  : _type = _CupertinoFormSectionType.base,
@@ -104,8 +104,9 @@ class CupertinoFormSection extends StatelessWidget {
   /// [CupertinoTextFormFieldRow] widgets be included in the [children] list in
   /// order to retain the iOS look.
   ///
-  /// The [margins] parameter sets the padding for the [Column] encapsulating
-  /// [children], and defaults to the standard notched-style iOS form padding.
+  /// The [margin] parameter sets the spacing around the content area of the
+  /// section encapsulating [children], and defaults to the standard
+  /// notched-style iOS form padding.
   ///
   /// The [borderRadius] parameter sets the circular border radius for the
   /// [Column] encapsulating [children] rows. Defaults to 10.0 for the standard
@@ -117,7 +118,7 @@ class CupertinoFormSection extends StatelessWidget {
     Key? key,
     required this.children,
     this.header,
-    this.margins = _kDefaultInsetGroupedRowsPadding,
+    this.margin = _kDefaultInsetGroupedRowsMargin,
     this.borderRadius = _kDefaultInsetGroupedBorderRadius,
     this.decoration,
   })  : _type = _CupertinoFormSectionType.insetGrouped,
@@ -130,12 +131,12 @@ class CupertinoFormSection extends StatelessWidget {
   /// [children] rows.
   final Widget? header;
 
-  /// Padding for the the [Column] encapsulating the [children].
+  /// Margin around the content area of the section encapsulating [children].
   ///
   /// Defaults to zero padding if constructed with standard
   /// [CupertinoFormSection] constructor. Defaults to the standard notched-style
-  /// iOS padding when constructing with [CupertinoFormSection.insetGrouped].
-  final EdgeInsetsGeometry margins;
+  /// iOS margin when constructing with [CupertinoFormSection.insetGrouped].
+  final EdgeInsetsGeometry margin;
 
   /// The list of rows in the section.
   ///
@@ -224,7 +225,7 @@ class CupertinoFormSection extends StatelessWidget {
                   ),
           ),
           Padding(
-            padding: margins,
+            padding: margin,
             child: ClipRRect(
               borderRadius: borderRadius,
               child: Column(

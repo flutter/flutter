@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-// Prefix widget padding determined via SwiftUI's `Form` view in iOS 14.2 SDK.
-const EdgeInsetsGeometry _kDefaultMargins =
+// Content padding determined via SwiftUI's `Form` view in the iOS 14.2 SDK.
+const EdgeInsetsGeometry _kDefaultPadding =
     EdgeInsetsDirectional.fromSTEB(16.0, 6.0, 6.0, 6.0);
 
 /// An iOS-style form row.
@@ -24,9 +24,9 @@ const EdgeInsetsGeometry _kDefaultMargins =
 /// row. Standard iOS guidelines encourage passing a [Text] widget to [prefix]
 /// to detail the nature of the row's [child] widget.
 ///
-/// The [margins] parameter is used to pad the contents of the row. It defaults
+/// The [padding] parameter is used to pad the contents of the row. It defaults
 /// to the standard iOS padding. If no edge insets are intended, explicitly pass
-/// [EdgeInsets.zero] to [margins].
+/// [EdgeInsets.zero] to [padding].
 ///
 /// The [helper] and [error] parameters are both optional widgets targeted at
 /// displaying more information about the row. Both widgets are placed
@@ -90,9 +90,9 @@ class CupertinoFormRow extends StatelessWidget {
   /// row. Standard iOS guidelines encourage passing a [Text] widget to [prefix]
   /// to detail the nature of the row's [child] widget.
   ///
-  /// The [margins] parameter is used to pad the contents of the row. It defaults
+  /// The [padding] parameter is used to pad the contents of the row. It defaults
   /// to the standard iOS padding. If no edge insets are intended, explicitly
-  /// pass [EdgeInsets.zero] to [margins].
+  /// pass [EdgeInsets.zero] to [padding].
   ///
   /// The [helper] and [error] parameters are both optional widgets targeted at
   /// displaying more information about the row. Both widgets are placed
@@ -104,7 +104,7 @@ class CupertinoFormRow extends StatelessWidget {
     Key? key,
     required this.child,
     this.prefix,
-    this.margins,
+    this.padding,
     this.helper,
     this.error,
   }) : super(key: key);
@@ -117,11 +117,11 @@ class CupertinoFormRow extends StatelessWidget {
   /// up all horizontal space in the row.
   final Widget? prefix;
 
-  /// Margins used to pad the contents of the row.
+  /// Content padding for the row.
   ///
   /// Defaults to the standard iOS padding for form rows. If no edge insets are
-  /// intended, explicitly pass [EdgeInsets.zero] to [margins].
-  final EdgeInsetsGeometry? margins;
+  /// intended, explicitly pass [EdgeInsets.zero] to [padding].
+  final EdgeInsetsGeometry? padding;
 
   /// A widget that is displayed underneath the [prefix] and [child] widgets.
   ///
@@ -171,7 +171,7 @@ class CupertinoFormRow extends StatelessWidget {
         color: CupertinoColors.systemBackground.resolveFrom(context),
       ),
       child: Padding(
-        padding: margins ?? _kDefaultMargins,
+        padding: padding ?? _kDefaultPadding,
         child: Column(
           children: <Widget>[
             Row(

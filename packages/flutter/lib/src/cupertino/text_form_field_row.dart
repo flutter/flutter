@@ -30,16 +30,16 @@ import 'theme.dart';
 /// guidelines encourage passing a [Text] widget to [prefix] to detail the
 /// nature of the input.
 ///
-/// The [margins] parameter is used to pad the contents of the row. It is
-/// directly passed to [CupertinoFormRow]. If the [margins]
+/// The [padding] parameter is used to pad the contents of the row. It is
+/// directly passed to [CupertinoFormRow]. If the [padding]
 /// parameter is null, [CupertinoFormRow] constructs its own default
-/// margins (which are the standard form row margins in iOS.) If no edge
-/// insets are intended, explicitly pass [EdgeInsets.zero] to [margins].
+/// padding (which is the standard form row padding in iOS.) If no edge
+/// insets are intended, explicitly pass [EdgeInsets.zero] to [padding].
 ///
 /// If a [controller] is not specified, [initialValue] can be used to give
 /// the automatically generated controller an initial value.
 ///
-/// Remember to call [TextEditingController.dispose] of the [controller], if one
+/// Consider calling [TextEditingController.dispose] of the [controller], if one
 /// is specified, when it is no longer needed. This will ensure we discard any
 /// resources used by the object.
 ///
@@ -124,11 +124,11 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// guidelines encourage passing a [Text] widget to [prefix] to detail the
   /// nature of the input.
   ///
-  /// The [margins] parameter is used to pad the contents of the row. It is
-  /// directly passed to [CupertinoFormRow]. If the [margins]
+  /// The [padding] parameter is used to pad the contents of the row. It is
+  /// directly passed to [CupertinoFormRow]. If the [padding]
   /// parameter is null, [CupertinoFormRow] constructs its own default
-  /// margins (which are the standard form row margins in iOS.) If no edge
-  /// insets are intended, explicitly pass [EdgeInsets.zero] to [margins].
+  /// padding (which is the standard form row padding in iOS.) If no edge
+  /// insets are intended, explicitly pass [EdgeInsets.zero] to [padding].
   ///
   /// For documentation about the various parameters, see the
   /// [CupertinoTextField] class and [new CupertinoTextField.borderless],
@@ -136,7 +136,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   CupertinoTextFormFieldRow({
     Key? key,
     this.prefix,
-    this.margins,
+    this.padding,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
@@ -228,7 +228,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
 
             return CupertinoFormRow(
               prefix: prefix,
-              margins: margins,
+              padding: padding,
               error: (field.errorText == null) ? null : Text(field.errorText!),
               child: CupertinoTextField.borderless(
                 controller: state._effectiveController,
@@ -284,15 +284,15 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// nature of the input.
   final Widget? prefix;
 
-  /// Margins used to pad the contents of the row.
+  /// Content padding for the row.
   ///
-  /// The [margins] widget is passed to [CupertinoFormRow]. If the [margins]
+  /// The [padding] widget is passed to [CupertinoFormRow]. If the [padding]
   /// parameter is null, [CupertinoFormRow] constructs its own default
-  /// margins, which are the standard form row margins in iOS.
+  /// padding, which is the standard form row padding in iOS.
   ///
   /// If no edge insets are intended, explicitly pass [EdgeInsets.zero] to
-  /// [margins].
-  final EdgeInsetsGeometry? margins;
+  /// [padding].
+  final EdgeInsetsGeometry? padding;
 
   /// Controls the text being edited.
   ///
