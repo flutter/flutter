@@ -577,6 +577,7 @@ class InkResponse extends StatelessWidget {
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.of(context);
     return _InkResponseStateWidget(
+      inkWellKey: key,
       child: child,
       onTap: onTap,
       onTapDown: onTapDown,
@@ -626,6 +627,7 @@ class InkResponse extends StatelessWidget {
 
 class _InkResponseStateWidget extends StatefulWidget {
   const _InkResponseStateWidget({
+    this.inkWellKey,
     this.child,
     this.onTap,
     this.onTapDown,
@@ -662,6 +664,8 @@ class _InkResponseStateWidget extends StatefulWidget {
        assert(autofocus != null),
        assert(canRequestFocus != null);
 
+  // Avoid duplicate GlobalKey registration
+  final Key? inkWellKey;
   final Widget? child;
   final GestureTapCallback? onTap;
   final GestureTapDownCallback? onTapDown;
@@ -740,6 +744,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   final ObserverList<_ParentInkResponseState> _activeChildren = ObserverList<_ParentInkResponseState>();
 
+  bool _deactivated = false;
+
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
     assert(childState != null);
@@ -787,6 +793,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void dispose() {
+    _deactivate();
     FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
     super.dispose();
   }
@@ -1019,6 +1026,23 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void deactivate() {
+    assert(!_deactivated);
+    _deactivated = true;
+    if (widget.inkWellKey is! GlobalKey) {
+      _deactivate();
+    }
+    super.deactivate();
+  }
+
+  @override
+  void updateKeepAlive() {
+    // call [AutomaticKeepAliveClientMixin._releaseKeepAlive] when [_deactivated] is true.
+    if (!_deactivated)
+      super.updateKeepAlive();
+  }
+
+  // deactivate splashes and highlights
+  void _deactivate() {
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes!;
       _splashes = null;
@@ -1032,7 +1056,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       _highlights[highlight] = null;
     }
     widget.parentState?.markChildInkResponsePressed(this, false);
-    super.deactivate();
   }
 
   bool _isWidgetEnabled(_InkResponseStateWidget widget) {
@@ -1073,6 +1096,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
+    _deactivated = false;
     for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);
     }

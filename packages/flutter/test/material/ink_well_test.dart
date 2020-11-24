@@ -1332,4 +1332,102 @@ void main() {
       textDirection: TextDirection.ltr,
     ));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/6751
+  testWidgets('When InkWell has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
+    Widget buildApp({bool onTapDownChangeWrap = false, bool onTapChangeWrap = false, bool useKey = true}) {
+      bool wrap = false;
+
+      final GlobalKey key = GlobalKey();
+      return MaterialApp(home: Scaffold(
+        body: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, void Function(void Function()) setState) {
+              Future<void> changeWrap() async{
+                await Future<void>.delayed(const Duration(milliseconds: 50));
+
+                setState(() { wrap = !wrap; });
+              }
+
+              Widget child = InkWell(
+                key: useKey ? key : null,
+                onTapDown: (_) async {
+                  if (onTapDownChangeWrap)
+                    changeWrap();
+                },
+                onTap: () async {
+                  if (onTapChangeWrap)
+                    changeWrap();
+                },
+                child: Container(
+                  height: 160,
+                  alignment: Alignment.center,
+                ),
+              );
+
+              if (wrap) {
+                child = Container(
+                  margin: const EdgeInsets.only(top: 320),
+                  child: child,
+                );
+              }
+
+              return child;
+            },
+          ),
+        ),
+      ));
+    }
+
+    await tester.pumpWidget(buildApp(
+      onTapChangeWrap: true,
+      useKey: false,
+    ));
+    await tester.tap(find.byType(InkWell));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      isNot(paints..circle()),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      isNot(paints..circle()),
+    );
+
+    // Does not call setState.
+    await tester.pumpWidget(buildApp());
+    await tester.tap(find.byType(InkWell));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      paints..circle(),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      isNot(paints..circle()),
+    );
+
+    await tester.pumpWidget(buildApp(onTapChangeWrap: true));
+    await tester.tap(find.byType(InkWell));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      paints..circle(),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      isNot(paints..circle()),
+    );
+
+    await tester.pumpWidget(buildApp(onTapDownChangeWrap: true));
+    await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(
+      tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+      paints..circle(),
+    );
+  });
 }
