@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+//import 'dart:io' as io; TODO:
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -14,12 +16,12 @@ import './stdio.dart';
 import './version.dart';
 
 /// Create a new dev release without cherry picks.
-class RollDev extends Command<void> {
-  RollDev({
-    this.fileSystem,
-    this.platform,
-    this.repository,
-    this.stdio,
+class RollDevCommand extends Command<void> {
+  RollDevCommand({
+    @required this.checkouts,
+    @required this.fileSystem,
+    @required this.platform,
+    @required this.stdio,
   }) {
     argParser.addOption(
       kIncrement,
@@ -60,10 +62,10 @@ class RollDev extends Command<void> {
     argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   }
 
+  final Checkouts checkouts;
   final FileSystem fileSystem;
   final Platform platform;
   final Stdio stdio;
-  final Repository repository;
 
   @override
   String get name => 'roll-dev';
@@ -76,9 +78,12 @@ class RollDev extends Command<void> {
   void run() {
     rollDev(
       argResults: argResults,
-      fileSystem: fileSystem,
-      platform: platform,
-      repository: repository,
+      repository: checkouts.addRepo(
+        fileSystem: fileSystem,
+        platform: platform,
+        repoType: RepositoryType.framework,
+        stdio: stdio,
+      ),
       stdio: stdio,
       usage: argParser.usage,
     );
@@ -93,8 +98,8 @@ bool rollDev({
   @required String usage,
   @required ArgResults argResults,
   @required Stdio stdio,
-  @required Platform platform,
-  @required FileSystem fileSystem,
+  //@required Platform platform,
+  //@required FileSystem fileSystem,
   @required Repository repository,
   String remoteName = 'origin',
 }) {

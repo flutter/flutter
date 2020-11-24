@@ -10,15 +10,16 @@
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:dev_tools/codesign.dart';
+import 'package:dev_tools/roll_dev.dart';
+import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:dev_tools/repository.dart';
-import 'package:dev_tools/roll_dev.dart';
-import 'package:dev_tools/stdio.dart';
 
-void main(List<String> args) {
+Future<void> main(List<String> args) async {
   const FileSystem fileSystem = LocalFileSystem();
   const ProcessManager processManager = LocalProcessManager();
   const Platform platform = LocalPlatform();
@@ -31,7 +32,9 @@ void main(List<String> args) {
     fileSystem: fileSystem,
     platform: platform,
     processManager: processManager,
+    stdio: stdio,
   );
+
   final CommandRunner<void> runner = CommandRunner<void>(
     'conductor',
     'A tool for coordinating Flutter releases.',
@@ -39,15 +42,16 @@ void main(List<String> args) {
   );
 
   <Command<void>>[
-    RollDev(
+    RollDevCommand(
+      checkouts: checkouts,
       fileSystem: fileSystem,
       platform: platform,
-      repository: checkouts.addRepo(
-        fileSystem: fileSystem,
-        platform: platform,
-        repoType: RepositoryType.framework,
-        stdio: stdio,
-      ),
+      stdio: stdio,
+    ),
+    CodesignCommand(
+      checkouts: checkouts,
+      fileSystem: fileSystem,
+      platform: platform,
       stdio: stdio,
     ),
   ].forEach(runner.addCommand);
@@ -58,7 +62,7 @@ void main(List<String> args) {
   }
 
   try {
-    runner.run(args);
+    await runner.run(args);
   } on Exception catch (e) {
     stdio.printError(e.toString());
     io.exit(1);

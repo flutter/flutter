@@ -28,8 +28,14 @@ class Repository {
     this.localUpstream = false,
     this.useExistingCheckout = false,
   })  : git = Git(processManager),
+        _checkoutDirectory = parentDirectory.childDirectory(name),
         assert(localUpstream != null),
-        assert(useExistingCheckout != null);
+        assert(useExistingCheckout != null) {
+    if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
+      stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
+      _checkoutDirectory.deleteSync(recursive: true);
+    }
+  }
 
   final String name;
   final String upstream;
@@ -44,24 +50,11 @@ class Repository {
   /// If the repository will be used as an upstream for a test repo.
   final bool localUpstream;
 
-  Directory _checkoutDirectory;
-
-  /// Lazily-loaded directory for the repository checkout.
-  ///
-  /// Cloning a repository is time-consuming, thus the repository is not cloned
-  /// until this getter is called.
-  Directory get checkoutDirectory {
-    if (_checkoutDirectory != null) {
-      return _checkoutDirectory;
-    }
-    _checkoutDirectory = parentDirectory.childDirectory(name);
-    if (checkoutDirectory.existsSync() && !useExistingCheckout) {
-      deleteDirectory();
-    }
-    if (!checkoutDirectory.existsSync()) {
-      stdio.printTrace('Cloning $name to ${checkoutDirectory.path}...');
+  void ensureCloned() {
+    if (!_checkoutDirectory.existsSync()) {
+      stdio.printTrace('Cloning $name to ${_checkoutDirectory.path}...');
       git.run(
-        <String>['clone', '--', upstream, checkoutDirectory.path],
+        <String>['clone', '--', upstream, _checkoutDirectory.path],
         'Cloning $name repo',
         workingDirectory: parentDirectory.path,
       );
@@ -72,27 +65,23 @@ class Repository {
           git.run(
             <String>['checkout', channel, '--'],
             'check out branch $channel locally',
-            workingDirectory: checkoutDirectory.path,
+            workingDirectory: _checkoutDirectory.path,
           );
         }
       }
     } else {
       stdio.printTrace(
-        'Using existing $name repo at ${checkoutDirectory.path}...',
+        'Using existing $name repo at ${_checkoutDirectory.path}...',
       );
     }
-    return _checkoutDirectory;
   }
 
-  void deleteDirectory() {
-    if (!checkoutDirectory.existsSync()) {
-      stdio.printTrace(
-        'Tried to delete ${checkoutDirectory.path} but it does not exist.',
-      );
-      return;
-    }
-    stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
-    checkoutDirectory.deleteSync(recursive: true);
+  final Directory _checkoutDirectory;
+
+  /// Lazily-loaded directory for the repository checkout.
+  Directory get checkoutDirectory {
+    ensureCloned();
+    return _checkoutDirectory;
   }
 
   /// The URL of the remote named [remoteName].
@@ -216,24 +205,6 @@ class Repository {
     );
   }
 
-  Version flutterVersion() {
-    // Build tool
-    processManager.runSync(<String>[
-      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
-      'help',
-    ]);
-    // Check version
-    final io.ProcessResult result = processManager.runSync(<String>[
-      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
-      '--version',
-      '--machine',
-    ]);
-    final Map<String, dynamic> versionJson = jsonDecode(
-      globals.stdoutToString(result.stdout),
-    ) as Map<String, dynamic>;
-    return Version.fromString(versionJson['frameworkVersion'] as String);
-  }
-
   /// Create an empty commit and return the revision.
   @visibleForTesting
   String authorEmptyCommit([String message = 'An empty commit']) {
@@ -277,6 +248,51 @@ class Repository {
   }
 }
 
+class FrameworkRepository extends Repository {
+  FrameworkRepository(Checkouts checkouts)
+      : super(
+          name: 'framework',
+          upstream: defaultUpstream,
+          fileSystem: checkouts.fileSystem,
+          parentDirectory: checkouts.directory,
+          platform: checkouts.platform,
+          processManager: checkouts.processManager,
+          stdio: checkouts.stdio,
+        );
+
+  static String defaultUpstream = 'https://github.com/flutter/flutter.git';
+
+  String get cacheDirectory =>
+      fileSystem.path.join(checkoutDirectory.path, 'bin', 'cache');
+
+  void ensureToolReady() {
+    final File toolsSnapshot = fileSystem
+        .directory(cacheDirectory)
+        .childFile('flutter_tools.snapshot');
+    if (toolsSnapshot.existsSync()) {
+      return;
+    }
+  }
+
+  Version flutterVersion() {
+    // Build tool
+    processManager.runSync(<String>[
+      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
+      'help',
+    ]);
+    // Check version
+    final io.ProcessResult result = processManager.runSync(<String>[
+      fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
+      '--version',
+      '--machine',
+    ]);
+    final Map<String, dynamic> versionJson = jsonDecode(
+      globals.stdoutToString(result.stdout),
+    ) as Map<String, dynamic>;
+    return Version.fromString(versionJson['frameworkVersion'] as String);
+  }
+}
+
 /// An enum of all the repositories that the Conductor supports.
 enum RepositoryType {
   framework,
@@ -285,9 +301,10 @@ enum RepositoryType {
 
 class Checkouts {
   Checkouts({
-    @required Platform platform,
     @required this.fileSystem,
+    @required this.platform,
     @required this.processManager,
+    @required this.stdio,
     Directory parentDirectory,
     String directoryName = 'checkouts',
   }) {
@@ -328,38 +345,40 @@ class Checkouts {
 
   Directory directory;
   final FileSystem fileSystem;
+  final Platform platform;
   final ProcessManager processManager;
+  final Stdio stdio;
 
-  Repository addRepo({
-    @required RepositoryType repoType,
-    @required Stdio stdio,
-    @required Platform platform,
-    FileSystem fileSystem,
-    String upstream,
-    String name,
-    bool localUpstream = false,
-    bool useExistingCheckout = false,
-  }) {
-    switch (repoType) {
-      case RepositoryType.framework:
-        name ??= 'framework';
-        upstream ??= 'https://github.com/flutter/flutter.git';
-        break;
-      case RepositoryType.engine:
-        name ??= 'engine';
-        upstream ??= 'https://github.com/flutter/engine.git';
-        break;
-    }
-    return Repository(
-      name: name,
-      upstream: upstream,
-      stdio: stdio,
-      platform: platform,
-      fileSystem: fileSystem,
-      parentDirectory: directory,
-      processManager: processManager,
-      localUpstream: localUpstream,
-      useExistingCheckout: useExistingCheckout,
-    );
-  }
+  //Repository addRepo({
+  //  @required RepositoryType repoType,
+  //  @required Stdio stdio,
+  //  @required Platform platform,
+  //  @required FileSystem fileSystem,
+  //  String upstream,
+  //  String name,
+  //  bool localUpstream = false,
+  //  bool useExistingCheckout = false,
+  //}) {
+  //  switch (repoType) {
+  //    case RepositoryType.framework:
+  //      name ??= 'framework';
+  //      upstream ??= 'https://github.com/flutter/flutter.git';
+  //      break;
+  //    case RepositoryType.engine:
+  //      name ??= 'engine';
+  //      upstream ??= 'https://github.com/flutter/engine.git';
+  //      break;
+  //  }
+  //  return Repository(
+  //    name: name,
+  //    upstream: upstream,
+  //    stdio: stdio,
+  //    platform: platform,
+  //    fileSystem: fileSystem,
+  //    parentDirectory: directory,
+  //    processManager: processManager,
+  //    localUpstream: localUpstream,
+  //    useExistingCheckout: useExistingCheckout,
+  //  );
+  //}
 }
