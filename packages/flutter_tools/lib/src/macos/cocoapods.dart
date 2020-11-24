@@ -89,11 +89,9 @@ class CocoaPods {
       _processManager = processManager,
       _xcodeProjectInterpreter = xcodeProjectInterpreter,
       _logger = logger,
-      _platform = platform,
       _artifacts = artifacts,
       _usage = usage,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-      _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
       _operatingSystemUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: logger,
@@ -103,19 +101,17 @@ class CocoaPods {
 
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
-  final FileSystemUtils _fileSystemUtils;
   final ProcessUtils _processUtils;
   final OperatingSystemUtils _operatingSystemUtils;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
-  final Platform _platform;
   final Artifacts _artifacts;
   final Usage _usage;
 
   Future<String> _versionText;
 
-  String get cocoaPodsMinimumVersion => '1.6.0';
-  String get cocoaPodsRecommendedVersion => '1.9.0';
+  String get cocoaPodsMinimumVersion => '1.9.0';
+  String get cocoaPodsRecommendedVersion => '1.10.0';
 
   Future<bool> get isInstalled =>
     _processUtils.exitsHappy(<String>['which', 'pod']);
@@ -155,28 +151,6 @@ class CocoaPods {
     } on FormatException {
       return CocoaPodsStatus.notInstalled;
     }
-  }
-
-  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are
-  /// cloned.
-  ///
-  /// Versions >= 1.8.0 do not require 'pod setup' and default to a CDN instead
-  /// of a locally cloned repository.
-  /// See http://blog.cocoapods.org/CocoaPods-1.8.0-beta/
-  ///
-  /// A user can override the default location via the CP_REPOS_DIR environment
-  /// variable.
-  ///
-  /// See https://github.com/CocoaPods/CocoaPods/blob/master/lib/cocoapods/config.rb#L138
-  /// for details of this variable.
-  Future<bool> get isCocoaPodsInitialized async {
-    final Version installedVersion = Version.parse(await cocoaPodsVersionText);
-    if (installedVersion != null && installedVersion >= Version.parse('1.8.0')) {
-      return true;
-    }
-    final String cocoapodsReposDir = _platform.environment['CP_REPOS_DIR']
-      ?? _fileSystem.path.join(_fileSystemUtils.homeDirPath, '.cocoapods', 'repos');
-    return _fileSystem.isDirectory(_fileSystem.path.join(cocoapodsReposDir, 'master'));
   }
 
   Future<bool> processPods({
@@ -245,17 +219,6 @@ class CocoaPods {
         break;
       case CocoaPodsStatus.recommended:
         break;
-    }
-    if (!await isCocoaPodsInitialized) {
-      _logger.printError(
-        'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
-        '$noCocoaPodsConsequence\n'
-        'To initialize CocoaPods, run:\n'
-        '  pod setup\n'
-        "once to finalize CocoaPods' installation.",
-        emphasis: true,
-      );
-      return false;
     }
 
     return true;

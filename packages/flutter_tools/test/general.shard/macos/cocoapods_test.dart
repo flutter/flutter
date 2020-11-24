@@ -80,7 +80,7 @@ void main() {
       xcodeProjectInterpreter: mockXcodeProjectInterpreter,
       usage: usage,
     );
-    pretendPodVersionIs('1.9.0');
+    pretendPodVersionIs('1.10.0');
     fileSystem.file(fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
     ))
@@ -177,32 +177,26 @@ void main() {
 
     testWithoutContext('detects below minimum version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.5.0');
+      pretendPodVersionIs('1.6.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowMinimumVersion);
     });
 
     testWithoutContext('detects below recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.6.0');
+      pretendPodVersionIs('1.9.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowRecommendedVersion);
     });
 
     testWithoutContext('detects at recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.9.0');
+      pretendPodVersionIs('1.10.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     });
 
     testWithoutContext('detects above recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.9.1');
+      pretendPodVersionIs('1.10.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
-    });
-
-    testWithoutContext('detects initialized over 1.8.0', () async {
-      pretendPodIsInstalled();
-      pretendPodVersionIs('1.8.0');
-      expect(await cocoaPodsUnderTest.isCocoaPodsInitialized, isTrue);
     });
   });
 
