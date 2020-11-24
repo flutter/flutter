@@ -1006,7 +1006,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///
 /// This sample shows a [SliverAppBar] with three simple properties. The first property
 /// is [pinned],The second property is [snap] while the third property is [floating].
-/// 
+///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
 /// ```
