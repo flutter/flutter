@@ -42,7 +42,6 @@ class CheckboxThemeData with Diagnosticable {
     this.materialTapTargetSize,
     this.visualDensity,
     this.shape,
-    this.textDirection,
   });
 
   /// {@macro flutter.material.checkbox.mouseCursor}
@@ -93,10 +92,7 @@ class CheckboxThemeData with Diagnosticable {
   final VisualDensity? visualDensity;
 
   /// The border of checkbox.
-  final RoundedRectangleBorder? shape;
-
-  /// Defines the TextDirection of the checkbox.
-  final TextDirection? textDirection;
+  final OutlinedBorder? shape;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -108,8 +104,7 @@ class CheckboxThemeData with Diagnosticable {
     double? splashRadius,
     MaterialTapTargetSize? materialTapTargetSize,
     VisualDensity? visualDensity,
-    RoundedRectangleBorder? shape,
-    TextDirection? textDirection,
+    OutlinedBorder? shape,
   }) {
     return CheckboxThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -120,7 +115,6 @@ class CheckboxThemeData with Diagnosticable {
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       visualDensity: visualDensity ?? this.visualDensity,
       shape: shape ?? this.shape,
-      textDirection:  textDirection ?? this.textDirection,
     );
   }
 
@@ -136,7 +130,7 @@ class CheckboxThemeData with Diagnosticable {
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
-      shape: ShapeBorder.lerp(a?.shape, b?.shape, t) as RoundedRectangleBorder?,
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t) as OutlinedBorder?,
     );
   }
 
@@ -151,7 +145,6 @@ class CheckboxThemeData with Diagnosticable {
       materialTapTargetSize,
       visualDensity,
       shape,
-      textDirection,
     );
   }
 
@@ -169,8 +162,7 @@ class CheckboxThemeData with Diagnosticable {
       && other.splashRadius == splashRadius
       && other.materialTapTargetSize == materialTapTargetSize
       && other.visualDensity == visualDensity
-      && other.shape == shape
-      && other.textDirection == textDirection;
+      && other.shape == shape;
   }
 
   @override
@@ -184,7 +176,6 @@ class CheckboxThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<OutlinedBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(

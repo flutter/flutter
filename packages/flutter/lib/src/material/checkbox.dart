@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../material.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
@@ -73,7 +74,6 @@ class Checkbox extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.shape,
-    this.textDirection,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(autofocus != null),
@@ -241,11 +241,12 @@ class Checkbox extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// The Border of the checkbox.
-  final RoundedRectangleBorder? shape;
-
-  /// The TextDirection of the checkbox.
-  final TextDirection? textDirection;
+  /// The shape of the checkbox's [Material].
+  ///
+  /// If this property is null then [checkboxTheme.shape] of [ThemeData.checkboxTheme]
+  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
+  /// with a circular corner radius of 1.0.
+  final OutlinedBorder? shape;
 
   /// The width of a checkbox widget.
   static const double width = 18.0;
@@ -402,8 +403,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             vsync: this,
             hasFocus: _focused,
             hovering: _hovering,
-            textDirection: widget.textDirection ?? themeData.checkboxTheme.textDirection ?? TextDirection.ltr,
             shape: widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
+              side: BorderSide(width: 2),
               borderRadius: BorderRadius.all(Radius.circular(1.0)),
             ),
           );
@@ -430,7 +431,6 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     required this.hasFocus,
     required this.hovering,
     required this.shape,
-    required this.textDirection,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(activeColor != null),
@@ -451,8 +451,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<bool?>? onChanged;
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
-  final RoundedRectangleBorder shape;
-  final TextDirection textDirection;
+  final OutlinedBorder shape;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
@@ -470,7 +469,6 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     hasFocus: hasFocus,
     hovering: hovering,
     shape: shape,
-    textDirection: textDirection,
   );
 
   @override
@@ -491,8 +489,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..vsync = vsync
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..shape = shape
-      ..textDirection = textDirection;
+      ..shape = shape;
   }
 }
 
@@ -514,7 +511,6 @@ class _RenderCheckbox extends RenderToggleable {
     required bool hasFocus,
     required bool hovering,
     required this.shape,
-    required this.textDirection,
     required TickerProvider vsync,
   }) : _oldValue = value,
        super(
@@ -534,8 +530,7 @@ class _RenderCheckbox extends RenderToggleable {
 
   bool? _oldValue;
   Color checkColor;
-  RoundedRectangleBorder shape;
-  TextDirection textDirection;
+  OutlinedBorder shape;
 
   @override
   set value(bool? newValue) {
@@ -555,17 +550,11 @@ class _RenderCheckbox extends RenderToggleable {
   // At t == 0.0, the outer rect's size is _kEdgeSize (Checkbox.width)
   // At t == 0.5, .. is _kEdgeSize - _kStrokeWidth
   // At t == 1.0, .. is _kEdgeSize
-  RRect _outerRectAt(Offset origin, double t) {
+  Rect _outerRectAt(Offset origin, double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
     final double size = _kEdgeSize - inset * _kStrokeWidth;
     final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
-    return RRect.fromRectAndCorners(
-      rect,
-      bottomLeft: shape.borderRadius.resolve(textDirection).bottomLeft,
-      bottomRight: shape.borderRadius.resolve(textDirection).bottomRight,
-      topLeft: shape.borderRadius.resolve(textDirection).topLeft,
-      topRight: shape.borderRadius.resolve(textDirection).topRight,
-    );
+    return rect;
   }
 
   // The checkbox's border color if value == false, or its fill color when
@@ -583,12 +572,9 @@ class _RenderCheckbox extends RenderToggleable {
       ..strokeWidth = _kStrokeWidth;
   }
 
-  void _drawBorder(Canvas canvas, RRect outer, double t, Paint paint) {
+  void _drawBorder(Canvas canvas, Rect outer, double t, Paint paint) {
     assert(t >= 0.0 && t <= 0.5);
-    final double size = outer.width;
-    // As t goes from 0.0 to 1.0, gradually fill the outer RRect.
-    final RRect inner = outer.deflate(math.min(size / 2.0, _kStrokeWidth + size * t));
-    canvas.drawDRRect(outer, inner, paint);
+    shape.paint(canvas, outer);
   }
 
   void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
@@ -641,13 +627,13 @@ class _RenderCheckbox extends RenderToggleable {
     // Four cases: false to null, false to true, null to false, true to false
     if (_oldValue == false || value == false) {
       final double t = value == false ? 1.0 - tNormalized : tNormalized;
-      final RRect outer = _outerRectAt(origin, t);
+      final Rect outer = _outerRectAt(origin, t);
       final Paint paint = Paint()..color = _colorAt(t);
 
       if (t <= 0.5) {
         _drawBorder(canvas, outer, t, paint);
       } else {
-        canvas.drawRRect(outer, paint);
+        canvas.drawPath(shape.getOuterPath(outer), paint);
 
         final double tShrink = (t - 0.5) * 2.0;
         if (_oldValue == null || value == null)
@@ -656,9 +642,9 @@ class _RenderCheckbox extends RenderToggleable {
           _drawCheck(canvas, origin, tShrink, strokePaint);
       }
     } else { // Two cases: null to true, true to null
-      final RRect outer = _outerRectAt(origin, 1.0);
+      final Rect outer = _outerRectAt(origin, 1.0);
       final Paint paint = Paint() ..color = _colorAt(1.0);
-      canvas.drawRRect(outer, paint);
+      canvas.drawPath(shape.getOuterPath(outer), paint);
 
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
