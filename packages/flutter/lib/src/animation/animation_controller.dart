@@ -556,11 +556,19 @@ class AnimationController extends Animation<double>
     Duration? simulationDuration = duration;
     if (simulationDuration == null) {
       assert(() {
-        if ((this.duration == null && _direction == _AnimationDirection.reverse && reverseDuration == null) || this.duration == null) {
+        if (this.duration == null && _direction == _AnimationDirection.reverse && reverseDuration == null) {
           throw FlutterError(
-            'AnimationController.animateTo() called with no explicit duration and no default duration or reverseDuration.\n'
+            'AnimationController.animateBack() called with no explicit duration and no default duration or reverseDuration.\n'
+            'Either the "duration" argument to the animateBack() method should be provided, or the '
+            '"duration" or "reverseDuration" property should be set, either in the constructor or later, before '
+            'calling the animateBack() function.'
+          );
+        }
+        if (this.duration == null && _direction == _AnimationDirection.forward) {
+          throw FlutterError(
+            'AnimationController.animateTo() called with no explicit duration and no default duration.\n'
             'Either the "duration" argument to the animateTo() method should be provided, or the '
-            '"duration" and/or "reverseDuration" property should be set, either in the constructor or later, before '
+            '"duration" property should be set, either in the constructor or later, before '
             'calling the animateTo() function.'
           );
         }

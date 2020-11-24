@@ -929,6 +929,26 @@ void main() {
     tick(const Duration(seconds: 1));
     expect(statuses, <AnimationStatus>[AnimationStatus.reverse]);
   });
+
+  test('AnimateBack can runs successfully with just "reverseDuration" property set', () {
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
+      reverseDuration: const Duration(seconds: 2),
+      vsync: const TestVSync(),
+    )..addStatusListener((AnimationStatus status) {
+      statuses.add(status);
+    });
+
+    controller.animateBack(0.8);
+
+    expect(statuses, <AnimationStatus>[AnimationStatus.reverse]);
+    statuses.clear();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(seconds: 2));
+    expect(statuses, <AnimationStatus>[AnimationStatus.dismissed]);
+
+    controller.dispose();
+  });
 }
 
 class TestSimulation extends Simulation {
