@@ -158,6 +158,7 @@ std::unique_ptr<RasterCacheResult> RasterCache::RasterizeLayer(
         SkISize canvas_size = canvas->getBaseLayerSize();
         SkNWayCanvas internal_nodes_canvas(canvas_size.width(),
                                            canvas_size.height());
+        internal_nodes_canvas.setMatrix(canvas->getTotalMatrix());
         internal_nodes_canvas.addCanvas(canvas);
         Layer::PaintContext paintContext = {
             /* internal_nodes_canvas= */ static_cast<SkCanvas*>(
