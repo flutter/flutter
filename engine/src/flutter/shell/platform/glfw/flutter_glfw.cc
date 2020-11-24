@@ -22,6 +22,7 @@
 #include "flutter/shell/platform/glfw/key_event_handler.h"
 #include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
 #include "flutter/shell/platform/glfw/platform_handler.h"
+#include "flutter/shell/platform/glfw/system_utils.h"
 #include "flutter/shell/platform/glfw/text_input_plugin.h"
 
 // GLFW_TRUE & GLFW_FALSE are introduced since libglfw-3.3,
@@ -690,6 +691,27 @@ static bool RunFlutterEngine(
   return true;
 }
 
+// Passes locale information to the Flutter engine.
+static void SetUpLocales(FlutterDesktopEngineState* state) {
+  std::vector<flutter::LanguageInfo> languages =
+      flutter::GetPreferredLanguageInfo();
+  std::vector<FlutterLocale> flutter_locales =
+      flutter::ConvertToFlutterLocale(languages);
+  // Convert the locale list to the locale pointer list that must be provided.
+  std::vector<const FlutterLocale*> flutter_locale_list;
+  flutter_locale_list.reserve(flutter_locales.size());
+  std::transform(
+      flutter_locales.begin(), flutter_locales.end(),
+      std::back_inserter(flutter_locale_list),
+      [](const auto& arg) -> const auto* { return &arg; });
+  FlutterEngineResult result = FlutterEngineUpdateLocales(
+      state->flutter_engine, flutter_locale_list.data(),
+      flutter_locale_list.size());
+  if (result != kSuccess) {
+    std::cerr << "Failed to set up Flutter locales." << std::endl;
+  }
+}
+
 // Populates |state|'s helper object fields that are common to normal and
 // headless mode.
 //
@@ -713,6 +735,8 @@ static void SetUpCommonEngineState(FlutterDesktopEngineState* state,
   // System channel handler.
   state->platform_handler = std::make_unique<flutter::PlatformHandler>(
       state->internal_plugin_registrar->messenger(), window);
+
+  SetUpLocales(state);
 }
 
 bool FlutterDesktopInit() {

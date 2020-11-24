@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/testing/testing.gni")
+
 _public_headers = [ "public/flutter_glfw.h" ]
 
 # Any files that are built by clients (client_wrapper code, library headers for
@@ -28,6 +30,8 @@ source_set("flutter_glfw_headers") {
 }
 
 source_set("flutter_glfw") {
+  public = [ "system_utils.h" ]
+
   sources = [
     "event_loop.cc",
     "event_loop.h",
@@ -41,6 +45,7 @@ source_set("flutter_glfw") {
     "keyboard_hook_handler.h",
     "platform_handler.cc",
     "platform_handler.h",
+    "system_utils.cc",
     "text_input_plugin.cc",
     "text_input_plugin.h",
   ]
@@ -69,6 +74,21 @@ source_set("flutter_glfw") {
       "IOKit.framework",
     ]
   }
+}
+
+test_fixtures("flutter_glfw_fixtures") {
+  fixtures = []
+}
+
+executable("flutter_glfw_unittests") {
+  testonly = true
+  sources = [ "system_utils_test.cc" ]
+  deps = [
+    ":flutter_glfw",
+    ":flutter_glfw_fixtures",
+    "//flutter/shell/platform/embedder:embedder_headers",
+    "//flutter/testing",
+  ]
 }
 
 copy("publish_headers_glfw") {

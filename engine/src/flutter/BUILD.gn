@@ -4,6 +4,7 @@
 
 import("//flutter/common/config.gni")
 import("//flutter/shell/platform/config.gni")
+import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
 
 # Whether to build the dartdevc sdk, libraries, and source files
@@ -140,6 +141,10 @@ group("flutter") {
       if (is_linux) {
         public_deps +=
             [ "//flutter/shell/platform/linux:flutter_linux_unittests" ]
+        if (build_glfw_shell) {
+          public_deps +=
+              [ "//flutter/shell/platform/glfw:flutter_glfw_unittests" ]
+        }
       }
 
       if (is_mac) {
