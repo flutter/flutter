@@ -124,7 +124,7 @@ void main() {
     await tester.tap(find.byKey(withCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    Navigator.of(popupContext)!.pop();
+    Navigator.of(popupContext).pop();
     await tester.pump();
     expect(cancels, equals(2));
   });
@@ -1801,6 +1801,123 @@ void main() {
       tester.getBottomLeft(find.byKey(_lastKey)).dy,
       lessThan(600 - windowPaddingBottom), // Device height is 600.
     );
+  });
+
+  testWidgets('PopupMenu button can render at its "natural" size in AppBar', (WidgetTester tester) async {
+    final GlobalKey buttonKey = GlobalKey();
+
+    Widget buildFrame(double width, double height) {
+      return MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(
+                top: 32.0,
+                bottom: 32.0,
+              ),
+            ),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 100.0,
+            title: const Text('PopupMenu Test'),
+            actions: <Widget>[PopupMenuButton<int>(
+              child: SizedBox(
+                key: buttonKey,
+                height: height,
+                width: width,
+                child: const ColoredBox(
+                  color: Colors.pink,
+                ),
+              ),
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                const PopupMenuItem<int>(child: Text('-1-'), value: 1),
+                const PopupMenuItem<int>(child: Text('-2-'), value: 2),
+                const PopupMenuItem<int>(child: Text('-3-'), value: 3),
+                const PopupMenuItem<int>(child: Text('-4-'), value: 4),
+                const PopupMenuItem<int>(child: Text('-5-'), value: 5),
+              ],
+            )],
+          ),
+          body: Container(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(10.0, 10.0));
+    Size buttonSize = tester.getSize(find.byKey(buttonKey));
+    expect(buttonSize, const Size(10.0, 10.0));
+
+    await tester.pumpWidget(buildFrame(20.5, 30.5));
+    buttonSize = tester.getSize(find.byKey(buttonKey));
+    expect(buttonSize, const Size(20.5, 30.5));
+
+    await tester.pumpWidget(buildFrame(20.0, 100.0));
+    buttonSize = tester.getSize(find.byKey(buttonKey));
+    expect(buttonSize, const Size(20.0, 100.0));
+
+    await tester.pumpWidget(buildFrame(20.0, 100.1));
+    buttonSize = tester.getSize(find.byKey(buttonKey));
+    expect(buttonSize, const Size(20.0, 100.0)); // Do not overflow the AppBar.
+  });
+
+  testWidgets('PopupMenu position test when have unsafe area', (WidgetTester tester) async {
+    final GlobalKey buttonKey = GlobalKey();
+    final GlobalKey firstItemKey = GlobalKey();
+
+    Widget buildFrame(double width, double height) {
+      return MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(
+                top: 32.0,
+                bottom: 32.0,
+              ),
+            ),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('PopupMenu Test'),
+            actions: <Widget>[PopupMenuButton<int>(
+              child: SizedBox(
+                key: buttonKey,
+                height: height,
+                width: width,
+                child: const ColoredBox(
+                  color: Colors.pink,
+                ),
+              ),
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                PopupMenuItem<int>(
+                  key: firstItemKey,
+                  child: const Text('-1-'),
+                  value: 1,
+                ),
+                const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
+              ],
+            )],
+          ),
+          body: Container(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(20.0, 20.0));
+
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    final Offset button = tester.getBottomRight(find.byKey(buttonKey));
+    final Offset popupMenu = tester.getTopRight(find.byKey(firstItemKey));
+
+    // The menu should popup blew the button.
+    // The 8.0 pixels are [_kMenuScreenPadding] and [_kMenuVerticalPadding].
+    expect(popupMenu, Offset(button.dx - 8.0, button.dy + 8.0));
   });
 
   group('feedback', () {
