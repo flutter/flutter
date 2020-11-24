@@ -70,7 +70,7 @@ void main() {
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
       FileSystem: () => memoryFileSystem,
@@ -111,11 +111,113 @@ void main() {
           'distributionPath=wrapper/dists\n'
           'zipStoreBase=GRADLE_USER_HOME\n'
           'zipStorePath=wrapper/dists\n'
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-6.7-all.zip\n');
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
+
+  group('migrateToR8', () {
+    MemoryFileSystem memoryFileSystem;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem.test();
+    });
+
+    testUsingContext("throws ToolExit if gradle.properties doesn't exist", () {
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      expect(() {
+        gradleUtils.migrateToR8(sampleAppAndroid);
+      }, throwsToolExit(message: 'Expected file ${sampleAppAndroid.path}'));
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('throws ToolExit if it cannot write gradle.properties', () {
+      final MockDirectory sampleAppAndroid = MockDirectory();
+      final MockFile gradleProperties = MockFile();
+
+      when(gradleProperties.path).thenReturn('foo/gradle.properties');
+      when(gradleProperties.existsSync()).thenReturn(true);
+      when(gradleProperties.readAsStringSync()).thenReturn('');
+      when(gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append))
+        .thenThrow(const FileSystemException());
+
+      when(sampleAppAndroid.childFile('gradle.properties'))
+        .thenReturn(gradleProperties);
+
+      expect(() {
+        gradleUtils.migrateToR8(sampleAppAndroid);
+      },
+      throwsToolExit(message:
+        'The tool failed to add `android.enableR8=true` to foo/gradle.properties. '
+        'Please update the file manually and try this command again.'));
+    });
+
+    testUsingContext('does not update gradle.properties if it already uses R8', () {
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('android.enableR8=true');
+
+      gradleUtils.migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText,
+        contains('gradle.properties already sets `android.enableR8`'));
+      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals('android.enableR8=true'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('sets android.enableR8=true', () {
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M\n');
+
+      gradleUtils.migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
+      expect(
+        sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals(
+          'org.gradle.jvmargs=-Xmx1536M\n'
+          'android.enableR8=true\n'
+        ),
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('appends android.enableR8=true to the new line', () {
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M');
+
+      gradleUtils.migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
+      expect(
+        sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals(
+          'org.gradle.jvmargs=-Xmx1536M\n'
+          'android.enableR8=true\n'
+        ),
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any()
     });
   });
 
@@ -139,6 +241,7 @@ void main() {
       androidDirectory.childFile('gradle.properties').createSync();
 
       when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
+      when(gradleUtils.migrateToR8(any)).thenReturn(null);
 
       expect(
         GradleUtils().getExecutable(FlutterProject.current()),
@@ -170,6 +273,7 @@ void main() {
       when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
 
       when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
+      when(gradleUtils.migrateToR8(any)).thenReturn(null);
 
       GradleUtils().getExecutable(flutterProject);
 
@@ -200,6 +304,7 @@ void main() {
       when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
 
       when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
+      when(gradleUtils.migrateToR8(any)).thenReturn(null);
 
       GradleUtils().getExecutable(flutterProject);
 
@@ -230,6 +335,7 @@ void main() {
       when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
 
       when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
+      when(gradleUtils.migrateToR8(any)).thenReturn(null);
 
       GradleUtils().getExecutable(flutterProject);
 

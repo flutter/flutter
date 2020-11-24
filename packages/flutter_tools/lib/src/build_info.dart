@@ -12,7 +12,6 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
-import 'macos/xcode.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
@@ -222,6 +221,7 @@ class AndroidBuildInfo {
       AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
+    this.shrink = false,
     this.fastStart = false,
   });
 
@@ -234,6 +234,9 @@ class AndroidBuildInfo {
   /// build artifact. When this is true, multiple build artifacts (one per ABI)
   /// will be produced.
   final bool splitPerAbi;
+
+  /// Whether to enable code shrinking on release mode.
+  final bool shrink;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
@@ -314,6 +317,12 @@ String getNameForBuildMode(BuildMode buildMode) {
 /// Returns the [BuildMode] for a particular `name`.
 BuildMode getBuildModeForName(String name) {
   return BuildMode.fromName(name);
+}
+
+/// Environment type of the target device.
+enum EnvironmentType {
+  physical,
+  simulator,
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
@@ -477,22 +486,18 @@ enum AndroidArch {
 }
 
 /// The default set of iOS device architectures to build for.
-List<DarwinArch> defaultIOSArchsForSdk(SdkType sdkType) {
-  switch (sdkType) {
-    case SdkType.iPhone:
-      return <DarwinArch>[
-        DarwinArch.armv7,
-        DarwinArch.arm64,
-      ];
-    case SdkType.iPhoneSimulator:
-      return <DarwinArch>[
-        // Apple Silicon ARM simulators not yet supported.
-        DarwinArch.x86_64,
-      ];
-    default:
-      assert(false, 'Unknown SDK type $sdkType');
-      return null;
+List<DarwinArch> defaultIOSArchsForEnvironment(
+    EnvironmentType environmentType) {
+  if (environmentType == EnvironmentType.simulator) {
+    return <DarwinArch>[
+      // Apple Silicon ARM simulators not yet supported.
+      DarwinArch.x86_64,
+    ];
   }
+  return <DarwinArch>[
+    DarwinArch.armv7,
+    DarwinArch.arm64,
+  ];
 }
 
 String getNameForDarwinArch(DarwinArch arch) {
