@@ -4,6 +4,8 @@
 
 import 'dart:io' hide Platform;
 
+import 'package:file/file.dart' as fs;
+import 'package:file/memory.dart';
 import 'package:mockito/mockito.dart';
 
 import '../test.dart';
@@ -54,6 +56,27 @@ void main() {
           reason: '$version is invalid but verifyVersionFile said it was fine',
         );
       }
+    });
+  });
+
+  group('flutter/plugins version', () {
+    final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+    final fs.File pluginsVersionFile = memoryFileSystem.file(flutterPluginsVersionFile);
+    const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
+    setUpAll(() {
+      pluginsVersionFile.createSync(recursive: true);
+    });
+
+    test('commit hash', () async {
+      pluginsVersionFile.writeAsStringSync(kSampleHash);
+      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem);
+      expect(actualHash, kSampleHash);
+    });
+
+    test('commit hash with newlines', () async {
+      pluginsVersionFile.writeAsStringSync('\n$kSampleHash\n');
+      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem);
+      expect(actualHash, kSampleHash);
     });
   });
 }
