@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'debug_overflow_indicator.dart';
+import 'layer.dart';
+import 'layout_helper.dart';
 import 'object.dart';
 import 'stack.dart' show RelativeRect;
 
@@ -86,7 +88,6 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
     }
     return false;
   }
-
 }
 
 /// Insets its child by the given padding.
@@ -189,6 +190,24 @@ class RenderPadding extends RenderShiftedBox {
     if (child != null) // next line relies on double.infinity absorption
       return child!.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    _resolve();
+    assert(_resolvedPadding != null);
+    if (child == null) {
+      return constraints.constrain(Size(
+        _resolvedPadding!.left + _resolvedPadding!.right,
+        _resolvedPadding!.top + _resolvedPadding!.bottom,
+      ));
+    }
+    final BoxConstraints innerConstraints = constraints.deflate(_resolvedPadding!);
+    final Size childSize = child!.getDryLayout(innerConstraints);
+    return constraints.constrain(Size(
+      _resolvedPadding!.left + childSize.width + _resolvedPadding!.right,
+      _resolvedPadding!.top + childSize.height + _resolvedPadding!.bottom,
+    ));
   }
 
   @override
@@ -385,6 +404,23 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
+    final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.infinity;
+    if (child != null) {
+      final Size childSize = child!.getDryLayout(constraints.loosen());
+      return constraints.constrain(Size(
+        shrinkWrapWidth ? childSize.width * (_widthFactor ?? 1.0) : double.infinity,
+        shrinkWrapHeight ? childSize.height * (_heightFactor ?? 1.0) : double.infinity),
+      );
+    }
+    return constraints.constrain(Size(
+      shrinkWrapWidth ? 0.0 : double.infinity,
+      shrinkWrapHeight ? 0.0 : double.infinity,
+    ));
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
@@ -405,9 +441,9 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   void debugPaintSize(PaintingContext context, Offset offset) {
     super.debugPaintSize(context, offset);
     assert(() {
-      Paint paint;
+      final Paint paint;
       if (child != null && !child!.size.isEmpty) {
-        Path path;
+        final Path path;
         paint = Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
@@ -570,8 +606,8 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   @override
@@ -652,7 +688,7 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   Rect _overflowChildRect = Rect.zero;
   bool _isOverflowing = false;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -666,27 +702,45 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     }
   }
 
+  Size _calculateSizeWithChild({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    assert(child != null);
+    // Let the child lay itself out at it's "natural" size, but if
+    // constrainedAxis is non-null, keep any constraints on that axis.
+    final BoxConstraints childConstraints;
+    if (constrainedAxis != null) {
+      switch (constrainedAxis!) {
+        case Axis.horizontal:
+          childConstraints = BoxConstraints(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
+          break;
+        case Axis.vertical:
+          childConstraints = BoxConstraints(maxHeight: constraints.maxHeight, minHeight: constraints.minHeight);
+          break;
+      }
+    } else {
+      childConstraints = const BoxConstraints();
+    }
+    return constraints.constrain(layoutChild(child!, childConstraints));
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return constraints.smallest;
+    }
+    return _calculateSizeWithChild(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child != null) {
-      // Let the child lay itself out at it's "natural" size, but if
-      // constrainedAxis is non-null, keep any constraints on that axis.
-      BoxConstraints childConstraints;
-      if (constrainedAxis != null) {
-        switch (constrainedAxis!) {
-          case Axis.horizontal:
-            childConstraints = BoxConstraints(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
-            break;
-          case Axis.vertical:
-            childConstraints = BoxConstraints(maxHeight: constraints.maxHeight, minHeight: constraints.minHeight);
-            break;
-        }
-      } else {
-        childConstraints = const BoxConstraints();
-      }
-      child!.layout(childConstraints, parentUsesSize: true);
-      size = constraints.constrain(child!.size);
+      size = _calculateSizeWithChild(
+        constraints: constraints,
+        layoutChild: ChildLayoutHelper.layoutChild,
+      );
       alignChild();
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
       _overflowContainerRect = Offset.zero & size;
@@ -712,10 +766,12 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     }
 
     if (clipBehavior == Clip.none) {
+      _clipRectLayer = null;
       super.paint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint,
+          clipBehavior: clipBehavior, oldLayer:_clipRectLayer);
     }
 
     // Display the overflow indicator.
@@ -724,6 +780,8 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
       return true;
     }());
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) {
@@ -805,6 +863,11 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
     if (child != null)
       return child!.getDistanceToActualBaseline(baseline);
     return super.computeDistanceToActualBaseline(baseline);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(_requestedSize);
   }
 
   @override
@@ -906,7 +969,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMinIntrinsicWidth(height);
     } else { // the following line relies on double.infinity absorption
@@ -918,7 +981,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMaxIntrinsicWidth(height);
     } else { // the following line relies on double.infinity absorption
@@ -930,7 +993,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMinIntrinsicHeight(width);
     } else { // the following line relies on double.infinity absorption
@@ -942,7 +1005,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    double result;
+    final double result;
     if (child == null) {
       result = super.computeMaxIntrinsicHeight(width);
     } else { // the following line relies on double.infinity absorption
@@ -950,6 +1013,15 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     }
     assert(result.isFinite);
     return result / (_heightFactor ?? 1.0);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      final Size childSize = child!.getDryLayout(_getInnerConstraints(constraints));
+      return constraints.constrain(childSize);
+    }
+    return constraints.constrain(_getInnerConstraints(constraints).constrain(Size.zero));
   }
 
   @override
@@ -1139,6 +1211,11 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _getSize(constraints);
+  }
+
+  @override
   void performLayout() {
     size = _getSize(constraints);
     if (child != null) {
@@ -1205,6 +1282,17 @@ class RenderBaseline extends RenderShiftedBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      assert(debugCannotComputeDryLayout(
+        reason: 'Baseline metrics are only available after a full layout.',
+      ));
+      return const Size(0, 0);
+    }
+    return constraints.smallest;
+  }
+
+  @override
   void performLayout() {
     if (child != null) {
       final BoxConstraints constraints = this.constraints;
@@ -1217,7 +1305,7 @@ class RenderBaseline extends RenderShiftedBox {
       final Size childSize = child!.size;
       size = constraints.constrain(Size(childSize.width, top + childSize.height));
     } else {
-      performResize();
+      size = constraints.smallest;
     }
   }
 

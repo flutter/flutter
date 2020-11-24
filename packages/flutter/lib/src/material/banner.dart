@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
@@ -20,6 +18,30 @@ import 'theme.dart';
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return MaterialBanner(
+///     padding: const EdgeInsets.all(20),
+///     content: Text("Hey, I am a Material Banner"),
+///     leading: Icon(Icons.agriculture_outlined),
+///     backgroundColor: Colors.grey[300],
+///     actions: <Widget>[
+///       FlatButton(
+///         child: Text("OPEN"),
+///         onPressed: () {},
+///       ),
+///       FlatButton(
+///         child: Text("DISMISS"),
+///         onPressed: () {},
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// The [actions] will be placed beside the [content] if there is only one.
 /// Otherwise, the [actions] will be placed below the [content]. Use
 /// [forceActionsBelow] to override this behavior.
@@ -35,10 +57,10 @@ class MaterialBanner extends StatelessWidget {
   /// The [actions], [content], and [forceActionsBelow] must be non-null.
   /// The [actions.length] must be greater than 0.
   const MaterialBanner({
-    Key key,
-    @required this.content,
+    Key? key,
+    required this.content,
     this.contentTextStyle,
-    @required this.actions,
+    required this.actions,
     this.leading,
     this.backgroundColor,
     this.padding,
@@ -58,7 +80,7 @@ class MaterialBanner extends StatelessWidget {
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
   /// also `null`, [TextTheme.bodyText2] of [ThemeData.textTheme] is used.
-  final TextStyle contentTextStyle;
+  final TextStyle? contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
   /// the [MaterialBanner].
@@ -69,13 +91,13 @@ class MaterialBanner extends StatelessWidget {
   /// The (optional) leading widget of the [MaterialBanner].
   ///
   /// Typically an [Icon] widget.
-  final Widget leading;
+  final Widget? leading;
 
   /// The color of the surface of this [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
   /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// The amount of space by which to inset the [content].
   ///
@@ -84,12 +106,12 @@ class MaterialBanner extends StatelessWidget {
   ///
   /// If the [actions] are trailing the [content], this defaults to
   /// `EdgeInsetsDirectional.only(start: 16.0, top: 2.0)`.
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   /// The amount of space by which to inset the [leading] widget.
   ///
   /// This defaults to `EdgeInsetsDirectional.only(end: 16.0)`.
-  final EdgeInsetsGeometry leadingPadding;
+  final EdgeInsetsGeometry? leadingPadding;
 
   /// An override to force the [actions] to be below the [content] regardless of
   /// how many there are.
@@ -128,7 +150,7 @@ class MaterialBanner extends StatelessWidget {
     final Color backgroundColor = this.backgroundColor
         ?? bannerTheme.backgroundColor
         ?? theme.colorScheme.surface;
-    final TextStyle textStyle = contentTextStyle
+    final TextStyle? textStyle = contentTextStyle
         ?? bannerTheme.contentTextStyle
         ?? theme.textTheme.bodyText2;
 
@@ -147,7 +169,7 @@ class MaterialBanner extends StatelessWidget {
                   ),
                 Expanded(
                   child: DefaultTextStyle(
-                    style: textStyle,
+                    style: textStyle!,
                     child: content,
                   ),
                 ),

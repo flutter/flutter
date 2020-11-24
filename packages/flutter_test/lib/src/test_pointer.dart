@@ -25,11 +25,7 @@ class TestPointer {
     this.kind = PointerDeviceKind.touch,
     int? device,
     int buttons = kPrimaryButton,
-  ])
-      : assert(kind != null),
-        assert(pointer != null),
-        assert(buttons != null),
-        _buttons = buttons {
+  ]) : _buttons = buttons {
     switch (kind) {
       case PointerDeviceKind.mouse:
         _device = device ?? 1;
@@ -211,7 +207,6 @@ class TestPointer {
     Duration timeStamp = Duration.zero,
     Offset? location,
   }) {
-    assert(timeStamp != null);
     _location = location ?? _location;
     return PointerAddedEvent(
       timeStamp: timeStamp,
@@ -230,7 +225,6 @@ class TestPointer {
     Duration timeStamp = Duration.zero,
     Offset? location,
   }) {
-    assert(timeStamp != null);
     _location = location ?? _location;
     return PointerRemovedEvent(
       timeStamp: timeStamp,
@@ -251,13 +245,10 @@ class TestPointer {
     Offset newLocation, {
     Duration timeStamp = Duration.zero,
   }) {
-    assert(newLocation != null);
-    assert(timeStamp != null);
     assert(
         !isDown,
         'Hover events can only be generated when the pointer is up. To '
         'simulate movement when the pointer is down, use move() instead.');
-    assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate hover events");
     final Offset delta = location != null ? newLocation - location! : Offset.zero;
     _location = newLocation;
     return PointerHoverEvent(
@@ -278,8 +269,6 @@ class TestPointer {
     Offset scrollDelta, {
     Duration timeStamp = Duration.zero,
   }) {
-    assert(scrollDelta != null);
-    assert(timeStamp != null);
     assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate pointer signal events");
     assert(location != null);
     return PointerScrollEvent(
@@ -327,11 +316,7 @@ class TestGesture {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int? device,
     int buttons = kPrimaryButton,
-  }) : assert(dispatcher != null),
-       assert(pointer != null),
-       assert(kind != null),
-       assert(buttons != null),
-       _dispatcher = dispatcher,
+  }) : _dispatcher = dispatcher,
        _pointer = TestPointer(pointer, kind, device, buttons);
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
@@ -380,8 +365,7 @@ class TestGesture {
   /// Send a move event moving the pointer by the given offset.
   ///
   /// If the pointer is down, then a move event is dispatched. If the pointer is
-  /// up, then a hover event is dispatched. Touch devices are not able to send
-  /// hover events.
+  /// up, then a hover event is dispatched.
   Future<void> moveBy(Offset offset, { Duration timeStamp = Duration.zero }) {
     assert(_pointer.location != null);
     return moveTo(_pointer.location! + offset, timeStamp: timeStamp);
@@ -390,15 +374,12 @@ class TestGesture {
   /// Send a move event moving the pointer to the given location.
   ///
   /// If the pointer is down, then a move event is dispatched. If the pointer is
-  /// up, then a hover event is dispatched. Touch devices are not able to send
-  /// hover events.
+  /// up, then a hover event is dispatched.
   Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() {
       if (_pointer._isDown) {
         return _dispatcher(_pointer.move(location, timeStamp: timeStamp));
       } else {
-        assert(_pointer.kind != PointerDeviceKind.touch,
-            'Touch device move events can only be sent if the pointer is down.');
         return _dispatcher(_pointer.hover(location, timeStamp: timeStamp));
       }
     });

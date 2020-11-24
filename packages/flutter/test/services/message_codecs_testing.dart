@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import '../flutter_test_alternative.dart';
 
 void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes) {
-  final ByteData encoded = codec.encodeMessage(message);
+  final ByteData encoded = codec.encodeMessage(message)!;
   expect(
     encoded.buffer.asUint8List(0, encoded.lengthInBytes),
     orderedEquals(expectedBytes),
@@ -18,17 +16,17 @@ void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes)
 }
 
 void checkEncodeDecode<T>(MessageCodec<T> codec, T message) {
-  final ByteData encoded = codec.encodeMessage(message);
+  final ByteData? encoded = codec.encodeMessage(message);
   final T decoded = codec.decodeMessage(encoded);
   if (message == null) {
     expect(encoded, isNull);
     expect(decoded, isNull);
   } else {
     expect(deepEquals(message, decoded), isTrue);
-    final ByteData encodedAgain = codec.encodeMessage(decoded);
+    final ByteData? encodedAgain = codec.encodeMessage(decoded);
     expect(
-      encodedAgain.buffer.asUint8List(),
-      orderedEquals(encoded.buffer.asUint8List()),
+      encodedAgain!.buffer.asUint8List(),
+      orderedEquals(encoded!.buffer.asUint8List()),
     );
   }
 }

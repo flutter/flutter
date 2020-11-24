@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
@@ -32,7 +30,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
+        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -56,7 +54,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
+        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
@@ -96,7 +94,7 @@ void main() {
     Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final RenderDecoratedBox box = tester.element(find.byKey(page2Key))
-        .findAncestorRenderObjectOfType<RenderDecoratedBox>();
+        .findAncestorRenderObjectOfType<RenderDecoratedBox>()!;
 
     // Page 1 is moving to the left.
     expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
@@ -481,30 +479,6 @@ void main() {
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('throws when builder returns null', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Text('Home'),
-    ));
-    // No exceptions yet.
-    expect(tester.takeException(), isNull);
-
-    tester
-        .state<NavigatorState>(find.byType(Navigator))
-        .push(MaterialPageRoute<void>(
-          settings: const RouteSettings(name: 'broken'),
-          builder: (BuildContext context) => null,
-        ));
-    await tester.pumpAndSettle();
-    // An exception should've been thrown because the `builder` returned null.
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(exception.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   The builder for route "broken" returned null.\n'
-      '   Route builders must never return null.\n'
-    ));
-  });
-
   testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -584,7 +558,7 @@ void main() {
           body: Center(
             child: ElevatedButton(
               onPressed: () {
-                Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
+                Navigator.push<void>(scaffoldKey.currentContext!, MaterialPageRoute<void>(
                   builder: (BuildContext context) {
                     return const Scaffold(
                       body: Center(child: Text('route')),
@@ -655,7 +629,7 @@ void main() {
     // Use the navigator to push a route instead of tapping the 'push' button.
     // The topmost route (the one that's animating away), ignores input while
     // the pop is underway because route.navigator.userGestureInProgress.
-    Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
+    Navigator.push<void>(scaffoldKey.currentContext!, MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return const Scaffold(
           body: Center(child: Text('route')),
@@ -693,7 +667,7 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 0);
 
-    Navigator.push<void>(homeScaffoldKey.currentContext, MaterialPageRoute<void>(
+    Navigator.push<void>(homeScaffoldKey.currentContext!, MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Scaffold(
           key: pageScaffoldKey,
@@ -763,10 +737,10 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 0);
 
-    final ValueNotifier<bool> notifier = Navigator.of(homeScaffoldKey.currentContext).userGestureInProgressNotifier;
+    final ValueNotifier<bool> notifier = Navigator.of(homeScaffoldKey.currentContext!).userGestureInProgressNotifier;
     expect(notifier.value, false);
 
-    Navigator.push<void>(homeScaffoldKey.currentContext, MaterialPageRoute<void>(
+    Navigator.push<void>(homeScaffoldKey.currentContext!, MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return Scaffold(
           key: pageScaffoldKey,
@@ -846,7 +820,10 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test should never execute this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -861,7 +838,10 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test should never execute this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -883,7 +863,10 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test should never execute this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -901,7 +884,10 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test should never execute this.
+          return true;
+        },
         transitionDelegate: detector,
       )
     );
@@ -919,7 +905,7 @@ void main() {
     expect(find.text('subpage'), findsOneWidget);
     expect(find.text('home'), findsNothing);
 
-    navigator.currentState.pop();
+    navigator.currentState!.pop();
     await tester.pump();
 
     expect(find.text('subpage'), findsOneWidget);
@@ -931,9 +917,9 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
   bool hasTransition = false;
   @override
   Iterable<RouteTransitionRecord> resolve({
-    List<RouteTransitionRecord> newPageRouteHistory,
-    Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
-    Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
+    required List<RouteTransitionRecord> newPageRouteHistory,
+    required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes
   }) {
     hasTransition = true;
     return super.resolve(
@@ -945,13 +931,13 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 }
 
 Widget buildNavigator({
-  List<Page<dynamic>> pages,
-  PopPageCallback onPopPage,
-  GlobalKey<NavigatorState> key,
-  TransitionDelegate<dynamic> transitionDelegate
+  required List<Page<dynamic>> pages,
+  required PopPageCallback onPopPage,
+  GlobalKey<NavigatorState>? key,
+  TransitionDelegate<dynamic>? transitionDelegate
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+    data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -974,14 +960,14 @@ Widget buildNavigator({
 class KeepsStateTestWidget extends StatefulWidget {
   const KeepsStateTestWidget({this.navigatorKey});
 
-  final Key navigatorKey;
+  final Key? navigatorKey;
 
   @override
   State<KeepsStateTestWidget> createState() => _KeepsStateTestWidgetState();
 }
 
 class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
-  String _subpage = 'subpage';
+  String? _subpage = 'subpage';
 
   @override
   Widget build(BuildContext context) {
@@ -990,7 +976,7 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
         key: widget.navigatorKey,
         pages: <Page<void>>[
           const MaterialPage<void>(child: Text('home')),
-          if (_subpage != null) MaterialPage<void>(child: Text(_subpage)),
+          if (_subpage != null) MaterialPage<void>(child: Text(_subpage!)),
         ],
         onPopPage: (Route<dynamic> route, dynamic result) {
           if (!route.didPop(result)) {

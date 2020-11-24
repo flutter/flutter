@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -15,7 +13,7 @@ class TestDataSource extends DataTableSource {
     this.onSelectChanged,
   });
 
-  final void Function(bool) onSelectChanged;
+  final void Function(bool?)? onSelectChanged;
 
   int get generation => _generation;
   int _generation = 0;
@@ -68,7 +66,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int rowsPerPage) {
+        onRowsPerPageChanged: (int? rowsPerPage) {
           log.add('rows-per-page-changed: $rowsPerPage');
         },
         onPageChanged: (int rowIndex) {
@@ -218,7 +216,7 @@ void main() {
         availableRowsPerPage: const <int>[
           8, 9,
         ],
-        onRowsPerPageChanged: (int rowsPerPage) { },
+        onRowsPerPageChanged: (int? rowsPerPage) { },
         columns: const <DataColumn>[
           DataColumn(label: Text('COL1')),
           DataColumn(label: Text('COL2')),
@@ -229,6 +227,43 @@ void main() {
     expect(find.text('Rows per page:'), findsOneWidget);
     expect(find.text('8'), findsOneWidget);
     expect(tester.getTopRight(find.text('8')).dx, tester.getTopRight(find.text('Rows per page:')).dx + 40.0); // per spec
+  });
+
+  testWidgets('PaginatedDataTable with and without header and actions', (WidgetTester tester) async {
+    await binding.setSurfaceSize(const Size(800, 800));
+    const String headerText = 'HEADER';
+    final List<Widget> actions = <Widget>[
+      IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+    ];
+    Widget buildTable({String? header, List<Widget>? actions}) => MaterialApp(
+      home: PaginatedDataTable(
+        header: header != null ? Text(header) : null,
+        actions: actions,
+        source: TestDataSource(onSelectChanged: (bool? value) {}),
+        showCheckboxColumn: true,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(buildTable(header: headerText));
+    expect(find.text(headerText), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsNothing);
+
+    await tester.pumpWidget(buildTable(header: headerText, actions: actions));
+    expect(find.text(headerText), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsOneWidget);
+
+    await tester.pumpWidget(buildTable());
+    expect(find.text(headerText), findsNothing);
+    expect(find.byIcon(Icons.add), findsNothing);
+
+    expect(() => buildTable(actions: actions), throwsAssertionError);
+
+    await binding.setSurfaceSize(null);
   });
 
   testWidgets('PaginatedDataTable with large text', (WidgetTester tester) async {
@@ -243,7 +278,7 @@ void main() {
           source: source,
           rowsPerPage: 501,
           availableRowsPerPage: const <int>[ 501 ],
-          onRowsPerPageChanged: (int rowsPerPage) { },
+          onRowsPerPageChanged: (int? rowsPerPage) { },
           columns: const <DataColumn>[
             DataColumn(label: Text('COL1')),
             DataColumn(label: Text('COL2')),
@@ -280,7 +315,7 @@ void main() {
               rowsPerPage: 5,
               dragStartBehavior: DragStartBehavior.down,
               availableRowsPerPage: const <int>[ 5 ],
-              onRowsPerPageChanged: (int rowsPerPage) { },
+              onRowsPerPageChanged: (int? rowsPerPage) { },
               columns: const <DataColumn>[
                 DataColumn(label: Text('COL1')),
                 DataColumn(label: Text('COL2')),
@@ -315,7 +350,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int rowsPerPage) {},
+        onRowsPerPageChanged: (int? rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -336,7 +371,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int rowsPerPage) {},
+        onRowsPerPageChanged: (int? rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -398,7 +433,7 @@ void main() {
     await binding.setSurfaceSize(const Size(_width, _height));
 
     final TestDataSource source = TestDataSource(
-      onSelectChanged: (bool value) {},
+      onSelectChanged: (bool? value) {},
     );
     Finder cellContent;
     Finder checkbox;
@@ -412,9 +447,9 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4,
         ],
-        onRowsPerPageChanged: (int rowsPerPage) {},
+        onRowsPerPageChanged: (int? rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
-        onSelectAll: (bool value) {},
+        onSelectAll: (bool? value) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -481,9 +516,9 @@ void main() {
           availableRowsPerPage: const <int>[
             2, 4,
           ],
-          onRowsPerPageChanged: (int rowsPerPage) {},
+          onRowsPerPageChanged: (int? rowsPerPage) {},
           onPageChanged: (int rowIndex) {},
-          onSelectAll: (bool value) {},
+          onSelectAll: (bool? value) {},
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -564,7 +599,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int rowsPerPage) {},
+        onRowsPerPageChanged: (int? rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -620,7 +655,7 @@ void main() {
           availableRowsPerPage: const <int>[
             2, 4, 8, 16,
           ],
-          onRowsPerPageChanged: (int rowsPerPage) {},
+          onRowsPerPageChanged: (int? rowsPerPage) {},
           onPageChanged: (int rowIndex) {},
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
@@ -691,7 +726,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int rowsPerPage) {},
+        onRowsPerPageChanged: (int? rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -735,7 +770,7 @@ void main() {
     Widget buildTable(bool checkbox) => MaterialApp(
       home: PaginatedDataTable(
         header: const Text('Test table'),
-        source: TestDataSource(onSelectChanged: (bool value) {}),
+        source: TestDataSource(onSelectChanged: (bool? value) {}),
         showCheckboxColumn: checkbox,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -750,5 +785,37 @@ void main() {
 
     await tester.pumpWidget(buildTable(false));
     expect(find.byType(Checkbox), findsNothing);
+  });
+
+  testWidgets('Table should not use decoration from DataTableTheme', (WidgetTester tester) async {
+    final Size originalSize = binding.renderView.size;
+    await binding.setSurfaceSize(const Size(800, 800));
+
+    Widget buildTable() {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+            dataTableTheme: const DataTableThemeData(
+              decoration: BoxDecoration(color: Colors.white),
+            ),
+        ),
+        home: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: TestDataSource(onSelectChanged: (bool? value) {}),
+          showCheckboxColumn: true,
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTable());
+    final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container)).first;
+    expect(tester.widget<Container>(tableContainerFinder).decoration, const BoxDecoration());
+
+    // Reset the surface size.
+    await binding.setSurfaceSize(originalSize);
   });
 }

@@ -72,12 +72,11 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 
 // An object that mocks the behavior of a render object with [MouseTrackerAnnotation].
 class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation, HitTestTarget  {
-  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer});
+  const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer, this.validForMouseTracker = true});
 
   @override
   final PointerEnterEventListener? onEnter;
 
-  @override
   final PointerHoverEventListener? onHover;
 
   @override
@@ -85,6 +84,9 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
 
   @override
   final MouseCursor cursor;
+
+  @override
+  final bool validForMouseTracker;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {

@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -295,12 +296,11 @@ void _validatePodfile(String appPath) {
     throw TaskResult.failure('Podfile.lock does not contain expected pods');
   }
 
-  checkFileExists(path.join(
+  checkDirectoryNotExists(path.join(
     appPath,
     'ios',
     'Flutter',
     'Flutter.framework',
-    'Flutter',
   ));
 
   checkFileExists(path.join(

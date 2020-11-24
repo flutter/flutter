@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -18,12 +16,12 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   expect(element.renderObject, isA<RenderStack>());
   final RenderStack renderObject = element.renderObject as RenderStack;
   try {
-    RenderObject child = renderObject.firstChild;
+    RenderObject? child = renderObject.firstChild;
     for (final BoxDecoration decoration in expectedDecorations) {
       expect(child, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
+      final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
       expect(decoratedBox.decoration, equals(decoration));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData as StackParentData;
+      final StackParentData decoratedBoxParentData = decoratedBox.parentData! as StackParentData;
       child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);
@@ -34,10 +32,13 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
 }
 
 class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
-  MockMultiChildRenderObjectWidget({ Key key, List<Widget> children }) : super(key: key, children: children);
+  MockMultiChildRenderObjectWidget({ Key? key, required List<Widget> children }) : super(key: key, children: children);
 
   @override
-  RenderObject createRenderObject(BuildContext context) => null;
+  RenderObject createRenderObject(BuildContext context) {
+    assert(false);
+    return FakeRenderObject();
+  }
 }
 
 void main() {
@@ -354,17 +355,11 @@ void main() {
 
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
   });
+}
 
-  // Regression test for https://github.com/flutter/flutter/issues/37136.
-  test('provides useful assertion message when one of the children is null', () {
-    bool assertionTriggered = false;
-    try {
-      MockMultiChildRenderObjectWidget(children: const <Widget>[null]);
-    } catch (e) {
-      expect(e.toString(), contains("MockMultiChildRenderObjectWidget's children must not contain any null values,"));
-      assertionTriggered = true;
-    }
-
-    expect(assertionTriggered, isTrue);
-  });
+class FakeRenderObject extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
 }

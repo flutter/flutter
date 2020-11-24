@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -22,7 +20,6 @@ void main() {
     const Gradient gradient = LinearGradient(colors: <Color>[colorR, colorG]);
     expect(const ShapeDecoration(shape: Border()), const ShapeDecoration(shape: Border()));
     expect(() => ShapeDecoration(color: colorR, gradient: nonconst(gradient), shape: const Border()), throwsAssertionError);
-    expect(() => ShapeDecoration(gradient: nonconst(gradient), shape: null), throwsAssertionError);
     expect(
       ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.circle)),
       const ShapeDecoration(shape: CircleBorder(side: BorderSide.none)),
@@ -52,9 +49,9 @@ void main() {
     expect(Decoration.lerp(a, b, 1.0), b);
     const Size size = Size(200.0, 100.0); // at t=0.5, width will be 150 (x=25 to x=175).
     expect(a.hitTest(size, const Offset(20.0, 50.0)), isFalse);
-    expect(Decoration.lerp(a, b, 0.1).hitTest(size, const Offset(20.0, 50.0)), isFalse);
-    expect(Decoration.lerp(a, b, 0.5).hitTest(size, const Offset(20.0, 50.0)), isFalse);
-    expect(Decoration.lerp(a, b, 0.9).hitTest(size, const Offset(20.0, 50.0)), isTrue);
+    expect(Decoration.lerp(a, b, 0.1)!.hitTest(size, const Offset(20.0, 50.0)), isFalse);
+    expect(Decoration.lerp(a, b, 0.5)!.hitTest(size, const Offset(20.0, 50.0)), isFalse);
+    expect(Decoration.lerp(a, b, 0.9)!.hitTest(size, const Offset(20.0, 50.0)), isTrue);
     expect(b.hitTest(size, const Offset(20.0, 50.0)), isTrue);
   });
 

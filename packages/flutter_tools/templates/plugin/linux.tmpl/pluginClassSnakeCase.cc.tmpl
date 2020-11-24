@@ -4,6 +4,8 @@
 #include <gtk/gtk.h>
 #include <sys/utsname.h>
 
+#include <cstring>
+
 #define {{pluginClassCapitalSnakeCase}}(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), {{pluginClassSnakeCase}}_get_type(), \
                               {{pluginClass}}))

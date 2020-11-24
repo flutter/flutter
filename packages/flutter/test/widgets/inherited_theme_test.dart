@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,7 +12,7 @@ class TestRoute extends PageRouteBuilder<void> {
 }
 
 class IconTextBox extends StatelessWidget {
-  const IconTextBox(this.text, { Key key }) : super(key: key);
+  const IconTextBox(this.text, { Key? key }) : super(key: key);
   final String text;
   @override
   Widget build(BuildContext context) {
@@ -34,7 +32,7 @@ void main() {
     const Color textColor = Color(0xFF00FF00);
     const Color iconColor = Color(0xFF0000FF);
     bool useCaptureAll = false;
-    BuildContext navigatorContext;
+    late BuildContext navigatorContext;
 
     Widget buildFrame() {
       return WidgetsApp(
@@ -88,7 +86,7 @@ void main() {
           of: find.byType(Icon),
           matching: find.byType(RichText),
         ),
-      ).text.style;
+      ).text.style!;
     }
 
     TextStyle getTextStyle(String text) {
@@ -97,7 +95,7 @@ void main() {
           of: find.text(text),
           matching: find.byType(RichText),
         ),
-      ).text.style;
+      ).text.style!;
     }
 
     useCaptureAll = false;
@@ -199,7 +197,7 @@ void main() {
           of: find.byKey(key),
           matching: find.byType(RichText),
         ),
-      ).text.style;
+      ).text.style!;
     }
 
     expect(getIconStyle(icon1).color, innerColor);
@@ -245,7 +243,7 @@ void main() {
           of: find.text(text),
           matching: find.byType(RichText),
         ),
-      ).text.style;
+      ).text.style!;
     }
 
     expect(getTextStyle('Hello').fontSize, null);

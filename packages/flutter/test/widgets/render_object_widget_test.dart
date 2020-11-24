@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -16,8 +14,8 @@ final BoxDecoration kBoxDecorationC = BoxDecoration(border: nonconst(null));
 
 class TestWidget extends StatelessWidget {
   const TestWidget({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;
@@ -27,7 +25,7 @@ class TestWidget extends StatelessWidget {
 }
 
 class TestOrientedBox extends SingleChildRenderObjectWidget {
-  const TestOrientedBox({ Key key, Widget child }) : super(key: key, child: child);
+  const TestOrientedBox({ Key? key, Widget? child }) : super(key: key, child: child);
 
   Decoration _getDecoration(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
@@ -37,8 +35,6 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
       case Orientation.portrait:
         return const BoxDecoration(color: Color(0xFF0000FF));
     }
-    assert(orientation != null);
-    return null;
   }
 
   @override
@@ -51,7 +47,7 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
 }
 
 class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
-  const TestNonVisitingWidget({ Key key, Widget child }) : super(key: key, child: child);
+  const TestNonVisitingWidget({ Key? key, required Widget child }) : super(key: key, child: child);
 
   @override
   RenderObject createRenderObject(BuildContext context) => TestNonVisitingRenderObject();
@@ -59,14 +55,19 @@ class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
 
 class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return child!.getDryLayout(constraints);
+  }
+
+  @override
   void performLayout() {
-    child.layout(constraints, parentUsesSize: true);
-    size = child.size;
+    child!.layout(constraints, parentUsesSize: true);
+    size = child!.size;
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.paintChild(child, offset);
+    context.paintChild(child!, offset);
   }
 
   @override
@@ -107,7 +108,7 @@ void main() {
       expect(renderObject.position, equals(DecorationPosition.background));
       expect(renderObject.child, isNotNull);
       expect(renderObject.child, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox child = renderObject.child as RenderDecoratedBox;
+      final RenderDecoratedBox child = renderObject.child! as RenderDecoratedBox;
       expect(child.decoration, equals(kBoxDecorationB));
       expect(child.position, equals(DecorationPosition.background));
       expect(child.child, isNull);
@@ -196,10 +197,10 @@ void main() {
     expect(element.renderObject, isA<RenderDecoratedBox>());
     final RenderDecoratedBox parent = element.renderObject as RenderDecoratedBox;
     expect(parent.child, isA<RenderDecoratedBox>());
-    final RenderDecoratedBox child = parent.child as RenderDecoratedBox;
+    final RenderDecoratedBox child = parent.child! as RenderDecoratedBox;
     expect(child.decoration, equals(kBoxDecorationB));
     expect(child.child, isA<RenderDecoratedBox>());
-    final RenderDecoratedBox grandChild = child.child as RenderDecoratedBox;
+    final RenderDecoratedBox grandChild = child.child! as RenderDecoratedBox;
     expect(grandChild.decoration, equals(kBoxDecorationC));
     expect(grandChild.child, isNull);
 

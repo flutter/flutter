@@ -32,7 +32,7 @@ const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlo
 
 /// Specify how a [SnackBar] was closed.
 ///
-/// The [ScaffoldState.showSnackBar] function returns a
+/// The [ScaffoldMessengerState.showSnackBar] function returns a
 /// [ScaffoldFeatureController]. The value of the controller's closed property
 /// is a Future that resolves to a SnackBarClosedReason. Applications that need
 /// to know how a snackbar was closed can use this value.
@@ -40,7 +40,7 @@ const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlo
 /// Example:
 ///
 /// ```dart
-/// Scaffold.of(context).showSnackBar(
+/// ScaffoldMessenger.of(context).showSnackBar(
 ///   SnackBar( ... )
 /// ).closed.then((SnackBarClosedReason reason) {
 ///    ...
@@ -57,10 +57,10 @@ enum SnackBarClosedReason {
   swipe,
 
   /// The snack bar was closed by the [ScaffoldFeatureController] close callback
-  /// or by calling [ScaffoldState.hideCurrentSnackBar] directly.
+  /// or by calling [ScaffoldMessengerState.hideCurrentSnackBar] directly.
   hide,
 
-  /// The snack bar was closed by an call to [ScaffoldState.removeCurrentSnackBar].
+  /// The snack bar was closed by an call to [ScaffoldMessengerState.removeCurrentSnackBar].
   remove,
 
   /// The snack bar was closed because its timer expired.
@@ -123,13 +123,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    Scaffold.of(context)!.hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
   Widget build(BuildContext context) {
     Color? resolveForegroundColor(Set<MaterialState> states) {
-      final SnackBarThemeData snackBarTheme = Theme.of(context)!.snackBarTheme;
+      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
       if (states.contains(MaterialState.disabled))
         return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
       return widget.textColor ?? snackBarTheme.actionTextColor;
@@ -137,7 +137,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
     return TextButton(
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.resolveWith<Color>(resolveForegroundColor),
+        foregroundColor: MaterialStateProperty.resolveWith<Color?>(resolveForegroundColor),
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
@@ -150,21 +150,84 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=zpO6n_oZWw0}
 ///
-/// To display a snack bar, call `Scaffold.of(context).showSnackBar()`, passing
-/// an instance of [SnackBar] that describes the message.
+/// To display a snack bar, call `ScaffoldMessenger.of(context).showSnackBar()`,
+/// passing an instance of [SnackBar] that describes the message.
 ///
 /// To control how long the [SnackBar] remains visible, specify a [duration].
 ///
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a [SnackBar] with an [action] button implemented using
+/// [SnackBarAction].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ElevatedButton(
+///     child: Text("Show Snackbar"),
+///     onPressed: () {
+///       ScaffoldMessenger.of(context).showSnackBar(
+///         SnackBar(
+///           content: Text("Awesome Snackbar!"),
+///           action: SnackBarAction(
+///             label: "Action",
+///             onPressed: () {
+///               // Code to execute.
+///             },
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a customized [SnackBar]. It utilizes
+/// [behavior], [shape], [padding], [width], and [duration] to customize the
+/// location, appearance, and the duration for which the [SnackBar] is visible.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ElevatedButton(
+///     child: Text("Show Snackbar"),
+///     onPressed: () {
+///       ScaffoldMessenger.of(context).showSnackBar(
+///         SnackBar(
+///           action: SnackBarAction(
+///             label: "Action",
+///             onPressed: () {
+///               // Code to execute.
+///             },
+///           ),
+///           content: Text("Awesome SnackBar!"),
+///           duration: Duration(milliseconds: 1500),
+///           width: 280.0, // Width of the SnackBar.
+///           padding: EdgeInsets.symmetric(
+///             horizontal: 8.0), // Inner padding for SnackBar content.
+///           behavior: SnackBarBehavior.floating,
+///           shape: RoundedRectangleBorder(
+///             borderRadius: BorderRadius.circular(10.0),
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
-///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
-///    display and animation of snack bars.
-///  * [ScaffoldState.showSnackBar], which displays a [SnackBar].
-///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the currently
-///    displayed snack bar, if any, and allows the next to be displayed.
+///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],
+///    which manages the display and animation of snack bars.
+///  * [ScaffoldMessengerState.showSnackBar], which displays a [SnackBar].
+///  * [ScaffoldMessengerState.removeCurrentSnackBar], which abruptly hides the
+///    currently displayed snack bar, if any, and allows the next to be displayed.
 ///  * [SnackBarAction], which is used to specify an [action] button to show
 ///    on the snack bar.
 ///  * [SnackBarThemeData], to configure the default property values for
@@ -293,7 +356,7 @@ class SnackBar extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the
+  ///  * [ScaffoldMessengerState.removeCurrentSnackBar], which abruptly hides the
   ///    currently displayed snack bar, if any, and allows the next to be
   ///    displayed.
   ///  * <https://material.io/design/components/snackbars.html>
@@ -305,7 +368,7 @@ class SnackBar extends StatefulWidget {
   /// Called the first time that the snackbar is visible within a [Scaffold].
   final VoidCallback? onVisible;
 
-  // API for Scaffold.showSnackBar():
+  // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
   static AnimationController createAnimationController({ required TickerProvider vsync }) {
@@ -341,7 +404,6 @@ class SnackBar extends StatefulWidget {
   @override
   State<SnackBar> createState() => _SnackBarState();
 }
-
 
 class _SnackBarState extends State<SnackBar> {
   bool _wasVisible = false;
@@ -384,9 +446,9 @@ class _SnackBarState extends State<SnackBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
     assert(widget.animation != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
@@ -428,6 +490,8 @@ class _SnackBarState extends State<SnackBar> {
     final EdgeInsetsGeometry padding = widget.padding
       ?? EdgeInsetsDirectional.only(start: horizontalPadding, end: widget.action != null ? 0 : horizontalPadding);
 
+    final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
+
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
@@ -445,20 +509,23 @@ class _SnackBarState extends State<SnackBar> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
               child: DefaultTextStyle(
-                style: contentTextStyle,
+                style: contentTextStyle!,
                 child: widget.content,
               ),
             ),
           ),
           if (widget.action != null)
-            TextButtonTheme(
-              data: TextButtonThemeData(
-                style: TextButton.styleFrom(
-                  primary: buttonColor,
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: actionHorizontalMargin),
+              child: TextButtonTheme(
+                data: TextButtonThemeData(
+                  style: TextButton.styleFrom(
+                    primary: buttonColor,
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  ),
                 ),
+                child: widget.action!,
               ),
-              child: widget.action,
             ),
         ],
       ),
@@ -525,20 +592,20 @@ class _SnackBarState extends State<SnackBar> {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        Scaffold.of(context)!.removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
         key: const Key('dismissible'),
         direction: DismissDirection.down,
         resizeDuration: null,
         onDismissed: (DismissDirection direction) {
-          Scaffold.of(context)!.removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
         child: snackBar,
       ),
     );
 
-    Widget snackBarTransition;
+    final Widget snackBarTransition;
     if (mediaQueryData.accessibleNavigation) {
       snackBarTransition = snackBar;
     } else if (isFloatingSnackBar) {
@@ -560,6 +627,9 @@ class _SnackBarState extends State<SnackBar> {
       );
     }
 
-    return ClipRect(child: snackBarTransition);
+    return Hero(
+      child: ClipRect(child: snackBarTransition),
+      tag: '<SnackBar Hero tag - ${widget.content}>',
+    );
   }
 }

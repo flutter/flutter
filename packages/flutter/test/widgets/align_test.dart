@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -26,20 +24,17 @@ void main() {
 
     await tester.pumpWidget(
       const Align(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: Alignment.topLeft,
       ),
     );
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Align(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: AlignmentDirectional.topStart,
       ),
     ));
     await tester.pumpWidget(
       const Align(
-        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: Alignment.topLeft,
       ),
     );
@@ -108,7 +103,7 @@ void main() {
       ),
     );
 
-    final Size size = alignKey.currentContext.size;
+    final Size size = alignKey.currentContext!.size!;
     expect(size.width, equals(800.0));
     expect(size.height, equals(10.0));
   });
