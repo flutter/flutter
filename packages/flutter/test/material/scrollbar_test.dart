@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -118,85 +116,6 @@ void main() {
     // Scrollbar is not supposed to draw anything if there isn't enough content.
     expect(canvas.invocations.isEmpty, isTrue);
   });
-
-  testWidgets('Adaptive scrollbar', (WidgetTester tester) async {
-    Widget viewWithScroll(TargetPlatform platform) {
-      return _buildBoilerplate(
-        child: Theme(
-          data: ThemeData(
-            platform: platform
-          ),
-          child: const Scrollbar(
-            child: SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(viewWithScroll(TargetPlatform.android));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
-    await tester.pump();
-    // Scrollbar fully showing
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.byType(Scrollbar), paints..rect());
-
-    await tester.pumpWidget(viewWithScroll(TargetPlatform.iOS));
-    final TestGesture gesture = await tester.startGesture(
-      tester.getCenter(find.byType(SingleChildScrollView))
-    );
-    await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Scrollbar), paints..rrect());
-    expect(find.byType(CupertinoScrollbar), paints..rrect());
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    await tester.pumpWidget(viewWithScroll(TargetPlatform.macOS));
-    await gesture.down(
-      tester.getCenter(find.byType(SingleChildScrollView)),
-    );
-    await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Scrollbar), paints..rrect());
-    expect(find.byType(CupertinoScrollbar), paints..rrect());
-  });
-
-  testWidgets('Scrollbar passes controller to CupertinoScrollbar', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    Widget viewWithScroll(TargetPlatform? platform) {
-      return _buildBoilerplate(
-        child: Theme(
-          data: ThemeData(
-            platform: platform
-          ),
-          child: Scrollbar(
-            controller: controller,
-            child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(viewWithScroll(debugDefaultTargetPlatformOverride));
-    final TestGesture gesture = await tester.startGesture(
-      tester.getCenter(find.byType(SingleChildScrollView))
-    );
-    await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(CupertinoScrollbar), paints..rrect());
-    final CupertinoScrollbar scrollbar = find.byType(CupertinoScrollbar).evaluate().first.widget as CupertinoScrollbar;
-    expect(scrollbar.controller, isNotNull);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('When isAlwaysShown is true, must pass a controller',
       (WidgetTester tester) async {
@@ -546,14 +465,67 @@ void main() {
     await tester.pump();
 
     // Long press on the scrollbar thumb and expect it to grow
-    expect(find.byType(Scrollbar), paints..rect(
-      rect: const Rect.fromLTWH(780, 0, 20, 300),
+    expect(find.byType(Scrollbar), paints..rrect(
+      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(778, 0, 20, 300), const Radius.circular(8)),
     ));
     await tester.pumpWidget(viewWithScroll(radius: const Radius.circular(10)));
     expect(find.byType(Scrollbar), paints..rrect(
-      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(780, 0, 20, 300), const Radius.circular(10)),
+      rrect: RRect.fromRectAndRadius(const Rect.fromLTWH(778, 0, 20, 300), const Radius.circular(10)),
     ));
 
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('When isAlwaysShown is true, must pass a controller',(WidgetTester tester) async {
+    Widget viewWithScroll() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Scrollbar(
+            isAlwaysShown: true,
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    expect(() async {
+      await tester.pumpWidget(viewWithScroll());
+    }, throwsAssertionError);
+  });
+
+
+  testWidgets('On first render with isAlwaysShown: true, the thumb shows', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(),
+          child: Scrollbar(
+            isAlwaysShown: true,
+            controller: controller,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), paints..rect());
+
+
   });
 }

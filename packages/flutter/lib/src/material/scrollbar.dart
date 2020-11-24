@@ -2,233 +2,232 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
-import 'theme.dart';
-
-const double _kScrollbarThickness = 6.0;
+const double _kScrollbarThickness = 8.0;
+const double _kScrollbarHoverThickness = 12.0;
+const double _kScrollbarMargin = 2.0;
+const double _kScrollbarMinLength = 48.0;
+const Radius _kScrollbarRadius = Radius.circular(8.0);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
 /// A material design scrollbar.
 ///
-/// A scrollbar indicates which portion of a [Scrollable] widget is actually
-/// visible.
+/// To add a scrollbar thumb to a [ScrollView], simply wrap the scroll view
+/// widget in a [Scrollbar] widget.
 ///
-/// Dynamically changes to an iOS style scrollbar that looks like
-/// [CupertinoScrollbar] on the iOS platform.
+/// {@macro flutter.widgets.Scrollbar}
 ///
-/// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
-/// a [Scrollbar] widget.
+/// A scrollbar track can been drawn when triggered by a hover event, which is
+/// controlled by [showTrackOnHover]. The thickness of the track and scrollbar
+/// thumb will become larger when hovering, unless overridden by [thickness].
+///
+/// //TODO(Piinks): Add code sample
 ///
 /// See also:
 ///
+///  * [RawScrollbar], the simple base class this extends.
+///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which display a linear, scrollable list of children.
 ///  * [GridView], which display a 2 dimensional, scrollable array of children.
-class Scrollbar extends StatefulWidget {
+class Scrollbar extends RawScrollbar {
   /// Creates a material design scrollbar that wraps the given [child].
   ///
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   const Scrollbar({
     Key? key,
-    required this.child,
-    this.controller,
-    this.isAlwaysShown = false,
-    this.thickness,
-    this.radius,
-  }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
-       super(key: key);
+    required Widget child,
+    ScrollController? controller,
+    bool isAlwaysShown = false,
+    this.showTrackOnHover = false,
+    // TODO(Piinks): should we include thickness[WithTrack/OnHover], a la
+    // CupertinoScrollbar thickness/thicknessWhileDragging?
+    // May be better to not introduce more properties in lieu of future ScrollbarTheme
+    double? thickness,
+    Radius? radius,
+  }) : super(
+         key: key,
+         child: child,
+         controller: controller,
+         isAlwaysShown: isAlwaysShown,
+         thickness: thickness,
+         radius: radius,
+         fadeDuration: _kScrollbarFadeDuration,
+         timeToFade: _kScrollbarTimeToFade,
+         pressDuration: Duration.zero,
+       );
 
-  /// The widget below this widget in the tree.
-  ///
-  /// The scrollbar will be stacked on top of this child. This child (and its
-  /// subtree) should include a source of [ScrollNotification] notifications.
-  ///
-  /// Typically a [ListView] or [CustomScrollView].
-  final Widget child;
-
-  /// {@macro flutter.cupertino.cupertinoScrollbar.controller}
-  final ScrollController? controller;
-
-  /// {@macro flutter.cupertino.cupertinoScrollbar.isAlwaysShown}
-  final bool isAlwaysShown;
-
-  /// The thickness of the scrollbar.
-  ///
-  /// If this is non-null, it will be used as the thickness of the scrollbar on
-  /// all platforms, whether the scrollbar is being dragged by the user or not.
-  /// By default (if this is left null), each platform will get a thickness
-  /// that matches the look and feel of the platform, and the thickness may
-  /// grow while the scrollbar is being dragged if the platform look and feel
-  /// calls for such behavior.
-  final double? thickness;
-
-  /// The radius of the corners of the scrollbar.
-  ///
-  /// If this is non-null, it will be used as the fixed radius of the scrollbar
-  /// on all platforms, whether the scrollbar is being dragged by the user or
-  /// not. By default (if this is left null), each platform will get a radius
-  /// that matches the look and feel of the platform, and the radius may
-  /// change while the scrollbar is being dragged if the platform look and feel
-  /// calls for such behavior.
-  final Radius? radius;
+  /// Controls if the track will show on hover and remain, including during drag.
+  /// 
+  /// Defaults to false, cannot be null.
+  final bool showTrackOnHover;
 
   @override
   _ScrollbarState createState() => _ScrollbarState();
 }
 
-class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMixin {
-  ScrollbarPainter? _materialPainter;
+class _ScrollbarState extends RawScrollbarState<Scrollbar> {
+  late AnimationController _hoverAnimationController;
   late TextDirection _textDirection;
-  late Color _themeColor;
-  late bool _useCupertinoScrollbar;
-  late AnimationController _fadeoutAnimationController;
-  late Animation<double> _fadeoutOpacityAnimation;
-  Timer? _fadeoutTimer;
+  bool _dragIsActive = false;
+  bool _hoverIsActive = false;
+  
+  Color get _thumbColor {
+    if (_dragIsActive)
+      return const Color(0xFF616161);
+
+    // If the track is visible, the thumb color animation is ignored.
+    if (widget.showTrackOnHover && _hoverIsActive)
+      return const Color(0xFF757575);
+
+    return Color.lerp(
+      const Color(0xFFE0E0E0),
+      const Color(0xFF757575),
+      _hoverAnimationController.value,
+    )!;
+  }
+
+  Color get _trackColor => _hoverIsActive && widget.showTrackOnHover
+    ? const Color(0xFF424242).withOpacity(0.04)
+    : const Color(0x00000000);
+
+  Color get _trackBorderColor => _hoverIsActive && widget.showTrackOnHover
+    ? const Color(0xFFE0E0E0)
+    : const Color(0x00000000);
+
+  double get _thickness {
+   if (widget.thickness != null)
+     return widget.thickness!;
+   return _hoverIsActive && widget.showTrackOnHover
+     ? _kScrollbarHoverThickness
+     : _kScrollbarThickness;
+  }
 
   @override
   void initState() {
     super.initState();
-    _fadeoutAnimationController = AnimationController(
+    _hoverAnimationController = AnimationController(
       vsync: this,
-      duration: _kScrollbarFadeDuration,
+      duration: const Duration(milliseconds: 200),
     );
-    _fadeoutOpacityAnimation = CurvedAnimation(
-      parent: _fadeoutAnimationController,
-      curve: Curves.fastOutSlowIn,
-    );
+    _hoverAnimationController.addListener(() {
+      painter!.updateColors(
+        _thumbColor,
+        _trackColor,
+        _trackBorderColor,
+      );
+      painter!.updateThickness(
+        _thickness,
+        widget.radius ?? _kScrollbarRadius,
+      );
+    });
   }
 
   @override
   void didChangeDependencies() {
+    _textDirection = Directionality.of(context);
+    painter = _buildMaterialScrollbarPainter();
     super.didChangeDependencies();
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        // On iOS, stop all local animations. CupertinoScrollbar has its own
-        // animations.
-        _fadeoutTimer?.cancel();
-        _fadeoutTimer = null;
-        _fadeoutAnimationController.reset();
-        _useCupertinoScrollbar = true;
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        _themeColor = theme.highlightColor.withOpacity(1.0);
-        _textDirection = Directionality.of(context);
-        _materialPainter = _buildMaterialScrollbarPainter();
-        _useCupertinoScrollbar = false;
-        _triggerScrollbar();
-        break;
-    }
   }
 
   @override
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
-      if (widget.isAlwaysShown == false) {
-        _fadeoutAnimationController.reverse();
-      } else {
-        _triggerScrollbar();
-        _fadeoutAnimationController.animateTo(1.0);
-      }
-    }
-    if (!_useCupertinoScrollbar) {
-      _materialPainter!
-        ..thickness = widget.thickness ?? _kScrollbarThickness
-        ..radius = widget.radius;
-    }
-  }
-
-  // Wait one frame and cause an empty scroll event.  This allows the thumb to
-  // show immediately when isAlwaysShown is true.  A scroll event is required in
-  // order to paint the thumb.
-  void _triggerScrollbar() {
-    WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
-      if (widget.isAlwaysShown) {
-        _fadeoutTimer?.cancel();
-        widget.controller!.position.didUpdateScrollPositionBy(0);
-      }
-    });
+    painter!
+      ..thickness = _thickness
+      ..radius = widget.radius ?? _kScrollbarRadius;
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
     return ScrollbarPainter(
-      color: _themeColor,
+      color: _thumbColor,
+      trackColor: _trackColor,
+      trackBorderColor: _trackBorderColor,
       textDirection: _textDirection,
       thickness: widget.thickness ?? _kScrollbarThickness,
-      radius: widget.radius,
-      fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
+      radius: widget.radius ?? _kScrollbarRadius,
+      crossAxisMargin: _kScrollbarMargin,
+      minLength: _kScrollbarMinLength,
+      fadeoutOpacityAnimation: fadeoutOpacityAnimation,
       padding: MediaQuery.of(context).padding,
     );
   }
 
-  bool _handleScrollNotification(ScrollNotification notification) {
-    final ScrollMetrics metrics = notification.metrics;
-    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
-      return false;
+  @override
+  void handleLongPressStart(LongPressStartDetails details) {
+    super.handleLongPressStart(details);
+    _dragIsActive = true;
+    painter!.updateColors(
+      _thumbColor,
+      _trackColor,
+      _trackBorderColor,
+    );
+  }
+
+  @override
+  void handleLongPressEnd(LongPressEndDetails details) {
+    super.handleLongPressEnd(details);
+    _dragIsActive = false;
+    painter!.updateColors(
+      _thumbColor,
+      _trackColor,
+      _trackBorderColor,
+    );
+  }
+
+  void maybeHovering(PointerHoverEvent event) {
+    if (customPaintKey.currentContext == null) {
+      return;
     }
 
-    // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
-    // scroll notifications here.
-    if (!_useCupertinoScrollbar &&
-        (notification is ScrollUpdateNotification ||
-            notification is OverscrollNotification)) {
-      if (_fadeoutAnimationController.status != AnimationStatus.forward) {
-        _fadeoutAnimationController.forward();
-      }
+    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
+    final Offset localOffset = renderBox.globalToLocal(event.position);
+    final bool onScrollbar = painter.hitTestInteractive(localOffset);
 
-      _materialPainter!.update(
-        notification.metrics,
-        notification.metrics.axisDirection,
-      );
-      if (!widget.isAlwaysShown) {
-        _fadeoutTimer?.cancel();
-        _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
-          _fadeoutAnimationController.reverse();
-          _fadeoutTimer = null;
-        });
-      }
+    // Check is the position of the pointer falls over the painted scrollbar
+    if (onScrollbar) {
+      // Pointer exited hovering the scrollbar
+      _hoverIsActive = true;
+      _hoverAnimationController.forward();
+    } else {
+      // Pointer entered the area of the painted scrollbar
+      _hoverIsActive = false;
+      _hoverAnimationController.reverse();
     }
-    return false;
+  }
+
+  void maybeHoverExit(PointerExitEvent event) {
+    _hoverIsActive = false;
+    _hoverAnimationController.reverse();
   }
 
   @override
   void dispose() {
-    _fadeoutAnimationController.dispose();
-    _fadeoutTimer?.cancel();
-    _materialPainter?.dispose();
+    _hoverAnimationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_useCupertinoScrollbar) {
-      return CupertinoScrollbar(
-        child: widget.child,
-        isAlwaysShown: widget.isAlwaysShown,
-        thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
-        thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
-        radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
-        controller: widget.controller,
-      );
-    }
     return NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
+      onNotification: handleScrollNotification,
       child: RepaintBoundary(
-        child: CustomPaint(
-          foregroundPainter: _materialPainter,
-          child: RepaintBoundary(
-            child: widget.child,
+        child: RawGestureDetector(
+          gestures: defaultGestures,
+          child: MouseRegion(
+            onExit: maybeHoverExit,
+            onHover: maybeHovering,
+            child: CustomPaint(
+              key: customPaintKey,
+              foregroundPainter: painter,
+              child: RepaintBoundary(child: widget.child),
+            ),
           ),
         ),
       ),

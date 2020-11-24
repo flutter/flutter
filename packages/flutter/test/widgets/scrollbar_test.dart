@@ -45,6 +45,9 @@ class _DrawRectOnceCanvas extends Fake implements Canvas {
   void drawRect(Rect rect, Paint paint) {
     rects.add(rect);
   }
+
+  @override
+  void drawLine(Offset p1, Offset p2, Paint paint) {}
 }
 
 void main() {

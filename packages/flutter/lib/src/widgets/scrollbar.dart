@@ -2,20 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
+import 'basic.dart';
+import 'binding.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
+import 'media_query.dart';
+import 'notification_listener.dart';
+import 'primary_scroll_controller.dart';
+import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
+import 'scroll_notification.dart';
+import 'scrollable.dart';
+import 'ticker_provider.dart';
 
 const double _kMinThumbExtent = 18.0;
 const double _kMinInteractiveSize = 48.0;
+const double _kScrollbarThickness = 6.0;
+const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
+const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
-/// A [CustomPainter] for painting scrollbars.
+/// A [CustomPainter] for painting scrollbar thumbs.
 ///
-/// The size of the scrollbar along its scroll direction is typically
+/// The size of the scrollbar thumb along its scroll direction is typically
 /// proportional to the percentage of content completely visible on screen,
 /// as long as its size isn't less than [minLength] and it isn't overscrolling.
 ///
@@ -25,10 +41,10 @@ const double _kMinInteractiveSize = 48.0;
 /// rebuilding when:
 ///
 ///  * the scroll position changes; and
-///  * when the scrollbar fades away.
+///  * when the scrollbar thumb fades away.
 ///
 /// Calling [update] with the new [ScrollMetrics] will repaint the new scrollbar
-/// position.
+/// thumb position.
 ///
 /// Updating the value on the provided [fadeoutOpacityAnimation] will repaint
 /// with the new opacity.
@@ -42,9 +58,11 @@ const double _kMinInteractiveSize = 48.0;
 ///  * [CupertinoScrollbar] for a widget showing a scrollbar around a
 ///    [Scrollable] in the iOS style.
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
-  /// Creates a scrollbar with customizations given by construction arguments.
+  /// Creates a scrollbar thumb with customizations given by construction arguments.
   ScrollbarPainter({
     required Color color,
+    Color trackColor = const Color(0x00000000),
+    Color trackBorderColor = const Color(0x00000000),
     required TextDirection textDirection,
     required this.thickness,
     required this.fadeoutOpacityAnimation,
@@ -69,6 +87,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _color = color,
        _textDirection = textDirection,
        _padding = padding,
+       _trackColor = trackColor,
+       _trackBorderColor = trackBorderColor,
        minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
@@ -82,6 +102,30 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
 
     _color = value;
+    notifyListeners();
+  }
+
+  /// [Color] of the track. Mustn't be null.
+  Color get trackColor => _trackColor;
+  Color _trackColor;
+  set trackColor(Color value) {
+    assert(value != null);
+    if (trackColor == value)
+      return;
+
+    _trackColor = value;
+    notifyListeners();
+  }
+
+  /// [Color] of the track border. Mustn't be null.
+  Color get trackBorderColor => _trackBorderColor;
+  Color _trackBorderColor;
+  set trackBorderColor(Color value) {
+    assert(value != null);
+    if (trackBorderColor == value)
+      return;
+
+    _trackBorderColor = value;
     notifyListeners();
   }
 
@@ -171,6 +215,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ScrollMetrics? _lastMetrics;
   AxisDirection? _lastAxisDirection;
   Rect? _thumbRect;
+  Rect? _trackRect;
+  late double _thumbOffset;
 
   /// Update with new [ScrollMetrics]. The scrollbar will show and redraw itself
   /// based on these new metrics.
@@ -192,47 +238,82 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  Paint get _paint {
+  /// Update and redraw with new scrollbar color.
+  void updateColors(Color newThumbColor, Color newTrackColor, Color newTrackBorderColor) {
+    color = newThumbColor;
+    trackColor = newTrackColor;
+    trackBorderColor = newTrackBorderColor;
+    notifyListeners();
+  }
+
+  Paint get _thumbPaint {
     return Paint()
       ..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
-  void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset, double thumbExtent, AxisDirection direction) {
+  Paint _trackPaint({ bool isBorder = false }) {
+    if (isBorder)
+      return Paint()
+        ..color = _trackBorderColor.withOpacity(trackBorderColor.opacity * fadeoutOpacityAnimation.value)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+    return Paint()
+      ..color = _trackColor.withOpacity(trackColor.opacity * fadeoutOpacityAnimation.value);
+  }
+
+  void _paintScrollbar(Canvas canvas, Size size, double thumbExtent, AxisDirection direction) {
     final double x, y;
-    final Size thumbSize;
+    final Size thumbSize, trackSize;
+    final Offset trackOffset;
 
     switch (direction) {
       case AxisDirection.down:
         thumbSize = Size(thickness, thumbExtent);
+        trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = textDirection == TextDirection.rtl
           ? crossAxisMargin + padding.left
           : size.width - thickness - crossAxisMargin - padding.right;
-        y = thumbOffset;
+        y = _thumbOffset;
+        trackOffset = Offset(x - crossAxisMargin, 0.0);
         break;
       case AxisDirection.up:
         thumbSize = Size(thickness, thumbExtent);
+        trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = textDirection == TextDirection.rtl
           ? crossAxisMargin + padding.left
           : size.width - thickness - crossAxisMargin - padding.right;
-        y = thumbOffset;
+        y = _thumbOffset;
+        trackOffset = Offset(x - crossAxisMargin, 0.0);
         break;
       case AxisDirection.left:
         thumbSize = Size(thumbExtent, thickness);
-        x = thumbOffset;
+        x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
+        trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
+        trackOffset = Offset(0.0, y - crossAxisMargin);
         break;
       case AxisDirection.right:
         thumbSize = Size(thumbExtent, thickness);
-        x = thumbOffset;
+        trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
+        x = _thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
+        trackOffset = Offset(0.0, y - crossAxisMargin);
         break;
     }
 
+    _trackRect = trackOffset & trackSize;
+    canvas.drawRect(_trackRect!, _trackPaint());
+    canvas.drawLine(
+      trackOffset,
+      Offset(trackOffset.dx, trackOffset.dy + _trackExtent),
+      _trackPaint(isBorder: true),
+    );
+
     _thumbRect = Offset(x, y) & thumbSize;
     if (radius == null)
-      canvas.drawRect(_thumbRect!, _paint);
+      canvas.drawRect(_thumbRect!, _thumbPaint);
     else
-      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paint);
+      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _thumbPaint);
   }
 
   double _thumbExtent() {
@@ -332,14 +413,34 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double beforePadding = _isVertical ? padding.top : padding.left;
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
-    final double thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
+    _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
 
-    return _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, _lastAxisDirection!);
+    return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
 
   /// Same as hitTest, but includes some padding to make sure that the region
   /// isn't too small to be interacted with by the user.
   bool hitTestInteractive(Offset position) {
+    if (_thumbRect == null) {
+      return false;
+    }
+    // The thumb is not able to be hit when transparent.
+    if (fadeoutOpacityAnimation.value == 0.0) {
+      return false;
+    }
+    final Rect interactiveScrollbarRect = _trackRect == null
+      ? _thumbRect!.expandToInclude(
+          Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
+        )
+      : _trackRect!.expandToInclude(
+          Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
+        );
+    return interactiveScrollbarRect.contains(position);
+  }
+
+  /// Same as hitTestInteractive, but excludes the track portion of the scrollbar.
+  /// Used to evaluate interactions with only the scrollbar thumb.
+  bool hitTestOnlyThumbInteractive(Offset position) {
     if (_thumbRect == null) {
       return false;
     }
@@ -353,7 +454,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return interactiveThumbRect.contains(position);
   }
 
-  // Scrollbars can be interactive in Cupertino.
+  // Scrollbar thumbs are interactive.
   @override
   bool? hitTest(Offset? position) {
     if (_thumbRect == null) {
@@ -385,4 +486,626 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
+}
+
+/// An base class for building animated scrollbar thumbs.
+///
+/// To add a scrollbar thumb to a [ScrollView], simply wrap the scroll view
+/// widget in a [RawScrollbar] widget.
+///
+/// {@template flutter.widgets.Scrollbar}
+/// A scrollbar thumb indicates which portion of a [Scrollable] widget is actually
+/// visible.
+///
+/// By default, the thumb will fade in and out as the child scroll view widget
+/// scrolls. When [isAlwaysShown] is true, and the associated
+/// [ScrollController] is provided for [controller], the scrollbar thumb will
+/// remain visible without the fade animation.
+///
+/// Scrollbars are interactive and will use the [PrimaryScrollController] if
+/// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
+/// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
+/// exclusive of the thumb will trigger a [ScrollIncrementType.page] based on
+/// the relative position to the thumb.
+/// {@endtemplate}
+///
+/// //TODO(Piinks): Add code sample
+///
+/// See also:
+///
+///  * [RawScrollbar], the abstract base class this inherits from.
+///  * [ListView], which display a linear, scrollable list of children.
+///  * [GridView], which display a 2 dimensional, scrollable array of children.
+class RawScrollbar extends StatefulWidget {
+  /// Creates a basic raw scrollbar that wraps the given [child].
+  ///
+  /// The [child] should be a source of [ScrollNotification] notifications,
+  /// typically a [Scrollable] widget.
+  ///
+  /// The [child], [isAlwaysShown], [fadeDuration], and [timeToFade] arguments
+  /// must not be null.
+  const RawScrollbar({
+    Key? key,
+    required this.child,
+    this.controller,
+    this.isAlwaysShown = false,
+    this.radius,
+    this.thickness,
+    this.thumbColor,
+    this.fadeDuration = _kScrollbarFadeDuration,
+    this.timeToFade = _kScrollbarTimeToFade,
+    this.pressDuration = Duration.zero,
+  }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
+       assert(child != null),
+       assert(fadeDuration != null),
+       assert(timeToFade != null),
+       super(key: key);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// The scrollbar will be stacked on top of this child. This child (and its
+  /// subtree) should include a source of [ScrollNotification] notifications.
+  ///
+  /// Typically a [ListView] or [CustomScrollView].
+  final Widget child;
+
+  /// The [ScrollController] used to implement Scrollbar dragging.
+  ///
+  /// If nothing is passed to controller, the default behavior is to automatically
+  /// enable scrollbar dragging on the nearest ScrollController using
+  /// [PrimaryScrollController.of].
+  ///
+  /// If a ScrollController is passed, then scrollbar dragging will be enabled on
+  /// the given ScrollController. A stateful ancestor of this widget needs to
+  /// manage the ScrollController and either pass it to a scrollable descendant
+  /// or use a PrimaryScrollController to share it.
+  ///
+  /// Here is an example of using the `controller` parameter to enable
+  /// scrollbar dragging for multiple independent ListViews:
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// final ScrollController _controllerOne = ScrollController();
+  /// final ScrollController _controllerTwo = ScrollController();
+  ///
+  /// build(BuildContext context) {
+  /// return Column(
+  ///   children: <Widget>[
+  ///     Container(
+  ///        height: 200,
+  ///        child: CupertinoScrollbar(
+  ///          controller: _controllerOne,
+  ///          child: ListView.builder(
+  ///            controller: _controllerOne,
+  ///            itemCount: 120,
+  ///            itemBuilder: (BuildContext context, int index) => Text('item $index'),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///      Container(
+  ///        height: 200,
+  ///        child: CupertinoScrollbar(
+  ///          controller: _controllerTwo,
+  ///          child: ListView.builder(
+  ///            controller: _controllerTwo,
+  ///            itemCount: 120,
+  ///            itemBuilder: (BuildContext context, int index) => Text('list 2 item $index'),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///    ],
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final ScrollController? controller;
+
+  /// Indicates whether the [Scrollbar] should always be visible.
+  ///
+  /// When false, the scrollbar will be shown during scrolling
+  /// and will fade out otherwise.
+  ///
+  /// When true, the scrollbar will always be visible and never fade out.
+  ///
+  /// The [controller] property must be set in this case.
+  /// It should be passed the relevant [Scrollable]'s [ScrollController].
+  ///
+  /// Defaults to false.
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// final ScrollController _controllerOne = ScrollController();
+  /// final ScrollController _controllerTwo = ScrollController();
+  ///
+  /// build(BuildContext context) {
+  /// return Column(
+  ///   children: <Widget>[
+  ///     Container(
+  ///        height: 200,
+  ///        child: Scrollbar(
+  ///          isAlwaysShown: true,
+  ///          controller: _controllerOne,
+  ///          child: ListView.builder(
+  ///            controller: _controllerOne,
+  ///            itemCount: 120,
+  ///            itemBuilder: (BuildContext context, int index)
+  ///                => Text('item $index'),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///      Container(
+  ///        height: 200,
+  ///        child: CupertinoScrollbar(
+  ///          isAlwaysShown: true,
+  ///          controller: _controllerTwo,
+  ///          child: SingleChildScrollView(
+  ///            controller: _controllerTwo,
+  ///            child: SizedBox(height: 2000, width: 500,),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///    ],
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final bool isAlwaysShown;
+
+  /// The radius of the corners of the scrollbar.
+  final Radius? radius;
+
+  /// The thickness of the scrollbar.
+  final double? thickness;
+
+  /// The color of the scrollbar thumb.
+  final Color? thumbColor;
+
+  /// The [Duration] of the fade animation.
+  ///
+  /// Cannot be null.
+  final Duration fadeDuration;
+
+  /// The [Duration] of time until the fade animation begins.
+  ///
+  /// Cannot be null.
+  final Duration timeToFade;
+
+  /// The [Duration] of time that a LongPress will trigger the drag gesture of
+  /// the scrollbar thumb.
+  ///
+  /// Cannot be null, defaults to [Duration.zero].
+  final Duration pressDuration;
+
+  @override
+  RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
+}
+
+/// The state for a [RawScrollbar] widget, also shared by the [Scrollbar] and
+/// [CupertinoScrollbar] widgets.
+///
+/// Controls the animation that fades a scrollbar thumb in and out of view.
+class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProviderStateMixin<T> {
+  double? _dragScrollbarAxisPosition;
+  Drag? _drag;
+  ScrollController? _currentController;
+
+  /// A [GlobalKey] associated with the [painter], will be assigned to the
+  /// [CustomPaint] of the scrollbar.
+  @protected
+  GlobalKey get customPaintKey => _customPaintKey;
+  final GlobalKey _customPaintKey = GlobalKey();
+
+
+  /// Used to paint the scrollbar.
+  @protected
+  ScrollbarPainter? painter;
+
+  /// Controls the fading in and out of the scrollbar thumb.
+  @protected
+  AnimationController get fadeoutAnimationController => _fadeoutAnimationController;
+  late AnimationController _fadeoutAnimationController;
+  
+  /// Used to animate the opacity of the scrollbar thumb.
+  @protected
+  Animation<double> get fadeoutOpacityAnimation => _fadeoutOpacityAnimation;
+  late Animation<double> _fadeoutOpacityAnimation;
+
+  /// Used to initiate the fade out animation upon completion.
+  @protected
+  Timer? get fadeoutTimer => _fadeoutTimer;
+  Timer? _fadeoutTimer;
+  
+  @override
+  void initState() {
+    super.initState();
+    _fadeoutAnimationController = AnimationController(
+      vsync: this,
+      duration: widget.fadeDuration,
+    );
+    _fadeoutOpacityAnimation = CurvedAnimation(
+      parent: _fadeoutAnimationController,
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // If a painter has not been created by a subclass, create a raw scrollbar
+    // painter.
+    painter ??= _buildRawScrollbarPainter();
+    maybeTriggerScrollbar();
+  }
+
+  /// Waits one frame and cause an empty scroll event.
+  ///
+  /// This allows the thumb to show immediately when isAlwaysShown is true.
+  /// A scroll event is required in order to paint the thumb.
+  @protected
+  void maybeTriggerScrollbar() {
+    WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+      if (widget.isAlwaysShown) {
+        _fadeoutTimer?.cancel();
+        // Wait one frame and cause an empty scroll event.  This allows the
+        // thumb to show immediately when isAlwaysShown is true. A scroll
+        // event is required in order to paint the thumb.
+        widget.controller!.position.didUpdateScrollPositionBy(0);
+      }
+    });
+  }
+
+  ScrollbarPainter _buildRawScrollbarPainter() {
+    return ScrollbarPainter(
+      color: widget.thumbColor ?? const Color(0x66BCBCBC).withOpacity(1.0),
+      textDirection: Directionality.of(context),
+      thickness: widget.thickness ?? _kScrollbarThickness,
+      radius: widget.radius,
+      fadeoutOpacityAnimation: fadeoutOpacityAnimation,
+      padding: MediaQuery.of(context).padding,
+    );
+  }
+
+  @override
+  void didUpdateWidget(T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
+      if (widget.isAlwaysShown == true) {
+        maybeTriggerScrollbar();
+        _fadeoutAnimationController.animateTo(1.0);
+      } else {
+        _fadeoutAnimationController.reverse();
+      }
+    }
+    painter!
+      ..thickness = widget.thickness ?? _kScrollbarThickness
+      ..radius = widget.radius
+      ..color = widget.thumbColor ?? const Color(0x66BCBCBC).withOpacity(1.0);
+  }
+
+  void _updateScrollPosition(double primaryDelta) {
+    assert(_currentController != null);
+
+    // Convert primaryDelta, the amount that the scrollbar moved since the last
+    // time _dragScrollbar was called, into the coordinate space of the scroll
+    // position, and jump to that position.
+    final double scrollOffsetLocal = painter!.getTrackToScroll(primaryDelta);
+    final double scrollOffsetGlobal = scrollOffsetLocal + _currentController!.position.pixels;
+    _currentController!.position.jumpTo(scrollOffsetGlobal);
+  }
+
+  void _maybeStartFadeoutTimer() {
+    if (!widget.isAlwaysShown) {
+      _fadeoutTimer?.cancel();
+      _fadeoutTimer = Timer(widget.timeToFade, () {
+        _fadeoutAnimationController.reverse();
+        _fadeoutTimer = null;
+      });
+    }
+  }
+
+  /// Returns the [Axis] of the child scroll view, or null if one is not
+  /// determined.
+  @protected
+  Axis? getDirection() {
+    try {
+      return _currentController!.position.axis;
+    } catch (_) {
+      // Ignore the gesture if we cannot determine the direction.
+      return null;
+    }
+  }
+
+  /// Cancels the [fadeoutTimer] when a long press gesture has been recognized.
+  @protected
+  void handleLongPress() {
+    if (getDirection() == null) {
+      return;
+    }
+    fadeoutTimer?.cancel();
+  }
+
+  /// Handler called when a long press gesture has started.
+  ///
+  /// Begins the fade out animation and updates the position of the child
+  /// scrollable.
+  @protected
+  void handleLongPressStart(LongPressStartDetails details) {
+    _currentController = widget.controller ?? PrimaryScrollController.of(context);
+    final Axis? direction = getDirection();
+    if (direction == null) {
+      return;
+    }
+    _fadeoutTimer?.cancel();
+    _fadeoutAnimationController.forward();
+    switch (direction) {
+      case Axis.vertical:
+        _dragScrollbarAxisPosition = details.localPosition.dy;
+        break;
+      case Axis.horizontal:
+        _dragScrollbarAxisPosition = details.localPosition.dx;
+        break;
+    }
+  }
+
+  /// Handler called when a currently active long press gesture moves.
+  ///
+  /// Updates the position of the child scrollable.
+  @protected
+  void handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    final Axis? direction = getDirection();
+    if (direction == null) {
+      return;
+    }
+    switch(direction) {
+      case Axis.vertical:
+        _updateScrollPosition(details.localPosition.dy - _dragScrollbarAxisPosition!);
+        _dragScrollbarAxisPosition = details.localPosition.dy;
+        break;
+      case Axis.horizontal:
+        _updateScrollPosition(details.localPosition.dx - _dragScrollbarAxisPosition!);
+        _dragScrollbarAxisPosition = details.localPosition.dx;
+        break;
+    }
+  }
+
+  /// Handler called when a long press has ended.
+  ///
+  /// Finishes any active drag action on the child scroll view.
+  @protected
+  void handleLongPressEnd(LongPressEndDetails details) {
+    final Axis? direction = getDirection();
+    if (direction == null)
+      return;
+    final Offset pixelsPerSecond = details.velocity.pixelsPerSecond;
+    _maybeStartFadeoutTimer();
+    _dragScrollbarAxisPosition = null;
+    final double scrollVelocity = painter!.getTrackToScroll(
+      direction == Axis.vertical
+        ? pixelsPerSecond.dy
+        : pixelsPerSecond.dx
+    );
+    _drag?.end(DragEndDetails(
+      primaryVelocity: -scrollVelocity,
+      velocity: Velocity(
+        pixelsPerSecond: direction == Axis.vertical
+          ? Offset(0.0, -scrollVelocity)
+          : Offset(-scrollVelocity, 0.0),
+      ),
+    ));
+    _drag = null;
+    _currentController = null;
+  }
+
+  /// Handler for tapping on the scrollbar track.
+  ///
+  /// Will complete a [ScrollIncrementType.page] on the [child] [ScrollView].
+  @protected
+  void handleTrackTapDown(TapDownDetails details) {
+    print(details.localPosition);
+    // The Scrollbar should page towards the position of the tap on the track.
+    _currentController = widget.controller ?? PrimaryScrollController.of(context);
+
+    double scrollIncrement;
+    // Is an increment calculator available?
+    final ScrollIncrementCalculator? calculator = Scrollable.of(
+      _currentController!.position.context.notificationContext!
+    )?.widget.incrementCalculator;
+    if (calculator != null) {
+      scrollIncrement = calculator(
+        ScrollIncrementDetails(
+          type: ScrollIncrementType.page,
+          metrics: _currentController!.position,
+        )
+      );
+    } else {
+      // Default page increment
+      scrollIncrement = 0.8 * widget.controller!.position.viewportDimension;
+    }
+
+    // Adjust scrollIncrement for direction
+    switch (_currentController!.position.axisDirection) {
+      case AxisDirection.up:
+        if (details.localPosition.dy > painter!._thumbOffset)
+          scrollIncrement = -scrollIncrement;
+        break;
+      case AxisDirection.down:
+        if (details.localPosition.dy < painter!._thumbOffset)
+          scrollIncrement = -scrollIncrement;
+        break;
+      case AxisDirection.right:
+        if (details.localPosition.dx < painter!._thumbOffset)
+          scrollIncrement = -scrollIncrement;
+        break;
+      case AxisDirection.left:
+        if (details.localPosition.dx > painter!._thumbOffset)
+          scrollIncrement = -scrollIncrement;
+        break;
+    }
+
+    widget.controller!.position.moveTo(
+      widget.controller!.position.pixels + scrollIncrement,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  /// Updates the scrollbar thumb and it's animations based on the received
+  /// [ScrollNotification].
+  @protected
+  bool handleScrollNotification(ScrollNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent)
+      return false;
+
+    if (notification is ScrollUpdateNotification ||
+      notification is OverscrollNotification) {
+      // Any movements always makes the scrollbar start showing up.
+      if (_fadeoutAnimationController.status != AnimationStatus.forward)
+        _fadeoutAnimationController.forward();
+
+      fadeoutTimer?.cancel();
+      painter!.update(notification.metrics, notification.metrics.axisDirection);
+    } else if (notification is ScrollEndNotification) {
+      if (_dragScrollbarAxisPosition == null)
+        _maybeStartFadeoutTimer();
+    }
+    return false;
+  }
+
+  /// Get the GestureRecognizerFactories used to detect gestures on the scrollbar
+  /// thumb.
+  @protected
+  Map<Type, GestureRecognizerFactory> get defaultGestures {
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
+    if (controller == null)
+      return gestures;
+
+    gestures[_ThumbPressGestureRecognizer] =
+      GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
+          () => _ThumbPressGestureRecognizer(
+          debugOwner: this,
+          customPaintKey: customPaintKey,
+          pressDuration: widget.pressDuration,
+        ),
+          (_ThumbPressGestureRecognizer instance) {
+          instance
+            ..onLongPress = handleLongPress
+            ..onLongPressStart = handleLongPressStart
+            ..onLongPressMoveUpdate = handleLongPressMoveUpdate
+            ..onLongPressEnd = handleLongPressEnd;
+        },
+      );
+
+    gestures[_TrackTapGestureRecognizer] =
+      GestureRecognizerFactoryWithHandlers<_TrackTapGestureRecognizer>(
+          () => _TrackTapGestureRecognizer(
+          debugOwner: this,
+          customPaintKey: customPaintKey,
+        ),
+          (_TrackTapGestureRecognizer instance) {
+          instance.onTapDown = handleTrackTapDown;
+        },
+      );
+
+    return gestures;
+  }
+
+  @override
+  void dispose() {
+    _fadeoutAnimationController.dispose();
+    _fadeoutTimer?.cancel();
+    painter?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: handleScrollNotification,
+      child: RepaintBoundary(
+        child: RawGestureDetector(
+          gestures: defaultGestures,
+          child: CustomPaint(
+            key: customPaintKey,
+            foregroundPainter: painter,
+            child: RepaintBoundary(child: widget.child),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// A long press gesture detector that only responds to events on the scrollbar's
+// thumb and ignores everything else.
+class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
+  _ThumbPressGestureRecognizer({
+    double? postAcceptSlopTolerance,
+    PointerDeviceKind? kind,
+    required Object debugOwner,
+    required GlobalKey customPaintKey,
+    required Duration pressDuration,
+  }) :  _customPaintKey = customPaintKey,
+      super(
+      postAcceptSlopTolerance: postAcceptSlopTolerance,
+      kind: kind,
+      debugOwner: debugOwner,
+      duration: pressDuration,
+    );
+
+  final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    if (!_hitTestInteractive(_customPaintKey, event.position)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
+    if (customPaintKey.currentContext == null) {
+      return false;
+    }
+    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
+    final Offset localOffset = renderBox.globalToLocal(offset);
+    return painter.hitTestOnlyThumbInteractive(localOffset);
+  }
+}
+
+// A tap gesture detector that only responds to events on the scrollbar's
+// track and ignores everything else, including the thumb.
+class _TrackTapGestureRecognizer extends TapGestureRecognizer {
+  _TrackTapGestureRecognizer({
+    required Object debugOwner,
+    required GlobalKey customPaintKey,
+  }) :  _customPaintKey = customPaintKey,
+      super(debugOwner: debugOwner);
+
+  final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    if (!_hitTestInteractive(_customPaintKey, event.position)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
+    if (customPaintKey.currentContext == null) {
+      return false;
+    }
+    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
+    final Offset localOffset = renderBox.globalToLocal(offset);
+    // We only receive track taps that are not on the thumb.
+    return painter.hitTestInteractive(localOffset) && !painter.hitTestOnlyThumbInteractive(localOffset);
+  }
 }
