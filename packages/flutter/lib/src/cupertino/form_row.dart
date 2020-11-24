@@ -166,39 +166,34 @@ class CupertinoFormRow extends StatelessWidget {
       ),
     ];
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-      ),
-      child: Padding(
-        padding: padding ?? _kDefaultPadding,
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: rowChildren,
+    return Padding(
+      padding: padding ?? _kDefaultPadding,
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: rowChildren,
+          ),
+          if (helper != null)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: DefaultTextStyle(
+                style: textStyle,
+                child: helper!,
+              ),
             ),
-            if (helper != null)
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: DefaultTextStyle(
-                  style: textStyle,
-                  child: helper!,
+          if (error != null)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: DefaultTextStyle(
+                style: const TextStyle(
+                  color: CupertinoColors.destructiveRed,
+                  fontWeight: FontWeight.w500,
                 ),
+                child: error!,
               ),
-            if (error != null)
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: DefaultTextStyle(
-                  style: const TextStyle(
-                    color: CupertinoColors.destructiveRed,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  child: error!,
-                ),
-              ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

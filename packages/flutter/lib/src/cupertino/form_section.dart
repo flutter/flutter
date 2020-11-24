@@ -6,6 +6,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'theme.dart';
+
+// Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
+const EdgeInsetsDirectional _kDefaultHeaderMargin =
+    EdgeInsetsDirectional.fromSTEB(16.5, 16.0, 16.5, 10.0);
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
@@ -33,7 +38,7 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 /// between rows. Does not create borders on top and bottom of the rows.
 ///
 /// The [header] parameter sets the form section header. The section header lies
-/// above the [children] rows.
+/// above the [children] rows, with margins that match the iOS style.
 ///
 /// The [children] parameter is required and sets the list of rows shown in
 /// the section. The [children] parameter takes a list, as opposed to a more
@@ -45,11 +50,20 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 /// The [margin] parameter sets the spacing around the content area of the
 /// section encapsulating [children].
 ///
-/// The [borderRadius] parameter sets the circular border radius for the
-/// [Column] encapsulating [children] rows.
+/// The [groupDecoration] parameter sets the decoration for the row group.
+/// If null, defaults to a conditional background color for the row group,
+/// with [CupertinoColors.systemBackground] in light themes and
+/// [CupertinoColors.secondarySystemBackground] in dark themes.
+/// If null, defaults to 10.0 circular radius when constructing with
+/// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
+/// standard [CupertinoFormSection] constructor.
 ///
-/// The [decoration] parameter sets the decoration for the section. Defaults to
-/// a [CupertinoColors.secondarySystemBackground] background color.
+/// The [backgroundColor] parameter sets the background color for the section.
+/// If null, defaults to a conditional background color for the section, with
+/// [CupertinoColors.secondarySystemBackground] in light themes and
+/// [CupertinoColors.systemBackground] in dark themes.
+///
+/// {@macro flutter.material.Material.clipBehavior}
 class CupertinoFormSection extends StatelessWidget {
   /// Creates a section that mimicks standard iOS forms.
   ///
@@ -58,7 +72,7 @@ class CupertinoFormSection extends StatelessWidget {
   /// rows, the dividers between rows, and borders on top and bottom of the rows.
   ///
   /// The [header] parameter sets the form section header. The section header
-  /// lies above the [children] rows.
+  /// lies above the [children] rows, with margins that match the iOS style.
   ///
   /// The [children] parameter is required and sets the list of rows shown in
   /// the section. The [children] parameter takes a list, as opposed to a more
@@ -70,19 +84,28 @@ class CupertinoFormSection extends StatelessWidget {
   /// The [margin] parameter sets the spacing around the content area of the
   /// section encapsulating [children], and defaults to zero padding.
   ///
-  /// The [borderRadius] parameter sets the circular border radius for the
-  /// [Column] encapsulating [children] rows. Defaults to 0.0 for the standard
-  /// edge-to-edge style.
+  /// The [groupDecoration] parameter sets the decoration for the row group.
+  /// If null, defaults to a conditional background color for the row group,
+  /// with [CupertinoColors.systemBackground] in light themes and
+  /// [CupertinoColors.secondarySystemBackground] in dark themes.
+  /// If null, defaults to 10.0 circular radius when constructing with
+  /// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
+  /// standard [CupertinoFormSection] constructor.
   ///
-  /// The [decoration] parameter sets the decoration for the section. Defaults
-  /// to a [CupertinoColors.secondarySystemBackground] background color.
+  /// The [backgroundColor] parameter sets the background color for the section.
+  /// If null, defaults to a conditional background color for the section, with
+  /// [CupertinoColors.secondarySystemBackground] in light themes and
+  /// [CupertinoColors.systemBackground] in dark themes.
+  ///
+  /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoFormSection({
     Key? key,
     required this.children,
     this.header,
     this.margin = EdgeInsets.zero,
-    this.borderRadius = BorderRadius.zero,
-    this.decoration,
+    this.backgroundColor,
+    this.groupDecoration,
+    this.clipBehavior = Clip.none,
   })  : _type = _CupertinoFormSectionType.base,
         assert(children.length > 0),
         super(key: key);
@@ -95,7 +118,7 @@ class CupertinoFormSection extends StatelessWidget {
   /// between rows. Does not create borders on top and bottom of the rows.
   ///
   /// The [header] parameter sets the form section header. The section header
-  /// lies above the [children] rows.
+  /// lies above the [children] rows, with margins that match the iOS style.
   ///
   /// The [children] parameter is required and sets the list of rows shown in
   /// the section. The [children] parameter takes a list, as opposed to a more
@@ -108,19 +131,28 @@ class CupertinoFormSection extends StatelessWidget {
   /// section encapsulating [children], and defaults to the standard
   /// notched-style iOS form padding.
   ///
-  /// The [borderRadius] parameter sets the circular border radius for the
-  /// [Column] encapsulating [children] rows. Defaults to 10.0 for the standard
-  /// edge-to-edge style.
+  /// The [groupDecoration] parameter sets the decoration for the row group.
+  /// If null, defaults to a conditional background color for the row group,
+  /// with [CupertinoColors.systemBackground] in light themes and
+  /// [CupertinoColors.secondarySystemBackground] in dark themes.
+  /// If null, defaults to 10.0 circular radius when constructing with
+  /// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
+  /// standard [CupertinoFormSection] constructor.
   ///
-  /// The [decoration] parameter sets the decoration for the section. Defaults
-  /// to a [CupertinoColors.secondarySystemBackground] background color.
+  /// The [backgroundColor] parameter sets the background color for the section.
+  /// If null, defaults to a conditional background color for the section, with
+  /// [CupertinoColors.secondarySystemBackground] in light themes and
+  /// [CupertinoColors.systemBackground] in dark themes.
+  ///
+  /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoFormSection.insetGrouped({
     Key? key,
     required this.children,
     this.header,
     this.margin = _kDefaultInsetGroupedRowsMargin,
-    this.borderRadius = _kDefaultInsetGroupedBorderRadius,
-    this.decoration,
+    this.backgroundColor,
+    this.groupDecoration,
+    this.clipBehavior = Clip.none,
   })  : _type = _CupertinoFormSectionType.insetGrouped,
         assert(children.length > 0),
         super(key: key);
@@ -146,19 +178,28 @@ class CupertinoFormSection extends StatelessWidget {
   /// widgets be included in the [children] list in order to retain the iOS look.
   final List<Widget> children;
 
-  /// Sets the decoration for the section.
+  /// Sets the decoration for the row group.
   ///
-  /// Defaults to a [CupertinoColors.secondarySystemBackground] background
-  /// color.
-  final BoxDecoration? decoration;
+  /// If null, defaults to a conditional background color for the row group,
+  /// with [CupertinoColors.systemBackground] in light themes and
+  /// [CupertinoColors.secondarySystemBackground] in dark themes.
+  ///
+  /// If null, defaults to 10.0 circular radius when constructing with
+  /// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
+  /// standard [CupertinoFormSection] constructor.
+  final BoxDecoration? groupDecoration;
 
-  /// Sets the border radius for the [Column] encapsulating [children]
-  /// rows.
+  /// Sets the background color for the section.
   ///
-  /// Defaults to zero radius when constructed with standard [CupertinoFormSection]
-  /// constructor. Defaults to 10.0 circular radius when constructing with
-  /// [CupertinoFormSection.insetGrouped].
-  final BorderRadius? borderRadius;
+  /// If null, defaults to a conditional background color for the section, with
+  /// [CupertinoColors.secondarySystemBackground] in light themes and
+  /// [CupertinoColors.systemBackground] in dark themes.
+  final Color? backgroundColor;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -176,12 +217,8 @@ class CupertinoFormSection extends StatelessWidget {
     // The value of the starting inset (15.0) is determined using SwiftUI's Form
     // seperators in the iOS 14.2 SDK.
     final Widget shortDivider = Container(
-      child: Container(
-        margin: const EdgeInsetsDirectional.only(start: 15.0),
-        color: dividerColor,
-        height: dividerHeight,
-      ),
-      color: CupertinoColors.systemBackground.resolveFrom(context),
+      margin: const EdgeInsetsDirectional.only(start: 15.0),
+      color: dividerColor,
       height: dividerHeight,
     );
 
@@ -207,12 +244,48 @@ class CupertinoFormSection extends StatelessWidget {
       childrenWithDividers.add(longDivider);
     }
 
-    return DecoratedBox(
-      decoration: decoration ??
+    final Color themeAwareSystemBackgroundColor =
+        CupertinoColors.systemBackground.resolveFrom(context);
+
+    final Color themeAwareSecondarySystemBackgroundColor =
+        CupertinoColors.secondarySystemBackground.resolveFrom(context);
+
+    // When the background color is not provided, use the default background
+    // color determined from standard SwiftUI Forms in iOS 14.2 SDK.
+    // Defaults to black (systemBackground) in dark themes, and
+    // gray (secondarySystemBackground) in light themes.
+    final Color themeAwareBackgroundColor = backgroundColor ??
+        (MediaQuery.of(context).platformBrightness == Brightness.dark
+            ? themeAwareSystemBackgroundColor
+            : themeAwareSecondarySystemBackgroundColor);
+
+    // When the group decoration is not provided, makes a group color with the
+    // default group background color determined from standard SwiftUI Forms in
+    // iOS 14.2 SDK.
+    // The color for the row group is the reverse of themeAwareBackgroundColor.
+    // Defaults to gray (secondarySystemBackground) in dark themes, and
+    // black (systemBackground) in light themes.
+    final Color themeAwareGroupColor = groupDecoration?.color ??
+        (MediaQuery.of(context).platformBrightness == Brightness.dark
+            ? themeAwareSecondarySystemBackgroundColor
+            : themeAwareSystemBackgroundColor);
+
+    final DecoratedBox decoratedChildrenGroup = DecoratedBox(
+      decoration: groupDecoration ??
           BoxDecoration(
-            color:
-                CupertinoColors.secondarySystemBackground.resolveFrom(context),
+            color: themeAwareGroupColor,
+            borderRadius: _kDefaultInsetGroupedBorderRadius,
           ),
+      child: Column(
+        children: childrenWithDividers,
+      ),
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color:
+            CupertinoDynamicColor.resolve(themeAwareBackgroundColor, context),
+      ),
       child: Column(
         children: <Widget>[
           Align(
@@ -225,17 +298,20 @@ class CupertinoFormSection extends StatelessWidget {
                       color:
                           CupertinoColors.secondaryLabel.resolveFrom(context),
                     ),
-                    child: header!,
+                    child: Padding(
+                      padding: _kDefaultHeaderMargin,
+                      child: header!,
+                    ),
                   ),
           ),
           Padding(
             padding: margin,
-            child: ClipRRect(
-              borderRadius: borderRadius,
-              child: Column(
-                children: childrenWithDividers,
-              ),
-            ),
+            child: clipBehavior == Clip.none
+                ? decoratedChildrenGroup
+                : ClipRRect(
+                    borderRadius: _kDefaultInsetGroupedBorderRadius,
+                    clipBehavior: clipBehavior,
+                    child: decoratedChildrenGroup),
           ),
         ],
       ),
