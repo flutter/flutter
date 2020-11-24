@@ -1036,7 +1036,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void updateKeepAlive() {
-    // call [AutomaticKeepAliveClientMixin._releaseKeepAlive] when [_deactivated] is true.
+    // call [AutomaticKeepAliveClientMixin._releaseKeepAlive] when
+    // [_deactivated] is true.
     if (!_deactivated)
       super.updateKeepAlive();
   }
