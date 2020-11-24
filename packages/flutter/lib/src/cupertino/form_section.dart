@@ -164,7 +164,7 @@ class CupertinoFormSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
     final double dividerHeight = 1.0 / MediaQuery.of(context).devicePixelRatio;
-    // final double dividerHeight = 0.5;
+
     // Long divider is used for wrapping the top and bottom of rows.
     // Only used in _CupertinoFormSectionType.base mode
     final Widget longDivider = Container(
