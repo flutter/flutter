@@ -59,14 +59,15 @@ class FlutterVersion {
   FlutterVersion({
     SystemClock clock = const SystemClock(),
     String workingDirectory,
+    String frameworkRevision,
   }) : _clock = clock,
-      _workingDirectory = workingDirectory {
-    _frameworkRevision = _runGit(
+       _workingDirectory = workingDirectory {
+    _frameworkRevision = frameworkRevision ?? _runGit(
       gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
       globals.processUtils,
       _workingDirectory,
     );
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, fetchTags: false);
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, fetchTags: false, gitRef: _frameworkRevision);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
@@ -733,7 +734,7 @@ class GitTagVersion {
   /// The git tag that is this version's closest ancestor.
   final String gitTag;
 
-  static GitTagVersion determine(ProcessUtils processUtils, {String workingDirectory, bool fetchTags = false}) {
+  static GitTagVersion determine(ProcessUtils processUtils, {String workingDirectory, bool fetchTags = false, String gitRef = 'HEAD'}) {
     if (fetchTags) {
       final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
       if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
@@ -743,7 +744,7 @@ class GitTagVersion {
       }
     }
     final List<String> tags = _runGit(
-      'git tag --points-at HEAD', processUtils, workingDirectory).trim().split('\n');
+      'git tag --points-at $gitRef', processUtils, workingDirectory).trim().split('\n');
 
     // Check first for a stable tag
     final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
@@ -764,7 +765,7 @@ class GitTagVersion {
     // recent tag and number of commits past.
     return parse(
       _runGit(
-        'git describe --match *.*.* --long --tags',
+        'git describe --match *.*.* --long --tags $gitRef',
         processUtils,
         workingDirectory,
       )

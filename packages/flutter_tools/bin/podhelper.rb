@@ -31,7 +31,19 @@ def flutter_additional_ios_build_settings(target)
 
   # [target.deployment_target] is a [String] formatted as "8.0".
   inherit_deployment_target = target.deployment_target[/\d+/].to_i < 9
+
+  # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
+  # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
+  artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
+  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios'), __FILE__)
+  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios-release'), __FILE__)
+
   target.build_configurations.each do |build_configuration|
+    # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
+    configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
+    build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"
+    build_configuration.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Flutter'
+
     build_configuration.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
     # Suppress warning when pod supports a version lower than the minimum supported by Xcode (Xcode 12 - iOS 9).
@@ -68,28 +80,33 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
   ios_application_path ||= File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
   raise 'Could not find iOS application path' unless ios_application_path
 
-  copied_flutter_dir = File.join(ios_application_path, 'Flutter')
-  copied_framework_path = File.join(copied_flutter_dir, 'Flutter.framework')
-  copied_podspec_path = File.join(copied_flutter_dir, 'Flutter.podspec')
+  copied_podspec_path = File.expand_path('Flutter.podspec', File.join(ios_application_path, 'Flutter'))
 
-  unless File.exist?(copied_framework_path) && File.exist?(copied_podspec_path)
-    # Copy Flutter.framework and Flutter.podspec to Flutter/ to have something to link against if the xcode backend script has not run yet.
-    # That script will copy the correct debug/profile/release version of the framework based on the currently selected Xcode configuration,
-    # which can handle a local engine.
-    # CocoaPods will not embed the framework on pod install (before any build phases can generate) if the dylib does not exist.
+  # Generate a fake podspec to represent the Flutter framework.
+  # This is only necessary because plugin podspecs contain `s.dependency 'Flutter'`, and if this Podfile
+  # does not add a `pod 'Flutter'` CocoaPods will try to download it from the CoocaPods trunk.
+  File.open(copied_podspec_path, 'w') { |podspec|
+    podspec.write <<~EOF
+      #
+      # NOTE: This podspec is NOT to be published. It is only used as a local source!
+      #       This is a generated file; do not edit or check into version control.
+      #
 
-    # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
-    # Copy frameworks from $FLUTTER_ROOT/bin/cache/artifacts/engine/ios (Debug).
-    debug_framework_dir = File.expand_path(File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine', 'ios'), __FILE__)
-
-    unless File.exist?(copied_framework_path)
-      # Avoid the complication of dependencies like FileUtils.
-      system('cp', '-r', File.expand_path('Flutter.framework', debug_framework_dir), copied_flutter_dir)
-    end
-    unless File.exist?(copied_podspec_path)
-      system('cp', File.expand_path('Flutter.podspec', debug_framework_dir), copied_flutter_dir)
-    end
-  end
+      Pod::Spec.new do |s|
+        s.name             = 'Flutter'
+        s.version          = '1.0.0'
+        s.summary          = 'High-performance, high-fidelity mobile apps.'
+        s.homepage         = 'https://flutter.io'
+        s.license          = { :type => 'MIT' }
+        s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+        s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
+        s.ios.deployment_target = '8.0'
+        # Framework linking is handled by Flutter tooling, not CocoaPods.
+        # Add a placeholder to satisfy `s.dependency 'Flutter'` plugin podspecs.
+        s.vendored_frameworks = 'path/to/nothing'
+      end
+    EOF
+  }
 
   # Keep pod path relative so it can be checked into Podfile.lock.
   pod 'Flutter', :path => 'Flutter'

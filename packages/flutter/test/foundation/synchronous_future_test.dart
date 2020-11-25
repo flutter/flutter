@@ -27,8 +27,9 @@ void main() {
     expect(await stream.single, equals(42));
 
     bool ranAction = false;
-    final Future<int> completeResult = future.whenComplete(() {
+    final Future<int> completeResult = future.whenComplete(() { // ignore: void_checks, https://github.com/dart-lang/linter/issues/1675
       ranAction = true;
+      // verify that whenComplete does NOT propagate its return value:
       return Future<int>.value(31);
     });
 
@@ -39,7 +40,7 @@ void main() {
 
     Object? exception;
     try {
-      await future.whenComplete(() {
+      await future.whenComplete(() { // ignore: void_checks, https://github.com/dart-lang/linter/issues/1675
         throw ArgumentError();
       });
       // Unreached.

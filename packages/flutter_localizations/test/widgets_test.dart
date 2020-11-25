@@ -52,7 +52,7 @@ class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizati
   }
 
   @override
-  String toString() => '$runtimeType($prefix)';
+  String toString() => '${objectRuntimeType(this, 'SyncTestLocalizationsDelegate')}($prefix)';
 }
 
 class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
@@ -74,7 +74,7 @@ class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizat
   }
 
   @override
-  String toString() => '$runtimeType($prefix)';
+  String toString() => '${objectRuntimeType(this, 'AsyncTestLocalizationsDelegate')}($prefix)';
 }
 
 class MoreLocalizations {
@@ -689,8 +689,8 @@ void main() {
           const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale1 = ui.window.locales!.first;
-          final Locale locale2 = ui.window.locales![1];
+          final Locale locale1 = ui.window.locales.first;
+          final Locale locale2 = ui.window.locales[1];
           return Text('$locale1 $locale2');
         },
       )

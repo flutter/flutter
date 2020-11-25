@@ -1280,6 +1280,14 @@ class _RenderDecoration extends RenderBox {
   Matrix4? _labelTransform;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
+    ));
+    return const Size(0, 0);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _labelTransform = null;

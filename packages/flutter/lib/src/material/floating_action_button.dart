@@ -586,6 +586,19 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   double computeMinIntrinsicHeight(double width) => 0.0;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      final Size childSize = child!.getDryLayout(const BoxConstraints());
+      return Size(
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, childSize.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, childSize.height)),
+      );
+    } else {
+      return constraints.biggest;
+    }
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child != null) {
