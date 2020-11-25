@@ -826,8 +826,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
                     child: _ContextMenuSheet(
                       key: _sheetGlobalKey,
                       actions: _actions,
-                      contextMenuLocation: _contextMenuLocation,
-                      orientation: orientation,
                     ),
                   ),
                 ),
@@ -1192,8 +1190,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           child: _ContextMenuSheet(
             key: widget.sheetGlobalKey,
             actions: widget.actions!,
-            contextMenuLocation: widget.contextMenuLocation,
-            orientation: widget.orientation,
           ),
         ),
       ),
@@ -1308,8 +1304,6 @@ class _ContextMenuSheet extends StatelessWidget {
     Key? key,
     required this.actions,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuLocation != null),
-       assert(orientation != null),
        super(key: key);
 
   final List<Widget> actions;
