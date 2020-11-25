@@ -420,6 +420,7 @@ class DataTable extends StatelessWidget {
     this.headingRowHeight,
     this.headingTextStyle,
     this.horizontalMargin,
+    this.checkBoxHorizontalMargin,
     this.columnSpacing,
     this.showCheckboxColumn = true,
     this.showBottomBorder = false,
@@ -594,6 +595,8 @@ class DataTable extends StatelessWidget {
   /// defaults to 24.0 to adhere to the Material Design specifications.
   final double? horizontalMargin;
 
+  final double? checkBoxHorizontalMargin;
+
   /// {@template flutter.material.dataTable.columnSpacing}
   /// The horizontal margin between the contents of each data column.
   /// {@endtemplate}
@@ -679,6 +682,8 @@ class DataTable extends StatelessWidget {
   /// in the first and last cells of each row.
   static const double _horizontalMargin = 24.0;
 
+  static const double _checkBoxHorizontalMargin = 0.0;
+
   /// The default horizontal margin between the contents of each data column.
   static const double _columnSpacing = 56.0;
 
@@ -702,6 +707,9 @@ class DataTable extends StatelessWidget {
     final double effectiveHorizontalMargin = horizontalMargin
       ?? themeData.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
+    final double effectiveCheckBoxHorizontalMargin = checkBoxHorizontalMargin
+      ?? themeData.dataTableTheme.checkBoxHorizontalMargin
+      ?? _checkBoxHorizontalMargin;
     Widget contents = Semantics(
       container: true,
       child: Padding(
