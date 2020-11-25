@@ -61,8 +61,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
     required Color color,
-    Color trackColor = const Color(0x00000000),
-    Color trackBorderColor = const Color(0x00000000),
     required TextDirection textDirection,
     required this.thickness,
     required this.fadeoutOpacityAnimation,
@@ -87,8 +85,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _color = color,
        _textDirection = textDirection,
        _padding = padding,
-       _trackColor = trackColor,
-       _trackBorderColor = trackBorderColor,
        minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
@@ -102,30 +98,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
 
     _color = value;
-    notifyListeners();
-  }
-
-  /// [Color] of the track. Mustn't be null.
-  Color get trackColor => _trackColor;
-  Color _trackColor;
-  set trackColor(Color value) {
-    assert(value != null);
-    if (trackColor == value)
-      return;
-
-    _trackColor = value;
-    notifyListeners();
-  }
-
-  /// [Color] of the track border. Mustn't be null.
-  Color get trackBorderColor => _trackBorderColor;
-  Color _trackBorderColor;
-  set trackBorderColor(Color value) {
-    assert(value != null);
-    if (trackBorderColor == value)
-      return;
-
-    _trackBorderColor = value;
     notifyListeners();
   }
 
@@ -215,8 +187,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ScrollMetrics? _lastMetrics;
   AxisDirection? _lastAxisDirection;
   Rect? _thumbRect;
-  Rect? _trackRect;
-  late double _thumbOffset;
 
   /// Update with new [ScrollMetrics]. The scrollbar will show and redraw itself
   /// based on these new metrics.
@@ -238,82 +208,47 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  /// Update and redraw with new scrollbar color.
-  void updateColors(Color newThumbColor, Color newTrackColor, Color newTrackBorderColor) {
-    color = newThumbColor;
-    trackColor = newTrackColor;
-    trackBorderColor = newTrackBorderColor;
-    notifyListeners();
-  }
-
-  Paint get _thumbPaint {
+  Paint get _paint {
     return Paint()
       ..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
-  Paint _trackPaint({ bool isBorder = false }) {
-    if (isBorder)
-      return Paint()
-        ..color = _trackBorderColor.withOpacity(trackBorderColor.opacity * fadeoutOpacityAnimation.value)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0;
-    return Paint()
-      ..color = _trackColor.withOpacity(trackColor.opacity * fadeoutOpacityAnimation.value);
-  }
-
-  void _paintScrollbar(Canvas canvas, Size size, double thumbExtent, AxisDirection direction) {
+  void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset, double thumbExtent, AxisDirection direction) {
     final double x, y;
-    final Size thumbSize, trackSize;
-    final Offset trackOffset;
+    final Size thumbSize;
 
     switch (direction) {
       case AxisDirection.down:
         thumbSize = Size(thickness, thumbExtent);
-        trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = textDirection == TextDirection.rtl
           ? crossAxisMargin + padding.left
           : size.width - thickness - crossAxisMargin - padding.right;
-        y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, 0.0);
+        y = thumbOffset;
         break;
       case AxisDirection.up:
         thumbSize = Size(thickness, thumbExtent);
-        trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
         x = textDirection == TextDirection.rtl
           ? crossAxisMargin + padding.left
           : size.width - thickness - crossAxisMargin - padding.right;
-        y = _thumbOffset;
-        trackOffset = Offset(x - crossAxisMargin, 0.0);
+        y = thumbOffset;
         break;
       case AxisDirection.left:
         thumbSize = Size(thumbExtent, thickness);
-        x = _thumbOffset;
+        x = thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
-        trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
-        trackOffset = Offset(0.0, y - crossAxisMargin);
         break;
       case AxisDirection.right:
         thumbSize = Size(thumbExtent, thickness);
-        trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
-        x = _thumbOffset;
+        x = thumbOffset;
         y = size.height - thickness - crossAxisMargin - padding.bottom;
-        trackOffset = Offset(0.0, y - crossAxisMargin);
         break;
     }
 
-    _trackRect = trackOffset & trackSize;
-    canvas.drawRect(_trackRect!, _trackPaint());
-    canvas.drawLine(
-      trackOffset,
-      Offset(trackOffset.dx, trackOffset.dy + _trackExtent),
-      _trackPaint(isBorder: true),
-    );
-
     _thumbRect = Offset(x, y) & thumbSize;
     if (radius == null)
-      canvas.drawRect(_thumbRect!, _thumbPaint);
+      canvas.drawRect(_thumbRect!, _paint);
     else
-      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _thumbPaint);
+      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paint);
   }
 
   double _thumbExtent() {
@@ -413,34 +348,14 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double beforePadding = _isVertical ? padding.top : padding.left;
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
-    _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
+    final double thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
 
-    return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
+    return _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, _lastAxisDirection!);
   }
 
   /// Same as hitTest, but includes some padding to make sure that the region
   /// isn't too small to be interacted with by the user.
   bool hitTestInteractive(Offset position) {
-    if (_thumbRect == null) {
-      return false;
-    }
-    // The thumb is not able to be hit when transparent.
-    if (fadeoutOpacityAnimation.value == 0.0) {
-      return false;
-    }
-    final Rect interactiveScrollbarRect = _trackRect == null
-      ? _thumbRect!.expandToInclude(
-          Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
-        )
-      : _trackRect!.expandToInclude(
-          Rect.fromCircle(center: _thumbRect!.center, radius: _kMinInteractiveSize / 2),
-        );
-    return interactiveScrollbarRect.contains(position);
-  }
-
-  /// Same as hitTestInteractive, but excludes the track portion of the scrollbar.
-  /// Used to evaluate interactions with only the scrollbar thumb.
-  bool hitTestOnlyThumbInteractive(Offset position) {
     if (_thumbRect == null) {
       return false;
     }
@@ -504,12 +419,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///
 /// Scrollbars are interactive and will use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
-/// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
-/// exclusive of the thumb will trigger a [ScrollIncrementType.page] based on
-/// the relative position to the thumb.
+/// of the [ScrollView] to change the [ScrollPosition].
 /// {@endtemplate}
 ///
-/// //TODO(Piinks): Add code sample
+// TODO(Piinks): Add code sample
 ///
 /// See also:
 ///
@@ -898,58 +811,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _currentController = null;
   }
 
-  /// Handler for tapping on the scrollbar track.
-  ///
-  /// Will complete a [ScrollIncrementType.page] on the [child] [ScrollView].
-  @protected
-  void handleTrackTapDown(TapDownDetails details) {
-    // The Scrollbar should page towards the position of the tap on the track.
-    _currentController = widget.controller ?? PrimaryScrollController.of(context);
-
-    double scrollIncrement;
-    // Is an increment calculator available?
-    final ScrollIncrementCalculator? calculator = Scrollable.of(
-      _currentController!.position.context.notificationContext!
-    )?.widget.incrementCalculator;
-    if (calculator != null) {
-      scrollIncrement = calculator(
-        ScrollIncrementDetails(
-          type: ScrollIncrementType.page,
-          metrics: _currentController!.position,
-        )
-      );
-    } else {
-      // Default page increment
-      scrollIncrement = 0.8 * widget.controller!.position.viewportDimension;
-    }
-
-    // Adjust scrollIncrement for direction
-    switch (_currentController!.position.axisDirection) {
-      case AxisDirection.up:
-        if (details.localPosition.dy > painter!._thumbOffset)
-          scrollIncrement = -scrollIncrement;
-        break;
-      case AxisDirection.down:
-        if (details.localPosition.dy < painter!._thumbOffset)
-          scrollIncrement = -scrollIncrement;
-        break;
-      case AxisDirection.right:
-        if (details.localPosition.dx < painter!._thumbOffset)
-          scrollIncrement = -scrollIncrement;
-        break;
-      case AxisDirection.left:
-        if (details.localPosition.dx > painter!._thumbOffset)
-          scrollIncrement = -scrollIncrement;
-        break;
-    }
-
-    widget.controller!.position.moveTo(
-      widget.controller!.position.pixels + scrollIncrement,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
-    );
-  }
-
   /// Updates the scrollbar thumb and it's animations based on the received
   /// [ScrollNotification].
   @protected
@@ -998,16 +859,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         },
       );
 
-    gestures[_TrackTapGestureRecognizer] =
-      GestureRecognizerFactoryWithHandlers<_TrackTapGestureRecognizer>(
-          () => _TrackTapGestureRecognizer(
-          debugOwner: this,
-          customPaintKey: customPaintKey,
-        ),
-          (_TrackTapGestureRecognizer instance) {
-          instance.onTapDown = handleTrackTapDown;
-        },
-      );
+    // TODO(Piinks): Add track tap gesture in follow-up
 
     return gestures;
   }
@@ -1073,38 +925,6 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
     final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
     final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
     final Offset localOffset = renderBox.globalToLocal(offset);
-    return painter.hitTestOnlyThumbInteractive(localOffset);
-  }
-}
-
-// A tap gesture detector that only responds to events on the scrollbar's
-// track and ignores everything else, including the thumb.
-class _TrackTapGestureRecognizer extends TapGestureRecognizer {
-  _TrackTapGestureRecognizer({
-    required Object debugOwner,
-    required GlobalKey customPaintKey,
-  }) :  _customPaintKey = customPaintKey,
-      super(debugOwner: debugOwner);
-
-  final GlobalKey _customPaintKey;
-
-  @override
-  bool isPointerAllowed(PointerDownEvent event) {
-    if (!_hitTestInteractive(_customPaintKey, event.position)) {
-      return false;
-    }
-    return super.isPointerAllowed(event);
-  }
-
-  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
-    if (customPaintKey.currentContext == null) {
-      return false;
-    }
-    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
-    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
-    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
-    final Offset localOffset = renderBox.globalToLocal(offset);
-    // We only receive track taps that are not on the thumb.
-    return painter.hitTestInteractive(localOffset) && !painter.hitTestOnlyThumbInteractive(localOffset);
+    return painter.hitTestInteractive(localOffset);
   }
 }

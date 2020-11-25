@@ -39,7 +39,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// animate from [thickness] and [radius] to [thicknessWhileDragging] and
 /// [radiusWhileDragging].
 ///
-/// //TODO(Piinks): Add code sample
+// TODO(Piinks): Add code sample
 ///
 /// See also:
 ///
@@ -107,7 +107,6 @@ class CupertinoScrollbar extends RawScrollbar {
   /// from [radius] to this value, then animate back when the user stops
   /// dragging the scrollbar.
   final Radius radiusWhileDragging;
-
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
