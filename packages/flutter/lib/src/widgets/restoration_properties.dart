@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -125,7 +126,49 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
 
   @mustCallSuper
   @override
-  void initWithValue(T value) {
+  void initWithValue(T? value) {
+    assert(value != null);
+    _value = value;
+  }
+
+  /// Called whenever a new value is assigned to [value].
+  ///
+  /// The new value can be accessed via the regular [value] getter and the
+  /// previous value is provided as `oldValue`.
+  ///
+  /// Subclasses should call [notifyListeners] from this method, if the new
+  /// value changes what [toPrimitives] returns.
+  @protected
+  void didUpdateValue(T? oldValue);
+}
+
+abstract class RestorableValueN<T> extends RestorableProperty<T> {
+  /// The current value stored in this property.
+  ///
+  /// A representation of the current value is stored in the restoration data.
+  /// During state restoration, the property will restore the value to what it
+  /// was when the restoration data it is getting restored from was collected.
+  ///
+  /// The [value] can only be accessed after the property has been registered
+  /// with a [RestorationMixin] by calling
+  /// [RestorationMixin.registerForRestoration].
+  T? get value {
+    assert(isRegistered);
+    return _value;
+  }
+  T? _value;
+  set value(T? newValue) {
+    assert(isRegistered);
+    if (newValue != _value) {
+      final T? oldValue = _value;
+      _value = newValue;
+      didUpdateValue(oldValue);
+    }
+  }
+
+  @mustCallSuper
+  @override
+  void initWithValue(T? value) {
     _value = value;
   }
 
@@ -186,18 +229,18 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
 }
 
 // _RestorablePrimitiveValueN and its subclasses allows null values.
-class _RestorablePrimitiveValueN<T extends Object> extends RestorableValue<T> {
+class _RestorablePrimitiveValueN<T extends Object> extends RestorableValueN<T> {
   _RestorablePrimitiveValueN(this._defaultValue)
     : assert(debugIsSerializableForRestoration(_defaultValue)),
       super();
 
-  final T _defaultValue;
+  final T? _defaultValue;
 
   @override
-  T createDefaultValue() => _defaultValue;
+  T? createDefaultValue() => _defaultValue;
 
   @override
-  set value(T value) {
+  set value(T? value) {
     super.value = value;
   }
 
@@ -208,10 +251,10 @@ class _RestorablePrimitiveValueN<T extends Object> extends RestorableValue<T> {
   }
 
   @override
-  T fromPrimitives(Object? serialized) => serialized! as T;
+  T? fromPrimitives(Object? serialized) => serialized as T?;
 
   @override
-  Object toPrimitives() => value;
+  Object? toPrimitives() => value;
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [num].
@@ -286,7 +329,7 @@ class RestorableBoolN extends _RestorablePrimitiveValueN<bool> {
   /// Creates a [RestorableBoolN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableBoolN(bool defaultValue) : super(defaultValue);
+  RestorableBoolN(bool? defaultValue) : super(defaultValue);
 }
 
 /// A base class for creating a [RestorableProperty] that stores and restores a
@@ -318,7 +361,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   T? _value;
 
   @override
-  void initWithValue(T value) {
+  void initWithValue(T? value) {
     assert(value != null);
     _value?.removeListener(notifyListeners);
     _value = value;
@@ -349,7 +392,8 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// [ChangeNotifier] instance.
 abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
   @override
-  void initWithValue(T value) {
+  void initWithValue(T? value) {
+    assert(value != null);
     _diposeOldValue();
     super.initWithValue(value);
   }
