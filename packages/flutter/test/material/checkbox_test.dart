@@ -429,10 +429,8 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: Colors.orange[500])
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(
+            color: const Color(0xff1e88e5))
         ..path(color: Colors.white),
     );
 
@@ -446,7 +444,7 @@ void main() {
       paints
         ..circle(color: Colors.orange[500])
         ..drrect(
-            color: const Color(0x8a000000),
+            color: const Color(0xff000000),
             outer: RRect.fromLTRBR(
                 391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)),
         inner: RRect.fromLTRBR(393.0,
@@ -462,7 +460,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..drrect(
-            color: const Color(0x61000000),
+            color: const Color(0xff000000),
             outer: RRect.fromLTRBR(
                 391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)),
             inner: RRect.fromLTRBR(393.0,
@@ -525,11 +523,9 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
-        ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
+        ..path(
+            color: const Color(0xff1e88e5))
+        ..path(color: const Color(0xffffffff),style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Start hovering
@@ -542,10 +538,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..rrect(
-            color: const Color(0xff1e88e5),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(
+            color: const Color(0xff1e88e5))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -555,10 +549,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..rrect(
-            color: const Color(0x61000000),
-            rrect: RRect.fromLTRBR(
-                391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)))
+        ..path(
+            color: const Color(0x61000000))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
