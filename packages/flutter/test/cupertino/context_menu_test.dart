@@ -297,7 +297,7 @@ void main() {
 
       // The position of the action is on the right of the screen.
       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
-      final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
+//      final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
 //      expect(right.dx, greaterThan(center.dx));
 
       // Set the screen back to its normal size.
@@ -321,7 +321,7 @@ void main() {
       // Landscape doesn't support a centered action list, so the action is on
       // the left side of the screen.
       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
-      final Offset center = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
+//      final Offset center = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
 
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));

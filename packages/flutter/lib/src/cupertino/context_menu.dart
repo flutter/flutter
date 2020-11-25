@@ -1015,23 +1015,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     widget.onDismiss!(context, _lastScale, _sheetOpacityAnimation.value);
   }
 
-  Alignment _getChildAlignment(Orientation orientation, _ContextMenuLocation contextMenuLocation) {
-    switch (contextMenuLocation) {
-      case _ContextMenuLocation.center:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
-      case _ContextMenuLocation.right:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topLeft;
-      case _ContextMenuLocation.left:
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
-    }
-  }
-
   void _setDragOffset(Offset dragOffset) {
     // Allow horizontal and negative vertical movement, but damp it.
     final double endX = _kPadding * dragOffset.dx / _kDamping;
@@ -1171,7 +1154,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   double _getMenuSheetWidth(Orientation orientation, Size screenSize,) {
     if (orientation == Orientation.portrait) {
-      double width = math.max(_childLeft, _childRight) + _childWidth;
+      final double width = math.max(_childLeft, _childRight) + _childWidth;
       return math.min(width, screenSize.width * 2.0 / 3.0);
     }
     final double width = math.min(math.max(_childLeft, _childRight), screenSize.width / 2.0) - 2.0 * _kPadding;
@@ -1324,18 +1307,12 @@ class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
     Key? key,
     required this.actions,
-    required _ContextMenuLocation contextMenuLocation,
-    required Orientation orientation,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(contextMenuLocation != null),
        assert(orientation != null),
-       _contextMenuLocation = contextMenuLocation,
-       _orientation = orientation,
        super(key: key);
 
   final List<Widget> actions;
-  final _ContextMenuLocation _contextMenuLocation;
-  final Orientation _orientation;
 
   @override
   Widget build(BuildContext context) {
