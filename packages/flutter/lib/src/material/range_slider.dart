@@ -1265,8 +1265,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
-    size = Size(
+  Size computeDryLayout(BoxConstraints constraints) {
+    return Size(
       constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _maxSliderPartWidth,
       constraints.hasBoundedHeight ? constraints.maxHeight : math.max(_minPreferredTrackHeight!, _maxSliderPartHeight),
     );
@@ -1718,5 +1718,10 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
     if (_state.paintTopValueIndicator != null) {
       _state.paintTopValueIndicator!(context, offset);
     }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.smallest;
   }
 }

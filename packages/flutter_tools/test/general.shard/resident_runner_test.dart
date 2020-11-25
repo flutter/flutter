@@ -57,6 +57,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
@@ -85,6 +86,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.VM fakeVM = vm_service.VM(
@@ -149,6 +151,7 @@ void main() {
         ],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
       );
     });
     mockFlutterDevice = MockFlutterDevice();
@@ -242,6 +245,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.generator).thenReturn(residentCompiler);
     when(residentCompiler.recompile(
@@ -283,6 +287,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.generator).thenReturn(residentCompiler);
     when(residentCompiler.recompile(
@@ -317,6 +322,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.runCold(
       coldRunner: anyNamed('coldRunner'),
@@ -341,6 +347,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.runCold(
       coldRunner: anyNamed('coldRunner'),
@@ -370,6 +377,7 @@ void main() {
       applicationBinary: globals.fs.file('app.apk'),
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.generator).thenReturn(residentCompiler);
     when(residentCompiler.recompile(
@@ -459,6 +467,7 @@ void main() {
         fastStart: true,
         startPaused: true,
       ),
+      target: 'main.dart',
     );
     final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> onAppStart = Completer<void>.sync();
@@ -597,6 +606,7 @@ void main() {
         mockFlutterDevice,
       ],
       stayResident: false,
+      target: 'main.dart',
       debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
         BuildMode.debug, '', treeShakeIcons: false, extraFrontEndOptions: <String>[
         '--enable-experiment=non-nullable',
@@ -675,6 +685,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     );
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -1015,6 +1026,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     );
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -1414,6 +1426,7 @@ void main() {
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
+      target: 'main.dart',
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
@@ -1508,6 +1521,7 @@ void main() {
           commandHelp.P,
           commandHelp.a,
           'An Observatory debugger and profiler on null is available at: null',
+          '\n💪 Running with sound null safety 💪',
           ''
         ].join('\n')
     ));
@@ -1523,6 +1537,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
     residentRunner.printHelp(details: true);
 
@@ -1660,6 +1675,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
     await residentRunner.screenshot(mockFlutterDevice);
 
@@ -1766,6 +1782,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
@@ -1914,6 +1931,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugDumpApp(), false);
@@ -1935,6 +1953,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugDumpRenderTree(), false);
@@ -1956,6 +1975,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugDumpLayerTree(), false);
@@ -1977,6 +1997,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugDumpSemanticsTreeInTraversalOrder(), false);
@@ -1998,6 +2019,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(), false);
@@ -2019,6 +2041,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugToggleDebugPaintSizeEnabled(), false);
@@ -2040,6 +2063,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugToggleBrightness(), false);
@@ -2084,6 +2108,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugToggleInvertOversizedImages(), false);
@@ -2098,6 +2123,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugToggleInvertOversizedImages(), false);
@@ -2142,6 +2168,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugToggleDebugCheckElevationsEnabled(), false);
@@ -2163,6 +2190,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugTogglePerformanceOverlayOverride(), false);
@@ -2185,6 +2213,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugToggleWidgetInspector(), false);
@@ -2206,6 +2235,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
     );
 
     expect(await residentRunner.debugToggleProfileWidgetBuilds(), false);
@@ -2226,6 +2256,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.runHot(
       hotRunner: anyNamed('hotRunner'),
@@ -2252,6 +2283,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
     when(mockFlutterDevice.runHot(
@@ -2286,6 +2318,7 @@ void main() {
           dartDefines: <String>['a', 'b'],
         )
       ),
+      target: 'main.dart',
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
     when(mockFlutterDevice.runHot(
@@ -2321,6 +2354,7 @@ void main() {
           extraFrontEndOptions: <String>['--enable-experiment=non-nullable>']
         )
       ),
+      target: 'main.dart',
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
     when(mockFlutterDevice.runHot(
@@ -2350,6 +2384,7 @@ void main() {
       stayResident: false,
       dillOutputPath: 'test',
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
     when(mockFlutterDevice.runHot(
@@ -2382,6 +2417,7 @@ void main() {
         treeShakeIcons: false,
         trackWidgetCreation: true,
       )),
+      target: 'main.dart',
     );
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
     when(mockFlutterDevice.runHot(
@@ -2410,6 +2446,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.runHot(
       hotRunner: anyNamed('hotRunner'),
@@ -2440,6 +2477,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.runHot(
       hotRunner: anyNamed('hotRunner'),
@@ -2468,6 +2506,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
+      target: 'main.dart',
     );
     when(mockFlutterDevice.runCold(
       coldRunner: anyNamed('coldRunner'),

@@ -58,6 +58,8 @@ void main() {
       final FakeArgResults fakeArgResults = FakeArgResults(
         level: 'm',
         commit: latestCommit,
+        // Ensure this test passes after a dev release with hotfixes
+        force: true,
         remote: 'origin',
       );
 
@@ -95,6 +97,8 @@ void main() {
       final FakeArgResults fakeArgResults = FakeArgResults(
         level: 'y',
         commit: latestCommit,
+        // Ensure this test passes after a dev release with hotfixes
+        force: true,
         remote: 'origin',
       );
 
@@ -128,7 +132,5 @@ void main() {
     });
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
-  // TODO(fujino): re-enable once
-  // https://github.com/flutter/flutter/issues/70652 is resolved
-  }, skip: true);
+  });
 }

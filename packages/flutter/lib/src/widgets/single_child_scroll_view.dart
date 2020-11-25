@@ -541,6 +541,15 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   // which makes no sense.
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final Size childSize = child!.getDryLayout(_getInnerConstraints(constraints));
+    return constraints.constrain(childSize);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child == null) {

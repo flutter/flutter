@@ -18,22 +18,9 @@ class BuildBundleCommand extends BuildSubCommand {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
+    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesExtraDartFlagOptions();
     argParser
-      ..addFlag(
-        'precompiled',
-        negatable: false,
-        help:
-          'If not provided, then '
-          'a debug build is always provided, regardless of build mode. If provided '
-          'then release is the default mode.',
-      )
-      // This option is still referenced by the iOS build scripts. We should
-      // remove it once we've updated those build scripts.
-      ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
-      ..addOption('manifest', defaultsTo: defaultManifestPath)
-      ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
@@ -48,11 +35,7 @@ class BuildBundleCommand extends BuildSubCommand {
           'windows-x64',
         ],
       )
-      ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
-      ..addFlag('report-licensed-packages',
-        help: 'Whether to report the names of all the packages that are included '
-              "in the application's LICENSE file.",
-        defaultsTo: false);
+      ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory());
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
 
@@ -119,11 +102,9 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
-      manifestPath: stringArg('manifest'),
+      manifestPath: defaultManifestPath,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
-      precompiledSnapshot: boolArg('precompiled'),
-      reportLicensedPackages: boolArg('report-licensed-packages'),
       trackWidgetCreation: boolArg('track-widget-creation'),
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
