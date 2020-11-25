@@ -29,9 +29,9 @@ const double _kScrollbarThickness = 6.0;
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
-/// A [CustomPainter] for painting scrollbar thumbs.
+/// A [CustomPainter] for painting scrollbars.
 ///
-/// The size of the scrollbar thumb along its scroll direction is typically
+/// The size of the scrollbar along its scroll direction is typically
 /// proportional to the percentage of content completely visible on screen,
 /// as long as its size isn't less than [minLength] and it isn't overscrolling.
 ///
@@ -41,10 +41,10 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// rebuilding when:
 ///
 ///  * the scroll position changes; and
-///  * when the scrollbar thumb fades away.
+///  * when the scrollbar fades away.
 ///
 /// Calling [update] with the new [ScrollMetrics] will repaint the new scrollbar
-/// thumb position.
+/// position.
 ///
 /// Updating the value on the provided [fadeoutOpacityAnimation] will repaint
 /// with the new opacity.
@@ -58,7 +58,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///  * [CupertinoScrollbar] for a widget showing a scrollbar around a
 ///    [Scrollable] in the iOS style.
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
-  /// Creates a scrollbar thumb with customizations given by construction arguments.
+  /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
     required Color color,
     Color trackColor = const Color(0x00000000),
@@ -454,7 +454,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return interactiveThumbRect.contains(position);
   }
 
-  // Scrollbar thumbs are interactive.
+  // Scrollbars are interactive.
   @override
   bool? hitTest(Offset? position) {
     if (_thumbRect == null) {
@@ -903,7 +903,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Will complete a [ScrollIncrementType.page] on the [child] [ScrollView].
   @protected
   void handleTrackTapDown(TapDownDetails details) {
-    print(details.localPosition);
     // The Scrollbar should page towards the position of the tap on the track.
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
 

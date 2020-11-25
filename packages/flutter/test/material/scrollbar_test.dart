@@ -525,7 +525,61 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+  });
 
+  testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Scrollbar(
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        ),
+      ),
+    );
 
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromLTRBR(790.0, 0.0, 798.0, 360.0, const Radius.circular(8.0)),
+      )
+    );
+
+    // Tap on the track area below the thumb.
+    await tester.tapAt(const Offset(796.0, 550.0));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 400.0);
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 240.6, 797.0, 597.0),
+          const Radius.circular(1.5),
+        ),
+      )
+    );
+
+    // Tap on the track area above the thumb.
+    await tester.tapAt(const Offset(796.0, 50.0));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromLTRBR(790.0, 0.0, 798.0, 360.0, const Radius.circular(8.0)),
+      )
+    );
   });
 }
