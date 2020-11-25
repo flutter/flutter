@@ -10,6 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
@@ -21,21 +22,15 @@ class IOSContextMetal final : public IOSContext {
 
   ~IOSContextMetal();
 
-  fml::scoped_nsprotocol<id<MTLDevice>> GetDevice() const;
-
-  fml::scoped_nsprotocol<id<MTLCommandQueue>> GetMainCommandQueue() const;
-
-  fml::scoped_nsprotocol<id<MTLCommandQueue>> GetResourceCommandQueue() const;
+  fml::scoped_nsobject<FlutterDarwinContextMetal> GetDarwinContext() const;
 
   sk_sp<GrDirectContext> GetMainContext() const;
 
   sk_sp<GrDirectContext> GetResourceContext() const;
 
  private:
-  fml::scoped_nsprotocol<id<MTLDevice>> device_;
-  fml::scoped_nsprotocol<id<MTLCommandQueue>> main_queue_;
-  sk_sp<GrDirectContext> main_context_;
-  sk_sp<GrDirectContext> resource_context_;
+  fml::scoped_nsobject<FlutterDarwinContextMetal> darwin_context_metal_;
+  fml::scoped_nsprotocol<id<MTLCommandQueue>> main_command_queue_;
   fml::CFRef<CVMetalTextureCacheRef> texture_cache_;
 
   // |IOSContext|
