@@ -430,7 +430,6 @@ void main() {
 AppBarTheme _appBarTheme() {
   const Brightness brightness = Brightness.light;
   const Color backgroundColor = Colors.lightBlue;
-  const Color foregroundColor = Colors.yellow;
   const double elevation = 6.0;
   const Color shadowColor = Colors.red;
   const IconThemeData iconThemeData = IconThemeData(color: Colors.black);
