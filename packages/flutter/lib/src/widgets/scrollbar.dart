@@ -403,13 +403,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   SemanticsBuilderCallback? get semanticsBuilder => null;
 }
 
-/// An base class for building animated scrollbar thumbs.
+/// An base class for building animated scrollbars.
 ///
-/// To add a scrollbar thumb to a [ScrollView], simply wrap the scroll view
+/// To add a scrollbar to a [ScrollView], simply wrap the scroll view
 /// widget in a [RawScrollbar] widget.
 ///
 /// {@template flutter.widgets.Scrollbar}
-/// A scrollbar thumb indicates which portion of a [Scrollable] widget is actually
+/// A scrollbar indicates which portion of a [Scrollable] widget is actually
 /// visible.
 ///
 /// By default, the thumb will fade in and out as the child scroll view widget
@@ -425,8 +425,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 // TODO(Piinks): Add code sample
 ///
 /// See also:
-///
-///  * [RawScrollbar], the abstract base class this inherits from.
+///  * [Scrollbar], a scrollbar styled for Material Design.
+///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which display a linear, scrollable list of children.
 ///  * [GridView], which display a 2 dimensional, scrollable array of children.
 class RawScrollbar extends StatefulWidget {

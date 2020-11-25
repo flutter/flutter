@@ -8,6 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
+const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
+const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
+
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
 
@@ -500,7 +503,6 @@ void main() {
     }, throwsAssertionError);
   });
 
-
   testWidgets('On first render with isAlwaysShown: true, the thumb shows', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
@@ -525,5 +527,94 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+  });
+
+  testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scrollbar(
+          child: SingleChildScrollView(
+            child: SizedBox(width: 4000.0, height: 4000.0)
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.pump();
+    // Scrollbar fully showing
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(Scrollbar), paints..rect(
+      color: const Color(0x59000000),
+    ));
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(seconds: 3));
+    // Still there.
+    expect(find.byType(Scrollbar), paints..rect(
+      color: const Color(0x59000000),
+    ));
+
+    await gesture.up();
+    await tester.pump(_kScrollbarTimeToFade);
+    await tester.pump(_kScrollbarFadeDuration * 0.5);
+
+    // Opacity going down now.
+    expect(find.byType(Scrollbar), paints..rrect(
+      color: const Color(0x59000000),
+    ));
+  });
+
+  testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home:PrimaryScrollController(
+          controller: scrollController,
+          child: const Scrollbar(
+            child: SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+
+    // Scroll a bit.
+    const double scrollAmount = 10.0;
+    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    // Scroll down by swiping up.
+    await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    // Scrollbar thumb is fully showing and scroll offset has moved by
+    // scrollAmount.
+    expect(find.byType(Scrollbar), paints..rrect(
+      color: const Color(0x59000000),
+    ));
+    expect(scrollController.offset, scrollAmount);
+    await scrollGesture.up();
+    await tester.pump();
+
+    // Drag the thumb down to scroll down.
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pump(const Duration(milliseconds: 100));
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // The view has scrolled more than it would have by a swipe gesture of the
+    // same distance.
+    expect(scrollController.offset, greaterThan(scrollAmount * 2));
+    // The scrollbar thumb is still fully visible.
+    expect(find.byType(Scrollbar), paints..rrect(
+      color: const Color(0x59000000),
+    ));
+
+    // Let the thumb fade out so all timers have resolved.
+    await tester.pump(_kScrollbarTimeToFade);
+    await tester.pump(_kScrollbarFadeDuration);
   });
 }
