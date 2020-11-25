@@ -9,9 +9,9 @@
 
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
-#if FLUTTER_SHELL_ENABLE_METAL
+#if SHELL_ENABLE_METAL
 #import "flutter/shell/platform/darwin/ios/ios_surface_metal.h"
-#endif  // FLUTTER_SHELL_ENABLE_METAL
+#endif  // SHELL_ENABLE_METAL
 
 namespace flutter {
 
@@ -28,7 +28,7 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
     );
   }
 
-#if FLUTTER_SHELL_ENABLE_METAL
+#if SHELL_ENABLE_METAL
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
     if ([layer.get() isKindOfClass:[CAMetalLayer class]]) {
       return std::make_unique<IOSSurfaceMetal>(
@@ -38,7 +38,7 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
       );
     }
   }
-#endif  // FLUTTER_SHELL_ENABLE_METAL
+#endif  // SHELL_ENABLE_METAL
 
   return std::make_unique<IOSSurfaceSoftware>(std::move(layer),   // layer
                                               std::move(context)  // context

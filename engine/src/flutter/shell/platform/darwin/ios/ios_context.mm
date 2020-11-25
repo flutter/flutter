@@ -8,9 +8,9 @@
 #import "flutter/shell/platform/darwin/ios/ios_context_gl.h"
 #import "flutter/shell/platform/darwin/ios/ios_context_software.h"
 
-#if FLUTTER_SHELL_ENABLE_METAL
+#if SHELL_ENABLE_METAL
 #import "flutter/shell/platform/darwin/ios/ios_context_metal.h"
-#endif  // FLUTTER_SHELL_ENABLE_METAL
+#endif  // SHELL_ENABLE_METAL
 
 namespace flutter {
 
@@ -24,10 +24,10 @@ std::unique_ptr<IOSContext> IOSContext::Create(IOSRenderingAPI rendering_api) {
       return std::make_unique<IOSContextGL>();
     case IOSRenderingAPI::kSoftware:
       return std::make_unique<IOSContextSoftware>();
-#if FLUTTER_SHELL_ENABLE_METAL
+#if SHELL_ENABLE_METAL
     case IOSRenderingAPI::kMetal:
       return std::make_unique<IOSContextMetal>();
-#endif  // FLUTTER_SHELL_ENABLE_METAL
+#endif  // SHELL_ENABLE_METAL
     default:
       break;
   }
