@@ -381,19 +381,19 @@ void main() {
 
     await tester.pumpWidget(buildFrame(checkColor: const Color(0xFFFFFFFF)));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (default color)
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xff1e88e5))..path(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (default color)
 
     await tester.pumpWidget(buildFrame(checkColor: const Color(0xFF000000)));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xff1e88e5))..path(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
 
     await tester.pumpWidget(buildFrame(themeData: ThemeData(toggleableActiveColor: const Color(0xFF00FF00))));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..rrect(color: const Color(0xFF00FF00))); // paints's color is 0xFF00FF00 (theme)
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFF00FF00))); // paints's color is 0xFF00FF00 (theme)
 
     await tester.pumpWidget(buildFrame(activeColor: const Color(0xFF000000)));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..rrect(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
   });
 
   testWidgets('Checkbox is focusable and has correct focus color', (WidgetTester tester) async {
@@ -835,11 +835,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(enabled: true));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..rrect(color: activeEnabledFillColor));
+    expect(getCheckboxRenderer(), paints..path(color: activeEnabledFillColor));
 
     await tester.pumpWidget(buildFrame(enabled: false));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..rrect(color: activeDisabledFillColor));
+    expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
   });
 
   testWidgets('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
@@ -889,7 +889,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(getCheckboxRenderer(), paints..rrect(color: focusedFillColor));
+    expect(getCheckboxRenderer(), paints..path(color: focusedFillColor));
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -898,7 +898,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
-    expect(getCheckboxRenderer(), paints..rrect(color: hoveredFillColor));
+    expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
   });
 
   testWidgets('Checkbox respects borderRadius', (WidgetTester tester) async {
