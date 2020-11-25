@@ -1194,7 +1194,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Offset(borderSide.width, borderSide.width);
     }
-
   }
 
   double get _trailingBorderOffset => isLastButton ? trailingBorderSide.width : 0.0;
