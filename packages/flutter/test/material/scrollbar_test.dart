@@ -495,14 +495,14 @@ void main() {
     // Scrollbar fully showing
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(Scrollbar), paints..rect(
-      color: const Color(0x59000000),
+      color: const Color(0xffbcbcbc),
     ));
 
     await tester.pump(const Duration(seconds: 3));
     await tester.pump(const Duration(seconds: 3));
     // Still there.
     expect(find.byType(Scrollbar), paints..rect(
-      color: const Color(0x59000000),
+      color: const Color(0xffbcbcbc),
     ));
 
     await gesture.up();
@@ -510,8 +510,8 @@ void main() {
     await tester.pump(_kScrollbarFadeDuration * 0.5);
 
     // Opacity going down now.
-    expect(find.byType(Scrollbar), paints..rrect(
-      color: const Color(0x59000000),
+    expect(find.byType(Scrollbar), paints..rect(
+      color: const Color(0xc6bcbcbc),
     ));
   });
 
@@ -519,52 +519,40 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
-        home:PrimaryScrollController(
+        home: PrimaryScrollController(
           controller: scrollController,
-          child: const Scrollbar(
-            child: SingleChildScrollView(
+          child: Scrollbar(
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
               child: SizedBox(width: 4000.0, height: 4000.0)
             ),
           ),
         ),
       ),
     );
-
+    await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
-
-    // Scroll a bit.
-    const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-    // Scroll down by swiping up.
-    await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    // Scrollbar thumb is fully showing and scroll offset has moved by
-    // scrollAmount.
-    expect(find.byType(Scrollbar), paints..rrect(
-      color: const Color(0x59000000),
+    expect(find.byType(Scrollbar), paints..rect(
+      color: const Color(0xffbcbcbc),
+      rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
     ));
-    expect(scrollController.offset, scrollAmount);
-    await scrollGesture.up();
-    await tester.pump();
 
     // Drag the thumb down to scroll down.
-    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     await dragScrollbarGesture.up();
     await tester.pumpAndSettle();
 
     // The view has scrolled more than it would have by a swipe gesture of the
     // same distance.
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
-    // The scrollbar thumb is still fully visible.
-    expect(find.byType(Scrollbar), paints..rrect(
-      color: const Color(0x59000000),
+    expect(find.byType(Scrollbar), paints..rect(
+      color: const Color(0xffbcbcbc),
+      rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
     ));
-
-    // Let the thumb fade out so all timers have resolved.
-    await tester.pump(_kScrollbarTimeToFade);
-    await tester.pump(_kScrollbarFadeDuration);
   });
 }
