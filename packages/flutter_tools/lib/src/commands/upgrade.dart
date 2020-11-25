@@ -152,6 +152,7 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
+    globals.printStatus('Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...');
     await attemptReset(upstreamVersion.frameworkRevision);
     if (!testFlow) {
       await flutterUpgradeContinue();
