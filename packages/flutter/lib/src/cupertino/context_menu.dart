@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart';
 
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
@@ -153,9 +152,6 @@ class CupertinoContextMenu extends StatefulWidget {
   /// This parameter cannot be null.
   final Widget child;
 
-  final Offset? previewOffset;
-  final Size? previewSize;
-
   /// The actions that are shown in the menu.
   ///
   /// These actions are typically [CupertinoContextMenuAction]s.
@@ -225,6 +221,16 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   /// {@end-tool}
   final ContextMenuPreviewBuilder? previewBuilder;
+
+  /// The preview child offset in full-screen coordinate space.
+  ///
+  /// If not specified, [child] will be shown at the original position.
+  final Offset? previewOffset;
+
+  /// The preview child size.
+  ///
+  /// If not specified, [child] will be shown with the original size.
+  final Size? previewSize;
 
   @override
   _CupertinoContextMenuState createState() => _CupertinoContextMenuState();
