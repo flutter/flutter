@@ -1610,7 +1610,7 @@ class Scaffold extends StatefulWidget {
   final Widget? drawer;
 
   /// Optional callback that is called when the [Scaffold.drawer] is opened or closed.
-  final DrawerCallback drawerCallback;
+  final DrawerCallback? drawerCallback;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
@@ -1673,7 +1673,7 @@ class Scaffold extends StatefulWidget {
   final Widget? endDrawer;
 
   /// Optional callback that is called when the [Scaffold. endDrawer] is opened or closed.
-  final DrawerCallback endDrawerCallback;
+  final DrawerCallback? endDrawerCallback;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
