@@ -1283,8 +1283,8 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           final Size childSize = layoutChild(child!, innerConstraints);
 
           return constraints.constrain(Size(
-            leftConstraint + child!.size.width + rightConstraint,
-            topConstraint + child!.size.height + bottomConstraint,
+            leftConstraint + childSize.width + rightConstraint,
+            topConstraint + childSize.height + bottomConstraint,
           ));
         case VerticalDirection.up:
           final double trailingBorderOffset = isFirstButton ? leadingBorderSide.width : 0.0;
@@ -1305,8 +1305,8 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           final Size childSize = layoutChild(child!, innerConstraints);
 
           return constraints.constrain(Size(
-            leftConstraint + child!.size.width + rightConstraint,
-            topConstraint + child!.size.height + bottomConstraint,
+            leftConstraint + childSize.width + rightConstraint,
+            topConstraint + childSize.height + bottomConstraint,
           ));
       }
     }
