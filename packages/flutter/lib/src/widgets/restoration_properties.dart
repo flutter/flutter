@@ -185,6 +185,35 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
   }
 }
 
+// _RestorablePrimitiveValueN and its subclasses allows null values.
+class _RestorablePrimitiveValueN<T extends Object> extends RestorableValue<T> {
+  _RestorablePrimitiveValueN(this._defaultValue)
+    : assert(debugIsSerializableForRestoration(_defaultValue)),
+      super();
+
+  final T _defaultValue;
+
+  @override
+  T createDefaultValue() => _defaultValue;
+
+  @override
+  set value(T value) {
+    super.value = value;
+  }
+
+  @override
+  void didUpdateValue(T? oldValue) {
+    assert(debugIsSerializableForRestoration(value));
+    notifyListeners();
+  }
+
+  @override
+  T fromPrimitives(Object? serialized) => serialized! as T;
+
+  @override
+  Object toPrimitives() => value;
+}
+
 /// A [RestorableProperty] that knows how to store and restore a [num].
 ///
 /// {@template flutter.widgets.RestorableNum}
@@ -247,6 +276,17 @@ class RestorableBool extends _RestorablePrimitiveValue<bool> {
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableBool(bool defaultValue) : assert(defaultValue != null), super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore a [bool] that is
+/// nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+class RestorableBoolN extends _RestorablePrimitiveValueN<bool> {
+  /// Creates a [RestorableBoolN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableBoolN(bool defaultValue) : super(defaultValue);
 }
 
 /// A base class for creating a [RestorableProperty] that stores and restores a
