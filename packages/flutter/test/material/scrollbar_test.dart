@@ -479,56 +479,6 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('When isAlwaysShown is true, must pass a controller',(WidgetTester tester) async {
-    Widget viewWithScroll() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: Scrollbar(
-            isAlwaysShown: true,
-            child: const SingleChildScrollView(
-              child: SizedBox(
-                width: 4000.0,
-                height: 4000.0,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    expect(() async {
-      await tester.pumpWidget(viewWithScroll());
-    }, throwsAssertionError);
-  });
-
-  testWidgets('On first render with isAlwaysShown: true, the thumb shows', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    Widget viewWithScroll() {
-      return _buildBoilerplate(
-        child: Theme(
-          data: ThemeData(),
-          child: Scrollbar(
-            isAlwaysShown: true,
-            controller: controller,
-            child: SingleChildScrollView(
-              controller: controller,
-              child: const SizedBox(
-                width: 4000.0,
-                height: 4000.0,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(viewWithScroll());
-    await tester.pumpAndSettle();
-    expect(find.byType(Scrollbar), paints..rect());
-  });
-
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
