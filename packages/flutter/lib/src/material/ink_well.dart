@@ -1223,8 +1223,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// that are changing size.
 ///
 /// If [InkWell] or ancestor widget has [GlobalKey], then splashes will not
-/// stop animation even if the widget with [GlobalKey] changes position during
-/// splashes animation.
+/// stop animation even if the widget with [GlobalKey] changes position in the
+/// tree during splashes animation.
 ///
 /// See also:
 ///
