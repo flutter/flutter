@@ -352,6 +352,8 @@ Application::Application(
   std::string json_string;
   if (dart_utils::ReadFileToString(kRunnerConfigPath, &json_string)) {
     product_config_ = FlutterRunnerProductConfiguration(json_string);
+    FML_LOG(INFO) << "Successfully loaded runner configuration: "
+                  << json_string;
   } else {
     FML_LOG(WARNING) << "Failed to load runner configuration from "
                      << kRunnerConfigPath << "; using default config values.";

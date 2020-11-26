@@ -76,10 +76,26 @@ SceneUpdateContext::SceneUpdateContext(std::string debug_label,
                  std::move(view_ref_pair.control_ref),
                  std::move(view_ref_pair.view_ref),
                  debug_label),
-      root_node_(session_.get()),
-      intercept_all_input_(intercept_all_input) {
-  root_view_.AddChild(root_node_);
-  root_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask);
+      metrics_node_(session.get()),
+      layer_tree_node_(session_.get()) {
+  layer_tree_node_.SetLabel("Flutter::LayerTree");
+  metrics_node_.SetLabel("Flutter::MetricsWatcher");
+  metrics_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask);
+  metrics_node_.AddChild(layer_tree_node_);
+  root_view_.AddChild(metrics_node_);
+
+  // Set up the input interceptor at the top of the scene, if applicable.  It
+  // will capture all input, and any unwanted input will be reinjected into
+  // embedded views.
+  if (intercept_all_input) {
+    input_interceptor_node_.emplace(session_.get());
+    input_interceptor_node_->SetLabel("Flutter::InputInterceptor");
+    input_interceptor_node_->SetHitTestBehavior(
+        fuchsia::ui::gfx::HitTestBehavior::kDefault);
+    input_interceptor_node_->SetSemanticVisibility(false);
+
+    metrics_node_.AddChild(input_interceptor_node_.value());
+  }
 
   session_.Present();
 }
@@ -97,7 +113,8 @@ void SceneUpdateContext::EnableWireframe(bool enable) {
       scenic::NewSetEnableDebugViewBoundsCmd(root_view_.id(), enable));
 }
 
-void SceneUpdateContext::Reset() {
+void SceneUpdateContext::Reset(const SkISize& frame_size,
+                               float device_pixel_ratio) {
   paint_tasks_.clear();
   top_entity_ = nullptr;
   top_scale_x_ = 1.f;
@@ -106,9 +123,22 @@ void SceneUpdateContext::Reset() {
   next_elevation_ = 0.f;
   alpha_ = 1.f;
 
+  // Adjust scene scaling to match the device pixel ratio.
+  const float inv_dpr = 1.0f / device_pixel_ratio;
+  metrics_node_.SetScale(inv_dpr, inv_dpr, 1.0f);
+
+  // Set up the input interceptor at the top of the scene, if applicable.
+  if (input_interceptor_node_.has_value()) {
+    // TODO(fxb/): Don't hardcode elevation.
+    input_interceptor_node_->SetTranslation(frame_size.width() * 0.5f,
+                                            frame_size.height() * 0.5f, -100.f);
+    input_interceptor_node_->SetShape(scenic::Rectangle(
+        session_.get(), frame_size.width(), frame_size.height()));
+  }
+
   // We are going to be sending down a fresh node hierarchy every frame. So just
-  // enqueue a detach op on the imported root node.
-  session_.get()->Enqueue(scenic::NewDetachChildrenCmd(root_node_.id()));
+  // enqueue a detach op on the layer tree node.
+  layer_tree_node_.DetachChildren();
 }
 
 void SceneUpdateContext::CreateFrame(scenic::EntityNode& entity_node,
@@ -235,7 +265,7 @@ SceneUpdateContext::Entity::~Entity() {
   if (previous_entity_) {
     previous_entity_->embedder_node().AddChild(entity_node_);
   } else {
-    context_->root_node_.AddChild(entity_node_);
+    context_->layer_tree_node_.AddChild(entity_node_);
   }
 
   FML_DCHECK(context_->top_entity_ == this);
@@ -326,14 +356,6 @@ SceneUpdateContext::Frame::Frame(std::shared_ptr<SceneUpdateContext> context,
   // with opacity != 1. For now, clamp to a infinitesimally smaller value than
   // 1, which does not cause visual problems in practice.
   opacity_node_.SetOpacity(std::min(kOneMinusEpsilon, opacity_ / 255.0f));
-
-  if (context->intercept_all_input_) {
-    context->input_interceptor_.emplace(context->session_.get());
-    context->input_interceptor_->UpdateDimensions(
-        context->session_.get(), rrect.width(), rrect.height(),
-        -(local_elevation + kScenicZElevationBetweenLayers * 0.5f));
-    entity_node().AddChild(context->input_interceptor_->node());
-  }
 }
 
 SceneUpdateContext::Frame::~Frame() {
