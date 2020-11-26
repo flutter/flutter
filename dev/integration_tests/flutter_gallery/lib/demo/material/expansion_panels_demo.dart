@@ -14,7 +14,7 @@ enum Location {
 }
 
 typedef DemoItemBodyBuilder<T> = Widget Function(DemoItem<T> item);
-typedef ValueToString<T> = String Function(T value);
+typedef ValueToString<T> = String? Function(T value);
 
 class DualHeaderWithHint extends StatelessWidget {
   const DualHeaderWithHint({
@@ -24,10 +24,10 @@ class DualHeaderWithHint extends StatelessWidget {
     this.showHint,
   });
 
-  final String name;
-  final String value;
-  final String hint;
-  final bool showHint;
+  final String? name;
+  final String? value;
+  final String? hint;
+  final bool? showHint;
 
   Widget _crossFade(Widget first, Widget second, bool isExpanded) {
     return AnimatedCrossFade(
@@ -56,8 +56,8 @@ class DualHeaderWithHint extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                name,
-                style: textTheme.bodyText2.copyWith(fontSize: 15.0),
+                name!,
+                style: textTheme.bodyText2!.copyWith(fontSize: 15.0),
               ),
             ),
           ),
@@ -67,9 +67,9 @@ class DualHeaderWithHint extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(left: 24.0),
             child: _crossFade(
-              Text(value, style: textTheme.caption.copyWith(fontSize: 15.0)),
-              Text(hint, style: textTheme.caption.copyWith(fontSize: 15.0)),
-              showHint,
+              Text(value!, style: textTheme.caption!.copyWith(fontSize: 15.0)),
+              Text(hint!, style: textTheme.caption!.copyWith(fontSize: 15.0)),
+              showHint!,
             ),
           ),
         ),
@@ -87,9 +87,9 @@ class CollapsibleBody extends StatelessWidget {
   });
 
   final EdgeInsets margin;
-  final Widget child;
-  final VoidCallback onSave;
-  final VoidCallback onCancel;
+  final Widget? child;
+  final VoidCallback? onSave;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -106,8 +106,8 @@ class CollapsibleBody extends StatelessWidget {
           ) - margin,
           child: Center(
             child: DefaultTextStyle(
-              style: textTheme.caption.copyWith(fontSize: 15.0),
-              child: child,
+              style: textTheme.caption!.copyWith(fontSize: 15.0),
+              child: child!,
             ),
           ),
         ),
@@ -119,7 +119,7 @@ class CollapsibleBody extends StatelessWidget {
             children: <Widget>[
               Container(
                 margin: const EdgeInsets.only(right: 8.0),
-                child: FlatButton(
+                child: TextButton(
                   onPressed: onCancel,
                   child: const Text('CANCEL', style: TextStyle(
                     color: Colors.black54,
@@ -130,9 +130,8 @@ class CollapsibleBody extends StatelessWidget {
               ),
               Container(
                 margin: const EdgeInsets.only(right: 8.0),
-                child: FlatButton(
+                child: TextButton(
                   onPressed: onSave,
-                  textTheme: ButtonTextTheme.accent,
                   child: const Text('SAVE'),
                 ),
               ),
@@ -150,15 +149,15 @@ class DemoItem<T> {
     this.value,
     this.hint,
     this.builder,
-    this.valueToString,
+    required this.valueToString,
   }) : textController = TextEditingController(text: valueToString(value));
 
-  final String name;
-  final String hint;
+  final String? name;
+  final String? hint;
   final TextEditingController textController;
-  final DemoItemBodyBuilder<T> builder;
-  final ValueToString<T> valueToString;
-  T value;
+  final DemoItemBodyBuilder<T>? builder;
+  final ValueToString<T?> valueToString;
+  T? value;
   bool isExpanded = false;
 
   ExpansionPanelHeaderBuilder get headerBuilder {
@@ -172,7 +171,7 @@ class DemoItem<T> {
     };
   }
 
-  Widget build() => builder(this);
+  Widget build() => builder!(this);
 }
 
 class ExpansionPanelsDemo extends StatefulWidget {
@@ -183,7 +182,7 @@ class ExpansionPanelsDemo extends StatefulWidget {
 }
 
 class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
-  List<DemoItem<dynamic>> _demoItems;
+  late List<DemoItem<dynamic>> _demoItems;
 
   @override
   void initState() {
@@ -194,7 +193,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         name: 'Trip',
         value: 'Caribbean cruise',
         hint: 'Change trip name',
-        valueToString: (String value) => value,
+        valueToString: (String? value) => value,
         builder: (DemoItem<String> item) {
           void close() {
             setState(() {
@@ -207,8 +206,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
               builder: (BuildContext context) {
                 return CollapsibleBody(
                   margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  onSave: () { Form.of(context).save(); close(); },
-                  onCancel: () { Form.of(context).reset(); close(); },
+                  onSave: () { Form.of(context)!.save(); close(); },
+                  onCancel: () { Form.of(context)!.reset(); close(); },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: TextFormField(
@@ -217,7 +216,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         hintText: item.hint,
                         labelText: item.name,
                       ),
-                      onSaved: (String value) { item.value = value; },
+                      onSaved: (String? value) { item.value = value; },
                     ),
                   ),
                 );
@@ -230,7 +229,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         name: 'Location',
         value: Location.Bahamas,
         hint: 'Select location',
-        valueToString: (Location location) => location.toString().split('.')[1],
+        valueToString: (Location? location) => location.toString().split('.')[1],
         builder: (DemoItem<Location> item) {
           void close() {
             setState(() {
@@ -241,11 +240,11 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             child: Builder(
               builder: (BuildContext context) {
                 return CollapsibleBody(
-                  onSave: () { Form.of(context).save(); close(); },
-                  onCancel: () { Form.of(context).reset(); close(); },
+                  onSave: () { Form.of(context)!.save(); close(); },
+                  onCancel: () { Form.of(context)!.reset(); close(); },
                   child: FormField<Location>(
                     initialValue: item.value,
-                    onSaved: (Location result) { item.value = result; },
+                    onSaved: (Location? result) { item.value = result; },
                     builder: (FormFieldState<Location> field) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
@@ -283,7 +282,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         name: 'Sun',
         value: 80.0,
         hint: 'Select sun level',
-        valueToString: (double amount) => '${amount.round()}',
+        valueToString: (double? amount) => '${amount!.round()}',
         builder: (DemoItem<double> item) {
           void close() {
             setState(() {
@@ -295,11 +294,11 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             child: Builder(
               builder: (BuildContext context) {
                 return CollapsibleBody(
-                  onSave: () { Form.of(context).save(); close(); },
-                  onCancel: () { Form.of(context).reset(); close(); },
+                  onSave: () { Form.of(context)!.save(); close(); },
+                  onCancel: () { Form.of(context)!.reset(); close(); },
                   child: FormField<double>(
                     initialValue: item.value,
-                    onSaved: (double value) { item.value = value; },
+                    onSaved: (double? value) { item.value = value; },
                     builder: (FormFieldState<double> field) {
                       return Container(
                         // Allow room for the value indicator.
@@ -308,9 +307,9 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                           min: 0.0,
                           max: 100.0,
                           divisions: 5,
-                          activeColor: Colors.orange[100 + (field.value * 5.0).round()],
-                          label: '${field.value.round()}',
-                          value: field.value,
+                          activeColor: Colors.orange[100 + (field.value! * 5.0).round()],
+                          label: '${field.value!.round()}',
+                          value: field.value!,
                           onChanged: field.didChange,
                         ),
                       );

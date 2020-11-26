@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class Inside extends StatefulWidget {
-  const Inside({ Key key }) : super(key: key);
+  const Inside({ Key? key }) : super(key: key);
   @override
   InsideState createState() => InsideState();
 }
@@ -29,11 +27,11 @@ class InsideState extends State<Inside> {
 
 class Middle extends StatefulWidget {
   const Middle({
-    Key key,
+    Key? key,
     this.child,
   }) : super(key: key);
 
-  final Inside child;
+  final Inside? child;
 
   @override
   MiddleState createState() => MiddleState();
@@ -54,7 +52,7 @@ class MiddleState extends State<Middle> {
 }
 
 class Outside extends StatefulWidget {
-  const Outside({ Key key }) : super(key: key);
+  const Outside({ Key? key }) : super(key: key);
   @override
   OutsideState createState() => OutsideState();
 }

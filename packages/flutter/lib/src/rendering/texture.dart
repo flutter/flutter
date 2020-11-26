@@ -54,7 +54,7 @@ class TextureBox extends RenderBox {
     }
   }
 
-  /// {@macro FilterQuality}
+  /// {@macro flutter.widgets.Texture.filterQuality}
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
@@ -75,8 +75,8 @@ class TextureBox extends RenderBox {
   bool get isRepaintBoundary => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   @override

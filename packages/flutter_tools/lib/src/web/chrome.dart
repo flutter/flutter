@@ -35,6 +35,18 @@ const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 /// The expected Edge executable name on Windows.
 const String kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 
+/// Used by [ChromiumLauncher] to detect a glibc bug and retry launching the
+/// browser.
+///
+/// Once every few thousands of launches we hit this glibc bug:
+///
+/// https://sourceware.org/bugzilla/show_bug.cgi?id=19329.
+///
+/// When this happens Chrome spits out something like the following then exits with code 127:
+///
+///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
+const String _kGlibcError = 'Inconsistency detected by ld.so';
+
 typedef BrowserFinder = String Function(Platform, FileSystem);
 
 /// Find the chrome executable on the current platform.
@@ -106,13 +118,14 @@ class ChromiumLauncher {
     @required OperatingSystemUtils operatingSystemUtils,
     @required BrowserFinder browserFinder,
     @required Logger logger,
+    @visibleForTesting FileSystemUtils fileSystemUtils,
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
        _browserFinder = browserFinder,
        _logger = logger,
-       _fileSystemUtils = FileSystemUtils(
+       _fileSystemUtils = fileSystemUtils ?? FileSystemUtils(
          fileSystem: fileSystem,
          platform: platform,
        );
@@ -149,13 +162,13 @@ class ChromiumLauncher {
 
   /// Launch a Chromium browser to a particular `host` page.
   ///
-  /// `headless` defaults to false, and controls whether we open a headless or
-  /// a `headfull` browser.
+  /// [headless] defaults to false, and controls whether we open a headless or
+  /// a "headfull" browser.
   ///
-  /// `debugPort` is Chrome's debugging protocol port. If null, a random free
+  /// [debugPort] is Chrome's debugging protocol port. If null, a random free
   /// port is picked automatically.
   ///
-  /// `skipCheck` does not attempt to make a devtools connection before returning.
+  /// [skipCheck] does not attempt to make a devtools connection before returning.
   Future<Chromium> launch(String url, {
     bool headless = false,
     int debugPort,
@@ -167,6 +180,12 @@ class ChromiumLauncher {
     }
 
     final String chromeExecutable = _browserFinder(_platform, _fileSystem);
+
+    if (_logger.isVerbose) {
+      final ProcessResult versionResult = await _processManager.run(<String>[chromeExecutable, '--version']);
+      _logger.printTrace('Using ${versionResult.stdout}');
+    }
+
     final Directory userDataDir = _fileSystem.systemTempDirectory
       .createTempSync('flutter_tools_chrome_device.');
 
@@ -203,27 +222,7 @@ class ChromiumLauncher {
       url,
     ];
 
-    final Process process = await _processManager.start(args);
-
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen((String line) {
-        _logger.printTrace('[CHROME]: $line');
-      });
-
-    // Wait until the DevTools are listening before trying to connect. This is
-    // only required for flutter_test --platform=chrome and not flutter run.
-    await process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .map((String line) {
-        _logger.printTrace('[CHROME]:$line');
-        return line;
-      })
-      .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-        return 'Failed to spawn stderr';
-      });
+    final Process process = await _spawnChromiumProcess(args);
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {
@@ -240,12 +239,70 @@ class ChromiumLauncher {
     ), skipCheck);
   }
 
+  Future<Process> _spawnChromiumProcess(List<String> args) async {
+    // Keep attempting to launch the browser until one of:
+    // - Chrome launched successfully, in which case we just return from the loop.
+    // - The tool detected an unretriable Chrome error, in which case we throw ToolExit.
+    while (true) {
+      final Process process = await _processManager.start(args);
+
+      process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
+          _logger.printTrace('[CHROME]: $line');
+        });
+
+      // Wait until the DevTools are listening before trying to connect. This is
+      // only required for flutter_test --platform=chrome and not flutter run.
+      bool hitGlibcBug = false;
+      await process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .map((String line) {
+          _logger.printTrace('[CHROME]:$line');
+          if (line.contains(_kGlibcError)) {
+            hitGlibcBug = true;
+          }
+          return line;
+        })
+        .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+          if (hitGlibcBug) {
+            _logger.printTrace(
+              'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
+              'Will try launching browser again.',
+            );
+            return null;
+          }
+          _logger.printTrace('Failed to launch browser. Command used to launch it: ${args.join(' ')}');
+          throw ToolExit(
+            'Failed to launch browser. Make sure you are using an up-to-date '
+            'Chrome or Edge. Otherwise, consider using -d web-server instead '
+            'and filing an issue at https://github.com/flutter/flutter/issues.',
+          );
+        });
+
+      if (!hitGlibcBug) {
+        return process;
+      }
+
+      // A precaution that avoids accumulating browser processes, in case the
+      // glibc bug doesn't cause the browser to quit and we keep looping and
+      // launching more processes.
+      unawaited(process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
+        process.kill();
+        return null;
+      }));
+    }
+  }
+
+  // This is a directory which Chrome uses to store cookies, preferences and
+  // other session data.
+  String get _chromeDefaultPath => _fileSystem.path.join('Default');
+
   // This is a JSON file which contains configuration from the browser session,
   // such as window position. It is located under the Chrome data-dir folder.
   String get _preferencesPath => _fileSystem.path.join('Default', 'preferences');
-
-  // The directory that Chrome uses to store local storage information for web apps.
-  String get _localStoragePath => _fileSystem.path.join('Default', 'Local Storage');
 
   /// Copy Chrome user information from a Chrome session into a per-project
   /// cache.
@@ -253,41 +310,41 @@ class ChromiumLauncher {
   /// Note: more detailed docs of the Chrome user preferences store exists here:
   /// https://www.chromium.org/developers/design-documents/preferences.
   void _cacheUserSessionInformation(Directory userDataDir, Directory cacheDir) {
-    final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir?.path ?? '', _preferencesPath));
-    final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
-    final Directory targetLocalStorageDir = _fileSystem.directory(_fileSystem.path.join(cacheDir?.path ?? '', _localStoragePath));
-    final Directory sourceLocalStorageDir = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _localStoragePath));
+    final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir?.path ?? '', _chromeDefaultPath));
+    final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
 
-    if (sourcePreferencesFile.existsSync()) {
-      targetPreferencesFile.parent.createSync(recursive: true);
-      // If the file contains a crash string, remove it to hide the popup on next run.
-      final String contents = sourcePreferencesFile.readAsStringSync();
-      targetPreferencesFile.writeAsStringSync(contents
-          .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
+    if (sourceChromeDefault.existsSync()) {
+      targetChromeDefault.createSync(recursive: true);
+      try {
+        _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+      } on FileSystemException catch (err) {
+        // This is a best-effort update. Display the message in case the failure is relevant.
+        // one possible example is a file lock due to multiple running chrome instances.
+        _logger.printError('Failed to save Chrome preferences: $err');
+      }
     }
 
-    if (sourceLocalStorageDir.existsSync()) {
-      targetLocalStorageDir.createSync(recursive: true);
-      _fileSystemUtils.copyDirectorySync(sourceLocalStorageDir, targetLocalStorageDir);
+    final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir?.path ?? '', _preferencesPath));
+    final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
+
+    if (sourcePreferencesFile.existsSync()) {
+       targetPreferencesFile.parent.createSync(recursive: true);
+       // If the file contains a crash string, remove it to hide the popup on next run.
+       final String contents = sourcePreferencesFile.readAsStringSync();
+       targetPreferencesFile.writeAsStringSync(contents
+           .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
     }
   }
 
   /// Restore Chrome user information from a per-project cache into Chrome's
   /// user data directory.
   void _restoreUserSessionInformation(Directory cacheDir, Directory userDataDir) {
-    final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir.path ?? '', _preferencesPath));
-    final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
-    final Directory sourceLocalStorageDir = _fileSystem.directory(_fileSystem.path.join(cacheDir.path ?? '', _localStoragePath));
-    final Directory targetLocalStorageDir = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _localStoragePath));
+    final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path ?? '', _chromeDefaultPath));
+    final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
 
-    if (sourcePreferencesFile.existsSync()) {
-      targetPreferencesFile.parent.createSync(recursive: true);
-      sourcePreferencesFile.copySync(targetPreferencesFile.path);
-    }
-
-    if (sourceLocalStorageDir.existsSync()) {
-      targetLocalStorageDir.createSync(recursive: true);
-      _fileSystemUtils.copyDirectorySync(sourceLocalStorageDir, targetLocalStorageDir);
+    if (sourceChromeDefault.existsSync()) {
+      targetChromeDefault.createSync(recursive: true);
+      _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
     }
   }
 

@@ -86,7 +86,6 @@ void main() {
 
   test('no unauthorized imports of test_api', () {
     final List<String> allowedPaths = <String>[
-      fileSystem.path.join(flutterTools, 'lib', 'src', 'build_runner', 'build_script.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_web_platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'test_wrapper.dart'),
@@ -113,7 +112,7 @@ void main() {
 
   test('no unauthorized imports of package:path', () {
     final List<String> allowedPath = <String>[
-      fileSystem.path.join(flutterTools, 'lib', 'src', 'build_runner', 'web_compilation_delegate.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'isolated', 'web_compilation_delegate.dart'),
       fileSystem.path.join(flutterTools, 'test', 'general.shard', 'platform_plugins_test.dart'),
     ];
     for (final String dirName in <String>['lib', 'bin', 'test']) {
@@ -181,10 +180,10 @@ void main() {
     }
   });
 
-  test('no unauthorized imports of build_runner or dwds', () {
+  test('no unauthorized imports of build_runner/dwds/devtools', () {
     final List<String> allowedPaths = <String>[
-      fileSystem.path.join(flutterTools, 'test', 'src', 'build_runner'),
-      fileSystem.path.join(flutterTools, 'lib', 'src', 'build_runner'),
+      fileSystem.path.join(flutterTools, 'test', 'src', 'isolated'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'isolated'),
       fileSystem.path.join(flutterTools, 'lib', 'executable.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'devfs_web.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'resident_web_runner.dart'),
@@ -203,9 +202,10 @@ void main() {
               line.startsWith(RegExp(r'import.*package:build_runner/build_runner.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||
               line.startsWith(RegExp(r'import.*dwds:*.dart')) ||
+              line.startsWith(RegExp(r'import.*devtools_server:*.dart')) ||
               line.startsWith(RegExp(r'import.*build_runner/.*.dart'))) {
             final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
-            fail('$relativePath imports a build_runner package');
+            fail('$relativePath imports a build_runner/dwds/devtools package');
           }
         }
       }

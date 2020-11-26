@@ -213,7 +213,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   ///    text and text-direction-sensitive render objects.
   final TextDirection? textDirection;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -225,7 +225,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       overflowSpacing: overflowSpacing,
       overflowAlignment: overflowAlignment,
       overflowDirection: overflowDirection,
-      textDirection: textDirection ?? Directionality.of(context)!,
+      textDirection: textDirection ?? Directionality.of(context),
       clipBehavior: clipBehavior,
     );
   }
@@ -237,7 +237,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       ..overflowSpacing = overflowSpacing
       ..overflowAlignment = overflowAlignment
       ..overflowDirection = overflowDirection
-      ..textDirection = textDirection ?? Directionality.of(context)!
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..clipBehavior = clipBehavior;
   }
 
@@ -437,6 +437,31 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    RenderBox? child = firstChild;
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final BoxConstraints childConstraints = constraints.loosen();
+    double childrenWidth = 0.0;
+    double maxChildHeight = 0.0;
+    double y = 0.0;
+    while (child != null) {
+      final Size childSize = child.getDryLayout(childConstraints);
+      childrenWidth += childSize.width;
+      maxChildHeight = math.max(maxChildHeight, childSize.height);
+      y += childSize.height + overflowSpacing;
+      child = childAfter(child);
+    }
+    final double actualWidth = childrenWidth + spacing * (childCount - 1);
+    if (actualWidth > constraints.maxWidth) {
+      return constraints.constrain(Size(constraints.maxWidth, y - overflowSpacing));
+    } else {
+      return constraints.constrain(Size(actualWidth, maxChildHeight));
+    }
+  }
+
+  @override
   void performLayout() {
     RenderBox? child = firstChild;
     if (child == null) {
@@ -466,7 +491,7 @@ class _RenderOverflowBar extends RenderBox
       RenderBox? nextChild() => overflowDirection == VerticalDirection.down ? childAfter(child!) : childBefore(child!);
       double y = 0;
       while (child != null) {
-        final _OverflowBarParentData childParentData = child.parentData as _OverflowBarParentData;
+        final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
         double x = 0;
         switch (overflowAlignment) {
           case OverflowBarAlignment.start:
@@ -491,7 +516,7 @@ class _RenderOverflowBar extends RenderBox
       RenderBox? nextChild() => rtl ? childBefore(child!) : childAfter(child!);
       double x  = 0;
       while (child != null) {
-        final _OverflowBarParentData childParentData = child.parentData as _OverflowBarParentData;
+        final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
         childParentData.offset = Offset(x, (maxChildHeight - child.size.height) / 2);
         x += child.size.width + spacing;
         child = nextChild();

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -66,7 +64,7 @@ void main() {
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider does not move when tapped (RTL)', (WidgetTester tester) async {
@@ -102,7 +100,7 @@ void main() {
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider calls onChangeStart once when interaction begins', (WidgetTester tester) async {
@@ -143,7 +141,7 @@ void main() {
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider calls onChangeEnd once after interaction has ended', (WidgetTester tester) async {
@@ -184,14 +182,14 @@ void main() {
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider moves when dragged (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
-    double startValue;
-    double endValue;
+    late double startValue;
+    late double endValue;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -238,14 +236,14 @@ void main() {
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
-    double startValue;
-    double endValue;
+    late double startValue;
+    late double endValue;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -292,7 +290,7 @@ void main() {
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
   });
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
@@ -320,6 +318,7 @@ void main() {
             increasedValue: '60%',
             decreasedValue: '40%',
             textDirection: TextDirection.ltr,
+            flags: <SemanticsFlag>[SemanticsFlag.isSlider],
             actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
           ),
         ],
@@ -343,7 +342,14 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      TestSemantics.root(),
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            flags: <SemanticsFlag>[SemanticsFlag.isSlider],
+          )
+        ],
+      ),
       ignoreRect: true,
       ignoreTransform: true,
     ));
@@ -367,6 +373,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
+      isSlider: true,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '50%',
@@ -389,6 +396,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
+      isSlider: true,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '60%',

@@ -55,7 +55,7 @@ void main() {
 
     testWithoutContext('fetchUrl(destFile) writes the data to a file', () async {
       final Net net = createNet(FakeHttpClient(200, data: responseString));
-      final MemoryFileSystem fs = MemoryFileSystem();
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       final File destFile = fs.file('dest_file')..createSync();
       final List<int> data = await net.fetchUrl(
         Uri.parse('http://example.invalid/'),

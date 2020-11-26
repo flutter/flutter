@@ -38,11 +38,7 @@ void main() {
         manifestPath: anyNamed('manifestPath'),
         applicationKernelFilePath: anyNamed('applicationKernelFilePath'),
         depfilePath: anyNamed('depfilePath'),
-        privateKeyPath: anyNamed('privateKeyPath'),
         assetDirPath: anyNamed('assetDirPath'),
-        packagesPath: anyNamed('packagesPath'),
-        precompiledSnapshot: anyNamed('precompiledSnapshot'),
-        reportLicensedPackages: anyNamed('reportLicensedPackages'),
         trackWidgetCreation: anyNamed('trackWidgetCreation'),
         extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
         extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
@@ -112,7 +108,7 @@ void main() {
       '--target-platform=windows-x64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
@@ -130,7 +126,7 @@ void main() {
       '--target-platform=linux-x64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -148,7 +144,7 @@ void main() {
       '--target-platform=darwin-x64',
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
@@ -166,7 +162,7 @@ void main() {
       '--target-platform=windows-x64',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -184,7 +180,7 @@ void main() {
       '--target-platform=linux-x64',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -202,7 +198,7 @@ void main() {
       '--target-platform=darwin-x64',
     ]);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -234,7 +230,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     BuildSystem: () => MockBuildSystem(),
-    FileSystem: () => MemoryFileSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 }

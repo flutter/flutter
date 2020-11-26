@@ -18,7 +18,7 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// adhere to. This is useful when the parent constrains the child's size and layout,
 /// and doesn't depend on the child's intrinsic size.
 ///
-/// {@template flutter.widgets.layoutBuilder.builderFunctionInvocation}
+/// {@template flutter.widgets.ConstrainedLayoutBuilder}
 /// The [builder] function is called in the following situations:
 ///
 /// * The first time the widget is laid out.
@@ -116,23 +116,21 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   void _layout(ConstraintType constraints) {
     owner!.buildScope(this, () {
-      Widget? built;
-      if (widget.builder != null) {
-        try {
-          built = widget.builder(this, constraints);
-          debugWidgetBuilderValue(widget, built);
-        } catch (e, stack) {
-          built = ErrorWidget.builder(
-            _debugReportException(
-              ErrorDescription('building $widget'),
-              e,
-              stack,
-              informationCollector: () sync* {
-                yield DiagnosticsDebugCreator(DebugCreator(this));
-              },
-            ),
-          );
-        }
+      Widget built;
+      try {
+        built = widget.builder(this, constraints);
+        debugWidgetBuilderValue(widget, built);
+      } catch (e, stack) {
+        built = ErrorWidget.builder(
+          _debugReportException(
+            ErrorDescription('building $widget'),
+            e,
+            stack,
+            informationCollector: () sync* {
+              yield DiagnosticsDebugCreator(DebugCreator(this));
+            },
+          ),
+        );
       }
       try {
         _child = updateChild(_child, built, null);
@@ -237,7 +235,7 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
 /// child's size.
 ///
-/// {@macro flutter.widgets.layoutBuilder.builderFunctionInvocation}
+/// {@macro flutter.widgets.ConstrainedLayoutBuilder}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=IYDVcriKjsw}
 ///
@@ -348,6 +346,15 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(reason:
+      'Calculating the dry layout would require running the layout callback '
+      'speculatively, which might mutate the live render object tree.',
+    ));
+    return const Size(0, 0);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     rebuildIfNecessary();
@@ -395,7 +402,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
 FlutterErrorDetails _debugReportException(
   DiagnosticsNode context,
-  dynamic exception,
+  Object exception,
   StackTrace stack, {
   InformationCollector? informationCollector,
 }) {

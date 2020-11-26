@@ -369,14 +369,14 @@ abstract class FlutterTestDriver {
       } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
         await subscription.cancel();
         final StringBuffer error = StringBuffer();
-        error.write('Received app.stop event while waiting for $interestingOccurrence\n\n');
+        error.write('Received app.stop event while waiting for $interestingOccurrence\n\n$_errorBuffer');
         if (json['params'] != null && json['params']['error'] != null) {
           error.write('${json['params']['error']}\n\n');
         }
         if (json['params'] != null && json['params']['trace'] != null) {
           error.write('${json['params']['trace']}\n\n');
         }
-        response.completeError(error.toString());
+        response.completeError(Exception(error.toString()));
       }
     });
 
@@ -451,6 +451,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool singleWidgetReloads = false,
     File pidFile,
     String script,
+    List<String> additionalCommandArgs,
   }) async {
     await _setupProcess(
       <String>[
@@ -471,6 +472,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           'flutter-tester',
         if (structuredErrors)
           '--dart-define=flutter.inspector.structuredErrors=true',
+        ...?additionalCommandArgs,
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
@@ -536,7 +538,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // fast.
     unawaited(_process.exitCode.then((_) {
       if (!prematureExitGuard.isCompleted) {
-        prematureExitGuard.completeError('Process exited prematurely: ${args.join(' ')}: $_errorBuffer');
+        prematureExitGuard.completeError(Exception('Process exited prematurely: ${args.join(' ')}: $_errorBuffer'));
       }
     }));
 
@@ -567,7 +569,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         _currentRunningAppId = (await started)['params']['appId'] as String;
         prematureExitGuard.complete();
       } on Exception catch (error, stackTrace) {
-        prematureExitGuard.completeError(error, stackTrace);
+        prematureExitGuard.completeError(Exception(error.toString()), stackTrace);
       }
     }());
 
@@ -586,19 +588,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       'app.callServiceExtension',
       <String, dynamic>{'appId': _currentRunningAppId, 'methodName': 'ext.ui.window.scheduleFrame'},
     );
-  }
-
-  Future<void> reloadMethod({ String libraryId, String classId }) async {
-    if (_currentRunningAppId == null) {
-      throw Exception('App has not started yet');
-    }
-    final dynamic reloadMethodResponse = await _sendRequest(
-      'app.reloadMethod',
-      <String, dynamic>{'appId': _currentRunningAppId, 'class': classId, 'library': libraryId},
-    );
-    if (reloadMethodResponse == null || reloadMethodResponse['code'] != 0) {
-      _throwErrorResponse('reloadMethodResponse request failed');
-    }
   }
 
   Future<void> _restart({ bool fullRestart = false, bool pause = false, bool debounce = false, int debounceDurationOverrideMs }) async {
@@ -814,11 +803,11 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 }
 
 Map<String, dynamic> parseFlutterResponse(String line) {
-  if (line.startsWith('[') && line.endsWith(']')) {
+  if (line.startsWith('[') && line.endsWith(']') && line.length > 2) {
     try {
       final Map<String, dynamic> response = castStringKeyedMap(json.decode(line)[0]);
       return response;
-    } on Exception {
+    } on FormatException {
       // Not valid JSON, so likely some other output that was surrounded by [brackets]
       return null;
     }

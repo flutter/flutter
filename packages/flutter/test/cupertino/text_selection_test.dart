@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -23,7 +21,7 @@ class MockClipboard {
       case 'Clipboard.getData':
         return _clipboardData;
       case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
+        _clipboardData = methodCall.arguments! as Object;
         break;
     }
   }
@@ -80,14 +78,14 @@ void main() {
       ),
     );
     // Disabled buttons have no opacity change when pressed.
-    return button.pressedOpacity < 1.0;
+    return button.pressedOpacity! < 1.0;
   }
 
   group('canSelectAll', () {
     Widget createEditableText({
-      Key key,
-      String text,
-      TextSelection selection,
+      Key? key,
+      String? text,
+      TextSelection? selection,
     }) {
       final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
@@ -106,7 +104,7 @@ void main() {
     testWidgets('should return false when there is no text', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(key: key));
-      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState), false);
+      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
     testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
@@ -115,7 +113,7 @@ void main() {
         key: key,
         text: '123',
       ));
-      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState), true);
+      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
     testWidgets('should return false when there is text and partial uncollapsed selection', (WidgetTester tester) async {
@@ -125,7 +123,7 @@ void main() {
         text: '123',
         selection: const TextSelection(baseOffset: 1, extentOffset: 2),
       ));
-      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState), false);
+      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
     testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
@@ -135,7 +133,7 @@ void main() {
         text: '123',
         selection: const TextSelection(baseOffset: 0, extentOffset: 3),
       ));
-      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState), false);
+      expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
     });
   });
 

@@ -166,6 +166,12 @@ function upgrade_flutter () (
 function shared::execute() {
   export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
 
+  # If present, run the bootstrap script first
+  BOOTSTRAP_PATH="$FLUTTER_ROOT/bin/internal/bootstrap.sh"
+  if [ -f "$BOOTSTRAP_PATH" ]; then
+    source "$BOOTSTRAP_PATH"
+  fi
+
   FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
   SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
   STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"

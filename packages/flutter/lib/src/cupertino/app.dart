@@ -94,6 +94,7 @@ class CupertinoApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -132,6 +133,7 @@ class CupertinoApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.shortcuts,
     this.actions,
+    this.restorationScopeId,
   }) : assert(title != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -224,7 +226,7 @@ class CupertinoApp extends StatefulWidget {
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleListResolutionCallback? localeListResolutionCallback;
 
-  /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
+  /// {@macro flutter.widgets.LocaleResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleResolutionCallback? localeResolutionCallback;
@@ -315,6 +317,9 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.actions.seeAlso}
   final Map<Type, Action<Intent>>? actions;
 
+  /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
+  final String? restorationScopeId;
+
   @override
   _CupertinoAppState createState() => _CupertinoAppState();
 
@@ -373,7 +378,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context)!;
+    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
 
     if (_usesRouter) {
       return WidgetsApp.router(
@@ -400,6 +405,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
+        restorationScopeId: widget.restorationScopeId,
       );
     }
     return WidgetsApp(
@@ -433,6 +439,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
+      restorationScopeId: widget.restorationScopeId,
     );
   }
 

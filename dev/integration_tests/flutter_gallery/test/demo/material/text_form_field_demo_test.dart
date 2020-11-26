@@ -10,7 +10,7 @@ void main() {
   testWidgets('validates name field correctly', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
 
-    final Finder submitButton = find.widgetWithText(RaisedButton, 'SUBMIT');
+    final Finder submitButton = find.widgetWithText(ElevatedButton, 'SUBMIT');
     expect(submitButton, findsOneWidget);
 
     final Finder nameField = find.widgetWithText(TextFormField, 'Name *');

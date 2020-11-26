@@ -36,7 +36,7 @@ class AnimateSample extends StatefulWidget {
 
 class _AnimateSampleState extends State<AnimateSample>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {
@@ -66,9 +66,9 @@ void main() {
   test('Test pump on LiveWidgetController', () async {
     runApp(MaterialApp(home: Center(child: CountButton())));
 
-    await SchedulerBinding.instance.endOfFrame;
+    await SchedulerBinding.instance!.endOfFrame;
     final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance);
+        LiveWidgetController(WidgetsBinding.instance!);
     await controller.tap(find.text('Counter 0'));
     expect(find.text('Counter 0'), findsOneWidget);
     expect(find.text('Counter 1'), findsNothing);
@@ -79,9 +79,9 @@ void main() {
 
   test('Test pumpAndSettle on LiveWidgetController', () async {
     runApp(MaterialApp(home: Center(child: AnimateSample())));
-    await SchedulerBinding.instance.endOfFrame;
+    await SchedulerBinding.instance!.endOfFrame;
     final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance);
+        LiveWidgetController(WidgetsBinding.instance!);
     expect(find.text('Value: 1.0'), findsNothing);
     await controller.pumpAndSettle();
     expect(find.text('Value: 1.0'), findsOneWidget);
@@ -99,9 +99,9 @@ void main() {
         ),
       ),
     );
-    await SchedulerBinding.instance.endOfFrame;
+    await SchedulerBinding.instance!.endOfFrame;
     final WidgetController controller =
-        LiveWidgetController(WidgetsBinding.instance);
+        LiveWidgetController(WidgetsBinding.instance!);
 
     final Offset location = controller.getCenter(find.text('test'));
     final List<PointerEventRecord> records = <PointerEventRecord>[

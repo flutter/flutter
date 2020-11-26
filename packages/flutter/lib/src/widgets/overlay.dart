@@ -45,13 +45,17 @@ import 'ticker_provider.dart';
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
 /// call [State.setState], the user's battery will be drained unnecessarily.
 ///
+/// [OverlayEntry] is a [ChangeNotifier] that notifies when the widget built by
+/// [builder] is mounted or unmounted, whose exact state can be queried by
+/// [mounted].
+///
 /// See also:
 ///
 ///  * [Overlay]
 ///  * [OverlayState]
 ///  * [WidgetsApp]
 ///  * [MaterialApp]
-class OverlayEntry {
+class OverlayEntry extends ChangeNotifier {
   /// Creates an overlay entry.
   ///
   /// To insert the entry into an [Overlay], first find the overlay using
@@ -111,6 +115,19 @@ class OverlayEntry {
     _maintainState = value;
     assert(_overlay != null);
     _overlay!._didChangeEntryOpacity();
+  }
+
+  /// Whether the [OverlayEntry] is currently mounted in the widget tree.
+  ///
+  /// The [OverlayEntry] notifies its listeners when this value changes.
+  bool get mounted => _mounted;
+  bool _mounted = false;
+  void _updateMounted(bool value) {
+    if (value == _mounted) {
+      return;
+    }
+    _mounted = value;
+    notifyListeners();
   }
 
   OverlayState? _overlay;
@@ -173,6 +190,18 @@ class _OverlayEntryWidget extends StatefulWidget {
 
 class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   @override
+  void initState() {
+    super.initState();
+    widget.entry._updateMounted(true);
+  }
+
+  @override
+  void dispose() {
+    widget.entry._updateMounted(false);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TickerMode(
       enabled: widget.tickerEnabled,
@@ -233,7 +262,7 @@ class Overlay extends StatefulWidget {
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
@@ -518,7 +547,7 @@ class _Theatre extends MultiChildRenderObjectWidget {
   _RenderTheatre createRenderObject(BuildContext context) {
     return _RenderTheatre(
       skipCount: skipCount,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       clipBehavior: clipBehavior,
     );
   }
@@ -527,7 +556,7 @@ class _Theatre extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderTheatre renderObject) {
     renderObject
       ..skipCount = skipCount
-      ..textDirection = Directionality.of(context)!
+      ..textDirection = Directionality.of(context)
       ..clipBehavior = clipBehavior;
   }
 
@@ -610,7 +639,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -630,7 +659,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
     RenderBox? child = super.firstChild;
     for (int toSkip = skipCount; toSkip > 0; toSkip--) {
-      final StackParentData childParentData = child!.parentData as StackParentData;
+      final StackParentData childParentData = child!.parentData! as StackParentData;
       child = childParentData.nextSibling;
       assert(child != null);
     }
@@ -668,7 +697,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
       assert(!child.debugNeedsLayout);
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       double? candidate = child.getDistanceToActualBaseline(baseline);
       if (candidate != null) {
         candidate += childParentData.offset.dy;
@@ -687,9 +716,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
-    assert(size.isFinite);
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(constraints.biggest.isFinite);
+    return constraints.biggest;
   }
 
   @override
@@ -708,7 +737,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
         child.layout(nonPositionedConstraints, parentUsesSize: true);
@@ -727,7 +756,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     RenderBox? child = _lastOnstageChild;
     for (int i = 0; i < _onstageChildCount; i++) {
       assert(child != null);
-      final StackParentData childParentData = child!.parentData as StackParentData;
+      final StackParentData childParentData = child!.parentData! as StackParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -747,7 +776,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   void paintStack(PaintingContext context, Offset offset) {
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       context.paintChild(child, childParentData.offset + offset);
       child = childParentData.nextSibling;
     }
@@ -756,18 +785,22 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
     } else {
+      _clipRectLayer = null;
       paintStack(context, offset);
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
       visitor(child);
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       child = childParentData.nextSibling;
     }
   }
@@ -812,7 +845,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
         );
       }
 
-      final StackParentData childParentData = child.parentData as StackParentData;
+      final StackParentData childParentData = child.parentData! as StackParentData;
       child = childParentData.nextSibling;
       count += 1;
     }

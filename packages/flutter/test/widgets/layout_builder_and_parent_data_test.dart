@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class SizeChanger extends StatefulWidget {
   const SizeChanger({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;
@@ -45,8 +43,8 @@ class SizeChangerState extends State<SizeChanger> {
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;

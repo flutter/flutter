@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -733,7 +731,7 @@ class LicensePageObserver extends NavigatorObserver {
   int licensePageCount = 0;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is MaterialPageRoute<dynamic>) {
       licensePageCount++;
     }
@@ -745,7 +743,7 @@ class AboutDialogObserver extends NavigatorObserver {
   int dialogCount = 0;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.toString().contains('_DialogRoute')) {
       dialogCount++;
     }

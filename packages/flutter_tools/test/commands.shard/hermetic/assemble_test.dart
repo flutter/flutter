@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -20,8 +19,9 @@ import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  FlutterCommandRunner.initFlutterRoot();
   Cache.disableLocking();
+  Cache.flutterRoot = '';
+
   final Testbed testbed = Testbed(overrides: <Type, Generator>{
     BuildSystem: ()  => MockBuildSystem(),
     Cache: () => FakeCache(),
@@ -106,7 +106,7 @@ void main() {
         return BuildResult(success: true, performance: <String, PerformanceMeasurement>{
           'hello': PerformanceMeasurement(
             target: 'hello',
-            analyicsName: 'bar',
+            analyticsName: 'bar',
             elapsedMilliseconds: 123,
             skipped: false,
             succeeded: true,
@@ -208,7 +208,7 @@ void main() {
   testWithoutContext('writePerformanceData outputs performance data in JSON form', () {
     final List<PerformanceMeasurement> performanceMeasurement = <PerformanceMeasurement>[
       PerformanceMeasurement(
-        analyicsName: 'foo',
+        analyticsName: 'foo',
         target: 'hidden',
         skipped: false,
         succeeded: true,

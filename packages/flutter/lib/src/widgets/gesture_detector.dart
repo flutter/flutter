@@ -297,7 +297,7 @@ class GestureDetector extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// A pointer that might cause a tap with a primary button has contacted the
@@ -991,7 +991,7 @@ class RawGestureDetector extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The gestures that this widget will attempt to recognize.
@@ -1130,14 +1130,14 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
             'To set the gesture recognizers at other times, trigger a new build using setState() '
             'and provide the new gesture recognizers as constructor arguments to the corresponding '
             'RawGestureDetector or GestureDetector object.'
-          )
+          ),
         ]);
       }
       return true;
     }());
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
-      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject() as RenderSemanticsGestureHandler;
+      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject()! as RenderSemanticsGestureHandler;
       _updateSemanticsForRenderObject(semanticsGestureHandler);
     }
   }

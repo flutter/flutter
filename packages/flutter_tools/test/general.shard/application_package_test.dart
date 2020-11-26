@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -11,8 +10,10 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
@@ -30,42 +31,35 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
-class MockitoProcessManager extends Mock implements ProcessManager {}
 class MockitoAndroidSdk extends Mock implements AndroidSdk {}
 class MockitoAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
 void main() {
   group('Apk with partial Android SDK works', () {
     AndroidSdk sdk;
-    ProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
     MemoryFileSystem fs;
-    Cache mockCache;
-    File gradle;
+    Cache cache;
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       FileSystem: () => fs,
-      Cache: () => mockCache,
+      Cache: () => cache,
     };
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
-      mockProcessManager = MockitoProcessManager();
-      fs = MemoryFileSystem();
-      mockCache = MockCache();
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      fs = MemoryFileSystem.test();
+      cache = Cache.test(
+        processManager: FakeProcessManager.any(),
+      );
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
-      when(mockProcessManager.canRun(any)).thenReturn(true);
-      when(mockProcessManager.run(
-        any,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) async => ProcessResult(1, 0, 'stdout', 'stderr'));
-      when(mockProcessManager.runSync(any)).thenReturn(ProcessResult(1, 0, 'stdout', 'stderr'));
       final FlutterProject project = FlutterProject.current();
-      gradle = globals.fs.file(project.android.hostAppGradleRoot.childFile(
+      fs.file(project.android.hostAppGradleRoot.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
-      ).path)..createSync(recursive: true);
+      ).path).createSync(recursive: true);
     });
 
     testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
@@ -76,18 +70,19 @@ void main() {
       when(sdk.latestVersion).thenReturn(sdkVersion);
       when(sdk.platformToolsAvailable).thenReturn(true);
       when(sdk.licensesAvailable).thenReturn(false);
-      when(mockProcessManager.runSync(
-          argThat(equals(<String>[
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
             aaptPath,
             'dump',
             'xmltree',
-            apkFile.path,
+             apkFile.path,
             'AndroidManifest.xml',
-          ])),
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        ),
-      ).thenReturn(ProcessResult(0, 0, _aaptDataWithDefaultEnabledAndMainLauncherActivity, ''));
+          ],
+          stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity
+        )
+      );
 
       final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -95,6 +90,7 @@ void main() {
         applicationBinary: apkFile,
       );
       expect(applicationPackage.name, 'app.apk');
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools not, apk exists', () async {
@@ -108,26 +104,21 @@ void main() {
         .childFile('gradle.properties')
         .writeAsStringSync('irrelevant');
 
-      final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_application_package_test_gradle_wrapper.');
-      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
+      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper');
 
-      globals.fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
+      gradleWrapperDir.fileSystem.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
           .createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
-      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
+      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
+
+      fakeProcessManager.addCommand(FakeCommand(command: <String>[gradle.path, 'dependencies']));
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
         buildInfo: null,
         applicationBinary: globals.fs.file('app.apk'),
       );
-      verify(
-        mockProcessManager.run(
-          argThat(equals(<String>[gradle.path, 'dependencies'])),
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        ),
-      ).called(1);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools available, does not call gradle dependencies', () async {
@@ -138,77 +129,117 @@ void main() {
         TargetPlatform.android_arm,
         buildInfo: null,
       );
-      verifyNever(
-        mockProcessManager.run(
-          argThat(equals(<String>[gradle.path, 'dependencies'])),
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        ),
-      );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
-    testUsingContext('returns null when failed to extract manifest', () async {
+    testWithoutContext('returns null when failed to extract manifest', () async {
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
       when(sdk.latestVersion).thenReturn(sdkVersion);
-      when(mockProcessManager.runSync(argThat(contains('logcat'))))
-          .thenReturn(ProcessResult(0, 1, '', ''));
+      final AndroidApk androidApk = AndroidApk.fromApk(
+        null,
+        processManager: fakeProcessManager,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+        androidSdk: sdk,
+      );
 
-      expect(AndroidApk.fromApk(null), isNull);
-    }, overrides: overrides);
+      expect(androidApk, isNull);
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+    });
   });
 
   group('ApkManifestData', () {
-    testUsingContext('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledAndMainLauncherActivity);
+    testWithoutContext('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithExplicitEnabledAndMainLauncherActivity,
+        BufferLogger.test(),
+      );
+
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledAndMainLauncherActivity);
+    testWithoutContext('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+        BufferLogger.test(),
+      );
+
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('Parses manifest with a dist namespace', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDistNamespace);
+    testWithoutContext('Parses manifest with a dist namespace', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithDistNamespace,
+        BufferLogger.test(),
+      );
+
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
+    testWithoutContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
+      final BufferLogger logger = BufferLogger.test();
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoEnabledActivity,
+        logger,
+      );
+
       expect(data, isNull);
       expect(
-          testLogger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    }, overrides: noColorTerminalOverride);
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testUsingContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
+    testWithoutContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
+      final BufferLogger logger = BufferLogger.test();
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoMainActivity,
+        logger,
+      );
+
       expect(data, isNull);
       expect(
-          testLogger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    }, overrides: noColorTerminalOverride);
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testUsingContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
+    testWithoutContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
+      final BufferLogger logger = BufferLogger.test();
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithNoLauncherActivity,
+        logger,
+      );
+
       expect(data, isNull);
       expect(
-          testLogger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    }, overrides: noColorTerminalOverride);
+        logger.errorText,
+        'Error running io.flutter.examples.hello_world. Default activity not found\n',
+      );
+    });
 
-    testUsingContext('Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithLauncherAndDefaultActivity);
+    testWithoutContext('Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithLauncherAndDefaultActivity,
+        BufferLogger.test(),
+      );
+
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
-    }, overrides: noColorTerminalOverride);
+    });
 
-    testUsingContext('Parses manifest with missing application tag', () async {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithoutApplication);
+    testWithoutContext('Parses manifest with missing application tag', () async {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+        _aaptDataWithoutApplication,
+        BufferLogger.test(),
+      );
 
       expect(data, isNull);
     });
@@ -217,7 +248,7 @@ void main() {
   group('PrebuiltIOSApp', () {
     MockOperatingSystemUtils os;
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       PlistParser: () => MockPlistUtils(),
       Platform: _kNoColorTerminalPlatform,
@@ -365,7 +396,7 @@ void main() {
 
   group('FuchsiaApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
@@ -691,5 +722,4 @@ const String plistData = '''
 {"CFBundleIdentifier": "fooBundleId"}
 ''';
 
-class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }

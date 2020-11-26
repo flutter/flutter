@@ -61,6 +61,12 @@ IF NOT EXIST "%cache_dir%" (
 GOTO :after_subroutine
 
 :subroutine
+  REM If present, run the bootstrap script first
+  SET bootstrap_path=%FLUTTER_ROOT%\bin\internal\bootstrap.bat
+  IF EXIST "%bootstrap_path%" (
+    CALL "%bootstrap_path%"
+  )
+
   PUSHD "%flutter_root%"
   FOR /f %%r IN ('git rev-parse HEAD') DO SET revision=%%r
   POPD

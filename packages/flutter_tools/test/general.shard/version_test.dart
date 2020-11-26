@@ -36,7 +36,15 @@ void main() {
     mockCache = MockCache();
   });
 
-  for (final String channel in FlutterVersion.officialChannels) {
+  testUsingContext('Channel enum and string transform to each other', () {
+    for (final Channel channel in Channel.values) {
+      expect(getNameForChannel(channel), kOfficialChannels.toList()[channel.index]);
+    }
+    expect(kOfficialChannels.toList().map((String str) => getChannelForName(str)).toList(),
+      Channel.values);
+  });
+
+  for (final String channel in kOfficialChannels) {
     DateTime getChannelUpToDateVersion() {
       return _testClock.ago(FlutterVersion.versionAgeConsideredUpToDate(channel) ~/ 2);
     }
@@ -69,11 +77,11 @@ void main() {
         ));
 
         processManager.addCommand(const FakeCommand(
-          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          command: <String>['git', 'tag', '--points-at', '1234abcd'],
         ));
 
         processManager.addCommand(const FakeCommand(
-          command: <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
           stdout: '0.1.2-3-1234abcd',
         ));
 
@@ -111,7 +119,7 @@ void main() {
         _expectVersionMessage('');
         expect(processManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => processManager,
         Cache: () => mockCache,
       });
@@ -135,7 +143,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -157,7 +165,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -183,7 +191,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -214,7 +222,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -238,7 +246,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -258,7 +266,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -278,7 +286,7 @@ void main() {
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())));
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -312,7 +320,7 @@ void main() {
           workingDirectory: anyNamed('workingDirectory'),
         ));
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
       });
     });
@@ -328,7 +336,7 @@ void main() {
         fakeData(mockProcessManager, mockCache, channel: channel);
         _expectDefault(await VersionCheckStamp.load());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -337,7 +345,7 @@ void main() {
         fakeData(mockProcessManager, mockCache, stampJson: '<', channel: channel);
         _expectDefault(await VersionCheckStamp.load());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -351,7 +359,7 @@ void main() {
         );
         _expectDefault(await VersionCheckStamp.load());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -375,7 +383,7 @@ void main() {
         expect(stamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
         expect(stamp.lastTimeWarningWasPrinted, _testClock.now());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -402,7 +410,7 @@ void main() {
         expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
         expect(storedStamp.lastTimeWarningWasPrinted, _testClock.now());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -433,7 +441,7 @@ void main() {
         expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(const Duration(days: 2)));
         expect(storedStamp.lastTimeWarningWasPrinted, _testClock.now());
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(_testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock),
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
       });
@@ -555,7 +563,7 @@ void main() {
           stdout: '', // no tag
         ),
         const FakeCommand(
-          command: <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
           stdout: '$devTag-$commitsAhead-g$headRevision',
         ),
       ],
@@ -577,7 +585,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -603,7 +611,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -622,7 +630,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -648,7 +656,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -675,7 +683,7 @@ void main() {
       <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -693,7 +701,7 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -720,7 +728,7 @@ void main() {
       <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -853,12 +861,12 @@ void fakeData(
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(105, 0, '', ''));
   when(pm.runSync(
-    <String>['git', 'tag', '--points-at', 'HEAD'],
+    <String>['git', 'tag', '--points-at', '1234abcd'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(106, 0, '', ''));
   when(pm.runSync(
-    <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+    <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''));

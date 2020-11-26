@@ -27,13 +27,11 @@ class AnalysisServer {
     @required Logger logger,
     @required Platform platform,
     @required Terminal terminal,
-    @required List<String> experiments,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _platform = platform,
-       _terminal = terminal,
-       _experiments = experiments;
+       _terminal = terminal;
 
   final String sdkPath;
   final List<String> directories;
@@ -42,7 +40,6 @@ class AnalysisServer {
   final Logger _logger;
   final Platform _platform;
   final Terminal _terminal;
-  final List<String> _experiments;
 
   Process _process;
   final StreamController<bool> _analyzingController =
@@ -64,11 +61,6 @@ class AnalysisServer {
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
       '--disable-dart-dev',
       snapshot,
-      for (String experiment in _experiments)
-        ...<String>[
-          '--enable-experiment',
-          experiment,
-        ],
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
       '--sdk',
@@ -190,7 +182,7 @@ class AnalysisServer {
   }
 }
 
-enum _AnalysisSeverity {
+enum AnalysisSeverity {
   error,
   warning,
   info,
@@ -217,12 +209,12 @@ class AnalysisError implements Comparable<AnalysisError> {
 
   String get colorSeverity {
     switch (writtenError.severityLevel) {
-      case _AnalysisSeverity.error:
+      case AnalysisSeverity.error:
         return _terminal.color(writtenError.severity, TerminalColor.red);
-      case _AnalysisSeverity.warning:
+      case AnalysisSeverity.warning:
         return _terminal.color(writtenError.severity, TerminalColor.yellow);
-      case _AnalysisSeverity.info:
-      case _AnalysisSeverity.none:
+      case AnalysisSeverity.info:
+      case AnalysisSeverity.none:
         return writtenError.severity;
     }
     return null;
@@ -316,14 +308,14 @@ class WrittenError {
   final int startColumn;
   final int offset;
 
-  static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
-    'INFO': _AnalysisSeverity.info,
-    'WARNING': _AnalysisSeverity.warning,
-    'ERROR': _AnalysisSeverity.error,
+  static final Map<String, AnalysisSeverity> _severityMap = <String, AnalysisSeverity>{
+    'INFO': AnalysisSeverity.info,
+    'WARNING': AnalysisSeverity.warning,
+    'ERROR': AnalysisSeverity.error,
   };
 
-  _AnalysisSeverity get severityLevel =>
-      _severityMap[severity] ?? _AnalysisSeverity.none;
+  AnalysisSeverity get severityLevel =>
+      _severityMap[severity] ?? AnalysisSeverity.none;
 
   String get messageSentenceFragment {
     if (message.endsWith('.')) {

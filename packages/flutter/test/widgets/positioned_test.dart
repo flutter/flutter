@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -78,8 +76,8 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     void recordMetrics() {
-      final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
-      final BoxParentData boxParentData = box.parentData as BoxParentData;
+      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+      final BoxParentData boxParentData = box.parentData! as BoxParentData;
       sizes.add(box.size);
       positions.add(boxParentData.offset);
     }

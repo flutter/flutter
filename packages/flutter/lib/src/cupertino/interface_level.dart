@@ -57,14 +57,16 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// You can use this function to query the user interface elevation level within
   /// the given [BuildContext]. When that information changes, your widget will
   /// be scheduled to be rebuilt, keeping your widget up-to-date.
-  static CupertinoUserInterfaceLevelData? of(BuildContext context, { bool nullOk = false }) {
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is similar, but will return null if no
+  ///    [CupertinoUserInterfaceLevel] encloses the given context.
+  static CupertinoUserInterfaceLevelData of(BuildContext context) {
     assert(context != null);
-    assert(nullOk != null);
     final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     if (query != null)
       return query._data;
-    if (nullOk)
-      return null;
     throw FlutterError(
       'CupertinoUserInterfaceLevel.of() called with a context that does not contain a CupertinoUserInterfaceLevel.\n'
       'No CupertinoUserInterfaceLevel ancestor could be found starting from the context that was passed '
@@ -74,6 +76,27 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
       'The context used was:\n'
       '  $context'
     );
+  }
+
+  /// The data from the closest instance of this class that encloses the given
+  /// context, if there is one.
+  ///
+  /// Returns null if no [CupertinoUserInterfaceLevel] encloses the given context.
+  ///
+  /// You can use this function to query the user interface elevation level within
+  /// the given [BuildContext]. When that information changes, your widget will
+  /// be scheduled to be rebuilt, keeping your widget up-to-date.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is similar, but will throw an exception if no
+  ///    [CupertinoUserInterfaceLevel] encloses the given context.
+  static CupertinoUserInterfaceLevelData? maybeOf(BuildContext context) {
+    assert(context != null);
+    final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
+    if (query != null)
+      return query._data;
+    return null;
   }
 
   @override

@@ -27,12 +27,13 @@ class BuildApkCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesDartDefineOption();
-    usesExtraFrontendOptions();
+    usesExtraDartFlagOptions();
     addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
+    addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
@@ -89,7 +90,7 @@ class BuildApkCommand extends BuildSubCommand {
     if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
     }
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
@@ -108,12 +109,12 @@ class BuildApkCommand extends BuildSubCommand {
       globals.printStatus('To generate an app bundle, run:', emphasis: true, indent: 4);
       globals.printStatus('flutter build appbundle '
                   '--target-platform ${targetPlatforms.replaceAll(' ', '')}',indent: 8);
-      globals.printStatus('Learn more on: https://developer.android.com/guide/app-bundle',indent: 8);
+      globals.printStatus('Learn more: https://developer.android.com/guide/app-bundle',indent: 8);
       globals.printStatus('To split the APKs per ABI, run:', emphasis: true, indent: 4);
       globals.printStatus('flutter build apk '
                   '--target-platform ${targetPlatforms.replaceAll(' ', '')} '
                   '--split-per-abi', indent: 8);
-      globals.printStatus('Learn more on:  https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
+      globals.printStatus('Learn more: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
     }
     await androidBuilder.buildApk(
       project: FlutterProject.current(),

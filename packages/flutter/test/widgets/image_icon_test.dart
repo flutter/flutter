@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,7 +10,7 @@ import '../painting/mocks_for_image_cache.dart';
 
 
 void main() {
-  ImageProvider _image;
+  late ImageProvider _image;
 
   setUpAll(() async {
     _image = TestImageProvider(
@@ -45,8 +43,7 @@ void main() {
     );
 
     final Image image = tester.widget(find.byType(Image));
-    expect(image, isNotNull);
-    expect(image.color.alpha, equals(128));
+    expect(image.color!.alpha, equals(128));
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {

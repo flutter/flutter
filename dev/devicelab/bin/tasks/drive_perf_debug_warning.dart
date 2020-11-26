@@ -4,6 +4,7 @@
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<String> _runWithMode(String mode, String deviceId) async {

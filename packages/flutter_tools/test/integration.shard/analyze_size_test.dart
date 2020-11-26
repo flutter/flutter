@@ -4,7 +4,6 @@
 
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -61,7 +60,7 @@ void main() {
     final String outputFilePath = line.split(iosDebugMessage).last.trim();
     expect(fileSystem.file(fileSystem.path.join(woringDirectory, outputFilePath)), exists);
     expect(result.exitCode, 0);
-  }, skip: !const LocalPlatform().isMacOS); // Only supported on macOS
+  }, skip: true); // Extremely flaky due to https://github.com/flutter/flutter/issues/68144
 
   testWithoutContext('--analyze-size is only supported in release mode', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -78,6 +77,23 @@ void main() {
     print(result.stdout);
     print(result.stderr);
     expect(result.stderr.toString(), contains('--analyze-size can only be used on release builds'));
+
+    expect(result.exitCode, 1);
+  });
+
+  testWithoutContext('--analyze-size is not supported in combination with --split-debug-info', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+       ...getLocalEngineArguments(),
+      'build',
+      'apk',
+      '--analyze-size',
+      '--target-platform=android-arm64',
+      '--split-debug-info=infos'
+    ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+
+    expect(result.stderr.toString(), contains('--analyze-size cannot be combined with --split-debug-info'));
 
     expect(result.exitCode, 1);
   });

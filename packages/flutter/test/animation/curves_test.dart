@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -276,9 +274,6 @@ void main() {
 
   test('CatmullRomSpline enforces contract', () {
     expect(() {
-      CatmullRomSpline(null);
-    }, throwsAssertionError);
-    expect(() {
       CatmullRomSpline(const <Offset>[]);
     }, throwsAssertionError);
     expect(() {
@@ -327,9 +322,6 @@ void main() {
   });
 
   test('CatmullRomSpline enforces contract when precomputed', () {
-    expect(() {
-      CatmullRomSpline.precompute(null);
-    }, throwsAssertionError);
     expect(() {
       CatmullRomSpline.precompute(const <Offset>[]);
     }, throwsAssertionError);
@@ -395,9 +387,6 @@ void main() {
   });
 
   test('CatmullRomCurve enforces contract', () {
-    expect(() {
-      CatmullRomCurve(null);
-    }, throwsAssertionError);
     expect(() {
       CatmullRomCurve(const <Offset>[]);
     }, throwsAssertionError);
@@ -517,9 +506,6 @@ void main() {
   });
 
   test('CatmullRomCurve enforces contract when precomputed', () {
-    expect(() {
-      CatmullRomCurve.precompute(null);
-    }, throwsAssertionError);
     expect(() {
       CatmullRomCurve.precompute(const <Offset>[]);
     }, throwsAssertionError);

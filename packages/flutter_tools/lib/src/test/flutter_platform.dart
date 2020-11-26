@@ -3,16 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io; // ignore: dart_io_import;
 
 import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
+import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
@@ -22,7 +19,6 @@ import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../test/test_wrapper.dart';
@@ -57,8 +53,6 @@ FlutterPlatform installHook({
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
-  @required BuildMode buildMode,
-  bool trackWidgetCreation = false,
   bool updateGoldens = false,
   bool buildTestAssets = false,
   int observatoryPort,
@@ -67,10 +61,8 @@ FlutterPlatform installHook({
   FlutterProject flutterProject,
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
-  List<String> extraFrontEndOptions,
-  // Deprecated, use extraFrontEndOptions.
-  List<String> dartExperiments,
   bool nullAssertions = false,
+  @required BuildInfo buildInfo,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -97,15 +89,13 @@ FlutterPlatform installHook({
     port: port,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
-    buildMode: buildMode,
-    trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
-    extraFrontEndOptions: extraFrontEndOptions,
     nullAssertions: nullAssertions,
+    buildInfo: buildInfo,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -135,6 +125,7 @@ String generateTestBootstrap({
   bool updateGoldens = false,
   String languageVersionHeader = '',
   bool nullSafety = false,
+  bool flutterTestDep = true,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -152,8 +143,13 @@ import 'dart:async';
 import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
 import 'dart:isolate';
-
+''');
+  if (flutterTestDep) {
+    buffer.write('''
 import 'package:flutter_test/flutter_test.dart';
+''');
+  }
+  buffer.write('''
 import 'package:test_api/src/remote_listener.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -196,12 +192,16 @@ void main() {
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel<dynamic> channel = serializeSuite(() {
     catchIsolateErrors();
-    goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
-    autoUpdateGoldenFiles = $updateGoldens;
 ''');
+  if (flutterTestDep) {
+    buffer.write('''
+goldenFileComparator = LocalFileComparator(Uri.parse('$testUrl'));
+autoUpdateGoldenFiles = $updateGoldens;
+''');
+  }
   if (testConfigFile != null) {
     buffer.write('''
-    return () => test_config.main(test.main);
+    return () => test_config.testExecutable(test.main);
 ''');
   } else {
     buffer.write('''
@@ -242,15 +242,13 @@ class FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.precompiledDillFiles,
-    @required this.buildMode,
-    this.trackWidgetCreation,
     this.updateGoldens,
     this.buildTestAssets,
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
     this.nullAssertions = false,
-    @required this.extraFrontEndOptions,
+    @required this.buildInfo,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -265,15 +263,13 @@ class FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final Map<String, String> precompiledDillFiles;
-  final BuildMode buildMode;
-  final bool trackWidgetCreation;
   final bool updateGoldens;
   final bool buildTestAssets;
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
-  final List<String> extraFrontEndOptions;
   final bool nullAssertions;
+  final BuildInfo buildInfo;
 
   Directory fontsDirectory;
 
@@ -303,23 +299,10 @@ class FlutterPlatform extends PlatformPlugin {
     // LoadSuite to emit an error, which will be presented to the user.
     // Except for the Declarer error, which is a specific test incompatibility
     // error we need to catch.
-    try {
-      final StreamChannel<dynamic> channel = loadChannel(path, platform);
-      final RunnerSuiteController controller = deserializeSuite(path, platform,
-        suiteConfig, const PluginEnvironment(), channel, message);
-      return await controller.suite;
-    } on Exception catch (err) {
-      /// Rethrow a less confusing error if it is a test incompatibility.
-      if (err.toString().contains("type 'Declarer' is not a subtype of type 'Declarer'")) {
-        throw UnsupportedError('Package incompatibility between flutter and test packages:\n'
-          '  * flutter is incompatible with test <1.4.0.\n'
-          '  * flutter is incompatible with mockito <4.0.0\n'
-          "To fix this error, update test to at least '^1.4.0' and mockito to at least '^4.0.0'\n"
-        );
-      }
-      // Guess it was a different error.
-      rethrow;
-    }
+    final StreamChannel<dynamic> channel = loadChannel(path, platform);
+    final RunnerSuiteController controller = deserializeSuite(path, platform,
+      suiteConfig, const PluginEnvironment(), channel, message);
+    return controller.suite;
   }
 
   @override
@@ -390,10 +373,7 @@ class FlutterPlatform extends PlatformPlugin {
     StreamChannel<dynamic> controller,
     int ourTestCount,
   ) async {
-    _packageConfig ??= await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
-      logger: globals.logger,
-    );
+    _packageConfig ??= buildInfo.packageConfig;
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
@@ -448,7 +428,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, extraFrontEndOptions);
+        compiler ??= TestCompiler(buildInfo, flutterProject);
         mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {
@@ -460,18 +440,18 @@ class FlutterPlatform extends PlatformPlugin {
       final Process process = await _startProcess(
         shellPath,
         mainDart,
-        packages: globalPackagesPath,
+        packages: buildInfo.packagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         disableServiceAuthCodes: disableServiceAuthCodes,
-        observatoryPort: explicitObservatoryPort,
+        observatoryPort: disableDds ? explicitObservatoryPort : 0,
         serverPort: server.port,
       );
       subprocessActive = true;
       finalizers.add(() async {
         if (subprocessActive) {
           globals.printTrace('test $ourTestCount: ensuring end-of-process for shell');
-          process.kill();
+          process.kill(io.ProcessSignal.sigkill);
           final int exitCode = await process.exitCode;
           subprocessActive = false;
           if (!controllerSinkClosed && exitCode != -15) {
@@ -495,6 +475,7 @@ class FlutterPlatform extends PlatformPlugin {
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
       Uri processObservatoryUri;
+      final Uri ddsServiceUri = getDdsServiceUri();
       _pipeStandardStreamsToConsole(
         process,
         reportObservatoryUri: (Uri detectedUri) async {
@@ -504,6 +485,7 @@ class FlutterPlatform extends PlatformPlugin {
           if (!disableDds) {
             final DartDevelopmentService dds = await DartDevelopmentService.startDartDevelopmentService(
               detectedUri,
+              serviceUri: ddsServiceUri,
               enableAuthCodes: !disableServiceAuthCodes,
               ipv6: host.type == InternetAddressType.IPv6,
             );
@@ -725,18 +707,19 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
+    final LanguageVersion languageVersion = determineLanguageVersion(
+      file,
+      _packageConfig[flutterProject?.manifest?.appName],
+    );
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      languageVersionHeader: determineLanguageVersion(
-        file,
-        _packageConfig[flutterProject?.manifest?.appName],
-      ),
+      flutterTestDep: _packageConfig['flutter_test'] != null,
+      languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}'
     );
   }
-
 
   File _cachedFontConfig;
 
@@ -903,6 +886,19 @@ class FlutterPlatform extends PlatformPlugin {
       default:
         return 'Shell subprocess crashed with unexpected exit code $exitCode $when.';
     }
+  }
+
+  @visibleForTesting
+  @protected
+  Uri getDdsServiceUri() {
+    return Uri(
+      scheme: 'http',
+      host: (host.type == InternetAddressType.IPv6 ?
+        InternetAddress.loopbackIPv6 :
+        InternetAddress.loopbackIPv4
+      ).host,
+      port: explicitObservatoryPort ?? 0,
+    );
   }
 }
 

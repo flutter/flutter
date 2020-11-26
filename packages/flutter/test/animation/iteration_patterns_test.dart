@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
@@ -11,7 +9,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance.resetEpoch();
+    WidgetsBinding.instance!.resetEpoch();
   });
 
   test('AnimationController with mutating listener', () {
@@ -92,7 +90,7 @@ void main() {
     final VoidCallback listener1 = () { log.add('listener1'); };
     final VoidCallback badListener = () {
       log.add('badListener');
-      throw null;
+      throw ArgumentError();
     };
     final VoidCallback listener2 = () { log.add('listener2'); };
 
@@ -101,7 +99,7 @@ void main() {
     controller.addListener(listener2);
     controller.value = 0.2;
     expect(log, <String>['listener1', 'badListener', 'listener2']);
-    expect(tester.takeException(), isNullThrownError);
+    expect(tester.takeException(), isArgumentError);
     log.clear();
   });
 
@@ -115,7 +113,7 @@ void main() {
     final AnimationStatusListener listener1 = (AnimationStatus status) { log.add('listener1'); };
     final AnimationStatusListener badListener = (AnimationStatus status) {
       log.add('badListener');
-      throw null;
+      throw ArgumentError();
     };
     final AnimationStatusListener listener2 = (AnimationStatus status) { log.add('listener2'); };
 
@@ -124,7 +122,7 @@ void main() {
     controller.addStatusListener(listener2);
     controller.forward();
     expect(log, <String>['listener1', 'badListener', 'listener2']);
-    expect(tester.takeException(), isNullThrownError);
+    expect(tester.takeException(), isArgumentError);
     log.clear();
     controller.dispose();
   });

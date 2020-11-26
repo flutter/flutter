@@ -36,31 +36,26 @@ void main() {
 
   group('IOSDevice', () {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    Artifacts mockArtifacts;
-    MockCache mockCache;
-    MockVmService mockVmService;
+    Cache cache;
     Logger logger;
     IOSDeploy iosDeploy;
     IMobileDevice iMobileDevice;
-    FileSystem mockFileSystem;
+    FileSystem nullFileSystem;
 
     setUp(() {
-      mockArtifacts = MockArtifacts();
-      mockCache = MockCache();
-      mockVmService = MockVmService();
-      const MapEntry<String, String> dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path/to/libs');
-      when(mockCache.dyLdLibEntry).thenReturn(dyLdLibEntry);
+      final Artifacts artifacts = Artifacts.test();
+      cache = Cache.test();
       logger = BufferLogger.test();
       iosDeploy = IOSDeploy(
-        artifacts: mockArtifacts,
-        cache: mockCache,
+        artifacts: artifacts,
+        cache: cache,
         logger: logger,
         platform: macPlatform,
         processManager: FakeProcessManager.any(),
       );
       iMobileDevice = IMobileDevice(
-        artifacts: mockArtifacts,
-        cache: mockCache,
+        artifacts: artifacts,
+        cache: cache,
         logger: logger,
         processManager: FakeProcessManager.any(),
       );
@@ -70,7 +65,7 @@ void main() {
       IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -79,7 +74,6 @@ void main() {
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       );
     });
 
@@ -87,7 +81,7 @@ void main() {
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -96,12 +90,11 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -110,12 +103,11 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -124,12 +116,11 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -138,12 +129,11 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -152,7 +142,6 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 0);
     });
 
@@ -160,7 +149,7 @@ void main() {
       final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: mockFileSystem,
+        fileSystem: nullFileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -169,7 +158,6 @@ void main() {
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -185,7 +173,7 @@ void main() {
             IOSDevice(
               'device-123',
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-              fileSystem: mockFileSystem,
+              fileSystem: nullFileSystem,
               logger: logger,
               platform: platform,
               iosDeploy: iosDeploy,
@@ -194,7 +182,6 @@ void main() {
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
               interfaceType: IOSDeviceInterface.usb,
-              vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
             );
           },
           throwsAssertionError,
@@ -213,11 +200,10 @@ void main() {
       MockProcess mockProcess3;
       IOSDevicePortForwarder portForwarder;
       ForwardedPort forwardedPort;
-      Artifacts mockArtifacts;
-      MockCache mockCache;
+      Cache cache;
       Logger logger;
       IOSDeploy iosDeploy;
-      FileSystem mockFileSystem;
+      FileSystem nullFileSystem;
       IProxy iproxy;
 
       IOSDevicePortForwarder createPortForwarder(
@@ -228,7 +214,7 @@ void main() {
           id: device.id,
           logger: logger,
           operatingSystemUtils: OperatingSystemUtils(
-            fileSystem: mockFileSystem,
+            fileSystem: nullFileSystem,
             logger: logger,
             platform: FakePlatform(operatingSystem: 'macos'),
             processManager: FakeProcessManager.any(),
@@ -261,11 +247,10 @@ void main() {
         mockProcess2 = MockProcess();
         mockProcess3 = MockProcess();
         forwardedPort = ForwardedPort.withContext(123, 456, mockProcess3);
-        mockArtifacts = MockArtifacts();
-        mockCache = MockCache();
+        cache = Cache.test();
         iosDeploy = IOSDeploy(
-          artifacts: mockArtifacts,
-          cache: mockCache,
+          artifacts: Artifacts.test(),
+          cache: cache,
           logger: logger,
           platform: macPlatform,
           processManager: FakeProcessManager.any(),
@@ -276,7 +261,7 @@ void main() {
         device = IOSDevice(
           '123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: mockFileSystem,
+          fileSystem: nullFileSystem,
           logger: logger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
@@ -285,7 +270,6 @@ void main() {
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
           interfaceType: IOSDeviceInterface.usb,
-          vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
         );
         logReader1 = createLogReader(device, appPackage1, mockProcess1);
         logReader2 = createLogReader(device, appPackage2, mockProcess2);
@@ -305,10 +289,7 @@ void main() {
 
   group('polling', () {
     MockXcdevice mockXcdevice;
-    MockArtifacts mockArtifacts;
-    MockCache mockCache;
-    MockVmService mockVmService1;
-    MockVmService mockVmService2;
+    Cache cache;
     FakeProcessManager fakeProcessManager;
     BufferLogger logger;
     IOSDeploy iosDeploy;
@@ -319,23 +300,21 @@ void main() {
 
     setUp(() {
       mockXcdevice = MockXcdevice();
-      mockArtifacts = MockArtifacts();
-      mockCache = MockCache();
-      mockVmService1 = MockVmService();
-      mockVmService2 = MockVmService();
+      final Artifacts artifacts = Artifacts.test();
+      cache = Cache.test();
       logger = BufferLogger.test();
       mockIosWorkflow = MockIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
-        artifacts: mockArtifacts,
-        cache: mockCache,
+        artifacts: artifacts,
+        cache: cache,
         logger: logger,
         platform: macPlatform,
         processManager: fakeProcessManager,
       );
       iMobileDevice = IMobileDevice(
-        artifacts: mockArtifacts,
-        cache: mockCache,
+        artifacts: artifacts,
+        cache: cache,
         processManager: fakeProcessManager,
         logger: logger,
       );
@@ -352,7 +331,6 @@ void main() {
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService1,
       );
 
       device2 = IOSDevice(
@@ -367,7 +345,6 @@ void main() {
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         interfaceType: IOSDeviceInterface.usb,
-        vmServiceConnectUri: (String string, {Log log}) async => mockVmService2,
       );
     });
 
@@ -521,7 +498,7 @@ void main() {
       expect(iosDevices.deviceNotifier.items, isEmpty);
       expect(eventStream.hasListener, isTrue);
 
-      await iosDevices.dispose();
+      iosDevices.dispose();
       expect(eventStream.hasListener, isFalse);
     });
 
@@ -604,8 +581,6 @@ void main() {
 }
 
 class MockIOSApp extends Mock implements IOSApp {}
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}

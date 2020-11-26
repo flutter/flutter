@@ -77,11 +77,11 @@ class Form extends StatefulWidget {
     Key? key,
     required this.child,
     @Deprecated(
-      'Use autoValidateMode parameter which provide more specific '
-      'behaviour related to auto validation. '
+      'Use autoValidateMode parameter which provides more specific '
+      'behavior related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )
-    bool autovalidate = false,
+    this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
@@ -92,9 +92,8 @@ class Form extends StatefulWidget {
          autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.'
        ),
-       autovalidateMode = autovalidate
-           ? AutovalidateMode.always
-           : (autovalidateMode ?? AutovalidateMode.disabled),
+       autovalidateMode = autovalidateMode ??
+         (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
        super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
@@ -114,7 +113,7 @@ class Form extends StatefulWidget {
   ///
   /// This is the root of the widget hierarchy that contains this form.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
@@ -138,8 +137,17 @@ class Form extends StatefulWidget {
   /// Used to enable/disable form fields auto validation and update their error
   /// text.
   ///
-  /// {@macro flutter.widgets.form.autovalidateMode}
+  /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
+
+  /// Used to enable/disable form fields auto validation and update their error
+  /// text.
+  @Deprecated(
+    'Use autoValidateMode parameter which provides more specific '
+    'behavior related to auto validation. '
+    'This feature was deprecated after v1.19.0.'
+  )
+  final bool autovalidate;
 
   @override
   FormState createState() => FormState();
@@ -318,11 +326,11 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     @Deprecated(
-      'Use autoValidateMode parameter which provide more specific '
-      'behaviour related to auto validation. '
+      'Use autoValidateMode parameter which provides more specific '
+      'behavior related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )
-    bool autovalidate = false,
+    this.autovalidate = false,
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
   }) : assert(builder != null),
@@ -331,9 +339,8 @@ class FormField<T> extends StatefulWidget {
          autovalidate == true && autovalidateMode == null,
          'autovalidate and autovalidateMode should not be used together.'
        ),
-       autovalidateMode = autovalidate
-           ? AutovalidateMode.always
-           : (autovalidateMode ?? AutovalidateMode.disabled),
+        autovalidateMode = autovalidateMode ??
+          (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
@@ -373,7 +380,7 @@ class FormField<T> extends StatefulWidget {
   /// Used to enable/disable this form field auto validation and update its
   /// error text.
   ///
-  /// {@template flutter.widgets.form.autovalidateMode}
+  /// {@template flutter.widgets.FormField.autovalidateMode}
   /// If [AutovalidateMode.onUserInteraction] this form field will only
   /// auto-validate after its content changes, if [AutovalidateMode.always] it
   /// will auto validate even without user interaction and
@@ -384,6 +391,15 @@ class FormField<T> extends StatefulWidget {
   /// is set to [AutovalidateMode.always] for backward compatibility.
   /// {@endtemplate}
   final AutovalidateMode autovalidateMode;
+
+  /// Used to enable/disable auto validation and update their error
+  /// text.
+  @Deprecated(
+    'Use autoValidateMode parameter which provides more specific '
+    'behavior related to auto validation. '
+    'This feature was deprecated after v1.19.0.'
+  )
+  final bool autovalidate;
 
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
@@ -468,7 +484,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Sets the value associated with this form field.
   ///
-  /// This method should be only be called by subclasses that need to update
+  /// This method should only be called by subclasses that need to update
   /// the form field value due to state changes identified during the widget
   /// build phase, when calling `setState` is prohibited. In all other cases,
   /// the value should be set by a call to [didChange], which ensures that

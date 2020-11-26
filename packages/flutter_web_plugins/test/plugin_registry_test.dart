@@ -4,7 +4,7 @@
 
 @TestOn('chrome') // Uses web-only Flutter SDK
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui; // ignore: unused_import, it looks unused as web-only elements are the only elements used.
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,10 +54,10 @@ void main() {
       const StandardMessageCodec codec = StandardMessageCodec();
 
       final List<String> loggedMessages = <String>[];
-      ServicesBinding.instance.defaultBinaryMessenger
-          .setMessageHandler('test_send', (ByteData data) {
+      ServicesBinding.instance!.defaultBinaryMessenger
+          .setMessageHandler('test_send', (ByteData? data) {
         loggedMessages.add(codec.decodeMessage(data) as String);
-        return null;
+        return Future<ByteData?>.value(null);
       });
 
       await pluginBinaryMessenger.send(
@@ -68,14 +68,14 @@ void main() {
           'test_send', codec.encodeMessage('world'));
       expect(loggedMessages, equals(<String>['hello', 'world']));
 
-      ServicesBinding.instance.defaultBinaryMessenger
+      ServicesBinding.instance!.defaultBinaryMessenger
           .setMessageHandler('test_send', null);
     });
 
     test('throws when trying to set a mock handler', () {
       expect(
           () => pluginBinaryMessenger.setMockMessageHandler(
-              'test', (ByteData data) async => ByteData(0)),
+              'test', (ByteData? data) async => ByteData(0)),
           throwsFlutterError);
     });
   });

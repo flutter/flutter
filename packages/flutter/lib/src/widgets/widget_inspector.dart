@@ -544,7 +544,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   }) {
     RenderObject repaintBoundary = renderObject;
     while (repaintBoundary != null && !repaintBoundary.isRepaintBoundary) {
-      repaintBoundary = repaintBoundary.parent as RenderObject;
+      repaintBoundary = repaintBoundary.parent! as RenderObject;
     }
     assert(repaintBoundary != null);
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
@@ -560,7 +560,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
       // want to capture debugPaint information as well.
       data.containerLayer.append(_ProxyLayer(repaintBoundary.debugLayer!));
       data.foundTarget = true;
-      final OffsetLayer offsetLayer = repaintBoundary.debugLayer as OffsetLayer;
+      final OffsetLayer offsetLayer = repaintBoundary.debugLayer! as OffsetLayer;
       data.screenshotOffset = offsetLayer.offset;
     } else {
       // Repaint everything under the repaint boundary.
@@ -880,17 +880,20 @@ mixin WidgetInspectorService {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        const String argPrefix = 'arg';
         final List<String> args = <String>[];
-        parameters.forEach((String name, String value) {
-          if (name.startsWith(argPrefix)) {
-            final int index = int.parse(name.substring(argPrefix.length));
-            if (index >= args.length) {
-              args.length = index + 1;
-            }
-            args[index] = value;
+        int index = 0;
+        while (true) {
+          final String name = 'arg$index';
+          if (parameters.containsKey(name)) {
+            args.add(parameters[name]!);
+          } else {
+            break;
           }
-        });
+          index++;
+        }
+        // Verify that the only arguments other than perhaps 'isolateId' are
+        // arguments we have already handled.
+        assert(index == parameters.length || (index == parameters.length - 1 && parameters.containsKey('isolateId')));
         return <String, Object?>{'result': await callback(args)};
       },
     );
@@ -970,7 +973,7 @@ mixin WidgetInspectorService {
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
-      FlutterError.onError = _structuredExceptionHandler!;
+      FlutterError.onError = _structuredExceptionHandler;
     }
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
@@ -1357,7 +1360,7 @@ mixin WidgetInspectorService {
         if (object == selection.current) {
           return false;
         }
-        selection.current = object as RenderObject;
+        selection.current = object! as RenderObject;
         developer.inspect(selection.current);
       }
       if (selectionChangedCallback != null) {
@@ -1541,7 +1544,7 @@ mixin WidgetInspectorService {
   /// object that `diagnosticsNodeId` references only including children that
   /// were created directly by user code.
   ///
-  /// {@template widgets.inspector.trackCreation}
+  /// {@template flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
   /// Requires [Widget] creation locations which are only available for debug
   /// mode builds when the `--track-widget-creation` flag is enabled on the call
   /// to the `flutter` tool. This flag is enabled by default in debug builds.
@@ -1827,7 +1830,7 @@ mixin WidgetInspectorService {
 
   /// Returns whether [Widget] creation locations are available.
   ///
-  /// {@macro widgets.inspector.trackCreation}
+  /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
   bool isWidgetCreationTracked() {
     _widgetCreationTracked ??= _WidgetForTypeTests() is _HasCreationLocation;
     return _widgetCreationTracked!;
@@ -2191,7 +2194,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       if (diagnostics.style == DiagnosticsTreeStyle.offstage ||
           diagnostics.value is! RenderObject)
         continue;
-      final RenderObject child = diagnostics.value as RenderObject;
+      final RenderObject child = diagnostics.value! as RenderObject;
       final Rect? paintClip = object.describeApproximatePaintClip(child);
       if (paintClip != null && !paintClip.contains(localPosition))
         continue;
@@ -2245,7 +2248,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     if (!isSelectMode)
       return;
 
-    final RenderIgnorePointer ignorePointer = _ignorePointerKey.currentContext!.findRenderObject() as RenderIgnorePointer;
+    final RenderIgnorePointer ignorePointer = _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
     final RenderObject userRender = ignorePointer.child!;
     final List<RenderObject> selected = hitTest(position, userRender);
 
@@ -2284,10 +2287,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
 
-      if (selection != null) {
-        // Notify debuggers to open an inspector on the object.
-        developer.inspect(selection.current);
-      }
+      // Notify debuggers to open an inspector on the object.
+      developer.inspect(selection.current);
     }
     setState(() {
       // Only exit select mode if there is a button to return to select mode.
@@ -2445,8 +2446,8 @@ class _RenderInspectorOverlay extends RenderBox {
   bool get alwaysNeedsCompositing => true;
 
   @override
-  void performResize() {
-    size = constraints.constrain(const Size(double.infinity, double.infinity));
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(const Size(double.infinity, double.infinity));
   }
 
   @override
@@ -2455,7 +2456,7 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
-      rootRenderObject: parent is RenderObject ? parent as RenderObject : null,
+      rootRenderObject: parent is RenderObject ? parent! as RenderObject : null,
     ));
   }
 }
@@ -2665,8 +2666,8 @@ class _InspectorOverlayLayer extends Layer {
   ) {
     canvas.save();
     final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
-    final TextSpan textSpan = _textPainter?.text as TextSpan;
-    if (_textPainter == null || textSpan.text != message || _textPainterMaxWidth != maxWidth) {
+    final TextSpan? textSpan = _textPainter?.text as TextSpan?;
+    if (_textPainter == null || textSpan!.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
       _textPainter = TextPainter()
         ..maxLines = _kMaxTooltipLines
@@ -2737,7 +2738,7 @@ class _InspectorOverlayLayer extends Layer {
           && current.lastChild is _RenderInspectorOverlay) {
         return rootRenderObject == current;
       }
-      current = current.parent as RenderObject;
+      current = current.parent as RenderObject?;
     }
     return false;
   }
@@ -2760,7 +2761,7 @@ const TextStyle _messageStyle = TextStyle(
 /// Interface for classes that track the source code location the their
 /// constructor was called from.
 ///
-/// {@macro widgets.inspector.trackCreation}
+/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 // ignore: unused_element
 abstract class _HasCreationLocation {
   _Location get _location;
@@ -2850,7 +2851,7 @@ Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> proper
 Iterable<DiagnosticsNode>? _parseDiagnosticsNode(DiagnosticsNode node) {
   if (!_isDebugCreator(node))
     return null;
-  final DebugCreator debugCreator = node.value as DebugCreator;
+  final DebugCreator debugCreator = node.value! as DebugCreator;
   final Element element = debugCreator.element;
   return _describeRelevantUserCode(element);
 }
@@ -2893,7 +2894,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
 ///
 /// This always returns false if it is not called in debug mode.
 ///
-/// {@macro widgets.inspector.trackCreation}
+/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently is local creation locations are only available for
 /// [Widget] and [Element].
@@ -2913,7 +2914,7 @@ bool debugIsLocalCreationLocation(Object object) {
 ///
 /// ex: "file:///path/to/main.dart:4:3"
 ///
-/// {@macro widgets.inspector.trackCreation}
+/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 String? _describeCreationLocation(Object object) {
@@ -2923,7 +2924,7 @@ String? _describeCreationLocation(Object object) {
 
 /// Returns the creation location of an object if one is available.
 ///
-/// {@macro widgets.inspector.trackCreation}
+/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location? _getCreationLocation(Object? object) {
