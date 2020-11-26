@@ -28,12 +28,12 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 /// An iOS-style form section.
 ///
 /// The base constructor for [CupertinoFormSection] constructs an
-/// edge-to-edge style section which includes an iOS-style header, footer, rows,
+/// edge-to-edge style section which includes an iOS-style header, rows,
 /// the dividers between rows, and borders on top and bottom of the rows.
 ///
 /// The [CupertinoFormSection.insetGrouped] constructor creates a round-edged and
 /// padded section that is commonly seen in notched-displays like iPhone X and
-/// beyond. Creates an iOS-style header, footer, rows, and the dividers
+/// beyond. Creates an iOS-style header, rows, and the dividers
 /// between rows. Does not create borders on top and bottom of the rows.
 ///
 /// The [header] parameter sets the form section header. The section header lies
@@ -49,13 +49,13 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 /// The [margin] parameter sets the spacing around the content area of the
 /// section encapsulating [children].
 ///
-/// The [sectionBodyDecoration] parameter sets the decoration around [children].
+/// The [decoration] parameter sets the decoration around [children].
 /// If null, defaults to [CupertinoColors.secondarySystemGroupedBackground].
 /// If null, defaults to 10.0 circular radius when constructing with
 /// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
 /// standard [CupertinoFormSection] constructor.
 ///
-/// The [backgroundColor] parameter sets the background color for the section.
+/// The [backgroundColor] parameter sets the background color behind the section.
 /// If null, defaults to [CupertinoColors.systemGroupedBackground].
 ///
 /// {@macro flutter.material.Material.clipBehavior}
@@ -63,7 +63,7 @@ class CupertinoFormSection extends StatelessWidget {
   /// Creates a section that mimicks standard iOS forms.
   ///
   /// The base constructor for [CupertinoFormSection] constructs an
-  /// edge-to-edge style section which includes an iOS-style header, footer,
+  /// edge-to-edge style section which includes an iOS-style header,
   /// rows, the dividers between rows, and borders on top and bottom of the rows.
   ///
   /// The [header] parameter sets the form section header. The section header
@@ -79,14 +79,14 @@ class CupertinoFormSection extends StatelessWidget {
   /// The [margin] parameter sets the spacing around the content area of the
   /// section encapsulating [children], and defaults to zero padding.
   ///
-  /// The [sectionBodyDecoration] parameter sets the decoration around [children].
+  /// The [decoration] parameter sets the decoration around [children].
   /// If null, defaults to [CupertinoColors.secondarySystemGroupedBackground].
   /// If null, defaults to 10.0 circular radius when constructing with
   /// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
   /// standard [CupertinoFormSection] constructor.
   ///
-  /// The [backgroundColor] parameter sets the background color for the section.
-  /// If null, defaults to [CupertinoColors.systemGroupedBackground].
+  /// The [backgroundColor] parameter sets the background color behind the
+  /// section. If null, defaults to [CupertinoColors.systemGroupedBackground].
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoFormSection({
@@ -95,7 +95,7 @@ class CupertinoFormSection extends StatelessWidget {
     this.header,
     this.margin = EdgeInsets.zero,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
-    this.sectionBodyDecoration,
+    this.decoration,
     this.clipBehavior = Clip.none,
   })  : _type = _CupertinoFormSectionType.base,
         assert(children.length > 0),
@@ -105,7 +105,7 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// The [CupertinoFormSection.padded] constructor creates a round-edged and
   /// padded section that is commonly seen in notched-displays like iPhone X and
-  /// beyond. Creates an iOS-style header, footer, rows, and the dividers
+  /// beyond. Creates an iOS-style header, rows, and the dividers
   /// between rows. Does not create borders on top and bottom of the rows.
   ///
   /// The [header] parameter sets the form section header. The section header
@@ -122,14 +122,14 @@ class CupertinoFormSection extends StatelessWidget {
   /// section encapsulating [children], and defaults to the standard
   /// notched-style iOS form padding.
   ///
-  /// The [sectionBodyDecoration] parameter sets the decoration around [children].
+  /// The [decoration] parameter sets the decoration around [children].
   /// If null, defaults to [CupertinoColors.secondarySystemGroupedBackground].
   /// If null, defaults to 10.0 circular radius when constructing with
   /// [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
   /// standard [CupertinoFormSection] constructor.
   ///
-  /// The [backgroundColor] parameter sets the background color for the section.
-  /// Defaults to [CupertinoColors.systemGroupedBackground].
+  /// The [backgroundColor] parameter sets the background color behind the
+  /// section. If null, defaults to [CupertinoColors.systemGroupedBackground].
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoFormSection.insetGrouped({
@@ -138,7 +138,7 @@ class CupertinoFormSection extends StatelessWidget {
     this.header,
     this.margin = _kDefaultInsetGroupedRowsMargin,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
-    this.sectionBodyDecoration,
+    this.decoration,
     this.clipBehavior = Clip.none,
   })  : _type = _CupertinoFormSectionType.insetGrouped,
         assert(children.length > 0),
@@ -173,9 +173,9 @@ class CupertinoFormSection extends StatelessWidget {
   /// If null, border radius defaults to 10.0 circular radius when constructing
   /// with [CupertinoFormSection.insetGrouped]. Defaults to zero radius for the
   /// standard [CupertinoFormSection] constructor.
-  final BoxDecoration? sectionBodyDecoration;
+  final BoxDecoration? decoration;
 
-  /// Sets the background color for the section.
+  /// Sets the background color behind the section.
   ///
   /// Defaults to [CupertinoColors.systemGroupedBackground].
   final Color backgroundColor;
@@ -231,10 +231,10 @@ class CupertinoFormSection extends StatelessWidget {
     // Refactored the decorate children group in one place to avoid repeating it
     // twice down bellow in the returned widget.
     final DecoratedBox decoratedChildrenGroup = DecoratedBox(
-      decoration: sectionBodyDecoration ??
+      decoration: decoration ??
           BoxDecoration(
             color: CupertinoDynamicColor.resolve(
-                sectionBodyDecoration?.color ??
+                decoration?.color ??
                     CupertinoColors.secondarySystemGroupedBackground,
                 context),
             borderRadius: _kDefaultInsetGroupedBorderRadius,
