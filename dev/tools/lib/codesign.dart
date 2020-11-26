@@ -9,26 +9,53 @@ import 'package:file/file.dart';
 //import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
-//import 'package:process/process.dart';
+import 'package:process/process.dart';
 
 import './repository.dart';
 import './stdio.dart';
 
+const List<String> binariesWithEntitlements = <String>[
+  'ideviceinfo',
+  'idevicename',
+  'idevicescreenshot',
+  'idevicesyslog',
+  'libimobiledevice.6.dylib',
+  'libplist.3.dylib',
+  'iproxy',
+  'libusbmuxd.4.dylib',
+  'libssl.1.0.0.dylib',
+  'libcrypto.1.0.0.dylib',
+  'libzip.5.0.dylib',
+  'libzip.5.dylib',
+  'gen_snapshot',
+  'dart',
+  'dartaotruntime',
+  'flutter_tester',
+  'gen_snapshot_arm64',
+  'gen_snapshot_armv7',
+];
+
+const List<String> expectedEntitlements = <String>[
+  'com.apple.security.cs.allow-jit',
+  'com.apple.security.cs.allow-unsigned-executable-memory',
+  'com.apple.security.cs.allow-dyld-environment-variables',
+  'com.apple.security.network.client',
+  'com.apple.security.network.server',
+  'com.apple.security.cs.disable-library-validation',
+];
+
 const String kVerify = 'verify';
 const String kSignatures = 'signatures';
-/*
-String get repoRoot => path.normalize(
-    path.join(path.dirname(Platform.script.toFilePath()), '..', '..'));
-String get cacheDirectory =>
-    path.normalize(path.join(repoRoot, 'bin', 'cache'));
-*/
+const String kRevision = 'revision';
+
 class CodesignCommand extends Command<void> {
   CodesignCommand({
     @required this.checkouts,
-    @required this.fileSystem,
-    @required this.platform,
-    @required this.stdio,
-  }) {
+    @required this.conductorDirectory,
+  })  : fileSystem = checkouts.fileSystem,
+        platform = checkouts.platform,
+        stdio = checkouts.stdio,
+        processManager = checkouts.processManager {
     argParser.addFlag(
       kVerify,
       help:
@@ -36,19 +63,28 @@ class CodesignCommand extends Command<void> {
     );
     argParser.addFlag(
       kSignatures,
+      defaultsTo: true,
       help:
           'When off, this command will only verify the existence of binaries, and not their\n'
           'signatures or entitlements. Must be used with --verify flag.',
     );
+    argParser.addOption(
+      kRevision,
+      help: 'The Flutter FRAMEWORK revision to use. If not provided, defaults '
+          'to the same revision as that of the conductor.',
+    );
   }
 
   final Checkouts checkouts;
+  final Directory conductorDirectory;
   final FileSystem fileSystem;
   final Platform platform;
+  final ProcessManager processManager;
   final Stdio stdio;
 
   FrameworkRepository _framework;
-  FrameworkRepository get framework => _framework ??= FrameworkRepository(checkouts);
+  FrameworkRepository get framework =>
+      _framework ??= FrameworkRepository(checkouts);
 
   @visibleForTesting
   set framework(FrameworkRepository framework) => _framework = framework;
@@ -64,47 +100,56 @@ class CodesignCommand extends Command<void> {
   void run() {
     if (!platform.isMacOS) {
       throw Exception(
-        'Error! Expected operating system "macos", actual operating system is: '
-        '"${platform.operatingSystem}"');
+          'Error! Expected operating system "macos", actual operating system is: '
+          '"${platform.operatingSystem}"');
     }
 
     if (argResults['verify'] as bool != true) {
       throw Exception(
-        'Sorry, but codesigning is not implemented yet. Please pass the '
-        '--$kVerify flag to verify signatures.');
+          'Sorry, but codesigning is not implemented yet. Please pass the '
+          '--$kVerify flag to verify signatures.');
     }
-    verify();
+
+    String revision;
+    if (argResults[kRevision] != null) {
+      revision = argResults[kRevision] as String;
+    } else {
+      revision = processManager.runSync(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: conductorDirectory.path,
+      ).stdout as String;
+    }
+    verify(revision);
   }
 
   @visibleForTesting
-  void verify() {
-    if (!checkCacheIsCurrent()) {
-      stdio.printError(
-          'Warning! Your cache is either not present or not matching your flutter\n'
-          'version. Run a `flutter` command to update your cache, and re-try this\n'
-          'test.');
-      io.exit(1);
-    }
-
+  void verify(String revision) {
     final List<String> unsignedBinaries = <String>[];
     final List<String> wrongEntitlementBinaries = <String>[];
-    for (final String binaryPath in findBinaryPaths(cacheDirectory)) {
-      print('Verifying the code signature of $binaryPath');
-      final ProcessResult codeSignResult = Process.runSync(
-        'codesign',
+
+    framework.checkout(revision);
+
+    // Ensure artifacts present
+    framework.runFlutter(<String>['precache', '--ios', '--macos']);
+
+    for (final String binaryPath in findBinaryPaths(framework.cacheDirectory)) {
+      stdio.printTrace('Verifying the code signature of $binaryPath');
+      final io.ProcessResult codeSignResult = processManager.runSync(
         <String>[
+          'codesign',
           '-vvv',
           binaryPath,
         ],
       );
       if (codeSignResult.exitCode != 0) {
         unsignedBinaries.add(binaryPath);
-        print('File "$binaryPath" does not appear to be codesigned.\n'
+        stdio.printError(
+            'File "$binaryPath" does not appear to be codesigned.\n'
             'The `codesign` command failed with exit code ${codeSignResult.exitCode}:\n'
             '${codeSignResult.stderr}\n');
         continue;
       } else {
-        print('Verifying entitlements of $binaryPath');
+        stdio.printTrace('Verifying entitlements of $binaryPath');
         if (!hasExpectedEntitlements(binaryPath)) {
           wrongEntitlementBinaries.add(binaryPath);
         }
@@ -112,150 +157,96 @@ class CodesignCommand extends Command<void> {
     }
 
     if (unsignedBinaries.isNotEmpty) {
-      print('Found ${unsignedBinaries.length} unsigned binaries:');
+      stdio.printError('Found ${unsignedBinaries.length} unsigned binaries:');
       unsignedBinaries.forEach(print);
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
-      print(
+      stdio.printError(
           'Found ${wrongEntitlementBinaries.length} binaries with unexpected entitlements:');
       wrongEntitlementBinaries.forEach(print);
     }
 
     if (unsignedBinaries.isNotEmpty) {
       // TODO(jmagman): Also exit if `wrongEntitlementBinaries.isNotEmpty` after https://github.com/flutter/flutter/issues/46704 is done.
-      io.exit(1);
+      throw Exception('Test failed because unsigned binaries detected.');
     }
 
-    print(
-        'Verified that binaries are codesigned and have expected entitlements.');
+    stdio.printStatus(
+        'Verified that binaries for commit $revision are codesigned and have '
+        'expected entitlements.');
   }
 
-  /// Given the path to a stamp file, read the contents.
-  ///
-  /// Will throw if the file doesn't exist.
-  String readStamp(String filePath) {
-    final File file = fileSystem.file(filePath);
-    if (!file.existsSync()) {
-      throw 'Error! Stamp file $filePath does not exist!';
-    }
-    return file.readAsStringSync().trim();
-  }
-
-  /// Return whether or not the flutter cache is up to date.
-  bool checkCacheIsCurrent() {
-    try {
-      final String dartSdkStamp =
-          readStamp(fileSystem.path.join(cacheDirectory, 'engine-dart-sdk.stamp'));
-      final String engineVersion =
-          readStamp(fileSystem.path.join(repoRoot, 'bin', 'internal', 'engine.version'));
-      return dartSdkStamp == engineVersion;
-    } catch (e) {
-      print(e);
-      return false;
-    }
-  }
-
-}
-/*
-/// Check mime-type of file at [filePath] to determine if it is binary
-bool isBinary(String filePath) {
-  final ProcessResult result = Process.runSync(
-    'file',
-    <String>[
-      '--mime-type',
-      '-b', // is binary
-      filePath,
-    ],
-  );
-  return (result.stdout as String).contains('application/x-mach-binary');
-}
-
-/// Find every binary file in the given [rootDirectory]
-List<String> findBinaryPaths([String rootDirectory]) {
-  rootDirectory ??= cacheDirectory;
-  final ProcessResult result = Process.runSync(
-    'find',
-    <String>[
-      rootDirectory,
-      '-type',
-      'f',
-      '-perm',
-      '+111', // is executable
-    ],
-  );
-  final List<String> allFiles = (result.stdout as String)
-      .split('\n')
-      .where((String s) => s.isNotEmpty)
-      .toList();
-  return allFiles.where(isBinary).toList();
-}
-
-List<String> get binariesWithEntitlements => List<String>.unmodifiable(<String>[
-      'ideviceinfo',
-      'idevicename',
-      'idevicescreenshot',
-      'idevicesyslog',
-      'libimobiledevice.6.dylib',
-      'libplist.3.dylib',
-      'iproxy',
-      'libusbmuxd.4.dylib',
-      'libssl.1.0.0.dylib',
-      'libcrypto.1.0.0.dylib',
-      'libzip.5.0.dylib',
-      'libzip.5.dylib',
-      'gen_snapshot',
-      'dart',
-      'flutter_tester',
-      'gen_snapshot_arm64',
-      'gen_snapshot_armv7',
-    ]);
-
-List<String> get expectedEntitlements => List<String>.unmodifiable(<String>[
-      'com.apple.security.cs.allow-jit',
-      'com.apple.security.cs.allow-unsigned-executable-memory',
-      'com.apple.security.cs.allow-dyld-environment-variables',
-      'com.apple.security.network.client',
-      'com.apple.security.network.server',
-      'com.apple.security.cs.disable-library-validation',
-    ]);
-
-/// Check if the binary has the expected entitlements.
-bool hasExpectedEntitlements(String binaryPath) {
-  try {
-    final ProcessResult entitlementResult = Process.runSync(
-      'codesign',
+  /// Find every binary file in the given [rootDirectory]
+  List<String> findBinaryPaths(String rootDirectory) {
+    final io.ProcessResult result = processManager.runSync(
       <String>[
-        '--display',
-        '--entitlements',
-        ':-',
-        binaryPath,
+        'find',
+        rootDirectory,
+        '-type',
+        'f',
+        '-perm',
+        '+111', // is executable
       ],
     );
+    final List<String> allFiles = (result.stdout as String)
+        .split('\n')
+        .where((String s) => s.isNotEmpty)
+        .toList();
+    return allFiles.where(isBinary).toList();
+  }
 
-    if (entitlementResult.exitCode != 0) {
-      print(
-          'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
-          '${entitlementResult.stderr}\n');
+  /// Check mime-type of file at [filePath] to determine if it is binary
+  bool isBinary(String filePath) {
+    final io.ProcessResult result = processManager.runSync(
+      <String>[
+        'file',
+        '--mime-type',
+        '-b', // is binary
+        filePath,
+      ],
+    );
+    return (result.stdout as String).contains('application/x-mach-binary');
+  }
+
+  /// Check if the binary has the expected entitlements.
+  bool hasExpectedEntitlements(String binaryPath) {
+    try {
+      final io.ProcessResult entitlementResult = processManager.runSync(
+        <String>[
+          'codesign',
+          '--display',
+          '--entitlements',
+          ':-',
+          binaryPath,
+        ],
+      );
+
+      if (entitlementResult.exitCode != 0) {
+        stdio.printError(
+            'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
+            '${entitlementResult.stderr}\n');
+        return false;
+      }
+
+      bool passes = true;
+      final String output = entitlementResult.stdout as String;
+      for (final String entitlement in expectedEntitlements) {
+        final bool entitlementExpected = binariesWithEntitlements
+            .contains(fileSystem.path.basename(binaryPath));
+        if (output.contains(entitlement) != entitlementExpected) {
+          stdio.printError(
+              'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} entitlement $entitlement.');
+          passes = false;
+        }
+      }
+      return passes;
+    } catch (e) {
+      stdio.printError((e as Exception).toString());
       return false;
     }
-
-    bool passes = true;
-    final String output = entitlementResult.stdout as String;
-    for (final String entitlement in expectedEntitlements) {
-      final bool entitlementExpected =
-          binariesWithEntitlements.contains(path.basename(binaryPath));
-      if (output.contains(entitlement) != entitlementExpected) {
-        print(
-            'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} entitlement $entitlement.');
-        passes = false;
-      }
-    }
-    return passes;
-  } catch (e) {
-    print(e);
-    return false;
   }
 }
+/*
 
 */

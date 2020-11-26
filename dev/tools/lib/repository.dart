@@ -69,10 +69,6 @@ class Repository {
           );
         }
       }
-    } else {
-      stdio.printTrace(
-        'Using existing $name repo at ${_checkoutDirectory.path}...',
-      );
     }
   }
 
@@ -109,6 +105,14 @@ class Repository {
     git.run(
       <String>['fetch', remoteName, '--tags'],
       'fetch $remoteName --tags',
+      workingDirectory: checkoutDirectory.path,
+    );
+  }
+
+  void checkout(String revision) {
+    git.run(
+      <String>['checkout', revision],
+      'checkout $revision',
       workingDirectory: checkoutDirectory.path,
     );
   }
@@ -249,7 +253,7 @@ class Repository {
 }
 
 class FrameworkRepository extends Repository {
-  FrameworkRepository(Checkouts checkouts)
+  FrameworkRepository(Checkouts checkouts, {bool useExistingCheckout = false})
       : super(
           name: 'framework',
           upstream: defaultUpstream,
@@ -258,39 +262,74 @@ class FrameworkRepository extends Repository {
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
+          useExistingCheckout: useExistingCheckout,
         );
 
   static String defaultUpstream = 'https://github.com/flutter/flutter.git';
 
-  String get cacheDirectory =>
-      fileSystem.path.join(checkoutDirectory.path, 'bin', 'cache');
+  String get cacheDirectory => fileSystem.path.join(
+        checkoutDirectory.path,
+        'bin',
+        'cache',
+      );
 
-  void ensureToolReady() {
-    final File toolsSnapshot = fileSystem
-        .directory(cacheDirectory)
-        .childFile('flutter_tools.snapshot');
-    if (toolsSnapshot.existsSync()) {
-      return;
+  void _ensureToolReady() {
+    final File toolsStamp =
+        fileSystem.directory(cacheDirectory).childFile('flutter_tools.stamp');
+    if (toolsStamp.existsSync()) {
+      final String toolsStampHash = toolsStamp.readAsStringSync().trim();
+      final String repoHeadHash = reverseParse('HEAD');
+      if (toolsStampHash == repoHeadHash) {
+        return;
+      }
     }
-  }
 
-  Version flutterVersion() {
     // Build tool
     processManager.runSync(<String>[
       fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
       'help',
     ]);
-    // Check version
-    final io.ProcessResult result = processManager.runSync(<String>[
+  }
+
+  io.ProcessResult runFlutter(List<String> args) {
+    _ensureToolReady();
+
+    return processManager.runSync(<String>[
       fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
-      '--version',
-      '--machine',
+      ...args,
     ]);
+  }
+
+  @override
+  void checkout(String revision) {
+    super.checkout(revision);
+    _ensureToolReady();
+  }
+
+  Version flutterVersion() {
+    // Check version
+    final io.ProcessResult result =
+        runFlutter(<String>['--version', '--machine']);
     final Map<String, dynamic> versionJson = jsonDecode(
       globals.stdoutToString(result.stdout),
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
+
+  //TODO do we need this?
+  //io.ProcessResult runDart(List<String> args) {
+  //  _ensureToolReady();
+  //  final String dartBinPath = fileSystem.path.join(
+  //    cacheDirectory,
+  //    'dart-sdk',
+  //    'bin',
+  //    'dart',
+  //  );
+  //  return processManager.runSync(<String>[
+  //    dartBinPath,
+  //    ...args,
+  //  ]);
+  //}
 }
 
 /// An enum of all the repositories that the Conductor supports.
@@ -348,37 +387,4 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
-
-  //Repository addRepo({
-  //  @required RepositoryType repoType,
-  //  @required Stdio stdio,
-  //  @required Platform platform,
-  //  @required FileSystem fileSystem,
-  //  String upstream,
-  //  String name,
-  //  bool localUpstream = false,
-  //  bool useExistingCheckout = false,
-  //}) {
-  //  switch (repoType) {
-  //    case RepositoryType.framework:
-  //      name ??= 'framework';
-  //      upstream ??= 'https://github.com/flutter/flutter.git';
-  //      break;
-  //    case RepositoryType.engine:
-  //      name ??= 'engine';
-  //      upstream ??= 'https://github.com/flutter/engine.git';
-  //      break;
-  //  }
-  //  return Repository(
-  //    name: name,
-  //    upstream: upstream,
-  //    stdio: stdio,
-  //    platform: platform,
-  //    fileSystem: fileSystem,
-  //    parentDirectory: directory,
-  //    processManager: processManager,
-  //    localUpstream: localUpstream,
-  //    useExistingCheckout: useExistingCheckout,
-  //  );
-  //}
 }

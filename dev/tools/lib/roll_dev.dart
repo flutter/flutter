@@ -78,12 +78,7 @@ class RollDevCommand extends Command<void> {
   void run() {
     rollDev(
       argResults: argResults,
-      repository: checkouts.addRepo(
-        fileSystem: fileSystem,
-        platform: platform,
-        repoType: RepositoryType.framework,
-        stdio: stdio,
-      ),
+      repository: FrameworkRepository(checkouts),
       stdio: stdio,
       usage: argParser.usage,
     );
@@ -100,7 +95,7 @@ bool rollDev({
   @required Stdio stdio,
   //@required Platform platform,
   //@required FileSystem fileSystem,
-  @required Repository repository,
+  @required FrameworkRepository repository,
   String remoteName = 'origin',
 }) {
   final String level = argResults[kIncrement] as String;
