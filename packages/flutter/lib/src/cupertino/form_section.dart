@@ -103,7 +103,7 @@ class CupertinoFormSection extends StatelessWidget {
 
   /// Creates a section that mimicks standard "Inset Grouped" iOS forms.
   ///
-  /// The [CupertinoFormSection.padded] constructor creates a round-edged and
+  /// The [CupertinoFormSection.insetGrouped] constructor creates a round-edged and
   /// padded section that is commonly seen in notched-displays like iPhone X and
   /// beyond. Creates an iOS-style header, rows, and the dividers
   /// between rows. Does not create borders on top and bottom of the rows.
