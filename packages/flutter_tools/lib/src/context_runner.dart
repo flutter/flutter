@@ -114,6 +114,7 @@ Future<T> runInContext<T>(
         return AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          platform: globals.platform,
         );
       },
       BuildSystem: () => FlutterBuildSystem(
@@ -133,6 +134,8 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+        artifacts: globals.artifacts,
+        usage: globals.flutterUsage,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
@@ -184,8 +187,12 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         androidWorkflow: androidWorkflow,
       ),
-      FeatureFlags: () => const FlutterFeatureFlags(),
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FeatureFlags: () => FlutterFeatureFlags(
+        flutterVersion: globals.flutterVersion,
+        config: globals.config,
+        platform: globals.platform,
+      ),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
@@ -228,7 +235,10 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
+      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
+      ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
         logger: globals.logger,

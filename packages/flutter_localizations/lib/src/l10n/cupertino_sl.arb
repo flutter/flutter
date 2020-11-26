@@ -31,5 +31,5 @@
   "selectAllButtonLabel": "Izberi vse",
   "tabSemanticsLabel": "Zavihek $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Opusti",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "Iskanje"
 }

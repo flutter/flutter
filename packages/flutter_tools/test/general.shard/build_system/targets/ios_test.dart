@@ -24,6 +24,7 @@ final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment:
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
   '-fembed-bitcode-marker',
+  '-miphoneos-version-min=8.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -186,6 +187,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kTargetPlatform: 'ios',
+        kSdkRoot: 'path/to/sdk',
       },
       processManager: processManager,
       artifacts: artifacts,
@@ -206,5 +208,60 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macPlatform,
+  });
+
+  testUsingContext('AotAssemblyRelease throws exception if sdk root is missing', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kTargetPlatform: 'ios',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kIosArchs] = 'x86_64';
+
+    expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
+        .having(
+          (Exception exception) => exception.toString(),
+      'description',
+      contains('required define SdkRoot but it was not provided'),
+    )
+    ));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => macPlatform,
+  });
+
+  testWithoutContext('Unpack copies Flutter.framework', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory outputDir = fileSystem.directory('output');
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: processManager,
+      artifacts: artifacts,
+      logger: logger,
+      fileSystem: fileSystem,
+      outputDir: outputDir,
+    );
+
+    processManager.addCommand(
+      FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        'Artifact.flutterFramework.TargetPlatform.ios.debug',
+        outputDir.path,
+      ]),
+    );
+
+    await const DebugUnpackIOS().build(environment);
   });
 }

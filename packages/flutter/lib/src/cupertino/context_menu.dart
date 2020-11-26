@@ -292,7 +292,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         return widget.previewBuilder!(context, animation, widget.child);
       },
     );
-    Navigator.of(context, rootNavigator: true)!.push<void>(_route!);
+    Navigator.of(context, rootNavigator: true).push<void>(_route!);
     _route!.animation!.addStatusListener(_routeAnimationStatusListener);
   }
 
@@ -686,7 +686,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       parent: animation!,
       curve: const Interval(0.9, 1.0),
     ));
-    Navigator.of(context)!.pop();
+    Navigator.of(context).pop();
   }
 
   // Take measurements on the child and _ContextMenuSheet and update the
