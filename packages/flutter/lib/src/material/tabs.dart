@@ -568,8 +568,6 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Uses values from [TabBarTheme] if it is set in the current context.
 ///
-/// To see a sample implementation, visit the [TabController] documentation.
-///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows the implementation of [TabBar] with a [DefaultTabController]
@@ -626,9 +624,13 @@ class _TabBarScrollController extends ScrollController {
 ///    );
 ///  }
 /// ```
+/// {@end-tool}
 ///
-/// [TabBar] can also be implmented by using a [TabController] which provides more options,
-/// instead of a [DefaultTabController], below is a sample for this.
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// [TabBar] can also be implmented by using a [TabController] which provides more options
+/// to control the behaviour of the [TabBar] and [TabBarView], this can be used instead of
+/// a [DefaultTabController], below is a sample for this.
 ///
 /// ```dart preamble
 ///
