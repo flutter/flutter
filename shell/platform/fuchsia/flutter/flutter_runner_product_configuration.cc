@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter_runner_product_configuration.h"
+
 #include <zircon/assert.h>
 
+#include "flutter/fml/logging.h"
 #include "rapidjson/document.h"
 
 namespace flutter_runner {
@@ -14,8 +16,11 @@ FlutterRunnerProductConfiguration::FlutterRunnerProductConfiguration(
   rapidjson::Document document;
   document.Parse(json_string);
 
-  if (!document.IsObject())
+  if (!document.IsObject()) {
+    FML_LOG(ERROR) << "Failed to parse configuration; using defaults: "
+                   << json_string;
     return;
+  }
 
   // Parse out all values we're expecting.
   if (document.HasMember("vsync_offset_in_us")) {

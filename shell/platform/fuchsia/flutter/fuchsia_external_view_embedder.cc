@@ -21,6 +21,7 @@ namespace {
 // Z-fighting.
 constexpr float kScenicZElevationBetweenLayers = 0.0001f;
 constexpr float kScenicZElevationForPlatformView = 100.f;
+constexpr float kScenicElevationForInputInterceptor = 500.f;
 
 }  // namespace
 
@@ -39,18 +40,24 @@ FuchsiaExternalViewEmbedder::FuchsiaExternalViewEmbedder(
                  std::move(view_ref_pair.view_ref),
                  debug_label),
       metrics_node_(session_.get()),
-      root_node_(session_.get()),
-      intercept_all_input_(intercept_all_input) {
-  root_view_.AddChild(metrics_node_);
-  metrics_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask);
+      layer_tree_node_(session_.get()) {
+  layer_tree_node_.SetLabel("Flutter::LayerTree");
   metrics_node_.SetLabel("Flutter::MetricsWatcher");
-  metrics_node_.AddChild(root_node_);
-  root_node_.SetLabel("Flutter::LayerTree");
+  metrics_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask);
+  metrics_node_.AddChild(layer_tree_node_);
+  root_view_.AddChild(metrics_node_);
 
-  // Set up the input interceptor at the top of the scene, if applicable.
-  if (intercept_all_input_) {
-    input_interceptor_.emplace(session_.get());
-    metrics_node_.AddChild(input_interceptor_->node());
+  // Set up the input interceptor at the top of the scene, if applicable.  It
+  // will capture all input, and any unwanted input will be reinjected into
+  // embedded views.
+  if (intercept_all_input) {
+    input_interceptor_node_.emplace(session_.get());
+    input_interceptor_node_->SetLabel("Flutter::InputInterceptor");
+    input_interceptor_node_->SetHitTestBehavior(
+        fuchsia::ui::gfx::HitTestBehavior::kDefault);
+    input_interceptor_node_->SetSemanticVisibility(false);
+
+    metrics_node_.AddChild(input_interceptor_node_.value());
   }
 
   session_.Present();
@@ -124,12 +131,28 @@ void FuchsiaExternalViewEmbedder::BeginFrame(
   frame_composition_order_.push_back(kRootLayerId);
 
   // Set up the input interceptor at the top of the scene, if applicable.
-  if (input_interceptor_.has_value()) {
-    // TODO: Don't hardcode elevation.
-    const float kMaximumElevation = -100.f;
-    input_interceptor_->UpdateDimensions(session_.get(), frame_size.width(),
-                                         frame_size.height(),
-                                         kMaximumElevation);
+  if (input_interceptor_node_.has_value()) {
+    const uint64_t rect_hash =
+        (static_cast<uint64_t>(frame_size_.width()) << 32) +
+        frame_size_.height();
+
+    // Create a new rect if needed for the interceptor.
+    auto found_rect = scenic_interceptor_rects_.find(rect_hash);
+    if (found_rect == scenic_interceptor_rects_.end()) {
+      auto [emplaced_rect, success] =
+          scenic_interceptor_rects_.emplace(std::make_pair(
+              rect_hash, scenic::Rectangle(session_.get(), frame_size_.width(),
+                                           frame_size_.height())));
+      FML_DCHECK(success);
+
+      found_rect = std::move(emplaced_rect);
+    }
+
+    // TODO(fxb/): Don't hardcode elevation.
+    input_interceptor_node_->SetTranslation(
+        frame_size.width() * 0.5f, frame_size.height() * 0.5f,
+        -kScenicElevationForInputInterceptor);
+    input_interceptor_node_->SetShape(found_rect->second);
   }
 }
 
@@ -179,7 +202,7 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
 
     // First re-scale everything according to the DPR.
     const float inv_dpr = 1.0f / frame_dpr_;
-    root_node_.SetScale(inv_dpr, inv_dpr, 1.0f);
+    layer_tree_node_.SetScale(inv_dpr, inv_dpr, 1.0f);
 
     bool first_layer = true;
     for (const auto& layer_id : frame_composition_order_) {
@@ -267,7 +290,7 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
         }
 
         // Attach the ScenicView to the main scene graph.
-        root_node_.AddChild(view_holder.opacity_node);
+        layer_tree_node_.AddChild(view_holder.opacity_node);
 
         // Account for the ScenicView's height when positioning the next layer.
         embedded_views_height += kScenicZElevationForPlatformView;
@@ -355,7 +378,7 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
         first_layer = false;
 
         // Attach the ScenicLayer to the main scene graph.
-        root_node_.AddChild(scenic_layer.shape_node);
+        layer_tree_node_.AddChild(scenic_layer.shape_node);
 
         // Account for the ScenicLayer's height when positioning the next layer.
         scenic_layer_index++;
@@ -461,14 +484,12 @@ void FuchsiaExternalViewEmbedder::Reset() {
   frame_dpr_ = 1.f;
 
   // Detach the root node to prepare for the next frame.
-  session_.get()->Enqueue(scenic::NewDetachChildrenCmd(root_node_.id()));
+  layer_tree_node_.DetachChildren();
 
   // Clear images on all layers so they aren't cached unnecesarily.
   for (auto& layer : scenic_layers_) {
     layer.material.SetTexture(0);
   }
-
-  input_interceptor_.reset();
 }
 
 }  // namespace flutter_runner

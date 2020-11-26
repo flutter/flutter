@@ -66,23 +66,19 @@ void LayerTree::UpdateScene(std::shared_ptr<SceneUpdateContext> context) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
 
   // Reset for a new Scene.
-  context->Reset();
-
-  const float inv_dpr = 1.0f / device_pixel_ratio_;
-  SceneUpdateContext::Transform transform(context, inv_dpr, inv_dpr, 1.0f);
+  context->Reset(frame_size_, device_pixel_ratio_);
 
   SceneUpdateContext::Frame frame(
       context,
       SkRRect::MakeRect(
           SkRect::MakeWH(frame_size_.width(), frame_size_.height())),
-      SK_ColorTRANSPARENT, SK_AlphaOPAQUE, "flutter::LayerTree");
+      SK_ColorTRANSPARENT, SK_AlphaOPAQUE, "flutter::Layer");
   if (root_layer_->needs_system_composite()) {
     root_layer_->UpdateScene(context);
   }
   if (!root_layer_->is_empty()) {
     frame.AddPaintLayer(root_layer_.get());
   }
-  context->root_node().AddChild(transform.entity_node());
 }
 #endif
 
