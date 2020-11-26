@@ -313,6 +313,50 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
+  testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: FloatingActionButton.extended(
+            label: const Text('tooltip'),
+            onPressed: () {},
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    final Finder fabFinder = find.byType(PhysicalShape);
+    PhysicalShape getFABWidget(Finder finder) => tester.widget<PhysicalShape>(finder);
+
+    // Default, not disabled.
+    expect(getFABWidget(fabFinder).elevation, 6);
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getFABWidget(fabFinder).elevation, 6);
+
+    // Hovered.
+    final Offset center = tester.getCenter(fabFinder);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getFABWidget(fabFinder).elevation, 8);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    expect(getFABWidget(fabFinder).elevation, 12);
+  });
+
   testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(
@@ -897,6 +941,83 @@ void main() {
       find.byType(FloatingActionButton),
       paints..circle(color: splashColor),
     );
+  });
+
+  testWidgets('FloatingActionButton defaults', (WidgetTester tester) async {
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(FloatingActionButton),
+      matching: find.byType(Material),
+    );
+
+    // Enabled FlatButton
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FloatingActionButton.extended(
+          onPressed: () { },
+          label: const Text('button'),
+        ),
+      ),
+    );
+    Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    // expect(material.color, null);
+    expect(material.elevation, 6.0);
+    expect(material.shadowColor, null);
+    expect(material.shape, const StadiumBorder());
+    expect(material.textStyle?.color, const Color(0xffffffff));
+    expect(material.textStyle?.fontFamily, 'Roboto');
+    expect(material.textStyle?.fontSize, 14);
+    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+
+    final Offset center = tester.getCenter(find.byType(FloatingActionButton));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    material = tester.widget<Material>(rawButtonMaterial);
+    // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, null);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, null);
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle?.color, const Color(0xdd000000));
+    expect(material.textStyle?.fontFamily, 'Roboto');
+    expect(material.textStyle?.fontSize, 14);
+    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.transparency);
+
+    // Disabled FlatButton
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          onPressed: null,
+          child: Text('button'),
+        ),
+      ),
+    );
+    material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, null);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, null);
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle?.color, const Color(0x61000000));
+    expect(material.textStyle?.fontFamily, 'Roboto');
+    expect(material.textStyle?.fontSize, 14);
+    expect(material.textStyle?.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.transparency);
   });
 }
 
