@@ -449,97 +449,50 @@ void main() {
       );
     }
 
-    Future<void> test(Widget Function(Key? key, {bool onTapDownChangeWrap, bool onTapChangeWrap}) buildApp) async {
-      await tester.pumpWidget(buildApp(null, onTapChangeWrap: true));
-      await tester.tap(find.byType(InkWell));
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(false);
-      await tester.pumpAndSettle();
-      expectTest(false);
-
-      await tester.pumpWidget(buildApp(const Key('foo'), onTapChangeWrap: true));
-      await tester.tap(find.byType(InkWell));
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(false);
-      await tester.pumpAndSettle();
-      expectTest(false);
-
-      // Does not call setState.
-      await tester.pumpWidget(buildApp(GlobalKey()));
-      await tester.tap(find.byType(InkWell));
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(true);
-      await tester.pumpAndSettle();
-      expectTest(false);
-
-      await tester.pumpWidget(buildApp(GlobalKey(), onTapChangeWrap: true));
-      await tester.tap(find.byType(InkWell));
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(true);
-      await tester.pumpAndSettle();
-      expectTest(false);
-
-      await tester.pumpWidget(buildApp(GlobalKey(), onTapDownChangeWrap: true));
-      final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(true);
-      await testGesture.up();
-      await tester.pumpAndSettle();
-      expectTest(false);
-    }
-
-    await test((Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
-      bool wrap = false;
-
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: StatefulBuilder(
-              builder: (BuildContext context,
-                  void Function(void Function()) setState) {
-                Future<void> changeWrap() async {
-                  await Future<void>.delayed(const Duration(milliseconds: 50));
-
-                  setState(() {
-                    wrap = !wrap;
-                  });
-                }
-
-                Widget child = InkWell(
+    bool wrap = false;
+    final Key globalKey = GlobalKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, void Function(void Function()) setState) {
+              Widget child = Ink(
+                key: globalKey,
+                color: color,
+                width: 200.0,
+                height: 200.0,
+                child: InkWell(
                   splashColor: splashColor,
+                  onTap: () { },
                   onTapDown: (_) async {
-                    if (onTapDownChangeWrap)
-                      changeWrap();
-                  },
-                  onTap: () async {
-                    if (onTapChangeWrap)
-                      changeWrap();
-                  },
-                  child: Container(
-                    height: 160,
-                    alignment: Alignment.center,
-                  ),
-                );
+                    await Future<void>.delayed(const Duration(milliseconds: 50));
 
-                child = Ink(
-                  key: key,
-                  color: color,
+                    setState(() {
+                      wrap = !wrap;
+                    });
+                  }
+                ),
+              );
+
+              if (wrap) {
+                child = Container(
+                  margin: const EdgeInsets.only(top: 320),
                   child: child,
                 );
+              }
 
-                if (wrap) {
-                  child = Container(
-                    margin: const EdgeInsets.only(top: 320),
-                    child: child,
-                  );
-                }
-
-                return child;
-              },
-            ),
+              return child;
+            }
           ),
         ),
-      );
-    });
+      ),
+    ));
+    final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 60));
+    expectTest(true);
+    await testGesture.up();
+    await tester.pumpAndSettle();
+    expectTest(false);
   });
 }

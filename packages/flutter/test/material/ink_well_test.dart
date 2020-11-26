@@ -1394,8 +1394,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: StatefulBuilder(
-              builder: (BuildContext context,
-                  void Function(void Function()) setState) {
+              builder: (BuildContext context, void Function(void Function()) setState) {
                 Future<void> changeWrap() async {
                   await Future<void>.delayed(const Duration(milliseconds: 50));
 
@@ -1443,8 +1442,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: StatefulBuilder(
-              builder: (BuildContext context,
-                  void Function(void Function()) setState) {
+              builder: (BuildContext context, void Function(void Function()) setState) {
                 Future<void> changeWrap() async {
                   await Future<void>.delayed(const Duration(milliseconds: 50));
 
