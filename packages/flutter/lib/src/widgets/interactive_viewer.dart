@@ -932,10 +932,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       }
       final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
       final Size childSize = childRenderBox.size;
-      final double scaleChange = 1.0 - event.scrollDelta.dy / childSize.height;
-      if (scaleChange == 0.0) {
+      //Ignore left and right scroll
+      if (event.scrollDelta.dy == 0.0) {
         return;
       }
+      //Jump by 0.1 per scroll
+      final double scaleChange = (event.scrollDelta.dy < 0) ? 1.1 : 0.9;
       final Offset focalPointScene = _transformationController!.toScene(
         event.localPosition,
       );
