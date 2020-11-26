@@ -203,8 +203,7 @@ abstract class FlutterDriver {
   /// See also:
   ///
   ///  * [FlutterDriver.runUnsynchronized], which will execute an action
-  ///  with frame sync disabled and while the app under test is undergoing
-  ///  a transition.
+  ///    with frame sync disabled even while frames are pending.
   Future<void> waitFor(SerializableFinder finder, { Duration timeout }) async {
     await sendCommand(WaitFor(finder, timeout: timeout));
   }
