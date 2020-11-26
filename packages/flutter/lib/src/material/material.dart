@@ -335,7 +335,8 @@ class Material extends StatefulWidget {
 }
 
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
-  final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
+  final GlobalKey _inkFeatureRendererKey = GlobalKey(debugLabel: 'ink renderer');
+  _RenderInkFeatures? _inkFeatureRenderer;
 
   Color? _getBackgroundColor(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -375,16 +376,18 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext!.findRenderObject()! as _RenderInkFeatures;
-        renderer._didChangeLayout();
+        _inkFeatureRenderer?._didChangeLayout();
         return false;
       },
       child: _InkFeatures(
-        key: _inkFeatureRenderer,
+        key: _inkFeatureRendererKey,
         absorbHitTest: widget.type != MaterialType.transparency,
         color: backgroundColor,
         child: contents,
         vsync: this,
+        onInkFeatureRendererCreated: (_RenderInkFeatures inkFeatureRenderer) {
+          _inkFeatureRenderer = inkFeatureRenderer;
+        },
       ),
     );
 
@@ -434,6 +437,17 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
       child: contents,
     );
+  }
+
+  @override
+  void dispose() {
+    // If Material does not have a GlobalKey, but the child does, then if the
+    // child moves (e.g. changes depth) then all
+    // [TickerProviderStateMixin._tickers] should be released.
+    while (_inkFeatureRenderer?._inkFeatures?.isNotEmpty ?? false) {
+      _inkFeatureRenderer!._inkFeatures!.first.dispose();
+    }
+    super.dispose();
   }
 
   static Widget _transparentInterior({
@@ -559,6 +573,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
     required this.vsync,
     required this.absorbHitTest,
     Widget? child,
+    this.onInkFeatureRendererCreated,
   }) : super(key: key, child: child);
 
   // This widget must be owned by a MaterialState, which must be provided as the vsync.
@@ -570,13 +585,17 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 
   final bool absorbHitTest;
 
+  final ValueChanged<_RenderInkFeatures>? onInkFeatureRendererCreated;
+
   @override
   _RenderInkFeatures createRenderObject(BuildContext context) {
-    return _RenderInkFeatures(
+    final _RenderInkFeatures renderInkFeatures = _RenderInkFeatures(
       color: color,
       absorbHitTest: absorbHitTest,
       vsync: vsync,
     );
+    onInkFeatureRendererCreated?.call(renderInkFeatures);
+    return renderInkFeatures;
   }
 
   @override
