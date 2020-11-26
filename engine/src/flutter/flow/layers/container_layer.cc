@@ -114,7 +114,7 @@ void ContainerLayer::UpdateSceneChildren(
   if (child_layer_exists_below_) {
     frame.emplace(
         context, SkRRect::MakeRect(paint_bounds()), SK_ColorTRANSPARENT,
-        SkScalarRoundToInt(context->alphaf() * 255), "flutter::ContainerLayer");
+        SkScalarRoundToInt(context->alphaf() * 255), "flutter::Layer");
     frame->AddPaintLayer(this);
   }
 
