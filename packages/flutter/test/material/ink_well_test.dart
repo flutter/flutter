@@ -1025,7 +1025,7 @@ void main() {
   });
 
   testWidgets('When ink wells are reparented, the old parent can display splash while the new parent can not', (WidgetTester tester) async {
-    final GlobalKey innerKey = GlobalKey();
+    GlobalKey innerKey = GlobalKey();
     final GlobalKey leftKey = GlobalKey();
     final GlobalKey rightKey = GlobalKey();
 
@@ -1093,7 +1093,7 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
 
     // Press inner
     final TestGesture gesture = await tester.startGesture(const Offset(100, 50), pointer: 1);
@@ -1101,6 +1101,7 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
     // Switch side
+    innerKey = GlobalKey();
     await tester.pumpWidget(
       doubleInkWellRow(
         leftWidth: 90,
@@ -1111,6 +1112,8 @@ void main() {
         ),
       ),
     );
+    material = Material.of(tester.element(find.byKey(innerKey)))!;
+
     expect(material, paintsExactlyCountTimes(#drawCircle, 0));
 
     // A second pointer presses inner
