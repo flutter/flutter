@@ -577,7 +577,6 @@ class InkResponse extends StatelessWidget {
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.of(context);
     return _InkResponseStateWidget(
-      inkWellKey: key,
       child: child,
       onTap: onTap,
       onTapDown: onTapDown,
@@ -627,7 +626,6 @@ class InkResponse extends StatelessWidget {
 
 class _InkResponseStateWidget extends StatefulWidget {
   const _InkResponseStateWidget({
-    this.inkWellKey,
     this.child,
     this.onTap,
     this.onTapDown,
@@ -664,8 +662,6 @@ class _InkResponseStateWidget extends StatefulWidget {
        assert(autofocus != null),
        assert(canRequestFocus != null);
 
-  // Avoid duplicate GlobalKey registration
-  final Key? inkWellKey;
   final Widget? child;
   final GestureTapCallback? onTap;
   final GestureTapDownCallback? onTapDown;
@@ -1028,9 +1024,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void deactivate() {
     assert(!_deactivated);
     _deactivated = true;
-    if (widget.inkWellKey is! GlobalKey) {
-      _deactivate();
-    }
     super.deactivate();
   }
 
@@ -1228,6 +1221,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// size of its underlying [Material], where the splashes are rendered, changes
 /// during animation. You should avoid using InkWells within [Material] widgets
 /// that are changing size.
+///
+/// If [InkWell] or ancestor widget has [GlobalKey], then splashes will not
+/// stop animation even if the widget with [GlobalKey] changes position during
+/// splashes animation.
 ///
 /// See also:
 ///

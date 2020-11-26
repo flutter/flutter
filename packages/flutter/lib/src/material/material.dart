@@ -631,7 +631,11 @@ abstract class InkFeature {
   }
 
   void _paint(Canvas canvas) {
-    assert(referenceBox.attached);
+    // The referenceBox may be removed temporarily, but may dispose or rejoin
+    // the tree in the next frame.
+    if (!referenceBox.attached) {
+      return;
+    }
     assert(!_debugDisposed);
     // find the chain of renderers from us to the feature's referenceBox
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
