@@ -78,7 +78,6 @@ import 'theme.dart';
 ///
 /// ```dart imports
 /// import 'package:flutter/cupertino.dart';
-/// import 'package:flutter/services.dart';
 /// ```
 ///
 /// ```dart
@@ -90,7 +89,7 @@ import 'theme.dart';
 ///         onChanged: () {
 ///           Form.of(primaryFocus.context).save();
 ///         },
-///         child: CupertinoFormSection.padded(
+///         child: CupertinoFormSection.insetGrouped(
 ///           header: Text('SECTION 1'),
 ///           children: List<Widget>.generate(5, (int index) {
 ///             return CupertinoTextFormFieldRow(
