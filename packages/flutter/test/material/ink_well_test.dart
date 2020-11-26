@@ -1335,162 +1335,154 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/6751
   testWidgets('When InkWell/Ancestor has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
+    void expectTest(bool painted) {
+      final PaintPattern paintPattern = paints..circle();
+
+      expect(
+        Material.of(tester.element(find.byType(InkWell)))! as RenderBox,
+        painted ? paintPattern : isNot(paintPattern),
+      );
+    }
+
     Future<void> test(Widget Function(Key? key, {bool onTapDownChangeWrap, bool onTapChangeWrap}) buildApp) async {
       await tester.pumpWidget(buildApp(null, onTapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump(const Duration(milliseconds: 60));
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        isNot(paints..circle()),
-      );
+      expectTest(false);
       await tester.pumpAndSettle();
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        isNot(paints..circle()),
-      );
+      expectTest(false);
 
       await tester.pumpWidget(buildApp(const Key('foo'), onTapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump(const Duration(milliseconds: 60));
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        isNot(paints..circle()),
-      );
+      expectTest(false);
       await tester.pumpAndSettle();
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        isNot(paints..circle()),
-      );
+      expectTest(false);
 
       // Does not call setState.
       await tester.pumpWidget(buildApp(GlobalKey()));
       await tester.tap(find.byType(InkWell));
       await tester.pump(const Duration(milliseconds: 60));
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        paints..circle(),
-      );
+      expectTest(true);
       await tester.pumpAndSettle();
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        isNot(paints..circle()),
-      );
+      expectTest(false);
 
       await tester.pumpWidget(buildApp(GlobalKey(), onTapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump(const Duration(milliseconds: 60));
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        paints..circle(),
-      );
+      expectTest(true);
       await tester.pumpAndSettle();
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        isNot(paints..circle()),
-      );
+      expectTest(false);
 
       await tester.pumpWidget(buildApp(GlobalKey(), onTapDownChangeWrap: true));
       final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
       await tester.pump(const Duration(milliseconds: 60));
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        paints..circle(),
-      );
+      expectTest(true);
       await testGesture.up();
       await tester.pumpAndSettle();
-      expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
-        isNot(paints..circle()),
-      );
+      expectTest(false);
     }
 
     // InkWell have a key
     await test((Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
       bool wrap = false;
 
-      return MaterialApp(home: Scaffold(
-        body: Center(
-          child: StatefulBuilder(
-            builder: (BuildContext context, void Function(void Function()) setState) {
-              Future<void> changeWrap() async{
-                await Future<void>.delayed(const Duration(milliseconds: 50));
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context,
+                  void Function(void Function()) setState) {
+                Future<void> changeWrap() async {
+                  await Future<void>.delayed(const Duration(milliseconds: 50));
 
-                setState(() { wrap = !wrap; });
-              }
+                  setState(() {
+                    wrap = !wrap;
+                  });
+                }
 
-              Widget child = InkWell(
-                key: key,
-                onTapDown: (_) async {
-                  if (onTapDownChangeWrap) changeWrap();
-                },
-                onTap: () async {
-                  if (onTapChangeWrap) changeWrap();
-                },
-                child: Container(
-                  height: 160,
-                  alignment: Alignment.center,
-                ),
-              );
-
-              if (wrap) {
-                child = Container(
-                  margin: const EdgeInsets.only(top: 320),
-                  child: child,
+                Widget child = InkWell(
+                  key: key,
+                  onTapDown: (_) async {
+                    if (onTapDownChangeWrap)
+                      changeWrap();
+                  },
+                  onTap: () async {
+                    if (onTapChangeWrap)
+                      changeWrap();
+                  },
+                  child: Container(
+                    height: 160,
+                    alignment: Alignment.center,
+                  ),
                 );
-              }
 
-              return child;
-            },
+                if (wrap) {
+                  child = Container(
+                    margin: const EdgeInsets.only(top: 320),
+                    child: child,
+                  );
+                }
+
+                return child;
+              },
+            ),
           ),
         ),
-      ));
+      );
     });
 
-    // Parent widget have Key
+    // Ancestor widget have Key
     await test((Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
       bool wrap = false;
 
-      return MaterialApp(home: Scaffold(
-        body: Center(
-          child: StatefulBuilder(
-            builder: (BuildContext context, void Function(void Function()) setState) {
-              Future<void> changeWrap() async{
-                await Future<void>.delayed(const Duration(milliseconds: 50));
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context,
+                  void Function(void Function()) setState) {
+                Future<void> changeWrap() async {
+                  await Future<void>.delayed(const Duration(milliseconds: 50));
 
-                setState(() { wrap = !wrap; });
-              }
+                  setState(() {
+                    wrap = !wrap;
+                  });
+                }
 
-              Widget child = InkWell(
-                onTapDown: (_) async {
-                  if (onTapDownChangeWrap) changeWrap();
-                },
-                onTap: () async {
-                  if (onTapChangeWrap) changeWrap();
-                },
-                child: Container(
-                  height: 160,
-                  alignment: Alignment.center,
-                ),
-              );
+                Widget child = InkWell(
+                  onTapDown: (_) async {
+                    if (onTapDownChangeWrap)
+                      changeWrap();
+                  },
+                  onTap: () async {
+                    if (onTapChangeWrap)
+                      changeWrap();
+                  },
+                  child: Container(
+                    height: 160,
+                    alignment: Alignment.center,
+                  ),
+                );
 
-              child = Container(
-                key: key,
-                color: Colors.red,
-                child: child,
-              );
-
-              if (wrap) {
                 child = Container(
-                  margin: const EdgeInsets.only(top: 320),
+                  key: key,
                   child: child,
                 );
-              }
 
-              return child;
-            },
+                if (wrap) {
+                  child = Container(
+                    margin: const EdgeInsets.only(top: 320),
+                    child: child,
+                  );
+                }
+
+                return child;
+              },
+            ),
           ),
         ),
-      ));
+      );
     });
   });
 }
