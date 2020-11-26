@@ -15,7 +15,7 @@ void main() {
         home: Center(
           child: CupertinoFormSection(
             header: header,
-            children: [CupertinoTextFormFieldRow()],
+            children: <Widget>[CupertinoTextFormFieldRow()],
           ),
         ),
       ),
