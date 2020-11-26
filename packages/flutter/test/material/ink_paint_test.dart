@@ -432,4 +432,114 @@ void main() {
       throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
     }));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/6751
+  testWidgets('When Ink has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
+    const Color color = Colors.blue;
+    const Color splashColor = Colors.green;
+
+    void expectTest(bool painted) {
+      final PaintPattern paintPattern = paints
+        ..rect(color: Color(color.value))
+        ..circle(color: Color(splashColor.value));
+
+      expect(
+        Material.of(tester.element(find.byType(InkWell)))! as RenderBox,
+        painted ? paintPattern : isNot(paintPattern),
+      );
+    }
+
+    Future<void> test(Widget Function(Key? key, {bool onTapDownChangeWrap, bool onTapChangeWrap}) buildApp) async {
+      await tester.pumpWidget(buildApp(null, onTapChangeWrap: true));
+      await tester.tap(find.byType(InkWell));
+      await tester.pump(const Duration(milliseconds: 60));
+      expectTest(false);
+      await tester.pumpAndSettle();
+      expectTest(false);
+
+      await tester.pumpWidget(buildApp(const Key('foo'), onTapChangeWrap: true));
+      await tester.tap(find.byType(InkWell));
+      await tester.pump(const Duration(milliseconds: 60));
+      expectTest(false);
+      await tester.pumpAndSettle();
+      expectTest(false);
+
+      // Does not call setState.
+      await tester.pumpWidget(buildApp(GlobalKey()));
+      await tester.tap(find.byType(InkWell));
+      await tester.pump(const Duration(milliseconds: 60));
+      expectTest(true);
+      await tester.pumpAndSettle();
+      expectTest(false);
+
+      await tester.pumpWidget(buildApp(GlobalKey(), onTapChangeWrap: true));
+      await tester.tap(find.byType(InkWell));
+      await tester.pump(const Duration(milliseconds: 60));
+      expectTest(true);
+      await tester.pumpAndSettle();
+      expectTest(false);
+
+      await tester.pumpWidget(buildApp(GlobalKey(), onTapDownChangeWrap: true));
+      final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+      await tester.pump(const Duration(milliseconds: 60));
+      expectTest(true);
+      await testGesture.up();
+      await tester.pumpAndSettle();
+      expectTest(false);
+    }
+
+    await test((Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
+      bool wrap = false;
+
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context,
+                  void Function(void Function()) setState) {
+                Future<void> changeWrap() async {
+                  await Future<void>.delayed(const Duration(milliseconds: 50));
+
+                  setState(() {
+                    wrap = !wrap;
+                  });
+                }
+
+                Widget child = InkWell(
+                  splashColor: splashColor,
+                  onTapDown: (_) async {
+                    if (onTapDownChangeWrap)
+                      changeWrap();
+                  },
+                  onTap: () async {
+                    if (onTapChangeWrap)
+                      changeWrap();
+                  },
+                  child: Container(
+                    height: 160,
+                    alignment: Alignment.center,
+                  ),
+                );
+
+                child = Ink(
+                  key: key,
+                  color: color,
+                  child: child,
+                );
+
+                if (wrap) {
+                  child = Container(
+                    margin: const EdgeInsets.only(top: 320),
+                    child: child,
+                  );
+                }
+
+                return child;
+              },
+            ),
+          ),
+        ),
+      );
+    });
+  });
 }

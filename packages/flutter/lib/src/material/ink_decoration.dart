@@ -243,10 +243,10 @@ class _InkState extends State<Ink> {
   }
 
   @override
-  void deactivate() {
+  void dispose() {
     _ink?.dispose();
     assert(_ink == null);
-    super.deactivate();
+    super.dispose();
   }
 
   Widget _build(BuildContext context, BoxConstraints constraints) {
