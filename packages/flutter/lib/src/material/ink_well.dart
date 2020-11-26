@@ -822,6 +822,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void updateHighlight(_HighlightType type, { required bool value, bool callOnHover = true }) {
+    if(!mounted){
+      return;
+    }
     final InkHighlight? highlight = _highlights[type];
     void handleInkRemoval() {
       assert(_highlights[type] != null);
