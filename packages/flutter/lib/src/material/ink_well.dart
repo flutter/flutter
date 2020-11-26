@@ -1022,7 +1022,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void deactivate() {
-    assert(!_deactivated);
     _deactivated = true;
     super.deactivate();
   }
