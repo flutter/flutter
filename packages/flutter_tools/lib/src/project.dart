@@ -653,7 +653,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   void copyEngineArtifactToProject(BuildMode mode) {
-    // Copy podspec and framework from engine cache. The actual build mode
+    // Copy framework from engine cache. The actual build mode
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something
     // to be in this location.
@@ -665,12 +665,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       )
     );
     if (framework.existsSync()) {
-      final File podspec = framework.parent.childFile('Flutter.podspec');
       globals.fsUtils.copyDirectorySync(
         framework,
         engineCopyDirectory.childDirectory('Flutter.framework'),
       );
-      podspec.copySync(engineCopyDirectory.childFile('Flutter.podspec').path);
     }
   }
 

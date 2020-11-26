@@ -282,6 +282,39 @@ void main() {
       Platform: () => fakePlatform,
     });
 
+    testUsingContext('Show current version to the upgrade message.', () async {
+      const String revision = 'abc123';
+      const String upstreamRevision = 'def456';
+      const String version = '1.2.3';
+      const String upstreamVersion = '4.5.6';
+
+      when(flutterVersion.frameworkRevision).thenReturn(revision);
+      when(flutterVersion.frameworkVersion).thenReturn(version);
+
+      final MockFlutterVersion latestVersion = MockFlutterVersion();
+
+      when(latestVersion.frameworkRevision).thenReturn(upstreamRevision);
+      when(latestVersion.frameworkVersion).thenReturn(upstreamVersion);
+
+      fakeCommandRunner.alreadyUpToDate = false;
+      fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
+
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        force: true,
+        continueFlow: false,
+        testFlow: true,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(await result, FlutterCommandResult.success());
+      expect(testLogger.statusText, contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
     testUsingContext('precacheArtifacts passes env variables to child process', () async {
       processManager.addCommand(
         FakeCommand(

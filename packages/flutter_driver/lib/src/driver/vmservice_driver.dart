@@ -530,7 +530,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
   }
 }
 
-
 /// The connection function used by [FlutterDriver.connect].
 ///
 /// Overwrite this function if you require a custom method for connecting to
@@ -563,13 +562,18 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic> headers) 
   while (true) {
     try {
       socket = await WebSocket.connect(webSocketUrl, headers: headers);
+      final StreamController<dynamic> controller = StreamController<dynamic>();
+      final Completer<void> streamClosedCompleter = Completer<void>();
+      socket.listen(
+        (dynamic data) => controller.add(data),
+        onDone: () => streamClosedCompleter.complete(),
+      );
       final vms.VmService service = vms.VmService(
-        socket,
+        controller.stream,
         socket.add,
         log: null,
-        disposeHandler: () async {
-          await socket.close();
-        },
+        disposeHandler: () => socket.close(),
+        streamClosed: streamClosedCompleter.future
       );
       // This call is to ensure we are able to establish a connection instead of
       // keeping on trucking and failing farther down the process.
@@ -585,7 +589,6 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic> headers) 
     }
   }
 }
-
 
 /// The amount of time we wait prior to making the next attempt to connect to
 /// the VM service.
