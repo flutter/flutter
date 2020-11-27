@@ -1120,6 +1120,7 @@ void main() {
                             BottomNavigationBarItem(
                               label: label,
                               icon: Icon(Icons.ac_unit),
+                              toolTip: label,
                             ),
                             BottomNavigationBarItem(
                               label: 'B',
