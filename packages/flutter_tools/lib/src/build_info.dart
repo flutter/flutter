@@ -9,8 +9,8 @@ import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/utils.dart';
 import 'base/os.dart';
+import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
 
@@ -797,6 +797,8 @@ String _getNameForTargetPlatformOfDesktops(TargetPlatform platform) {
       return 'x64';
     case TargetPlatform.linux_arm64:
       return 'arm64';
+    default:
+      break;
   }
   assert(false);
   return null;

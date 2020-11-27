@@ -9,7 +9,6 @@ import 'package:process/process.dart';
 
 import '../build_info.dart';
 import '../globals.dart' as globals;
-import '../globals.dart';
 import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';

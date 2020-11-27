@@ -1004,16 +1004,16 @@ class FlutterSdk extends EngineCachedArtifact {
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
       if (cache.includeAllPlatforms) ...<List<String>>[
-        <String>['windows-${arch}', 'windows-${arch}/artifacts.zip'],
-        <String>['linux-${arch}', 'linux-${arch}/artifacts.zip'],
-        <String>['darwin-${arch}', 'darwin-${arch}/artifacts.zip'],
+        <String>['windows-$arch', 'windows-$arch/artifacts.zip'],
+        <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
+        <String>['darwin-$arch', 'darwin-$arch/artifacts.zip'],
       ]
       else if (_platform.isWindows)
-        <String>['windows-${arch}', 'windows-${arch}/artifacts.zip']
+        <String>['windows-$arch', 'windows-$arch/artifacts.zip']
       else if (_platform.isMacOS)
-        <String>['darwin-${arch}', 'darwin-${arch}/artifacts.zip']
+        <String>['darwin-$arch', 'darwin-$arch/artifacts.zip']
       else if (_platform.isLinux)
-        <String>['linux-${arch}', 'linux-${arch}/artifacts.zip'],
+        <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
     ];
   }
 
@@ -1097,9 +1097,9 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
     if (_platform.isLinux || ignorePlatformFiltering) {
       final String arch = getCurrentHostPlatformArchName();
       return <List<String>>[
-        <String>['linux-${arch}', 'linux-${arch}/linux-${arch}-flutter-gtk.zip'],
-        <String>['linux-${arch}-profile', 'linux-${arch}-profile/linux-${arch}-flutter-gtk.zip'],
-        <String>['linux-${arch}-release', 'linux-${arch}-release/linux-${arch}-flutter-gtk.zip'],
+        <String>['linux-$arch', 'linux-$arch/linux-$arch-flutter-gtk.zip'],
+        <String>['linux-$arch-profile', 'linux-$arch-profile/linux-$arch-flutter-gtk.zip'],
+        <String>['linux-$arch-release', 'linux-$arch-release/linux-$arch-flutter-gtk.zip'],
       ];
     }
     return const <List<String>>[];
@@ -1485,10 +1485,10 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     final String arch = getCurrentHostPlatformArchName();
-    Map<String, List<String>> artifacts = <String, List<String>> {
-      'macos': <String>['darwin-${arch}', 'darwin-${arch}/$artifactName.zip'],
-      'linux': <String>['linux-${arch}', 'linux-${arch}/$artifactName.zip'],
-      'windows': <String>['windows-${arch}', 'windows-${arch}/$artifactName.zip'],
+    final Map<String, List<String>> artifacts = <String, List<String>> {
+      'macos': <String>['darwin-$arch', 'darwin-$arch/$artifactName.zip'],
+      'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
+      'windows': <String>['windows-$arch', 'windows-$arch/$artifactName.zip'],
     };
     if (cache.includeAllPlatforms) {
       return artifacts.values.toList();

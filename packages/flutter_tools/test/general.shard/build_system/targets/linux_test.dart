@@ -18,7 +18,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 
 void main() {
-  final TargetPlatform targetPlatform = TargetPlatform.linux_x64;
+  const TargetPlatform targetPlatform = TargetPlatform.linux_x64;
   testWithoutContext('Copies files to correct cache directory, excluding unrelated code', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
@@ -36,7 +36,7 @@ void main() {
     );
     testEnvironment.buildDir.createSync(recursive: true);
 
-    await UnpackLinux(targetPlatform).build(testEnvironment);
+    await const UnpackLinux(targetPlatform).build(testEnvironment);
 
     expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
 
@@ -84,7 +84,7 @@ void main() {
       }
     ));
 
-    await DebugBundleLinuxAssets(targetPlatform).build(testEnvironment);
+    await const DebugBundleLinuxAssets(targetPlatform).build(testEnvironment);
     final Directory output = testEnvironment.outputDir
       .childDirectory('flutter_assets');
 
@@ -119,8 +119,8 @@ void main() {
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
 
-    await LinuxAotBundle(AotElfProfile(targetPlatform)).build(testEnvironment);
-    await ProfileBundleLinuxAssets(targetPlatform).build(testEnvironment);
+    await const LinuxAotBundle(AotElfProfile(targetPlatform)).build(testEnvironment);
+    await const ProfileBundleLinuxAssets(targetPlatform).build(testEnvironment);
     final Directory libDir = testEnvironment.outputDir
       .childDirectory('lib');
     final Directory assetsDir = testEnvironment.outputDir
@@ -153,8 +153,8 @@ void main() {
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
 
-    await LinuxAotBundle(AotElfRelease(targetPlatform)).build(testEnvironment);
-    await ReleaseBundleLinuxAssets(targetPlatform).build(testEnvironment);
+    await const LinuxAotBundle(AotElfRelease(targetPlatform)).build(testEnvironment);
+    await const ReleaseBundleLinuxAssets(targetPlatform).build(testEnvironment);
     final Directory libDir = testEnvironment.outputDir
       .childDirectory('lib');
     final Directory assetsDir = testEnvironment.outputDir
@@ -172,7 +172,7 @@ void main() {
 }
 
 void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
-  final TargetPlatform targetPlatform = TargetPlatform.linux_x64;
+  const TargetPlatform targetPlatform = TargetPlatform.linux_x64;
   final String desktopPath = artifacts.getArtifactPath(Artifact.linuxDesktopPath, platform: targetPlatform, mode: BuildMode.debug);
   fileSystem.file('$desktopPath/unrelated-stuff').createSync(recursive: true);
   fileSystem.file('$desktopPath/libflutter_linux_gtk.so').createSync(recursive: true);

@@ -99,7 +99,7 @@ abstract class BundleLinuxAssets extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
-    KernelSnapshot(),
+    const KernelSnapshot(),
     UnpackLinux(targetPlatform),
   ];
 
