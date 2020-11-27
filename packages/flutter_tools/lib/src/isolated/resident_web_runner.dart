@@ -468,16 +468,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
       globals.printStatus('This application is not configured to build on the web.');
       globals.printStatus('To add web support to a project, run `flutter create .`.');
     }
-    if (!globals.fs.isFileSync(mainPath)) {
-      String message = 'Tried to run $mainPath, but that file does not exist.';
-      if (target == null) {
-        message +=
-            '\nConsider using the -t option to specify the Dart file to start.';
-      }
-      globals.printError(message);
-      appFailedToStart();
-      return 1;
-    }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
       'Launching ${globals.fsUtils.getDisplayPath(target)} '
@@ -723,7 +713,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         ?? debuggingOptions.buildInfo.packageConfig,
     );
     final Status devFSStatus = globals.logger.startProgress(
-      'Syncing files to device ${device.device.name}...',
+      'Waiting for connection from debug service on ${device.device.name}...',
     );
     final UpdateFSReport report = await device.devFS.update(
       mainUri: await _generateEntrypoint(
@@ -833,6 +823,18 @@ class _ResidentWebRunner extends ResidentWebRunner {
           ..writeAsStringSync(websocketUri.toString());
       }
       globals.printStatus('Debug service listening on $websocketUri');
+      globals.printStatus('');
+      if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
+        globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
+      } else {
+        globals.printStatus(
+          'Running with unsound null safety',
+          emphasis: true,
+        );
+        globals.printStatus(
+          'For more information see https://dart.dev/null-safety/unsound-null-safety',
+        );
+      }
     }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));

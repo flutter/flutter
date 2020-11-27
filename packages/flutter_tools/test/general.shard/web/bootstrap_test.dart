@@ -30,6 +30,17 @@ void main() {
       'function(app, dart_sdk) {'));
   });
 
+  test('generateMainModule can set bootstrap name', () {
+    final String result = generateMainModule(
+      entrypoint: 'foo/bar/main.js',
+      nullAssertions: false,
+      bootstrapModule: 'foo_module.bootstrap',
+    );
+    // bootstrap main module has correct defined module.
+    expect(result, contains('define("foo_module.bootstrap", ["foo/bar/main.js", "dart_sdk"], '
+      'function(app, dart_sdk) {'));
+  });
+
   test('generateMainModule includes null safety switches', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
@@ -39,5 +50,11 @@ void main() {
     expect(result, contains('''
   if (true) {
     dart_sdk.dart.nonNullAsserts(true);'''));
+  });
+
+  test('generateTestBootstrapFileContents embeds urls correctly', () {
+    final String result = generateTestBootstrapFileContents('foo.dart.js', 'require.js', 'mapper.js');
+
+    expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
   });
 }

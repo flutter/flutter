@@ -415,10 +415,8 @@ class FloatingActionButton extends StatelessWidget {
   final BoxConstraints _sizeConstraints;
 
   static const double _defaultElevation = 6;
-  // TODO(gspencer): verify focus and hover elevation values are correct
-  // according to spec.
-  static const double _defaultFocusElevation = 8;
-  static const double _defaultHoverElevation = 10;
+  static const double _defaultFocusElevation = 6;
+  static const double _defaultHoverElevation = 8;
   static const double _defaultHighlightElevation = 12;
   static const ShapeBorder _defaultShape = CircleBorder();
   static const ShapeBorder _defaultExtendedShape = StadiumBorder();
@@ -584,6 +582,19 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) => 0.0;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      final Size childSize = child!.getDryLayout(const BoxConstraints());
+      return Size(
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, childSize.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, childSize.height)),
+      );
+    } else {
+      return constraints.biggest;
+    }
+  }
 
   @override
   void performLayout() {

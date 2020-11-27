@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -10,6 +11,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
+import '../dart/language_version.dart';
 import '../globals.dart' as globals;
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
@@ -27,13 +29,24 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     @required List<String> testFiles,
     @required BuildInfo buildInfo,
   }) async {
-    if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      throwToolExit('flutter test --platform=chrome does not currently support sound mode');
-    }
+    LanguageVersion languageVersion = LanguageVersion(2, 8);
+    Artifact platformDillArtifact;
+    // TODO(jonahwilliams): to support autodetect this would need to partition the source code into a
+    // a sound and unsound set and perform separate compilations.
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
-    if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-      extraFrontEndOptions.add('--no-sound-null-safety');
+    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
+      platformDillArtifact = Artifact.webPlatformKernelDill;
+      if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+        extraFrontEndOptions.add('--no-sound-null-safety');
+      }
+    } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
+      platformDillArtifact = Artifact.webPlatformSoundKernelDill;
+      languageVersion = nullSafeVersion;
+      if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+        extraFrontEndOptions.add('--sound-null-safety');
+      }
     }
+
     final Directory outputDirectory = globals.fs.directory(testOutputDir)
       ..createSync(recursive: true);
     final List<File> generatedFiles = <File>[];
@@ -44,12 +57,12 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         globals.fs.path.join(outputDirectory.path, '${relativeTestSegments.join('_')}.test.dart'));
       generatedFile
         ..createSync(recursive: true)
-        ..writeAsStringSync(_generateEntrypoint(relativeTestSegments.join('/'), testFilePath));
+        ..writeAsStringSync(_generateEntrypoint(relativeTestSegments.join('/'), testFilePath, languageVersion));
       generatedFiles.add(generatedFile);
     }
     // Generate a fake main file that imports all tests to be executed. This will force
     // each of them to be compiled.
-    final StringBuffer buffer = StringBuffer('// @dart=2.8\n');
+    final StringBuffer buffer = StringBuffer('// @dart=${languageVersion.major}.${languageVersion.minor}\n');
     for (final File generatedFile in generatedFiles) {
       buffer.writeln('import "${globals.fs.path.basename(generatedFile.path)}";');
     }
@@ -77,7 +90,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
       platformDill: globals.fs.file(globals.artifacts
-        .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildInfo.mode))
+        .getArtifactPath(platformDillArtifact, mode: buildInfo.mode))
         .absolute.uri.toString(),
       dartDefines: buildInfo.dartDefines,
       librariesSpec: globals.fs.file(globals.artifacts
@@ -106,9 +119,9 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       ..write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
 
-  String _generateEntrypoint(String relativeTestPath, String absolutePath) {
+  String _generateEntrypoint(String relativeTestPath, String absolutePath, LanguageVersion languageVersion) {
     return '''
-  // @dart = 2.8
+  // @dart = ${languageVersion.major}.${languageVersion.minor}
   import 'org-dartlang-app:///$relativeTestPath' as test;
   import 'dart:ui' as ui;
   import 'dart:html';
@@ -137,7 +150,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     postMessageChannel().pipe(channel);
   }
 
-  StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true, Future beforeLoad()}) => RemoteListener.start(getMain, hidePrints: hidePrints, beforeLoad: beforeLoad);
+  StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
 
   StreamChannel suiteChannel(String name) {
     var manager = SuiteChannelManager.current;
