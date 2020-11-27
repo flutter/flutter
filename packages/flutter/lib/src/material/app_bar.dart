@@ -1044,9 +1044,12 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///                 background: FlutterLogo(),
 ///               ),
 ///             ),
-///             SliverFillRemaining(
+///             SliverToBoxAdapter(
 ///               child: Center(
-///                   child:Text("Scroll to see SliverAppBar in effect ."),
+///                 child: Container(
+///                   height: 2000,
+///                   child: Text("Scroll to see SliverAppBar in effect ."),
+///                 ),
 ///               ),
 ///             ),
 ///           ],
