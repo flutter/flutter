@@ -736,7 +736,7 @@ String getWebBuildDirectory() {
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory([TargetPlatform targetPlatform = null]) {
+String getLinuxBuildDirectory([TargetPlatform targetPlatform]) {
   final String arch = (targetPlatform == null) ?
       getCurrentHostPlatformArchName() :
       _getNameForTargetPlatformOfDesktops(targetPlatform);
