@@ -240,7 +240,7 @@ class Checkbox extends StatefulWidget {
 
   /// The shape of the checkbox's [Material].
   ///
-  /// If this property is null then [checkboxTheme.shape] of [ThemeData.checkboxTheme]
+  /// If this property is null then [CheckboxThemeData.shape] of [ThemeData.checkboxTheme]
   /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
   /// with a circular corner radius of 1.0.
   final OutlinedBorder? shape;
