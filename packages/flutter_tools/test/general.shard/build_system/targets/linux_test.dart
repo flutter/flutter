@@ -84,7 +84,7 @@ void main() {
       }
     ));
 
-    await const DebugBundleLinuxAssets(targetPlatform).build(testEnvironment);
+    await DebugBundleLinuxAssets(targetPlatform).build(testEnvironment);
     final Directory output = testEnvironment.outputDir
       .childDirectory('flutter_assets');
 
@@ -119,8 +119,8 @@ void main() {
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
 
-    await const LinuxAotBundle(AotElfProfile(targetPlatform)).build(testEnvironment);
-    await const ProfileBundleLinuxAssets(targetPlatform).build(testEnvironment);
+    await LinuxAotBundle(AotElfProfile(targetPlatform)).build(testEnvironment);
+    await ProfileBundleLinuxAssets(targetPlatform).build(testEnvironment);
     final Directory libDir = testEnvironment.outputDir
       .childDirectory('lib');
     final Directory assetsDir = testEnvironment.outputDir
@@ -153,8 +153,8 @@ void main() {
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
 
-    await const LinuxAotBundle(AotElfRelease(targetPlatform)).build(testEnvironment);
-    await const ReleaseBundleLinuxAssets(targetPlatform).build(testEnvironment);
+    await LinuxAotBundle(AotElfRelease(targetPlatform)).build(testEnvironment);
+    await ReleaseBundleLinuxAssets(targetPlatform).build(testEnvironment);
     final Directory libDir = testEnvironment.outputDir
       .childDirectory('lib');
     final Directory assetsDir = testEnvironment.outputDir
