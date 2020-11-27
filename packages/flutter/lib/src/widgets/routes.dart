@@ -18,14 +18,14 @@ import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'page_storage.dart';
+import 'primary_scroll_controller.dart';
 import 'restoration.dart';
+import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
 // dynamic routeObserver;
 // NavigatorState navigator;
-
-const Color _kTransparent = Color(0x00000000);
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -662,7 +662,7 @@ class _DismissModalAction extends DismissAction {
 
   @override
   Object invoke(DismissIntent intent) {
-    return Navigator.of(context)!.maybePop();
+    return Navigator.of(context).maybePop();
   }
 }
 
@@ -722,6 +722,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   /// The node this scope will use for its root [FocusScope] widget.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_ModalScopeState Focus Scope');
+  final ScrollController primaryScrollController = ScrollController();
 
   @override
   void initState() {
@@ -802,44 +803,47 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                   actions: <Type, Action<Intent>>{
                     DismissIntent: _DismissModalAction(context),
                   },
-                  child: FocusScope(
-                    node: focusScopeNode, // immutable
-                    child: RepaintBoundary(
-                      child: AnimatedBuilder(
-                        animation: _listenable, // immutable
-                        builder: (BuildContext context, Widget? child) {
-                          return widget.route.buildTransitions(
-                            context,
-                            widget.route.animation!,
-                            widget.route.secondaryAnimation!,
-                            // This additional AnimatedBuilder is include because if the
-                            // value of the userGestureInProgressNotifier changes, it's
-                            // only necessary to rebuild the IgnorePointer widget and set
-                            // the focus node's ability to focus.
-                            AnimatedBuilder(
-                              animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
-                              builder: (BuildContext context, Widget? child) {
-                                final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                                focusScopeNode.canRequestFocus = !ignoreEvents;
-                                return IgnorePointer(
-                                  ignoring: ignoreEvents,
-                                  child: child,
+                  child: PrimaryScrollController(
+                    controller: primaryScrollController,
+                    child: FocusScope(
+                      node: focusScopeNode, // immutable
+                      child: RepaintBoundary(
+                        child: AnimatedBuilder(
+                          animation: _listenable, // immutable
+                          builder: (BuildContext context, Widget? child) {
+                            return widget.route.buildTransitions(
+                              context,
+                              widget.route.animation!,
+                              widget.route.secondaryAnimation!,
+                              // This additional AnimatedBuilder is include because if the
+                              // value of the userGestureInProgressNotifier changes, it's
+                              // only necessary to rebuild the IgnorePointer widget and set
+                              // the focus node's ability to focus.
+                              AnimatedBuilder(
+                                animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                                builder: (BuildContext context, Widget? child) {
+                                  final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                                  focusScopeNode.canRequestFocus = !ignoreEvents;
+                                  return IgnorePointer(
+                                    ignoring: ignoreEvents,
+                                    child: child,
+                                  );
+                                },
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: _page ??= RepaintBoundary(
+                            key: widget.route._subtreeKey, // immutable
+                            child: Builder(
+                              builder: (BuildContext context) {
+                                return widget.route.buildPage(
+                                  context,
+                                  widget.route.animation!,
+                                  widget.route.secondaryAnimation!,
                                 );
                               },
-                              child: child,
                             ),
-                          );
-                        },
-                        child: _page ??= RepaintBoundary(
-                          key: widget.route._subtreeKey, // immutable
-                          child: Builder(
-                            builder: (BuildContext context) {
-                              return widget.route.buildPage(
-                                context,
-                                widget.route.animation!,
-                                widget.route.secondaryAnimation!,
-                              );
-                            },
                           ),
                         ),
                       ),
@@ -1469,10 +1473,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
     if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
-      assert(barrierColor != _kTransparent);
+      assert(barrierColor != barrierColor!.withOpacity(0.0));
       final Animation<Color?> color = animation!.drive(
         ColorTween(
-          begin: _kTransparent,
+          begin: barrierColor!.withOpacity(0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
         ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
@@ -1843,7 +1847,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator)!.push<T>(_DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(_DialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,

@@ -43,6 +43,7 @@
     XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:60.0]);
 }
 
+// TODO(dnfield): this test has become flaky, fix https://github.com/flutter/flutter/issues/70630 and re-enable.
 - (void)testFlutterViewWarm {
     XCUIApplication *app = [[XCUIApplication alloc] init];
     [app launch];

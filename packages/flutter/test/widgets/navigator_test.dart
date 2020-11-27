@@ -204,13 +204,13 @@ void main() {
                         return ElevatedButton(
                           child: const Text('Next'),
                           onPressed: () {
-                            Navigator.of(context)!.push(
+                            Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (BuildContext context) {
                                   return ElevatedButton(
                                     child: const Text('Inner page'),
                                     onPressed: () {
-                                      Navigator.of(context, rootNavigator: true)!.push(
+                                      Navigator.of(context, rootNavigator: true).push(
                                         MaterialPageRoute<void>(
                                           builder: (BuildContext context) {
                                             return const Text('Dialog');
@@ -783,8 +783,8 @@ void main() {
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
         onTap: (){
-          Navigator.of(context)!.popUntil((Route<dynamic> route) => route.isFirst);
-          Navigator.of(context)!.pushReplacementNamed('/C');
+          Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+          Navigator.of(context).pushReplacementNamed('/C');
         },
       ),
       '/C': (BuildContext context) => const OnTapPage(id: 'C',
@@ -851,7 +851,7 @@ void main() {
         id: 'B',
         onTap: (){
           // Pops all routes with bad predicate.
-          Navigator.of(context)!.popUntil((Route<dynamic> route) => false);
+          Navigator.of(context).popUntil((Route<dynamic> route) => false);
         },
       ),
     };
@@ -929,7 +929,7 @@ void main() {
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
         onTap: () {
-          Navigator.of(context)!.pushNamedAndRemoveUntil('/D', ModalRoute.withName('/A'));
+          Navigator.of(context).pushNamedAndRemoveUntil('/D', ModalRoute.withName('/A'));
         },
       ),
       '/D': (BuildContext context) => const Text('page D'),
@@ -1597,7 +1597,7 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () {
         Navigator.pushNamed(context, '/A');
-        Navigator.of(context)!.pop();
+        Navigator.of(context).pop();
       }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
@@ -1825,12 +1825,12 @@ void main() {
   });
 
   testWidgets('initial routes below opaque route are offstage', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          key: g,
+          key: testKey,
           initialRoute: '/a/b',
           onGenerateRoute: (RouteSettings s) {
             return MaterialPageRoute<void>(
@@ -1850,7 +1850,7 @@ void main() {
     expect(find.text('+/a+', skipOffstage: false), findsOneWidget);
     expect(find.text('+/a/b+'), findsOneWidget);
 
-    g.currentState!.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('+/+'), findsNothing);
@@ -1858,7 +1858,7 @@ void main() {
     expect(find.text('+/a+'), findsOneWidget);
     expect(find.text('+/a/b+'), findsNothing);
 
-    g.currentState!.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('+/+'), findsOneWidget);
@@ -1868,12 +1868,12 @@ void main() {
 
   testWidgets('Can provide custom onGenerateInitialRoutes', (WidgetTester tester) async {
     bool onGenerateInitialRoutesCalled = false;
-    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          key: g,
+          key: testKey,
           initialRoute: 'Hello World',
           onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
             onGenerateInitialRoutesCalled = true;
@@ -1893,7 +1893,7 @@ void main() {
     expect(find.text('Hello'), findsNothing);
     expect(find.text('World'), findsOneWidget);
 
-    g.currentState!.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('Hello'), findsOneWidget);
@@ -1901,16 +1901,16 @@ void main() {
   });
 
   testWidgets('Navigator.of able to handle input context is a navigator context', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
-        navigatorKey: g,
+        navigatorKey: testKey,
         home: const Text('home'),
       )
     );
 
-    final NavigatorState state = Navigator.of(g.currentContext!)!;
-    expect(state, g.currentState);
+    final NavigatorState state = Navigator.of(testKey.currentContext!);
+    expect(state, testKey.currentState);
   });
 
   testWidgets('Navigator.of able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
@@ -1931,7 +1931,61 @@ void main() {
       )
     );
 
-    final NavigatorState state = Navigator.of(sub.currentContext!, rootNavigator: true)!;
+    final NavigatorState state = Navigator.of(sub.currentContext!, rootNavigator: true);
+    expect(state, root.currentState);
+  });
+
+  testWidgets('Navigator.maybeOf throws when there is no navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(SizedBox(key: testKey));
+
+    expect(() async {
+      Navigator.of(testKey.currentContext!);
+    }, throwsFlutterError);
+  });
+
+  testWidgets('Navigator.maybeOf works when there is no navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(SizedBox(key: testKey));
+
+    final NavigatorState? state = Navigator.maybeOf(testKey.currentContext!);
+    expect(state, isNull);
+  });
+
+  testWidgets('Navigator.maybeOf able to handle input context is a navigator context', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: testKey,
+          home: const Text('home'),
+        )
+    );
+
+    final NavigatorState? state = Navigator.maybeOf(testKey.currentContext!);
+    expect(state, isNotNull);
+    expect(state, testKey.currentState);
+  });
+
+  testWidgets('Navigator.maybeOf able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> root = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: root,
+          home: Navigator(
+            key: sub,
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) => const Text('dummy'),
+              );
+            },
+          ),
+        )
+    );
+
+    final NavigatorState? state = Navigator.maybeOf(sub.currentContext!, rootNavigator: true);
+    expect(state, isNotNull);
     expect(state, root.currentState);
   });
 

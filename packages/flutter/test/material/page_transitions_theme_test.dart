@@ -26,7 +26,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -52,7 +52,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -85,7 +85,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -125,7 +125,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => const Text('page b'),
@@ -169,7 +169,7 @@ void main() {
       '/': (BuildContext context) => Material(
         child: TextButton(
           child: const Text('push'),
-          onPressed: () { Navigator.of(context)!.pushNamed('/b'); },
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
       '/b': (BuildContext context) => StatefulBuilder(

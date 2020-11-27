@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -32,6 +33,7 @@ void main() {
   CocoaPods cocoaPodsUnderTest;
   InvokeProcess resultOfPodVersion;
   BufferLogger logger;
+  Usage usage;
 
   void pretendPodVersionFails() {
     resultOfPodVersion = () async => exitsWithError();
@@ -68,15 +70,17 @@ void main() {
     projectUnderTest = FlutterProject.fromDirectory(fileSystem.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
+    usage = Usage.test();
     cocoaPodsUnderTest = CocoaPods(
       fileSystem: fileSystem,
       processManager: mockProcessManager,
       logger: logger,
-      platform: FakePlatform(),
+      platform: FakePlatform(operatingSystem: 'macos'),
       artifacts: Artifacts.test(),
       xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+      usage: usage,
     );
-    pretendPodVersionIs('1.8.0');
+    pretendPodVersionIs('1.9.0');
     fileSystem.file(fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
     ))
@@ -448,6 +452,79 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
           contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"),
         );
       }
+    });
+
+    testWithoutContext('ffi failure on ARM macOS prompts gem install', () async {
+      pretendPodIsInstalled();
+      fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
+
+      when(mockProcessManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
+          .thenReturn(ProcessResult(0, 0, 'hw.optional.arm64: 1', ''));
+
+      when(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{
+          'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
+        },
+      )).thenAnswer((_) async => exitsWithError(
+            'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
+          ));
+
+      // Capture Usage.test() events.
+      final StringBuffer buffer =
+          await capturedConsolePrint(() => expectToolExitLater(
+                cocoaPodsUnderTest.processPods(
+                  xcodeProject: projectUnderTest.ios,
+                  buildMode: BuildMode.debug,
+                ),
+                equals('Error running pod install'),
+              ));
+      expect(
+        logger.errorText,
+        contains('set up CocoaPods for ARM macOS'),
+      );
+      expect(buffer.toString(),
+          contains('event {category: pod-install-failure, action: arm-ffi'));
+    });
+
+    testWithoutContext('ffi failure on x86 macOS does not prompt gem install', () async {
+      pretendPodIsInstalled();
+      fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
+
+      when(mockProcessManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
+          .thenReturn(ProcessResult(0, 1, '', ''));
+
+      when(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{
+          'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
+        },
+      )).thenAnswer((_) async => exitsWithError(
+        'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
+      ));
+
+      // Capture Usage.test() events.
+      final StringBuffer buffer =
+      await capturedConsolePrint(() => expectToolExitLater(
+        cocoaPodsUnderTest.processPods(
+          xcodeProject: projectUnderTest.ios,
+          buildMode: BuildMode.debug,
+        ),
+        equals('Error running pod install'),
+      ));
+      expect(
+        logger.errorText,
+        isNot(contains('ARM macOS')),
+      );
+      expect(buffer.isEmpty, true);
     });
 
     testWithoutContext('run pod install, if Podfile.lock is missing', () async {

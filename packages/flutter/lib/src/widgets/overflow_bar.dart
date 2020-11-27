@@ -437,6 +437,31 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    RenderBox? child = firstChild;
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final BoxConstraints childConstraints = constraints.loosen();
+    double childrenWidth = 0.0;
+    double maxChildHeight = 0.0;
+    double y = 0.0;
+    while (child != null) {
+      final Size childSize = child.getDryLayout(childConstraints);
+      childrenWidth += childSize.width;
+      maxChildHeight = math.max(maxChildHeight, childSize.height);
+      y += childSize.height + overflowSpacing;
+      child = childAfter(child);
+    }
+    final double actualWidth = childrenWidth + spacing * (childCount - 1);
+    if (actualWidth > constraints.maxWidth) {
+      return constraints.constrain(Size(constraints.maxWidth, y - overflowSpacing));
+    } else {
+      return constraints.constrain(Size(actualWidth, maxChildHeight));
+    }
+  }
+
+  @override
   void performLayout() {
     RenderBox? child = firstChild;
     if (child == null) {

@@ -98,7 +98,7 @@ class _SearchDemoState extends State<SearchDemo> {
       floatingActionButton: FloatingActionButton.extended(
         tooltip: 'Back', // Tests depend on this label to exit the demo.
         onPressed: () {
-          Navigator.of(context)!.pop();
+          Navigator.of(context).pop();
         },
         label: const Text('Close demo'),
         icon: const Icon(Icons.close),

@@ -8,7 +8,6 @@ import '../commands/build_windows.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'build_aar.dart';
-import 'build_aot.dart';
 import 'build_apk.dart';
 import 'build_appbundle.dart';
 import 'build_bundle.dart';
@@ -22,7 +21,6 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildAarCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildAotCommand());
     addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildIOSFrameworkCommand(
       buildSystem: globals.buildSystem,

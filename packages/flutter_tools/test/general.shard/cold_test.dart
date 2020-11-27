@@ -39,6 +39,7 @@ void main() {
 
     final int exitCode = await ColdRunner(devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      target: 'main.dart',
     ).attach();
     expect(exitCode, 2);
   });
@@ -61,6 +62,7 @@ void main() {
 
       await ColdRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
       ).cleanupAtFinish();
 
       verify(mockDevice1.dispose());
@@ -71,21 +73,6 @@ void main() {
   });
 
   group('cold run', () {
-    testUsingContext('returns 1 if not prebuilt mode & mainPath does not exist', () async {
-      final MockDevice mockDevice = MockDevice();
-      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
-      when(mockFlutterDevice.device).thenReturn(mockDevice);
-      final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
-      final int result = await ColdRunner(
-        devices,
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-      ).run();
-
-      expect(result, 1);
-      expect(testLogger.errorText, matches(r'Tried to run .*, but that file does not exist\.'));
-      expect(testLogger.errorText, matches(r'Consider using the -t option to specify the Dart file to start\.'));
-    });
-
     testUsingContext('calls runCold on attached device', () async {
       final MockDevice mockDevice = MockDevice();
       final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
@@ -100,6 +87,7 @@ void main() {
         devices,
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
       ).run();
 
       expect(result, 1);

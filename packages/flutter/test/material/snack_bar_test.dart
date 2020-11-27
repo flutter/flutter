@@ -2035,7 +2035,7 @@ void main() {
                   key: transitionTarget,
                   child: const Text('PUSH'),
                   onPressed: () {
-                    Navigator.of(context)!.pushNamed('/second');
+                    Navigator.of(context).pushNamed('/second');
                   },
                 ),
               ),

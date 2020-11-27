@@ -292,7 +292,7 @@ void showLicensePage({
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
-  Navigator.of(context, rootNavigator: useRootNavigator)!.push(MaterialPageRoute<void>(
+  Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
@@ -1342,8 +1342,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
             ? widget.masterPageBuilder!(c, false)
             : _MasterPage(
                 leading: widget.leading ??
-                    (widget.automaticallyImplyLeading && Navigator.of(context)!.canPop()
-                        ? BackButton(onPressed: () => Navigator.of(context)!.pop())
+                    (widget.automaticallyImplyLeading && Navigator.of(context).canPop()
+                        ? BackButton(onPressed: () => Navigator.of(context).pop())
                         : null),
                 title: widget.title,
                 centerTitle: widget.centerTitle,
@@ -1364,7 +1364,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
         onWillPop: () async {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
-          Navigator.of(context)!.pop();
+          Navigator.of(context).pop();
           return false;
         },
         child: BlockSemantics(child: widget.detailPageBuilder(context, arguments, null)),

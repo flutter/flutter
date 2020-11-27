@@ -72,7 +72,7 @@ enum StretchMode {
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: CustomScrollView(
-///         physics: const BouncingScrollPhysics(),
+///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///         slivers: <Widget>[
 ///           SliverAppBar(
 ///             stretch: true,

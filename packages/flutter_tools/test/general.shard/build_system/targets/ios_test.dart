@@ -187,6 +187,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kTargetPlatform: 'ios',
+        kSdkRoot: 'path/to/sdk',
       },
       processManager: processManager,
       artifacts: artifacts,
@@ -202,6 +203,34 @@ void main() {
         'description',
         contains('release/profile builds are only supported for physical devices.'),
       )
+    ));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => macPlatform,
+  });
+
+  testUsingContext('AotAssemblyRelease throws exception if sdk root is missing', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kTargetPlatform: 'ios',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kIosArchs] = 'x86_64';
+
+    expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
+        .having(
+          (Exception exception) => exception.toString(),
+      'description',
+      contains('required define SdkRoot but it was not provided'),
+    )
     ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

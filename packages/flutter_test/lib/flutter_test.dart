@@ -27,7 +27,7 @@
 /// with the following signature:
 ///
 /// ```dart
-/// Future<void> main(FutureOr<void> testMain());
+/// Future<void> testExecutable(FutureOr<void> Function() testMain);
 /// ```
 ///
 /// The test framework will execute that method and pass it the `main()` method

@@ -2513,64 +2513,61 @@ class _RenderChip extends RenderBox {
     return label!.getDistanceToActualBaseline(baseline);
   }
 
-  Size _layoutLabel(double iconSizes, Size size) {
-    final Size rawSize = _boxSize(label);
+  Size _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
-    if (constraints.maxWidth.isFinite) {
+    if (contentConstraints.maxWidth.isFinite) {
       final double maxWidth = math.max(
         0.0,
-        constraints.maxWidth
+        contentConstraints.maxWidth
         - iconSizes
         - theme.labelPadding.horizontal
         - theme.padding.horizontal,
       );
-      label!.layout(
-        constraints.copyWith(
+      final Size updatedSize = layoutChild(
+        label!,
+        BoxConstraints(
           minWidth: 0.0,
           maxWidth: maxWidth,
           minHeight: rawSize.height,
           maxHeight: size.height,
         ),
-        parentUsesSize: true,
       );
 
-      final Size updatedSize = _boxSize(label);
       return Size(
         updatedSize.width + theme.labelPadding.horizontal,
         updatedSize.height + theme.labelPadding.vertical,
       );
     }
 
-    label!.layout(
+    final Size updatedSize = layoutChild(
+      label!,
       BoxConstraints(
         minHeight: rawSize.height,
         maxHeight: size.height,
         minWidth: 0.0,
         maxWidth: size.width,
       ),
-      parentUsesSize: true,
     );
 
     return Size(
-      rawSize.width + theme.labelPadding.horizontal,
-      rawSize.height + theme.labelPadding.vertical,
+      updatedSize.width + theme.labelPadding.horizontal,
+      updatedSize.height + theme.labelPadding.vertical,
     );
   }
 
-  Size _layoutAvatar(BoxConstraints contentConstraints, double contentSize) {
+  Size _layoutAvatar(BoxConstraints contentConstraints, double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     final double requestedSize = math.max(0.0, contentSize);
     final BoxConstraints avatarConstraints = BoxConstraints.tightFor(
       width: requestedSize,
       height: requestedSize,
     );
-    avatar!.layout(avatarConstraints, parentUsesSize: true);
+    final Size avatarBoxSize = layoutChild(avatar!, avatarConstraints);
     if (!theme.showCheckmark && !theme.showAvatar) {
       return Size(0.0, contentSize);
     }
     double avatarWidth = 0.0;
     double avatarHeight = 0.0;
-    final Size avatarBoxSize = _boxSize(avatar);
     if (theme.showAvatar) {
       avatarWidth += avatarDrawerAnimation.value * avatarBoxSize.width;
     } else {
@@ -2580,19 +2577,18 @@ class _RenderChip extends RenderBox {
     return Size(avatarWidth, avatarHeight);
   }
 
-  Size _layoutDeleteIcon(BoxConstraints contentConstraints, double contentSize) {
+  Size _layoutDeleteIcon(BoxConstraints contentConstraints, double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     final double requestedSize = math.max(0.0, contentSize);
     final BoxConstraints deleteIconConstraints = BoxConstraints.tightFor(
       width: requestedSize,
       height: requestedSize,
     );
-    deleteIcon!.layout(deleteIconConstraints, parentUsesSize: true);
+    final Size boxSize = layoutChild(deleteIcon!, deleteIconConstraints);
     if (!deleteIconShowing) {
       return Size(0.0, contentSize);
     }
     double deleteIconWidth = 0.0;
     double deleteIconHeight = 0.0;
-    final Size boxSize = _boxSize(deleteIcon);
     deleteIconWidth += deleteDrawerAnimation.value * boxSize.width;
     deleteIconHeight += boxSize.height;
     return Size(deleteIconWidth, deleteIconHeight);
@@ -2628,19 +2624,28 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  void performLayout() {
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild).size;
+  }
+
+  _ChipSizes _computeSizes(BoxConstraints constraints, ChildLayouter layoutChild) {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
     final Offset densityAdjustment = Offset(0.0, theme.visualDensity.baseSizeAdjustment.dy / 2.0);
-    label!.layout(contentConstraints, parentUsesSize: true);
+    final Size rawLabelSize = layoutChild(label!, contentConstraints);
     final double contentSize = math.max(
       _kChipHeight - theme.padding.vertical + theme.labelPadding.vertical,
-      _boxSize(label).height + theme.labelPadding.vertical,
+      rawLabelSize.height + theme.labelPadding.vertical,
     );
-    final Size avatarSize = _layoutAvatar(contentConstraints, contentSize);
-    final Size deleteIconSize = _layoutDeleteIcon(contentConstraints, contentSize);
-    Size labelSize = Size(_boxSize(label).width, contentSize);
-    labelSize = _layoutLabel(avatarSize.width + deleteIconSize.width, labelSize);
+    final Size avatarSize = _layoutAvatar(contentConstraints, contentSize, layoutChild);
+    final Size deleteIconSize = _layoutDeleteIcon(contentConstraints, contentSize, layoutChild);
+    final Size labelSize = _layoutLabel(
+      contentConstraints,
+      avatarSize.width + deleteIconSize.width,
+      Size(rawLabelSize.width, contentSize),
+      rawLabelSize,
+      layoutChild,
+    );
 
     // This is the overall size of the content: it doesn't include
     // theme.padding, that is added in at the end.
@@ -2648,19 +2653,37 @@ class _RenderChip extends RenderBox {
       avatarSize.width + labelSize.width + deleteIconSize.width,
       contentSize,
     ) + densityAdjustment;
+    final Size paddedSize = Size(
+      overallSize.width + theme.padding.horizontal,
+      overallSize.height + theme.padding.vertical,
+    );
+    return _ChipSizes(
+      size: constraints.constrain(paddedSize),
+      overall: overallSize,
+      content: contentSize,
+      densityAdjustment: densityAdjustment,
+      avatar: avatarSize,
+      label: labelSize,
+      deleteIcon: deleteIconSize,
+    );
+  }
+
+  @override
+  void performLayout() {
+    final _ChipSizes sizes = _computeSizes(constraints, ChildLayoutHelper.layoutChild);
 
     // Now we have all of the dimensions. Place the children where they belong.
 
     const double left = 0.0;
-    final double right = overallSize.width;
+    final double right = sizes.overall.width;
 
     Offset centerLayout(Size boxSize, double x) {
-      assert(contentSize >= boxSize.height);
+      assert(sizes.content >= boxSize.height);
       switch (textDirection!) {
         case TextDirection.rtl:
-          return Offset(x - boxSize.width, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
+          return Offset(x - boxSize.width, (sizes.content - boxSize.height + sizes.densityAdjustment.dy) / 2.0);
         case TextDirection.ltr:
-          return Offset(x, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
+          return Offset(x, (sizes.content - boxSize.height + sizes.densityAdjustment.dy) / 2.0);
       }
     }
 
@@ -2674,29 +2697,29 @@ class _RenderChip extends RenderBox {
       case TextDirection.rtl:
         double start = right;
         if (theme.showCheckmark || theme.showAvatar) {
-          avatarOffset = centerLayout(avatarSize, start);
-          start -= avatarSize.width;
+          avatarOffset = centerLayout(sizes.avatar, start);
+          start -= sizes.avatar.width;
         }
-        labelOffset = centerLayout(labelSize, start);
-        start -= labelSize.width;
+        labelOffset = centerLayout(sizes.label, start);
+        start -= sizes.label.width;
         if (deleteIconShowing) {
           _deleteButtonRect = Rect.fromLTWH(
             0.0,
             0.0,
-            deleteIconSize.width + theme.padding.right,
-            overallSize.height + theme.padding.vertical,
+            sizes.deleteIcon.width + theme.padding.right,
+            sizes.overall.height + theme.padding.vertical,
           );
-          deleteIconOffset = centerLayout(deleteIconSize, start);
+          deleteIconOffset = centerLayout(sizes.deleteIcon, start);
         } else {
           _deleteButtonRect = Rect.zero;
         }
-        start -= deleteIconSize.width;
+        start -= sizes.deleteIcon.width;
         if (theme.canTapBody) {
           _pressRect = Rect.fromLTWH(
             _deleteButtonRect.width,
             0.0,
-            overallSize.width - _deleteButtonRect.width + theme.padding.horizontal,
-            overallSize.height + theme.padding.vertical,
+            sizes.overall.width - _deleteButtonRect.width + theme.padding.horizontal,
+            sizes.overall.height + theme.padding.vertical,
           );
         } else {
           _pressRect = Rect.zero;
@@ -2705,31 +2728,31 @@ class _RenderChip extends RenderBox {
       case TextDirection.ltr:
         double start = left;
         if (theme.showCheckmark || theme.showAvatar) {
-          avatarOffset = centerLayout(avatarSize, start - _boxSize(avatar).width + avatarSize.width);
-          start += avatarSize.width;
+          avatarOffset = centerLayout(sizes.avatar, start - _boxSize(avatar).width + sizes.avatar.width);
+          start += sizes.avatar.width;
         }
-        labelOffset = centerLayout(labelSize, start);
-        start += labelSize.width;
+        labelOffset = centerLayout(sizes.label, start);
+        start += sizes.label.width;
         if (theme.canTapBody) {
           _pressRect = Rect.fromLTWH(
             0.0,
             0.0,
             deleteIconShowing
                 ? start + theme.padding.left
-                : overallSize.width + theme.padding.horizontal,
-            overallSize.height + theme.padding.vertical,
+                : sizes.overall.width + theme.padding.horizontal,
+            sizes.overall.height + theme.padding.vertical,
           );
         } else {
           _pressRect = Rect.zero;
         }
-        start -= _boxSize(deleteIcon).width - deleteIconSize.width;
+        start -= _boxSize(deleteIcon).width - sizes.deleteIcon.width;
         if (deleteIconShowing) {
-          deleteIconOffset = centerLayout(deleteIconSize, start);
+          deleteIconOffset = centerLayout(sizes.deleteIcon, start);
           _deleteButtonRect = Rect.fromLTWH(
             start + theme.padding.left,
             0.0,
-            deleteIconSize.width + theme.padding.right,
-            overallSize.height + theme.padding.vertical,
+            sizes.deleteIcon.width + theme.padding.right,
+            sizes.overall.height + theme.padding.vertical,
           );
         } else {
           _deleteButtonRect = Rect.zero;
@@ -2740,14 +2763,14 @@ class _RenderChip extends RenderBox {
     labelOffset = labelOffset +
         Offset(
           0.0,
-          ((labelSize.height - theme.labelPadding.vertical) - _boxSize(label).height) / 2.0,
+          ((sizes.label.height - theme.labelPadding.vertical) - _boxSize(label).height) / 2.0,
         );
     _boxParentData(avatar!).offset = theme.padding.topLeft + avatarOffset;
     _boxParentData(label!).offset = theme.padding.topLeft + labelOffset + theme.labelPadding.topLeft;
     _boxParentData(deleteIcon!).offset = theme.padding.topLeft + deleteIconOffset;
     final Size paddedSize = Size(
-      overallSize.width + theme.padding.horizontal,
-      overallSize.height + theme.padding.vertical,
+      sizes.overall.width + theme.padding.horizontal,
+      sizes.overall.height + theme.padding.vertical,
     );
     size = constraints.constrain(paddedSize);
     assert(
@@ -2946,6 +2969,25 @@ class _RenderChip extends RenderBox {
 
   @override
   bool hitTestSelf(Offset position) => _deleteButtonRect.contains(position) || _pressRect.contains(position);
+}
+
+class _ChipSizes {
+  _ChipSizes({
+    required this.size,
+    required this.overall,
+    required this.content,
+    required this.avatar,
+    required this.label,
+    required this.deleteIcon,
+    required this.densityAdjustment,
+});
+  final Size size;
+  final Size overall;
+  final double content;
+  final Size avatar;
+  final Size label;
+  final Size deleteIcon;
+  final Offset densityAdjustment;
 }
 
 class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {

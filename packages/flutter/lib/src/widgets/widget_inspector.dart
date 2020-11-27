@@ -2446,8 +2446,8 @@ class _RenderInspectorOverlay extends RenderBox {
   bool get alwaysNeedsCompositing => true;
 
   @override
-  void performResize() {
-    size = constraints.constrain(const Size(double.infinity, double.infinity));
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(const Size(double.infinity, double.infinity));
   }
 
   @override

@@ -349,7 +349,7 @@ void main() {
                   focusNode: testNode1,
                   autofocus: true,
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       MaterialPageRoute<void>(
                         builder: (BuildContext context) {
                           return Center(
@@ -358,7 +358,7 @@ void main() {
                               focusNode: testNode2,
                               autofocus: true,
                               onPressed: () {
-                                Navigator.of(context)!.pop();
+                                Navigator.of(context).pop();
                               },
                               child: const Text('Go Back'),
                             ),
@@ -1148,7 +1148,7 @@ void main() {
                     focusNode: testNode1,
                     autofocus: true,
                     onPressed: () {
-                      Navigator.of(context)!.push<void>(
+                      Navigator.of(context).push<void>(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return Center(
@@ -1159,7 +1159,7 @@ void main() {
                                   focusNode: testNode2,
                                   autofocus: true,
                                   onPressed: () {
-                                    Navigator.of(context)!.pop();
+                                    Navigator.of(context).pop();
                                   },
                                   child: const Text('Go Back'),
                                 ),

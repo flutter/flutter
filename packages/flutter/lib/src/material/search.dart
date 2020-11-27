@@ -60,7 +60,7 @@ Future<T?> showSearch<T>({
   assert(context != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context)!.push(_SearchPageRoute<T>(
+  return Navigator.of(context).push(_SearchPageRoute<T>(
     delegate: delegate,
   ));
 }
@@ -294,7 +294,7 @@ abstract class SearchDelegate<T> {
   void close(BuildContext context, T result) {
     _currentBody = null;
     _focusNode?.unfocus();
-    Navigator.of(context)!
+    Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
   }

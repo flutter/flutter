@@ -576,7 +576,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   void performLayout() {
     _lastIndexThatFits = -1;
     if (firstChild == null) {
-      performResize();
+      size = constraints.smallest;
       return;
     }
 

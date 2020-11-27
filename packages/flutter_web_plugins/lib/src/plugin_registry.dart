@@ -121,8 +121,8 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
 
   /// Sends a platform message from the platform side back to the framework.
   @override
-  Future<ByteData> send(String channel, ByteData? message) {
-    final Completer<ByteData> completer = Completer<ByteData>();
+  Future<ByteData?> send(String channel, ByteData? message) {
+    final Completer<ByteData?> completer = Completer<ByteData?>();
     ui.window.onPlatformMessage!(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);

@@ -716,6 +716,11 @@ class _RenderTestLayoutPerformer extends RenderBox {
   final VoidCallback _performLayout;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return const Size(1, 1);
+  }
+
+  @override
   void performLayout() {
     size = const Size(1, 1);
     if (_performLayout != null)

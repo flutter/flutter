@@ -691,6 +691,11 @@ class _RenderLayoutSpy extends RenderBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
   void performLayout() {
     performLayoutCount += 1;
   }

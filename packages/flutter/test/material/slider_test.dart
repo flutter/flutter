@@ -2086,12 +2086,12 @@ void main() {
                   ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
-                      Navigator.of(context)!.pushReplacement(
+                      Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context)!.pop(); },
+                              onPressed: () { Navigator.of(context).pop(); },
                             );
                           },
                         ),

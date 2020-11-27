@@ -563,7 +563,7 @@ void main() {
               builder: (BuildContext context) {
                 return ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       PageRouteBuilder<void>(
                         settings: settings,
                         pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
@@ -612,7 +612,7 @@ void main() {
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)!.push<void>(
+                  Navigator.of(context).push<void>(
                     PageRouteBuilder<void>(
                       settings: settings,
                       pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
@@ -1138,7 +1138,7 @@ void main() {
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)!.push<void>(
+                  Navigator.of(context).push<void>(
                     MaterialPageRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -1188,7 +1188,7 @@ void main() {
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)!.push<void>(
+                  Navigator.of(context).push<void>(
                     ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -1247,7 +1247,7 @@ void main() {
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context)!.push<void>(
+                  Navigator.of(context).push<void>(
                     ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
@@ -1309,7 +1309,7 @@ void main() {
                 child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                       )
@@ -1371,7 +1371,7 @@ void main() {
                 child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                         barrierCurve: Curves.linear,
@@ -1425,6 +1425,69 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
+    testWidgets('white barrierColor', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Builder(
+              builder: (BuildContext context) {
+                return Center(
+                  child: ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      Navigator.of(context).push<void>(
+                          _TestDialogRouteWithCustomBarrierCurve<void>(
+                            child: const Text('Hello World'),
+                            barrierColor: Colors.white,
+                          )
+                      );
+                    },
+                  ),
+                );
+              }
+          ),
+        ),
+      ));
+
+      final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
+      int _getExpectedBarrierTweenAlphaValue(double t) {
+        return Color.getAlphaFromOpacity(_defaultBarrierTween.transform(t));
+      }
+
+      await tester.tap(find.text('X'));
+      await tester.pump();
+      final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
+      expect(animatedModalBarrier, findsOneWidget);
+
+      Animation<Color?> modalBarrierAnimation;
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.white.withOpacity(0));
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value!.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1),
+      );
+
+      await tester.pumpAndSettle();
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.white);
+    });
+
     testWidgets('modal route semantics order', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/46625.
       final SemanticsTester semantics = SemanticsTester(tester);
@@ -1436,7 +1499,7 @@ void main() {
                 child: ElevatedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push<void>(
+                    Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                         barrierLabel: 'test label',
@@ -1781,6 +1844,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
     required Widget child,
     this.barrierLabel,
+    this.barrierColor = Colors.black,
     Curve? barrierCurve,
   }) : _barrierCurve = barrierCurve,
        _child = child;
@@ -1794,7 +1858,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   final String? barrierLabel;
 
   @override
-  Color get barrierColor => Colors.black; // easier value to test against
+  final Color? barrierColor;
 
   @override
   Curve get barrierCurve {

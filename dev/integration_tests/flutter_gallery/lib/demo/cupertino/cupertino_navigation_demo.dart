@@ -117,7 +117,7 @@ class ExitButton extends StatelessWidget {
       ),
       onPressed: () {
         // The demo is on the root navigator.
-        Navigator.of(context, rootNavigator: true)!.pop();
+        Navigator.of(context, rootNavigator: true).pop();
       },
     );
   }
@@ -202,7 +202,7 @@ class Tab1RowItem extends StatelessWidget {
     final Widget row = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        Navigator.of(context)!.push(CupertinoPageRoute<void>(
+        Navigator.of(context).push(CupertinoPageRoute<void>(
           title: colorName,
           builder: (BuildContext context) => Tab1ItemPage(
             color: color,
@@ -752,7 +752,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
           const Padding(padding: EdgeInsets.only(top: 32.0)),
           GestureDetector(
             onTap: () {
-              Navigator.of(context, rootNavigator: true)!.push(
+              Navigator.of(context, rootNavigator: true).push(
                 CupertinoPageRoute<bool>(
                   fullscreenDialog: true,
                   builder: (BuildContext context) => Tab3Dialog(),
@@ -800,7 +800,7 @@ class Tab3Dialog extends StatelessWidget {
           child: const Text('Cancel'),
           padding: EdgeInsets.zero,
           onPressed: () {
-            Navigator.of(context)!.pop(false);
+            Navigator.of(context).pop(false);
           },
         ),
       ),

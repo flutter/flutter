@@ -12,6 +12,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -19,6 +20,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 
 const String noCocoaPodsConsequence = '''
   CocoaPods is used to retrieve the iOS and macOS platform side's plugin code that responds to your plugin usage on the Dart side.
@@ -82,23 +84,33 @@ class CocoaPods {
     @required Logger logger,
     @required Platform platform,
     @required Artifacts artifacts,
+    @required Usage usage,
   }) : _fileSystem = fileSystem,
       _processManager = processManager,
       _xcodeProjectInterpreter = xcodeProjectInterpreter,
       _logger = logger,
       _platform = platform,
       _artifacts = artifacts,
+      _usage = usage,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-      _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
+      _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
+      _operatingSystemUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
 
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
   final FileSystemUtils _fileSystemUtils;
   final ProcessUtils _processUtils;
+  final OperatingSystemUtils _operatingSystemUtils;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Platform _platform;
   final Artifacts _artifacts;
+  final Usage _usage;
 
   Future<String> _versionText;
 
@@ -370,12 +382,29 @@ class CocoaPods {
   }
 
   void _diagnosePodInstallFailure(ProcessResult result) {
-    final dynamic stdout = result.stdout;
-    if (stdout is String && stdout.contains('out-of-date source repos')) {
+    if (result.stdout is! String) {
+      return;
+    }
+    final String stdout = result.stdout as String;
+    if (stdout.contains('out-of-date source repos')) {
       _logger.printError(
         "Error: CocoaPods's specs repository is too out-of-date to satisfy dependencies.\n"
         'To update the CocoaPods specs, run:\n'
         '  pod repo update\n',
+        emphasis: true,
+      );
+    } else if (stdout.contains('Init_ffi_c') &&
+        stdout.contains('symbol not found') &&
+        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+      // https://github.com/flutter/flutter/issues/70796
+      UsageEvent(
+        'pod-install-failure',
+        'arm-ffi',
+        flutterUsage: _usage,
+      ).send();
+      _logger.printError(
+        'Error: To set up CocoaPods for ARM macOS, run:\n'
+        '  arch -x86_64 sudo gem install ffi\n',
         emphasis: true,
       );
     }

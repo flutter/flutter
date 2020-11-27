@@ -322,7 +322,7 @@ void main() {
                     child: CupertinoButton(
                       child: const Text('Next'),
                       onPressed: () {
-                        Navigator.of(context)!.push(
+                        Navigator.of(context).push(
                           CupertinoPageRoute<void>(
                             builder: (BuildContext context) {
                               return CupertinoPageScaffold(
@@ -333,7 +333,7 @@ void main() {
                                   child: CupertinoButton(
                                     child: const Text('Back'),
                                     onPressed: () {
-                                      Navigator.of(context)!.pop();
+                                      Navigator.of(context).pop();
                                     },
                                   ),
                                 ),

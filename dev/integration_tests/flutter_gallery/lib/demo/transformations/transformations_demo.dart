@@ -107,7 +107,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         TextButton(
           child: const Text('OK'),
           onPressed: () {
-            Navigator.of(context)!.pop();
+            Navigator.of(context).pop();
           },
         ),
       ],

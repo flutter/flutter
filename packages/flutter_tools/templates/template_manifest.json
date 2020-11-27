@@ -176,6 +176,7 @@
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Debug.xcconfig",
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Flutter.xcconfig",
         "templates/module/ios/host_app_ephemeral/Config.tmpl/Release.xcconfig",
+        "templates/module/ios/host_app_ephemeral/Flutter/engine/Flutter.podspec.tmpl",
         "templates/module/ios/host_app_ephemeral/Runner.tmpl/AppDelegate.h",
         "templates/module/ios/host_app_ephemeral/Runner.tmpl/AppDelegate.m",
         "templates/module/ios/host_app_ephemeral/Runner.tmpl/Assets.xcassets/AppIcon.appiconset/Contents.json",

@@ -151,11 +151,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           actions: <Widget> [
             TextButton(
               child: const Text('YES'),
-              onPressed: () { Navigator.of(context)!.pop(true); },
+              onPressed: () { Navigator.of(context).pop(true); },
             ),
             TextButton(
               child: const Text('NO'),
-              onPressed: () { Navigator.of(context)!.pop(false); },
+              onPressed: () { Navigator.of(context).pop(false); },
             ),
           ],
         );

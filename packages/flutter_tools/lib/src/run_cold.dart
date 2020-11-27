@@ -17,7 +17,7 @@ import 'vmservice.dart';
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
-    String target,
+    @required String target,
     @required DebuggingOptions debuggingOptions,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
@@ -52,18 +52,6 @@ class ColdRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
   }) async {
-    final bool prebuiltMode = applicationBinary != null;
-    if (!prebuiltMode) {
-      if (!globals.fs.isFileSync(mainPath)) {
-        String message = 'Tried to run $mainPath, but that file does not exist.';
-        if (target == null) {
-          message += '\nConsider using the -t option to specify the Dart file to start.';
-        }
-        globals.printError(message);
-        return 1;
-      }
-    }
-
     try {
       for (final FlutterDevice device in flutterDevices) {
         final int result = await device.runCold(

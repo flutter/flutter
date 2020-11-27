@@ -372,6 +372,11 @@ class RenderImage extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _sizeForConstraints(constraints);
+  }
+
+  @override
   void performLayout() {
     size = _sizeForConstraints(constraints);
   }

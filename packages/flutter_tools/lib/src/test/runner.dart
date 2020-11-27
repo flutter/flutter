@@ -11,6 +11,7 @@ import '../base/io.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
@@ -139,14 +140,28 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       testWrapper.registerPlatformPlugin(
         <Runtime>[Runtime.chrome],
         () {
+          // TODO(jonahwilliams): refactor this into a factory that handles
+          // providing dependencies.
           return FlutterWebPlatform.start(
             flutterProject.directory.path,
             updateGoldens: updateGoldens,
             shellPath: shellPath,
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
+            nullAssertions: nullAssertions,
             buildInfo: buildInfo,
             webMemoryFS: result,
+            logger: globals.logger,
+            fileSystem: globals.fs,
+            artifacts: globals.artifacts,
+            chromiumLauncher: ChromiumLauncher(
+              fileSystem: globals.fs,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              operatingSystemUtils: globals.os,
+              browserFinder: findChromeExecutable,
+              logger: globals.logger,
+            ),
           );
         },
       );

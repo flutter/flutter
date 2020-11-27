@@ -126,13 +126,13 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             TextButton(
               child: const Text('CANCEL'),
               onPressed: () {
-                Navigator.of(context)!.pop(false); // Pops the confirmation dialog but not the page.
+                Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
               },
             ),
             TextButton(
               child: const Text('DISCARD'),
               onPressed: () {
-                Navigator.of(context)!.pop(true); // Returning true to _onWillPop will pop again.
+                Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
               },
             ),
           ],

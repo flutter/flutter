@@ -826,37 +826,49 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
   }
 
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
+  Size _calculateChildSize(BoxConstraints constraints) {
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
     double maxHeight = _kMinSegmentedControlHeight;
-
-    for (final RenderBox child in getChildrenAsList()) {
+    RenderBox? child = firstChild;
+    while (child != null) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding);
+      child = childAfter(child);
     }
-
     childWidth = math.min(
       childWidth,
       (constraints.maxWidth - totalSeparatorWidth) / childCount,
     );
-
-    RenderBox? child = firstChild;
+    child = firstChild;
     while (child != null) {
       final double boxHeight = child.getMaxIntrinsicHeight(childWidth);
       maxHeight = math.max(maxHeight, boxHeight);
       child = childAfter(child);
     }
+    return Size(childWidth, maxHeight);
+  }
 
-    constraints.constrainHeight(maxHeight);
+  Size _computeOverallSizeFromChildSize(Size childSize) {
+    return constraints.constrain(Size(childSize.width * childCount + totalSeparatorWidth, childSize.height));
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final Size childSize = _calculateChildSize(constraints);
+    return _computeOverallSizeFromChildSize(childSize);
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    final Size childSize = _calculateChildSize(constraints);
 
     final BoxConstraints childConstraints = BoxConstraints.tightFor(
-      width: childWidth,
-      height: maxHeight,
+      width: childSize.width,
+      height: childSize.height,
     );
 
     // Layout children.
-    child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
       child = childAfter(child);
@@ -874,7 +886,7 @@ class _RenderSegmentedControl<T> extends RenderBox
       child = childAfter(child);
     }
 
-    size = constraints.constrain(Size(childWidth * childCount + totalSeparatorWidth, maxHeight));
+    size = _computeOverallSizeFromChildSize(childSize);
   }
 
   @override

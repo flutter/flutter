@@ -1206,7 +1206,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       )
     ];
 
-    final NavigatorState navigator = Navigator.of(context)!;
+    final NavigatorState navigator = Navigator.of(context);
     assert(_dropdownRoute == null);
     _dropdownRoute = _DropdownRoute<T>(
       items: menuItems,

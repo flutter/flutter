@@ -134,6 +134,7 @@ void main() {
       '.gitignore',
       '.ios/Flutter',
       '.ios/Flutter/flutter_project.podspec',
+      '.ios/Flutter/engine/Flutter.podspec',
       '.metadata',
       'lib/main.dart',
       'pubspec.yaml',

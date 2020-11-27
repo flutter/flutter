@@ -609,8 +609,8 @@ class RenderListWheelViewport
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   /// Gets the index of a child by looking at its [parentData].

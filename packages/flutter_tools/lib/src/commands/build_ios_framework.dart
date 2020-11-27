@@ -21,7 +21,6 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
-import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
@@ -375,11 +374,13 @@ end
     final Status status = globals.logger.startProgress(
       ' ├─Building App.framework...',
     );
-    final List<SdkType> sdkTypes = <SdkType>[SdkType.iPhone];
+    final List<EnvironmentType> environmentTypes = <EnvironmentType>[
+      EnvironmentType.physical,
+    ];
     final List<Directory> frameworks = <Directory>[];
     Target target;
     if (buildInfo.isDebug) {
-      sdkTypes.add(SdkType.iPhoneSimulator);
+      environmentTypes.add(EnvironmentType.simulator);
       target = const DebugIosApplicationBundle();
     } else if (buildInfo.isProfile) {
       target = const ProfileIosApplicationBundle();
@@ -388,10 +389,11 @@ end
     }
 
     try {
-      for (final SdkType sdkType in sdkTypes) {
-        final Directory outputBuildDirectory = sdkType == SdkType.iPhone
-            ? iPhoneBuildOutput
-            : simulatorBuildOutput;
+      for (final EnvironmentType sdkType in environmentTypes) {
+        final Directory outputBuildDirectory =
+            sdkType == EnvironmentType.physical
+                ? iPhoneBuildOutput
+                : simulatorBuildOutput;
         frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));
         final Environment environment = Environment(
           projectDir: globals.fs.currentDirectory,
@@ -411,7 +413,7 @@ end
                   buildInfo.extraGenSnapshotOptions.join(','),
             if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
               kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
-            kIosArchs: defaultIOSArchsForSdk(sdkType)
+            kIosArchs: defaultIOSArchsForEnvironment(sdkType)
                 .map(getNameForDarwinArch)
                 .join(' '),
             kSdkRoot: await globals.xcode.sdkLocation(sdkType),

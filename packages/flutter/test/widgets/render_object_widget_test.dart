@@ -55,6 +55,11 @@ class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
 
 class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return child!.getDryLayout(constraints);
+  }
+
+  @override
   void performLayout() {
     child!.layout(constraints, parentUsesSize: true);
     size = child!.size;

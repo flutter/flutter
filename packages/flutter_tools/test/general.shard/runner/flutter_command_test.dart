@@ -6,8 +6,10 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -104,6 +106,40 @@ void main() {
         }
       );
       await flutterCommand.run();
+    });
+
+    testUsingContext('finds the target file with default values', () async {
+      globals.fs.file('lib/main.dart').createSync(recursive: true);
+      final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
+      await runner.run(<String>['test']);
+
+      expect(fakeTargetCommand.cachedTargetFile, 'lib/main.dart');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('finds the target file with specified value', () async {
+      globals.fs.file('lib/foo.dart').createSync(recursive: true);
+      final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
+      await runner.run(<String>['test', '-t', 'lib/foo.dart']);
+
+      expect(fakeTargetCommand.cachedTargetFile, 'lib/foo.dart');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('throws tool exit if specified file does not exist', () async {
+      final FakeTargetCommand fakeTargetCommand = FakeTargetCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
+
+      expect(() async => await runner.run(<String>['test', '-t', 'lib/foo.dart']), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     void testUsingCommandContext(String testName, dynamic Function() testBody) {
@@ -483,6 +519,26 @@ class FakeNullSafeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
   }
+}
+
+class FakeTargetCommand extends FlutterCommand {
+  FakeTargetCommand() {
+    usesTargetOption();
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    cachedTargetFile = targetFile;
+    return FlutterCommandResult.success();
+  }
+
+  String cachedTargetFile;
+
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'test';
 }
 
 class MockVersion extends Mock implements FlutterVersion {}

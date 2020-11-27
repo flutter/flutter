@@ -29,29 +29,16 @@ const int kXcodeRequiredVersionMajor = 11;
 const int kXcodeRequiredVersionMinor = 0;
 const int kXcodeRequiredVersionPatch = 0;
 
-enum SdkType {
-  iPhone,
-  iPhoneSimulator,
-  macOS,
-}
-
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
 ///
 /// Usage: xcrun [options] <tool name> ... arguments ...
 /// ...
 /// --sdk <sdk name>            find the tool for the given SDK name.
-String getNameForSdk(SdkType sdk) {
-  switch (sdk) {
-    case SdkType.iPhone:
-      return 'iphoneos';
-    case SdkType.iPhoneSimulator:
-      return 'iphonesimulator';
-    case SdkType.macOS:
-      return 'macosx';
-  }
-  assert(false);
-  return null;
+String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
+  return (environmentType == EnvironmentType.simulator)
+      ? 'iphonesimulator'
+      : 'iphoneos';
 }
 
 /// A utility class for interacting with Xcode command line tools.
@@ -178,10 +165,10 @@ class Xcode {
     );
   }
 
-  Future<String> sdkLocation(SdkType sdk) async {
-    assert(sdk != null);
+  Future<String> sdkLocation(EnvironmentType environmentType) async {
+    assert(environmentType != null);
     final RunResult runResult = await _processUtils.run(
-      <String>[...xcrunCommand(), '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
+      <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-path'],
     );
     if (runResult.exitCode != 0) {
       throwToolExit('Could not find SDK location: ${runResult.stderr}');
@@ -201,6 +188,17 @@ class Xcode {
       orElse: () => null,
     );
   }
+}
+
+EnvironmentType environmentTypeFromSdkroot(Directory sdkroot) {
+  assert(sdkroot != null);
+  // iPhoneSimulator.sdk or iPhoneOS.sdk
+  final String sdkName = sdkroot.basename.toLowerCase();
+  if (sdkName.contains('iphone')) {
+    return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+  }
+  assert(false);
+  return null;
 }
 
 enum XCDeviceEvent {

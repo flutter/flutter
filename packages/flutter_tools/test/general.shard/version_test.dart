@@ -77,11 +77,11 @@ void main() {
         ));
 
         processManager.addCommand(const FakeCommand(
-          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          command: <String>['git', 'tag', '--points-at', '1234abcd'],
         ));
 
         processManager.addCommand(const FakeCommand(
-          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
           stdout: '0.1.2-3-1234abcd',
         ));
 
@@ -563,7 +563,7 @@ void main() {
           stdout: '', // no tag
         ),
         const FakeCommand(
-          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
           stdout: '$devTag-$commitsAhead-g$headRevision',
         ),
       ],
@@ -585,7 +585,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -611,7 +611,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -630,7 +630,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -656,7 +656,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -683,7 +683,7 @@ void main() {
       <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -701,7 +701,7 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -728,7 +728,7 @@ void main() {
       <String>['git', 'tag', '--points-at', 'HEAD'],
     ));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -861,12 +861,12 @@ void fakeData(
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(105, 0, '', ''));
   when(pm.runSync(
-    <String>['git', 'tag', '--points-at', 'HEAD'],
+    <String>['git', 'tag', '--points-at', '1234abcd'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(106, 0, '', ''));
   when(pm.runSync(
-    <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags'],
+    <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''));

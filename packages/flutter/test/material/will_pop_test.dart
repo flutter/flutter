@@ -139,7 +139,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => Future<bool>.value(willPopValue),
@@ -178,7 +178,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => Future<bool>.value(willPopValue),
@@ -230,11 +230,11 @@ void main() {
             actions: <Widget> [
               TextButton(
                 child: const Text('YES'),
-                onPressed: () { Navigator.of(context)!.pop(true); },
+                onPressed: () { Navigator.of(context).pop(true); },
               ),
               TextButton(
                 child: const Text('NO'),
-                onPressed: () { Navigator.of(context)!.pop(false); },
+                onPressed: () { Navigator.of(context).pop(false); },
               ),
             ],
           );
@@ -252,7 +252,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => showYesNoAlert(context),
@@ -338,7 +338,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(route);
+                    Navigator.of(context).push(route);
                   },
                 ),
               );

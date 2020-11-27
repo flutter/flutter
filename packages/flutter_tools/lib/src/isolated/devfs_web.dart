@@ -35,17 +35,8 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
+import '../web/compile.dart';
 import '../web/memory_fs.dart';
-
-/// Web rendering backend mode.
-enum WebRendererMode {
-  /// Auto detects which rendering backend to use.
-  autoDetect,
-  /// Always uses canvaskit.
-  canvaskit,
-  /// Always uses html.
-  html,
-}
 
 typedef DwdsLauncher = Future<Dwds> Function(
     {@required AssetReader assetReader,
@@ -549,46 +540,14 @@ class WebAssetServer implements AssetReader {
     return webSdkFile;
   }
 
-  static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsArtifactMap =
-    <WebRendererMode, Map<NullSafetyMode, Artifact>> {
-      WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
-        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
-      },
-      WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
-        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
-      },
-      WebRendererMode.html: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
-        NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
-      },
-    };
-
-  static const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> _dartSdkJsMapArtifactMap =
-    <WebRendererMode, Map<NullSafetyMode, Artifact>> {
-      WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
-        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
-      },
-      WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
-        NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
-      },
-      WebRendererMode.html: <NullSafetyMode, Artifact> {
-        NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
-        NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
-      },
-    };
-
   File get _resolveDartSdkJsFile =>
       globals.fs.file(globals.artifacts.getArtifactPath(
-          _dartSdkJsArtifactMap[webRenderer][_nullSafetyMode]
+          kDartSdkJsArtifactMap[webRenderer][_nullSafetyMode]
       ));
 
   File get _resolveDartSdkJsMapFile =>
     globals.fs.file(globals.artifacts.getArtifactPath(
-        _dartSdkJsMapArtifactMap[webRenderer][_nullSafetyMode]
+        kDartSdkJsMapArtifactMap[webRenderer][_nullSafetyMode]
     ));
 
   @override

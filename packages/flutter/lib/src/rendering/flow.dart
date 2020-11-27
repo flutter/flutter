@@ -296,6 +296,11 @@ class RenderFlow extends RenderBox
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _getSize(constraints);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     size = _getSize(constraints);
