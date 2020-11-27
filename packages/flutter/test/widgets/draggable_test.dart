@@ -844,6 +844,11 @@ void main() {
     int updated = 0;
     Offset dragDelta = Offset.zero;
 
+    setUp(() {
+      updated = 0;
+      dragDelta = Offset.zero;
+    });
+
     Widget build() {
       return MaterialApp(
         home: Column(
@@ -883,9 +888,6 @@ void main() {
     }
 
     testWidgets('Null axis onDragUpdate called only if draggable moves in any direction', (WidgetTester tester) async {
-      updated = 0;
-      dragDelta = Offset.zero;
-
       await tester.pumpWidget(build());
 
       expect(updated, 0);
@@ -921,9 +923,6 @@ void main() {
     });
 
     testWidgets('Vertical axis onDragUpdate only called if draggable moves vertical', (WidgetTester tester) async {
-      updated = 0;
-      dragDelta = Offset.zero;
-
       await tester.pumpWidget(build());
 
       expect(updated, 0);
@@ -959,9 +958,6 @@ void main() {
     });
 
     testWidgets('Horizontal axis onDragUpdate only called if draggable moves horizontal', (WidgetTester tester) async {
-      updated = 0;
-      dragDelta = Offset.zero;
-
       await tester.pumpWidget(build());
 
       expect(updated, 0);
