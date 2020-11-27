@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
 // Do not add package imports to this file.
 import 'dart:convert'; // ignore: dart_convert_import.
 import 'dart:io'; // ignore: dart_io_import.

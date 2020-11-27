@@ -496,7 +496,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         ),
       );
       if (!child.canTapOnHeader) {
-        final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         expandIconContainer = Semantics(
           label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
           container: true,

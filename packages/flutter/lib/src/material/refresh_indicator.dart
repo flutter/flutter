@@ -146,13 +146,13 @@ class RefreshIndicator extends StatefulWidget {
   /// else for more complicated layouts.
   final ScrollNotificationPredicate notificationPredicate;
 
-  /// {@macro flutter.material.progressIndicator.semanticsLabel}
+  /// {@macro flutter.progress_indicator.ProgressIndicator.semanticsLabel}
   ///
   /// This will be defaulted to [MaterialLocalizations.refreshIndicatorSemanticLabel]
   /// if it is null.
   final String? semanticsLabel;
 
-  /// {@macro flutter.material.progressIndicator.semanticsValue}
+  /// {@macro flutter.progress_indicator.ProgressIndicator.semanticsValue}
   final String? semanticsValue;
 
   /// Defines `strokeWidth` for `RefreshIndicator`.
@@ -196,11 +196,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   @override
   void didChangeDependencies() {
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     _valueColor = _positionController.drive(
       ColorTween(
-        begin: (widget.color ?? theme!.accentColor).withOpacity(0.0),
-        end: (widget.color ?? theme!.accentColor).withOpacity(1.0),
+        begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
+        end: (widget.color ?? theme.accentColor).withOpacity(1.0),
       ).chain(CurveTween(
         curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
       )),
@@ -258,7 +258,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        _dragOffset = _dragOffset! - notification.overscroll / 2.0;
+        _dragOffset = _dragOffset! - notification.overscroll;
         _checkDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
@@ -378,7 +378,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
               ));
             return true;
           }());
-          if (refreshResult == null)
+          // `refreshResult` has a non-nullable type, but might be null when
+          // running with weak checking, so we need to null check it anyway (and
+          // ignore the warning that the null-handling logic is dead code).
+          if (refreshResult == null) // ignore: dead_code
             return;
           refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {
@@ -464,7 +467,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                   animation: _positionController,
                   builder: (BuildContext context, Widget? child) {
                     return RefreshProgressIndicator(
-                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context)!.refreshIndicatorSemanticLabel,
+                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,

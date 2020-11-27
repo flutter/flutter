@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -27,7 +25,7 @@ void main() {
     expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
     expect(boundary.debugLayer, isNotNull);
-    expect(boundary.debugLayer.attached, isTrue); // this time it painted...
+    expect(boundary.debugLayer!.attached, isTrue); // this time it painted...
 
     root.opacity = 0.0;
     pumpFrame(phase: EnginePhase.paint);
@@ -35,7 +33,7 @@ void main() {
     expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
     expect(boundary.debugLayer, isNotNull);
-    expect(boundary.debugLayer.attached, isFalse); // this time it did not.
+    expect(boundary.debugLayer!.attached, isFalse); // this time it did not.
 
     root.opacity = 0.5;
     pumpFrame(phase: EnginePhase.paint);
@@ -43,7 +41,7 @@ void main() {
     expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
     expect(boundary.debugLayer, isNotNull);
-    expect(boundary.debugLayer.attached, isTrue); // this time it did again!
+    expect(boundary.debugLayer!.attached, isTrue); // this time it did again!
   });
 
   test('updateSubtreeNeedsAddToScene propagates Layer.alwaysNeedsAddToScene up the tree', () {
@@ -410,7 +408,7 @@ void main() {
     void _testConflicts(
       PhysicalModelLayer layerA,
       PhysicalModelLayer layerB, {
-      @required int expectedErrorCount,
+      required int expectedErrorCount,
       bool enableCheck = true,
     }) {
       assert(expectedErrorCount != null);

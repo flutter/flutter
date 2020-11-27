@@ -65,9 +65,9 @@ void main() {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
-    // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧🇺🇸'
-    // One three-person family, one four person family, one US flag.
-    const String text = '👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸';
+    // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧👏<modifier>'
+    // One three-person family, one four-person family, one clapping hands (medium skin tone).
+    const String text = '👩‍👩‍👦👩‍👩‍👧‍👧👏🏽';
     painter.text = const TextSpan(text: text);
     painter.layout(maxWidth: 10000);
 
@@ -116,13 +116,15 @@ void main() {
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 18), ui.Rect.zero);
     expect(caretOffset.dx, 98); // 👧
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 19), ui.Rect.zero);
-    expect(caretOffset.dx, 98); // 🇺
+    expect(caretOffset.dx, 98); // 👏
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 20), ui.Rect.zero);
-    expect(caretOffset.dx, 112); // 🇺
+    expect(caretOffset.dx, 98); // 👏
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 21), ui.Rect.zero);
-    expect(caretOffset.dx, 112); // 🇸
+    expect(caretOffset.dx, 98); // <medium skin tone modifier>
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 22), ui.Rect.zero);
-    expect(caretOffset.dx, 112); // 🇸
+    expect(caretOffset.dx, 98); // <medium skin tone modifier>
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
+    expect(caretOffset.dx, 126); // end of string
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter caret center space test', () {

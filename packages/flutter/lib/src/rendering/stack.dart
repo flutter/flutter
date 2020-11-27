@@ -8,6 +8,8 @@ import 'dart:ui' show lerpDouble, hashValues;
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
+import 'layer.dart';
+import 'layout_helper.dart';
 import 'object.dart';
 
 /// An immutable 2D, axis-aligned, floating-point rectangle whose coordinates
@@ -419,7 +421,7 @@ class RenderStack extends RenderBox
     }
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -524,22 +526,26 @@ class RenderStack extends RenderBox
   }
 
   @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     _resolve();
     assert(_resolvedAlignment != null);
-    _hasVisualOverflow = false;
     bool hasNonPositionedChildren = false;
     if (childCount == 0) {
-      size = constraints.biggest;
-      assert(size.isFinite);
-      return;
+      assert(constraints.biggest.isFinite);
+      return constraints.biggest;
     }
 
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
-    BoxConstraints nonPositionedConstraints;
+    final BoxConstraints nonPositionedConstraints;
     assert(fit != null);
     switch (fit) {
       case StackFit.loose:
@@ -561,9 +567,8 @@ class RenderStack extends RenderBox
       if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
 
-        child.layout(nonPositionedConstraints, parentUsesSize: true);
+        final Size childSize = layoutChild(child, nonPositionedConstraints);
 
-        final Size childSize = child.size;
         width = math.max(width, childSize.width);
         height = math.max(height, childSize.height);
       }
@@ -571,6 +576,7 @@ class RenderStack extends RenderBox
       child = childParentData.nextSibling;
     }
 
+    final Size size;
     if (hasNonPositionedChildren) {
       size = Size(width, height);
       assert(size.width == constraints.constrainWidth(width));
@@ -580,8 +586,21 @@ class RenderStack extends RenderBox
     }
 
     assert(size.isFinite);
+    return size;
+  }
 
-    child = firstChild;
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    _hasVisualOverflow = false;
+
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
+
+    assert(_resolvedAlignment != null);
+    RenderBox? child = firstChild;
     while (child != null) {
       final StackParentData childParentData = child.parentData! as StackParentData;
 
@@ -613,11 +632,15 @@ class RenderStack extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (clipBehavior != Clip.none && _hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
+      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack,
+          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
     } else {
+      _clipRectLayer = null;
       paintStack(context, offset);
     }
   }
+
+  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;

@@ -108,6 +108,26 @@ void main() {
     FlutterError.onError = oldFlutterError;
   });
 
+  test('centerSlice with scale ≠ 1', () async {
+    final TestCanvas canvas = TestCanvas();
+    paintImage(
+      canvas: canvas,
+      rect: const Rect.fromLTRB(10, 20, 430, 420),
+      image: image300x300,
+      scale: 2.0,
+      centerSlice: const Rect.fromLTRB(50, 40, 250, 260),
+    );
+
+    final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+      return invocation.memberName == #drawImageNine;
+    });
+
+    expect(command, isNotNull);
+    expect(command.positionalArguments[0], equals(image300x300));
+    expect(command.positionalArguments[1], equals(const Rect.fromLTRB(100.0, 80.0, 500.0, 520.0)));
+    expect(command.positionalArguments[2], equals(const Rect.fromLTRB(20.0, 40.0, 860.0, 840.0)));
+  });
+
   testWidgets('Reports Image painting', (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;

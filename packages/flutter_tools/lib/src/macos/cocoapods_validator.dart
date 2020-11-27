@@ -50,12 +50,12 @@ class CocoaPodsValidator extends DoctorValidator {
       } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.hint(
-          _userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          _userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       } else {
         status = ValidationType.partial;
         final String currentVersionText = await _cocoaPods.cocoaPodsVersionText;
         messages.add(ValidationMessage.hint(
-          _userMessages.cocoaPodsOutdated(currentVersionText, _cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          _userMessages.cocoaPodsOutdated(currentVersionText, _cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       }
     }
 

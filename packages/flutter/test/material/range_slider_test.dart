@@ -1372,12 +1372,12 @@ void main() {
                   ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
-                      Navigator.of(context)!.pushReplacement(
+                      Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context)!.pop(); },
+                              onPressed: () { Navigator.of(context).pop(); },
                             );
                           },
                         ),
@@ -1775,6 +1775,7 @@ void main() {
             children:  <Matcher>[
               matchesSemantics(
                 isEnabled: true,
+                isSlider: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1784,6 +1785,7 @@ void main() {
               ),
               matchesSemantics(
                 isEnabled: true,
+                isSlider: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,

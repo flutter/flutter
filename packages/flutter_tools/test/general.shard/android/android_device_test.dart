@@ -474,7 +474,6 @@ AndroidDevice setUpAndroidDevice({
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     processManager: processManager ?? FakeProcessManager.any(),
     androidConsoleSocketFactory: androidConsoleSocketFactory,
-    timeoutConfiguration: const TimeoutConfiguration(),
   );
 }
 

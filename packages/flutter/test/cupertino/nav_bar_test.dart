@@ -390,8 +390,8 @@ void main() {
     List<Element> titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
           return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
@@ -415,8 +415,8 @@ void main() {
     titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
           return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
@@ -1106,7 +1106,7 @@ void main() {
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: CupertinoPageScaffold(
               child: CustomScrollView(
                 slivers: <Widget>[
@@ -1154,7 +1154,7 @@ void main() {
       title: 'title',
       builder: (BuildContext context) {
         return MediaQuery(
-          data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
           child: Container(
             child: const CupertinoPageScaffold(
               child: CustomScrollView(

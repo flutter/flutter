@@ -72,7 +72,17 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
-      AndroidLicenseValidator: () => AndroidLicenseValidator(),
+      AndroidLicenseValidator: () => AndroidLicenseValidator(
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+        userMessages: globals.userMessages,
+        processManager: globals.processManager,
+        androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        stdio: globals.stdio,
+      ),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
@@ -88,13 +98,25 @@ Future<T> runInContext<T>(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
       ),
-      ApplicationPackageFactory: () => ApplicationPackageFactory(),
+      ApplicationPackageFactory: () => ApplicationPackageFactory(
+        userMessages: globals.userMessages,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        androidSdk: globals.androidSdk,
+      ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
         cache: globals.cache,
         platform: globals.platform,
       ),
-      AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
+      AssetBundleFactory: () {
+        return AssetBundleFactory.defaultInstance(
+          logger: globals.logger,
+          fileSystem: globals.fs,
+          platform: globals.platform,
+        );
+      },
       BuildSystem: () => FlutterBuildSystem(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -104,6 +126,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        osUtils: globals.os,
       ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,
@@ -111,7 +134,8 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-        timeoutConfiguration: timeoutConfiguration,
+        artifacts: globals.artifacts,
+        usage: globals.flutterUsage,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
@@ -152,6 +176,7 @@ Future<T> runInContext<T>(
           featureFlags: featureFlags,
         ),
         operatingSystemUtils: globals.os,
+        terminal: globals.terminal,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -162,8 +187,12 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         androidWorkflow: androidWorkflow,
       ),
-      FeatureFlags: () => const FlutterFeatureFlags(),
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FeatureFlags: () => FlutterFeatureFlags(
+        flutterVersion: globals.flutterVersion,
+        config: globals.config,
+        platform: globals.platform,
+      ),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
@@ -196,19 +225,20 @@ Future<T> runInContext<T>(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: globals.outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
           ),
       MacOSWorkflow: () => MacOSWorkflow(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
+      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
+      ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -236,13 +266,10 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        // Avoid a circular dependency by making this access lazy.
-        toolStampFile: () => globals.cache.getStampFileFor('flutter_tools'),
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
       ),

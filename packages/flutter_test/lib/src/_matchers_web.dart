@@ -83,13 +83,12 @@ RenderObject _findRepaintBoundary(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent as RenderObject;
-    assert(renderObject != null);
+    renderObject = renderObject.parent! as RenderObject;
   }
   return renderObject;
 }
 
-void _renderElement(ui.Window window, RenderObject renderObject) {
+void _renderElement(ui.FlutterView window, RenderObject renderObject) {
   assert(renderObject.debugLayer != null);
   final Layer layer = renderObject.debugLayer!;
   final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();

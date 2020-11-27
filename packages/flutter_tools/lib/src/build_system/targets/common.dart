@@ -65,6 +65,9 @@ const String kFileSystemRoots = 'FileSystemRoots';
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
+/// Path to the SDK root to be used as the isysroot.
+const String kSdkRoot = 'SdkRoot';
+
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
 
@@ -165,7 +168,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 ///
 /// Note that this target depends on the `.dart_tool/package_config.json` file
 /// even though it is not listed as an input. Pub inserts a timestamp into
-/// the file which causes unecessary rebuilds, so instead a subset of the contents
+/// the file which causes unnecessary rebuilds, so instead a subset of the contents
 /// are used an input instead.
 class KernelSnapshot extends Target {
   const KernelSnapshot();
@@ -323,7 +326,6 @@ abstract class AotElfBase extends Target {
       platform: targetPlatform,
       buildMode: buildMode,
       mainPath: environment.buildDir.childFile('app.dill').path,
-      packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,

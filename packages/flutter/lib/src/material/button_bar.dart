@@ -336,6 +336,25 @@ class _RenderButtonBarRow extends RenderFlex {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final Size size = super.computeDryLayout(constraints.copyWith(maxWidth: double.infinity));
+    if (size.width <= constraints.maxWidth) {
+      return super.computeDryLayout(constraints);
+    }
+    double currentHeight = 0.0;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
+      final Size childSize = child.getDryLayout(childConstraints);
+      currentHeight += childSize.height;
+      child = childAfter(child);
+      if (overflowButtonSpacing != null && child != null)
+        currentHeight += overflowButtonSpacing!;
+    }
+    return constraints.constrain(Size(constraints.maxWidth, currentHeight));
+  }
+
+  @override
   void performLayout() {
     // Set check layout width to false in reload or update cases.
     _hasCheckedLayoutWidth = false;
@@ -367,7 +386,7 @@ class _RenderButtonBarRow extends RenderFlex {
       }
 
       while (child != null) {
-        final FlexParentData childParentData = child.parentData as FlexParentData;
+        final FlexParentData childParentData = child.parentData! as FlexParentData;
 
         // Lay out the child with the button bar's original constraints, but
         // with minimum width set to zero.

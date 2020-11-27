@@ -11,12 +11,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('OutlinedButton defaults', (WidgetTester tester) async {
-    final Finder rawButtonMaterial = find.descendant(
-      of: find.byType(OutlinedButton),
-      matching: find.byType(Material),
-    );
-
+  testWidgets('OutlinedButton, OutlinedButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
 
     // Enabled OutlinedButton
@@ -32,7 +27,12 @@ void main() {
       ),
     );
 
-    Material material = tester.widget<Material>(rawButtonMaterial);
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(Material),
+    );
+
+    Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
@@ -40,13 +40,12 @@ void main() {
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(
-      side: BorderSide(
-        width: 1,
-        color: colorScheme.onSurface.withOpacity(0.12),
-      ),
-      borderRadius: BorderRadius.circular(4.0),
-    ));
+
+    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
+    RoundedRectangleBorder materialShape = material.shape! as RoundedRectangleBorder;
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.borderRadius, BorderRadius.circular(4.0));
+
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -63,7 +62,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     // No change vs enabled and not pressed.
-    material = tester.widget<Material>(rawButtonMaterial);
+    material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
@@ -71,13 +70,53 @@ void main() {
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(
-      side: BorderSide(
-        width: 1,
-        color: colorScheme.onSurface.withOpacity(0.12),
+
+    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
+    materialShape = material.shape! as RoundedRectangleBorder;
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.borderRadius, BorderRadius.circular(4.0));
+
+    expect(material.textStyle!.color, colorScheme.primary);
+    expect(material.textStyle!.fontFamily, 'Roboto');
+    expect(material.textStyle!.fontSize, 14);
+    expect(material.textStyle!.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+
+    // Enabled OutlinedButton.icon
+    final Key iconButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: colorScheme),
+        home: Center(
+          child: OutlinedButton.icon(
+            key: iconButtonKey,
+            onPressed: () { },
+            icon: const Icon(Icons.add),
+            label: const Text('label'),
+          ),
+        ),
       ),
-      borderRadius: BorderRadius.circular(4.0),
-    ));
+    );
+
+    final Finder iconButtonMaterial = find.descendant(
+      of: find.byKey(iconButtonKey),
+      matching: find.byType(Material),
+    );
+
+    material = tester.widget<Material>(iconButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, Colors.transparent);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+
+    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
+    materialShape = material.shape! as RoundedRectangleBorder;
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.borderRadius, BorderRadius.circular(4.0));
+
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -97,7 +136,7 @@ void main() {
       ),
     );
 
-    material = tester.widget<Material>(rawButtonMaterial);
+    material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
     expect(material.borderOnForeground, true);
     expect(material.borderRadius, null);
@@ -105,13 +144,12 @@ void main() {
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(
-      side: BorderSide(
-        width: 1,
-        color: colorScheme.onSurface.withOpacity(0.12),
-      ),
-      borderRadius: BorderRadius.circular(4.0),
-    ));
+
+    expect(material.shape, isInstanceOf<RoundedRectangleBorder>());
+    materialShape = material.shape! as RoundedRectangleBorder;
+    expect(materialShape.side, BorderSide(width: 1, color: colorScheme.onSurface.withOpacity(0.12)));
+    expect(materialShape.borderRadius, BorderRadius.circular(4.0));
+
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -635,7 +673,7 @@ void main() {
     BorderSide getBorderSide() {
       final OutlinedBorder border = tester.widget<Material>(
         find.descendant(of: outlinedButton, matching: find.byType(Material))
-      ).shape as OutlinedBorder;
+      ).shape! as OutlinedBorder;
       return border.side;
     }
 
@@ -1009,7 +1047,7 @@ void main() {
                 home: Builder(
                   builder: (BuildContext context) {
                     return MediaQuery(
-                      data: MediaQuery.of(context)!.copyWith(
+                      data: MediaQuery.of(context).copyWith(
                         textScaleFactor: textScaleFactor,
                       ),
                       child: Directionality(
@@ -1148,7 +1186,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(context)!.copyWith(
+              data: MediaQuery.of(context).copyWith(
                 textScaleFactor: 2,
               ),
               child: Scaffold(
@@ -1180,11 +1218,11 @@ PhysicalModelLayer _findPhysicalLayer(Element element) {
   expect(element, isNotNull);
   RenderObject? object = element.renderObject;
   while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
-    object = object.parent as RenderObject;
+    object = object.parent as RenderObject?;
   }
   expect(object!.debugLayer, isNotNull);
   expect(object.debugLayer!.firstChild, isA<PhysicalModelLayer>());
-  final PhysicalModelLayer layer = object.debugLayer!.firstChild as PhysicalModelLayer;
+  final PhysicalModelLayer layer = object.debugLayer!.firstChild! as PhysicalModelLayer;
   final Layer child = layer.firstChild!;
   return child is PhysicalModelLayer ? child : layer;
 }

@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -44,7 +45,6 @@ class FlutterTesterApp extends ApplicationPackage {
 /// Normally this is only used as the runner for `flutter test`, but it can
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
-// TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(String deviceId, {
     @required ProcessManager processManager,
@@ -158,9 +158,7 @@ class FlutterTesterDevice extends Device {
     await BundleBuilder().build(
       buildInfo: buildInfo,
       mainPath: mainPath,
-      assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
       treeShakeIcons: buildInfo.treeShakeIcons,
@@ -244,6 +242,16 @@ class FlutterTesterDevice extends Device {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
+
+  @override
+  DevFSWriter createDevFSWriter(
+    covariant ApplicationPackage app,
+    String userIdentifier,
+  ) {
+    return LocalDevFSWriter(
+      fileSystem: _fileSystem,
+    );
+  }
 
   @override
   Future<void> dispose() async {

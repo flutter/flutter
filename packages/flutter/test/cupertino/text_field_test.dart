@@ -29,6 +29,36 @@ class MockClipboard {
   }
 }
 
+class MockTextSelectionControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type,
+      double textLineHeight) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildToolbar(
+      BuildContext context,
+      Rect globalEditableRegion,
+      double textLineHeight,
+      Offset position,
+      List<TextSelectionPoint> endpoints,
+      TextSelectionDelegate delegate,
+      ClipboardStatusNotifier clipboardStatus) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    throw UnimplementedError();
+  }
+}
+
 class PathBoundsMatcher extends Matcher {
   const PathBoundsMatcher({
     this.rectMatcher,
@@ -1690,6 +1720,126 @@ void main() {
     },
   );
 
+  testWidgets('double tapping a space selects the previous word on iOS', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: ' blah blah  \n  blah',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+            maxLines: 2,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, -1);
+    expect(controller.value.selection.extentOffset, -1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 19);
+    expect(controller.value.selection.extentOffset, 19);
+
+    // Double tapping the second space selects the previous word.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 1);
+    expect(controller.value.selection.extentOffset, 5);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 19);
+    expect(controller.value.selection.extentOffset, 19);
+
+    // Double tapping the first space selects the space.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, 1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 19);
+    expect(controller.value.selection.extentOffset, 19);
+
+    // Double tapping the last space selects all previous contiguous spaces on
+    // both lines and the previous word.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 14));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 14));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 6);
+    expect(controller.value.selection.extentOffset, 14);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets('double tapping a space selects the space on Mac', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: ' blah blah',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, -1);
+    expect(controller.value.selection.extentOffset, -1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 10);
+    expect(controller.value.selection.extentOffset, 10);
+
+    // Double tapping the second space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 5);
+    expect(controller.value.selection.extentOffset, 6);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 10);
+    expect(controller.value.selection.extentOffset, 10);
+
+    // Double tapping the first space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, 1);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+
   testWidgets(
     'An obscured CupertinoTextField is not selectable when disabled',
     (WidgetTester tester) async {
@@ -2707,6 +2857,43 @@ void main() {
       expect(tapCount, 1);
   });
 
+  testWidgets('Focus test when the text field is disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, false); // initial status
+
+    // Should accept requestFocus.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    // Disable the text field, now it should not accept requestFocus.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            enabled: false,
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    // Should not accept requestFocus.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, false);
+  });
+
   testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
@@ -3222,8 +3409,8 @@ void main() {
       EditableText.debugDeterministicCursor = true;
       tester.binding.window.physicalSizeTestValue = const Size(400, 400);
       tester.binding.window.devicePixelRatioTestValue = 1;
-      TextEditingController controller;
-      EditableTextState state;
+      final TextEditingController controller;
+      final EditableTextState state;
 
       // Normal multiword collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
@@ -3293,8 +3480,8 @@ void main() {
       EditableText.debugDeterministicCursor = true;
       tester.binding.window.physicalSizeTestValue = const Size(400, 400);
       tester.binding.window.devicePixelRatioTestValue = 1;
-      TextEditingController controller;
-      EditableTextState state;
+      final TextEditingController controller;
+      final EditableTextState state;
 
       // Normal multiline collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the horizontal center of the text field.
@@ -4085,5 +4272,33 @@ void main() {
       find.byType(CupertinoApp),
       matchesGoldenFile('text_field_golden.TextSelectionStyle.2.png'),
     );
+  });
+
+  testWidgets('textSelectionControls is passed to EditableText', (WidgetTester tester) async {
+    final MockTextSelectionControls selectionControl = MockTextSelectionControls();
+    await tester.pumpWidget(
+       CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+              selectionControls: selectionControl
+            ),
+          ),
+        ),
+      );
+
+    final EditableText widget = tester.widget(find.byType(EditableText));
+    expect(widget.selectionControls, equals(selectionControl));
+  });
+
+  testWidgets('Do not add LengthLimiting formatter to the user supplied list', (WidgetTester tester) async {
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTextField(maxLength: 5, inputFormatters: formatters),
+      )
+    );
+
+    expect(formatters.isEmpty, isTrue);
   });
 }

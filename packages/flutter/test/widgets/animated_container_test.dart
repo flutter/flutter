@@ -45,7 +45,7 @@ void main() {
       ),
     );
 
-    final RenderDecoratedBox box = key.currentContext!.findRenderObject() as RenderDecoratedBox;
+    final RenderDecoratedBox box = key.currentContext!.findRenderObject()! as RenderDecoratedBox;
     actualDecoration = box.decoration as BoxDecoration;
     expect(actualDecoration.color, equals(decorationA.color));
 

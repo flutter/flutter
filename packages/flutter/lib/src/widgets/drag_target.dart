@@ -99,6 +99,73 @@ enum DragAnchor {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
 ///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// The following example has a [Draggable] widget along with a [DragTarget]
+/// in a row demonstrating an incremented `acceptedData` integer value when
+/// you drag the element to the target.
+///
+/// ```dart
+/// int acceptedData = 0;
+/// Widget build(BuildContext context) {
+///   return Row(
+///     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///     children: [
+///       Draggable<int>(
+///         // Data is the value this Draggable stores.
+///         data: 10,
+///         child: Container(
+///           height: 100.0,
+///           width: 100.0,
+///           color: Colors.lightGreenAccent,
+///           child: Center(
+///             child: Text("Draggable"),
+///           ),
+///         ),
+///         feedback: Container(
+///           color: Colors.deepOrange,
+///           height: 100,
+///           width: 100,
+///           child: Icon(Icons.directions_run),
+///         ),
+///         childWhenDragging: Container(
+///           height: 100.0,
+///           width: 100.0,
+///           color: Colors.pinkAccent,
+///           child: Center(
+///             child: Text("Child When Dragging"),
+///           ),
+///         ),
+///       ),
+///       DragTarget(
+///         builder: (
+///           BuildContext context,
+///           List<dynamic> accepted,
+///           List<dynamic> rejected,
+///         ) {
+///           return Container(
+///             height: 100.0,
+///             width: 100.0,
+///             color: Colors.cyan,
+///             child: Center(
+///               child: Text("Value is updated to: $acceptedData"),
+///             ),
+///           );
+///         },
+///         onAccept: (int data) {
+///           setState(() {
+///             acceptedData += data;
+///           });
+///         },
+///       ),
+///     ],
+///   );
+/// }
+///
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [DragTarget]
@@ -124,12 +191,12 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
+    this.rootOverlay = false,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
        super(key: key);
-
 
   /// The data that will be dropped by this draggable.
   final T? data;
@@ -159,7 +226,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// To limit the number of simultaneous drags on multitouch devices, see
   /// [maxSimultaneousDrags].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The widget to display instead of [child] when one or more drags are under way.
@@ -260,6 +327,15 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// This function will only be called while this widget is still mounted to
   /// the tree (i.e. [State.mounted] is true).
   final DragEndCallback? onDragEnd;
+
+  /// Whether the feedback widget will be put on the root [Overlay].
+  ///
+  /// When false, the feedback widget will be put on the closest [Overlay]. When
+  /// true, the [feedback] widget will be put on the farthest (aka root)
+  /// [Overlay].
+  ///
+  /// Defaults to false.
+  final bool rootOverlay;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
@@ -376,7 +452,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   _DragAvatar<T>? _startDrag(Offset position) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
-    Offset dragStartPoint;
+    final Offset dragStartPoint;
     switch (widget.dragAnchor) {
       case DragAnchor.child:
         final RenderBox renderObject = context.findRenderObject()! as RenderBox;
@@ -390,7 +466,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       _activeCount += 1;
     });
     final _DragAvatar<T> avatar = _DragAvatar<T>(
-      overlayState: Overlay.of(context, debugRequiredFor: widget)!,
+      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay)!,
       data: widget.data,
       axis: widget.axis,
       initialPosition: position,
@@ -427,7 +503,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay) != null);
     final bool canDrag = widget.maxSimultaneousDrags == null ||
                          _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;

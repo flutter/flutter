@@ -198,7 +198,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   Future<Evaluation> evaluate(WidgetTester tester) async {
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
+    final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
     ui.Image? image;
     final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
@@ -311,7 +311,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   // Given a pixel buffer based on the physical window size, can we actually
   // get all the data from this node? allow a small delta overlap before
   // culling the node.
-  bool _isNodeOffScreen(Rect paintBounds, ui.Window window) {
+  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
     return paintBounds.top < -50.0
       || paintBounds.left <  -50.0
       || paintBounds.bottom > (window.physicalSize.height * window.devicePixelRatio) + 50.0
@@ -370,7 +370,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     // Obtain rendered image.
 
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
+    final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
     ui.Image? image;
     final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
@@ -383,7 +383,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     // How to evaluate a single element.
 
     Evaluation evaluateElement(Element element) {
-      final RenderBox renderObject = element.renderObject as RenderBox;
+      final RenderBox renderObject = element.renderObject! as RenderBox;
 
       final Rect originalPaintBounds = renderObject.paintBounds;
 

@@ -14,6 +14,8 @@ import 'table_border.dart';
 /// Parent data used by [RenderTable] for its children.
 class TableCellParentData extends BoxParentData {
   /// Where this cell should be placed vertically.
+  ///
+  /// When using [TableCellVerticalAlignment.baseline], the text baseline must be set as well.
   TableCellVerticalAlignment? verticalAlignment;
 
   /// The column that the child was in the last time it was laid out.
@@ -390,7 +392,7 @@ class RenderTable extends RenderBox {
        _textBaseline = textBaseline,
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
-    _children = <RenderBox>[]..length = _columns * _rows;
+    _children = <RenderBox?>[]..length = _columns * _rows;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     children?.forEach(addRow);
   }
@@ -645,7 +647,7 @@ class RenderTable extends RenderBox {
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
-    _children = cells.toList();
+    _children = List<RenderBox?>.from(cells);
     assert(_children.length == rows * columns);
     markNeedsLayout();
   }
@@ -870,7 +872,7 @@ class RenderTable extends RenderBox {
     if (totalFlex > 0.0) {
       // this can only grow the table, but it _will_ grow the table at
       // least as big as the target width.
-      double targetWidth;
+      final double targetWidth;
       if (maxWidthConstraint.isFinite) {
         targetWidth = maxWidthConstraint;
       } else {
@@ -998,6 +1000,44 @@ class RenderTable extends RenderBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (rows * columns == 0) {
+      return constraints.constrain(const Size(0.0, 0.0));
+    }
+    final List<double> widths = _computeColumnWidths(constraints);
+    final double tableWidth = widths.fold(0.0, (double a, double b) => a + b);
+    double rowTop = 0.0;
+    for (int y = 0; y < rows; y += 1) {
+      double rowHeight = 0.0;
+      for (int x = 0; x < columns; x += 1) {
+        final int xy = x + y * columns;
+        final RenderBox? child = _children[xy];
+        if (child != null) {
+          final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+          assert(childParentData != null);
+          switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
+            case TableCellVerticalAlignment.baseline:
+              assert(debugCannotComputeDryLayout(
+                reason: 'TableCellVerticalAlignment.baseline requires a full layout for baseline metrics to be available.'
+              ));
+              return const Size(0 ,0);
+            case TableCellVerticalAlignment.top:
+            case TableCellVerticalAlignment.middle:
+            case TableCellVerticalAlignment.bottom:
+              final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: widths[x]));
+              rowHeight = math.max(rowHeight, childSize.height);
+              break;
+            case TableCellVerticalAlignment.fill:
+              break;
+          }
+        }
+      }
+      rowTop += rowHeight;
+    }
+    return constraints.constrain(Size(tableWidth, rowTop));
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     final int rows = this.rows;
@@ -1011,7 +1051,7 @@ class RenderTable extends RenderBox {
     }
     final List<double> widths = _computeColumnWidths(constraints);
     final List<double> positions = List<double>.filled(columns, 0.0, growable: false);
-    double tableWidth;
+    final double tableWidth;
     switch (textDirection) {
       case TextDirection.rtl:
         positions[columns - 1] = 0.0;
@@ -1049,7 +1089,7 @@ class RenderTable extends RenderBox {
           childParentData.y = y;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
-              assert(textBaseline != null);
+              assert(textBaseline != null, 'An explicit textBaseline is required when using baseline alignment.');
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
               final double? childBaseline = child.getDistanceToBaseline(textBaseline!, onlyReal: true);
               if (childBaseline != null) {

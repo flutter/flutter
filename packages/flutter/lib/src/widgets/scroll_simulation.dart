@@ -103,7 +103,7 @@ class BouncingScrollSimulation extends Simulation {
   }
 
   Simulation _simulation(double time) {
-    Simulation simulation;
+    final Simulation simulation;
     if (time > _springTime) {
       _timeOffset = _springTime.isFinite ? _springTime : 0.0;
       simulation = _springSimulation;

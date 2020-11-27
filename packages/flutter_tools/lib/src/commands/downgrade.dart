@@ -10,7 +10,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
@@ -87,7 +86,7 @@ class DowngradeCommand extends FlutterCommand {
     String workingDirectory = Cache.flutterRoot;
     if (argResults.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory');
-      _flutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
+      _flutterVersion = FlutterVersion(workingDirectory: workingDirectory);
     }
 
     final String currentChannel = _flutterVersion.channel;
@@ -98,9 +97,9 @@ class DowngradeCommand extends FlutterCommand {
         'to switch to an official channel.',
       );
     }
-    final String lastFlutterVesion = _persistentToolState.lastActiveVersion(channel);
+    final String lastFlutterVersion = _persistentToolState.lastActiveVersion(channel);
     final String currentFlutterVersion = _flutterVersion.frameworkRevision;
-    if (lastFlutterVesion == null || currentFlutterVersion == lastFlutterVesion) {
+    if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
       final String trailing = await _createErrorMessage(workingDirectory, channel);
       throwToolExit(
         'There is no previously recorded version for channel "$currentChannel".\n'
@@ -108,9 +107,9 @@ class DowngradeCommand extends FlutterCommand {
       );
     }
 
-    // Detect unkown versions.
+    // Detect unknown versions.
     final RunResult parseResult = await _processUtils.run(<String>[
-      'git', 'describe', '--tags', lastFlutterVesion,
+      'git', 'describe', '--tags', lastFlutterVersion,
     ], workingDirectory: workingDirectory);
     if (parseResult.exitCode != 0) {
       throwToolExit('Failed to parse version for downgrade:\n${parseResult.stderr}');
@@ -137,7 +136,7 @@ class DowngradeCommand extends FlutterCommand {
     // so this operation is safe.
     try {
       await _processUtils.run(
-        <String>['git', 'reset', '--hard', lastFlutterVesion],
+        <String>['git', 'reset', '--hard', lastFlutterVersion],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );

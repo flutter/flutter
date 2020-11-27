@@ -60,7 +60,7 @@ import 'inherited_notifier.dart';
 /// ```dart
 /// Color _color = Colors.white;
 ///
-/// bool _handleKeyPress(FocusNode node, RawKeyEvent event) {
+/// KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
 ///   if (event is RawKeyDownEvent) {
 ///     print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
 ///     if (event.logicalKey == LogicalKeyboardKey.keyR) {
@@ -68,22 +68,22 @@ import 'inherited_notifier.dart';
 ///       setState(() {
 ///         _color = Colors.red;
 ///       });
-///       return true;
+///       return KeyEventResult.handled;
 ///     } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
 ///       print('Changing color to green.');
 ///       setState(() {
 ///         _color = Colors.green;
 ///       });
-///       return true;
+///       return KeyEventResult.handled;
 ///     } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
 ///       print('Changing color to blue.');
 ///       setState(() {
 ///         _color = Colors.blue;
 ///       });
-///       return true;
+///       return KeyEventResult.handled;
 ///     }
 ///   }
-///   return false;
+///   return KeyEventResult.ignored;
 /// }
 ///
 /// @override
@@ -303,7 +303,7 @@ class Focus extends StatefulWidget {
 
   /// The child widget of this [Focus].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Handler for keys pressed when this object or one of its children has
@@ -433,21 +433,24 @@ class Focus extends StatefulWidget {
   ///
   /// If no [Focus] node is found before reaching the nearest [FocusScope]
   /// widget, or there is no [Focus] widget in scope, then this method will
-  /// throw an exception. To return null instead of throwing, pass true for
-  /// [nullOk].
+  /// throw an exception.
   ///
-  /// The [context] and [nullOk] arguments must not be null.
+  /// The `context` and `scopeOk` arguments must not be null.
   ///
   /// Calling this function creates a dependency that will rebuild the given
   /// context when the focus changes.
-  static FocusNode? of(BuildContext context, { bool nullOk = false, bool scopeOk = false }) {
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is similar to this function, but will return null
+  ///    instead of throwing if it doesn't find a [Focus] node.
+  static FocusNode of(BuildContext context, { bool scopeOk = false }) {
     assert(context != null);
-    assert(nullOk != null);
     assert(scopeOk != null);
     final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     final FocusNode? node = marker?.notifier;
-    if (node == null) {
-      if (!nullOk) {
+    assert(() {
+      if (node == null) {
         throw FlutterError(
           'Focus.of() was called with a context that does not contain a Focus widget.\n'
           'No Focus widget ancestor could be found starting from the context that was passed to '
@@ -457,10 +460,10 @@ class Focus extends StatefulWidget {
           '  $context'
         );
       }
-      return null;
-    }
-    if (!scopeOk && node is FocusScopeNode) {
-      if (!nullOk) {
+      return true;
+    }());
+    assert(() {
+      if (!scopeOk && node is FocusScopeNode) {
         throw FlutterError(
           'Focus.of() was called with a context that does not contain a Focus between the given '
           'context and the nearest FocusScope widget.\n'
@@ -472,6 +475,36 @@ class Focus extends StatefulWidget {
           '  $context'
         );
       }
+      return true;
+    }());
+    return node!;
+  }
+
+  /// Returns the [focusNode] of the [Focus] that most tightly encloses the
+  /// given [BuildContext].
+  ///
+  /// If no [Focus] node is found before reaching the nearest [FocusScope]
+  /// widget, or there is no [Focus] widget in scope, then this method will
+  /// return null.
+  ///
+  /// The `context` and `scopeOk` arguments must not be null.
+  ///
+  /// Calling this function creates a dependency that will rebuild the given
+  /// context when the focus changes.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is similar to this function, but will throw an exception if
+  ///    it doesn't find a [Focus] node instead of returning null.
+  static FocusNode? maybeOf(BuildContext context, { bool scopeOk = false }) {
+    assert(context != null);
+    assert(scopeOk != null);
+    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
+    final FocusNode? node = marker?.notifier;
+    if (node == null) {
+      return null;
+    }
+    if (!scopeOk && node is FocusScopeNode) {
       return null;
     }
     return node;
@@ -489,7 +522,7 @@ class Focus extends StatefulWidget {
   ///
   /// Calling this function creates a dependency that will rebuild the given
   /// context when the focus changes.
-  static bool isAt(BuildContext context) => Focus.of(context, nullOk: true)?.hasFocus ?? false;
+  static bool isAt(BuildContext context) => Focus.maybeOf(context)?.hasFocus ?? false;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -990,7 +1023,7 @@ class ExcludeFocus extends StatelessWidget {
 
   /// The child widget of this [ExcludeFocus].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

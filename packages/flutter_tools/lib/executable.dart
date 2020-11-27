@@ -6,10 +6,14 @@ import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
+import 'src/base/user_messages.dart';
+import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -28,7 +32,6 @@ import 'src/commands/format.dart';
 import 'src/commands/generate.dart';
 import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
-import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/make_host_app_editable.dart';
@@ -39,10 +42,8 @@ import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
-import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
-import 'src/commands/version.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -61,6 +62,11 @@ import 'src/web/web_runner.dart';
 Future<void> main(List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
+  // Support the -? Powershell help idiom.
+  final int powershellHelpIndex = args.indexOf('-?');
+  if (powershellHelpIndex != -1) {
+    args[powershellHelpIndex] = '-h';
+  }
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
       (args.length == 2 && verbose && args.last == 'doctor');
@@ -71,6 +77,15 @@ Future<void> main(List<String> args) async {
   final bool daemon = args.contains('daemon');
   final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
                           (args.contains('--machine') && args.contains('attach'));
+
+  // Cache.flutterRoot must be set early because other features use it (e.g.
+  // enginePath's initializer uses it). This can only work with the real
+  // instances of the platform or filesystem, so just use those.
+  Cache.flutterRoot = Cache.defaultFlutterRoot(
+    platform: const LocalPlatform(),
+    fileSystem: LocalFileSystem.instance,
+    userMessages: UserMessages(),
+  );
 
   await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(
@@ -93,7 +108,10 @@ Future<void> main(List<String> args) async {
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
     DowngradeCommand(),
-    DriveCommand(verboseHelp: verboseHelp),
+    DriveCommand(verboseHelp: verboseHelp,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    ),
     EmulatorsCommand(),
     FormatCommand(),
     GenerateCommand(),
@@ -116,15 +134,12 @@ Future<void> main(List<String> args) async {
     ShellCompletionCommand(),
     TestCommand(verboseHelp: verboseHelp),
     UpgradeCommand(),
-    VersionCommand(),
     SymbolizeCommand(
       stdio: globals.stdio,
       fileSystem: globals.fs,
     ),
     // Development-only commands. These are always hidden,
     IdeConfigCommand(),
-    InjectPluginsCommand(),
-    TrainingCommand(),
     UpdatePackagesCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
@@ -144,7 +159,6 @@ Future<void> main(List<String> args) async {
           outputPreferences: globals.outputPreferences,
           terminal: globals.terminal,
           stdio: globals.stdio,
-          timeoutConfiguration: timeoutConfiguration,
         );
         return loggerFactory.createLogger(
           daemon: daemon,
@@ -164,17 +178,14 @@ class LoggerFactory {
     @required Terminal terminal,
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
-    @required TimeoutConfiguration timeoutConfiguration,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _terminal = terminal,
        _stdio = stdio,
-       _timeoutConfiguration = timeoutConfiguration,
        _stopwatchFactory = stopwatchFactory,
        _outputPreferences = outputPreferences;
 
   final Terminal _terminal;
   final Stdio _stdio;
-  final TimeoutConfiguration _timeoutConfiguration;
   final StopwatchFactory _stopwatchFactory;
   final OutputPreferences _outputPreferences;
 
@@ -191,7 +202,6 @@ class LoggerFactory {
         terminal: _terminal,
         stdio: _stdio,
         outputPreferences: _outputPreferences,
-        timeoutConfiguration: _timeoutConfiguration,
         stopwatchFactory: _stopwatchFactory,
       );
     } else {
@@ -199,7 +209,6 @@ class LoggerFactory {
         terminal: _terminal,
         stdio: _stdio,
         outputPreferences: _outputPreferences,
-        timeoutConfiguration: _timeoutConfiguration,
         stopwatchFactory: _stopwatchFactory
       );
     }

@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -81,7 +80,7 @@ void main() {
         processManager,
         chromeLauncher,
       ),
-      throwsToolExit(),
+      throwsToolExit(message: 'Only one instance of chrome can be started'),
     );
   });
 
@@ -201,21 +200,22 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('"exit_type":"Crashed"');
 
-    final Directory localStorageContentsDirectory = dataDir
+    final Directory defaultContentDirectory = dataDir
         .childDirectory('Default')
-        .childDirectory('Local Storage')
-        .childDirectory('leveldb');
-    localStorageContentsDirectory.createSync(recursive: true);
-    localStorageContentsDirectory.childFile('LOCK').writeAsBytesSync(<int>[]);
-    localStorageContentsDirectory.childFile('LOG').writeAsStringSync('contents');
+        .childDirectory('Foo');
+        defaultContentDirectory.createSync(recursive: true);
 
-    processManager.addCommand(FakeCommand(command: const <String>[
-      'example_chrome',
-      '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-      '--remote-debugging-port=1234',
-      ...kChromeArgs,
-      'example_url',
-    ], completer: exitCompleter));
+    processManager.addCommand(FakeCommand(
+      command: const <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+        '--remote-debugging-port=1234',
+        ...kChromeArgs,
+        'example_url',
+      ],
+      completer: exitCompleter,
+      stderr: kDevtoolsStderr,
+    ));
 
     await chromeLauncher.launch(
       'example_url',
@@ -229,20 +229,79 @@ void main() {
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
 
-    // validate local storage
-    final Directory storageDir = fileSystem
+
+    // validate any Default content is copied
+    final Directory defaultContentDir = fileSystem
         .directory('.tmp_rand0/flutter_tools_chrome_device.rand0')
         .childDirectory('Default')
-        .childDirectory('Local Storage')
-        .childDirectory('leveldb');
+        .childDirectory('Foo');
 
-    expect(storageDir.existsSync(), true);
+    expect(defaultContentDir.existsSync(), true);
+  });
 
-    expect(storageDir.childFile('LOCK'), exists);
-    expect(storageDir.childFile('LOCK').readAsBytesSync(), hasLength(0));
+  testWithoutContext('can retry launch when glibc bug happens', () async {
+    const List<String> args = <String>[
+      'example_chrome',
+      '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+      '--remote-debugging-port=1234',
+      ...kChromeArgs,
+      '--headless',
+      '--disable-gpu',
+      '--no-sandbox',
+      '--window-size=2400,1800',
+      'example_url',
+    ];
 
-    expect(storageDir.childFile('LOG'), exists);
-    expect(storageDir.childFile('LOG').readAsStringSync(), 'contents');
+    // Pretend to hit glibc bug 3 times.
+    for (int i = 0; i < 3; i++) {
+      processManager.addCommand(const FakeCommand(
+        command: args,
+        stderr: 'Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: '
+                '_dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen '
+                '<= GL(dl_tls_generation)\' failed!',
+      ));
+    }
+
+    // Succeed on the 4th try.
+    processManager.addCommand(const FakeCommand(
+      command: args,
+      stderr: kDevtoolsStderr,
+    ));
+
+    expect(
+      () async => await chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        headless: true,
+      ),
+      returnsNormally,
+    );
+  });
+
+  testWithoutContext('gives up retrying when a non-glibc error happens', () async {
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+        '--remote-debugging-port=1234',
+        ...kChromeArgs,
+        '--headless',
+        '--disable-gpu',
+        '--no-sandbox',
+        '--window-size=2400,1800',
+        'example_url',
+      ],
+      stderr: 'nothing in the std error indicating glibc error',
+    ));
+
+    expect(
+      () async => await chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        headless: true,
+      ),
+      throwsToolExit(message: 'Failed to launch browser.'),
+    );
   });
 }
 
