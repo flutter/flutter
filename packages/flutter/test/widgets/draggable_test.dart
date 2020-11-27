@@ -992,7 +992,7 @@ void main() {
       expect(dragDelta.dy, 0);
     });
   });
-  
+
   testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
