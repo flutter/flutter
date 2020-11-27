@@ -36,7 +36,7 @@ void main() {
     );
     testEnvironment.buildDir.createSync(recursive: true);
 
-    await const UnpackLinux().build(testEnvironment);
+    await UnpackLinux().build(testEnvironment);
 
     expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
 
