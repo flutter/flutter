@@ -20,13 +20,13 @@ void main() {
           drawer: Container(
             color: Colors.blue,
           ),
-          drawerCallback: (isOpen) {
+          drawerCallback: (bool isOpen) {
             isDrawerOpen = isOpen;
           },
           endDrawer: Container(
             color: Colors.green,
           ),
-          endDrawerCallback: (isOpen) {
+          endDrawerCallback: (bool isOpen) {
             isEndDrawerOpen = isOpen;
           },
           body: Container()),
