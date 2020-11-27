@@ -18,6 +18,7 @@ environment:
 
 dependencies:
   args: any
+  collection: any
   meta: any
   kernel: any
 
@@ -27,6 +28,8 @@ dev_dependencies:
 dependency_overrides:
   args:
     path: ../../../third_party/dart/third_party/pkg/args
+  collection:
+    path: ../../../third_party/dart/third_party/pkg/collection
   kernel:
     path: ../../../third_party/dart/pkg/kernel
   meta:
