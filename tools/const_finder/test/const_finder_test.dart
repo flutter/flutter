@@ -5,6 +5,7 @@
 import 'dart:convert' show jsonEncode;
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:const_finder/const_finder.dart';
 import 'package:path/path.dart' as path;
 
@@ -12,6 +13,22 @@ void expect<T>(T value, T expected) {
   if (value != expected) {
     stderr.writeln('Expected: $expected');
     stderr.writeln('Actual:   $value');
+    exitCode = -1;
+  }
+}
+
+void expectInstances(dynamic value, dynamic expected) {
+  // To ensure we ignore insertion order into maps as well as lists we use
+  // DeepCollectionEquality as well as sort the lists.
+
+  int compareByStringValue(dynamic a, dynamic b) {
+    return a['stringValue'].compareTo(b['stringValue']) as int;
+  }
+  value['constantInstances'].sort(compareByStringValue);
+  expected['constantInstances'].sort(compareByStringValue);
+  if (!const DeepCollectionEquality().equals(value, expected)) {
+    stderr.writeln('Expected: ${jsonEncode(expected)}');
+    stderr.writeln('Actual:   ${jsonEncode(value)}');
     exitCode = -1;
   }
 }
@@ -50,9 +67,9 @@ void _checkConsts() {
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'Target',
   );
-  expect<String>(
-    jsonEncode(finder.findInstances()),
-    jsonEncode(<String, dynamic>{
+  expectInstances(
+    finder.findInstances(),
+    <String, dynamic>{
       'constantInstances': <Map<String, dynamic>>[
         <String, dynamic>{'stringValue': '100', 'intValue': 100, 'targetValue': null},
         <String, dynamic>{'stringValue': '102', 'intValue': 102, 'targetValue': null},
@@ -76,7 +93,7 @@ void _checkConsts() {
         <String, dynamic>{'stringValue': 'package', 'intValue':-1, 'targetValue': null},
       ],
       'nonConstantLocations': <dynamic>[],
-    }),
+    },
   );
 
   final ConstFinder finder2 = ConstFinder(
@@ -84,14 +101,14 @@ void _checkConsts() {
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'MixedInTarget',
   );
-  expect<String>(
-    jsonEncode(finder2.findInstances()),
-    jsonEncode(<String, dynamic>{
+  expectInstances(
+    finder2.findInstances(),
+    <String, dynamic>{
       'constantInstances': <Map<String, dynamic>>[
         <String, dynamic>{'val': '13'},
       ],
       'nonConstantLocations': <dynamic>[],
-    }),
+    },
   );
 }
 
@@ -103,9 +120,9 @@ void _checkNonConsts() {
     className: 'Target',
   );
 
-  expect<String>(
-    jsonEncode(finder.findInstances()),
-    jsonEncode(<String, dynamic>{
+  expectInstances(
+    finder.findInstances(),
+    <String, dynamic>{
       'constantInstances': <dynamic>[
         <String, dynamic>{'stringValue': '1', 'intValue': 1, 'targetValue': null},
         <String, dynamic>{'stringValue': '6', 'intValue': 6, 'targetValue': null},
@@ -141,7 +158,7 @@ void _checkNonConsts() {
           'column': 25,
         }
       ]
-    }),
+    },
   );
 }
 
