@@ -346,7 +346,7 @@ class ExpansionPanel {
   /// }
   /// ```
   /// {@end-tool}
-  final ExpansionPanelIconBuilder expandIconBuilder;
+  final ExpansionPanelIconBuilder? expandIconBuilder;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -369,7 +369,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required ExpansionPanelHeaderBuilder headerBuilder,
     required Widget body,
     bool canTapOnHeader = false,
-    ExpansionPanelIconBuilder expandIconBuilder,
+    ExpansionPanelIconBuilder? expandIconBuilder,
   }) : assert(value != null),
       super(
         body: body,
@@ -738,7 +738,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         expansionIndicator = IgnorePointer(
           ignoring: child.canTapOnHeader,
           ignoringSemantics: child.canTapOnHeader,
-          child: child.expandIconBuilder(
+          child: child.expandIconBuilder!(
             context,
             _isChildExpanded(index),
             () { _handlePressed(_isChildExpanded(index), index); },
