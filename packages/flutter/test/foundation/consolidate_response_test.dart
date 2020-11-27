@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -147,7 +145,7 @@ void main() {
         ]);
       });
     });
-  });
+  }, skip: kIsWeb);
 }
 
 class MockHttpClientResponse extends Fake implements HttpClientResponse {

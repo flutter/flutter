@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, Window;
+import 'dart:ui' as ui show Scene, SceneBuilder, FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -57,7 +57,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   RenderView({
     RenderBox? child,
     required ViewConfiguration configuration,
-    required ui.Window window,
+    required ui.FlutterView window,
   }) : assert(configuration != null),
        _configuration = configuration,
        _window = window {
@@ -85,7 +85,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  final ui.Window _window;
+  final ui.FlutterView _window;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -334,7 +334,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.semanticsEnabled)
+    if (_window.platformDispatcher.semanticsEnabled)
       properties.add(DiagnosticsNode.message('semantics enabled'));
   }
 }

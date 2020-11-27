@@ -339,7 +339,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // title
         if (widget.title != null) {
-          final ThemeData theme = Theme.of(context)!;
+          final ThemeData theme = Theme.of(context);
 
           Widget? title;
           switch (theme.platform) {

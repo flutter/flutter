@@ -6,10 +6,14 @@ import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
+import 'src/base/user_messages.dart';
+import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -73,6 +77,15 @@ Future<void> main(List<String> args) async {
   final bool daemon = args.contains('daemon');
   final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
                           (args.contains('--machine') && args.contains('attach'));
+
+  // Cache.flutterRoot must be set early because other features use it (e.g.
+  // enginePath's initializer uses it). This can only work with the real
+  // instances of the platform or filesystem, so just use those.
+  Cache.flutterRoot = Cache.defaultFlutterRoot(
+    platform: const LocalPlatform(),
+    fileSystem: LocalFileSystem.instance,
+    userMessages: UserMessages(),
+  );
 
   await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(

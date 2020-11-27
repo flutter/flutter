@@ -42,7 +42,7 @@ class BackButtonIcon extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Icon(_getIconData(Theme.of(context)!.platform));
+  Widget build(BuildContext context) => Icon(_getIconData(Theme.of(context).platform));
 }
 
 /// A material design back button.

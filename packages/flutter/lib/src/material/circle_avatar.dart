@@ -174,7 +174,7 @@ class CircleAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     TextStyle textStyle = theme.primaryTextTheme.subtitle1!.copyWith(color: foregroundColor);
     Color? effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {

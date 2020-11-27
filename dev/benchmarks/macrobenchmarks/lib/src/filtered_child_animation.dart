@@ -12,34 +12,34 @@ enum FilterType {
 }
 
 class FilteredChildAnimationPage extends StatefulWidget {
-  const FilteredChildAnimationPage(
-      this._filterType,
-      [
-        this._complexChild = true,
-        this._useRepaintBoundary = true,
-      ]);
+  const FilteredChildAnimationPage(this.initialFilterType, [
+    this.initialComplexChild = true,
+    this.initialUseRepaintBoundary = true,
+  ]);
 
-  final FilterType _filterType;
-  final bool _complexChild;
-  final bool _useRepaintBoundary;
+  final FilterType initialFilterType;
+  final bool initialComplexChild;
+  final bool initialUseRepaintBoundary;
 
   @override
-  _FilteredChildAnimationPageState createState() => _FilteredChildAnimationPageState(_filterType, _complexChild, _useRepaintBoundary);
+  _FilteredChildAnimationPageState createState() => _FilteredChildAnimationPageState();
 }
 
 class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage> with SingleTickerProviderStateMixin {
-  _FilteredChildAnimationPageState(this._filterType, this._complexChild, this._useRepaintBoundary);
-
   AnimationController _controller;
-  bool _useRepaintBoundary;
-  bool _complexChild;
-  FilterType _filterType;
   final GlobalKey _childKey = GlobalKey(debugLabel: 'child to animate');
   Offset _childCenter = Offset.zero;
+
+  FilterType _filterType;
+  bool _complexChild;
+  bool _useRepaintBoundary;
 
   @override
   void initState() {
     super.initState();
+    _filterType = widget.initialFilterType;
+    _complexChild = widget.initialComplexChild;
+    _useRepaintBoundary = widget.initialUseRepaintBoundary;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox childBox = _childKey.currentContext.findRenderObject() as RenderBox;
       _childCenter = childBox.paintBounds.center;

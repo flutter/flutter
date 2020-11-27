@@ -384,16 +384,16 @@ class AboutDialog extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (icon != null) IconTheme(data: Theme.of(context)!.iconTheme, child: icon),
+              if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ListBody(
                     children: <Widget>[
-                      Text(name, style: Theme.of(context)!.textTheme.headline5),
-                      Text(version, style: Theme.of(context)!.textTheme.bodyText2),
+                      Text(name, style: Theme.of(context).textTheme.headline5),
+                      Text(version, style: Theme.of(context).textTheme.bodyText2),
                       const SizedBox(height: _textVerticalSeparation),
-                      Text(applicationLegalese ?? '', style: Theme.of(context)!.textTheme.caption),
+                      Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
                     ],
                   ),
                 ),
@@ -551,26 +551,26 @@ class _AboutProgram extends StatelessWidget {
         children: <Widget>[
           Text(
             name,
-            style: Theme.of(context)!.textTheme.headline5,
+            style: Theme.of(context).textTheme.headline5,
             textAlign: TextAlign.center,
           ),
           if (icon != null)
-            IconTheme(data: Theme.of(context)!.iconTheme, child: icon!),
+            IconTheme(data: Theme.of(context).iconTheme, child: icon!),
           Text(
             version,
-            style: Theme.of(context)!.textTheme.bodyText2,
+            style: Theme.of(context).textTheme.bodyText2,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: _textVerticalSeparation),
           Text(
             legalese ?? '',
-            style: Theme.of(context)!.textTheme.caption,
+            style: Theme.of(context).textTheme.caption,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: _textVerticalSeparation),
           Text(
             'Powered by Flutter',
-            style: Theme.of(context)!.textTheme.bodyText2,
+            style: Theme.of(context).textTheme.bodyText2,
             textAlign: TextAlign.center,
           ),
         ],
@@ -621,7 +621,7 @@ class _PackagesViewState extends State<_PackagesView> {
                   builder: (BuildContext context, int? selectedId, Widget? _) {
                     return Center(
                       child: Material(
-                        color: Theme.of(context)!.cardColor,
+                        color: Theme.of(context).cardColor,
                         elevation: 4.0,
                         child: Container(
                           constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
@@ -633,7 +633,7 @@ class _PackagesViewState extends State<_PackagesView> {
                 );
               default:
                 return Material(
-                    color: Theme.of(context)!.cardColor,
+                    color: Theme.of(context).cardColor,
                     child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -717,7 +717,7 @@ class _PackageListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Ink(
-      color: isSelected ? Theme.of(context)!.highlightColor : Theme.of(context)!.cardColor,
+      color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).cardColor,
       child: ListTile(
         title: Text(packageName),
         subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
@@ -891,7 +891,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
     final double pad = _getGutterSize(context);
@@ -914,7 +914,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           title: _PackageLicensePageTitle(
             title,
             subtitle,
-            theme!.appBarTheme.textTheme ?? theme.primaryTextTheme,
+            theme.appBarTheme.textTheme ?? theme.primaryTextTheme,
           ),
         ),
         body: Center(
@@ -941,7 +941,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           SliverAppBar(
             automaticallyImplyLeading: false,
             pinned: true,
-            backgroundColor: theme!.cardColor,
+            backgroundColor: theme.cardColor,
             title: _PackageLicensePageTitle(title, subtitle, theme.textTheme),
           ),
           SliverPadding(
@@ -1540,7 +1540,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                     constraints:
                     BoxConstraints.tightFor(width: masterViewWidth),
                     child: IconTheme(
-                      data: Theme.of(context)!.primaryIconTheme,
+                      data: Theme.of(context).primaryIconTheme,
                       child: ButtonBar(
                         children:
                         widget.actionBuilder!(context, _ActionLevel.view),
@@ -1639,7 +1639,7 @@ class _DetailView extends StatelessWidget {
         return MouseRegion(
           // TODO(TonicArtos): Remove MouseRegion workaround for pointer hover events passing through DraggableScrollableSheet once https://github.com/flutter/flutter/issues/59741 is resolved.
           child: Card(
-            color: Theme.of(context)!.cardColor,
+            color: Theme.of(context).cardColor,
             elevation: _kCardElevation,
             clipBehavior: Clip.antiAlias,
             margin: const EdgeInsets.fromLTRB(

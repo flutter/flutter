@@ -606,4 +606,30 @@ void main() {
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
   });
+
+  test('Intrinsics throw if alignment is baseline', () {
+    final RenderDecoratedBox box = RenderDecoratedBox(
+      decoration: const BoxDecoration(),
+    );
+    final RenderFlex flex = RenderFlex(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[box],
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+    );
+    layout(flex, constraints: const BoxConstraints(
+      minWidth: 200.0, maxWidth: 200.0, minHeight: 200.0, maxHeight: 200.0,
+    ));
+
+    final Matcher cannotCalculateIntrinsics = throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      'Intrinsics are not available for CrossAxisAlignment.baseline.',
+    ));
+
+    expect(() => flex.getMaxIntrinsicHeight(100), cannotCalculateIntrinsics);
+    expect(() => flex.getMinIntrinsicHeight(100), cannotCalculateIntrinsics);
+    expect(() => flex.getMaxIntrinsicWidth(100), cannotCalculateIntrinsics);
+    expect(() => flex.getMinIntrinsicWidth(100), cannotCalculateIntrinsics);
+  });
 }

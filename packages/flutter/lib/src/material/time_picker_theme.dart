@@ -380,7 +380,7 @@ class TimePickerTheme extends InheritedTheme {
   /// ```
   static TimePickerThemeData of(BuildContext context) {
     final TimePickerTheme? timePickerTheme = context.dependOnInheritedWidgetOfExactType<TimePickerTheme>();
-    return timePickerTheme?.data ?? Theme.of(context)!.timePickerTheme;
+    return timePickerTheme?.data ?? Theme.of(context).timePickerTheme;
   }
 
   @override

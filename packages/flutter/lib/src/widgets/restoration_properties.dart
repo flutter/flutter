@@ -187,7 +187,7 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
 
 /// A [RestorableProperty] that knows how to store and restore a [num].
 ///
-/// {@template flutter.widgets.restoration.primitivevalue}
+/// {@template flutter.widgets.RestorableNum}
 /// The current [value] of this property is stored in the restoration data.
 /// During state restoration the property is restored to the value it had when
 /// the restoration data it is getting restored from was collected.
@@ -202,7 +202,7 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
 class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
   /// Creates a [RestorableNum].
   ///
-  /// {@template flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@template flutter.widgets.RestorableNum.constructor}
   /// If no restoration data is available to restore the value in this property
   /// from, the property will be initialized with the provided `defaultValue`.
   /// {@endtemplate}
@@ -211,41 +211,41 @@ class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
 
 /// A [RestorableProperty] that knows how to store and restore a [double].
 ///
-/// {@macro flutter.widgets.restoration.primitivevalue}
+/// {@macro flutter.widgets.RestorableNum}
 class RestorableDouble extends RestorableNum<double> {
   /// Creates a [RestorableDouble].
   ///
-  /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableDouble(double defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore an [int].
 ///
-/// {@macro flutter.widgets.restoration.primitivevalue}
+/// {@macro flutter.widgets.RestorableNum}
 class RestorableInt extends RestorableNum<int> {
   /// Creates a [RestorableInt].
   ///
-  /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableInt(int defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [String].
 ///
-/// {@macro flutter.widgets.restoration.primitivevalue}
+/// {@macro flutter.widgets.RestorableNum}
 class RestorableString extends _RestorablePrimitiveValue<String> {
   /// Creates a [RestorableString].
   ///
-  /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableString(String defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [bool].
 ///
-/// {@macro flutter.widgets.restoration.primitivevalue}
+/// {@macro flutter.widgets.RestorableNum}
 class RestorableBool extends _RestorablePrimitiveValue<bool> {
   /// Creates a [RestorableBool].
   ///
-  /// {@macro flutter.widgets.restoration.primitivevalue.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableBool(bool defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 

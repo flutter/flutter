@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -95,6 +96,7 @@ void main() {
         else
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
+        'EXCLUDED_ARCHS=arm64',
       ],
       stdout: 'STDOUT STUFF',
       onRun: () {
@@ -257,6 +259,7 @@ void main() {
       'DART_OBFUSCATION=true',
       'EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable',
       'EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable',
+      'FLUTTER_FRAMEWORK_DIR=.',
       'SPLIT_DEBUG_INFO=foo/',
       'TRACK_WIDGET_CREATION=true',
       'TREE_SHAKE_ICONS=true',
@@ -270,6 +273,7 @@ void main() {
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Artifacts: () => Artifacts.test(),
   });
 
   testUsingContext('macOS build supports build-name and build-number', () async {

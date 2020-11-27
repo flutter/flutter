@@ -325,7 +325,7 @@ class InkResponse extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Called when the user taps this part of the material.
@@ -732,11 +732,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   InteractiveInkFeature? _currentSplash;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight?> _highlights = <_HighlightType, InkHighlight?>{};
-  late Map<Type, Action<Intent>> _actionMap;
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _simulateTap),
+  };
 
   bool get highlightsExist => _highlights.values.where((InkHighlight? highlight) => highlight != null).isNotEmpty;
 
   final ObserverList<_ParentInkResponseState> _activeChildren = ObserverList<_ParentInkResponseState>();
+
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
     assert(childState != null);
@@ -753,17 +756,19 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
   bool get _anyChildInkResponsePressed => _activeChildren.isNotEmpty;
 
-  void _handleAction(ActivateIntent intent) {
+  void _simulateTap([ActivateIntent? intent]) {
     _startSplash(context: context);
-    _handleTap(context);
+    _handleTap();
+  }
+
+  void _simulateLongPress() {
+    _startSplash(context: context);
+    _handleLongPress();
   }
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <Type, Action<Intent>>{
-      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleAction),
-    };
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
@@ -798,11 +803,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       // Material Design spec. A separate highlight is no longer used.
       // See https://material.io/design/interaction/states.html#pressed
       case _HighlightType.pressed:
-        return widget.highlightColor ?? Theme.of(context)!.highlightColor;
+        return widget.highlightColor ?? Theme.of(context).highlightColor;
       case _HighlightType.focus:
-        return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? Theme.of(context)!.focusColor;
+        return widget.overlayColor?.resolve(focused) ?? widget.focusColor ?? Theme.of(context).focusColor;
       case _HighlightType.hover:
-        return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? Theme.of(context)!.hoverColor;
+        return widget.overlayColor?.resolve(hovered) ?? widget.hoverColor ?? Theme.of(context).hoverColor;
     }
   }
 
@@ -873,7 +878,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
     const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
-    final Color color =  widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context)!.splashColor;
+    final Color color =  widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback? rectCallback = widget.containedInkWell ? widget.getRectCallback!(referenceBox) : null;
     final BorderRadius? borderRadius = widget.borderRadius;
     final ShapeBorder? customBorder = widget.customBorder;
@@ -889,7 +894,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       } // else we're probably in deactivate()
     }
 
-    splash = (widget.splashFactory ?? Theme.of(context)!.splashFactory).create(
+    splash = (widget.splashFactory ?? Theme.of(context).splashFactory).create(
       controller: inkController,
       referenceBox: referenceBox,
       position: position,
@@ -975,7 +980,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     updateHighlight(_HighlightType.pressed, value: true);
   }
 
-  void _handleTap(BuildContext context) {
+  void _handleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(_HighlightType.pressed, value: false);
@@ -1002,7 +1007,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.onDoubleTap!();
   }
 
-  void _handleLongPress(BuildContext context) {
+  void _handleLongPress() {
     _currentSplash?.confirm();
     _currentSplash = null;
     if (widget.onLongPress != null) {
@@ -1073,7 +1078,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
 
     const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
-    _currentSplash?.color = widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context)!.splashColor;
+    _currentSplash?.color = widget.overlayColor?.resolve(pressed) ?? widget.splashColor ?? Theme.of(context).splashColor;
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
@@ -1096,15 +1101,19 @@ class _InkResponseState extends State<_InkResponseStateWidget>
             cursor: effectiveMouseCursor,
             onEnter: _handleMouseEnter,
             onExit: _handleMouseExit,
-            child: GestureDetector(
-              onTapDown: enabled ? _handleTapDown : null,
-              onTap: enabled ? () => _handleTap(context) : null,
-              onTapCancel: enabled ? _handleTapCancel : null,
-              onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
-              onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
-              behavior: HitTestBehavior.opaque,
-              excludeFromSemantics: widget.excludeFromSemantics,
-              child: widget.child,
+            child: Semantics(
+              onTap: widget.excludeFromSemantics || widget.onTap == null ? null : _simulateTap,
+              onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : _simulateLongPress,
+              child: GestureDetector(
+                onTapDown: enabled ? _handleTapDown : null,
+                onTap: enabled ? _handleTap : null,
+                onTapCancel: enabled ? _handleTapCancel : null,
+                onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
+                onLongPress: widget.onLongPress != null ? _handleLongPress : null,
+                behavior: HitTestBehavior.opaque,
+                excludeFromSemantics: true,
+                child: widget.child,
+              ),
             ),
           ),
         ),

@@ -593,7 +593,7 @@ class PageView extends StatefulWidget {
   /// the [children] list will not be mutated after it has been passed in here.
   /// See the documentation at [SliverChildListDelegate.children] for more details.
   ///
-  /// {@template flutter.widgets.pageView.allowImplicitScrolling}
+  /// {@template flutter.widgets.PageView.allowImplicitScrolling}
   /// The [allowImplicitScrolling] parameter must not be null. If true, the
   /// [PageView] will participate in accessibility scrolling more like a
   /// [ListView], where implicit scroll actions will move to the next page
@@ -635,7 +635,7 @@ class PageView extends StatefulWidget {
   /// you are planning to change child order at a later time, consider using
   /// [PageView] or [PageView.custom].
   ///
-  /// {@macro flutter.widgets.pageView.allowImplicitScrolling}
+  /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.builder({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -737,7 +737,7 @@ class PageView extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@macro flutter.widgets.pageView.allowImplicitScrolling}
+  /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.custom({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -824,7 +824,7 @@ class PageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;

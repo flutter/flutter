@@ -225,12 +225,39 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 50.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     expect(refreshCalled, false);
+  });
+
+  testWidgets('RefreshIndicator - just enough', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
   });
 
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {

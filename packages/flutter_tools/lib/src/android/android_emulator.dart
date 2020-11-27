@@ -14,7 +14,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -164,7 +163,7 @@ class AndroidEmulator extends Emulator {
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen(stderrList.add);
-    final Future<void> stdioFuture = waitGroup<void>(<Future<void>>[
+    final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
       stdoutSubscription.asFuture<void>(),
       stderrSubscription.asFuture<void>(),
     ]);

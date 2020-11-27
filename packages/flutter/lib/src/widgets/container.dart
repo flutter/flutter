@@ -290,7 +290,7 @@ class Container extends StatelessWidget {
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Align the [child] within the container.

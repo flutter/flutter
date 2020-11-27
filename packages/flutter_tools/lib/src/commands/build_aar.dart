@@ -112,7 +112,7 @@ class BuildAarCommand extends BuildSubCommand {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
-            getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
+            await getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
             targetArchs: targetArchitectures,
           )
         );

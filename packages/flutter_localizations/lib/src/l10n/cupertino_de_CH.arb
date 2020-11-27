@@ -1,4 +1,5 @@
 {
+  "searchTextFieldPlaceholderLabel": "Suche",
   "datePickerHourSemanticsLabelOne": "$hour Uhr",
   "datePickerHourSemanticsLabelOther": "$hour Uhr",
   "datePickerMinuteSemanticsLabelOne": "1 Minute",

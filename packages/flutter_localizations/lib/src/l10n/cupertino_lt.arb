@@ -31,5 +31,5 @@
   "selectAllButtonLabel": "Pasirinkti viską",
   "tabSemanticsLabel": "$tabIndex skirtukas iš $tabCount",
   "modalBarrierDismissLabel": "Atsisakyti",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "Ieškoti"
 }

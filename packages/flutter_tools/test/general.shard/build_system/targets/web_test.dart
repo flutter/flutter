@@ -238,7 +238,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Language version
-    expect(generated, contains('// @dart = 2.7'));
+    expect(generated, contains('// @dart=2.7'));
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and without init platform', () => testbed.run(() async {

@@ -211,11 +211,11 @@ void main() {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -251,11 +251,11 @@ void main() {
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                  title: const Text('Tab 1'),
+                  label: 'Tab 1',
                 ),
                 BottomNavigationBarItem(
                   icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                  title: const Text('Tab 2'),
+                  label: 'Tab 2',
                 ),
               ],
             ),
@@ -301,11 +301,11 @@ void main() {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
           ),

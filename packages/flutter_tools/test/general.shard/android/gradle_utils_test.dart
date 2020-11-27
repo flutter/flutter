@@ -72,7 +72,7 @@ void main() {
             'zipStorePath=wrapper/dists\n'
             'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
     }, overrides: <Type, Generator>{
-      Cache: () => Cache(rootOverride: tempDir),
+      Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -113,7 +113,7 @@ void main() {
           'zipStorePath=wrapper/dists\n'
           'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
     }, overrides: <Type, Generator>{
-      Cache: () => Cache(rootOverride: tempDir),
+      Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });

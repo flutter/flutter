@@ -491,6 +491,8 @@ class SampleChecker {
     final File analysisOptions = File(path.join(directory.path, 'analysis_options.yaml'))..createSync(recursive: true);
     pubSpec.writeAsStringSync('''
 name: analyze_sample_code
+environment:
+  sdk: '>=2.10.0 <3.0.0'
 dependencies:
   flutter:
     sdk: flutter

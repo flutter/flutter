@@ -213,7 +213,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   ///    text and text-direction-sensitive render objects.
   final TextDirection? textDirection;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;

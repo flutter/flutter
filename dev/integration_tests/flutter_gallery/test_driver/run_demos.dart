@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.9
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -26,7 +25,7 @@ final List<String> kSkippedDemos = <String>[
 /// home screen twice.
 Future<void> runDemos(List<String> demos, WidgetController controller) async {
   final Finder demoList = find.byType(Scrollable);
-  String currentDemoCategory;
+  String? currentDemoCategory;
 
   for (final String demo in demos) {
     if (kSkippedDemos.contains(demo))

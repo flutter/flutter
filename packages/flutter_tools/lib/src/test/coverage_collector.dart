@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:coverage/coverage.dart' as coverage;
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../vmservice.dart';
 
@@ -17,9 +17,10 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryPredicate, this.verbose = true});
+  CoverageCollector({this.libraryPredicate, this.verbose = true, @required this.packagesPath});
 
   final bool verbose;
+  final String packagesPath;
   Map<String, Map<int, int>> _globalHitmap;
   bool Function(String) libraryPredicate;
 
@@ -66,7 +67,7 @@ class CoverageCollector extends TestWatcher {
     _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.createHitmap(
       data['coverage'] as List<Map<String, dynamic>>,
-      packagesPath: globalPackagesPath,
+      packagesPath: packagesPath,
       checkIgnoredLines: true,
     ));
     _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
@@ -102,7 +103,7 @@ class CoverageCollector extends TestWatcher {
     _logMessage('pid $pid ($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.createHitmap(
       data['coverage'] as List<Map<String, dynamic>>,
-      packagesPath: globalPackagesPath,
+      packagesPath: packagesPath,
       checkIgnoredLines: true,
     ));
     _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
@@ -116,12 +117,13 @@ class CoverageCollector extends TestWatcher {
   Future<String> finalizeCoverage({
     coverage.Formatter formatter,
     Directory coverageDirectory,
+    String packagesPath,
   }) async {
     if (_globalHitmap == null) {
       return null;
     }
     if (formatter == null) {
-      final coverage.Resolver resolver = coverage.Resolver(packagesPath: globalPackagesPath);
+      final coverage.Resolver resolver = coverage.Resolver(packagesPath: packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
         ? <String>[globals.fs.path.join(packagePath, 'lib')]

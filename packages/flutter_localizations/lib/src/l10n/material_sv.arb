@@ -53,7 +53,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount tecken kvar",
   "refreshIndicatorSemanticLabel": "Uppdatera",
   "moreButtonTooltip": "Mer",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "mm/dd/åååå",
   "selectYearSemanticsLabel": "Välj år",
   "unspecifiedDate": "Datum",

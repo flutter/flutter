@@ -156,7 +156,7 @@ class MethodChannel {
       }
       throw MissingPluginException('No implementation found for method $method on channel $name');
     }
-    return codec.decodeEnvelope(result) as T;
+    return codec.decodeEnvelope(result) as T?;
   }
 
   /// Invokes a [method] on this channel with the specified [arguments].

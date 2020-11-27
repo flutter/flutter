@@ -238,7 +238,7 @@ class DayPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final int year = displayedMonth.year;
     final int month = displayedMonth.month;
@@ -686,7 +686,7 @@ class _YearPickerState extends State<YearPicker> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextStyle? style = themeData.textTheme.bodyText2;
     return ListView.builder(
       dragStartBehavior: widget.dragStartBehavior,

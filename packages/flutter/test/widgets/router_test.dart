@@ -368,6 +368,116 @@ void main() {
     expect(find.text('popped inner2'), findsOneWidget);
   });
 
+  testWidgets('ChildBackButtonDispatcher can be replaced without calling the takePriority', (WidgetTester tester) async {
+
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+    BackButtonDispatcher innerDispatcher = ChildBackButtonDispatcher(outerDispatcher);
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Column(
+              children: <Widget>[
+                const Text('initial'),
+                Router<RouteInformation>(
+                  backButtonDispatcher: innerDispatcher,
+                  routerDelegate: SimpleRouterDelegate(
+                    builder: (BuildContext context, RouteInformation? innerInformation) {
+                      return Container();
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      )
+    ));
+
+    // Creates a new child back button dispatcher and rebuild, this will cause
+    // the old one to be replaced and discarded.
+    innerDispatcher = ChildBackButtonDispatcher(outerDispatcher);
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Column(
+              children: <Widget>[
+                const Text('initial'),
+                Router<RouteInformation>(
+                  backButtonDispatcher: innerDispatcher,
+                  routerDelegate: SimpleRouterDelegate(
+                    builder: (BuildContext context, RouteInformation? innerInformation) {
+                      return Container();
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      )
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
+testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester tester) async {
+
+    final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
+    final BackButtonDispatcher innerDispatcher1 = ChildBackButtonDispatcher(outerDispatcher);
+    final BackButtonDispatcher innerDispatcher2 = ChildBackButtonDispatcher(innerDispatcher1);
+    final BackButtonDispatcher innerDispatcher3 = ChildBackButtonDispatcher(innerDispatcher2);
+    bool isPopped = false;
+    await tester.pumpWidget(buildBoilerPlate(
+      Router<RouteInformation>(
+        backButtonDispatcher: outerDispatcher,
+        routerDelegate: SimpleRouterDelegate(
+          builder: (BuildContext context, RouteInformation? information) {
+            // Creates the sub-router.
+            return Router<RouteInformation>(
+              backButtonDispatcher: innerDispatcher1,
+              routerDelegate: SimpleRouterDelegate(
+                builder: (BuildContext context, RouteInformation? innerInformation) {
+                  return Router<RouteInformation>(
+                    backButtonDispatcher: innerDispatcher2,
+                    routerDelegate: SimpleRouterDelegate(
+                      builder: (BuildContext context, RouteInformation? innerInformation) {
+                        return Router<RouteInformation>(
+                          backButtonDispatcher: innerDispatcher3,
+                          routerDelegate: SimpleRouterDelegate(
+                            onPopRoute: () {
+                              isPopped = true;
+                              return SynchronousFuture<bool>(true);
+                            },
+                            builder: (BuildContext context, RouteInformation? innerInformation) {
+                              return Container();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      )
+    ));
+    // This should work without calling the takePrioirty on the innerDispatcher2
+    // and the innerDispatcher1.
+    innerDispatcher3.takePriority();
+    bool result = false;
+    result = await outerDispatcher.invokeCallback(SynchronousFuture<bool>(false));
+    expect(result, isTrue);
+    expect(isPopped, isTrue);
+  });
+
   testWidgets('router does report URL change correctly', (WidgetTester tester) async {
     RouteInformation? reportedRouteInformation;
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider(

@@ -167,6 +167,10 @@ class Slider extends StatefulWidget {
        assert(divisions == null || divisions > 0),
        super(key: key);
 
+  /// Creates an adaptive [Slider] based on the target platform, following
+  /// Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  ///
   /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
   /// Material Design slider otherwise.
   ///
@@ -620,7 +624,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         return _buildMaterialSlider(context);
 
       case _SliderType.adaptive: {
-        final ThemeData theme = Theme.of(context)!;
+        final ThemeData theme = Theme.of(context);
         assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.android:
@@ -637,7 +641,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   Widget _buildMaterialSlider(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
 
     // If the widget has active or inactive colors specified, then we plug them
@@ -827,7 +831,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       state: state,
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
-      platform: Theme.of(context)!.platform,
+      platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
     );
@@ -849,7 +853,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
-      ..platform = Theme.of(context)!.platform
+      ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
       ..hovering = hovering;
     // Ticker provider cannot change since there's a 1:1 relationship between

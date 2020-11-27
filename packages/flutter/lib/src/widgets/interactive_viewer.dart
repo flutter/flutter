@@ -243,7 +243,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction.
   ///
-  /// {@template flutter.widgets.interactiveViewer.onInteraction}
+  /// {@template flutter.widgets.InteractiveViewer.onInteractionEnd}
   /// Will be called even if the interaction is disabled with
   /// [panEnabled] or [scaleEnabled].
   ///
@@ -265,7 +265,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will not have
   /// changed due to this interaction.
   ///
-  /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
   /// The coordinates provided in the details' `focalPoint` and
   /// `localFocalPoint` are normal Flutter event coordinates, not
@@ -284,7 +284,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction.
   ///
-  /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
   /// The coordinates provided in the details' `focalPoint` and
   /// `localFocalPoint` are normal Flutter event coordinates, not

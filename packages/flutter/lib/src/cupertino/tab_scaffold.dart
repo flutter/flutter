@@ -440,7 +440,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: CupertinoDynamicColor.resolve(widget.backgroundColor, context)
+        color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context)
             ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(

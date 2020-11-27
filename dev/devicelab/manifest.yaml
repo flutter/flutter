@@ -228,6 +228,7 @@ tasks:
       with SkSL shader warm-up with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -550,7 +551,6 @@ tasks:
       Measures the runtime performance of animations after a backdrop filter is removed on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -755,6 +755,7 @@ tasks:
       Android with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >

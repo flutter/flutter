@@ -362,6 +362,35 @@ void main() {
       expect(model.color, equals(surfaceColorWithOverlay));
       expect(model.color, isNot(equals(surfaceColor)));
     });
+
+    testWidgets('Expected overlay color can be computed using colorWithOverlay', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF123456);
+      const Color onSurfaceColor = Color(0xFF654321);
+      const double elevation = 8.0;
+
+      final Color surfaceColorWithOverlay =
+        ElevationOverlay.colorWithOverlay(surfaceColor, onSurfaceColor, elevation);
+
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: true,
+            colorScheme: const ColorScheme.dark(
+              surface: surfaceColor,
+              onSurface: onSurfaceColor,
+            ),
+          ),
+          child: buildMaterial(
+            color: surfaceColor,
+            elevation: elevation,
+          ),
+        ),
+      );
+
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(surfaceColorWithOverlay));
+      expect(model.color, isNot(equals(surfaceColor)));
+    });
   });
 
   group('Transparency clipping', () {

@@ -79,7 +79,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = stringArg('target');
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }

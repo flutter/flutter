@@ -44,6 +44,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
@@ -72,6 +73,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final vm_service.VM fakeVM = vm_service.VM(

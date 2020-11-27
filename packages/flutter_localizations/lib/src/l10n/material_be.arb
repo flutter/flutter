@@ -58,7 +58,7 @@
   "remainingTextFieldCharacterCountOther": "Засталося $remainingCount сімвала",
   "refreshIndicatorSemanticLabel": "Абнавіць",
   "moreButtonTooltip": "Яшчэ",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "мм/дд/гггг",
   "selectYearSemanticsLabel": "Выберыце год",
   "unspecifiedDate": "Дата",

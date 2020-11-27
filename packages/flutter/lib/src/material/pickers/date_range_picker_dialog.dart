@@ -413,7 +413,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
           helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
         );
-        final DialogTheme dialogTheme = Theme.of(context)!.dialogTheme;
+        final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
         size = orientation == Orientation.portrait ? _inputPortraitDialogSize : _inputLandscapeDialogSize;
         insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0);
         shape = dialogTheme.shape;
@@ -476,7 +476,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.of(context).orientation;
@@ -630,7 +630,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.of(context).orientation;

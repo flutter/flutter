@@ -28,7 +28,7 @@ void loadDateIntlDataIfNotLoaded() {
         // Strip scriptCode from the locale, as we do not distinguish between scripts
         // for dates.
         final List<String> codes = locale.split('_');
-        String countryCode;
+        String? countryCode;
         if (codes.length == 2) {
           countryCode = codes[1].length < 4 ? codes[1] : null;
         } else if (codes.length == 3) {

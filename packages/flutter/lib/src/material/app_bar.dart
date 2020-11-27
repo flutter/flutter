@@ -498,7 +498,7 @@ class _AppBarState extends State<AppBar> {
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
@@ -512,16 +512,16 @@ class _AppBarState extends State<AppBar> {
 
     IconThemeData overallIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
-      ?? theme!.primaryIconTheme;
+      ?? theme.primaryIconTheme;
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
     TextStyle? centerStyle = widget.textTheme?.headline6
       ?? appBarTheme.textTheme?.headline6
-      ?? theme!.primaryTextTheme.headline6;
+      ?? theme.primaryTextTheme.headline6;
     TextStyle? sideStyle = widget.textTheme?.bodyText2
       ?? appBarTheme.textTheme?.bodyText2
-      ?? theme!.primaryTextTheme.bodyText2;
+      ?? theme.primaryTextTheme.bodyText2;
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -560,7 +560,7 @@ class _AppBarState extends State<AppBar> {
     Widget? title = widget.title;
     if (title != null) {
       bool? namesRoute;
-      switch (theme!.platform) {
+      switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -632,7 +632,7 @@ class _AppBarState extends State<AppBar> {
       leading: leading,
       middle: title,
       trailing: actions,
-      centerMiddle: widget._getEffectiveCenterTitle(theme!),
+      centerMiddle: widget._getEffectiveCenterTitle(theme),
       middleSpacing: widget.titleSpacing ?? appBarTheme.titleSpacing ?? NavigationToolbar.kMiddleSpacing,
     );
 

@@ -9,10 +9,10 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/compile.dart';
+import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_wrapper.dart';
@@ -50,6 +50,8 @@ abstract class FlutterTestRunner {
     String randomSeed,
     bool nullAssertions = false,
     @required BuildInfo buildInfo,
+    String reporter,
+    String timeout,
   });
 }
 
@@ -84,12 +86,11 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String randomSeed,
     bool nullAssertions = false,
     @required BuildInfo buildInfo,
+    String reporter,
+    String timeout,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
-    if (!globals.processManager.canRun(shellPath)) {
-      throwToolExit('Cannot execute Flutter tester at $shellPath');
-    }
 
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = <String>[
@@ -100,7 +101,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       if (machine)
         ...<String>['-r', 'json']
       else
-        ...<String>['-r', 'compact'],
+        ...<String>['-r', reporter ?? 'compact'],
+      if (timeout != null)
+        ...<String>['--timeout', timeout],
       '--concurrency=$concurrency',
       for (final String name in names)
         ...<String>['--name', name],
@@ -119,14 +122,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         .absolute
         .uri
         .toFilePath();
-      final bool result = await webCompilationProxy.initialize(
+      final WebMemoryFS result = await webCompilationProxy.initialize(
         projectDirectory: flutterProject.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
-        projectName: flutterProject.manifest.appName,
-        initializePlatform: true,
+        buildInfo: buildInfo,
       );
-      if (!result) {
+      if (result == null) {
         throwToolExit('Failed to compile tests');
       }
       testArgs
@@ -143,6 +145,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             shellPath: shellPath,
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
+            buildInfo: buildInfo,
+            webMemoryFS: result,
           );
         },
       );
@@ -177,11 +181,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       nullAssertions: nullAssertions,
       buildInfo: buildInfo,
     );
-
-    // Make the global packages path absolute.
-    // (Makes sure it still works after we change the current directory.)
-    globalPackagesPath =
-        globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
 
     // Call package:test's main method in the appropriate directory.
     final Directory saved = globals.fs.currentDirectory;

@@ -17,7 +17,7 @@ void main() {
       builder: (BuildContext context) {
         return Container(
           key: primaryContainerKey,
-          color: Theme.of(context)!.primaryColor,
+          color: Theme.of(context).primaryColor,
         );
       },
     );
@@ -31,7 +31,7 @@ void main() {
             builder: (BuildContext context) {
               navigatorContext = context;
               return Theme(
-                data: Theme.of(context)!.copyWith(primaryColor: primaryColor),
+                data: Theme.of(context).copyWith(primaryColor: primaryColor),
                 child: Builder( // Introduce a context so the shadow Theme is visible to captureAll().
                   builder: (BuildContext context) {
                     return Center(

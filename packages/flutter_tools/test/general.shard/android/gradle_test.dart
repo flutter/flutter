@@ -29,7 +29,6 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
-import '../../src/pubspec_schema.dart';
 
 void main() {
   Cache.flutterRoot = getFlutterRoot();
@@ -553,8 +552,6 @@ include ':app'
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
 
-      // write schemaData otherwise pubspec.yaml file can't be loaded
-      writeEmptySchemaFile(fs);
 
       updateLocalProperties(
         project: FlutterProject.fromPath('path/to/project'),
@@ -1024,7 +1021,7 @@ plugin1=${plugin1.path}
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
 
       final Directory rootDirectory = fileSystem.currentDirectory;
-      cache = Cache(
+      cache = Cache.test(
         rootOverride: rootDirectory,
         fileSystem: fileSystem,
       );
@@ -2701,7 +2698,7 @@ plugin1=${plugin1.path}
       legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
       contains(templateSettingsDotGradle.readAsStringSync().trim()),
     );
-  });
+  }, skip: true); // TODO(jonahwilliams): This is an integration test and should be moved to the integration shard.
 }
 
 /// Generates a fake app bundle at the location [directoryName]/[fileName].

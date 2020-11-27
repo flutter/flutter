@@ -205,7 +205,7 @@ class FlatButton extends MaterialButton {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return RawMaterialButton(
       onPressed: onPressed,

@@ -57,7 +57,7 @@ void main() {
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
       final FlutterProject project = FlutterProject.current();
-      globals.fs.file(project.android.hostAppGradleRoot.childFile(
+      fs.file(project.android.hostAppGradleRoot.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
       ).path).createSync(recursive: true);
     });

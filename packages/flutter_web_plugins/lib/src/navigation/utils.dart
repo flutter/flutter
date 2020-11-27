@@ -2,43 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:html';
 
-AnchorElement _urlParsingNode;
+// TODO(mdebbar): Use the `URI` class instead?
+final AnchorElement _urlParsingNode = AnchorElement();
 
 /// Extracts the pathname part of a full [url].
 ///
 /// Example: for the url `http://example.com/foo`, the extracted pathname will
 /// be `/foo`.
 String extractPathname(String url) {
-  // TODO(mdebbar): Use the `URI` class instead?
-  _urlParsingNode ??= AnchorElement();
   _urlParsingNode.href = url;
-  final String pathname = _urlParsingNode.pathname;
+  final String pathname = _urlParsingNode.pathname ?? '';
   return (pathname.isEmpty || pathname[0] == '/') ? pathname : '/$pathname';
 }
 
-Element _baseElement;
+// The <base> element in the document.
+final Element? _baseElement = document.querySelector('base');
 
-/// Finds the <base> element in the document and returns its `href` attribute.
+/// Returns the `href` attribute of the <base> element in the document.
 ///
 /// Returns null if the element isn't found.
-String getBaseElementHrefFromDom() {
-  if (_baseElement == null) {
-    _baseElement = document.querySelector('base');
-    if (_baseElement == null) {
-      return null;
-    }
-  }
-  return _baseElement.getAttribute('href');
-}
+String? getBaseElementHrefFromDom() => _baseElement?.getAttribute('href');
 
 /// Checks that [baseHref] is set.
 ///
 /// Throws an exception otherwise.
-String checkBaseHref(String baseHref) {
+String checkBaseHref(String? baseHref) {
   if (baseHref == null) {
     throw Exception('Please add a <base> element to your index.html');
   }

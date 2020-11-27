@@ -75,7 +75,7 @@ class Cocoon {
   }
 
   /// Send [TaskResult] to Cocoon.
-  Future<void> sendTaskResult({String taskName, TaskResult result}) async {
+  Future<void> sendTaskResult({String builderName, TaskResult result}) async {
     // Skip logging on test runs
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((LogRecord rec) {
@@ -85,7 +85,7 @@ class Cocoon {
     final Map<String, dynamic> status = <String, dynamic>{
       'CommitBranch': commitBranch,
       'CommitSha': commitSha,
-      'TaskName': taskName,
+      'BuilderName': builderName,
       'NewStatus': result.succeeded ? 'Succeeded' : 'Failed',
     };
 

@@ -115,7 +115,7 @@ class AppBarTheme with Diagnosticable {
 
   /// The [ThemeData.appBarTheme] property of the ambient [Theme].
   static AppBarTheme of(BuildContext context) {
-    return Theme.of(context)!.appBarTheme;
+    return Theme.of(context).appBarTheme;
   }
 
   /// Linearly interpolate between two AppBar themes.
