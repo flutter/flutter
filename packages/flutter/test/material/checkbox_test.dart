@@ -444,7 +444,7 @@ void main() {
       paints
         ..circle(color: Colors.orange[500])
         ..drrect(
-            color: const Color(0xff000000),
+            color: const Color(0x8a000000),
             outer: RRect.fromLTRBR(
                 391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)),
         inner: RRect.fromLTRBR(393.0,
@@ -460,7 +460,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..drrect(
-            color: const Color(0xff000000),
+            color: const Color(0x61000000),
             outer: RRect.fromLTRBR(
                 391.0, 291.0, 409.0, 309.0, const Radius.circular(1.0)),
             inner: RRect.fromLTRBR(393.0,

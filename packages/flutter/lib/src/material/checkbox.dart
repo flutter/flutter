@@ -401,7 +401,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             hasFocus: _focused,
             hovering: _hovering,
             shape: widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
-              side: BorderSide(width: 2),
               borderRadius: BorderRadius.all(Radius.circular(1.0)),
             ),
           );
@@ -571,6 +570,9 @@ class _RenderCheckbox extends RenderToggleable {
 
   void _drawBorder(Canvas canvas, Rect outer, double t, Paint paint) {
     assert(t >= 0.0 && t <= 0.5);
+    if (shape.side == BorderSide.none) {
+      shape = shape.copyWith(side: BorderSide(width: 2, color: paint.color));
+    }
     shape.paint(canvas, outer);
   }
 

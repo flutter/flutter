@@ -77,7 +77,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
-    const Color defaultFillColor = Color(0xff000000);
+    const Color defaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff1);
     const Color defaultCheckColor = Color(0xfffffff2);
     const Color focusedCheckColor = Color(0xfffffff3);
@@ -230,7 +230,7 @@ void main() {
     // Checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..drrect(color: const Color(0xff000000)));
+    expect(_getCheckboxMaterial(tester), paints..drrect(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
 
@@ -283,7 +283,7 @@ void main() {
     // Unselected checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..drrect(color: const Color(0xff000000)));
+    expect(_getCheckboxMaterial(tester), paints..drrect(color: themeDefaultFillColor));
 
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
