@@ -84,7 +84,12 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   // Scroll the demo around a bit more.
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
   await tester.pump();
-  await tester.pump(const Duration(milliseconds: 400));
+  if (demo.title == 'Pull to refresh') {
+    // This fling gesture will trigger 'OverscrollDemo' [RefreshIndicator.onRefresh].
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump(const Duration(milliseconds: 400));
+  }
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 50));
