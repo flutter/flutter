@@ -98,6 +98,6 @@ class BottomNavigationBarItem {
   ///    the icons themselves.
   final Color? backgroundColor;
 
-  /// The ToolTip message for this [BottomNavigationBarItem].
+  /// The text to display in the tooltip for this [BottomNavigationBarItem].
   final String? toolTip;
 }
