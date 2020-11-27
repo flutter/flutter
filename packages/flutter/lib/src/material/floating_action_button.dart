@@ -415,10 +415,8 @@ class FloatingActionButton extends StatelessWidget {
   final BoxConstraints _sizeConstraints;
 
   static const double _defaultElevation = 6;
-  // TODO(gspencer): verify focus and hover elevation values are correct
-  // according to spec.
-  static const double _defaultFocusElevation = 8;
-  static const double _defaultHoverElevation = 10;
+  static const double _defaultFocusElevation = 6;
+  static const double _defaultHoverElevation = 8;
   static const double _defaultHighlightElevation = 12;
   static const ShapeBorder _defaultShape = CircleBorder();
   static const ShapeBorder _defaultExtendedShape = StadiumBorder();
