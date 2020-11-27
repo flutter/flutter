@@ -542,12 +542,12 @@ void main() {
     final Finder outlinedButton = find.byType(OutlinedButton);
 
     // Default, not disabled.
-    expect(outlinedButton, paints..path(color: defaultColor));
+    expect(outlinedButton, paints..drrect(color: defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(outlinedButton, paints..path(color: focusedColor));
+    expect(outlinedButton, paints..drrect(color: focusedColor));
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(OutlinedButton));
@@ -558,12 +558,12 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(outlinedButton, paints..path(color: hoverColor));
+    expect(outlinedButton, paints..drrect(color: hoverColor));
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(outlinedButton, paints..path(color: pressedColor));
+    expect(outlinedButton, paints..drrect(color: pressedColor));
   });
 
   testWidgets('OutlinedButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {

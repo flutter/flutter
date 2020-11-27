@@ -312,6 +312,50 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
+  testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: FloatingActionButton.extended(
+            label: const Text('tooltip'),
+            onPressed: () {},
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+
+    final Finder fabFinder = find.byType(PhysicalShape);
+    PhysicalShape getFABWidget(Finder finder) => tester.widget<PhysicalShape>(finder);
+
+    // Default, not disabled.
+    expect(getFABWidget(fabFinder).elevation, 6);
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getFABWidget(fabFinder).elevation, 6);
+
+    // Hovered.
+    final Offset center = tester.getCenter(fabFinder);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getFABWidget(fabFinder).elevation, 8);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    expect(getFABWidget(fabFinder).elevation, 12);
+  });
+
   testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(

@@ -316,7 +316,7 @@ void main() {
           any,
           label: 'gradle-expected-file-not-found',
           parameters: const <String, String> {
-            'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
+            'cd37': 'androidGradlePluginVersion: 5.6.2, fileExtension: .aab',
           },
         ),
       ).called(1);
@@ -771,9 +771,6 @@ flutter:
 
       expect(getGradleVersionFor('3.4.0'), '5.6.2');
       expect(getGradleVersionFor('3.5.0'), '5.6.2');
-
-      expect(getGradleVersionFor('4.0.0'), '6.7');
-      expect(getGradleVersionFor('4.1.0'), '6.7');
     });
 
     testWithoutContext('throws on unsupported versions', () {
