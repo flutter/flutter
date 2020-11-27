@@ -1935,6 +1935,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         && _isWhitespace(text!.text!.codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
+      // TODO(justinmc): New refactor should remove this use of
+      // defaultTargetPlatform.
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
           int startIndex = position.offset - 1;

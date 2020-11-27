@@ -1060,6 +1060,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onDoubleTapDown(TapDownDetails details) {
+    // TODO(justinmc): Move this into TextEditingBehavior file. Then, change
+    // the call to renderEditable so that it doens't need to know the platform.
+    // Do a switch on the platform here. selectWordExcept spaces?
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar)
