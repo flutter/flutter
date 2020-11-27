@@ -22,6 +22,7 @@ import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
+import 'build_info.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
@@ -998,20 +999,21 @@ class FlutterSdk extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
+    final String arch = getCurrentHostPlatformArchName();
     return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
       if (cache.includeAllPlatforms) ...<List<String>>[
-        <String>['windows-x64', 'windows-x64/artifacts.zip'],
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+        <String>['windows-${arch}', 'windows-${arch}/artifacts.zip'],
+        <String>['linux-${arch}', 'linux-${arch}/artifacts.zip'],
+        <String>['darwin-${arch}', 'darwin-${arch}/artifacts.zip'],
       ]
       else if (_platform.isWindows)
-        <String>['windows-x64', 'windows-x64/artifacts.zip']
+        <String>['windows-${arch}', 'windows-${arch}/artifacts.zip']
       else if (_platform.isMacOS)
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip']
+        <String>['darwin-${arch}', 'darwin-${arch}/artifacts.zip']
       else if (_platform.isLinux)
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
+        <String>['linux-${arch}', 'linux-${arch}/artifacts.zip'],
     ];
   }
 
@@ -1093,7 +1095,12 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     if (_platform.isLinux || ignorePlatformFiltering) {
-      return _linuxDesktopBinaryDirs;
+      final String arch = getCurrentHostPlatformArchName();
+      return <List<String>>[
+        <String>['linux-${arch}', 'linux-${arch}/linux-${arch}-flutter-gtk.zip'],
+        <String>['linux-${arch}-profile', 'linux-${arch}-profile/linux-${arch}-flutter-gtk.zip'],
+        <String>['linux-${arch}-release', 'linux-${arch}-release/linux-${arch}-flutter-gtk.zip'],
+      ];
     }
     return const <List<String>>[];
   }
@@ -1477,10 +1484,11 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    const Map<String, List<String>> artifacts = <String, List<String>> {
-      'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
-      'linux': <String>['linux-x64', 'linux-x64/$artifactName.zip'],
-      'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
+    final String arch = getCurrentHostPlatformArchName();
+    Map<String, List<String>> artifacts = <String, List<String>> {
+      'macos': <String>['darwin-${arch}', 'darwin-${arch}/$artifactName.zip'],
+      'linux': <String>['linux-${arch}', 'linux-${arch}/$artifactName.zip'],
+      'windows': <String>['windows-${arch}', 'windows-${arch}/$artifactName.zip'],
     };
     if (cache.includeAllPlatforms) {
       return artifacts.values.toList();
@@ -1608,12 +1616,6 @@ const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
   <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
   <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
   <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],
-];
-
-const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
-  <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
-  <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
-  <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
 ];
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[

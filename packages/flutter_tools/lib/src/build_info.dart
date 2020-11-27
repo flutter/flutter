@@ -738,7 +738,7 @@ String getWebBuildDirectory() {
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory([TargetPlatform targetPlatform = null]) {
   final String arch = (targetPlatform == null) ?
-      _getCurrentHostPlatformArchName() :
+      getCurrentHostPlatformArchName() :
       _getNameForTargetPlatformOfDesktops(targetPlatform);
   final String subDirs = 'linux/' + arch;
   return globals.fs.path.join(getBuildDirectory(), subDirs);
@@ -784,7 +784,7 @@ enum NullSafetyMode {
   autodetect,
 }
 
-String _getCurrentHostPlatformArchName() {
+String getCurrentHostPlatformArchName() {
   final HostPlatform hostPlatform = getCurrentHostPlatform();
   return _getNameForHostPlatformArch(hostPlatform);
 }
