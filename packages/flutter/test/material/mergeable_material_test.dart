@@ -1113,7 +1113,7 @@ void main() {
     List<Widget> animatedContainer = tester.widgetList(find.byType(AnimatedContainer)).toList();
     List<BoxDecoration> boxes = <BoxDecoration>[];
     for(final Widget container in animatedContainer) {
-      boxes.add((container as AnimatedContainer).decoration as BoxDecoration);
+      boxes.add((container as AnimatedContainer).decoration! as BoxDecoration);
     }
 
     int offset = 0;
@@ -1175,7 +1175,7 @@ void main() {
     boxes = <BoxDecoration>[];
 
     for(final Widget container in animatedContainer) {
-      boxes.add((container as AnimatedContainer).decoration as BoxDecoration);
+      boxes.add((container as AnimatedContainer).decoration! as BoxDecoration);
     }
 
     offset = 0;
@@ -1261,10 +1261,10 @@ void main() {
       ),
     );
 
-    BoxDecoration boxDecoration = tester.widget<Container>(find.byType(Container).first).decoration as BoxDecoration;
+    BoxDecoration boxDecoration = tester.widget<Container>(find.byType(Container).first).decoration! as BoxDecoration;
     expect(boxDecoration.color, materialSliceColor);
 
-    boxDecoration = tester.widget<Container>(find.byType(Container).last).decoration as BoxDecoration;
+    boxDecoration = tester.widget<Container>(find.byType(Container).last).decoration! as BoxDecoration;
     expect(boxDecoration.color, themeCardColor);
   });
 }
