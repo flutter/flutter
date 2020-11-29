@@ -221,4 +221,28 @@ void main() {
     expect(_getCardMaterial(tester).shadowColor, _getCard(tester).shadowColor);
     expect(_getCardMaterial(tester).shadowColor, Colors.red);
   });
+
+  testWidgets('Card uses colorScheme surface color as default', (WidgetTester tester) async {
+    final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(cardColor: colorScheme.surface),
+        home: const Scaffold(
+          body: Card(
+            child: Text('card'),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(Card),
+        matching: find.byType(Material),
+      ),
+    );
+
+    expect(material.type, MaterialType.card);
+    expect(material.color, colorScheme.surface);
+  });
 }

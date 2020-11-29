@@ -326,7 +326,7 @@ class ThemeData with Diagnosticable {
     shadowColor ??= Colors.black;
     scaffoldBackgroundColor ??= canvasColor;
     bottomAppBarColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    cardColor ??= isDark ? colorScheme?.surface ?? Colors.grey[800]! : colorScheme?.surface ?? Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
 
     // Create a ColorScheme that is backwards compatible as possible
