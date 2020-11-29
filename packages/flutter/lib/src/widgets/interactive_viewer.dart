@@ -13,6 +13,9 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'ticker_provider.dart';
 
+// TODO(justinmc): Cleaner way about this?
+const double _kTolerance = 100000000000.0;
+
 /// A widget that enables pan and zoom interactions with its child.
 ///
 /// The user can transform the child by dragging to pan or pinching to zoom.
@@ -691,13 +694,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         ).abs();
         return distanceB.compareTo(distanceA);
       })).first;
-    //print('justin out of ${invalidSides.length} invalid sides: $invalidSides, worst was $invalidSide');
 
     // Find the nearest points on boundaryRect and the viewportSide that doesn't
     // intersect to each other, and move the points on top of each other.
     final OffsetTuple closestPoints = invalidSide.findClosestPointsRect(_boundaryRect);
     final Offset difference = closestPoints.a - closestPoints.b;
-    //print('justin for rect $_boundaryRect and invalidSide $invalidSide, closest point onside: ${closestPoints.a}, onrect: ${closestPoints.b}, so move by $difference');
 
     final Matrix4 correctedMatrix = matrix.clone()
         ..translate(difference.dx, difference.dy);
@@ -734,69 +735,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         return !side!.intersectsRect(_boundaryRect);
       }, orElse: () => null);
       */
-      // TODO(justinmc): It's currently possible to hit this case when panning
-      // into the corner after a rotation. Makes me think that the correction
-      // translation isn't right due to the rotation. However, it does seem to
-      // work in places other than corners.
-      // Corners are a tough case. 2 or even 3 sides will go invalid at the same
-      // time for a corner. It needs to translate such that both become valid.
-      //print('justin still invalid after correction! $correctedInvalidSide doesnt intersect $_boundaryRect for sides $correctedViewportSide01, $correctedViewportSide12, $correctedViewportSide23, $correctedViewportSide30');
+      // TODO(justinmc): This case is possible when 2 sides go invalid at the
+      // same time. Can happen when the boundary corner is in the viewport
+      // corner. Fix by correcting both sides at once?
       return Matrix4.identity();
     }
 
-    //print('justin corrected it successfully!');
     // TODO(justinmc): Instead of identity matrix, return the original matrix?
     // If the corrected matrix is still invalid, return the identity matrix.
     return correctedMatrix;
-
-    /*
-    // Desired translation goes out of bounds, so translate to the nearest
-    // in-bounds point instead.
-    final Offset nextTotalTranslation = _getMatrixTranslation(matrix);
-    final Matrix4 currentMatrix = _transformationController.value;
-    final double currentScale = currentMatrix.getMaxScaleOnAxis();
-    final Offset correctedTotalTranslation = Offset(
-      nextTotalTranslation.dx - offendingDistance.dx * currentScale,
-      nextTotalTranslation.dy - offendingDistance.dy * currentScale,
-    );
-    //print('justin translation $nextTotalTranslation goes out of bounds by $offendingDistance, so correct it to $correctedTotalTranslation');
-    // TODO(justinmc): This needs some work to handle rotation properly. The
-    // idea is that the boundaries are axis aligned (boundariesAabbQuad), but
-    // calculating the translation to put the viewport inside that Quad is more
-    // complicated than this when rotated.
-     // https://github.com/flutter/flutter/issues/57698
-    final Matrix4 correctedMatrix = currentMatrix.clone()..setTranslation(Vector3(
-      correctedTotalTranslation.dx,
-      correctedTotalTranslation.dy,
-      0.0,
-    ));
-
-    // Double check that the corrected translation fits.
-    final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
-    final Offset offendingCorrectedDistance = _exceedsBy(boundariesAabbQuad, correctedViewport);
-    if (offendingCorrectedDistance == Offset.zero) {
-      return correctedMatrix;
-    }
-
-    // If the corrected translation doesn't fit in either direction, don't allow
-    // any translation at all. This happens when the viewport is larger than the
-    // entire boundary.
-    if (offendingCorrectedDistance.dx != 0.0 && offendingCorrectedDistance.dy != 0.0) {
-      return currentMatrix.clone();
-    }
-
-    // Otherwise, allow translation in only the direction that fits. This
-    // happens when the viewport is larger than the boundary in one direction.
-    final Offset unidirectionalCorrectedTotalTranslation = Offset(
-      offendingCorrectedDistance.dx == 0.0 ? correctedTotalTranslation.dx : 0.0,
-      offendingCorrectedDistance.dy == 0.0 ? correctedTotalTranslation.dy : 0.0,
-    );
-    return currentMatrix.clone()..setTranslation(Vector3(
-      unidirectionalCorrectedTotalTranslation.dx,
-      unidirectionalCorrectedTotalTranslation.dy,
-      0.0,
-    ));
-    */
   }
 
   // Returns true iff the given _GestureType is enabled.
@@ -1403,17 +1350,15 @@ class LineSegment {
   // some tolerance for error. Rect.contains only considers the top and left
   // sides inclusively.
   static bool _rectContainsInclusive(Rect rect, Offset offset) {
-    // TODO(justinmc): This tolerance.
-    const int tolerance = 1000000000000;
     final Rect rRect = Rect.fromLTRB(
-      (rect.top * tolerance).round() / tolerance,
-      (rect.left * tolerance).round() / tolerance,
-      (rect.right * tolerance).round() / tolerance,
-      (rect.bottom * tolerance).round() / tolerance,
+      (rect.top * _kTolerance).round() / _kTolerance,
+      (rect.left * _kTolerance).round() / _kTolerance,
+      (rect.right * _kTolerance).round() / _kTolerance,
+      (rect.bottom * _kTolerance).round() / _kTolerance,
     );
     final Offset rOffset = Offset(
-      (offset.dx * tolerance).round() / tolerance,
-      (offset.dy * tolerance).round() / tolerance,
+      (offset.dx * _kTolerance).round() / _kTolerance,
+      (offset.dy * _kTolerance).round() / _kTolerance,
     );
     if (!(rOffset.dx >= rRect.left && rOffset.dx <= rRect.right
         && rOffset.dy >= rRect.top && rOffset.dy <= rRect.bottom)) {
@@ -1431,7 +1376,10 @@ class LineSegment {
     final double intersectionY = nonVertical.slope * x + nonVertical.lineYIntercept;
     assert(x.isFinite);
     assert(intersectionY.isFinite);
-    return Offset(x, intersectionY);
+    return Offset(
+      (x * _kTolerance).round() / _kTolerance,
+      (intersectionY * _kTolerance).round() / _kTolerance,
+    );
   }
 
   // A subcase of the intercepts method.
@@ -1448,7 +1396,7 @@ class LineSegment {
       return offset.dx == p0.dx;
     }
     // Use the line formula with a tolerance.
-    return (offset.dy - (slope * offset.dx + lineYIntercept)).abs() <= 0.000000000001;
+    return (offset.dy - (slope * offset.dx + lineYIntercept)).abs() <= 1 / _kTolerance;
   }
 
   /// True iff the offset lies on the line segment, inclusively.
