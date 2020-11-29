@@ -1422,7 +1422,7 @@ void main() {
                     ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool isChecked) {
+                        onChanged: (bool? isChecked) {
                           handlePressed();
                         },
                       );
@@ -1442,7 +1442,7 @@ void main() {
                     ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool isChecked) {
+                        onChanged: (bool? isChecked) {
                           handlePressed();
                         },
                       );
@@ -1509,7 +1509,7 @@ void main() {
                     ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool isChecked) {
+                        onChanged: (bool? isChecked) {
                           handlePressed();
                         },
                       );
@@ -1529,7 +1529,7 @@ void main() {
                     ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool isChecked) {
+                        onChanged: (bool? isChecked) {
                           handlePressed();
                         },
                       );
@@ -1598,7 +1598,7 @@ void main() {
                     ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool isChecked) {
+                        onChanged: (bool? isChecked) {
                           handlePressed();
                           _onChangeCalled = true;
                         },
@@ -1620,7 +1620,7 @@ void main() {
                     ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool isChecked) {
+                        onChanged: (bool? isChecked) {
                           handlePressed();
                           _onChangeCalled = true;
                         },
@@ -1699,7 +1699,7 @@ void main() {
                     ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool isChecked) {
+                        onChanged: (bool? isChecked) {
                           handlePressed();
                           _onChangeCalled = true;
                         },
@@ -1721,7 +1721,7 @@ void main() {
                     ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool isChecked) {
+                        onChanged: (bool? isChecked) {
                           handlePressed();
                           _onChangeCalled = true;
                         },
@@ -1801,7 +1801,7 @@ void main() {
                 ) {
                   return Checkbox(
                     value: isExpanded,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       handlePressed();
                     },
                   );
@@ -1822,7 +1822,7 @@ void main() {
                 ) {
                   return Checkbox(
                     value: isExpanded,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       handlePressed();
                     },
                   );
