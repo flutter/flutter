@@ -22,7 +22,6 @@ void main() {
       'apk',
       '--debug',
       '--target-platform', 'android-arm',
-      '--no-shrink',
       '--verbose',
     ], workingDirectory: woringDirectory);
     print(result.stdout);
