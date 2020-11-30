@@ -794,6 +794,112 @@ void main() {
 
     await tester.pumpAndSettle();
   });
+
+
+  testWidgets('Checkbox fill color resolves in enabled/disabled states', (WidgetTester tester) async {
+    const Color activeEnabledFillColor = Color(0xFF000001);
+    const Color activeDisabledFillColor = Color(0xFF000002);
+
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return activeDisabledFillColor;
+      }
+      return activeEnabledFillColor;
+    }
+
+    final MaterialStateProperty<Color> fillColor =
+      MaterialStateColor.resolveWith(getFillColor);
+
+    Widget buildFrame({required bool enabled}) {
+      return Material(
+        child: Theme(
+          data: ThemeData(),
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                value: true,
+                fillColor: fillColor,
+                onChanged: enabled ? (bool? value) { } : null,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    RenderToggleable getCheckboxRenderer() {
+      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
+        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
+      }));
+    }
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..rrect(color: activeEnabledFillColor));
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..rrect(color: activeDisabledFillColor));
+  });
+
+  testWidgets('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'checkbox');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredFillColor = Color(0xFF000001);
+    const Color focusedFillColor = Color(0xFF000002);
+
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredFillColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusedFillColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> fillColor =
+      MaterialStateColor.resolveWith(getFillColor);
+
+    Widget buildFrame() {
+      return Material(
+        child: Theme(
+          data: ThemeData(),
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                focusNode: focusNode,
+                autofocus: true,
+                value: true,
+                fillColor: fillColor,
+                onChanged: (bool? value) { },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    RenderToggleable getCheckboxRenderer() {
+      return tester.renderObject<RenderToggleable>(find.byWidgetPredicate((Widget widget) {
+        return widget.runtimeType.toString() == '_CheckboxRenderObjectWidget';
+      }));
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(getCheckboxRenderer(), paints..rrect(color: focusedFillColor));
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(getCheckboxRenderer(), paints..rrect(color: hoveredFillColor));
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {

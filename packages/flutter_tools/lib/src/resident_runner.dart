@@ -27,8 +27,6 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
-import 'dart/language_version.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -48,7 +46,6 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
-    this.nullSafetyMode = NullSafetyMode.autodetect,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -84,7 +81,6 @@ class FlutterDevice {
     String userIdentifier,
   }) async {
     ResidentCompiler generator;
-    NullSafetyMode nullSafetyMode = buildInfo.nullSafetyMode;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
@@ -96,39 +92,21 @@ class FlutterDevice {
     // a warning message and dump some debug information which can be
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
+      // TODO(jonahwilliams): consistently provide these flags across platforms.
       Artifact platformDillArtifact;
-      List<String> extraFrontEndOptions;
+      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
-        extraFrontEndOptions = buildInfo.extraFrontEndOptions;
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
-      } else {
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          globals.fs.file(buildInfo.packagesPath),
-          logger: globals.logger,
-        );
-        final File entrypointFile = globals.fs.file(target);
-        final LanguageVersion languageVersion = determineLanguageVersion(
-          entrypointFile,
-          packageConfig.packageOf(entrypointFile.absolute.uri),
-        );
-        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
-          platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--sound-null-safety',
-          ];
-          nullSafetyMode = NullSafetyMode.sound;
-        } else {
-          platformDillArtifact = Artifact.webPlatformKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--no-sound-null-safety',
-          ];
-          nullSafetyMode = NullSafetyMode.unsound;
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
         }
+      } else {
+        assert(false);
       }
 
       generator = ResidentCompiler(
@@ -202,7 +180,6 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
-      nullSafetyMode: nullSafetyMode,
     );
   }
 
@@ -210,7 +187,6 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
-  final NullSafetyMode nullSafetyMode;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
@@ -369,9 +345,8 @@ class FlutterDevice {
 
   Future<Uri> setupDevFS(
     String fsName,
-    Directory rootDirectory, {
-    String packagesFilePath,
-  }) {
+    Directory rootDirectory,
+  ) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmService,
@@ -737,7 +712,7 @@ class FlutterDevice {
 abstract class ResidentRunner {
   ResidentRunner(
     this.flutterDevices, {
-    this.target,
+    @required this.target,
     @required this.debuggingOptions,
     String projectRootPath,
     this.ipv6,
@@ -745,7 +720,7 @@ abstract class ResidentRunner {
     this.hotMode = true,
     String dillOutputPath,
     this.machine = false,
-  }) : mainPath = findMainDartFile(target),
+  }) : mainPath = globals.fs.path.absolute(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
@@ -1244,15 +1219,8 @@ abstract class ResidentRunner {
         ipv6: ipv6,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
       );
-      // This will wait for at least one flutter view before returning.
-      final Status status = globals.logger.startProgress(
-        'Waiting for ${device.device.name} to report its views...',
-      );
-      try {
-        await device.vmService.getFlutterViews();
-      } finally {
-        status.stop();
-      }
+      await device.vmService.getFlutterViews();
+
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
@@ -1397,17 +1365,6 @@ class OperationResult {
   bool get isOk => code == 0;
 
   static final OperationResult ok = OperationResult(0, '');
-}
-
-/// Given the value of the --target option, return the path of the Dart file
-/// where the app's main function should be.
-String findMainDartFile([ String target ]) {
-  target ??= '';
-  final String targetPath = globals.fs.path.absolute(target);
-  if (globals.fs.isDirectorySync(targetPath)) {
-    return globals.fs.path.join(targetPath, 'lib', 'main.dart');
-  }
-  return targetPath;
 }
 
 Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {

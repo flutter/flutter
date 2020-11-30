@@ -100,7 +100,7 @@ void main() {
             return Material(
               child: ElevatedButton(
                 child: const Text('X'),
-                onPressed: () { Navigator.of(context)!.pushNamed('/next'); },
+                onPressed: () { Navigator.of(context).pushNamed('/next'); },
               ),
             );
           }
@@ -258,7 +258,7 @@ void main() {
                   child: ElevatedButton(
                       child: const Text('X'),
                       onPressed: () async {
-                        result = Navigator.of(context)!.pushNamed<Object?>('/a');
+                        result = Navigator.of(context).pushNamed<Object?>('/a');
                       },
                   ),
                 );
@@ -270,7 +270,7 @@ void main() {
                 child: ElevatedButton(
                   child: const Text('Y'),
                   onPressed: () {
-                    Navigator.of(context)!.pop('all done');
+                    Navigator.of(context).pop('all done');
                   },
                 ),
               );

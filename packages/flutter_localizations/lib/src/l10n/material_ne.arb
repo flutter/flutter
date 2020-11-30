@@ -52,7 +52,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount वर्णहरू बाँकी",
   "refreshIndicatorSemanticLabel": "पुनः ताजा गर्नुहोस्",
   "moreButtonTooltip": "थप",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "mm/dd/yyyy",
   "selectYearSemanticsLabel": "वर्ष छान्नुहोस्",
   "unspecifiedDate": "मिति",

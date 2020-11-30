@@ -24,7 +24,7 @@ class TestImageInfo implements ImageInfo {
   final int value;
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '${objectRuntimeType(this, 'TestImageInfo')}($value)';
 
   @override
   TestImageInfo clone() {
@@ -81,7 +81,7 @@ class TestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  String toString() => '$runtimeType($key, $imageValue)';
+  String toString() => '${objectRuntimeType(this, 'TestImageProvider')}($key, $imageValue)';
 }
 
 class FailingTestImageProvider extends TestImageProvider {

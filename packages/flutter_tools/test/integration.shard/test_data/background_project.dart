@@ -12,7 +12,7 @@ class BackgroundProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+    sdk: ">=2.12.0-0 <3.0.0"
 
   dependencies:
     flutter:
@@ -62,7 +62,7 @@ class RepeatingBackgroundProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+    sdk: ">=2.12.0-0 <3.0.0"
 
   dependencies:
     flutter:

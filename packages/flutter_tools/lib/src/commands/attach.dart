@@ -12,6 +12,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import  '../build_info.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
@@ -210,6 +211,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
+
     Future<int> getDevicePort() async {
       if (debugPort != null) {
         return debugPort;
@@ -381,22 +383,23 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     assert(device != null);
     assert(flutterProject != null);
     assert(usesIpv6 != null);
+    final BuildInfo buildInfo = await getBuildInfo();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       fileSystemRoots: stringsArg('filesystem-root'),
       fileSystemScheme: stringArg('filesystem-scheme'),
-      target: stringArg('target'),
+      target: targetFile,
       targetModel: TargetModel(stringArg('target-model')),
-      buildInfo: getBuildInfo(),
+      buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       platform: globals.platform,
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo(), disableDds: boolArg('disable-dds'));
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(buildInfo, disableDds: boolArg('disable-dds'));
 
-    return getBuildInfo().isDebug
+    return buildInfo.isDebug
       ? hotRunnerFactory.build(
           flutterDevices,
           target: targetFile,

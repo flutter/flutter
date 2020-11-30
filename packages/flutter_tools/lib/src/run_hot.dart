@@ -66,7 +66,7 @@ class DeviceReloadReport {
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
-    String target,
+    @required String target,
     @required DebuggingOptions debuggingOptions,
     this.benchmarkMode = false,
     this.applicationBinary,
@@ -295,22 +295,9 @@ class HotRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
   }) async {
-    if (!globals.fs.isFileSync(mainPath)) {
-      String message = 'Tried to run $mainPath, but that file does not exist.';
-      if (target == null) {
-        message += '\nConsider using the -t option to specify the Dart file to start.';
-      }
-      globals.printError(message);
-      return 1;
-    }
-
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(debuggingOptions.buildInfo.packagesPath),
-      logger: globals.logger,
-    );
     for (final FlutterDevice device in flutterDevices) {
       // Here we initialize the frontend_server concurrently with the platform
       // build, reducing overall initialization time. This is safe because the first
@@ -331,7 +318,7 @@ class HotRunner extends ResidentRunner {
               getDefaultApplicationKernelPath(
                 trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
               ),
-            packageConfig: packageConfig,
+            packageConfig: debuggingOptions.buildInfo.packageConfig,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
       }
@@ -366,7 +353,6 @@ class HotRunner extends ResidentRunner {
         await device.setupDevFS(
           fsName,
           globals.fs.directory(projectRootPath),
-          packagesFilePath: packagesFilePath,
         ),
     ];
   }
@@ -387,7 +373,8 @@ class HotRunner extends ResidentRunner {
       urisToMonitor: flutterDevices[0].devFS.sources,
       packagesPath: packagesFilePath,
       asyncScanning: hotRunnerConfig.asyncScanning,
-      packageConfig: flutterDevices[0].devFS.lastPackageConfig,
+      packageConfig: flutterDevices[0].devFS.lastPackageConfig
+          ?? debuggingOptions.buildInfo.packageConfig,
     );
     final File entrypointFile = globals.fs.file(mainPath);
     if (!entrypointFile.existsSync()) {
@@ -1099,11 +1086,22 @@ class HotRunner extends ResidentRunner {
       printHelpDetails();
     }
     for (final FlutterDevice device in flutterDevices) {
-      final String dname = device.device.name;
       // Caution: This log line is parsed by device lab tests.
       globals.printStatus(
-        'An Observatory debugger and profiler on $dname is available at: '
+        'An Observatory debugger and profiler on ${device.device.name} is available at: '
         '${device.vmService.httpAddress}',
+      );
+    }
+    globals.printStatus('');
+    if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
+      globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
+    } else {
+      globals.printStatus(
+        'Running with unsound null safety',
+        emphasis: true,
+      );
+      globals.printStatus(
+        'For more information see https://dart.dev/null-safety/unsound-null-safety',
       );
     }
   }
@@ -1212,7 +1210,7 @@ class ProjectFileInvalidator {
       // Initial load.
       assert(urisToMonitor.isEmpty);
       return InvalidationResult(
-        packageConfig: await _createPackageConfig(packagesPath),
+        packageConfig: packageConfig,
         uris: <Uri>[]
       );
     }
