@@ -6,7 +6,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/web/web_device.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -19,6 +18,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
+import '../web/web_device.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
