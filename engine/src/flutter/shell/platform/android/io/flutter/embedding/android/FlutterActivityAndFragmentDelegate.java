@@ -22,7 +22,6 @@ import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
-import io.flutter.app.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
@@ -752,7 +751,10 @@ import java.util.Arrays;
    * FlutterActivityAndFragmentDelegate}.
    */
   /* package */ interface Host
-      extends SplashScreenProvider, FlutterEngineProvider, FlutterEngineConfigurator {
+      extends SplashScreenProvider,
+          FlutterEngineProvider,
+          FlutterEngineConfigurator,
+          PlatformPlugin.PlatformPluginDelegate {
     /** Returns the {@link Context} that backs the host {@link Activity} or {@code Fragment}. */
     @NonNull
     Context getContext();
