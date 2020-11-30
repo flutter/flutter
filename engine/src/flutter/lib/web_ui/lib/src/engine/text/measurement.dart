@@ -771,8 +771,6 @@ class LinesCalculator {
   /// This method should be called for every line break. As soon as it reaches
   /// the maximum number of lines required
   void update(LineBreakResult brk) {
-    final bool isHardBreak = brk.type == LineBreakType.mandatory ||
-        brk.type == LineBreakType.endOfText;
     final int chunkEnd = brk.index;
     final int chunkEndWithoutNewlines = brk.indexWithoutTrailingNewlines;
     final int chunkEndWithoutSpace = brk.indexWithoutTrailingSpaces;
@@ -855,7 +853,7 @@ class LinesCalculator {
       return;
     }
 
-    if (isHardBreak) {
+    if (brk.isHard) {
       _addLineBreak(brk);
     }
     _lastBreak = brk;
@@ -872,15 +870,13 @@ class LinesCalculator {
       lineWidth: lineWidth,
       maxWidth: _maxWidth,
     );
-    final bool isHardBreak = brk.type == LineBreakType.mandatory ||
-        brk.type == LineBreakType.endOfText;
 
     final EngineLineMetrics metrics = EngineLineMetrics.withText(
       _text!.substring(_lineStart, brk.indexWithoutTrailingNewlines),
       startIndex: _lineStart,
       endIndex: brk.index,
       endIndexWithoutNewlines: brk.indexWithoutTrailingNewlines,
-      hardBreak: isHardBreak,
+      hardBreak: brk.isHard,
       width: lineWidth,
       widthWithTrailingSpaces: lineWidthWithTrailingSpaces,
       left: alignOffset,
@@ -995,7 +991,7 @@ class MaxIntrinsicCalculator {
   /// intrinsic width calculated so far. When the whole text is consumed,
   /// [value] will contain the final maximum intrinsic width.
   void update(LineBreakResult brk) {
-    if (brk.type == LineBreakType.opportunity) {
+    if (!brk.isHard) {
       return;
     }
 

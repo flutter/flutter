@@ -252,6 +252,14 @@ void testMain() {
                   '"$text"\n'
                   '\nExpected line break at {$lastLineBreak - $i} but found line break at {$lastLineBreak - ${result.index}}.',
             );
+
+            // Since this is a line break, passing a `maxEnd` that's greater
+            // should return the same line break.
+            final LineBreakResult maxEndResult =
+                nextLineBreak(text, lastLineBreak, maxEnd: i + 1);
+            expect(maxEndResult.index, i);
+            expect(maxEndResult.type, isNot(LineBreakType.prohibited));
+
             lastLineBreak = i;
           } else {
             // This isn't a line break opportunity so the line break should be
@@ -264,6 +272,13 @@ void testMain() {
                   '"$text"\n'
                   '\nUnexpected line break found at {$lastLineBreak - $i}.',
             );
+
+            // Since this isn't a line break, passing it as a `maxEnd` should
+            // return `maxEnd` as a prohibited line break type.
+            final LineBreakResult maxEndResult =
+                nextLineBreak(text, lastLineBreak, maxEnd: i);
+            expect(maxEndResult.index, i);
+            expect(maxEndResult.type, LineBreakType.prohibited);
           }
         }
       }
