@@ -1421,6 +1421,7 @@ void main() {
       );
 
       // The children should be laid out along vertical and the first child at top.
+      // The item height is icon height + default border width (48.0 + 1.0) pixels.
       expect(tester.getCenter(find.text('First child')), const Offset(400.0, 251.0));
       expect(tester.getCenter(find.text('Second child')), const Offset(400.0, 300.0));
       expect(tester.getCenter(find.text('Third child')), const Offset(400.0, 349.0));
@@ -1483,7 +1484,7 @@ void main() {
 
   testWidgets(
     'VerticalDirection test when direction is vertical.',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         Material(
           child: boilerplate(

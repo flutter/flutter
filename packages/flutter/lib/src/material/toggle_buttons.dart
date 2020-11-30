@@ -387,24 +387,27 @@ class ToggleButtons extends StatelessWidget {
   /// the buttons default to non-rounded borders.
   final BorderRadius? borderRadius;
 
-  /// The direction along which the buttons are rendered
+  /// The direction along which the buttons are rendered.
   ///
-  /// Defaults to [Axis.horizontal]
+  /// Defaults to [Axis.horizontal].
   final Axis direction;
 
-  /// Determines the order to lay children out vertically and how to interpret start and end in the vertical direction.
-  ///
-  /// If the direction is Axis.vertical, this controls which order children are painted in (down or up).
+  /// If [direction] is [Axis.vertical], this parameter determines whether to lay out
+  /// the buttons starting from the first or last child from top to bottom.
   final VerticalDirection verticalDirection;
 
-  bool _isFirstIndex(int index, int length, TextDirection textDirection) {
+  // Determines if this is the first child that is being laid out
+  // by the render object, _not_ the order of the children in its list.
+  bool _isFirstButton(int index, int length, TextDirection textDirection) {
     return index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
       (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
       || index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
       (direction == Axis.vertical && verticalDirection == VerticalDirection.up));
   }
 
-  bool _isLastIndex(int index, int length, TextDirection textDirection) {
+  // Determines if this is the last child that is being laid out
+  // by the render object, _not_ the order of the children in its list.
+  bool _isLastButton(int index, int length, TextDirection textDirection) {
     return index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
       (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
       || index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
@@ -422,24 +425,24 @@ class ToggleButtons extends StatelessWidget {
       ?? BorderRadius.zero;
 
     if (direction == Axis.horizontal) {
-      if (_isFirstIndex(index, length, textDirection)) {
+      if (_isFirstButton(index, length, textDirection)) {
         return BorderRadius.only(
           topLeft: resultingBorderRadius.topLeft,
           bottomLeft: resultingBorderRadius.bottomLeft,
         );
-      } else if (_isLastIndex(index, length, textDirection)) {
+      } else if (_isLastButton(index, length, textDirection)) {
         return BorderRadius.only(
           topRight: resultingBorderRadius.topRight,
           bottomRight: resultingBorderRadius.bottomRight,
         );
       }
     } else {
-      if (_isFirstIndex(index, length, textDirection)) {
+      if (_isFirstButton(index, length, textDirection)) {
         return BorderRadius.only(
           topLeft: resultingBorderRadius.topLeft,
           topRight: resultingBorderRadius.topRight,
         );
-      } else if (_isLastIndex(index, length, textDirection)) {
+      } else if (_isLastButton(index, length, textDirection)) {
         return BorderRadius.only(
           bottomLeft: resultingBorderRadius.bottomLeft,
           bottomRight: resultingBorderRadius.bottomRight,
@@ -464,24 +467,24 @@ class ToggleButtons extends StatelessWidget {
       ?? _defaultBorderWidth;
 
     if (direction == Axis.horizontal) {
-      if (_isFirstIndex(index, length, textDirection)) {
+      if (_isFirstButton(index, length, textDirection)) {
         return BorderRadius.only(
           topLeft: resultingBorderRadius.topLeft - Radius.circular(resultingBorderWidth / 2.0),
           bottomLeft: resultingBorderRadius.bottomLeft - Radius.circular(resultingBorderWidth / 2.0),
         );
-      } else if (_isLastIndex(index, length, textDirection)) {
+      } else if (_isLastButton(index, length, textDirection)) {
         return BorderRadius.only(
           topRight: resultingBorderRadius.topRight - Radius.circular(resultingBorderWidth / 2.0),
           bottomRight: resultingBorderRadius.bottomRight - Radius.circular(resultingBorderWidth / 2.0),
         );
       }
     } else {
-      if (_isFirstIndex(index, length, textDirection)) {
+      if (_isFirstButton(index, length, textDirection)) {
         return BorderRadius.only(
           topLeft: resultingBorderRadius.topLeft - Radius.circular(resultingBorderWidth / 2.0),
           topRight: resultingBorderRadius.topRight - Radius.circular(resultingBorderWidth / 2.0),
         );
-      } else if (_isLastIndex(index, length, textDirection)) {
+      } else if (_isLastButton(index, length, textDirection)) {
         return BorderRadius.only(
           bottomLeft: resultingBorderRadius.bottomLeft - Radius.circular(resultingBorderWidth / 2.0),
           bottomRight: resultingBorderRadius.bottomRight - Radius.circular(resultingBorderWidth / 2.0),
@@ -833,9 +836,8 @@ class _ToggleButton extends StatelessWidget {
   /// The direction along which the buttons are rendered.
   final Axis direction;
 
-  /// Determines the order to lay children out vertically and how to interpret start and end in the vertical direction.
-  ///
-  /// If the direction is Axis.vertical, this controls which order children are painted in (down or up).
+  /// If [direction] is [Axis.vertical], this property defines whether or not this button in its list
+  /// of buttons is laid out starting from top to bottom or from bottom to top.
   final VerticalDirection verticalDirection;
 
   /// The button's label, which is usually an [Icon] or a [Text] widget.
@@ -959,9 +961,12 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
   // The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
 
-  // If [direction] is [Axis.horizontal], this corresponds the width and color
+  // The width and color of the side borders.
+  //
+  // If [direction] is [Axis.horizontal], this corresponds to the width and color
   // of the button's top and bottom side borders.
-  // If [direction] is [Axis.vertical], this corresponds the width and color
+  //
+  // If [direction] is [Axis.vertical], this corresponds to the width and color
   // of the button's left and right side borders.
   final BorderSide borderSide;
 
@@ -980,8 +985,8 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
   // The direction along which the buttons are rendered.
   final Axis direction;
 
-  // Determines the order to lay children out vertically
-  // and how to interpret start and end in the vertical direction.
+  // If [direction] is [Axis.vertical], this property defines whether or not this button in its list
+  // of buttons is laid out starting from top to bottom or from bottom to top.
   final VerticalDirection verticalDirection;
 
   @override
@@ -1118,6 +1123,10 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     return box == null ? 0.0 : box.getMaxIntrinsicHeight(width);
   }
 
+  static double _minHeight(RenderBox? box, double width) {
+    return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
+  }
+
   static double _minWidth(RenderBox? box, double height) {
     return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
   }
@@ -1138,11 +1147,18 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   double computeMaxIntrinsicHeight(double width) {
     return direction == Axis.horizontal
       ? borderSide.width * 2.0 + _maxHeight(child, width)
-      : leadingBorderSide.width * 2.0 + _maxHeight(child, width);
+      : leadingBorderSide.width + _maxHeight(child, width) + trailingBorderSide.width;
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
+  double computeMinIntrinsicHeight(double width) {
+    return direction == Axis.horizontal
+        ? borderSide.width * 2.0 + _minHeight(child, width)
+        : leadingBorderSide.width + _maxHeight(child, width) + trailingBorderSide.width;
+  }
+
+//  @override
+//  double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
 
   @override
   double computeMaxIntrinsicWidth(double height) {
@@ -1175,28 +1191,27 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     if (child == null) {
       return;
     }
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
     if (direction == Axis.horizontal) {
       switch (textDirection) {
         case TextDirection.ltr:
-          final BoxParentData childParentData = child!.parentData! as BoxParentData;
-          childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
+          childParentData.offset = Offset(leadingBorderSide.width, borderSide.width);
           break;
         case TextDirection.rtl:
-          final BoxParentData childParentData = child!.parentData! as BoxParentData;
-          if (isLastButton) {
-            childParentData.offset = Offset(_trailingBorderOffset, _trailingBorderOffset);
-          } else {
-            childParentData.offset = Offset(0, borderSide.width);
-          }
+          childParentData.offset = Offset(trailingBorderSide.width, borderSide.width);
           break;
       }
     } else {
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = Offset(borderSide.width, borderSide.width);
+      switch (verticalDirection) {
+        case VerticalDirection.down:
+          childParentData.offset = Offset(borderSide.width, leadingBorderSide.width);
+          break;
+        case VerticalDirection.up:
+          childParentData.offset = Offset(borderSide.width, trailingBorderSide.width);
+          break;
+      }
     }
   }
-
-  double get _trailingBorderOffset => isLastButton ? trailingBorderSide.width : 0.0;
 
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     if (child == null) {
@@ -1206,7 +1221,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           borderSide.width * 2.0,
         ));
       } else {
-        size = constraints.constrain(Size(
+        return constraints.constrain(Size(
           borderSide.width * 2.0,
           leadingBorderSide.width + trailingBorderSide.width,
         ));
@@ -1219,97 +1234,30 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final double bottomConstraint;
 
     if (direction == Axis.horizontal) {
-      switch (textDirection) {
-        case TextDirection.ltr:
-          rightConstraint = _trailingBorderOffset;
-          leftConstraint = leadingBorderSide.width;
-          topConstraint = borderSide.width;
-          bottomConstraint = borderSide.width;
-
-          final BoxConstraints innerConstraints = constraints.deflate(
-            EdgeInsets.only(
-              left: leftConstraint,
-              top: topConstraint,
-              right: rightConstraint,
-              bottom: bottomConstraint,
-            ),
-          );
-
-          final Size childSize = layoutChild(child!, innerConstraints);
-
-          return constraints.constrain(Size(
-            leftConstraint + childSize.width + rightConstraint,
-            borderSide.width * 2.0 + childSize.height,
-          ));
-        case TextDirection.rtl:
-          rightConstraint = leadingBorderSide.width;
-          leftConstraint = _trailingBorderOffset;
-          topConstraint = borderSide.width;
-          bottomConstraint = borderSide.width;
-
-          final BoxConstraints innerConstraints = constraints.deflate(
-            EdgeInsets.only(
-              left: leftConstraint,
-              top: topConstraint,
-              right: rightConstraint,
-              bottom: bottomConstraint,
-            ),
-          );
-
-          final Size childSize = layoutChild(child!, innerConstraints);
-          return constraints.constrain(Size(
-            leftConstraint + childSize.width + rightConstraint,
-            borderSide.width * 2.0 + childSize.height,
-          ));
-      }
+      rightConstraint = trailingBorderSide.width;
+      leftConstraint = leadingBorderSide.width;
+      topConstraint = borderSide.width;
+      bottomConstraint = borderSide.width;
     } else {
-      final double trailingBorderOffset = isLastButton ? trailingBorderSide.width : 0.0;
-      switch (verticalDirection) {
-        case VerticalDirection.down:
-          rightConstraint = borderSide.width;
-          leftConstraint = borderSide.width;
-          topConstraint = leadingBorderSide.width;
-          bottomConstraint = trailingBorderOffset;
-
-          final BoxConstraints innerConstraints = constraints.deflate(
-            EdgeInsets.only(
-              left: leftConstraint,
-              top: topConstraint,
-              right: rightConstraint,
-              bottom: bottomConstraint,
-            ),
-          );
-
-          final Size childSize = layoutChild(child!, innerConstraints);
-
-          return constraints.constrain(Size(
-            leftConstraint + childSize.width + rightConstraint,
-            topConstraint + childSize.height + bottomConstraint,
-          ));
-        case VerticalDirection.up:
-          final double trailingBorderOffset = isFirstButton ? leadingBorderSide.width : 0.0;
-          rightConstraint = borderSide.width;
-          leftConstraint = borderSide.width;
-          topConstraint = trailingBorderOffset;
-          bottomConstraint = leadingBorderSide.width;
-
-          final BoxConstraints innerConstraints = constraints.deflate(
-            EdgeInsets.only(
-              left: leftConstraint,
-              top: topConstraint,
-              right: rightConstraint,
-              bottom: bottomConstraint,
-            ),
-          );
-
-          final Size childSize = layoutChild(child!, innerConstraints);
-
-          return constraints.constrain(Size(
-            leftConstraint + childSize.width + rightConstraint,
-            topConstraint + childSize.height + bottomConstraint,
-          ));
-      }
+      rightConstraint = borderSide.width;
+      leftConstraint = borderSide.width;
+      topConstraint = leadingBorderSide.width;
+      bottomConstraint = trailingBorderSide.width;
     }
+    final BoxConstraints innerConstraints = constraints.deflate(
+      EdgeInsets.only(
+        left: leftConstraint,
+        top: topConstraint,
+        right: rightConstraint,
+        bottom: bottomConstraint,
+      ),
+    );
+    final Size childSize = layoutChild(child!, innerConstraints);
+
+    return constraints.constrain(Size(
+      leftConstraint + childSize.width + rightConstraint,
+      topConstraint + childSize.height + bottomConstraint,
+    ));
   }
 
   @override
@@ -1486,40 +1434,40 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         case VerticalDirection.up:
           if (isLastButton) {
             final Path bottomPath = Path();
-            bottomPath..moveTo(outer.left, outer.bottom + leadingBorderSide.width / 2)
-              ..lineTo(outer.right, outer.bottom + leadingBorderSide.width / 2);
+            bottomPath..moveTo(outer.left, outer.bottom - leadingBorderSide.width / 2.0)
+              ..lineTo(outer.right, outer.bottom - leadingBorderSide.width / 2.0);
             context.canvas.drawPath(bottomPath, leadingPaint);
 
             final Paint endingPaint = trailingBorderSide.toPaint();
             final Path endingPath = Path();
-            endingPath..moveTo(rrect.left, rrect.bottom + leadingBorderSide.width / 2.0)
+            endingPath..moveTo(rrect.left, rrect.bottom - leadingBorderSide.width / 2.0)
               ..lineTo(rrect.left, rrect.top + rrect.tlRadiusY)
               ..addArc(tlCorner, math.pi, sweepAngle)
               ..lineTo(rrect.right - rrect.trRadiusX, rrect.top)
               ..addArc(trCorner, math.pi * 3.0 / 2.0, sweepAngle)
-              ..lineTo(rrect.right, rrect.bottom + leadingBorderSide.width / 2.0);
+              ..lineTo(rrect.right, rrect.bottom - leadingBorderSide.width / 2.0);
             context.canvas.drawPath(endingPath, endingPaint);
           } else if (isFirstButton) {
             final Path leadingPath = Path();
-            leadingPath..moveTo(rrect.left, rrect.top + leadingBorderSide.width / 2.0)
+            leadingPath..moveTo(rrect.left, outer.top)
               ..lineTo(rrect.left, rrect.bottom - rrect.blRadiusY)
               ..addArc(blCorner, math.pi, -sweepAngle)
               ..lineTo(rrect.right - rrect.brRadiusX, rrect.bottom)
               ..addArc(brCorner, math.pi / 2.0, -sweepAngle)
-              ..lineTo(rrect.right, rrect.top + leadingBorderSide.width / 2.0);
+              ..lineTo(rrect.right, outer.top);
             context.canvas.drawPath(leadingPath, leadingPaint);
           } else {
             final Path bottomPath = Path();
-            bottomPath..moveTo(outer.left, outer.bottom + leadingBorderSide.width / 2)
-              ..lineTo(outer.right, outer.bottom + leadingBorderSide.width / 2);
+            bottomPath..moveTo(outer.left, outer.bottom - leadingBorderSide.width / 2.0)
+              ..lineTo(outer.right, outer.bottom - leadingBorderSide.width / 2.0);
             context.canvas.drawPath(bottomPath, leadingPaint);
 
             final Paint paint = borderSide.toPaint();
             final Path paths = Path(); // Left and right borders.
-            paths..moveTo(rrect.left, outer.top + leadingBorderSide.width)
-              ..lineTo(rrect.left, outer.bottom)
-              ..moveTo(rrect.right, outer.top + leadingBorderSide.width)
-              ..lineTo(rrect.right, outer.bottom);
+            paths..moveTo(rrect.left, outer.top)
+              ..lineTo(rrect.left, outer.bottom - leadingBorderSide.width)
+              ..moveTo(rrect.right, outer.top)
+              ..lineTo(rrect.right, outer.bottom - leadingBorderSide.width);
             context.canvas.drawPath(paths, paint);
           }
           break;
