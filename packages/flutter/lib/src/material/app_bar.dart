@@ -306,7 +306,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// ```
   final Widget? title;
 
-  /// {@template flutter.material.appbar.title}
+  /// {@template flutter.material.appbar.actions}
   /// A list of Widgets to display in a row after the [title] widget.
   ///
   /// Typically these widgets are [IconButton]s representing common operations.
@@ -489,7 +489,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The color, opacity, and size to use for toolbar icons.
   ///
   /// If this property is null, then a copy of [ThemeData.iconTheme]
-  /// is used, with the [IconTheme.color] set to the
+  /// is used, with the [IconThemeData.color] set to the
   /// app bar's [foregroundColor].
   /// {@endtemplate}
   ///
@@ -617,7 +617,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// {@template flutter.material.appbar.toolbarTextStyle}
   /// The default text style for the AppBar's [leading], and
-  /// [trailing] widgets, but not its [title].
+  /// [actions] widgets, but not its [title].
   ///
   /// If this property is null, then [AppBarTheme.toolbarTextStyle] of
   /// [ThemeData.appBarTheme] is used. If that is also null, the default
@@ -644,7 +644,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// See also:
   ///
   ///  * [toolbarTextStyle], which is the default text style for the AppBar's
-  ///    [title], [leading], and [trailing] widgets, also known as the
+  ///    [title], [leading], and [actions] widgets, also known as the
   ///    AppBar's "toolbar".
   ///  * [DefaultTextStyle], which overrides the default text style for all of the
   ///    the widgets in a subtree.
@@ -754,7 +754,7 @@ class _AppBarState extends State<AppBar> {
     TextStyle? titleTextStyle = widget.backwardsCompatibility
       ? widget.textTheme?.headline6
         ?? appBarTheme.textTheme?.headline6
-        ?? theme.textTheme.headline6
+        ?? theme.primaryTextTheme.headline6
       : widget.titleTextStyle
         ?? appBarTheme.titleTextStyle
         ?? theme.textTheme.headline6?.copyWith(color: foregroundColor);

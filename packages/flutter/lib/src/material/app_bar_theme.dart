@@ -96,7 +96,7 @@ class AppBarTheme with Diagnosticable {
   /// See also:
   ///
   ///  * [actionsIconTheme], which overrides the default value for
-  ///    [AppBar.actionsItemTheme] in all descendant [AppBar] widgets.
+  ///    [AppBar.actionsIconTheme] in all descendant [AppBar] widgets.
   ///  * [foregroundColor], which overrides the default value
   ///    [AppBar.foregroundColor] in all descendant widgets.
   final IconThemeData? iconTheme;
