@@ -809,7 +809,7 @@ void main() {
       colorScheme: themeAfterSnackBar!.colorScheme,
     ); // Fields replaced by SnackBar.
 
-    expect(comparedTheme == themeAfterSnackBar, true);
+    expect(comparedTheme, themeAfterSnackBar);
   });
 
   testWidgets('Snackbar margin can be customized', (WidgetTester tester) async {
