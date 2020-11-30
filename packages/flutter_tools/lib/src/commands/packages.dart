@@ -220,7 +220,9 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.interactively(<String>[_commandName, ...argResults.rest], stdio: globals.stdio);
+    final List<String> subArgs = argResults.rest.toList()
+      ..removeWhere((String arg) => arg == '--');
+    await pub.interactively(<String>[_commandName, ...subArgs], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
 }

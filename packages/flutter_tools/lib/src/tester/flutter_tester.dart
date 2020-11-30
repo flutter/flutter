@@ -153,15 +153,12 @@ class FlutterTesterDevice extends Device {
     final String applicationKernelFilePath = getKernelPathForTransformerOptions(
       _fileSystem.path.join(_buildDirectory, 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
-      nullSafetyMode: buildInfo.nullSafetyMode,
     );
     // Build assets and perform initial compilation.
     await BundleBuilder().build(
       buildInfo: buildInfo,
       mainPath: mainPath,
-      assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
       treeShakeIcons: buildInfo.treeShakeIcons,

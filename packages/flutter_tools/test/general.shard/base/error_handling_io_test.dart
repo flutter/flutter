@@ -817,17 +817,35 @@ void main() {
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
     });
 
-    testWithoutContext('copySync handles error if openSync on destination file fails', () {
+    testWithoutContext('copySync handles error if createSync on destination file fails', () {
       final MockFile source = MockFile();
       final MockFile dest = MockFile();
       when(source.openSync(mode: anyNamed('mode')))
         .thenReturn(MockRandomAccessFile());
-      when(dest.openSync(mode: anyNamed('mode')))
+      when(dest.createSync(recursive: anyNamed('recursive')))
         .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
       when(mockFileSystem.file('source')).thenReturn(source);
       when(mockFileSystem.file('dest')).thenReturn(dest);
 
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit());
+    });
+
+    // dart:io is able to clobber read-only files.
+    testWithoutContext('copySync will copySync even if the destination is not writable', () {
+      final MockFile source = MockFile();
+      final MockFile dest = MockFile();
+
+      when(source.copySync(any)).thenReturn(dest);
+      when(mockFileSystem.file('source')).thenReturn(source);
+      when(source.openSync(mode: anyNamed('mode')))
+        .thenReturn(MockRandomAccessFile());
+      when(mockFileSystem.file('dest')).thenReturn(dest);
+      when(dest.openSync(mode: FileMode.writeOnly))
+        .thenThrow(const FileSystemException('', '', OSError('', eaccess)));
+
+      fileSystem.file('source').copySync('dest');
+
+      verify(source.copySync('dest')).called(1);
     });
 
     testWithoutContext('copySync will copySync if there are no exceptions', () {

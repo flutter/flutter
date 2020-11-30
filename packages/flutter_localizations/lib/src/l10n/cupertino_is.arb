@@ -21,5 +21,5 @@
   "selectAllButtonLabel": "Velja allt",
   "tabSemanticsLabel": "Flipi $tabIndex af $tabCount",
   "modalBarrierDismissLabel": "Hunsa",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "Leit"
 }

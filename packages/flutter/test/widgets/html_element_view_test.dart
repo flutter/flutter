@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('chrome')
-
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';

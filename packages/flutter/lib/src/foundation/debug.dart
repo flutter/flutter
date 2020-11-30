@@ -102,7 +102,7 @@ String debugFormatDouble(double? value) {
 }
 
 /// A setting that can be used to override the platform [Brightness] exposed
-/// from [BindingBase.window].
+/// from [BindingBase.platformDispatcher].
 ///
 /// See also:
 ///
