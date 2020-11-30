@@ -1343,7 +1343,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/70177
   testWidgets('disabledHint behavior test', (WidgetTester tester) async {
-    Widget build({List<String>? items, ValueChanged<String?>? onChanged, String? value, Widget? hint, Widget? disabledHint,}) => buildFrame(
+    Widget build({ List<String>? items, ValueChanged<String?>? onChanged, String? value, Widget? hint, Widget? disabledHint }) => buildFrame(
       items: items,
       onChanged: onChanged,
       value: value,
@@ -1401,7 +1401,7 @@ void main() {
     ));
     expect(getIndex(), null);
 
-    // If [value], [hint] and [disabledHint] are null, the button is enable, nothing displayed.
+    // If [value], [hint] and [disabledHint] are null, the button is enabled, nothing displayed.
     await tester.pumpWidget(build(
       items: menuItems,
       onChanged: onChanged,

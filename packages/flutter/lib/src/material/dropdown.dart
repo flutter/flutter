@@ -795,9 +795,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// [onChanged] is null, the button will be disabled, the down arrow
   /// will be greyed out.
   ///
-  /// If [value] is null, [hint] or [disabledHint] is non-null, depends on the
-  /// dropdown button enabled or disabled status, the [hint] or [disabledHint] widget
-  /// is displayed as a placeholder for the dropdown button's value.
+  /// If [value] is null and the button is enabled, [hint] will be displayed
+  /// if it is non-null.
+  ///
+  /// If [value] is null and the button is disabled, [disabledHint] will be displayed
+  /// if it is non-null. If [disabledHint] is null, then [hint] will be displayed
+  /// if it is non-null.
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified). The boolean [isDense] and
@@ -815,7 +818,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.value,
     this.hint,
     this.disabledHint,
-    required this.onChanged,
+    this.onChanged,
     this.onTap,
     this.elevation = 8,
     this.style,
@@ -859,21 +862,21 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// The value of the currently selected [DropdownMenuItem].
   ///
-  /// If [value] is null, [hint] or [disabledHint] is non-null, depends on the
-  /// dropdown enabled or disabled status, the [hint] or [disabledHint] widget
-  /// is displayed as a placeholder for the dropdown button's value.
+  /// If [value] is null and the button is enabled, [hint] will be displayed
+  /// if it is non-null.
+  ///
+  /// If [value] is null and the button is disabled, [disabledHint] will be displayed
+  /// if it is non-null. If [disabledHint] is null, then [hint] will be displayed
+  /// if it is non-null.
   final T? value;
 
   /// A placeholder widget that is displayed by the dropdown button.
   ///
-  /// If [value] is null, the dropdown is enabled ([items] and [onChanged] are non-null),
+  /// If [value] is null and the dropdown is enabled ([items] and [onChanged] are non-null),
   /// this widget is displayed as a placeholder for the dropdown button's value.
   ///
-  /// If [value] is null, the dropdown is disabled and [disabledHint] is null,
-  /// This widget is displayed.
-  ///
-  /// If [value] is null, the dropdown is disabled and [disabledHint] is non-null,
-  /// [disabledHint] widget is displayed.
+  /// If [value] is null and the dropdown is disabled and [disabledHint] is null,
+  /// this widget is used as the placeholder.
   final Widget? hint;
 
   /// A preferred placeholder widget that is displayed when the dropdown is disabled.
@@ -1446,7 +1449,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     T? value,
     Widget? hint,
     Widget? disabledHint,
-    required this.onChanged,
+    this.onChanged,
     VoidCallback? onTap,
     int elevation = 8,
     TextStyle? style,
