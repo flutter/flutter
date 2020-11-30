@@ -6,27 +6,58 @@
 
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
 #import "flutter/shell/platform/darwin/ios/ios_external_texture_metal.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 
 namespace flutter {
 
-IOSContextMetal::IOSContextMetal() {
-  darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetal>{
-      [[[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice] retain]};
+static GrContextOptions CreateMetalGrContextOptions() {
+  GrContextOptions options = {};
+  if (PersistentCache::cache_sksl()) {
+    options.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
+  }
+  PersistentCache::MarkStrategySet();
+  options.fPersistentCache = PersistentCache::GetCacheForProcess();
+  return options;
+}
 
-  if (!darwin_context_metal_) {
+IOSContextMetal::IOSContextMetal() {
+  device_.reset([MTLCreateSystemDefaultDevice() retain]);
+  if (!device_) {
+    FML_DLOG(ERROR) << "Could not acquire Metal device.";
     return;
   }
 
-  main_command_queue_.reset([darwin_context_metal_.get().mtlCommandQueue retain]);
+  main_queue_.reset([device_ newCommandQueue]);
+
+  if (!main_queue_) {
+    FML_DLOG(ERROR) << "Could not create Metal command queue.";
+    return;
+  }
+
+  [main_queue_ setLabel:@"Flutter Main Queue"];
+
+  const auto& context_options = CreateMetalGrContextOptions();
+
+  // Skia expect arguments to `MakeMetal` transfer ownership of the reference in for release later
+  // when the GrDirectContext is collected.
+  main_context_ =
+      GrDirectContext::MakeMetal([device_ retain], [main_queue_ retain], context_options);
+  resource_context_ =
+      GrDirectContext::MakeMetal([device_ retain], [main_queue_ retain], context_options);
+
+  if (!main_context_ || !resource_context_) {
+    FML_DLOG(ERROR) << "Could not create Skia Metal contexts.";
+    return;
+  }
+
+  resource_context_->setResourceCacheLimits(0u, 0u);
 
   CVMetalTextureCacheRef texture_cache_raw = NULL;
   auto cv_return = CVMetalTextureCacheCreate(kCFAllocatorDefault,  // allocator
-                                             NULL,  // cache attributes (NULL default)
-                                             darwin_context_metal_.get().mtlDevice,  // metal device
-                                             NULL,  // texture attributes (NULL default)
+                                             NULL,           // cache attributes (NULL default)
+                                             device_.get(),  // metal device
+                                             NULL,           // texture attributes (NULL default)
                                              &texture_cache_raw  // [out] cache
   );
   if (cv_return != kCVReturnSuccess) {
@@ -38,21 +69,30 @@ IOSContextMetal::IOSContextMetal() {
 
 IOSContextMetal::~IOSContextMetal() = default;
 
-fml::scoped_nsobject<FlutterDarwinContextMetal> IOSContextMetal::GetDarwinContext() const {
-  return darwin_context_metal_;
+fml::scoped_nsprotocol<id<MTLDevice>> IOSContextMetal::GetDevice() const {
+  return device_;
+}
+
+fml::scoped_nsprotocol<id<MTLCommandQueue>> IOSContextMetal::GetMainCommandQueue() const {
+  return main_queue_;
+}
+
+fml::scoped_nsprotocol<id<MTLCommandQueue>> IOSContextMetal::GetResourceCommandQueue() const {
+  // TODO(52150): Create a dedicated resource queue once multiple queues are supported in Skia.
+  return main_queue_;
 }
 
 sk_sp<GrDirectContext> IOSContextMetal::GetMainContext() const {
-  return darwin_context_metal_.get().mainContext;
+  return main_context_;
 }
 
 sk_sp<GrDirectContext> IOSContextMetal::GetResourceContext() const {
-  return darwin_context_metal_.get().resourceContext;
+  return resource_context_;
 }
 
 // |IOSContext|
 sk_sp<GrDirectContext> IOSContextMetal::CreateResourceContext() {
-  return darwin_context_metal_.get().resourceContext;
+  return resource_context_;
 }
 
 // |IOSContext|
