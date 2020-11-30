@@ -1148,6 +1148,64 @@ void main() {
     expect(targetMidRightPage1, findsOneWidget);
     expect(targetMidLeftPage1, findsOneWidget);
   });
+
+  testWidgets('PointerScroll on nested NeverScrollable ListView goes to outer Scrollable.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/70948
+    final ScrollController outerController = ScrollController();
+    final ScrollController innerController = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          controller: outerController,
+          child: Container(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    for (int i = 0; i < 100; i++)
+                      Text('SingleChildScrollView $i'),
+                  ]
+                ),
+                Container(
+                  height: 3000,
+                  width: 400,
+                  child: ListView.builder(
+                    controller: innerController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Text('Nested NeverScrollable ListView $index');
+                    },
+                  )
+                ),
+              ]
+            )
+          )
+        )
+      ),
+    ));
+    expect(outerController.position.pixels, 0.0);
+    expect(innerController.position.pixels, 0.0);
+    final Offset outerScrollable = tester.getCenter(find.text('SingleChildScrollView 3'));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Hover over the outer scroll view and create a pointer scroll.
+    testPointer.hover(outerScrollable);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(outerController.position.pixels, 20.0);
+    expect(innerController.position.pixels, 0.0);
+
+    final Offset innerScrollable = tester.getCenter(find.text('Nested NeverScrollable ListView 20'));
+    // Hover over the inner scroll view and create a pointer scroll.
+    // This inner scroll view is not scrollable, and so the outer should scroll.
+    testPointer.hover(innerScrollable);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(outerController.position.pixels, 0.0);
+    expect(innerController.position.pixels, 0.0);
+  });
 }
 
 // ignore: must_be_immutable

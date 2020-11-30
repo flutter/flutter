@@ -441,7 +441,7 @@ Command: /home/android/gradlew assembleRelease
 
       expect(testLogger.statusText,
         contains(
-          'The build failed likely due to AndroidX incompatibilities in a plugin. '
+          'The built failed likely due to AndroidX incompatibilities in a plugin. '
           'The tool is about to try using Jetfier to solve the incompatibility.'
         )
       );

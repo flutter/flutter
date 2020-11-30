@@ -2031,6 +2031,36 @@ void main() {
       );
       await tester.pumpAndSettle();
     });
+
+    testWidgets('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          extendBodyBehindAppBar: false,
+        ),
+      ));
+      final Offset defaultOffset = tester.getCenter(find.byType(FloatingActionButton));
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          extendBodyBehindAppBar: true,
+        ),
+      ));
+      final Offset extendedBodyOffset = tester.getCenter(find.byType(FloatingActionButton));
+
+      expect(defaultOffset.dy, extendedBodyOffset.dy);
+    });
   });
 
   testWidgets('ScaffoldMessenger.maybeOf can return null if not found', (WidgetTester tester) async {

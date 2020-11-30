@@ -2031,6 +2031,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    final double width = forceLine ? constraints.maxWidth : constraints
+        .constrainWidth(_textPainter.size.width + _caretMargin);
+    return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
