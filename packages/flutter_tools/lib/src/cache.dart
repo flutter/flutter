@@ -1792,21 +1792,7 @@ class ArtifactUpdater {
 
       try {
         extractor(tempFile, location);
-      } on ProcessException {
-        retries -= 1;
-        if (retries == 0) {
-          rethrow;
-        }
-        _deleteIgnoringErrors(tempFile);
-        continue;
-      } on ArchiveException {
-        retries -= 1;
-        if (retries == 0) {
-          rethrow;
-        }
-        _deleteIgnoringErrors(tempFile);
-        continue;
-      } on FormatException {
+      } on Exception {
         retries -= 1;
         if (retries == 0) {
           rethrow;
