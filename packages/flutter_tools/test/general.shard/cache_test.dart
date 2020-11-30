@@ -495,18 +495,17 @@ void main() {
   });
 
   testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
-    FakeProcessManager fakeProcessManager = FakeProcessManager.any();
     fakeProcessManager.addCommand(
       const FakeCommand(
         command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
+          'uname',
+          '-m',
         ],
-        stdout: 'hw.optional.arm64: 1',
+        stdout: 'x86_64',
       ),
     );
 
-    final Cache cache = Cache.test(processManager: fakeProcessManager);
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
     final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
@@ -518,7 +517,6 @@ void main() {
   });
 
   testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
-    FakeProcessManager fakeProcessManager = FakeProcessManager.any();
     fakeProcessManager.addCommand(
       const FakeCommand(
         command: <String>[
@@ -529,7 +527,7 @@ void main() {
       ),
     );
 
-    final Cache cache = Cache.test(processManager: fakeProcessManager);
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
     final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'linux'),
