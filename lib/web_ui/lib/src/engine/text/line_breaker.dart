@@ -10,6 +10,9 @@ enum LineBreakType {
   /// Indicates that a line break is possible but not mandatory.
   opportunity,
 
+  /// Indicates that a line break isn't possible.
+  prohibited,
+
   /// Indicates that this is a hard line break that can't be skipped.
   mandatory,
 
@@ -73,6 +76,9 @@ class LineBreakResult {
   /// of width constraints. But a line break opportunity requires further checks
   /// to decide whether to take the line break or not.
   final LineBreakType type;
+
+  bool get isHard =>
+      type == LineBreakType.mandatory || type == LineBreakType.endOfText;
 
   @override
   int get hashCode => ui.hashValues(
@@ -160,7 +166,7 @@ bool _hasEastAsianWidthFWH(int charCode) {
 ///
 /// * https://www.unicode.org/reports/tr14/tr14-45.html#Algorithm
 /// * https://www.unicode.org/Public/11.0.0/ucd/LineBreak.txt
-LineBreakResult nextLineBreak(String text, int index) {
+LineBreakResult nextLineBreak(String text, int index, {int? maxEnd}) {
   int? codePoint = getCodePoint(text, index);
   LineCharProperty curr = lineLookup.findForChar(codePoint);
 
@@ -199,6 +205,15 @@ LineBreakResult nextLineBreak(String text, int index) {
   // Always break at the end of text.
   // LB3: ! eot
   while (index < text.length) {
+    if (index == maxEnd) {
+      return LineBreakResult(
+        index,
+        lastNonNewlineIndex,
+        lastNonSpaceIndex,
+        LineBreakType.prohibited,
+      );
+    }
+
     // Keep count of the RI (regional indicator) sequence.
     if (curr == LineCharProperty.RI) {
       regionalIndicatorCount++;
