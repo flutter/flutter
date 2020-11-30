@@ -134,11 +134,11 @@ const Feature flutterWebFeature = Feature(
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
+    enabledByDefault: flutterNext,
   ),
   beta: FeatureChannelSetting(
     available: true,
