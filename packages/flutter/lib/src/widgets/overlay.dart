@@ -716,9 +716,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
-    assert(size.isFinite);
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(constraints.biggest.isFinite);
+    return constraints.biggest;
   }
 
   @override

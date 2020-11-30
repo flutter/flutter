@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'box.dart';
 import 'layer.dart';
+import 'layout_helper.dart';
 import 'object.dart';
 
 /// How [Wrap] should align objects.
@@ -400,66 +401,6 @@ class RenderWrap extends RenderBox
       child.parentData = WrapParentData();
   }
 
-  double _computeIntrinsicHeightForWidth(double width) {
-    assert(direction == Axis.horizontal);
-    double height = 0.0;
-    double runWidth = 0.0;
-    double runHeight = 0.0;
-    int childCount = 0;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      // TODO(chunhtai): use the new intrinsic API to calculate child sizes
-      // once https://github.com/flutter/flutter/issues/48679 is fixed.
-      final double childWidth = math.min(child.getMaxIntrinsicWidth(double.infinity), width);
-      final double childHeight = child.getMaxIntrinsicHeight(childWidth);
-      // There must be at least one child before we move on to the next run.
-      if (childCount > 0 && runWidth + childWidth + spacing > width) {
-        height += runHeight + runSpacing;
-        runWidth = 0.0;
-        runHeight = 0.0;
-        childCount = 0;
-      }
-      runWidth += childWidth;
-      runHeight = math.max(runHeight, childHeight);
-      if (childCount > 0)
-        runWidth += spacing;
-      childCount += 1;
-      child = childAfter(child);
-    }
-    height += runHeight;
-    return height;
-  }
-
-  double _computeIntrinsicWidthForHeight(double height) {
-    assert(direction == Axis.vertical);
-    double width = 0.0;
-    double runHeight = 0.0;
-    double runWidth = 0.0;
-    int childCount = 0;
-    RenderBox? child = firstChild;
-    while (child != null) {
-      // TODO(chunhtai): use the new intrinsic API to calculate child sizes
-      // once https://github.com/flutter/flutter/issues/48679 is fixed.
-      final double childHeight = math.min(child.getMaxIntrinsicHeight(double.infinity), height);
-      final double childWidth = child.getMaxIntrinsicWidth(childHeight);
-      // There must be at least one child before we move on to the next run.
-      if (childCount > 0 && runHeight + childHeight + spacing > height) {
-        width += runWidth + runSpacing;
-        runHeight = 0.0;
-        runWidth = 0.0;
-        childCount = 0;
-      }
-      runHeight += childHeight;
-      runWidth = math.max(runWidth, childWidth);
-      if (childCount > 0)
-        runHeight += spacing;
-      childCount += 1;
-      child = childAfter(child);
-    }
-    width += runWidth;
-    return width;
-  }
-
   @override
   double computeMinIntrinsicWidth(double height) {
     switch (direction) {
@@ -472,7 +413,7 @@ class RenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
-        return _computeIntrinsicWidthForHeight(height);
+        return computeDryLayout(BoxConstraints(maxHeight: height)).width;
     }
   }
 
@@ -488,7 +429,7 @@ class RenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
-        return _computeIntrinsicWidthForHeight(height);
+        return computeDryLayout(BoxConstraints(maxHeight: height)).width;
     }
   }
 
@@ -496,7 +437,7 @@ class RenderWrap extends RenderBox
   double computeMinIntrinsicHeight(double width) {
     switch (direction) {
       case Axis.horizontal:
-        return _computeIntrinsicHeightForWidth(width);
+        return computeDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
         double height = 0.0;
         RenderBox? child = firstChild;
@@ -512,7 +453,7 @@ class RenderWrap extends RenderBox
   double computeMaxIntrinsicHeight(double width) {
     switch (direction) {
       case Axis.horizontal:
-        return _computeIntrinsicHeightForWidth(width);
+        return computeDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
         double height = 0.0;
         RenderBox? child = firstChild;
@@ -529,21 +470,21 @@ class RenderWrap extends RenderBox
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
-  double _getMainAxisExtent(RenderBox child) {
+  double _getMainAxisExtent(Size childSize) {
     switch (direction) {
       case Axis.horizontal:
-        return child.size.width;
+        return childSize.width;
       case Axis.vertical:
-        return child.size.height;
+        return childSize.height;
     }
   }
 
-  double _getCrossAxisExtent(RenderBox child) {
+  double _getCrossAxisExtent(Size childSize) {
     switch (direction) {
       case Axis.horizontal:
-        return child.size.height;
+        return childSize.height;
       case Axis.vertical:
-        return child.size.width;
+        return childSize.width;
     }
   }
 
@@ -569,6 +510,61 @@ class RenderWrap extends RenderBox
   }
 
   bool _hasVisualOverflow = false;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeDryLayout(constraints);
+  }
+
+  Size _computeDryLayout(BoxConstraints constraints, [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
+    final BoxConstraints childConstraints;
+    double mainAxisLimit = 0.0;
+    switch (direction) {
+      case Axis.horizontal:
+        childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
+        mainAxisLimit = constraints.maxWidth;
+        break;
+      case Axis.vertical:
+        childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
+        mainAxisLimit = constraints.maxHeight;
+        break;
+    }
+
+    double mainAxisExtent = 0.0;
+    double crossAxisExtent = 0.0;
+    double runMainAxisExtent = 0.0;
+    double runCrossAxisExtent = 0.0;
+    int childCount = 0;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final Size childSize = layoutChild(child, childConstraints);
+      final double childMainAxisExtent = _getMainAxisExtent(childSize);
+      final double childCrossAxisExtent = _getCrossAxisExtent(childSize);
+      // There must be at least one child before we move on to the next run.
+      if (childCount > 0 && runMainAxisExtent + childMainAxisExtent + spacing > mainAxisLimit) {
+        mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
+        crossAxisExtent += runCrossAxisExtent + runSpacing;
+        runMainAxisExtent = 0.0;
+        runCrossAxisExtent = 0.0;
+        childCount = 0;
+      }
+      runMainAxisExtent += childMainAxisExtent;
+      runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
+      if (childCount > 0)
+        runMainAxisExtent += spacing;
+      childCount += 1;
+      child = childAfter(child);
+    }
+    crossAxisExtent += runCrossAxisExtent;
+    mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
+
+    switch (direction) {
+      case Axis.horizontal:
+        return constraints.constrain(Size(mainAxisExtent, crossAxisExtent));
+      case Axis.vertical:
+        return constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
+    }
+  }
 
   @override
   void performLayout() {
@@ -614,8 +610,8 @@ class RenderWrap extends RenderBox
     int childCount = 0;
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
-      final double childMainAxisExtent = _getMainAxisExtent(child);
-      final double childCrossAxisExtent = _getCrossAxisExtent(child);
+      final double childMainAxisExtent = _getMainAxisExtent(child.size);
+      final double childCrossAxisExtent = _getCrossAxisExtent(child.size);
       if (childCount > 0 && runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
@@ -735,8 +731,8 @@ class RenderWrap extends RenderBox
         final WrapParentData childParentData = child.parentData! as WrapParentData;
         if (childParentData._runIndex != i)
           break;
-        final double childMainAxisExtent = _getMainAxisExtent(child);
-        final double childCrossAxisExtent = _getCrossAxisExtent(child);
+        final double childMainAxisExtent = _getMainAxisExtent(child.size);
+        final double childCrossAxisExtent = _getCrossAxisExtent(child.size);
         final double childCrossAxisOffset = _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis)
           childMainPosition -= childMainAxisExtent;

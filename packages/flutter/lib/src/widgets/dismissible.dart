@@ -50,7 +50,10 @@ enum DismissDirection {
   up,
 
   /// The [Dismissible] can be dismissed by dragging down only.
-  down
+  down,
+
+  /// The [Dismissible] cannot be dismissed by dragging.
+  none
 }
 
 /// A widget that can be dismissed by dragging in the indicated [direction].
@@ -305,9 +308,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         || widget.direction == DismissDirection.startToEnd;
   }
 
-  DismissDirection? _extentToDirection(double extent) {
+  DismissDirection _extentToDirection(double extent) {
     if (extent == 0.0)
-      return null;
+      return DismissDirection.none;
     if (_directionIsXAxis) {
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
@@ -319,7 +322,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     return extent > 0 ? DismissDirection.down : DismissDirection.up;
   }
 
-  DismissDirection? get _dismissDirection => _extentToDirection(_dragExtent);
+  DismissDirection get _dismissDirection => _extentToDirection(_dragExtent);
 
   bool get _isActive {
     return _dragUnderway || _moveController!.isAnimating;
@@ -391,6 +394,10 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             break;
         }
         break;
+
+      case DismissDirection.none:
+        _dragExtent = 0;
+        break;
     }
     if (oldDragExtent.sign != _dragExtent.sign) {
       setState(() {
@@ -426,7 +433,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
     final double vx = velocity.pixelsPerSecond.dx;
     final double vy = velocity.pixelsPerSecond.dy;
-    DismissDirection? flingDirection;
+    DismissDirection flingDirection;
     // Verify that the fling is in the generally right direction and fast enough.
     if (_directionIsXAxis) {
       if (vx.abs() - vy.abs() < _kMinFlingVelocityDelta || vx.abs() < _kMinFlingVelocity)
@@ -495,8 +502,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   Future<bool?> _confirmStartResizeAnimation() async {
     if (widget.confirmDismiss != null) {
-      final DismissDirection direction = _dismissDirection!;
-      assert(direction != null);
+      final DismissDirection direction = _dismissDirection;
       return widget.confirmDismiss!(direction);
     }
     return true;
@@ -509,8 +515,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     assert(_sizePriorToCollapse == null);
     if (widget.resizeDuration == null) {
       if (widget.onDismissed != null) {
-        final DismissDirection direction = _dismissDirection!;
-        assert(direction != null);
+        final DismissDirection direction = _dismissDirection;
         widget.onDismissed!(direction);
       }
     } else {
@@ -537,8 +542,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   void _handleResizeProgressChanged() {
     if (_resizeController!.isCompleted) {
       if (widget.onDismissed != null) {
-        final DismissDirection direction = _dismissDirection!;
-        assert(direction != null);
+        final DismissDirection direction = _dismissDirection;
         widget.onDismissed!(direction);
       }
     } else {
@@ -555,7 +559,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
     Widget? background = widget.background;
     if (widget.secondaryBackground != null) {
-      final DismissDirection? direction = _dismissDirection;
+      final DismissDirection direction = _dismissDirection;
       if (direction == DismissDirection.endToStart || direction == DismissDirection.up)
         background = widget.secondaryBackground;
     }
