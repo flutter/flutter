@@ -1,4 +1,4 @@
-Signature: 5a9d1e9a39cc846122fbb0b08f821335
+Signature: 85c298b5b793c191eae07f14f4ee41fc
 
 UNUSED LICENSES:
 
@@ -9095,6 +9095,10 @@ FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart2/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/MD5/dart/md5.dart
 FILE: ../../../third_party/dart/benchmarks/MD5/dart2/md5.dart
+FILE: ../../../third_party/dart/benchmarks/Omnibus/dart/Omnibus.dart
+FILE: ../../../third_party/dart/benchmarks/Omnibus/dart2/Omnibus.dart
+FILE: ../../../third_party/dart/benchmarks/OmnibusDeferred/dart/OmnibusDeferred.dart
+FILE: ../../../third_party/dart/benchmarks/OmnibusDeferred/dart2/OmnibusDeferred.dart
 FILE: ../../../third_party/dart/benchmarks/RuntimeType/dart/RuntimeType.dart
 FILE: ../../../third_party/dart/benchmarks/RuntimeType/dart2/RuntimeType.dart
 FILE: ../../../third_party/dart/benchmarks/SHA1/dart/sha1.dart
