@@ -1,5 +1,5 @@
 ---
-name: I want to file a bug or feature request about Flutter's CI infrastructure
+name: The CI infrastructure used by Flutter has a problem
 about: As a contributor, you want to file an issue about the build/test/release
   infra, e.g. dashboards (http://flutter-dashboard.appspot.com), devicelab,
   LUCI (https://ci.chromium.org/p/flutter) etc.
