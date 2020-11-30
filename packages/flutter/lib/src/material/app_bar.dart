@@ -944,12 +944,12 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    final Brightness brightness = widget.brightness
-      ?? appBarTheme.brightness
-      ?? colorScheme.brightness;
-    final SystemUiOverlayStyle overlayStyle =
-      widget.systemOverlayStyle
-      ?? (brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+    final SystemUiOverlayStyle overlayStyle = widget.backwardsCompatibility
+      ? ((widget.brightness ?? appBarTheme.brightness ?? colorScheme.brightness) == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+      : widget.systemOverlayStyle
+        ?? appBarTheme.systemOverlayStyle
+        ?? (colorScheme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+
     return Semantics(
       container: true,
       child: AnnotatedRegion<SystemUiOverlayStyle>(

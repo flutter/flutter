@@ -72,6 +72,7 @@ void main() {
 
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
     const Brightness brightness = Brightness.dark;
+    const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light;
     const Color color = Colors.orange;
     const double elevation = 3.0;
     const Color shadowColor = Colors.red;
@@ -88,6 +89,7 @@ void main() {
             backwardsCompatibility: false,
             backgroundColor: color,
             brightness: brightness,
+            systemOverlayStyle: systemOverlayStyle,
             elevation: elevation,
             shadowColor: shadowColor,
             iconTheme: iconThemeData,
