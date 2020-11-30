@@ -1157,9 +1157,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         : leadingBorderSide.width + _maxHeight(child, width) + trailingBorderSide.width;
   }
 
-//  @override
-//  double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
-
   @override
   double computeMaxIntrinsicWidth(double height) {
     return direction == Axis.horizontal
