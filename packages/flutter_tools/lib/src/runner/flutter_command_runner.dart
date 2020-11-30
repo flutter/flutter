@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -109,6 +110,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: "List the special 'flutter-tester' device in device listings. "
               'This headless device is used to\ntest Flutter tooling.');
+    argParser.addFlag('show-web-server-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: "List the special 'web-server' device in device listings. "
+    );
   }
 
   @override
@@ -203,6 +209,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (topLevelResults['show-test-device'] as bool ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
+    }
+    if (topLevelResults['show-web-server-device'] as bool ||
+        topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
+      WebServerDevice.showWebServerDevice = true;
     }
 
     // Set up the tooling configuration.
