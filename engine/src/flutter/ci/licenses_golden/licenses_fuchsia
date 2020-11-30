@@ -1,4 +1,4 @@
-Signature: fdd213f000589eaf5b2051238e8efdc6
+Signature: 352b63a208523719e904136c14f7bd62
 
 UNUSED LICENSES:
 
@@ -2885,6 +2885,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/iovar.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/crash_register.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_register.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/last_reboot_info.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/codec.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/dai_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/device.fidl
