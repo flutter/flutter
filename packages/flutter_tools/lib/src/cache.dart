@@ -430,6 +430,10 @@ class Cache {
     }
   }
 
+  String getHostPlatformArchName() {
+    return getNameForHostPlatformArch(_osUtils.hostPlatform);
+  }
+
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
   Directory getCacheDir(String name) {
     final Directory dir = _fileSystem.directory(_fileSystem.path.join(getRoot().path, name));
@@ -999,7 +1003,7 @@ class FlutterSdk extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final String arch = getCurrentHostPlatformArchName();
+    final String arch = cache.getHostPlatformArchName();
     return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
@@ -1095,7 +1099,7 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     if (_platform.isLinux || ignorePlatformFiltering) {
-      final String arch = getCurrentHostPlatformArchName();
+      final String arch = cache.getHostPlatformArchName();
       return <List<String>>[
         <String>['linux-$arch', 'linux-$arch/linux-$arch-flutter-gtk.zip'],
         <String>['linux-$arch-profile', 'linux-$arch-profile/linux-$arch-flutter-gtk.zip'],
@@ -1484,7 +1488,7 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final String arch = getCurrentHostPlatformArchName();
+    final String arch = cache.getHostPlatformArchName();
     final Map<String, List<String>> artifacts = <String, List<String>> {
       'macos': <String>['darwin-$arch', 'darwin-$arch/$artifactName.zip'],
       'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],

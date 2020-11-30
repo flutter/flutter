@@ -22,6 +22,19 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  FakeProcessManager fakeProcessManager;
+
+  setUp(() {
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+  });
+
+  Cache createCache(Platform platform) {
+    return Cache.test(
+      platform: platform,
+      processManager: fakeProcessManager
+    );
+  }
+
   group('Cache.checkLockAcquired', () {
     setUp(() {
       Cache.enableLocking();
@@ -364,7 +377,17 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on linux', () {
-    final Cache cache = Cache.test();
+    fakeProcessManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'uname',
+          '-m',
+        ],
+        stdout: 'x86_64',
+      ),
+    );
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
     cache.includeAllPlatforms = false;
 
@@ -372,7 +395,7 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on windows', () {
-    final Cache cache = Cache.test();
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'windows'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'windows'));
     cache.includeAllPlatforms = false;
 
@@ -380,7 +403,17 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on macos', () {
-    final Cache cache = Cache.test();
+    fakeProcessManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        stdout: 'hw.optional.arm64: 0',
+      ),
+    );
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'macos'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
     cache.includeAllPlatforms = false;
 
@@ -388,7 +421,17 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on fuchsia', () {
-    final Cache cache = Cache.test();
+    fakeProcessManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'uname',
+          '-m',
+        ],
+        stdout: 'x86_64',
+      ),
+    );
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
     cache.includeAllPlatforms = false;
 
@@ -396,7 +439,17 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts for all platforms', () {
-    final Cache cache = Cache.test();
+    fakeProcessManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'uname',
+          '-m',
+        ],
+        stdout: 'x86_64',
+      ),
+    );
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
     cache.includeAllPlatforms = true;
 
@@ -442,7 +495,18 @@ void main() {
   });
 
   testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
-    final Cache cache = Cache.test();
+    FakeProcessManager fakeProcessManager = FakeProcessManager.any();
+    fakeProcessManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        stdout: 'hw.optional.arm64: 1',
+      ),
+    );
+
+    final Cache cache = Cache.test(processManager: fakeProcessManager);
     final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
@@ -454,7 +518,18 @@ void main() {
   });
 
   testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
-    final Cache cache = Cache.test();
+    FakeProcessManager fakeProcessManager = FakeProcessManager.any();
+    fakeProcessManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'uname',
+          '-m',
+        ],
+        stdout: 'x86_64',
+      ),
+    );
+
+    final Cache cache = Cache.test(processManager: fakeProcessManager);
     final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'linux'),
