@@ -503,6 +503,7 @@ tasks:
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+      flaky: true # https://github.com/flutter/flutter/issues/71414
 
   flavors_test_ios:
     description: >
