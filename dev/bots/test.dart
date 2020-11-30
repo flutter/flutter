@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:file/file.dart' as fs;
+import 'package:file/local.dart';
 import 'package:googleapis/bigquery/v2.dart' as bq;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
@@ -37,6 +39,7 @@ final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pu
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+final String flutterPluginsVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_plugins.version');
 
 String get platformFolderName {
   if (Platform.isWindows)
@@ -142,6 +145,7 @@ Future<void> main(List<String> args) async {
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
+      'flutter_plugins': _runFlutterPluginsTests,
     });
   } on ExitException catch (error) {
     error.apply();
@@ -860,6 +864,77 @@ Future<void> _runWebLongRunningTests() async {
   await _stopChromeDriver();
 }
 
+/// Returns the commit hash of the flutter/plugins repository that's rolled in.
+///
+/// The flutter/plugins repository is a downstream dependency, it is only used
+/// by flutter/flutter for testing purposes, to assure stable tests for a given
+/// flutter commit the flutter/plugins commit hash to test against is coded in
+/// the bin/internal/flutter_plugins.version file.
+///
+/// The `filesystem` parameter specified filesystem to read the plugins version file from.
+/// The `pluginsVersionFile` parameter allows specifying an alternative path for the
+/// plugins version file, when null [flutterPluginsVersionFile] is used.
+Future<String> getFlutterPluginsVersion({
+  fs.FileSystem fileSystem = const LocalFileSystem(),
+  String pluginsVersionFile,
+}) async {
+  final File versionFile = fileSystem.file(pluginsVersionFile ?? flutterPluginsVersionFile);
+  final String versionFileContents = await versionFile.readAsString();
+  return versionFileContents.trim();
+}
+
+/// Executes the test suite for the flutter/plugins repo.
+Future<void> _runFlutterPluginsTests() async {
+  Future<void> runAnalyze() async {
+    print('${green}Running analysis for flutter/plugins$reset');
+    final Directory checkout = Directory.systemTemp.createTempSync('plugins');
+    await runCommand(
+      'git',
+      <String>[
+        '-c',
+        'core.longPaths=true',
+        'clone',
+        'https://github.com/flutter/plugins.git',
+        '.'
+      ],
+      workingDirectory: checkout.path,
+    );
+    final String pluginsCommit = await getFlutterPluginsVersion();
+    await runCommand(
+      'git',
+      <String>[
+        '-c',
+        'core.longPaths=true',
+        'checkout',
+        pluginsCommit,
+      ],
+      workingDirectory: checkout.path,
+    );
+    await runCommand(
+      pub,
+      <String>[
+        'global',
+        'activate',
+        'flutter_plugin_tools',
+      ],
+      workingDirectory: checkout.path,
+    );
+    await runCommand(
+      pub,
+      <String>[
+        'global',
+        'run',
+        'flutter_plugin_tools',
+        'analyze',
+      ],
+      workingDirectory: checkout.path,
+    );
+  }
+  await selectSubshard(<String, ShardRunner>{
+    'analyze': runAnalyze,
+  });
+}
+
 // The `chromedriver` process created by this test.
 //
 // If an existing chromedriver is already available on port 4444, the existing
@@ -1126,13 +1201,13 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
         '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
+      '--sound-null-safety', // web tests do not autodetect yet.
       ...?flutterTestArgs,
       ...tests,
     ],
     workingDirectory: workingDirectory,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
-      'FLUTTER_LOW_RESOURCE_MODE': 'true',
     },
   );
 }

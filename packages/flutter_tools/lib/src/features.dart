@@ -265,7 +265,7 @@ const Feature singleWidgetReload = Feature(
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
+    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
