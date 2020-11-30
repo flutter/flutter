@@ -6,6 +6,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
@@ -18,9 +21,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.view.View;
 import android.view.Window;
+import androidx.activity.OnBackPressedDispatcher;
+import androidx.fragment.app.FragmentActivity;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.ClipboardContentFormat;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.SystemChromeStyle;
+import io.flutter.plugin.platform.PlatformPlugin.PlatformPluginDelegate;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -132,5 +138,88 @@ public class PlatformPluginTest {
       assertEquals(0XFFC70039, fakeActivity.getWindow().getStatusBarColor());
       assertEquals(0XFF000000, fakeActivity.getWindow().getNavigationBarColor());
     }
+  }
+
+  @Test
+  public void popSystemNavigatorFlutterActivity() {
+    Activity mockActivity = mock(Activity.class);
+    PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
+    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(false);
+    PlatformPlugin platformPlugin =
+        new PlatformPlugin(mockActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+
+    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+
+    verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
+    verify(mockActivity, times(1)).finish();
+  }
+
+  @Test
+  public void doesNotDoAnythingByDefaultIfPopSystemNavigatorOverridden() {
+    Activity mockActivity = mock(Activity.class);
+    PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
+    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(true);
+    PlatformPlugin platformPlugin =
+        new PlatformPlugin(mockActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+
+    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+
+    verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
+    // No longer perform the default action when overridden.
+    verify(mockActivity, never()).finish();
+  }
+
+  @Test
+  public void popSystemNavigatorFlutterFragment() {
+    FragmentActivity mockFragmentActivity = mock(FragmentActivity.class);
+    OnBackPressedDispatcher onBackPressedDispatcher = mock(OnBackPressedDispatcher.class);
+    when(mockFragmentActivity.getOnBackPressedDispatcher()).thenReturn(onBackPressedDispatcher);
+    PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
+    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(false);
+    PlatformPlugin platformPlugin =
+        new PlatformPlugin(mockFragmentActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+
+    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+
+    verify(mockFragmentActivity, never()).finish();
+    verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
+    verify(mockFragmentActivity, times(1)).getOnBackPressedDispatcher();
+    verify(onBackPressedDispatcher, times(1)).onBackPressed();
+  }
+
+  @Test
+  public void doesNotDoAnythingByDefaultIfFragmentPopSystemNavigatorOverridden() {
+    FragmentActivity mockFragmentActivity = mock(FragmentActivity.class);
+    OnBackPressedDispatcher onBackPressedDispatcher = mock(OnBackPressedDispatcher.class);
+    when(mockFragmentActivity.getOnBackPressedDispatcher()).thenReturn(onBackPressedDispatcher);
+    PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
+    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(true);
+    PlatformPlugin platformPlugin =
+        new PlatformPlugin(mockFragmentActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+
+    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+
+    verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
+    // No longer perform the default action when overridden.
+    verify(mockFragmentActivity, never()).finish();
+    verify(mockFragmentActivity, never()).getOnBackPressedDispatcher();
+  }
+
+  @Test
+  public void setRequestedOrientationFlutterFragment() {
+    FragmentActivity mockFragmentActivity = mock(FragmentActivity.class);
+    PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
+    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(false);
+    PlatformPlugin platformPlugin =
+        new PlatformPlugin(mockFragmentActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+
+    platformPlugin.mPlatformMessageHandler.setPreferredOrientations(0);
+
+    verify(mockFragmentActivity, times(1)).setRequestedOrientation(0);
   }
 }

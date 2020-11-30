@@ -902,11 +902,7 @@ public class FlutterActivity extends Activity
   @Override
   public PlatformPlugin providePlatformPlugin(
       @Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
-    if (activity != null) {
-      return new PlatformPlugin(getActivity(), flutterEngine.getPlatformChannel());
-    } else {
-      return null;
-    }
+    return new PlatformPlugin(getActivity(), flutterEngine.getPlatformChannel(), this);
   }
 
   /**
@@ -1030,6 +1026,12 @@ public class FlutterActivity extends Activity
       return false;
     }
     return true;
+  }
+
+  @Override
+  public boolean popSystemNavigator() {
+    // Hook for subclass. No-op if returns false.
+    return false;
   }
 
   private boolean stillAttachedForEvent(String event) {

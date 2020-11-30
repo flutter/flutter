@@ -382,5 +382,10 @@ public class FlutterAndroidComponentTest {
 
     @Override
     public void detachFromFlutterEngine() {}
+
+    @Override
+    public boolean popSystemNavigator() {
+      return false;
+    }
   }
 }
