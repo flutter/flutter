@@ -2089,6 +2089,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ));
       }
     }
+
+    // To keep the cursor from blinking while it moves, restart the timer here.
+    if (_cursorTimer != null) {
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   bool _textChangedSinceLastCaretUpdate = false;
