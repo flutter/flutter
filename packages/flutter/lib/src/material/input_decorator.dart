@@ -2745,6 +2745,8 @@ class InputDecoration {
   /// When [FloatingLabelBehavior.never] the label will always appear in an empty
   /// field in place of the content.
   /// {@endtemplate}
+  ///
+  /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
@@ -3690,6 +3692,8 @@ class InputDecorationTheme with Diagnosticable {
   final bool hasFloatingPlaceholder;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
+  ///
+  /// Defaults to [FloatingLabelBehavior.auto].
   final FloatingLabelBehavior floatingLabelBehavior;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses
