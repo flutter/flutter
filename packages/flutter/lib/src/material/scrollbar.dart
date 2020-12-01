@@ -18,9 +18,6 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// {@macro flutter.widgets.Scrollbar}
 ///
-/// A scrollbar track can been drawn when triggered by a hover event, which is
-/// controlled by [showTrackOnHover]. The thickness of the track and scrollbar
-/// thumb will become larger when hovering, unless overridden by [thickness].
 ///
 // TODO(Piinks): Add code sample
 ///
