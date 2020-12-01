@@ -55,6 +55,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
 
   ProcessResult _popResult(List<String> command) {
     final String key = command.join(' ');
+    expect(key, 'blah');
     expect(fakeResults, isNotEmpty);
     expect(fakeResults, contains(key));
     expect(fakeResults[key], isNotEmpty);

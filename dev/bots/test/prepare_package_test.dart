@@ -234,6 +234,13 @@ void main() {
     group('ArchivePublisher for $platformName', () {
       FakeProcessManager processManager;
       Directory tempDir;
+      final String gsutilCall = platform.isWindows
+          ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+          : 'gsutil.py';
+      final String releasesName = 'releases_$platformName.json';
+      final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+      final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
+      final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
 
       setUp(() async {
         processManager = FakeProcessManager();
@@ -245,11 +252,7 @@ void main() {
       });
 
       test('calls the right processes', () async {
-        final String releasesName = 'releases_$platformName.json';
-        final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
-        final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
-        final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
         final String releasesJson = '''
@@ -289,10 +292,9 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
-        final String gsutilCall = platform.isWindows
-            ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
-            : 'gsutil.py';
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          // This process fails because the file does NOT already exist
+          '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
@@ -341,6 +343,28 @@ void main() {
         );
         const JsonEncoder encoder = JsonEncoder.withIndent('  ');
         expect(contents, equals(encoder.convert(jsonData)));
+      });
+
+      test('publishArchive throws if forceUpload is false and artifact '
+           'already exists on cloud storage', () async {
+        final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final ArchivePublisher publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          'v1.2.3',
+          outputFile,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        await publisher.publishArchive(false);
+        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          // This process returns 0 because file already exists
+          '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
+        };
+        processManager.verifyCalls(calls.keys.toList());
       });
     });
   }
