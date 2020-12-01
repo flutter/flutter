@@ -1121,7 +1121,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
     collectLanguageVersionEvents(
       buildInfo.packageConfig,
       buildInfo.nullSafetyMode,
