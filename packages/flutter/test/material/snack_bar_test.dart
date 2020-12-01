@@ -798,7 +798,7 @@ void main() {
                   },
                   child: const Text('X'),
                 );
-              }
+              },
           ),
         ),
       ),
