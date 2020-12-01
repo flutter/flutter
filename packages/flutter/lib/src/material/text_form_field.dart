@@ -229,7 +229,7 @@ class TextFormField extends FormField<String> {
        builder: (FormFieldState<String> field) {
          final _TextFormFieldState state = field as _TextFormFieldState;
          final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-             .applyDefaults(Theme.of(field.context)!.inputDecorationTheme);
+             .applyDefaults(Theme.of(field.context).inputDecorationTheme);
          void onChangedHandler(String value) {
            field.didChange(value);
            if (onChanged != null) {

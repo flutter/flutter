@@ -157,7 +157,7 @@ class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSel
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
     final Widget onePhysicalPixelVerticalDivider =
-        SizedBox(width: 1.0 / MediaQuery.of(context)!.devicePixelRatio);
+        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
     void addToolbarButton(
       String text,
@@ -312,6 +312,11 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     size = constraints.biggest;
@@ -463,7 +468,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     ClipboardStatusNotifier clipboardStatus,
   ) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context)!;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough space
@@ -664,7 +669,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
             pressedOpacity: 0.7,
             child: const Text('◀', style: _kToolbarButtonFontStyle),
           ),
-          dividerWidth: 1.0 / MediaQuery.of(context)!.devicePixelRatio,
+          dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
           nextButton: CupertinoButton(
             borderRadius: null,
             color: _kToolbarBackgroundColor,
@@ -968,7 +973,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   @override
   void performLayout() {
     if (firstChild == null) {
-      performResize();
+      size = constraints.smallest;
       return;
     }
 

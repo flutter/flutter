@@ -416,7 +416,7 @@ class RestorationManager extends ChangeNotifier {
 /// its current state changes, the data in the bucket must be updated. At the
 /// same time, the data in the bucket should be kept to a minimum. For example,
 /// for data that can be retrieved from other sources (like a database or
-/// webservice) only enough information (e.g. an ID or resource locator) to
+/// web service) only enough information (e.g. an ID or resource locator) to
 /// re-obtain that data should be stored in the bucket. In addition to managing
 /// the data in a bucket, an owner may also make the bucket available to other
 /// entities so they can claim child buckets from it via [claimChild] for their
@@ -439,7 +439,7 @@ class RestorationBucket {
   /// Creates an empty [RestorationBucket] to be provided to [adoptChild] to add
   /// it to the bucket hierarchy.
   ///
-  /// {@template flutter.services.restoration.bucketcreation}
+  /// {@template flutter.services.RestorationBucket.empty.bucketCreation}
   /// Instantiating a bucket directly is rare, most buckets are created by
   /// claiming a child from a parent via [claimChild]. If no parent bucket is
   /// available, [RestorationManager.rootBucket] may be used as a parent.
@@ -478,7 +478,7 @@ class RestorationBucket {
   /// }
   /// ```
   ///
-  /// {@macro flutter.services.restoration.bucketcreation}
+  /// {@macro flutter.services.RestorationBucket.empty.bucketCreation}
   ///
   /// The `manager` argument must not be null.
   RestorationBucket.root({
@@ -501,7 +501,7 @@ class RestorationBucket {
   /// data stored under the given ID. In that case, create an empty bucket (via
   /// [RestorationBucket.empty] and have the parent adopt it via [adoptChild].
   ///
-  /// {@macro flutter.services.restoration.bucketcreation}
+  /// {@macro flutter.services.RestorationBucket.empty.bucketCreation}
   ///
   /// The `restorationId` and `parent` argument must not be null.
   RestorationBucket.child({

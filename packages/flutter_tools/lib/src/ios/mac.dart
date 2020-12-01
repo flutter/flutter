@@ -539,7 +539,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     logger.printError('');
     logger.printError('You can temporarily work around this issue by running:');
-    logger.printError('  rm -rf ios/Flutter/App.framework');
+    logger.printError('  flutter clean');
     return;
   }
 

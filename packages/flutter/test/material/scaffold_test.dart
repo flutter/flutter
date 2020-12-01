@@ -355,7 +355,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context)!.showBottomSheet<void>((BuildContext context) {
+                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
                     return Container(
                       key: sheetKey,
                       color: Colors.blue[500],
@@ -683,7 +683,7 @@ void main() {
               extendBody: extendBody,
               body: Builder(
                 builder: (BuildContext context) {
-                  mediaQueryBottom = MediaQuery.of(context)!.padding.bottom;
+                  mediaQueryBottom = MediaQuery.of(context).padding.bottom;
                   return Container(key: bodyKey);
                 },
               ),
@@ -756,7 +756,7 @@ void main() {
                   ),
                   body: Builder(
                     builder: (BuildContext context) {
-                      mediaQueryTop = MediaQuery.of(context)!.padding.top;
+                      mediaQueryTop = MediaQuery.of(context).padding.top;
                       return Container(key: bodyKey);
                     }
                   ),
@@ -1675,7 +1675,7 @@ void main() {
       MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            screenWidth = MediaQuery.of(context)!.size.width;
+            screenWidth = MediaQuery.of(context).size.width;
             return Scaffold(
               endDrawer: const Drawer(
                 child: Text('Drawer'),
@@ -1811,7 +1811,7 @@ void main() {
         late FlutterError error;
         try {
           key.currentState!.showBottomSheet<void>((BuildContext context) {
-            final ThemeData themeData = Theme.of(context)!;
+            final ThemeData themeData = Theme.of(context);
             return Container(
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: themeData.disabledColor))
@@ -1900,7 +1900,7 @@ void main() {
         MaterialApp(
           home: Builder(
             builder: (BuildContext context) {
-              Scaffold.of(context)!.showBottomSheet<void>((BuildContext context) {
+              Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
                 return Container();
               });
               return Container();
@@ -2031,9 +2031,39 @@ void main() {
       );
       await tester.pumpAndSettle();
     });
+
+    testWidgets('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          extendBodyBehindAppBar: false,
+        ),
+      ));
+      final Offset defaultOffset = tester.getCenter(find.byType(FloatingActionButton));
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          extendBodyBehindAppBar: true,
+        ),
+      ));
+      final Offset extendedBodyOffset = tester.getCenter(find.byType(FloatingActionButton));
+
+      expect(defaultOffset.dy, extendedBodyOffset.dy);
+    });
   });
 
-  testWidgets('ScaffoldMessenger.of can return null', (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger.maybeOf can return null if not found', (WidgetTester tester) async {
     ScaffoldMessengerState? scaffoldMessenger;
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(Directionality(
@@ -2045,7 +2075,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  scaffoldMessenger = ScaffoldMessenger.of(context, nullOk: true);
+                  scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
                 },
                 behavior: HitTestBehavior.opaque,
                 child: Container(
@@ -2064,7 +2094,7 @@ void main() {
     expect(scaffoldMessenger, isNull);
   });
 
-  testWidgets('ScaffoldMessenger.of will assert if !nullOk', (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger.of will assert if not found', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
 
     final List<dynamic> exceptions = <dynamic>[];
@@ -2128,12 +2158,11 @@ void main() {
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'
       '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#342d0 ink renderer]\n'
+      '     _InkFeatures-[GlobalKey#00000 ink renderer]\n'
       '     NotificationListener<LayoutChangedNotification>\n'
       '     PhysicalModel\n'
       '     AnimatedPhysicalModel\n'
       '     Material\n'
-      '     PrimaryScrollController\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
       '     MediaQuery\n'

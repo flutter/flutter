@@ -237,7 +237,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         border: _border,
         gapAnimation: widget.gapAnimation,
         gap: widget.gap,
-        textDirection: Directionality.of(context)!,
+        textDirection: Directionality.of(context),
         fillColor: widget.fillColor,
         hoverColorTween: _hoverColorTween,
         hoverAnimation: _hoverAnimation,
@@ -1280,6 +1280,14 @@ class _RenderDecoration extends RenderBox {
   Matrix4? _labelTransform;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
+    ));
+    return const Size(0, 0);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _labelTransform = null;
@@ -1812,7 +1820,7 @@ class InputDecorator extends StatefulWidget {
   /// How the text in the decoration should be aligned horizontally.
   final TextAlign? textAlign;
 
-  /// {@template flutter.widgets.inputDecorator.textAlignVertical}
+  /// {@template flutter.material.InputDecorator.textAlignVertical}
   /// How the text should be aligned vertically.
   ///
   /// Determines the alignment of the baseline within the available space of
@@ -1956,7 +1964,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   InputDecoration? _effectiveDecoration;
   InputDecoration? get decoration {
     _effectiveDecoration ??= widget.decoration.applyDefaults(
-      Theme.of(context)!.inputDecorationTheme,
+      Theme.of(context).inputDecorationTheme,
     );
     return _effectiveDecoration;
   }
@@ -2143,7 +2151,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextStyle inlineStyle = _getInlineStyle(themeData);
     final TextBaseline textBaseline = inlineStyle.textBaseline!;
 
@@ -2311,7 +2319,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     // The _Decoration widget and _RenderDecoration assume that contentPadding
     // has been resolved to EdgeInsets.
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets? decorationContentPadding = decoration!.contentPadding?.resolve(textDirection);
 
     final EdgeInsets contentPadding;

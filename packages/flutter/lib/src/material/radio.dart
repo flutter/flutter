@@ -112,8 +112,10 @@ class Radio<T> extends StatefulWidget {
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
+    this.fillColor,
     this.focusColor,
     this.hoverColor,
+    this.splashRadius,
     this.materialTapTargetSize,
     this.visualDensity,
     this.focusNode,
@@ -159,6 +161,7 @@ class Radio<T> extends StatefulWidget {
   /// ```
   final ValueChanged<T?>? onChanged;
 
+  /// {@template flutter.material.radio.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
@@ -169,8 +172,16 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If null, then the value of [RadioThemeData.mouseCursor] is used.
+  /// If that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
+  ///    `MaterialStateProperty` which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Set to true if this radio button is allowed to be returned to an
@@ -239,20 +250,50 @@ class Radio<T> extends StatefulWidget {
   /// The color to use when this radio button is selected.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
+  ///
+  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
+  /// state, it will be used instead of this color.
   final Color? activeColor;
 
-  /// Configures the minimum size of the tap target.
+  /// {@template flutter.material.radio.fillColor}
+  /// The color that fills the radio button, in all [MaterialState]s.
   ///
-  /// Defaults to [ThemeData.materialTapTargetSize].
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [activeColor] is used in the selected state. If
+  /// that is also null, then the value of [RadioThemeData.fillColor] is used.
+  /// If that is also null, then [ThemeData.disabledColor] is used in
+  /// the disabled state, [ThemeData.toggleableActiveColor] is used in the
+  /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
+  /// default state.
+  final MaterialStateProperty<Color?>? fillColor;
+
+  /// {@template flutter.material.radio.materialTapTargetSize}
+  /// Configures the minimum size of the tap target.
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [RadioThemeData.materialTapTargetSize] is used.
+  /// If that is also null, then the value of [ThemeData.materialTapTargetSize]
+  /// is used.
   ///
   /// See also:
   ///
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize? materialTapTargetSize;
 
+  /// {@template flutter.material.radio.visualDensity}
   /// Defines how compact the radio's layout will be.
+  /// {@endtemplate}
   ///
   /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// If null, then the value of [RadioThemeData.visualDensity] is used. If that
+  /// is also null, then the value of [ThemeData.visualDensity] is used.
   ///
   /// See also:
   ///
@@ -261,10 +302,26 @@ class Radio<T> extends StatefulWidget {
   final VisualDensity? visualDensity;
 
   /// The color for the radio's [Material] when it has the input focus.
+  ///
+  /// If null, then the value of [RadioThemeData.overlayColor] is used in the
+  /// focused state. If that is also null, then the value of
+  /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
   /// The color for the radio's [Material] when a pointer is hovering over it.
+  ///
+  /// If null, then the value of [RadioThemeData.overlayColor] is used in the
+  /// hovered state. If that is also null, then the value of
+  /// [ThemeData.hoverColor] is used.
   final Color? hoverColor;
+
+  /// {@template flutter.material.radio.splashRadius}
+  /// The splash radius of the circular [Material] ink response.
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [RadioThemeData.splashRadius] is used. If that
+  /// is also null, then [kRadialReactionRadius] is used.
+  final double? splashRadius;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -312,10 +369,6 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     }
   }
 
-  Color _getInactiveColor(ThemeData themeData) {
-    return enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
-  }
-
   void _handleChanged(bool? selected) {
     if (selected == null) {
       widget.onChanged!(null);
@@ -326,31 +379,84 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     }
   }
 
+  bool get _selected => widget.value == widget.groupValue;
+
+  Set<MaterialState> get _states => <MaterialState>{
+    if (!enabled) MaterialState.disabled,
+    if (_hovering) MaterialState.hovered,
+    if (_focused) MaterialState.focused,
+    if (_selected) MaterialState.selected,
+  };
+
+  MaterialStateProperty<Color?> get _widgetFillColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return widget.activeColor;
+      }
+      return null;
+    });
+  }
+
+  MaterialStateProperty<Color> get _defaultFillColor {
+    final ThemeData themeData = Theme.of(context);
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return themeData.disabledColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return themeData.toggleableActiveColor;
+      }
+      return themeData.unselectedWidgetColor;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
+    final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
+      ?? themeData.radioTheme.materialTapTargetSize
+      ?? themeData.materialTapTargetSize;
+    final VisualDensity effectiveVisualDensity = widget.visualDensity
+      ?? themeData.radioTheme.visualDensity
+      ?? themeData.visualDensity;
     Size size;
-    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
+    switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        size = const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0);
+        size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
         break;
       case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
+        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
         break;
     }
-    size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
+    size += effectiveVisualDensity.baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    final bool selected = widget.value == widget.groupValue;
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
-      <MaterialState>{
-        if (!enabled) MaterialState.disabled,
-        if (_hovering) MaterialState.hovered,
-        if (_focused) MaterialState.focused,
-        if (selected) MaterialState.selected,
-      },
-    );
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
+      ?? themeData.radioTheme.mouseCursor?.resolve(_states)
+      ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, _states);
+
+    // Colors need to be resolved in selected and non selected states separately
+    // so that they can be lerped between.
+    final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
+    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
+      ?? _widgetFillColor.resolve(activeStates)
+      ?? themeData.radioTheme.fillColor?.resolve(activeStates)
+      ?? _defaultFillColor.resolve(activeStates);
+    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
+      ?? _widgetFillColor.resolve(inactiveStates)
+      ?? themeData.radioTheme.fillColor?.resolve(inactiveStates)
+      ?? _defaultFillColor.resolve(inactiveStates);
+
+    final Color effectiveFocusOverlayColor = widget.focusColor
+        ?? themeData.radioTheme.overlayColor?.resolve(<MaterialState>{MaterialState.focused})
+        ?? themeData.focusColor;
+    final Color effectiveHoverOverlayColor = widget.hoverColor
+        ?? themeData.radioTheme.overlayColor?.resolve(<MaterialState>{MaterialState.hovered})
+        ?? themeData.hoverColor;
 
     return FocusableActionDetector(
       actions: _actionMap,
@@ -363,11 +469,12 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
       child: Builder(
         builder: (BuildContext context) {
           return _RadioRenderObjectWidget(
-            selected: selected,
-            activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
-            inactiveColor: _getInactiveColor(themeData),
-            focusColor: widget.focusColor ?? themeData.focusColor,
-            hoverColor: widget.hoverColor ?? themeData.hoverColor,
+            selected: _selected,
+            activeColor: effectiveActiveColor,
+            inactiveColor: effectiveInactiveColor,
+            focusColor: effectiveFocusOverlayColor,
+            hoverColor: effectiveHoverOverlayColor,
+            splashRadius: widget.splashRadius ?? themeData.radioTheme.splashRadius ?? kRadialReactionRadius,
             onChanged: enabled ? _handleChanged : null,
             toggleable: widget.toggleable,
             additionalConstraints: additionalConstraints,
@@ -395,6 +502,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     required this.vsync,
     required this.hasFocus,
     required this.hovering,
+    required this.splashRadius,
   }) : assert(selected != null),
        assert(activeColor != null),
        assert(inactiveColor != null),
@@ -409,6 +517,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeColor;
   final Color focusColor;
   final Color hoverColor;
+  final double splashRadius;
   final ValueChanged<bool?>? onChanged;
   final bool toggleable;
   final TickerProvider vsync;
@@ -421,6 +530,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     inactiveColor: inactiveColor,
     focusColor: focusColor,
     hoverColor: hoverColor,
+    splashRadius: splashRadius,
     onChanged: onChanged,
     tristate: toggleable,
     vsync: vsync,
@@ -437,6 +547,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveColor = inactiveColor
       ..focusColor = focusColor
       ..hoverColor = hoverColor
+      ..splashRadius = splashRadius
       ..onChanged = onChanged
       ..tristate = toggleable
       ..additionalConstraints = additionalConstraints
@@ -453,6 +564,7 @@ class _RenderRadio extends RenderToggleable {
     required Color inactiveColor,
     required Color focusColor,
     required Color hoverColor,
+    required double splashRadius,
     required ValueChanged<bool?>? onChanged,
     required bool tristate,
     required BoxConstraints additionalConstraints,
@@ -465,6 +577,7 @@ class _RenderRadio extends RenderToggleable {
          inactiveColor: inactiveColor,
          focusColor: focusColor,
          hoverColor: hoverColor,
+         splashRadius: splashRadius,
          onChanged: onChanged,
          tristate: tristate,
          additionalConstraints: additionalConstraints,
@@ -480,11 +593,10 @@ class _RenderRadio extends RenderToggleable {
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final Offset center = (offset & size).center;
-    final Color radioColor = onChanged != null ? activeColor : inactiveColor;
 
     // Outer circle
     final Paint paint = Paint()
-      ..color = Color.lerp(inactiveColor, radioColor, position.value)!
+      ..color = Color.lerp(inactiveColor, activeColor, position.value)!
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, _kOuterRadius, paint);

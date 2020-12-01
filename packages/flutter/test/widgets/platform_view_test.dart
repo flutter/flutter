@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -991,7 +990,7 @@ void main() {
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
       final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode!;
-      final FocusNode containerFocusNode = Focus.of(containerElement)!;
+      final FocusNode containerFocusNode = Focus.of(containerElement);
 
       containerFocusNode.requestFocus();
 
@@ -1038,7 +1037,7 @@ void main() {
 
 
       final Element containerElement = tester.element(find.byKey(containerKey));
-      final FocusNode containerFocusNode = Focus.of(containerElement)!;
+      final FocusNode containerFocusNode = Focus.of(containerElement);
 
       containerFocusNode.requestFocus();
       await tester.pump();
@@ -1086,7 +1085,7 @@ void main() {
       viewsController.createCompleter!.complete();
 
       final Element containerElement = tester.element(find.byKey(containerKey));
-      final FocusNode containerFocusNode = Focus.of(containerElement)!;
+      final FocusNode containerFocusNode = Focus.of(containerElement);
 
       containerFocusNode.requestFocus();
       await tester.pump();
@@ -2491,7 +2490,7 @@ void main() {
       );
       final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode!;
       final Element containerElement = tester.element(find.byKey(containerKey));
-      final FocusNode containerFocusNode = Focus.of(containerElement)!;
+      final FocusNode containerFocusNode = Focus.of(containerElement);
 
       containerFocusNode.requestFocus();
       await tester.pump();

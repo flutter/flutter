@@ -275,7 +275,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoAlertDialog(
               title: const Text('The Title'),
               content: Text('Very long content ' * 20),
@@ -375,7 +375,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -436,7 +436,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: textScaleFactor),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
             child: CupertinoAlertDialog(
               actions: const <Widget>[
                 CupertinoDialogAction(
@@ -487,7 +487,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: textScaleFactor),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
             child: CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -556,7 +556,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.of(context)!.devicePixelRatio;
+          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -601,7 +601,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.of(context)!.devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -677,7 +677,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoAlertDialog(
               title: const Text('The Title'),
               content: Text('The message\n' * 20),
@@ -809,7 +809,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.of(context)!.devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -1151,7 +1151,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: const RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: Text('Title'),

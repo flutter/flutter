@@ -14,7 +14,6 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
-import 'dart/pub.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
@@ -654,7 +653,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   void copyEngineArtifactToProject(BuildMode mode) {
-    // Copy podspec and framework from engine cache. The actual build mode
+    // Copy framework from engine cache. The actual build mode
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something
     // to be in this location.
@@ -666,15 +665,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       )
     );
     if (framework.existsSync()) {
-      final Directory engineDest = ephemeralDirectory
-          .childDirectory('Flutter')
-          .childDirectory('engine');
-      final File podspec = framework.parent.childFile('Flutter.podspec');
       globals.fsUtils.copyDirectorySync(
         framework,
-        engineDest.childDirectory('Flutter.framework'),
+        engineCopyDirectory.childDirectory('Flutter.framework'),
       );
-      podspec.copySync(engineDest.childFile('Flutter.podspec').path);
     }
   }
 
@@ -683,9 +677,19 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     .childDirectory('Flutter')
     .childFile('Generated.xcconfig');
 
-  Directory get compiledDartFramework => _flutterLibRoot
+  /// No longer compiled to this location.
+  ///
+  /// Used only for "flutter clean" to remove old references.
+  Directory get deprecatedCompiledDartFramework => _flutterLibRoot
       .childDirectory('Flutter')
       .childDirectory('App.framework');
+
+  /// No longer copied to this location.
+  ///
+  /// Used only for "flutter clean" to remove old references.
+  Directory get deprecatedProjectFlutterFramework => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childDirectory('Flutter.framework');
 
   Directory get pluginRegistrantHost {
     return isModule
@@ -695,6 +699,22 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
         : hostAppRoot.childDirectory(_hostAppProjectName);
   }
 
+  File get pluginRegistrantHeader {
+    final Directory registryDirectory = isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    return registryDirectory.childFile('GeneratedPluginRegistrant.h');
+  }
+
+  File get pluginRegistrantImplementation {
+    final Directory registryDirectory = isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    return registryDirectory.childFile('GeneratedPluginRegistrant.m');
+  }
+
+  Directory get engineCopyDirectory {
+    return isModule
+        ? ephemeralDirectory.childDirectory('Flutter').childDirectory('engine')
+        : hostAppRoot.childDirectory('Flutter');
+  }
+
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
     final Template template = await Template.fromName(
       path,
@@ -702,7 +722,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       templateManifest: null,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
-      pub: pub,
     );
     template.render(
       target,
@@ -862,7 +881,6 @@ to migrate your project.
       templateManifest: null,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
-      pub: pub,
     );
     template.render(
       target,

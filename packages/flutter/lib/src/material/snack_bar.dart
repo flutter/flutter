@@ -123,13 +123,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    Scaffold.of(context)!.hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
   Widget build(BuildContext context) {
     Color? resolveForegroundColor(Set<MaterialState> states) {
-      final SnackBarThemeData snackBarTheme = Theme.of(context)!.snackBarTheme;
+      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
       if (states.contains(MaterialState.disabled))
         return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
       return widget.textColor ?? snackBarTheme.actionTextColor;
@@ -157,6 +157,69 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// A SnackBar with an action will not time out when TalkBack or VoiceOver are
 /// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a [SnackBar] with an [action] button implemented using
+/// [SnackBarAction].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ElevatedButton(
+///     child: Text("Show Snackbar"),
+///     onPressed: () {
+///       ScaffoldMessenger.of(context).showSnackBar(
+///         SnackBar(
+///           content: Text("Awesome Snackbar!"),
+///           action: SnackBarAction(
+///             label: "Action",
+///             onPressed: () {
+///               // Code to execute.
+///             },
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a customized [SnackBar]. It utilizes
+/// [behavior], [shape], [padding], [width], and [duration] to customize the
+/// location, appearance, and the duration for which the [SnackBar] is visible.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ElevatedButton(
+///     child: Text("Show Snackbar"),
+///     onPressed: () {
+///       ScaffoldMessenger.of(context).showSnackBar(
+///         SnackBar(
+///           action: SnackBarAction(
+///             label: "Action",
+///             onPressed: () {
+///               // Code to execute.
+///             },
+///           ),
+///           content: Text("Awesome SnackBar!"),
+///           duration: Duration(milliseconds: 1500),
+///           width: 280.0, // Width of the SnackBar.
+///           padding: EdgeInsets.symmetric(
+///             horizontal: 8.0), // Inner padding for SnackBar content.
+///           behavior: SnackBarBehavior.floating,
+///           shape: RoundedRectangleBorder(
+///             borderRadius: BorderRadius.circular(10.0),
+///           ),
+///         ),
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -383,9 +446,9 @@ class _SnackBarState extends State<SnackBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context)!;
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
     assert(widget.animation != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
@@ -529,14 +592,14 @@ class _SnackBarState extends State<SnackBar> {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        Scaffold.of(context)!.removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
         key: const Key('dismissible'),
         direction: DismissDirection.down,
         resizeDuration: null,
         onDismissed: (DismissDirection direction) {
-          Scaffold.of(context)!.removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
         child: snackBar,
       ),

@@ -2022,6 +2022,90 @@ Future<void> main() async {
     expect(tester.takeException(), isAssertionError);
   });
 
+  testWidgets('Can push/pop on outer Navigator if nested Navigators contains same Heroes', (WidgetTester tester) async {
+    const String heroTag = 'foo';
+    final GlobalKey<NavigatorState> rootNavigator = GlobalKey<NavigatorState>();
+    final Key rootRouteHero = UniqueKey();
+    final Key nestedRouteHeroOne = UniqueKey();
+    final Key nestedRouteHeroTwo = UniqueKey();
+    final List<Key> keys = <Key>[nestedRouteHeroOne, nestedRouteHeroTwo];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: rootNavigator,
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: Icon(Icons.home)),
+              BottomNavigationBarItem(icon: Icon(Icons.favorite)),
+            ],
+          ),
+          tabBuilder: (BuildContext context, int index) {
+            return CupertinoTabView(
+              builder: (BuildContext context) => Hero(
+                tag: heroTag,
+                child: Placeholder(
+                  key: keys[index],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Show both tabs to init.
+    await tester.tap(find.byIcon(Icons.home));
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.favorite));
+    await tester.pump();
+
+    // Inner heroes are in the tree, one is offstage.
+    expect(find.byKey(nestedRouteHeroTwo), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroOne), findsNothing);
+    expect(find.byKey(nestedRouteHeroOne, skipOffstage: false), findsOneWidget);
+
+    // Root hero is not in the tree.
+    expect(find.byKey(rootRouteHero), findsNothing);
+
+    rootNavigator.currentState!.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => Hero(
+          tag: heroTag,
+          child: Placeholder(
+            key: rootRouteHero,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Inner heroes are still in the tree, both are offstage.
+    expect(find.byKey(nestedRouteHeroOne), findsNothing);
+    expect(find.byKey(nestedRouteHeroTwo), findsNothing);
+    expect(find.byKey(nestedRouteHeroOne, skipOffstage: false), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroTwo, skipOffstage: false), findsOneWidget);
+
+    // Root hero is in the tree.
+    expect(find.byKey(rootRouteHero), findsOneWidget);
+
+    // Doesn't crash.
+    expect(tester.takeException(), isNull);
+
+    rootNavigator.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    // Root hero is not in the tree
+    expect(find.byKey(rootRouteHero), findsNothing);
+
+    // Both heroes are in the tree, one is offstage
+    expect(find.byKey(nestedRouteHeroTwo), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroOne), findsNothing);
+    expect(find.byKey(nestedRouteHeroOne, skipOffstage: false), findsOneWidget);
+  });
+
   testWidgets('Hero within a Hero subtree, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -2545,5 +2629,155 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(1.0));
+  });
+
+  testWidgets('Heroes in enabled HeroMode do transition', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            HeroMode(
+              enabled: true,
+              child: Card(
+                child: Hero(
+                  tag: 'a',
+                  child: SizedBox(
+                    height: 100.0,
+                    width: 100.0,
+                    key: firstKey,
+                  ),
+                ),
+              ),
+            ),
+            Builder(
+              builder: (BuildContext context) {
+                return FlatButton(
+                  child: const Text('push'),
+                  onPressed: () {
+                    Navigator.push(context, PageRouteBuilder<void>(
+                      pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+                        return Card(
+                          child: Hero(
+                            tag: 'a',
+                            child: SizedBox(
+                              height: 150.0,
+                              width: 150.0,
+                              key: secondKey,
+                            ),
+                          ),
+                        );
+                      },
+                    ));
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    await tester.tap(find.text('push'));
+    await tester.pump();
+
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey, skipOffstage: false), isOffstage);
+    expect(find.byKey(secondKey, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), findsOneWidget);
+    expect(find.byKey(secondKey), isNotInCard);
+    expect(find.byKey(secondKey), isOnstage);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+  });
+
+  testWidgets('Heroes in disabled HeroMode do not transition', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            HeroMode(
+              enabled: false,
+              child: Card(
+                child: Hero(
+                  tag: 'a',
+                  child: SizedBox(
+                    height: 100.0,
+                    width: 100.0,
+                    key: firstKey,
+                  ),
+                ),
+              ),
+            ),
+            Builder(
+              builder: (BuildContext context) {
+                return FlatButton(
+                  child: const Text('push'),
+                  onPressed: () {
+                    Navigator.push(context, PageRouteBuilder<void>(
+                      pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+                        return Card(
+                          child: Hero(
+                            tag: 'a',
+                            child: SizedBox(
+                              height: 150.0,
+                              width: 150.0,
+                              key: secondKey,
+                            ),
+                          ),
+                        );
+                      },
+                    ));
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    await tester.tap(find.text('push'));
+    await tester.pump();
+
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey, skipOffstage: false), isOffstage);
+    expect(find.byKey(secondKey, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    // When HeroMode is disabled, heroes will not move.
+    // So the original page contains the hero.
+    expect(find.byKey(firstKey), findsOneWidget);
+
+    // The hero should be in the new page, onstage, soon.
+    expect(find.byKey(secondKey), findsOneWidget);
+    expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(secondKey), isOnstage);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byKey(firstKey), findsNothing);
+
+    expect(find.byKey(secondKey), findsOneWidget);
+    expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(secondKey), isOnstage);
   });
 }

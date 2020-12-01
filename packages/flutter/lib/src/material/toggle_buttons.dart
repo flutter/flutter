@@ -221,7 +221,7 @@ class ToggleButtons extends StatelessWidget {
   /// When the callback is null, all toggle buttons will be disabled.
   final void Function(int index)? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// The [TextStyle] to apply to any text in these toggle buttons.
@@ -575,9 +575,9 @@ class ToggleButtons extends StatelessWidget {
       'There are ${focusNodes!.length} focus nodes, while '
       'there are ${children.length} children.'
     );
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
 
     return IntrinsicHeight(
       child: Row(
@@ -734,7 +734,7 @@ class _ToggleButton extends StatelessWidget {
   /// If this is null, the button will be disabled, see [enabled].
   final VoidCallback? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// The width and color of the button's leading side border.
@@ -772,7 +772,7 @@ class _ToggleButton extends StatelessWidget {
     Color? currentFocusColor;
     Color? currentHoverColor;
     Color? currentSplashColor;
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
     if (onPressed != null && selected) {
@@ -901,7 +901,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     borderRadius,
     isFirstButton,
     isLastButton,
-    Directionality.of(context)!,
+    Directionality.of(context),
   );
 
   @override
@@ -913,7 +913,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
       ..borderRadius = borderRadius
       ..isFirstButton = isFirstButton
       ..isLastButton = isLastButton
-      ..textDirection = Directionality.of(context)!;
+      ..textDirection = Directionality.of(context);
   }
 }
 
@@ -1043,22 +1043,54 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
+  @override
   void performLayout() {
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
     if (child == null) {
-      size = constraints.constrain(Size(
+      return;
+    }
+    switch (textDirection) {
+      case TextDirection.ltr:
+        final BoxParentData childParentData = child!.parentData! as BoxParentData;
+        childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
+        break;
+      case TextDirection.rtl:
+        final BoxParentData childParentData = child!.parentData! as BoxParentData;
+        if (isLastButton) {
+          childParentData.offset = Offset(_trailingBorderOffset, _trailingBorderOffset);
+        } else {
+          childParentData.offset = Offset(0, horizontalBorderSide.width);
+        }
+        break;
+    }
+  }
+
+  double get _trailingBorderOffset => isLastButton ? trailingBorderSide.width : 0.0;
+
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    if (child == null) {
+      return constraints.constrain(Size(
         leadingBorderSide.width + trailingBorderSide.width,
         horizontalBorderSide.width * 2.0,
       ));
-      return;
     }
 
-    final double trailingBorderOffset = isLastButton ? trailingBorderSide.width : 0.0;
     final double leftConstraint;
     final double rightConstraint;
 
     switch (textDirection) {
       case TextDirection.ltr:
-        rightConstraint = trailingBorderOffset;
+        rightConstraint = _trailingBorderOffset;
         leftConstraint = leadingBorderSide.width;
 
         final BoxConstraints innerConstraints = constraints.deflate(
@@ -1070,18 +1102,15 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           ),
         );
 
-        child!.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child!.parentData! as BoxParentData;
-        childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
+        final Size childSize = layoutChild(child!, innerConstraints);
 
-        size = constraints.constrain(Size(
-          leftConstraint + child!.size.width + rightConstraint,
-          horizontalBorderSide.width * 2.0 + child!.size.height,
+        return constraints.constrain(Size(
+          leftConstraint + childSize.width + rightConstraint,
+          horizontalBorderSide.width * 2.0 + childSize.height,
         ));
-        break;
       case TextDirection.rtl:
         rightConstraint = leadingBorderSide.width;
-        leftConstraint = trailingBorderOffset;
+        leftConstraint = _trailingBorderOffset;
 
         final BoxConstraints innerConstraints = constraints.deflate(
           EdgeInsets.only(
@@ -1092,20 +1121,12 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           ),
         );
 
-        child!.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child!.parentData! as BoxParentData;
+        final Size childSize = layoutChild(child!, innerConstraints);
 
-        if (isLastButton) {
-          childParentData.offset = Offset(trailingBorderOffset, trailingBorderOffset);
-        } else {
-          childParentData.offset = Offset(0, horizontalBorderSide.width);
-        }
-
-        size = constraints.constrain(Size(
-          leftConstraint + child!.size.width + rightConstraint,
-          horizontalBorderSide.width * 2.0 + child!.size.height,
+        return constraints.constrain(Size(
+          leftConstraint + childSize.width + rightConstraint,
+          horizontalBorderSide.width * 2.0 + childSize.height,
         ));
-        break;
     }
   }
 

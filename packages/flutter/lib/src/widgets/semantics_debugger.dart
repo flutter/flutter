@@ -38,7 +38,7 @@ class SemanticsDebugger extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The [TextStyle] to use when rendering semantics labels.

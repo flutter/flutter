@@ -12,7 +12,10 @@ void main() {
     final Map<String, dynamic> expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
-      'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
+      'goog:loggingPrefs': <String, String>{
+        sync_io.LogType.browser: 'INFO',
+        sync_io.LogType.performance: 'ALL',
+      },
       'chromeOptions': <String, dynamic>{
         'w3c': false,
         'args': <String>[
@@ -44,7 +47,10 @@ void main() {
     final Map<String, dynamic> expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
-      'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
+      'goog:loggingPrefs': <String, String>{
+        sync_io.LogType.browser: 'INFO',
+        sync_io.LogType.performance: 'ALL',
+      },
       'chromeOptions': <String, dynamic>{
         'binary': chromeBinary,
         'w3c': false,

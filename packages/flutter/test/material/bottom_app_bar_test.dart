@@ -88,7 +88,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)!.copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -113,7 +113,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)!.copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,

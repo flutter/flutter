@@ -647,7 +647,7 @@ void main() {
               builder: (BuildContext context) {
                 return FloatingActionButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context)!.showSnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Snacky!')),
                     );
                   },

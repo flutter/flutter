@@ -30,7 +30,6 @@ class AnalyzeCommand extends FlutterCommand {
        _logger = logger,
        _terminal = terminal,
        _platform = platform {
-    addEnableExperimentation(hide: !verboseHelp);
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
@@ -126,7 +125,6 @@ class AnalyzeCommand extends FlutterCommand {
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
-        experiments: stringsArg('enable-experiment'),
         artifacts: _artifacts,
       ).analyze();
     } else {
@@ -140,7 +138,6 @@ class AnalyzeCommand extends FlutterCommand {
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
-        experiments: stringsArg('enable-experiment'),
         artifacts: _artifacts,
       ).analyze();
     }

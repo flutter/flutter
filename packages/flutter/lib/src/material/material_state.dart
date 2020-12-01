@@ -21,9 +21,15 @@ import 'package:flutter/rendering.dart';
 ///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [Color] or a
 ///    `MaterialStateProperty<Color>`.
-///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`
-///    which is used in APIs that need to accept either a [MouseCursor] or a
-///    [MaterialStateProperty<MouseCursor>].
+///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
+///    `MaterialStateProperty` which is used in APIs that need to accept either
+///    a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
+///  * [MaterialStateOutlinedBorder], an [OutlinedBorder] that implements
+///    `MaterialStateProperty` which is used in APIs that need to accept either
+///    an [OutlinedBorder] or a [MaterialStateProperty<OutlinedBorder>].
+///  * [MaterialStateBorderSide], a [BorderSide] that implements
+///    `MaterialStateProperty` which is used in APIs that need to accept either
+///    a [BorderSide] or a [MaterialStateProperty<BorderSide>].
 
 enum MaterialState {
   /// The state when the user drags their mouse cursor over the given widget.
@@ -280,6 +286,123 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 
   @override
   String get debugDescription => 'MaterialStateMouseCursor($name)';
+}
+
+/// Defines a [BorderSide] whose value depends on a set of [MaterialState]s
+/// which represent the interactive state of a component.
+///
+/// To use a [MaterialStateBorderSide], you should create a subclass of a
+/// [MaterialStateBorderSide] and override the abstract `resolve` method.
+///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// This example defines a subclass of [MaterialStateBorderSide], that resolves
+/// to a red border side when its widget is selected.
+///
+/// ```dart preamble
+/// class RedSelectedBorderSide extends MaterialStateBorderSide {
+///   @override
+///   BorderSide resolve(Set<MaterialState> states) {
+///     if (states.contains(MaterialState.selected)) {
+///       return BorderSide(
+///         width: 1,
+///         color: Colors.red,
+///       );
+///     }
+///     return null;  // Defer to default value on the theme or widget.
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// bool isSelected = true;
+///
+/// Widget build(BuildContext context) {
+///   return FilterChip(
+///     label: Text('Select chip'),
+///     selected: isSelected,
+///     onSelected: (bool value) {
+///       setState(() {
+///         isSelected = value;
+///       });
+///     },
+///     side: RedSelectedBorderSide(),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This class should only be used for parameters which are documented to take
+/// [MaterialStateBorderSide], otherwise only the default state will be used.
+abstract class MaterialStateBorderSide extends BorderSide implements MaterialStateProperty<BorderSide?> {
+  /// Creates a [MaterialStateBorderSide].
+  const MaterialStateBorderSide();
+
+  /// Returns a [BorderSide] that's to be used when a Material component is
+  /// in the specified state. Return null to defer to the default value of the
+  /// widget or theme.
+  @override
+  BorderSide? resolve(Set<MaterialState> states);
+}
+
+/// Defines an [OutlinedBorder] whose value depends on a set of [MaterialState]s
+/// which represent the interactive state of a component.
+///
+/// To use a [MaterialStateOutlinedBorder], you should create a subclass of an
+/// [OutlinedBorder] and implement [MaterialStateOutlinedBorder]'s abstract
+/// `resolve` method.
+///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// This example defines a subclass of [RoundedRectangleBorder] and an
+/// implementation of [MaterialStateOutlinedBorder], that resolves to
+/// [RoundedRectangleBorder] when its widget is selected.
+///
+/// ```dart preamble
+/// class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
+///   @override
+///   OutlinedBorder resolve(Set<MaterialState> states) {
+///     if (states.contains(MaterialState.selected)) {
+///       return RoundedRectangleBorder();
+///     }
+///     return null;  // Defer to default value on the theme or widget.
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// bool isSelected = true;
+///
+/// Widget build(BuildContext context) {
+///   return FilterChip(
+///     label: Text('Select chip'),
+///     selected: isSelected,
+///     onSelected: (bool value) {
+///       setState(() {
+///         isSelected = value;
+///       });
+///     },
+///     shape: SelectedBorder(),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This class should only be used for parameters which are documented to take
+/// [MaterialStateOutlinedBorder], otherwise only the default state will be used.
+///
+/// See also:
+///
+///  * [ShapeBorder] the base class for shape outlines.
+abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements MaterialStateProperty<OutlinedBorder?> {
+  /// Creates a [MaterialStateOutlinedBorder].
+  const MaterialStateOutlinedBorder();
+
+  /// Returns an [OutlinedBorder] that's to be used when a Material component is
+  /// in the specified state. Return null to defer to the default value of the
+  /// widget or theme.
+  @override
+  OutlinedBorder? resolve(Set<MaterialState> states);
 }
 
 /// Interface for classes that [resolve] to a value of type `T` based
