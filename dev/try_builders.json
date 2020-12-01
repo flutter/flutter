@@ -396,6 +396,6 @@
          "repo":"flutter",
          "task_name":"flutter_plugins",
          "enabled":true
-      },
+      }
    ]
 }
