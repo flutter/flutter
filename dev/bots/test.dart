@@ -652,6 +652,13 @@ Future<void> _runFrameworkTests() async {
         tableData: bigqueryApi?.tabledata,
       );
     }
+    // Run release mode tests (see packages/flutter/test_release/README.md)
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
+      tableData: bigqueryApi?.tabledata,
+      tests: <String>[ 'test_release' + path.separator ],
+    );
   }
 
   Future<void> runLibraries() async {
