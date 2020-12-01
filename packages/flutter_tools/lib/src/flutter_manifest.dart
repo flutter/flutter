@@ -423,7 +423,6 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         break;
       case 'assets':
-      case 'services':
         if (kvp.value is! YamlList || kvp.value[0] is! String) {
           errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
