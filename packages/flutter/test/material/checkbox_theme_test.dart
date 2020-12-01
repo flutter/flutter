@@ -290,6 +290,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
   });
+
+  // TODO: Add test for selected/unselected checkbox can have different pressed color
 }
 
 Future<void> _pointGestureToCheckbox(WidgetTester tester) async {

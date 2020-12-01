@@ -1497,4 +1497,6 @@ void main() {
       reason: 'Active disabled thumb color should be blended on top of surface color',
     );
   });
+
+  // TODO: Add test for on/off switch with different pressed color.
 }

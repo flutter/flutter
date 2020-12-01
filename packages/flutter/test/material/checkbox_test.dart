@@ -900,6 +900,10 @@ void main() {
 
     expect(getCheckboxRenderer(), paints..rrect(color: hoveredFillColor));
   });
+
+  // TODO: Add test for selected/unselected checkbox can have different pressed color
+
+  // TODO: Add test for tristate checkbox with different selected/unselected pressed color
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
