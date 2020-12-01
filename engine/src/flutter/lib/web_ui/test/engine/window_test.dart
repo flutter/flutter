@@ -292,6 +292,7 @@ void testMain() {
     // that the list is populated again).
     EnginePlatformDispatcher.instance.debugResetLocales();
     expect(window.locales, isEmpty);
+    expect(window.locale, equals(const ui.Locale.fromSubtags()));
     expect(localeChangedCount, 0);
     html.window.dispatchEvent(html.Event('languagechange'));
     expect(window.locales, isNotEmpty);
