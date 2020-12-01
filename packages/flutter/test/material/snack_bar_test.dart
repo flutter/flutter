@@ -776,29 +776,29 @@ void main() {
         theme: theme,
         home: Scaffold(
           body: Builder(
-              builder: (BuildContext context) {
-                themeBeforeSnackBar = Theme.of(context);
-                return GestureDetector(
-                  onTap: () {
-                    Scaffold.of(context).showSnackBar(
-                      SnackBar(
-                        content: Builder(
-                          builder: (BuildContext context) {
-                            themeAfterSnackBar = Theme.of(context);
-                            return const Text('I am a snack bar.');
-                          },
-                        ),
-                        duration: const Duration(seconds: 2),
-                        action: SnackBarAction(
-                          label: 'ACTION',
-                          onPressed: () { },
-                        ),
+            builder: (BuildContext context) {
+              themeBeforeSnackBar = Theme.of(context);
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Builder(
+                        builder: (BuildContext context) {
+                          themeAfterSnackBar = Theme.of(context);
+                          return const Text('I am a snack bar.');
+                        },
                       ),
-                    );
-                  },
-                  child: const Text('X'),
-                );
-              },
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () { },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
           ),
         ),
       ),
