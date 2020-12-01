@@ -7,9 +7,10 @@ import 'gradle_errors.dart';
 /// Process log output from gradle, removing irrelevant output and capturing
 /// exception information.
 class GradleLogProcessor {
-  GradleLogProcessor(this.localGradleErrors);
+  GradleLogProcessor(this.localGradleErrors, this.verbose);
 
   final List<GradleHandledError> localGradleErrors;
+  final bool verbose;
 
   GradleHandledError detectedGradleError;
   String detectedGradleErrorLine;
@@ -19,7 +20,7 @@ class GradleLogProcessor {
     // All gradle failures lead to a fairly long footer which contains mostly
     // irrelevant information for a flutter build, along with misleading advice to
     // run with --stacktrace (which does not exist for the flutter CLI). remove this.
-    if (line.startsWith('FAILURE: Build failed with an exception.') || atFailureFooter) {
+    if (!verbose && (line.startsWith('FAILURE: Build failed with an exception.') || atFailureFooter)) {
       atFailureFooter = true;
       return null;
     }

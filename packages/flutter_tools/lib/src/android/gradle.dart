@@ -361,7 +361,7 @@ Future<void> buildGradleApp({
   }
   command.add(assembleTask);
 
-  final GradleLogProcessor gradleLogProcessor = GradleLogProcessor(localGradleErrors);
+  final GradleLogProcessor gradleLogProcessor = GradleLogProcessor(localGradleErrors, globals.logger.isVerbose);
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {

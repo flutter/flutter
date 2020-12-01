@@ -1,4 +1,3 @@
-
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -9,9 +8,7 @@ import 'package:flutter_tools/src/android/gradle_log_processor.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-void main() {
-   testUsingContext('Does not print failure footer', () async {
-      final List<String> output = r'''
+final List<String> gradleErrorOutputLines = r'''
 Some other stuff.
 FAILURE: Build failed with an exception.
 
@@ -29,9 +26,19 @@ Run with --stacktrace option to get the stack trace. Run with --info or --debug 
 
 BUILD FAILED in 24s
 '''.split('\n');
-      final GradleLogProcessor gradleLogProcessor = GradleLogProcessor(<GradleHandledError>[]);
 
-      expect(output.map(gradleLogProcessor.consumeLog).where((String line) => line != null), <String>['Some other stuff.']);
-      expect(gradleLogProcessor.atFailureFooter, true);
-    });
+void main() {
+  testUsingContext('Does not print failure footer in non-verbose mode', () async {
+    final GradleLogProcessor gradleLogProcessor = GradleLogProcessor(<GradleHandledError>[], false);
+
+    expect(gradleErrorOutputLines.map(gradleLogProcessor.consumeLog).where((String line) => line != null), <String>['Some other stuff.']);
+    expect(gradleLogProcessor.atFailureFooter, true);
+  });
+
+  testUsingContext('Does print failure footer in verbose mode', () async {
+    final GradleLogProcessor gradleLogProcessor = GradleLogProcessor(<GradleHandledError>[], true);
+
+    expect(gradleErrorOutputLines.map(gradleLogProcessor.consumeLog).where((String line) => line != null), gradleErrorOutputLines);
+    expect(gradleLogProcessor.atFailureFooter, false);
+  });
 }
