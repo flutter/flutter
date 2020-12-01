@@ -316,8 +316,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  /// The color that should be used for the reaction when drawn when the
-  /// toggleable is active.
+  /// The color that should be used for the reaction when the toggleable is
+  /// active.
   ///
   /// Used when the toggleable needs to change the reaction color/transparency
   /// that is displayed when the toggleable is active and tapped.
@@ -333,8 +333,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  /// The color that should be used for the reaction when drawn when the
-  /// toggleable is inactive.
+  /// The color that should be used for the reaction when the toggleable is
+  /// inactive.
   ///
   /// Used when the toggleable needs to change the reaction color/transparency
   /// that is displayed when the toggleable is inactive and tapped.

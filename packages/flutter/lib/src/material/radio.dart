@@ -330,7 +330,6 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialState.selected].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [activeColor] with alpha
