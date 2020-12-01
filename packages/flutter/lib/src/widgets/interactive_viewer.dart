@@ -540,6 +540,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   late AnimationController _controller;
   Axis? _panAxis; // Used with alignPanAxis.
   Offset? _referenceFocalPoint; // Point where the current gesture began.
+  // A scale gesture may not be recognized until it has moved a few pixels.
+  // However, details.scale will be calculated from the original point where the
+  // pointers went down. This can cause the scale to immediately jump to a value
+  // significantly far from one, creating a jarring experience for the user. To
+  // work around this, the amount of this jump is saved and factored out of the
+  // amount that the child is scaled.
+  double? _scaleJump;
   double? _scaleStart; // Scale value at start of scaling gesture.
   double? _rotationStart = 0.0; // Rotation at start of rotation gesture.
   double _currentRotation = 0.0; // Rotation of _transformationController.value.
@@ -760,6 +767,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _gestureType = null;
     _panAxis = null;
     _scaleStart = _transformationController!.value.getMaxScaleOnAxis();
+    _scaleJump = null;
     _referenceFocalPoint = _transformationController!.toScene(
       details.localFocalPoint,
     );
@@ -773,6 +781,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset focalPointScene = _transformationController!.toScene(
       details.localFocalPoint,
     );
+    _scaleJump ??= details.scale - 1.0;
 
     if (_gestureType == _GestureType.pan) {
       // When a gesture first starts, it sometimes has no change in scale and
@@ -793,7 +802,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         // details.scale gives us the amount to change the scale as of the
         // start of this gesture, so calculate the amount to scale as of the
         // previous call to _onScaleUpdate.
-        final double desiredScale = _scaleStart! * details.scale;
+        final double dejumpedScale = details.scale - _scaleJump!;
+        final double desiredScale = _scaleStart! * dejumpedScale;
         final double scaleChange = desiredScale / scale;
         _transformationController!.value = _matrixScale(
           _transformationController!.value,
@@ -872,6 +882,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   void _onScaleEnd(ScaleEndDetails details) {
     widget.onInteractionEnd?.call(details);
     _scaleStart = null;
+    _scaleJump = null;
     _rotationStart = null;
     _referenceFocalPoint = null;
 
