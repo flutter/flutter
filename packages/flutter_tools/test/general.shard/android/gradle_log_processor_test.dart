@@ -6,7 +6,6 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_log_processor.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 final List<String> gradleErrorOutputLines = r'''
 Some other stuff.
