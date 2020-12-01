@@ -390,6 +390,12 @@
          "repo": "flutter",
          "task_name": "win_web_tool_tests",
          "enabled":false
-      }
+      },
+      {
+         "name":"Linux flutter_plugins",
+         "repo":"flutter",
+         "task_name":"flutter_plugins",
+         "enabled":true
+      },
    ]
 }
