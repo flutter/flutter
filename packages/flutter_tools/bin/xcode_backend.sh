@@ -116,7 +116,6 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   local flutter_engine_flag=""
   local local_engine_flag=""
   local flutter_framework="${framework_path}/Flutter.framework"
-  local flutter_podspec="${framework_path}/Flutter.podspec"
 
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -137,7 +136,6 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
-    flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
   fi
 
   local bitcode_flag=""
@@ -147,9 +145,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
 
   # TODO(jmagman): use assemble copied engine in add-to-app.
   if [[ -e "${project_path}/.ios" ]]; then
-    RunCommand rm -rf -- "${derived_dir}/engine"
-    mkdir "${derived_dir}/engine"
-    RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
+    RunCommand rm -rf -- "${derived_dir}/engine/Flutter.framework"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
   fi
 

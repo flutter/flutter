@@ -21,7 +21,7 @@ class _PlatformAdaptiveIcons {
   }
 
   // Generated code: do not hand-edit.
-  // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts
+  // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
   // BEGIN GENERATED PLATFORM ADAPTIVE ICONS
 
   /// Platform-adaptive icon for <i class="material-icons md-36">arrow_back</i> &#x2014; material icon named "arrow back" and <i class="material-icons md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios".;
@@ -164,7 +164,7 @@ class Icons {
   static _PlatformAdaptiveIcons get adaptive => _PlatformAdaptiveIcons();
 
   // Generated code: do not hand-edit.
-  // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts
+  // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
   // BEGIN GENERATED ICONS
 
   /// <i class="material-icons md-36">10k</i> &#x2014; material icon named "10k".

@@ -5,14 +5,12 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../input_border.dart';
-import '../input_decorator.dart';
-import '../material_localizations.dart';
-import '../text_form_field.dart';
-import '../theme.dart';
-
-import 'date_picker_common.dart';
-import 'date_utils.dart' as utils;
+import 'date.dart';
+import 'input_border.dart';
+import 'input_decorator.dart';
+import 'material_localizations.dart';
+import 'text_form_field.dart';
+import 'theme.dart';
 
 /// A [TextFormField] configured to accept and validate a date entered by a user.
 ///
@@ -63,9 +61,9 @@ class InputDatePickerFormField extends StatefulWidget {
   }) : assert(firstDate != null),
        assert(lastDate != null),
        assert(autofocus != null),
-       initialDate = initialDate != null ? utils.dateOnly(initialDate) : null,
-       firstDate = utils.dateOnly(firstDate),
-       lastDate = utils.dateOnly(lastDate),
+       initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
+       firstDate = DateUtils.dateOnly(firstDate),
+       lastDate = DateUtils.dateOnly(lastDate),
        super(key: key) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
@@ -156,6 +154,24 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _updateValueForSelectedDate();
+  }
+
+  @override
+  void didUpdateWidget(InputDatePickerFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDate != oldWidget.initialDate) {
+      // Can't update the form field in the middle of a build, so do it next frame
+      WidgetsBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+        setState(() {
+          _selectedDate = widget.initialDate;
+          _updateValueForSelectedDate();
+        });
+      });
+    }
+  }
+
+  void _updateValueForSelectedDate() {
     if (_selectedDate != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       _inputText = localizations.formatCompactDate(_selectedDate!);
@@ -169,6 +185,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         _autoSelected = true;
       }
       _controller.value = textEditingValue;
+    } else {
+      _inputText = '';
+      _controller.value = _controller.value.copyWith(text: _inputText);
     }
   }
 
@@ -195,26 +214,21 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return null;
   }
 
-  void _handleSaved(String? text) {
-    if (widget.onDateSaved != null) {
-      final DateTime? date = _parseDate(text);
-      if (_isValidAcceptableDate(date)) {
-        _selectedDate = date;
-        _inputText = text;
-        widget.onDateSaved!(date!);
-      }
+  void _updateDate(String? text, ValueChanged<DateTime>? callback) {
+    final DateTime? date = _parseDate(text);
+    if (_isValidAcceptableDate(date)) {
+      _selectedDate = date;
+      _inputText = text;
+      callback?.call(_selectedDate!);
     }
   }
 
+  void _handleSaved(String? text) {
+    _updateDate(text, widget.onDateSaved);
+  }
+
   void _handleSubmitted(String text) {
-    if (widget.onDateSubmitted != null) {
-      final DateTime? date = _parseDate(text);
-      if (_isValidAcceptableDate(date)) {
-        _selectedDate = date;
-        _inputText = text;
-        widget.onDateSubmitted!(date!);
-      }
-    }
+    _updateDate(text, widget.onDateSubmitted);
   }
 
   @override

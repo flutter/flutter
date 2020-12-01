@@ -134,6 +134,7 @@ void main() {
       '.gitignore',
       '.ios/Flutter',
       '.ios/Flutter/flutter_project.podspec',
+      '.ios/Flutter/engine/Flutter.podspec',
       '.metadata',
       'lib/main.dart',
       'pubspec.yaml',
@@ -2115,7 +2116,7 @@ void main() {
     expect(env['flutter'].allows(Version(1, 19, 0)), false);
   });
 
-  testUsingContext('default app uses Android SDK 30', () async {
+  testUsingContext('default app uses Android sdk 29', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -2129,8 +2130,8 @@ void main() {
 
     final String buildContent = await globals.fs.file(projectDir.path + '/android/app/build.gradle').readAsString();
 
-    expect(buildContent.contains('compileSdkVersion 30'), true);
-    expect(buildContent.contains('targetSdkVersion 30'), true);
+    expect(buildContent.contains('compileSdkVersion 29'), true);
+    expect(buildContent.contains('targetSdkVersion 29'), true);
   });
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {

@@ -141,7 +141,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       aotSymbols.contains('_kDartVmSnapshot')) {
     throw TaskResult.failure('Debug App.framework contains AOT');
   }
-  await _checkFrameworkArchs(debugAppFrameworkPath, 'Debug');
+  await _checkFrameworkArchs(debugAppFrameworkPath, true);
 
   // Xcode changed the name of this generated directory in Xcode 12.
   const String xcode11ArmDirectoryName = 'ios-armv7_arm64';
@@ -193,7 +193,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'App',
     );
 
-    await _checkFrameworkArchs(appFrameworkPath, mode);
+    await _checkFrameworkArchs(appFrameworkPath, false);
     await _checkBitcode(appFrameworkPath, mode);
 
     final String aotSymbols = await dylibSymbols(appFrameworkPath);
@@ -239,7 +239,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'Flutter',
     );
 
-    await _checkFrameworkArchs(engineFrameworkPath, mode);
+    await _checkFrameworkArchs(engineFrameworkPath, mode == 'Debug');
     await _checkBitcode(engineFrameworkPath, mode);
 
     checkFileExists(path.join(
@@ -280,7 +280,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'device_info.framework',
       'device_info',
     );
-    await _checkFrameworkArchs(pluginFrameworkPath, mode);
+    await _checkFrameworkArchs(pluginFrameworkPath, mode == 'Debug');
     await _checkBitcode(pluginFrameworkPath, mode);
 
     checkFileExists(path.join(
@@ -343,7 +343,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'FlutterPluginRegistrant'
     );
 
-    await _checkFrameworkArchs(registrantFrameworkPath, mode);
+    await _checkFrameworkArchs(registrantFrameworkPath, mode == 'Debug');
     await _checkBitcode(registrantFrameworkPath, mode);
 
     checkFileExists(path.join(
@@ -450,24 +450,24 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   }
 }
 
-Future<void> _checkFrameworkArchs(String frameworkPath, String mode) async {
+Future<void> _checkFrameworkArchs(String frameworkPath, bool shouldContainSimulator) async {
   checkFileExists(frameworkPath);
 
   final String archs = await fileType(frameworkPath);
   if (!archs.contains('armv7')) {
-    throw TaskResult.failure('$mode $frameworkPath armv7 architecture missing');
+    throw TaskResult.failure('$frameworkPath armv7 architecture missing');
   }
 
   if (!archs.contains('arm64')) {
-    throw TaskResult.failure('$mode $frameworkPath arm64 architecture missing');
+    throw TaskResult.failure('$frameworkPath arm64 architecture missing');
   }
   final bool containsSimulator = archs.contains('x86_64');
-  final bool isDebug = mode == 'Debug';
 
   // Debug should contain the simulator archs.
   // Release and Profile should not.
-  if (containsSimulator != isDebug) {
-    throw TaskResult.failure('$mode $frameworkPath x86_64 architecture ${isDebug ? 'missing' : 'present'}');
+  if (containsSimulator != shouldContainSimulator) {
+    throw TaskResult.failure(
+        '$frameworkPath x86_64 architecture ${shouldContainSimulator ? 'missing' : 'present'}');
   }
 }
 
