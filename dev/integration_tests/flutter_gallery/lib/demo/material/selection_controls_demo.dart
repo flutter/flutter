@@ -67,13 +67,13 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
     );
   }
 
-  bool checkboxValueA = true;
-  bool checkboxValueB = false;
-  bool checkboxValueC;
-  int radioValue = 0;
+  bool? checkboxValueA = true;
+  bool? checkboxValueB = false;
+  bool? checkboxValueC;
+  int? radioValue = 0;
   bool switchValue = false;
 
-  void handleRadioValueChanged(int value) {
+  void handleRadioValueChanged(int? value) {
     setState(() {
       radioValue = value;
     });
@@ -92,7 +92,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
                 label: 'Checkbox A',
                 child: Checkbox(
                   value: checkboxValueA,
-                  onChanged: (bool value) {
+                  onChanged: (bool? value) {
                     setState(() {
                       checkboxValueA = value;
                     });
@@ -103,7 +103,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
                 label: 'Checkbox B',
                 child: Checkbox(
                   value: checkboxValueB,
-                  onChanged: (bool value) {
+                  onChanged: (bool? value) {
                     setState(() {
                       checkboxValueB = value;
                     });
@@ -115,7 +115,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
                 child: Checkbox(
                   value: checkboxValueC,
                   tristate: true,
-                  onChanged: (bool value) {
+                  onChanged: (bool? value) {
                     setState(() {
                       checkboxValueC = value;
                     });

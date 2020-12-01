@@ -16,7 +16,7 @@ class PersistentBottomSheetDemo extends StatefulWidget {
 class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  VoidCallback _showBottomSheetCallback;
+  VoidCallback? _showBottomSheetCallback;
 
   @override
   void initState() {
@@ -28,7 +28,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     setState(() { // disable the button
       _showBottomSheetCallback = null;
     });
-    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       final ThemeData themeData = Theme.of(context);
       return Container(
         decoration: BoxDecoration(

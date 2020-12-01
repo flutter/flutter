@@ -387,6 +387,54 @@ void main() {
     semantics.dispose();
   });
 
+    testWidgets('Semantics tagForChildren works', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          container: true,
+          tagForChildren: const SemanticsTag('custom tag'),
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                container: true,
+                child: const Text('child 1'),
+              ),
+              Semantics(
+                container: true,
+                child: const Text('child 2'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'child 1',
+              tags: <SemanticsTag>[const SemanticsTag('custom tag')],
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'child 2',
+              tags: <SemanticsTag>[const SemanticsTag('custom tag')],
+              textDirection: TextDirection.ltr,
+            ),
+          ]
+        ),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
+  });
+
   testWidgets('Semantics widget supports all actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 

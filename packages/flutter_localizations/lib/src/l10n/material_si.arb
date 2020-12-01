@@ -52,7 +52,7 @@
   "remainingTextFieldCharacterCountOther": "අනුලකුණු $remainingCountක් ඉතිරිය",
   "refreshIndicatorSemanticLabel": "නැවුම් කරන්න",
   "moreButtonTooltip": "තව",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "mm/dd/yyyy",
   "selectYearSemanticsLabel": "වර්ෂය තෝරන්න",
   "unspecifiedDate": "දිනය",

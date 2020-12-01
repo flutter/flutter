@@ -57,7 +57,7 @@ void main() {
       ServicesBinding.instance!.defaultBinaryMessenger
           .setMessageHandler('test_send', (ByteData? data) {
         loggedMessages.add(codec.decodeMessage(data) as String);
-        return null;
+        return Future<ByteData?>.value(null);
       });
 
       await pluginBinaryMessenger.send(

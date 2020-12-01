@@ -1404,7 +1404,7 @@ class _RenderListTile extends RenderBox {
        _textDirection = textDirection,
        _titleBaselineType = titleBaselineType,
        _subtitleBaselineType = subtitleBaselineType,
-       _horizontalTitleGap = horizontalTitleGap + visualDensity.horizontal * 2.0,
+       _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth;
 
@@ -1519,6 +1519,7 @@ class _RenderListTile extends RenderBox {
 
   double get horizontalTitleGap => _horizontalTitleGap;
   double _horizontalTitleGap;
+  double get _effectiveHorizontalTitleGap => _horizontalTitleGap + visualDensity.horizontal * 2.0;
 
   set horizontalTitleGap(double value) {
     assert(value != null);
@@ -1602,7 +1603,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     final double leadingWidth = leading != null
-      ? math.max(leading!.getMinIntrinsicWidth(height), _minLeadingWidth) + _horizontalTitleGap
+      ? math.max(leading!.getMinIntrinsicWidth(height), _minLeadingWidth) + _effectiveHorizontalTitleGap
       : 0.0;
     return leadingWidth
       + math.max(_minWidth(title, height), _minWidth(subtitle, height))
@@ -1612,7 +1613,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeMaxIntrinsicWidth(double height) {
     final double leadingWidth = leading != null
-      ? math.max(leading!.getMaxIntrinsicWidth(height), _minLeadingWidth) + _horizontalTitleGap
+      ? math.max(leading!.getMaxIntrinsicWidth(height), _minLeadingWidth) + _effectiveHorizontalTitleGap
       : 0.0;
     return leadingWidth
       + math.max(_maxWidth(title, height), _maxWidth(subtitle, height))
@@ -1668,6 +1669,14 @@ class _RenderListTile extends RenderBox {
     parentData.offset = offset;
   }
 
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.'
+    ));
+    return const Size(0, 0);
+  }
+
   // All of the dimensions below were taken from the Material Design spec:
   // https://material.io/design/components/lists.html#specs
   @override
@@ -1708,10 +1717,10 @@ class _RenderListTile extends RenderBox {
     );
 
     final double titleStart = hasLeading
-      ? math.max(_minLeadingWidth, leadingSize.width) + _horizontalTitleGap
+      ? math.max(_minLeadingWidth, leadingSize.width) + _effectiveHorizontalTitleGap
       : 0.0;
     final double adjustedTrailingWidth = hasTrailing
-        ? math.max(trailingSize.width + _horizontalTitleGap, 32.0)
+        ? math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0)
         : 0.0;
     final BoxConstraints textConstraints = looseConstraints.tighten(
       width: tileWidth - titleStart - adjustedTrailingWidth,
