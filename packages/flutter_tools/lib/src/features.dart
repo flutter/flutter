@@ -49,6 +49,9 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
+  /// Whether the CFE experimental invalidation strategy is enabled.
+  bool get isExperimentalInvalidationStrategyEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -93,6 +96,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
+  bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
@@ -125,6 +131,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterAndroidFeature,
   flutterIOSFeature,
   flutterFuchsiaFeature,
+  experimentalInvalidationStrategy,
 ];
 
 /// The [Feature] for flutter web.
@@ -256,6 +263,29 @@ const Feature singleWidgetReload = Feature(
   name: 'Hot reload optimization for changes to class body of a single widget',
   configSetting: 'single-widget-reload-optimization',
   environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The CFE experimental invalidation strategy.
+const Feature experimentalInvalidationStrategy = Feature(
+  name: 'Hot reload optimization that reduces incremental artifact size',
+  configSetting: 'experimental-invalidation-strategy',
+  environmentOverride: 'FLUTTER_CFE_EXPERIMENTAL_INVALIDATION',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
