@@ -796,13 +796,24 @@ Future<void> _runWebUnitTests() async {
 
   // This for loop computes all but the last shard.
   for (int index = 0; index < webShardCount - 1; index += 1) {
-    subshards['$index'] = () => _runFlutterWebTest(
-      flutterPackageDirectory.path,
-      allTests.sublist(
-        index * testsPerShard,
-        (index + 1) * testsPerShard,
-      ),
-    );
+    subshards['$index'] = ()  async {
+      await _runFlutterWebTest(
+        flutterPackageDirectory.path,
+        allTests.sublist(
+          index * testsPerShard,
+          (index + 1) * testsPerShard,
+        ),
+        canvaskit: false,
+      );
+      await _runFlutterWebTest(
+        flutterPackageDirectory.path,
+        allTests.sublist(
+          index * testsPerShard,
+          (index + 1) * testsPerShard,
+        ),
+        canvaskit: true,
+      );
+    };
   }
 
   // The last shard also runs the flutter_web_plugins tests.
@@ -816,14 +827,25 @@ Future<void> _runWebUnitTests() async {
         (webShardCount - 1) * testsPerShard,
         allTests.length,
       ),
+      canvaskit: false,
+    );
+    await _runFlutterWebTest(
+      flutterPackageDirectory.path,
+      allTests.sublist(
+        (webShardCount - 1) * testsPerShard,
+        allTests.length,
+      ),
+      canvaskit: true,
     );
     await _runFlutterWebTest(
       path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
       <String>['test'],
+      canvaskit: false,
     );
     await _runFlutterWebTest(
-        path.join(flutterRoot, 'packages', 'flutter_driver'),
-        <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
+      path.join(flutterRoot, 'packages', 'flutter_driver'),
+      <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
+      canvaskit: false,
     );
   };
 
@@ -1175,7 +1197,7 @@ Future<void> _runWebDebugTest(String target, {
   }
 }
 
-Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) async {
+Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests, { bool canvaskit = false }) async {
   await runCommand(
     flutter,
     <String>[
@@ -1185,6 +1207,8 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
       '-v',
       '--platform=chrome',
       '--sound-null-safety', // web tests do not autodetect yet.
+      if (canvaskit)
+        '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       ...?flutterTestArgs,
       ...tests,
     ],
