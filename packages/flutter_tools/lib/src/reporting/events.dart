@@ -249,3 +249,37 @@ class CodeSizeEvent extends UsageEvent {
 class ErrorHandlingEvent extends UsageEvent {
   ErrorHandlingEvent(String parameter) : super('error-handling', parameter, flutterUsage: globals.flutterUsage);
 }
+
+/// The category for analytics events related to null safety.
+const String kNullSafetyCategory = 'null-safety';
+
+/// Emit various null safety analytic events.
+///
+/// 1. The current null safety runtime mode.
+/// 2. The % of dependencies that are not migrated.
+/// 3. The main language version.
+void collectLanguageVersionEvents(
+  PackageConfig packageConfig,
+  NullSafetyMode nullSafetyMode,
+  String currentPackage,
+  Usage flutterUsage,
+) {
+  int migrated = 0;
+  LanguageVersion languageVersion;
+  for (final Package package in packageConfig.packages) {
+    if (package.name == currentPackage) {
+      languageVersion = package.languageVersion;
+    }
+    if (package.languageVersion.major >= nullSafeVersion.major &&
+        package.languageVersion.minor >= nullSafeVersion.minor) {
+      migrated += 1;
+    }
+  }
+  final int formattedPercentage = (migrated / packageConfig.packages.length * 100).round()
+  flutterUsage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: nullSafetyMode.toString());
+  flutterUsage.sendEvent(kNullSafetyCategory, 'migrated', value: formattedPercentage);
+  if (languageVersion != null) {
+    final String formattedVersion = '${languageVersion.major}.${languageVersion.minor}';
+    flutterUsage.sendEvent(kNullSafetyCategory, 'language-version', label: formattedVersion);
+  }
+}

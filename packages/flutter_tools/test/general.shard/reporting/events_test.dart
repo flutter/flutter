@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
 
@@ -49,6 +51,46 @@ void main() {
     expect(doctorResultEvent.send, returnsNormally);
 
     verify(usage.sendEvent('doctor-result', any, label: anyNamed('label'))).called(1);
+  });
+
+  testWithoutContext('Reports null safe analytics events', () {
+    final Usage usage = MockUsage();
+    final PackageConfig packageConfig = PackageConfig(<Package>[
+      Package('foo', Uri.parse('file:///foo/'), languageVersion: LanguageVersion(2, 12)),
+      Package('bar', Uri.parse('file:///fizz/'), languageVersion: LanguageVersion(2, 1)),
+      Package('baz', Uri.parse('file:///bar/'), languageVersion: LanguageVersion(2, 2)),
+    ]);
+
+    collectLanguageVersionEvents(
+      packageConfig,
+      NullSafetyMode.sound,
+      'foo',
+      usage,
+    );
+
+    verify(usage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'));
+    verify(usage.sendEvent(kNullSafetyCategory, 'migrated', value: 33));
+    verify(usage.sendEvent(kNullSafetyCategory, 'language-version', label: '2.12'));
+  });
+
+  testWithoutContext('Does not crash if main package is missing', () {
+    final Usage usage = MockUsage();
+    final PackageConfig packageConfig = PackageConfig(<Package>[
+      Package('foo', Uri.parse('file:///foo/lib/'), languageVersion: LanguageVersion(2, 12)),
+      Package('bar', Uri.parse('file:///fizz/lib/'), languageVersion: LanguageVersion(2, 1)),
+      Package('baz', Uri.parse('file:///bar/lib/'), languageVersion: LanguageVersion(2, 2)),
+    ]);
+
+    collectLanguageVersionEvents(
+      packageConfig,
+      NullSafetyMode.sound,
+      'something-unrelated',
+      usage,
+    );
+
+    verify(usage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'));
+    verify(usage.sendEvent(kNullSafetyCategory, 'migrated', value: 33));
+    verifyNever(usage.sendEvent(kNullSafetyCategory, 'language-version', label: anyNamed('label')));
   });
 }
 

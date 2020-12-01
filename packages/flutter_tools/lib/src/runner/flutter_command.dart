@@ -1103,6 +1103,7 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
+      await _sendNullSafetyAnalyticsEvents(project);
     }
 
     setupApplicationPackages();
@@ -1117,6 +1118,16 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return await runCommand();
+  }
+
+  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
+    final BuildInfo buildInfo = await getBuildInfo();
+    collectLanguageVersionEvents(
+      buildInfo.packageConfig,
+      buildInfo.nullSafetyMode,
+      project.manifest.appName,
+      globals.flutterUsage,
+    );
   }
 
   /// The set of development artifacts required for this command.
