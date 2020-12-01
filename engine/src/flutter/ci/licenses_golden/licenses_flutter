@@ -716,6 +716,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityDele
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityEvents.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterApplication.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActivity.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidKeyProcessor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidTouchProcessor.java
