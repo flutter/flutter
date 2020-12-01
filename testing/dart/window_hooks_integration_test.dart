@@ -426,4 +426,17 @@ void main() {
     expectEquals(window.padding.bottom, 0.0);
     expectEquals(window.systemGestureInsets.bottom, 44.0);
   });
+
+  test('PlatformDispatcher.locale returns unknown locale when locales is set to empty list', () {
+    late Locale locale;
+    runZoned(() {
+      window.onLocaleChanged = () {
+        locale = PlatformDispatcher.instance.locale;
+      };
+    });
+
+    _updateLocales(<String>[]);
+    expectEquals(locale, const Locale.fromSubtags());
+    expectEquals(locale.languageCode, 'und');
+  });
 }
