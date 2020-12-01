@@ -83,36 +83,12 @@ int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
 /// WARNING: this number must match the shard count in LUCI configs.
 const int kWebLongRunningTestShardCount = 3;
 
-/// Tests that we don't run on Web for various reasons.
+/// Tests that we don't run on Web for compilation reasons.
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileKnownFailures = <String>[
-  // This test doesn't compile because it depends on code outside the flutter package.
-  'test/examples/sector_layout_test.dart',
-  // This test relies on widget tracking capability in the VM.
-  'test/widgets/widget_inspector_test.dart',
-  'test/painting/decoration_test.dart',
-  'test/material/time_picker_test.dart',
-  'test/material/text_field_test.dart',
-  'test/material/floating_action_button_test.dart',
-  'test/widgets/selectable_text_test.dart',
-  'test/widgets/color_filter_test.dart',
-  'test/widgets/editable_text_cursor_test.dart',
-  'test/material/data_table_test.dart',
-  'test/cupertino/nav_bar_transition_test.dart',
-  'test/cupertino/refresh_test.dart',
-  'test/cupertino/text_field_test.dart',
-  'test/cupertino/route_test.dart',
-  'test/foundation/error_reporting_test.dart',
-  'test/foundation/consolidate_response_test.dart',
-  'test/foundation/stack_trace_test.dart',
   'test/services/message_codecs_vm_test.dart',
-  'test/services/platform_messages_test.dart',
-  'test/widgets/image_resolution_test.dart ',
-  'test/widgets/platform_view_test.dart',
-  'test/widgets/route_notification_messages_test.dart',
-  'test/widgets/semantics_tester_generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart',
-  'test/widgets/text_golden_test.dart',
+  'test/examples/sector_layout_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom

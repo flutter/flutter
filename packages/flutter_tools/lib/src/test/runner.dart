@@ -134,7 +134,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       }
       testArgs
         ..add('--platform=chrome')
-        ..add('--precompiled=$tempBuildDir')
         ..add('--')
         ..addAll(testFiles);
       testWrapper.registerPlatformPlugin(
