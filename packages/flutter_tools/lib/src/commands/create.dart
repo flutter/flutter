@@ -8,27 +8,32 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
-import '../base/terminal.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
-import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
-import 'create_plugin.dart';
+
+const List<String> _kDefaultPlatforms = <String>[
+  'ios',
+  'android',
+  'windows',
+  'linux',
+  'macos',
+  'web',
+];
 
 class CreateCommand extends CreateBase {
   CreateCommand() {
-    addSubcommand(CreatePluginCommand());
     addPlatformsOptions(customHelp: 'The platforms supported by this project. '
         'This argument only works when the --template is set to app or plugin. '
         'Platform folders (e.g. android/) will be generated in the target project. '
         'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
-        'Adding desktop platforms requires the corresponding desktop config setting to be enabled.');
+        'Adding desktop platforms requires the corresponding desktop config setting to be enabled.', defaultPlatforms: _kDefaultPlatforms);
     argParser.addOption(
       'template',
       abbr: 't',
@@ -292,10 +297,10 @@ class CreateCommand extends CreateBase {
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       final List<String> requestedPlatforms = _getUserRequestedPlatforms();
       final String platformsString = requestedPlatforms.join(', ');
-      _printPluginDirectoryLocationMessage(relativePluginPath, projectName, platformsString);
+      printPluginDirectoryLocationMessage(relativePluginPath, projectName, platformsString);
       if (!creatingNewProject && requestedPlatforms.isNotEmpty) {
-        _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
-      } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
+        printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
+      } else if (getSupportedPlatformsInPlugin(projectDir).isEmpty){
         globals.printError(_kNoPlatformsArgMessage);
       }
     } else  {
@@ -370,9 +375,9 @@ Your $application code is in $relativeAppMain.
       templateContext['macos'] = false;
       templateContext['windows'] = false;
     }
-    final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
+    final List<String> platformsToAdd = getSupportedPlatformsFromTemplateContext(templateContext);
 
-    final List<String> existingPlatforms = _getSupportedPlatformsInPlugin(directory);
+    final List<String> existingPlatforms = getSupportedPlatformsInPlugin(directory);
     for (final String existingPlatform in existingPlatforms) {
       // re-generate files for existing platforms
       templateContext[existingPlatform] = true;
@@ -433,23 +438,6 @@ Your $application code is in $relativeAppMain.
     return -files.length;
   }
 
-  List<String> _getSupportedPlatformsFromTemplateContext(Map<String, dynamic> templateContext) {
-    return <String>[
-      if (templateContext['ios'] == true)
-        'ios',
-      if (templateContext['android'] == true)
-        'android',
-      if (templateContext['web'] == true)
-        'web',
-      if (templateContext['linux'] == true)
-        'linux',
-      if (templateContext['windows'] == true)
-        'windows',
-      if (templateContext['macos'] == true)
-        'macos',
-    ];
-  }
-
   // Returns a list of platforms that are explicitly requested by user via `--platforms`.
   List<String> _getUserRequestedPlatforms() {
     if (!argResults.wasParsed('platforms')) {
@@ -459,18 +447,7 @@ Your $application code is in $relativeAppMain.
   }
 }
 
-
-// Determine what platforms are supported based on generated files.
-List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
-  final String pubspecPath = globals.fs.path.join(projectDir.absolute.path, 'pubspec.yaml');
-  final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
-  final List<String> platforms = manifest.validSupportedPlatforms == null
-    ? <String>[]
-    : manifest.validSupportedPlatforms.keys.toList();
-  return platforms;
-}
-
-void _printPluginDirectoryLocationMessage(String pluginPath, String projectName, String platformsString) {
+void printPluginDirectoryLocationMessage(String pluginPath, String projectName, String platformsString) {
   final String relativePluginMain = globals.fs.path.join(pluginPath, 'lib', '$projectName.dart');
   final String relativeExampleMain = globals.fs.path.join(pluginPath, 'example', 'lib', 'main.dart');
   globals.printStatus('''
@@ -487,15 +464,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
     ''');
   }
-}
-
-void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
-  globals.printStatus('''
-
-You need to update $pluginPath/pubspec.yaml to support $platformsString.
-For more information, see https://flutter.dev/go/developing-plugins.
-
-''', emphasis: true, color: TerminalColor.red);
 }
 
 const String _kNoPlatformsArgMessage = '''

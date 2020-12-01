@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
@@ -121,10 +123,10 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
   @protected
-  void addPlatformsOptions({String customHelp}) {
+  void addPlatformsOptions({String customHelp, List<String> defaultPlatforms}) {
     argParser.addMultiOption('platforms',
         help: customHelp ?? _kDefaultPlatformArgumentHelp,
-        defaultsTo: _kAvailablePlatforms,
+        defaultsTo: defaultPlatforms,
         allowed: _kAvailablePlatforms);
   }
 
@@ -423,6 +425,24 @@ abstract class CreateBase extends FlutterCommand {
     return generatedCount;
   }
 
+  /// Converts all platforms in `templateContext` into a [List] and returns it.
+  List<String> getSupportedPlatformsFromTemplateContext(Map<String, dynamic> templateContext) {
+    return <String>[
+      if (templateContext['ios'] == true)
+        'ios',
+      if (templateContext['android'] == true)
+        'android',
+      if (templateContext['web'] == true)
+        'web',
+      if (templateContext['linux'] == true)
+        'linux',
+      if (templateContext['windows'] == true)
+        'windows',
+      if (templateContext['macos'] == true)
+        'macos',
+    ];
+  }
+
   /// Creates an android identifier.
   ///
   /// Android application ID is specified in: https://developer.android.com/studio/build/application-id
@@ -478,6 +498,36 @@ abstract class CreateBase extends FlutterCommand {
     return segments.join('.');
   }
 
+  /// Prints the directory information of generated plugins.
+  void printPluginDirectoryLocationMessage(String pluginPath, String projectName, String platformsString) {
+    final String relativePluginMain = globals.fs.path.join(pluginPath, 'lib', '$projectName.dart');
+    final String relativeExampleMain = globals.fs.path.join(pluginPath, 'example', 'lib', 'main.dart');
+    globals.printStatus('''
+
+    Your plugin code is in $relativePluginMain.
+
+    You example app code is in $relativeExampleMain.
+
+    ''');
+    if (platformsString != null && platformsString.isNotEmpty) {
+      globals.printStatus('''
+    Host platform code is in the $platformsString directories under $pluginPath.
+    To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
+
+      ''');
+    }
+  }
+
+  /// Prints a message about how to update pubspec for plugins.
+  void printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
+    globals.printStatus('''
+
+You need to update $pluginPath/pubspec.yaml to support $platformsString.
+For more information, see https://flutter.dev/go/developing-plugins.
+
+''', emphasis: true, color: TerminalColor.red);
+}
+
   Set<Uri> get _templateManifest =>
       __templateManifest ??= _computeTemplateManifest();
   Set<Uri> __templateManifest;
@@ -516,6 +566,16 @@ abstract class CreateBase extends FlutterCommand {
       },
     );
     return filesCreated;
+  }
+
+  /// Determine what platforms are supported based on generated files.
+  List<String> getSupportedPlatformsInPlugin(Directory projectDir) {
+    final String pubspecPath = globals.fs.path.join(projectDir.absolute.path, 'pubspec.yaml');
+    final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
+    final List<String> platforms = manifest.validSupportedPlatforms == null
+      ? <String>[]
+      : manifest.validSupportedPlatforms.keys.toList();
+    return platforms;
   }
 }
 
