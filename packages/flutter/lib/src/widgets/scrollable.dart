@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -628,25 +629,35 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // SCROLL WHEEL
 
+  // Returns the offset that should result from applying [event] to the current
+  // position, taking min/max scroll extent into account.
+  double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
+    final double delta = _pointerSignalEventDelta(event);
+    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
+      position.maxScrollExtent);
+  }
+
   // Returns the delta that should result from applying [event] with axis and
   // direction taken into account.
-  double _targetScrollDeltaForPointerScroll(PointerScrollEvent event) {
+  double _pointerSignalEventDelta(PointerScrollEvent event) {
     double delta = widget.axis == Axis.horizontal
-        ? event.scrollDelta.dx
-        : event.scrollDelta.dy;
+      ? event.scrollDelta.dx
+      : event.scrollDelta.dy;
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
     }
-
     return delta;
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
-      final double targetScrollOffset = _targetScrollDeltaForPointerScroll(event);
+      if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
+        return;
+      }
+      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
-      if (targetScrollOffset != 0) {
+      if (targetScrollOffset != position.pixels) {
         GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
@@ -654,12 +665,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
-      return;
-    }
-    final double targetScrollOffset = _targetScrollDeltaForPointerScroll(event as PointerScrollEvent);
-    if (targetScrollOffset != 0) {
-      position.pointerScroll(targetScrollOffset);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
+    if (targetScrollOffset != position.pixels) {
+      position.pointerScroll(_pointerSignalEventDelta(event));
     }
   }
 

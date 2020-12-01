@@ -14,9 +14,9 @@ import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config_types.dart';
 
-import '../src/common.dart';
-import '../src/context.dart';
-import '../src/testbed.dart';
+import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',

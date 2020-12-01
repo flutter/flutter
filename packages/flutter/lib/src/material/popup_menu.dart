@@ -150,6 +150,14 @@ class _RenderMenuItem extends RenderShiftedBox {
   ValueChanged<Size> onLayout;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return Size.zero;
+    }
+    return child!.getDryLayout(constraints);
+  }
+
+  @override
   void performLayout() {
     if (child == null) {
       size = Size.zero;
