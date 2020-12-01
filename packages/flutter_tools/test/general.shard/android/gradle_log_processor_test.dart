@@ -28,14 +28,14 @@ BUILD FAILED in 24s
 '''.split('\n');
 
 void main() {
-  testUsingContext('Does not print failure footer in non-verbose mode', () async {
+  testWithoutContext('Does not print failure footer in non-verbose mode', () async {
     final GradleLogProcessor gradleLogProcessor = GradleLogProcessor(<GradleHandledError>[], false);
 
     expect(gradleErrorOutputLines.map(gradleLogProcessor.consumeLog).where((String line) => line != null), <String>['Some other stuff.']);
     expect(gradleLogProcessor.atFailureFooter, true);
   });
 
-  testUsingContext('Does print failure footer in verbose mode', () async {
+  testWithoutContext('Does print failure footer in verbose mode', () async {
     final GradleLogProcessor gradleLogProcessor = GradleLogProcessor(<GradleHandledError>[], true);
 
     expect(gradleErrorOutputLines.map(gradleLogProcessor.consumeLog).where((String line) => line != null), gradleErrorOutputLines);
