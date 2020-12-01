@@ -264,6 +264,9 @@ void collectLanguageVersionEvents(
   String currentPackage,
   Usage flutterUsage,
 ) {
+  if (packageConfig.packages.isEmpty) {
+    return;
+  }
   int migrated = 0;
   LanguageVersion languageVersion;
   for (final Package package in packageConfig.packages) {
