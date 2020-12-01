@@ -275,7 +275,7 @@ void collectLanguageVersionEvents(
       migrated += 1;
     }
   }
-  final int formattedPercentage = (migrated / packageConfig.packages.length * 100).round()
+  final int formattedPercentage = (migrated / packageConfig.packages.length * 100).round();
   flutterUsage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: nullSafetyMode.toString());
   flutterUsage.sendEvent(kNullSafetyCategory, 'migrated', value: formattedPercentage);
   if (languageVersion != null) {
