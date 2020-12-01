@@ -16,6 +16,11 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
+const TextStyle _kDefaultPlaceholderStyle = TextStyle(
+  fontWeight: FontWeight.w400,
+  color: CupertinoColors.placeholderText,
+);
+
 // Value inspected from Xcode 11 & iOS 13.0 Simulator.
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
   color: CupertinoDynamicColor.withBrightness(
@@ -228,6 +233,148 @@ class CupertinoTextField extends StatefulWidget {
       fontWeight: FontWeight.w400,
       color: CupertinoColors.placeholderText,
     ),
+    this.prefix,
+    this.prefixMode = OverlayVisibilityMode.always,
+    this.suffix,
+    this.suffixMode = OverlayVisibilityMode.always,
+    this.clearButtonMode = OverlayVisibilityMode.never,
+    TextInputType? keyboardType,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.style,
+    this.strutStyle,
+    this.textAlign = TextAlign.start,
+    this.textAlignVertical,
+    this.readOnly = false,
+    ToolbarOptions? toolbarOptions,
+    this.showCursor,
+    this.autofocus = false,
+    this.obscuringCharacter = '•',
+    this.obscureText = false,
+    this.autocorrect = true,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    this.enableSuggestions = true,
+    this.maxLines = 1,
+    this.minLines,
+    this.expands = false,
+    this.maxLength,
+    this.maxLengthEnforced = true,
+    this.onChanged,
+    this.onEditingComplete,
+    this.onSubmitted,
+    this.inputFormatters,
+    this.enabled,
+    this.cursorWidth = 2.0,
+    this.cursorHeight,
+    this.cursorRadius = const Radius.circular(2.0),
+    this.cursorColor,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.keyboardAppearance,
+    this.scrollPadding = const EdgeInsets.all(20.0),
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.enableInteractiveSelection = true,
+    this.selectionControls,
+    this.onTap,
+    this.scrollController,
+    this.scrollPhysics,
+    this.autofillHints,
+    this.restorationId,
+  }) : assert(textAlign != null),
+       assert(readOnly != null),
+       assert(autofocus != null),
+       // TODO(a14n): uncomment when issue is fixed, https://github.com/dart-lang/sdk/issues/43407
+       assert(obscuringCharacter != null/* && obscuringCharacter.length == 1*/),
+       assert(obscureText != null),
+       assert(autocorrect != null),
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       assert(enableSuggestions != null),
+       assert(maxLengthEnforced != null),
+       assert(scrollPadding != null),
+       assert(dragStartBehavior != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
+       assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         "minLines can't be greater than maxLines",
+       ),
+       assert(expands != null),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+       assert(maxLength == null || maxLength > 0),
+       assert(clearButtonMode != null),
+       assert(prefixMode != null),
+       assert(suffixMode != null),
+       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+       assert(!identical(textInputAction, TextInputAction.newline) ||
+         maxLines == 1 ||
+         !identical(keyboardType, TextInputType.text),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
+       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       toolbarOptions = toolbarOptions ?? (obscureText ?
+         const ToolbarOptions(
+           selectAll: true,
+           paste: true,
+         ) :
+         const ToolbarOptions(
+           copy: true,
+           cut: true,
+           selectAll: true,
+           paste: true,
+         )),
+       super(key: key);
+
+  /// Creates a borderless iOS-style text field.
+  ///
+  /// To provide a prefilled text entry, pass in a [TextEditingController] with
+  /// an initial value to the [controller] parameter.
+  ///
+  /// To provide a hint placeholder text that appears when the text entry is
+  /// empty, pass a [String] to the [placeholder] parameter.
+  ///
+  /// The [maxLines] property can be set to null to remove the restriction on
+  /// the number of lines. In this mode, the intrinsic height of the widget will
+  /// grow as the number of lines of text grows. By default, it is `1`, meaning
+  /// this is a single-line text field and will scroll horizontally when
+  /// overflown. [maxLines] must not be zero.
+  ///
+  /// The text cursor is not shown if [showCursor] is false or if [showCursor]
+  /// is null (the default) and [readOnly] is true.
+  ///
+  /// If specified, the [maxLength] property must be greater than zero.
+  ///
+  /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
+  /// changing the shape of the selection highlighting. These properties default
+  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
+  /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
+  /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
+  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
+  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [minLines], which is the minimum number of lines to occupy when the
+  ///    content spans fewer lines.
+  ///  * [expands], to allow the widget to size itself to its parent's height.
+  ///  * [maxLength], which discusses the precise meaning of "number of
+  ///    characters" and how it may differ from the intuitive meaning.
+  const CupertinoTextField.borderless({
+    Key? key,
+    this.controller,
+    this.focusNode,
+    this.decoration,
+    this.padding = const EdgeInsets.all(6.0),
+    this.placeholder,
+    this.placeholderStyle = _kDefaultPlaceholderStyle,
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
