@@ -142,6 +142,7 @@ class FlutterTesterDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
+    HostPlatform hostPlatform, // used for test.
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
@@ -160,7 +161,7 @@ class FlutterTesterDevice extends Device {
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
-      platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
+      platform: getTargetPlatformForName(getNameForHostPlatform(hostPlatform ?? getCurrentHostPlatform())),
       treeShakeIcons: buildInfo.treeShakeIcons,
     );
 
