@@ -12,6 +12,10 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'plugins.dart';
 
+const Set<String> _kValidPluginPlatforms = <String>{
+  'android', 'ios', 'web', 'windows', 'linux', 'macos'
+};
+
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
   FlutterManifest._(this._logger);
@@ -197,6 +201,20 @@ class FlutterManifest {
       }
     }
     return null;
+  }
+
+  /// Like [supportedPlatforms], but only returns the valid platforms that are supported in flutter plugins.
+  Map<String, dynamic> get validSupportedPlatforms {
+    final Map<String, dynamic> allPlatforms = supportedPlatforms;
+    if (allPlatforms == null) {
+      return null;
+    }
+    final Map<String, dynamic> platforms = <String, dynamic>{}..addAll(supportedPlatforms);
+    platforms.removeWhere((String key, dynamic _) => !_kValidPluginPlatforms.contains(key));
+    if (platforms.isEmpty) {
+      return null;
+    }
+    return platforms;
   }
 
   List<Map<String, dynamic>> get fontsDescriptor {
