@@ -544,8 +544,12 @@ include ':app'
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: TargetPlatform.android_arm,
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'android_arm'));
 
       final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
@@ -1689,8 +1693,12 @@ plugin1=${plugin1.path}
     });
 
     testUsingContext('build apk uses selected local engine,the engine abi is arm', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: TargetPlatform.android_arm,
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_arm'));
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
@@ -1782,8 +1790,12 @@ plugin1=${plugin1.path}
 
     testUsingContext(
         'build apk uses selected local engine,the engine abi is arm64', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_arm64'));
 
       fileSystem.file('out/android_arm64/flutter_embedding_release.pom')
@@ -1875,8 +1887,12 @@ plugin1=${plugin1.path}
 
     testUsingContext(
         'build apk uses selected local engine,the engine abi is x86', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_x86'));
 
       fileSystem.file('out/android_x86/flutter_embedding_release.pom')
@@ -1968,8 +1984,12 @@ plugin1=${plugin1.path}
 
     testUsingContext(
         'build apk uses selected local engine,the engine abi is x64', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_x64'));
 
       fileSystem.file('out/android_x64/flutter_embedding_release.pom')
@@ -2113,8 +2133,12 @@ plugin1=${plugin1.path}
     });
 
     testUsingContext('build aar uses selected local engine，the engine abi is arm', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: TargetPlatform.android_arm,
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_arm'));
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
@@ -2210,8 +2234,12 @@ plugin1=${plugin1.path}
 
     testUsingContext(
         'build aar uses selected local engine，the engine abi is arm64', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_arm64'));
 
       fileSystem.file('out/android_arm64/flutter_embedding_release.pom')
@@ -2308,8 +2336,12 @@ plugin1=${plugin1.path}
 
     testUsingContext(
         'build aar uses selected local engine，the engine abi is x86', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_x86'));
 
       fileSystem.file('out/android_x86/flutter_embedding_release.pom')
@@ -2406,8 +2438,12 @@ plugin1=${plugin1.path}
 
     testUsingContext(
         'build aar uses selected local engine，the engine abi is x64', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+        environmentType: anyNamed('environmentType'),
+      )).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_x64'));
 
       fileSystem.file('out/android_x64/flutter_embedding_release.pom')
