@@ -549,9 +549,10 @@ class PlatformDispatcher {
   /// This is the first locale selected by the user and is the user's primary
   /// locale (the locale the device UI is displayed in)
   ///
-  /// This is equivalent to `locales.first` and will provide an empty non-null
-  /// locale if the [locales] list has not been set or is empty.
-  Locale get locale => locales.first;
+  /// This is equivalent to `locales.first`, except that it will provide an
+  /// undefined (using the language tag "und") non-null locale if the [locales]
+  /// list has not been set or is empty.
+  Locale get locale => locales.isEmpty ? const Locale.fromSubtags() : locales.first;
 
   /// The full system-reported supported locales of the device.
   ///
@@ -1317,6 +1318,10 @@ class Locale {
   /// [script](https://github.com/unicode-org/cldr/blob/master/common/validity/script.xml) and
   /// [region](https://github.com/unicode-org/cldr/blob/master/common/validity/region.xml) for
   /// each of languageCode, scriptCode and countryCode respectively.
+  ///
+  /// The [languageCode] subtag is optional. When there is no language subtag,
+  /// the parameter should be omitted or set to "und". When not supplied, the
+  /// [languageCode] defaults to "und", an undefined language code.
   ///
   /// The [countryCode] subtag is optional. When there is no country subtag,
   /// the parameter should be omitted or passed `null` instead of an empty-string.
