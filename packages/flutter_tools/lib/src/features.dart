@@ -134,15 +134,19 @@ const Feature flutterWebFeature = Feature(
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: flutterNext,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: flutterNext,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: flutterNext,
   ),
 );
 
@@ -378,3 +382,5 @@ class FeatureChannelSetting {
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
 }
+
+const bool flutterNext = false;
