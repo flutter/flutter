@@ -125,6 +125,7 @@ android_java_sources = [
   "io/flutter/app/FlutterActivityEvents.java",
   "io/flutter/app/FlutterApplication.java",
   "io/flutter/app/FlutterFragmentActivity.java",
+  "io/flutter/app/FlutterPlayStoreSplitApplication.java",
   "io/flutter/app/FlutterPluginRegistry.java",
   "io/flutter/embedding/android/AndroidKeyProcessor.java",
   "io/flutter/embedding/android/AndroidTouchProcessor.java",
