@@ -12,6 +12,7 @@ import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals hide fs, logger, processManager, artifacts;
+import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -267,10 +268,16 @@ abstract class UnpackIOS extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    if (environment.defines[kSdkRoot] == null) {
+      throw MissingDefineException(kSdkRoot, name);
+    }
+    final Directory sdkRoot = environment.fileSystem.directory(environment.defines[kSdkRoot]);
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
       platform: TargetPlatform.ios,
       mode: buildMode,
+      environmentType: environmentType,
     );
 
     final ProcessResult result = environment.processManager.runSync(<String>[
