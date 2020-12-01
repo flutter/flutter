@@ -285,13 +285,22 @@ class InputConnectionAdaptor extends BaseInputConnection
     return clamped;
   }
 
+  // This function is called both when hardware key events occur and aren't
+  // handled by the framework, as well as when soft keyboard editing events
+  // occur, and need a chance to be handled by the framework.
   @Override
   public boolean sendKeyEvent(KeyEvent event) {
-    // Give the key processor a chance to process this event.  It will send it
-    // to the framework to be handled and return true. If the framework ends up
-    // not handling it, the processor will re-send the event, this time
-    // returning false so that it can be processed here.
-    if (keyProcessor != null && keyProcessor.onKeyEvent(event)) {
+    // This gives the key processor a chance to process this event if it came
+    // from a soft keyboard. It will send it to the framework to be handled and
+    // return true. If the framework ends up not handling it, the processor will
+    // re-send the event to this function. Only do this if the event is not the
+    // current event, since that indicates that the key processor sent it to us,
+    // and we only want to call the key processor for events that it doesn't
+    // already know about (i.e. when events arrive here from a soft keyboard and
+    // not a hardware keyboard), to avoid a loop.
+    if (keyProcessor != null
+        && !keyProcessor.isCurrentEvent(event)
+        && keyProcessor.onKeyEvent(event)) {
       return true;
     }
 

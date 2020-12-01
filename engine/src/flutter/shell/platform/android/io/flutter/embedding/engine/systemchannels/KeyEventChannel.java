@@ -43,19 +43,17 @@ public class KeyEventChannel {
     /**
      * Called whenever the framework responds that a given key event was handled by the framework.
      *
-     * @param id the event id of the event to be marked as being handled by the framework. Must not
-     *     be null.
+     * @param event the event to be marked as being handled by the framework. Must not be null.
      */
-    public void onKeyEventHandled(long id);
+    public void onKeyEventHandled(KeyEvent event);
 
     /**
      * Called whenever the framework responds that a given key event wasn't handled by the
      * framework.
      *
-     * @param id the event id of the event to be marked as not being handled by the framework. Must
-     *     not be null.
+     * @param event the event to be marked as not being handled by the framework. Must not be null.
      */
-    public void onKeyEventNotHandled(long id);
+    public void onKeyEventNotHandled(KeyEvent event);
   }
 
   /**
@@ -69,11 +67,11 @@ public class KeyEventChannel {
   }
 
   /**
-   * Creates a reply handler for this an event with the given eventId.
+   * Creates a reply handler for the given key event.
    *
-   * @param eventId the event ID to create a reply for.
+   * @param event the Android key event to create a reply for.
    */
-  BasicMessageChannel.Reply<Object> createReplyHandler(long eventId) {
+  BasicMessageChannel.Reply<Object> createReplyHandler(KeyEvent event) {
     return message -> {
       if (eventResponseHandler == null) {
         return;
@@ -81,19 +79,19 @@ public class KeyEventChannel {
 
       try {
         if (message == null) {
-          eventResponseHandler.onKeyEventNotHandled(eventId);
+          eventResponseHandler.onKeyEventNotHandled(event);
           return;
         }
         final JSONObject annotatedEvent = (JSONObject) message;
         final boolean handled = annotatedEvent.getBoolean("handled");
         if (handled) {
-          eventResponseHandler.onKeyEventHandled(eventId);
+          eventResponseHandler.onKeyEventHandled(event);
         } else {
-          eventResponseHandler.onKeyEventNotHandled(eventId);
+          eventResponseHandler.onKeyEventNotHandled(event);
         }
       } catch (JSONException e) {
         Log.e(TAG, "Unable to unpack JSON message: " + e);
-        eventResponseHandler.onKeyEventNotHandled(eventId);
+        eventResponseHandler.onKeyEventNotHandled(event);
       }
     };
   }
@@ -106,7 +104,7 @@ public class KeyEventChannel {
     message.put("keymap", "android");
     encodeKeyEvent(keyEvent, message);
 
-    channel.send(message, createReplyHandler(keyEvent.eventId));
+    channel.send(message, createReplyHandler(keyEvent.event));
   }
 
   public void keyDown(@NonNull FlutterKeyEvent keyEvent) {
@@ -115,176 +113,58 @@ public class KeyEventChannel {
     message.put("keymap", "android");
     encodeKeyEvent(keyEvent, message);
 
-    channel.send(message, createReplyHandler(keyEvent.eventId));
+    channel.send(message, createReplyHandler(keyEvent.event));
   }
 
   private void encodeKeyEvent(
-      @NonNull FlutterKeyEvent event, @NonNull Map<String, Object> message) {
-    message.put("flags", event.flags);
-    message.put("plainCodePoint", event.plainCodePoint);
-    message.put("codePoint", event.codePoint);
-    message.put("keyCode", event.keyCode);
-    message.put("scanCode", event.scanCode);
-    message.put("metaState", event.metaState);
-    if (event.complexCharacter != null) {
-      message.put("character", event.complexCharacter.toString());
+      @NonNull FlutterKeyEvent keyEvent, @NonNull Map<String, Object> message) {
+    message.put("flags", keyEvent.event.getFlags());
+    message.put("plainCodePoint", keyEvent.event.getUnicodeChar(0x0));
+    message.put("codePoint", keyEvent.event.getUnicodeChar());
+    message.put("keyCode", keyEvent.event.getKeyCode());
+    message.put("scanCode", keyEvent.event.getScanCode());
+    message.put("metaState", keyEvent.event.getMetaState());
+    if (keyEvent.complexCharacter != null) {
+      message.put("character", keyEvent.complexCharacter.toString());
     }
-    message.put("source", event.source);
-    message.put("vendorId", event.vendorId);
-    message.put("productId", event.productId);
-    message.put("deviceId", event.deviceId);
-    message.put("repeatCount", event.repeatCount);
+    message.put("source", keyEvent.event.getSource());
+    InputDevice device = InputDevice.getDevice(keyEvent.event.getDeviceId());
+    int vendorId = 0;
+    int productId = 0;
+    if (device != null) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        vendorId = device.getVendorId();
+        productId = device.getProductId();
+      }
+    }
+    message.put("vendorId", vendorId);
+    message.put("productId", productId);
+    message.put("deviceId", keyEvent.event.getDeviceId());
+    message.put("repeatCount", keyEvent.event.getRepeatCount());
   }
 
   /** A key event as defined by Flutter. */
   public static class FlutterKeyEvent {
     /**
-     * The id for the device this event came from.
+     * The Android key event that this Flutter key event was created from.
      *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getDeviceId()">KeyEvent.getDeviceId()</a>
+     * <p>This event is used to identify pending events when results are received from the
+     * framework.
      */
-    public final int deviceId;
-    /**
-     * The flags for this key event.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getFlags()">KeyEvent.getFlags()</a>
-     */
-    public final int flags;
-    /**
-     * The code point for the Unicode character produced by this event if no meta keys were pressed
-     * (by passing 0 to {@code KeyEvent.getUnicodeChar(int)}).
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getUnicodeChar(int)">KeyEvent.getUnicodeChar(int)</a>
-     */
-    public final int plainCodePoint;
-    /**
-     * The code point for the Unicode character produced by this event, taking into account the meta
-     * keys currently pressed.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getUnicodeChar()">KeyEvent.getUnicodeChar()</a>
-     */
-    public final int codePoint;
-    /**
-     * The Android key code for this event.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getKeyCode()">KeyEvent.getKeyCode()</a>
-     */
-    public final int keyCode;
+    public final KeyEvent event;
     /**
      * The character produced by this event, including any combining characters pressed before it.
      */
     @Nullable public final Character complexCharacter;
-    /**
-     * The Android scan code for the key pressed.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getScanCode()">KeyEvent.getScanCode()</a>
-     */
-    public final int scanCode;
-    /**
-     * The meta key state for the Android key event.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getMetaState()">KeyEvent.getMetaState()</a>
-     */
-    public final int metaState;
-    /**
-     * The source of the key event.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getSource()">KeyEvent.getSource()</a>
-     */
-    public final int source;
-    /**
-     * The vendorId of the device that produced this key event.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/InputDevice?hl=en#getVendorId()">InputDevice.getVendorId()</a>
-     */
-    public final int vendorId;
-    /**
-     * The productId of the device that produced this key event.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/InputDevice?hl=en#getProductId()">InputDevice.getProductId()</a>
-     */
-    public final int productId;
-    /**
-     * The repeat count for this event.
-     *
-     * @see <a
-     *     href="https://developer.android.com/reference/android/view/KeyEvent?hl=en#getRepeatCount()">KeyEvent.getRepeatCount()</a>
-     */
-    public final int repeatCount;
-    /**
-     * The unique id for this Flutter key event.
-     *
-     * <p>This id is used to identify pending events when results are received from the framework.
-     * This ID does not come from Android.
-     */
-    public final long eventId;
 
-    public FlutterKeyEvent(@NonNull KeyEvent androidKeyEvent, long eventId) {
-      this(androidKeyEvent, null, eventId);
+    public FlutterKeyEvent(@NonNull KeyEvent androidKeyEvent) {
+      this(androidKeyEvent, null);
     }
 
     public FlutterKeyEvent(
-        @NonNull KeyEvent androidKeyEvent, @Nullable Character complexCharacter, long eventId) {
-      this(
-          androidKeyEvent.getDeviceId(),
-          androidKeyEvent.getFlags(),
-          androidKeyEvent.getUnicodeChar(0x0),
-          androidKeyEvent.getUnicodeChar(),
-          androidKeyEvent.getKeyCode(),
-          complexCharacter,
-          androidKeyEvent.getScanCode(),
-          androidKeyEvent.getMetaState(),
-          androidKeyEvent.getSource(),
-          androidKeyEvent.getRepeatCount(),
-          eventId);
-    }
-
-    public FlutterKeyEvent(
-        int deviceId,
-        int flags,
-        int plainCodePoint,
-        int codePoint,
-        int keyCode,
-        @Nullable Character complexCharacter,
-        int scanCode,
-        int metaState,
-        int source,
-        int repeatCount,
-        long eventId) {
-      this.deviceId = deviceId;
-      this.flags = flags;
-      this.plainCodePoint = plainCodePoint;
-      this.codePoint = codePoint;
-      this.keyCode = keyCode;
+        @NonNull KeyEvent androidKeyEvent, @Nullable Character complexCharacter) {
+      this.event = androidKeyEvent;
       this.complexCharacter = complexCharacter;
-      this.scanCode = scanCode;
-      this.metaState = metaState;
-      this.source = source;
-      this.repeatCount = repeatCount;
-      this.eventId = eventId;
-      InputDevice device = InputDevice.getDevice(deviceId);
-      if (device != null) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-          this.vendorId = device.getVendorId();
-          this.productId = device.getProductId();
-        } else {
-          this.vendorId = 0;
-          this.productId = 0;
-        }
-      } else {
-        this.vendorId = 0;
-        this.productId = 0;
-      }
     }
   }
 }

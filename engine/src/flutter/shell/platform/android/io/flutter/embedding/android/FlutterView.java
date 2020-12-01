@@ -739,11 +739,6 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     } else if (event.getAction() == KeyEvent.ACTION_UP) {
       // Stop tracking the event.
       getKeyDispatcherState().handleUpEvent(event);
-      if (!event.isTracking() || event.isCanceled()) {
-        // Don't send the event to the key processor if it was canceled, or no
-        // longer being tracked.
-        return super.dispatchKeyEvent(event);
-      }
     }
     // If the key processor doesn't handle it, then send it on to the
     // superclass. The key processor will typically handle all events except
