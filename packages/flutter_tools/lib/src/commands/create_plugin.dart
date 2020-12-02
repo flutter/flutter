@@ -14,6 +14,8 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
+const String _kNoPlatformsMessage = 'Must specify at least one platform using --platforms.';
+
 /// A command that creates plugin projects.
 class CreatePluginCommand extends CreateBase {
   CreatePluginCommand() {
@@ -44,15 +46,13 @@ class CreatePluginCommand extends CreateBase {
     validateOutputDirectoryArg();
 
     final List<String> platforms = stringsArg('platforms');
-    if (platforms == null || platforms.isEmpty) {
-      throwToolExit('Must specify at least one platform using --platforms',
-        exitCode: 2);
-    }
+    _validateRequestedPlatforms(platforms);
 
     final String organization = await getOrganization();
 
     final bool overwrite = boolArg('overwrite');
     validateProjectDir(overwrite: overwrite);
+
 
     final Map<String, dynamic> templateContext = createTemplateContext(
       organization: organization,
@@ -64,10 +64,10 @@ class CreatePluginCommand extends CreateBase {
       iosLanguage: stringArg('ios-language'),
       ios: platforms.contains('ios'),
       android: platforms.contains('android'),
-      web: featureFlags.isWebEnabled && platforms.contains('web'),
-      linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
-      macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
-      windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
+      web: platforms.contains('web'),
+      linux: platforms.contains('linux'),
+      macos: platforms.contains('macos'),
+      windows: platforms.contains('windows'),
     );
 
     // TODO(cyanglaz): remove this when `flutter create -t plugin` is completely removed.
@@ -146,5 +146,35 @@ class CreatePluginCommand extends CreateBase {
 
     generatedCount += await generateApp(project.example.directory, templateContext, overwrite: overwrite, pluginExampleApp: true);
     return generatedCount;
+  }
+
+  void _validateRequestedPlatforms(List<String> platforms) {
+    if (platforms == null || platforms.isEmpty) {
+      throwToolExit(_kNoPlatformsMessage,
+        exitCode: 2);
+    }
+    final List<String> disabledPlatforms = <String>[];
+    if (platforms.contains('web') && !featureFlags.isWebEnabled) {
+      disabledPlatforms.add('web');
+    }
+    if (platforms.contains('linux') && !featureFlags.isLinuxEnabled) {
+      disabledPlatforms.add('linux');
+    }
+    if (platforms.contains('macos') && !featureFlags.isMacOSEnabled) {
+      disabledPlatforms.add('macos');
+    }
+    if (platforms.contains('windows') && !featureFlags.isWindowsEnabled) {
+      disabledPlatforms.add('windows');
+    }
+    if (disabledPlatforms.isEmpty) {
+      return;
+    }
+    throwToolExit('''
+Requested platforms: $disabledPlatforms were disabled.
+For more information on desktop platforms, see https://flutter.dev/desktop#set-up.
+For more information on web, see https://flutter.dev/docs/get-started/web#set-up.
+
+''', exitCode: 2);
+
   }
 }
