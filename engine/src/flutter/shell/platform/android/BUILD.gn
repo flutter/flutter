@@ -403,7 +403,10 @@ action("pom_libflutter") {
   artifact_id =
       string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
 
-  outputs = [ "$root_build_dir/$artifact_id.pom" ]
+  outputs = [
+    "$root_build_dir/$artifact_id.pom",
+    "$root_build_dir/$artifact_id.maven-metadata.xml",
+  ]
 
   args = [
     "--destination",
@@ -422,7 +425,10 @@ action("pom_embedding") {
 
   artifact_id = "flutter_embedding_$flutter_runtime_mode"
 
-  outputs = [ "$root_build_dir/$artifact_id.pom" ]
+  outputs = [
+    "$root_build_dir/$artifact_id.pom",
+    "$root_build_dir/$artifact_id.maven-metadata.xml",
+  ]
 
   args = [
     "--destination",
