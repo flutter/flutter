@@ -83,4 +83,42 @@ void main() {
     pumpFrame();
     expect(root.size, equals(inner.size));
   });
+
+  group('When RenderObject.debugCheckingIntrinsics is true', () {
+    setUp(() => RenderObject.debugCheckingIntrinsics = true);
+    tearDown(() => RenderObject.debugCheckingIntrinsics = false);
+    test('parent returns correct intrinsics', () {
+      RenderParentSize parent;
+      RenderFixedSize inner;
+      layout(
+        RenderIntrinsicSize(
+          child: parent = RenderParentSize(
+            child: inner = RenderFixedSize()
+          )
+        ),
+        constraints: const BoxConstraints(
+          minWidth: 0.0,
+          minHeight: 0.0,
+          maxWidth: 1000.0,
+          maxHeight: 1000.0,
+        ),
+      );
+
+      _expectIntrinsicDimensions(parent, 100);
+
+      inner.grow();
+      pumpFrame();
+
+      _expectIntrinsicDimensions(parent, 200);
+    });
+  });
+}
+
+/// Asserts that all unbounded intrinsic dimensions for [object] match
+/// [dimension].
+void _expectIntrinsicDimensions(RenderBox object, double dimension) {
+  expect(object.getMinIntrinsicWidth(double.infinity), equals(dimension));
+  expect(object.getMaxIntrinsicWidth(double.infinity), equals(dimension));
+  expect(object.getMinIntrinsicHeight(double.infinity), equals(dimension));
+  expect(object.getMaxIntrinsicHeight(double.infinity), equals(dimension));
 }
