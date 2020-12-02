@@ -5,7 +5,7 @@
 #ifndef FLUTTER_BENCHMARKING_BENCHMARKING_H_
 #define FLUTTER_BENCHMARKING_BENCHMARKING_H_
 
-#include "benchmark/benchmark.h"
+#include "benchmark/benchmark_api.h"
 
 namespace benchmarking {
 
