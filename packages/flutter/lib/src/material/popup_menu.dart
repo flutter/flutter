@@ -1102,20 +1102,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     }
   }
 
-  Icon _getIcon(TargetPlatform platform) {
-    assert(platform != null);
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return const Icon(Icons.more_vert);
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return const Icon(Icons.more_horiz);
-    }
-  }
-
   bool get _canRequestFocus {
     final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
     switch (mode) {
@@ -1146,7 +1132,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       );
 
     return IconButton(
-      icon: widget.icon ?? _getIcon(Theme.of(context).platform),
+      icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,

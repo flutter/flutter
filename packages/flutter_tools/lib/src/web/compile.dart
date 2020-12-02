@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
@@ -19,10 +16,6 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../web/memory_fs.dart';
-
-/// The [WebCompilationProxy] instance.
-WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
 Future<void> buildWeb(
   FlutterProject flutterProject,
@@ -89,23 +82,6 @@ Future<void> buildWeb(
     status.stop();
   }
   globals.flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
-}
-
-/// An indirection on web compilation.
-///
-/// Avoids issues with syncing build_runner_core to other repos.
-class WebCompilationProxy {
-  const WebCompilationProxy();
-
-  /// Initialize the web compiler from the `projectDirectory`.
-  Future<WebMemoryFS> initialize({
-    @required Directory projectDirectory,
-    @required String testOutputDir,
-    @required List<String> testFiles,
-    @required BuildInfo buildInfo,
-  }) async {
-    throw UnimplementedError();
-  }
 }
 
 /// Web rendering backend mode.

@@ -139,12 +139,13 @@ class FlutterDevice {
     } else {
       // The flutter-widget-cache feature only applies to run mode.
       List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      if (featureFlags.isSingleWidgetReloadEnabled) {
-        extraFrontEndOptions = <String>[
-          '--flutter-widget-cache',
-          ...?extraFrontEndOptions,
-        ];
-      }
+      extraFrontEndOptions = <String>[
+        if (featureFlags.isSingleWidgetReloadEnabled)
+         '--flutter-widget-cache',
+        if (featureFlags.isExperimentalInvalidationStrategyEnabled)
+          '--enable-experiment=alternative-invalidation-strategy',
+        ...?extraFrontEndOptions,
+      ];
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(
           Artifact.flutterPatchedSdkPath,

@@ -18,6 +18,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
+import '../web/web_device.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -109,6 +110,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: "List the special 'flutter-tester' device in device listings. "
               'This headless device is used to\ntest Flutter tooling.');
+    argParser.addFlag('show-web-server-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: "List the special 'web-server' device in device listings. "
+    );
   }
 
   @override
@@ -203,6 +209,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (topLevelResults['show-test-device'] as bool ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
+    }
+    if (topLevelResults['show-web-server-device'] as bool ||
+        topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
+      WebServerDevice.showWebServerDevice = true;
     }
 
     // Set up the tooling configuration.
