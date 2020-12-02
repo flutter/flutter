@@ -689,6 +689,12 @@ Future<void> main(List<String> rawArguments) async {
         'directory: $baseUrl$releaseFolder',
   );
   argParser.addFlag(
+    'force',
+    abbr: 'f',
+    defaultsTo: false,
+    help: 'Overwrite a previously uploaded package.',
+  );
+  argParser.addFlag(
     'help',
     defaultsTo: false,
     negatable: false,
@@ -709,14 +715,14 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   final String revision = parsedArguments['revision'] as String;
-  if (revision.isEmpty) {
+  if (revision == null) {
     errorExit('Invalid argument: --revision must be specified.');
   }
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
 
-  if ((parsedArguments['branch'] as String).isEmpty) {
+  if (parsedArguments['branch'] == null) {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
@@ -758,7 +764,7 @@ Future<void> main(List<String> rawArguments) async {
         version,
         outputFile,
       );
-      await publisher.publishArchive();
+      await publisher.publishArchive(parsedArguments['force'] as bool);
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;
