@@ -354,7 +354,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     super.didChange(value);
 
     if (_effectiveController!.text != value) {
-      _effectiveController!.text = value;
+      _effectiveController!.text = value ?? '';
     }
   }
 
@@ -362,7 +362,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   void reset() {
     super.reset();
     setState(() {
-      _effectiveController!.text = widget.initialValue;
+      _effectiveController!.text = widget.initialValue ?? '';
     });
   }
 
