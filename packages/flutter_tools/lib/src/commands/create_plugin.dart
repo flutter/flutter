@@ -150,8 +150,7 @@ class CreatePluginCommand extends CreateBase {
 
   void _validateRequestedPlatforms(List<String> platforms) {
     if (platforms == null || platforms.isEmpty) {
-      throwToolExit(_kNoPlatformsMessage,
-        exitCode: 2);
+      throwToolExit(_kNoPlatformsMessage, exitCode: 2);
     }
     final List<String> disabledPlatforms = <String>[];
     if (platforms.contains('web') && !featureFlags.isWebEnabled) {
