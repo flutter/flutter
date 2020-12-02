@@ -102,6 +102,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       options: <String>[
         'ios-framework',
         '--universal',
+        '--verbose',
         '--output=$outputDirectoryName'
       ],
     );
