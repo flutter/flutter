@@ -146,12 +146,15 @@ class StdoutHandler {
 }
 
 /// List the preconfigured build options for a given build mode.
-List<String> buildModeOptions(BuildMode mode) {
+List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
   switch (mode) {
     case BuildMode.debug:
       return <String>[
         '-Ddart.vm.profile=false',
-        '-Ddart.vm.product=false',
+        // This allows the CLI to override the value of this define for unit
+        // testing the framework.
+        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+          '-Ddart.vm.product=false',
         '--enable-asserts',
       ];
     case BuildMode.profile:
@@ -241,7 +244,7 @@ class KernelCompiler {
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
-      ...buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
@@ -672,7 +675,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--packages',
         packagesPath,
       ],
-      ...buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
       if (fileSystemRoots != null)
         for (final String root in fileSystemRoots) ...<String>[

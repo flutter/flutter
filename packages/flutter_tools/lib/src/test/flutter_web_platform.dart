@@ -146,6 +146,18 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// Uri of the test package.
   Uri get testUri => _flutterToolPackageConfig['test'].packageUriRoot;
 
+  WebRendererMode get _rendererMode  {
+    return buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')
+      ? WebRendererMode.canvaskit
+      : WebRendererMode.html;
+  }
+
+  NullSafetyMode get _nullSafetyMode {
+    return buildInfo.nullSafetyMode == NullSafetyMode.sound
+      ? NullSafetyMode.sound
+      : NullSafetyMode.unsound;
+  }
+
   final Configuration _config;
   final shelf.Server _server;
   Uri get url => _server.url;
@@ -178,13 +190,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     'dart_stack_trace_mapper.js',
   ));
 
-  File get _dartSdk => _fileSystem.file(_artifacts.getArtifactPath(kDartSdkJsArtifactMap[WebRendererMode.html][
-    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
-  ]));
+  File get _dartSdk => _fileSystem.file(
+    _artifacts.getArtifactPath(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
 
-  File get _dartSdkSourcemaps => _fileSystem.file(_artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[WebRendererMode.html][
-    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
-  ]));
+  File get _dartSdkSourcemaps => _fileSystem.file(
+    _artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
