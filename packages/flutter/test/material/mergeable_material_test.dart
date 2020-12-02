@@ -1110,9 +1110,11 @@ void main() {
       ),
     );
 
-    List<Widget> animatedContainer = tester.widgetList(find.byType(AnimatedContainer)).toList();
+    List<Widget> animatedContainers = tester.widgetList(
+      find.byType(AnimatedContainer),
+    ).toList();
     List<BoxDecoration> boxes = <BoxDecoration>[];
-    for(final Widget container in animatedContainer) {
+    for (final Widget container in animatedContainers) {
       boxes.add((container as AnimatedContainer).decoration! as BoxDecoration);
     }
 
@@ -1171,10 +1173,12 @@ void main() {
     // Wait for dividers to shrink.
     await tester.pump(const Duration(milliseconds: 200));
 
-    animatedContainer = tester.widgetList(find.byType(AnimatedContainer)).toList();
+    animatedContainers = tester.widgetList(
+      find.byType(AnimatedContainer),
+    ).toList();
     boxes = <BoxDecoration>[];
 
-    for(final Widget container in animatedContainer) {
+    for (final Widget container in animatedContainers) {
       boxes.add((container as AnimatedContainer).decoration! as BoxDecoration);
     }
 
