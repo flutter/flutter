@@ -33,9 +33,12 @@ class Scrollbar extends RawScrollbar {
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   ///
-  /// If nothing is passed to [controller], the default behavior is to automatically
+  /// If the [controller] is null, the default behavior is to automatically
   /// enable scrollbar dragging on the nearest [ScrollController] using
   /// [PrimaryScrollController.of].
+  ///
+  /// When null, [thickness] and [radius] defaults will result in a rectangular
+  /// painted thumb that is 6.0 pixels wide.
   const Scrollbar({
     Key? key,
     required Widget child,
@@ -53,7 +56,7 @@ class Scrollbar extends RawScrollbar {
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
-         // CupertinoScrollbar overrides the ScrollbarPainter, so the color
+         // Scrollbar overrides the ScrollbarPainter, so the color
          // passed to the super class does not matter.
          thumbColor: const Color(0x00000000),
        );
@@ -65,6 +68,8 @@ class Scrollbar extends RawScrollbar {
 class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   late TextDirection _textDirection;
   late Color _themeColor;
+
+  // TODO(Piinks): Add Material Design updates
 
   @override
   void didChangeDependencies() {
