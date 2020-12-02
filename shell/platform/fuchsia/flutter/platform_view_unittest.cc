@@ -105,9 +105,10 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     return nullptr;
   }
   // |flutter::PlatformView::Delegate|
-  void LoadDartDeferredLibrary(intptr_t loading_unit_id,
-                               const uint8_t* snapshot_data,
-                               const uint8_t* snapshot_instructions) {}
+  void LoadDartDeferredLibrary(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions) {}
   // |flutter::PlatformView::Delegate|
   void UpdateAssetManager(
       std::shared_ptr<flutter::AssetManager> asset_manager) {}

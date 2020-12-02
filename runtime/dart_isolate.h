@@ -9,6 +9,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <unordered_set>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/compiler_specific.h"
@@ -384,6 +385,15 @@ class DartIsolate : public UIDartState {
   ///
   fml::RefPtr<fml::TaskRunner> GetMessageHandlingTaskRunner() const;
 
+  bool LoadLoadingUnit(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions);
+
+  void LoadLoadingUnitFailure(intptr_t loading_unit_id,
+                              const std::string error_message,
+                              bool transient);
+
  private:
   friend class IsolateConfiguration;
   class AutoFireClosure {
@@ -401,6 +411,7 @@ class DartIsolate : public UIDartState {
   Phase phase_ = Phase::Unknown;
   std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
+  std::unordered_set<fml::RefPtr<DartSnapshot>> loading_unit_snapshots_;
   fml::RefPtr<fml::TaskRunner> message_handling_task_runner_;
   const bool may_insecurely_connect_to_all_domains_;
   std::string domain_network_policy_;
@@ -491,6 +502,9 @@ class DartIsolate : public UIDartState {
   // |Dart_IsolateGroupCleanupCallback|
   static void DartIsolateGroupCleanupCallback(
       std::shared_ptr<DartIsolateGroupData>* isolate_group_data);
+
+  // |Dart_DeferredLoadHandler|
+  static Dart_Handle OnDartLoadLibrary(intptr_t loading_unit_id);
 
   FML_DISALLOW_COPY_AND_ASSIGN(DartIsolate);
 };

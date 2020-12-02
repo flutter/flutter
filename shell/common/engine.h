@@ -11,6 +11,7 @@
 #include "flutter/assets/asset_manager.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/hint_freed_delegate.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
@@ -267,6 +268,12 @@ class Engine final : public RuntimeDelegate,
     ///             identified by the specified loading unit id should be
     ///             downloaded and loaded into the Dart VM via
     ///             `LoadDartDeferredLibrary`
+    ///
+    ///             Upon encountering errors or otherwise failing to load a
+    ///             loading unit with the specified id, the failure should be
+    ///             directly reported to dart by calling
+    ///             `LoadDartDeferredLibraryFailure` to ensure the waiting dart
+    ///             future completes with an error.
     ///
     /// @param[in]  loading_unit_id  The unique id of the deferred library's
     ///                              loading unit. This id is to be passed
@@ -790,10 +797,13 @@ class Engine final : public RuntimeDelegate,
   ///             The Dart compiler may generate separate shared libraries
   ///             files called 'loading units' when libraries are imported
   ///             as deferred. Each of these shared libraries are identified
-  ///             by a unique loading unit id. Callers should dlopen the
-  ///             shared library file and use dlsym to resolve the dart
-  ///             symbols. These symbols can then be passed to this method to
-  ///             be dynamically loaded into the VM.
+  ///             by a unique loading unit id. Callers should open and resolve
+  ///             a SymbolMapping from the shared library. The Mappings should
+  ///             be moved into this method, as ownership will be assumed by the
+  ///             dart root isolate after successful loading and released after
+  ///             shutdown of the root isolate. The loading unit may not be
+  ///             used after isolate shutdown. If loading fails, the mappings
+  ///             will be released.
   ///
   ///             This method is paired with a RequestDartDeferredLibrary
   ///             invocation that provides the embedder with the loading unit id
@@ -810,9 +820,10 @@ class Engine final : public RuntimeDelegate,
   /// @param[in]  snapshot_data    Dart snapshot instructions of the loading
   ///                              unit's shared library.
   ///
-  void LoadDartDeferredLibrary(intptr_t loading_unit_id,
-                               const uint8_t* snapshot_data,
-                               const uint8_t* snapshot_instructions);
+  void LoadDartDeferredLibrary(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions);
 
  private:
   Engine::Delegate& delegate_;
@@ -862,11 +873,8 @@ class Engine final : public RuntimeDelegate,
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) override;
 
-  // The Following commented out code connects into part 2 of the split AOT
-  // feature. Left commented out until it lands:
-
-  // // |RuntimeDelegate|
-  // void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
+  // |RuntimeDelegate|
+  void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
 
   void SetNeedsReportTimings(bool value) override;
 

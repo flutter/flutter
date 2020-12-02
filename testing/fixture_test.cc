@@ -9,6 +9,7 @@ namespace testing {
 
 FixtureTest::FixtureTest()
     : native_resolver_(std::make_shared<TestDartNativeResolver>()),
+      split_aot_symbols_(LoadELFSplitSymbolFromFixturesIfNeccessary()),
       assets_dir_(fml::OpenDirectory(GetFixturesPath(),
                                      false,
                                      fml::FilePermission::kRead)),
