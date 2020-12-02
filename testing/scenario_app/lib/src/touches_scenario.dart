@@ -4,9 +4,9 @@
 
 // @dart = 2.6
 
-import 'dart:convert';
 import 'dart:ui';
 
+import 'channel_util.dart';
 import 'scenario.dart';
 
 /// A scenario that sends back messages when touches are received.
@@ -16,15 +16,12 @@ class TouchesScenario extends Scenario {
 
   @override
   void onPointerDataPacket(PointerDataPacket packet) {
-    window.sendPlatformMessage(
-      'touches_scenario',
-      utf8.encoder
-          .convert(const JsonCodec().encode(<String, dynamic>{
-            'change': packet.data[0].change.toString(),
-          }))
-          .buffer
-          .asByteData(),
-      null,
+    sendJsonMessage(
+      dispatcher: dispatcher,
+      channel: 'display_data',
+      json: <String, dynamic>{
+      'data': packet.data[0].change.toString(),
+      },
     );
   }
 }

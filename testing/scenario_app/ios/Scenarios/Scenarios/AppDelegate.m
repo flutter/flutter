@@ -28,7 +28,7 @@
     self.window.tintColor = UIColor.systemPinkColor;
   }
   NSDictionary<NSString*, NSString*>* launchArgsMap = @{
-    // The Platform view golden test args should match `PlatformViewGoldenTestManager`.
+    // The golden test args should match `GoldenTestManager`.
     @"--locale-initialization" : @"locale_initialization",
     @"--platform-view" : @"platform_view",
     @"--platform-view-no-overlay-intersection" : @"platform_view_no_overlay_intersection",
@@ -53,7 +53,8 @@
     @"--tap-status-bar" : @"tap_status_bar",
     @"--text-semantics-focus" : @"text_semantics_focus",
     @"--animated-color-square" : @"animated_color_square",
-    @"--platform-view-with-continuous-texture" : @"platform_view_with_continuous_texture"
+    @"--platform-view-with-continuous-texture" : @"platform_view_with_continuous_texture",
+    @"--bogus-font-text" : @"bogus_font_text"
   };
   __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap
@@ -104,16 +105,18 @@
                                   codec:[FlutterJSONMethodCodec sharedInstance]];
               [channel invokeMethod:@"set_scenario" arguments:@{@"name" : scenarioIdentifier}];
             }];
+  // Can be used to synchronize timing in the test for a signal from Dart.
   [engine.binaryMessenger
-      setMessageHandlerOnChannel:@"touches_scenario"
+      setMessageHandlerOnChannel:@"display_data"
             binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
               NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:message
                                                                    options:0
                                                                      error:nil];
-              UITextField* text = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 100)];
-              text.text = dict[@"change"];
+              UITextField* text = [[UITextField alloc] initWithFrame:CGRectMake(0, 400, 300, 100)];
+              text.text = dict[@"data"];
               [flutterViewController.view addSubview:text];
             }];
+
   TextPlatformViewFactory* textPlatformViewFactory =
       [[TextPlatformViewFactory alloc] initWithMessenger:engine.binaryMessenger];
   NSObject<FlutterPluginRegistrar>* registrar =
