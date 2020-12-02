@@ -62,6 +62,7 @@ static const std::string gAllowedDartFlags[] = {
     "--profile_period",
     "--random_seed",
     "--sample-buffer-duration",
+    "--trace-kernel",
     "--trace-reload",
     "--trace-reload-verbose",
     "--write-service-info",
