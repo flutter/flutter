@@ -1230,6 +1230,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final double topConstraint;
     final double bottomConstraint;
 
+    // It does not matter what [textDirection] or [verticalDirection] is,
+    // since deflating the size constraints horizontally/vertically
+    // and the returned size accounts for the width of both sides.
     if (direction == Axis.horizontal) {
       rightConstraint = trailingBorderSide.width;
       leftConstraint = leadingBorderSide.width;
