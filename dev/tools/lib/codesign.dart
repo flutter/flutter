@@ -6,7 +6,6 @@ import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-//import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -167,8 +166,7 @@ class CodesignCommand extends Command<void> {
       wrongEntitlementBinaries.forEach(print);
     }
 
-    if (unsignedBinaries.isNotEmpty) {
-      // TODO(jmagman): Also exit if `wrongEntitlementBinaries.isNotEmpty` after https://github.com/flutter/flutter/issues/46704 is done.
+    if (unsignedBinaries.isNotEmpty || wrongEntitlementBinaries.isNotEmpty) {
       throw Exception('Test failed because unsigned binaries detected.');
     }
 
@@ -247,6 +245,3 @@ class CodesignCommand extends Command<void> {
     }
   }
 }
-/*
-
-*/
