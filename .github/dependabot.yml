@@ -14,3 +14,4 @@ updates:
     labels:
       - "team"
       - "team: infra"
+      - "waiting for tree to go green"
