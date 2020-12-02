@@ -6,10 +6,9 @@
 part of engine;
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
-void skiaInstantiateImageCodec(Uint8List list, Callback<ui.Codec> callback,
+ui.Codec skiaInstantiateImageCodec(Uint8List list,
     [int? width, int? height, int? format, int? rowBytes]) {
-  final CkAnimatedImage codec = CkAnimatedImage.decodeFromBytes(list);
-  callback(codec);
+  return CkAnimatedImage.decodeFromBytes(list);
 }
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after
@@ -49,7 +48,11 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage> implements ui.C
 
   @override
   SkAnimatedImage createDefault() {
-    return canvasKit.MakeAnimatedImageFromEncoded(_bytes);
+    final SkAnimatedImage? animatedImage = canvasKit.MakeAnimatedImageFromEncoded(_bytes);
+    if (animatedImage == null) {
+      throw Exception('Failed to decode image');
+    }
+    return animatedImage;
   }
 
   @override

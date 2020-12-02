@@ -452,20 +452,14 @@ Future<Codec> instantiateImageCodec(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) {
-  return _futurize<Codec>((engine.Callback<Codec> callback) =>
-      // TODO: Implement targetWidth and targetHeight support.
-      _instantiateImageCodec(list, callback));
-}
-
-String? _instantiateImageCodec(Uint8List list, engine.Callback<Codec> callback) {
+}) async {
   if (engine.useCanvasKit) {
-    engine.skiaInstantiateImageCodec(list, callback);
-    return null;
+    // TODO: Implement targetWidth and targetHeight support.
+    return engine.skiaInstantiateImageCodec(list);
+  } else {
+    final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
+    return engine.HtmlBlobCodec(blob);
   }
-  final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
-  callback(engine.HtmlBlobCodec(blob));
-  return null;
 }
 
 Future<Codec> webOnlyInstantiateImageCodecFromUrl(Uri uri,
@@ -565,12 +559,9 @@ Future<Codec> _createBmp(
     }
   }
 
-  final Completer<Codec> codecCompleter = Completer<Codec>();
-  _instantiateImageCodec(
+  return instantiateImageCodec(
     bmpData.buffer.asUint8List(),
-    (Codec codec) => codecCompleter.complete(codec),
   );
-  return codecCompleter.future;
 }
 
 void decodeImageFromPixels(
@@ -587,16 +578,13 @@ void decodeImageFromPixels(
   if (engine.useCanvasKit) {
     engine.skiaInstantiateImageCodec(
       pixels,
-      (Codec codec) {
-        codec.getNextFrame().then((FrameInfo info) {
-          callback(info.image);
-        });
-      },
       width,
       height,
       format.index,
       rowBytes,
-    );
+    ).getNextFrame().then((FrameInfo info) {
+      callback(info.image);
+    });
     return;
   }
 
