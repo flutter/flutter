@@ -518,7 +518,7 @@ void main() {
 
       verify(globals.flutterUsage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
       verify(globals.flutterUsage.sendEvent(kNullSafetyCategory, 'migrated', value: 100)).called(1);
-      verify(globals.flutterUsage.sendEvent(kNullSafetyCategory, 'language-version', label: '2.7')).called(1);
+      verify(globals.flutterUsage.sendEvent(kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
     }, overrides: <Type, Generator>{
       Pub: () => FakePub(),
       Usage: () => MockitoUsage(),
