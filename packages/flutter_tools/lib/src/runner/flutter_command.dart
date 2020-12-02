@@ -487,6 +487,9 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
+  /// Whether this command should report null safety analytics.
+  bool get reportNullSafety => false;
+
   Duration get deviceDiscoveryTimeout {
     if (_deviceDiscoveryTimeout == null
         && argResults.options.contains(FlutterOptions.kDeviceTimeout)
@@ -1103,7 +1106,9 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
-      await _sendNullSafetyAnalyticsEvents(project);
+      if (reportNullSafety) {
+        await _sendNullSafetyAnalyticsEvents(project);
+      }
     }
 
     setupApplicationPackages();
