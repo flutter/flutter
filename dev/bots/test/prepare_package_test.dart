@@ -359,11 +359,12 @@ void main() {
           subprocessOutput: false,
           platform: platform,
         );
-        await publisher.publishArchive(false);
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           // This process returns 0 because file already exists
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
         };
+        processManager.fakeResults = calls;
+        expect(() async => await publisher.publishArchive(false), throwsException);
         processManager.verifyCalls(calls.keys.toList());
       });
     });
