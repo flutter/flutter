@@ -29,9 +29,9 @@ Animator::Animator(Delegate& delegate,
       last_vsync_start_time_(),
       last_frame_target_time_(),
       dart_frame_deadline_(0),
-#if FLUTTER_SHELL_ENABLE_METAL
+#if SHELL_ENABLE_METAL
       layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(2)),
-#else   // FLUTTER_SHELL_ENABLE_METAL
+#else   // SHELL_ENABLE_METAL
       // TODO(dnfield): We should remove this logic and set the pipeline depth
       // back to 2 in this case. See
       // https://github.com/flutter/engine/pull/9132 for discussion.
@@ -40,7 +40,7 @@ Animator::Animator(Delegate& delegate,
                   task_runners.GetRasterTaskRunner()
               ? 1
               : 2)),
-#endif  // FLUTTER_SHELL_ENABLE_METAL
+#endif  // SHELL_ENABLE_METAL
       pending_frame_semaphore_(1),
       frame_number_(1),
       paused_(false),
