@@ -861,8 +861,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _textLayoutLastMinWidth = null;
   }
 
-  // Returns a cached plain text version of the text in the painter.
   String? _cachedPlainText;
+  // Returns a plain text version of the text in the painter.
+  //
+  // Returns the obscured text when [obscureText] is true. See
+  // [obscureText] and [obscuringCharacter].
   String get _plainText {
     _cachedPlainText ??= _textPainter.text!.toPlainText();
     return _cachedPlainText!;
