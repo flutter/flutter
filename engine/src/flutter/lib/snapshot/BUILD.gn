@@ -197,6 +197,29 @@ bin_to_linkable("platform_strong_dill_linkable") {
   executable = false
 }
 
+action("create_arm_gen_snapshot") {
+  output_dir = "$root_out_dir/clang_x64"
+  script = "//flutter/sky/tools/create_macos_gen_snapshots.py"
+  visibility = [ ":*" ]
+  args = [
+    "--dst",
+    rebase_path(output_dir),
+  ]
+  if (target_cpu == "arm") {
+    args += [
+      "--armv7-out-dir",
+      rebase_path("$root_out_dir"),
+    ]
+    outputs = [ "$output_dir/gen_snapshot_armv7" ]
+  } else {
+    args += [
+      "--arm64-out-dir",
+      rebase_path("$root_out_dir"),
+    ]
+    outputs = [ "$output_dir/gen_snapshot_arm64" ]
+  }
+}
+
 source_set("snapshot") {
   deps = [
     ":isolate_snapshot_data_linkable",
@@ -205,6 +228,10 @@ source_set("snapshot") {
     ":vm_snapshot_data_linkable",
     ":vm_snapshot_instructions_linkable",
   ]
+  if (host_os == "macos" && (target_cpu == "arm" || target_cpu == "arm64")) {
+    deps += [ ":create_arm_gen_snapshot" ]
+  }
+
   sources = get_target_outputs(":isolate_snapshot_data_linkable") +
             get_target_outputs(":isolate_snapshot_instructions_linkable") +
             get_target_outputs(":vm_snapshot_data_linkable") +
