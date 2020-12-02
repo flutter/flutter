@@ -315,21 +315,6 @@ class FrameworkRepository extends Repository {
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
-
-  //TODO do we need this?
-  //io.ProcessResult runDart(List<String> args) {
-  //  _ensureToolReady();
-  //  final String dartBinPath = fileSystem.path.join(
-  //    cacheDirectory,
-  //    'dart-sdk',
-  //    'bin',
-  //    'dart',
-  //  );
-  //  return processManager.runSync(<String>[
-  //    dartBinPath,
-  //    ...args,
-  //  ]);
-  //}
 }
 
 /// An enum of all the repositories that the Conductor supports.
