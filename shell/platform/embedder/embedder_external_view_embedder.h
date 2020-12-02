@@ -40,6 +40,11 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   /// @brief      Creates an external view embedder used by the generic embedder
   ///             API.
   ///
+  /// @param[in] avoid_backing_store_cache If set, create_render_target callback
+  ///                                      will beinvoked every frame for every
+  ///                                      engine composited layer. The result
+  ///                                      will not cached.
+  ///
   /// @param[in]  create_render_target_callback
   ///                                     The render target callback used to
   ///                                     request the render target for a layer.
@@ -49,6 +54,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   ///                                     embedder for presentation.
   ///
   EmbedderExternalViewEmbedder(
+      bool avoid_backing_store_cache,
       const CreateRenderTargetCallback& create_render_target_callback,
       const PresentCallback& present_callback);
 
@@ -100,6 +106,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   SkCanvas* GetRootCanvas() override;
 
  private:
+  const bool avoid_backing_store_cache_;
   const CreateRenderTargetCallback create_render_target_callback_;
   const PresentCallback present_callback_;
   SurfaceTransformationCallback surface_transformation_callback_;

@@ -937,6 +937,8 @@ typedef struct {
   /// Callback invoked by the engine to composite the contents of each layer
   /// onto the screen.
   FlutterLayersPresentCallback present_layers_callback;
+  /// Avoid caching backing stores provided by this compositor.
+  bool avoid_backing_store_cache;
 } FlutterCompositor;
 
 typedef struct {
