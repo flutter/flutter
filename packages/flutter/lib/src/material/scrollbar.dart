@@ -35,6 +35,10 @@ class Scrollbar extends RawScrollbar {
   ///
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
+  ///
+  /// If nothing is passed to [controller], the default behavior is to automatically
+  /// enable scrollbar dragging on the nearest [ScrollController] using
+  /// [PrimaryScrollController.of].
   const Scrollbar({
     Key? key,
     required Widget child,
@@ -47,11 +51,14 @@ class Scrollbar extends RawScrollbar {
          child: child,
          controller: controller,
          isAlwaysShown: isAlwaysShown,
-         thickness: thickness,
+         thickness: thickness ?? _kScrollbarThickness,
          radius: radius,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
+         // CupertinoScrollbar overrides the ScrollbarPainter, so the color
+         // passed to the super class does not matter.
+         thumbColor: const Color(0x00000000),
        );
 
   @override
@@ -75,7 +82,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     painter!
-      ..thickness = widget.thickness ?? _kScrollbarThickness
+      ..thickness = widget.thickness
       ..radius = widget.radius;
   }
 
@@ -83,7 +90,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     return ScrollbarPainter(
       color: _themeColor,
       textDirection: _textDirection,
-      thickness: widget.thickness ?? _kScrollbarThickness,
+      thickness: widget.thickness,
       radius: widget.radius,
       fadeoutOpacityAnimation: fadeoutOpacityAnimation,
       padding: MediaQuery.of(context).padding,

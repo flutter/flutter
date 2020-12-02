@@ -37,7 +37,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///
 /// When dragging a [CupertinoScrollbar] thumb, the thickness and radius will
 /// animate from [thickness] and [radius] to [thicknessWhileDragging] and
-/// [radiusWhileDragging].
+/// [radiusWhileDragging], respectively.
 ///
 // TODO(Piinks): Add code sample
 ///
@@ -77,6 +77,9 @@ class CupertinoScrollbar extends RawScrollbar {
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
+         // CupertinoScrollbar overrides the ScrollbarPainter, so the color
+         // passed to the super class does not matter.
+         thumbColor: const Color(0x00000000),
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
@@ -116,7 +119,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   late AnimationController _thicknessAnimationController;
 
   double get _thickness {
-    return widget.thickness! + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
+    return widget.thickness + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness);
   }
 
   Radius get _radius {

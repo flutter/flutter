@@ -25,7 +25,6 @@ import 'ticker_provider.dart';
 
 const double _kMinThumbExtent = 18.0;
 const double _kMinInteractiveSize = 48.0;
-const double _kScrollbarThickness = 6.0;
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
@@ -435,16 +434,16 @@ class RawScrollbar extends StatefulWidget {
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   ///
-  /// The [child], [isAlwaysShown], [fadeDuration], and [timeToFade] arguments
-  /// must not be null.
+  /// The [child], [thickness], [thumbColor], [isAlwaysShown], [fadeDuration],
+  /// and [timeToFade] arguments must not be null.
   const RawScrollbar({
     Key? key,
     required this.child,
+    required this.thickness,
+    required this.thumbColor,
     this.controller,
     this.isAlwaysShown = false,
     this.radius,
-    this.thickness,
-    this.thumbColor,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
@@ -566,23 +565,30 @@ class RawScrollbar extends StatefulWidget {
   /// {@end-tool}
   final bool isAlwaysShown;
 
-  /// The radius of the corners of the scrollbar.
+  /// [Radius] of corners if the scrollbar should have rounded corners.
+  ///
+  /// Scrollbar will be rectangular if [radius] is null, which is the default
+  /// behavior.
   final Radius? radius;
 
-  /// The thickness of the scrollbar.
-  final double? thickness;
+  /// The thickness of the scrollbar in the cross axis of the scrollable.
+  ///
+  /// Cannot be null.
+  final double thickness;
 
   /// The color of the scrollbar thumb.
-  final Color? thumbColor;
+  ///
+  /// Cannot be null.
+  final Color thumbColor;
 
   /// The [Duration] of the fade animation.
   ///
-  /// Cannot be null.
+  /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
   final Duration fadeDuration;
 
   /// The [Duration] of time until the fade animation begins.
   ///
-  /// Cannot be null.
+  /// Cannot be null, defaults to a [Duration] of 600 milliseconds.
   final Duration timeToFade;
 
   /// The [Duration] of time that a LongPress will trigger the drag gesture of
@@ -671,9 +677,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   ScrollbarPainter _buildRawScrollbarPainter() {
     return ScrollbarPainter(
-      color: widget.thumbColor ?? const Color(0x66BCBCBC).withOpacity(1.0),
+      color: widget.thumbColor,
       textDirection: Directionality.of(context),
-      thickness: widget.thickness ?? _kScrollbarThickness,
+      thickness: widget.thickness,
       radius: widget.radius,
       fadeoutOpacityAnimation: fadeoutOpacityAnimation,
       padding: MediaQuery.of(context).padding,
@@ -692,9 +698,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       }
     }
     painter!
-      ..thickness = widget.thickness ?? _kScrollbarThickness
+      ..thickness = widget.thickness
       ..radius = widget.radius
-      ..color = widget.thumbColor ?? const Color(0x66BCBCBC).withOpacity(1.0);
+      ..color = widget.thumbColor;
   }
 
   void _updateScrollPosition(double primaryDelta) {
