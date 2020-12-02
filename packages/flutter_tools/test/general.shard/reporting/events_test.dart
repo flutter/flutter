@@ -61,16 +61,18 @@ void main() {
       Package('baz', Uri.parse('file:///bar/'), languageVersion: LanguageVersion(2, 2)),
     ]);
 
-    collectLanguageVersionEvents(
+    NullSafetyAnalysisEvent(
       packageConfig,
       NullSafetyMode.sound,
       'foo',
       usage,
-    );
+    ).send();
 
-    verify(usage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'));
-    verify(usage.sendEvent(kNullSafetyCategory, 'migrated', value: 33));
-    verify(usage.sendEvent(kNullSafetyCategory, 'language-version', label: '2.12'));
+    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
+    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+      'cd49': '1', 'cd50': '3',
+    })).called(1);
+    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
   });
 
   testWithoutContext('Does not crash if main package is missing', () {
@@ -81,16 +83,18 @@ void main() {
       Package('baz', Uri.parse('file:///bar/lib/'), languageVersion: LanguageVersion(2, 2)),
     ]);
 
-    collectLanguageVersionEvents(
+    NullSafetyAnalysisEvent(
       packageConfig,
       NullSafetyMode.sound,
       'something-unrelated',
       usage,
-    );
+    ).send();
 
-    verify(usage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound'));
-    verify(usage.sendEvent(kNullSafetyCategory, 'migrated', value: 33));
-    verifyNever(usage.sendEvent(kNullSafetyCategory, 'language-version', label: anyNamed('label')));
+    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
+    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+      'cd49': '1', 'cd50': '3',
+    })).called(1);
+    verifyNever(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: anyNamed('label')));
   });
 }
 

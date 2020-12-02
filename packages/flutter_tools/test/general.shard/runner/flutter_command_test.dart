@@ -516,9 +516,11 @@ void main() {
 
       await runner.run(<String>['test']);
 
-      verify(globals.flutterUsage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
-      verify(globals.flutterUsage.sendEvent(kNullSafetyCategory, 'migrated', value: 100)).called(1);
-      verify(globals.flutterUsage.sendEvent(kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
+      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
+      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+        'cd49': '1', 'cd50': '1',
+      })).called(1);
+      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
     }, overrides: <Type, Generator>{
       Pub: () => FakePub(),
       Usage: () => MockitoUsage(),
