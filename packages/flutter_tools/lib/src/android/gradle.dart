@@ -23,6 +23,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'gradle_errors.dart';
+import 'gradle_log_processor.dart';
 import 'gradle_utils.dart';
 
 /// The directory where the APK artifact is generated.
@@ -360,31 +361,7 @@ Future<void> buildGradleApp({
   }
   command.add(assembleTask);
 
-  GradleHandledError detectedGradleError;
-  String detectedGradleErrorLine;
-  String consumeLog(String line) {
-    // This message was removed from first-party plugins,
-    // but older plugin versions still display this message.
-    if (androidXPluginWarningRegex.hasMatch(line)) {
-      // Don't pipe.
-      return null;
-    }
-    if (detectedGradleError != null) {
-      // Pipe stdout/stderr from Gradle.
-      return line;
-    }
-    for (final GradleHandledError gradleError in localGradleErrors) {
-      if (gradleError.test(line)) {
-        detectedGradleErrorLine = line;
-        detectedGradleError = gradleError;
-        // The first error match wins.
-        break;
-      }
-    }
-    // Pipe stdout/stderr from Gradle.
-    return line;
-  }
-
+  final GradleLogProcessor gradleLogProcessor = GradleLogProcessor(localGradleErrors, globals.logger.isVerbose);
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
@@ -393,13 +370,14 @@ Future<void> buildGradleApp({
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       environment: gradleEnvironment,
-      mapFunction: consumeLog,
+      mapFunction: gradleLogProcessor.consumeLog,
     );
   } on ProcessException catch (exception) {
-    consumeLog(exception.toString());
+    gradleLogProcessor.atFailureFooter = false;
+    gradleLogProcessor.consumeLog(exception.toString());
     // Rethrow the exception if the error isn't handled by any of the
     // `localGradleErrors`.
-    if (detectedGradleError == null) {
+    if (gradleLogProcessor.detectedGradleError == null) {
       rethrow;
     }
   } finally {
@@ -409,22 +387,22 @@ Future<void> buildGradleApp({
   globals.flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
 
   if (exitCode != 0) {
-    if (detectedGradleError == null) {
+    if (gradleLogProcessor.detectedGradleError == null) {
       BuildEvent('gradle-unknown-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
       );
     } else {
-      final GradleBuildStatus status = await detectedGradleError.handler(
-        line: detectedGradleErrorLine,
+      final GradleBuildStatus status = await gradleLogProcessor.detectedGradleError.handler(
+        line: gradleLogProcessor.detectedGradleErrorLine,
         project: project,
         usesAndroidX: usesAndroidX,
         shouldBuildPluginAsAar: shouldBuildPluginAsAar,
       );
 
       if (retries >= 1) {
-        final String successEventLabel = 'gradle-${detectedGradleError.eventLabel}-success';
+        final String successEventLabel = 'gradle-${gradleLogProcessor.detectedGradleError.eventLabel}-success';
         switch (status) {
           case GradleBuildStatus.retry:
             await buildGradleApp(
@@ -454,7 +432,7 @@ Future<void> buildGradleApp({
             // noop.
         }
       }
-      BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', flutterUsage: globals.flutterUsage).send();
+      BuildEvent('gradle-${gradleLogProcessor.detectedGradleError.eventLabel}-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,

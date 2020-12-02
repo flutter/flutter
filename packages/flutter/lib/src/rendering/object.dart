@@ -1822,6 +1822,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   bool get sizedByParent => false;
 
+  /// {@template flutter.rendering.RenderObject.performResize}
   /// Updates the render objects size using only the constraints.
   ///
   /// Do not call this function directly: call [layout] instead. This function
@@ -1829,10 +1830,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// render object during layout. The layout constraints provided by your
   /// parent are available via the [constraints] getter.
   ///
-  /// Subclasses that set [sizedByParent] to true should override this method
-  /// to compute their size.
-  ///
   /// This function is called only if [sizedByParent] is true.
+  /// {@endtemplate}
+  ///
+  /// Subclasses that set [sizedByParent] to true should override this method to
+  /// compute their size. Subclasses of [RenderBox] should consider overriding
+  /// [RenderBox.computeDryLayout] instead.
   @protected
   void performResize();
 
