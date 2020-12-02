@@ -252,6 +252,47 @@ void main() {
     }
   });
 
+  testWidgets('AppBar iconTheme with color=null defers to outer IconTheme', (WidgetTester tester) async {
+    // Verify claim made in https://github.com/flutter/flutter/pull/71184#issuecomment-737419215
+
+    Widget buildFrame({ Color? appIconColor, Color? appBarIconColor }) {
+      return MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        home: IconTheme(
+          data: IconThemeData(color: appIconColor),
+          child: Builder(
+            builder: (BuildContext context) {
+              return Scaffold(
+                appBar: AppBar(
+                  backwardsCompatibility: false,
+                  iconTheme: IconThemeData(color: appBarIconColor),
+                  actions: <Widget>[
+                    IconButton(icon: const Icon(Icons.share), onPressed: () { })
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    RichText getIconText() {
+      return tester.widget<RichText>(
+        find.descendant(
+          of: find.byType(Icon),
+          matching: find.byType(RichText),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(appIconColor: Colors.lime, appBarIconColor: null));
+    expect(getIconText().text.style!.color, Colors.lime);
+
+    await tester.pumpWidget(buildFrame(appIconColor: Colors.lime, appBarIconColor: Colors.purple));
+    expect(getIconText().text.style!.color, Colors.purple);
+  });
+
   testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
