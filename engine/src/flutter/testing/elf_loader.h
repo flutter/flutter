@@ -16,6 +16,14 @@ namespace testing {
 
 inline constexpr const char* kAOTAppELFFileName = "app_elf_snapshot.so";
 
+// This file name is what gen_snapshot defaults to. It is based off of the
+// name of the base file, with the `2` indicating that this split corresponds
+// to loading unit id of 2. The base module id is 1 and is omitted as it is not
+// considered a split. If dart changes the naming convention, this should be
+// changed to match, however, this is considered unlikely to happen.
+inline constexpr const char* kAOTAppELFSplitFileName =
+    "app_elf_snapshot.so-2.part.so";
+
 struct LoadedELFDeleter {
   void operator()(Dart_LoadedElf* elf) { ::Dart_UnloadELF(elf); }
 };
@@ -39,6 +47,17 @@ struct ELFAOTSymbols {
 /// @return     The loaded ELF symbols.
 ///
 ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary();
+
+//------------------------------------------------------------------------------
+/// @brief      Attempts to resolve split loading unit AOT symbols from the
+///             portable ELF loader. If the dart code does not make use of
+///             deferred libraries, then there will be no split .so to load.
+///             This only returns valid symbols when the VM is configured for
+///             AOT.
+///
+/// @return     The loaded ELF symbols.
+///
+ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary();
 
 //------------------------------------------------------------------------------
 /// @brief      Prepare the settings objects various AOT mappings resolvers with

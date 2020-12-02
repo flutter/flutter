@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
+
+import 'split_lib_test.dart' deferred as splitlib;
 
 void main() {
 }
@@ -23,6 +26,23 @@ void canRegisterNativeCallback() async {
   print('In function canRegisterNativeCallback');
   notifyNative();
   print('Called native method from canRegisterNativeCallback');
+}
+
+Future<void>? splitLoadFuture = null;
+
+@pragma('vm:entry-point')
+void canCallDeferredLibrary() {
+  print('In function canCallDeferredLibrary');
+  splitLoadFuture = splitlib.loadLibrary()
+    .then((_) {
+        print('Deferred load complete');
+        notifySuccess(splitlib.splitAdd(10, 23) == 33);
+      })
+    .catchError((_) {
+        print('Deferred load error');
+        notifySuccess(false);
+      });
+  notifyNative();
 }
 
 void notifyNative() native 'NotifyNative';

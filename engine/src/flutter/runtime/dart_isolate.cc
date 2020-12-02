@@ -320,6 +320,10 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
     return false;
   }
 
+  if (tonic::LogIfError(Dart_SetDeferredLoadHandler(OnDartLoadLibrary))) {
+    return false;
+  }
+
   if (!UpdateThreadPoolNames()) {
     return false;
   }
@@ -330,6 +334,37 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
 
 fml::RefPtr<fml::TaskRunner> DartIsolate::GetMessageHandlingTaskRunner() const {
   return message_handling_task_runner_;
+}
+
+bool DartIsolate::LoadLoadingUnit(
+    intptr_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  tonic::DartState::Scope scope(this);
+
+  fml::RefPtr<DartSnapshot> dart_snapshot =
+      DartSnapshot::IsolateSnapshotFromMappings(
+          std::move(snapshot_data), std::move(snapshot_instructions));
+
+  Dart_Handle result = Dart_DeferredLoadComplete(
+      loading_unit_id, dart_snapshot->GetDataMapping(),
+      dart_snapshot->GetInstructionsMapping());
+  if (tonic::LogIfError(result)) {
+    LoadLoadingUnitFailure(loading_unit_id, Dart_GetError(result),
+                           /*transient*/ true);
+    return false;
+  }
+  loading_unit_snapshots_.insert(dart_snapshot);
+  return true;
+}
+
+void DartIsolate::LoadLoadingUnitFailure(intptr_t loading_unit_id,
+                                         const std::string error_message,
+                                         bool transient) {
+  tonic::DartState::Scope scope(this);
+  Dart_Handle result = Dart_DeferredLoadCompleteError(
+      loading_unit_id, error_message.c_str(), transient);
+  tonic::LogIfError(result);
 }
 
 void DartIsolate::SetMessageHandlingTaskRunner(
@@ -1001,6 +1036,20 @@ void DartIsolate::OnShutdownCallback() {
   if (isolate_shutdown_callback) {
     isolate_shutdown_callback();
   }
+}
+
+Dart_Handle DartIsolate::OnDartLoadLibrary(intptr_t loading_unit_id) {
+  if (Current()->platform_configuration()) {
+    Current()->platform_configuration()->client()->RequestDartDeferredLibrary(
+        loading_unit_id);
+    return Dart_Null();
+  }
+  const std::string error_message =
+      "Platform Configuration was null. Deferred library load request"
+      "for loading unit id " +
+      std::to_string(loading_unit_id) + " was not sent.";
+  FML_LOG(ERROR) << error_message;
+  return Dart_NewApiError(error_message.c_str());
 }
 
 DartIsolate::AutoFireClosure::AutoFireClosure(const fml::closure& closure)

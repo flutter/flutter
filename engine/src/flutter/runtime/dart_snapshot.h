@@ -103,6 +103,18 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
       const Settings& settings);
 
   //----------------------------------------------------------------------------
+  /// @brief      Create an isolate snapshot from existing fml::Mappings.
+  ///
+  /// @param[in]  snapshot_data          The mapping for the heap snapshot.
+  /// @param[in]  snapshot_instructions  The mapping for the instructions
+  ///                                    snapshot.
+  ///
+  /// @return     A valid isolate snapshot or nullptr.
+  static fml::RefPtr<DartSnapshot> IsolateSnapshotFromMappings(
+      std::shared_ptr<const fml::Mapping> snapshot_data,
+      std::shared_ptr<const fml::Mapping> snapshot_instructions);
+
+  //----------------------------------------------------------------------------
   /// @brief      Determines if this snapshot contains a heap component. Since
   ///             the instructions component is optional, the method does not
   ///             check for its presence. Use `IsValidForAOT` to determine if

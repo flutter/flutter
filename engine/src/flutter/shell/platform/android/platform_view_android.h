@@ -94,9 +94,10 @@ class PlatformViewAndroid final : public PlatformView {
       const fml::jni::JavaObjectWeakGlobalRef& surface_texture);
 
   // |PlatformView|
-  void LoadDartDeferredLibrary(intptr_t loading_unit_id,
-                               const uint8_t* snapshot_data,
-                               const uint8_t* snapshot_instructions) override;
+  void LoadDartDeferredLibrary(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions) override;
 
   // |PlatformView|
   void UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager) override;

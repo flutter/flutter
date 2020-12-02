@@ -15,6 +15,8 @@
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/file.h"
+#include "flutter/fml/mapping.h"
+#include "flutter/fml/native_library.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
@@ -539,12 +541,8 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
   std::vector<std::string> search_paths =
       fml::jni::StringArrayToVector(env, jSearchPaths);
 
-  // TODO: Switch to using the NativeLibrary class, eg:
-  //
-  //      fml::RefPtr<fml::NativeLibrary> native_lib =
-  //          fml::NativeLibrary::Create(lib_name.c_str());
-  //
-  // Find and open the shared library.
+  // Use dlopen here to directly check if handle is nullptr before creating a
+  // NativeLibrary.
   void* handle = nullptr;
   while (handle == nullptr && !search_paths.empty()) {
     std::string path = search_paths.back();
@@ -556,42 +554,20 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
                            "No lib .so found for provided search paths.", true);
     return;
   }
+  fml::RefPtr<fml::NativeLibrary> native_lib =
+      fml::NativeLibrary::CreateWithHandle(handle, false);
 
   // Resolve symbols.
-  uint8_t* isolate_data =
-      static_cast<uint8_t*>(::dlsym(handle, DartSnapshot::kIsolateDataSymbol));
-  if (isolate_data == nullptr) {
-    // Mac sometimes requires an underscore prefix.
-    std::stringstream underscore_symbol_name;
-    underscore_symbol_name << "_" << DartSnapshot::kIsolateDataSymbol;
-    isolate_data = static_cast<uint8_t*>(
-        ::dlsym(handle, underscore_symbol_name.str().c_str()));
-    if (isolate_data == nullptr) {
-      LoadLoadingUnitFailure(loading_unit_id,
-                             "Could not resolve data symbol in library", true);
-      return;
-    }
-  }
-  uint8_t* isolate_instructions = static_cast<uint8_t*>(
-      ::dlsym(handle, DartSnapshot::kIsolateInstructionsSymbol));
-  if (isolate_instructions == nullptr) {
-    // Mac sometimes requires an underscore prefix.
-    std::stringstream underscore_symbol_name;
-    underscore_symbol_name << "_" << DartSnapshot::kIsolateInstructionsSymbol;
-    isolate_instructions = static_cast<uint8_t*>(
-        ::dlsym(handle, underscore_symbol_name.str().c_str()));
-    if (isolate_data == nullptr) {
-      LoadLoadingUnitFailure(loading_unit_id,
-                             "Could not resolve instructions symbol in library",
-                             true);
-      return;
-    }
-  }
+  std::unique_ptr<const fml::SymbolMapping> data_mapping =
+      std::make_unique<const fml::SymbolMapping>(
+          native_lib, DartSnapshot::kIsolateDataSymbol);
+  std::unique_ptr<const fml::SymbolMapping> instructions_mapping =
+      std::make_unique<const fml::SymbolMapping>(
+          native_lib, DartSnapshot::kIsolateInstructionsSymbol);
 
   ANDROID_SHELL_HOLDER->GetPlatformView()->LoadDartDeferredLibrary(
-      loading_unit_id, isolate_data, isolate_instructions);
-
-  // TODO(garyq): fallback on soPath.
+      loading_unit_id, std::move(data_mapping),
+      std::move(instructions_mapping));
 }
 
 // TODO(garyq): persist additional asset resolvers by updating instead of

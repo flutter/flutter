@@ -174,6 +174,27 @@ class PlatformConfigurationClient {
   ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) = 0;
 
+  //--------------------------------------------------------------------------
+  /// @brief      Invoked when the Dart VM requests that a deferred library
+  ///             be loaded. Notifies the engine that the deferred library
+  ///             identified by the specified loading unit id should be
+  ///             downloaded and loaded into the Dart VM via
+  ///             `LoadDartDeferredLibrary`
+  ///
+  ///             Upon encountering errors or otherwise failing to load a
+  ///             loading unit with the specified id, the failure should be
+  ///             directly reported to dart by calling
+  ///             `LoadDartDeferredLibraryFailure` to ensure the waiting dart
+  ///             future completes with an error.
+  ///
+  /// @param[in]  loading_unit_id  The unique id of the deferred library's
+  ///                              loading unit. This id is to be passed
+  ///                              back into LoadDartDeferredLibrary
+  ///                              in order to identify which deferred
+  ///                              library to load.
+  ///
+  virtual void RequestDartDeferredLibrary(intptr_t loading_unit_id) = 0;
+
  protected:
   virtual ~PlatformConfigurationClient();
 };
