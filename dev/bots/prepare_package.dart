@@ -715,14 +715,14 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   final String revision = parsedArguments['revision'] as String;
-  if (revision == null) {
+  if (!parsedArguments.wasParsed('revision')) {
     errorExit('Invalid argument: --revision must be specified.');
   }
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
 
-  if (parsedArguments['branch'] == null) {
+  if (!parsedArguments.wasParsed('branch')) {
     errorExit('Invalid argument: --branch must be specified.');
   }
 

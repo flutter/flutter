@@ -345,8 +345,7 @@ void main() {
         expect(contents, equals(encoder.convert(jsonData)));
       });
 
-      test('publishArchive throws if forceUpload is false and artifact '
-           'already exists on cloud storage', () async {
+      test('publishArchive throws if forceUpload is false and artifact already exists on cloud storage', () async {
         final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
         final ArchivePublisher publisher = ArchivePublisher(
@@ -368,8 +367,7 @@ void main() {
         processManager.verifyCalls(calls.keys.toList());
       });
 
-      test('publishArchive does not throw if forceUpload is true and artifact '
-           'already exists on cloud storage', () async {
+      test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
         final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
         final ArchivePublisher publisher = ArchivePublisher(
