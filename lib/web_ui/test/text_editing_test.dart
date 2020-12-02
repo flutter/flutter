@@ -2163,7 +2163,7 @@ void checkInputEditingState(
 
 /// In case of an exception backup DOM element(s) can still stay on the DOM.
 void clearBackUpDomElementIfExists() {
-  List<Node> domElementsToRemove = List<Node>();
+  List<Node> domElementsToRemove = <Node>[];
   if (document.getElementsByTagName('input').length > 0) {
     domElementsToRemove..addAll(document.getElementsByTagName('input'));
   }
