@@ -1701,6 +1701,25 @@ void main() {
   });
 
   group('AlertDialog.scrollable: ', () {
+    testWidgets('Scrollable by default', (WidgetTester tester) async {
+      final Key titleKey = UniqueKey();
+      final AlertDialog dialog = AlertDialog(
+        title: Container(
+          key: titleKey,
+          color: Colors.green,
+          height: 1000,
+        ),
+      );
+      await tester.pumpWidget(_buildAppWithDialog(dialog));
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      final RenderBox box = tester.renderObject(find.byKey(titleKey));
+      final Offset originalOffset = box.localToGlobal(Offset.zero);
+      await tester.drag(find.byKey(titleKey), const Offset(0.0, -200.0));
+      expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -200.0)));
+    });
+
     testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
