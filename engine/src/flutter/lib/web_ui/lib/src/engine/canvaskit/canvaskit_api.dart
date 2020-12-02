@@ -44,7 +44,7 @@ class CanvasKit {
   external SkTextDirectionEnum get TextDirection;
   external SkFontWeightEnum get FontWeight;
   external SkFontSlantEnum get FontSlant;
-  external SkAnimatedImage MakeAnimatedImageFromEncoded(Uint8List imageData);
+  external SkAnimatedImage? MakeAnimatedImageFromEncoded(Uint8List imageData);
   external SkShaderNamespace get Shader;
   external SkMaskFilterNamespace get MaskFilter;
   external SkColorFilterNamespace get ColorFilter;

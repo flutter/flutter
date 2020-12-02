@@ -4,6 +4,7 @@
 
 // @dart = 2.6
 import 'dart:html' show ProgressEvent;
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -113,6 +114,15 @@ void testMain() {
       expect((await image.toByteData()).lengthInBytes, greaterThan(0));
       expect((await image.toByteData(format: ui.ImageByteFormat.png)).lengthInBytes, greaterThan(0));
       testCollector.collectNow();
+    });
+
+    test('Reports error when failing to decode image', () async {
+      try {
+        await ui.instantiateImageCodec(Uint8List(0));
+        fail('Expected to throw');
+      } on Exception catch (exception) {
+        expect(exception.toString(), 'Exception: Failed to decode image');
+      }
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
