@@ -18,15 +18,29 @@ void sendJsonMethodCall({
   dynamic arguments,
   PlatformMessageResponseCallback callback,
 }) {
+  sendJsonMessage(
+    dispatcher: dispatcher,
+    channel: channel,
+    json: <String, dynamic>{
+        'method': method,
+        'args': arguments,
+    },
+  );
+}
+
+/// Send a JSON message over a channel.
+void sendJsonMessage({
+  @required PlatformDispatcher dispatcher,
+  @required String channel,
+  @required Map<String, dynamic> json,
+  PlatformMessageResponseCallback callback,
+}) {
   dispatcher.sendPlatformMessage(
     channel,
     // This recreates a combination of OptionalMethodChannel, JSONMethodCodec,
     // and _DefaultBinaryMessenger in the framework.
     utf8.encoder.convert(
-      const JsonCodec().encode(<String, dynamic>{
-        'method': method,
-        'args': arguments,
-      })
+      const JsonCodec().encode(json)
     ).buffer.asByteData(),
     callback,
   );

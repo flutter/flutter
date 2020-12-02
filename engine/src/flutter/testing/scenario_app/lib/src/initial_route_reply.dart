@@ -5,8 +5,7 @@
 // @dart = 2.6
 import 'dart:ui';
 
-import 'package:scenario_app/src/channel_util.dart';
-
+import 'channel_util.dart';
 import 'scenario.dart';
 
 /// A blank page that just sends back to the platform what the set initial
