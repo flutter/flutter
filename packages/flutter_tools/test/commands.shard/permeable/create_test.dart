@@ -141,8 +141,6 @@ void main() {
       'pubspec.yaml',
       'README.md',
       'test/widget_test.dart',
-      'integration_test/app_test.dart',
-      'integration_test/driver.dart',
     ], unexpectedPaths: <String>[
       'android/',
       'ios/',
