@@ -13,26 +13,27 @@ def main():
   parser = argparse.ArgumentParser(description='Copies architecture-dependent gen_snapshot binaries to output dir')
 
   parser.add_argument('--dst', type=str, required=True)
-  parser.add_argument('--arm64-out-dir', type=str, required=True)
-  parser.add_argument('--armv7-out-dir', type=str, required=True)
+  parser.add_argument('--arm64-out-dir', type=str)
+  parser.add_argument('--armv7-out-dir', type=str)
 
   args = parser.parse_args()
 
-  arm64_gen_snapshot = os.path.join(args.arm64_out_dir, 'clang_x64', 'gen_snapshot')
-  armv7_gen_snapshot = os.path.join(args.armv7_out_dir, 'clang_x64', 'gen_snapshot')
+  if args.arm64_out_dir:
+    generate_gen_snapshot(args.arm64_out_dir, os.path.join(args.dst, 'gen_snapshot_arm64'))
 
-  if not os.path.isfile(arm64_gen_snapshot):
-    print 'Cannot find x86_64 (arm64) gen_snapshot at', arm64_gen_snapshot
-    return 1
+  if args.armv7_out_dir:
+    generate_gen_snapshot(args.armv7_out_dir, os.path.join(args.dst, 'gen_snapshot_armv7'))
 
-  if not os.path.isfile(armv7_gen_snapshot):
-    print 'Cannot find i386 (armv7) gen_snapshot at', armv7_gen_snapshot
-    return 1
 
-  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', armv7_gen_snapshot,
-      '-o', os.path.join(args.dst, 'gen_snapshot_armv7')])
-  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', arm64_gen_snapshot,
-      '-o', os.path.join(args.dst, 'gen_snapshot_arm64')])
+def generate_gen_snapshot(directory, destination):
+  gen_snapshot_dir = os.path.join(directory, 'clang_x64', 'gen_snapshot')
+  if not os.path.isfile(gen_snapshot_dir):
+    print 'Cannot find gen_snapshot at', gen_snapshot_dir
+    sys.exit(1)
+
+  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', gen_snapshot_dir,
+      '-o', destination])
+
 
 if __name__ == '__main__':
   sys.exit(main())
