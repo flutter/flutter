@@ -509,7 +509,7 @@ void main() {
   "generated": "2020-12-02T19:30:53.862346Z",
   "generator": "pub",
   "generatorVersion": "2.12.0-76.0.dev"
-} 
+}
  ''');
       final FakeReportingNullSafetyCommand command = FakeReportingNullSafetyCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
