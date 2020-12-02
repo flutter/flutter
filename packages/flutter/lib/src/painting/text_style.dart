@@ -1113,7 +1113,7 @@ class TextStyle with Diagnosticable {
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
         fontSize: strutStyle.fontSize == null ? null : strutStyle.fontSize! * textScaleFactor,
-        lineHeight: strutStyle.lineHeight,
+        height: strutStyle.height,
         leading: strutStyle.leading,
         fontWeight: strutStyle.fontWeight,
         fontStyle: strutStyle.fontStyle,
