@@ -85,7 +85,7 @@ class EmbedderConfigBuilder {
   void SetPlatformMessageCallback(
       const std::function<void(const FlutterPlatformMessage*)>& callback);
 
-  void SetCompositor();
+  void SetCompositor(bool avoid_backing_store_cache = false);
 
   FlutterCompositor& GetCompositor();
 

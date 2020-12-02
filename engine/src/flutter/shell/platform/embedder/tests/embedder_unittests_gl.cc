@@ -3352,5 +3352,52 @@ TEST_F(EmbedderTest, MultipleDisplaysWithSameDisplayIdIsInvalid) {
   latch.Wait();
 }
 
+TEST_F(EmbedderTest, CompositorRenderTargetsNotRecycledWhenAvoidsCacheSet) {
+  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(300, 200));
+  builder.SetCompositor(/*avoid_backing_store_cache=*/true);
+  builder.SetDartEntrypoint("render_targets_are_recycled");
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLTexture);
+
+  const unsigned num_frames = 8;
+  const unsigned num_engine_layers = 10;
+  const unsigned num_backing_stores = num_frames * num_engine_layers;
+  fml::CountDownLatch latch(1 + num_frames);  // 1 for native test signal.
+
+  context.AddNativeCallback("SignalNativeTest",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              latch.CountDown();
+                            }));
+
+  context.GetCompositor().SetPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 20u);
+        latch.CountDown();
+      },
+      /*one_shot=*/false);
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 300;
+  event.height = 200;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_EQ(context.GetCompositor().GetBackingStoresCreatedCount(),
+            num_backing_stores);
+  // Killing the engine should collect all the frames.
+  engine.reset();
+  ASSERT_EQ(context.GetCompositor().GetPendingBackingStoresCount(), 0u);
+}
+
 }  // namespace testing
 }  // namespace flutter

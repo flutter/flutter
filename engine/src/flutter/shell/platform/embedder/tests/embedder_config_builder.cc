@@ -249,7 +249,7 @@ void EmbedderConfigBuilder::SetPlatformMessageCallback(
   context_.SetPlatformMessageCallback(callback);
 }
 
-void EmbedderConfigBuilder::SetCompositor() {
+void EmbedderConfigBuilder::SetCompositor(bool avoid_backing_store_cache) {
   context_.SetupCompositor();
   auto& compositor = context_.GetCompositor();
   compositor_.struct_size = sizeof(compositor_);
@@ -279,6 +279,7 @@ void EmbedderConfigBuilder::SetCompositor() {
 
     );
   };
+  compositor_.avoid_backing_store_cache = avoid_backing_store_cache;
   project_args_.compositor = &compositor_;
 }
 
