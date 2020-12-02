@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 import argparse
+import datetime
 import os
 import sys
 import json
@@ -32,6 +33,33 @@ POM_DEPENDENCY = '''
       <version>{2}</version>
       <scope>compile</scope>
     </dependency>
+'''
+
+MAVEN_METADATA_CONTENT ='''
+<metadata xmlns="http://maven.apache.org/METADATA/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/METADATA/1.1.0 http://maven.apache.org/xsd/metadata-1.1.0.xsd" modelVersion="1.1.0">
+  <groupId>io.flutter</groupId>
+  <artifactId>{0}</artifactId>
+  <version>{1}</version>
+  <versioning>
+    <versions>
+      <version>{1}</version>
+    </versions>
+    <snapshot>
+      <timestamp>{2}</timestamp>
+      <buildNumber>0</buildNumber>
+    </snapshot>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>{1}</value>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>{1}</value>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>
 '''
 
 def main():
@@ -66,6 +94,11 @@ def main():
   # Write the POM file.
   with open(os.path.join(args.destination, out_file_name), 'w') as f:
     f.write(POM_FILE_CONTENT.format(engine_artifact_id, artifact_version, pom_dependencies))
+
+  # Write the Maven metadata file.
+  with open(os.path.join(args.destination, '%s.maven-metadata.xml' % engine_artifact_id), 'w') as f:
+    timestamp = datetime.datetime.utcnow().strftime("%Y%m%d.%H%M%S")
+    f.write(MAVEN_METADATA_CONTENT.format(engine_artifact_id, artifact_version, timestamp))
 
 if __name__ == '__main__':
   sys.exit(main())
