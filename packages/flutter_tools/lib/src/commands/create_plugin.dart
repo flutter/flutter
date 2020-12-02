@@ -174,6 +174,5 @@ For more information on desktop platforms, see https://flutter.dev/desktop#set-u
 For more information on web, see https://flutter.dev/docs/get-started/web#set-up.
 
 ''', exitCode: 2);
-
   }
 }
