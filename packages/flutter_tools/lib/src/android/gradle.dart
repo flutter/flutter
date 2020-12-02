@@ -645,8 +645,8 @@ Future<void> buildGradleAar({
     globals.printStatus(result.stdout, wrap: false);
     globals.printError(result.stderr, wrap: false);
     throwToolExit(
-      'Gradle task $aarTask failed with exit code $exitCode.',
-      exitCode: exitCode,
+      'Gradle task $aarTask failed with exit code ${result.exitCode}.',
+      exitCode: result.exitCode,
     );
   }
   final Directory repoDirectory = getRepoDirectory(outputDirectory);
