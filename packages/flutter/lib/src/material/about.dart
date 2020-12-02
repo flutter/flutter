@@ -16,6 +16,7 @@ import 'card.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'dialog.dart';
+import 'dialog_theme.dart';
 import 'divider.dart';
 import 'floating_action_button.dart';
 import 'floating_action_button_location.dart';
@@ -242,6 +243,7 @@ void showAboutDialog({
   Widget? applicationIcon,
   String? applicationLegalese,
   List<Widget>? children,
+  DialogTheme? dialogTheme,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
@@ -257,6 +259,7 @@ void showAboutDialog({
         applicationIcon: applicationIcon,
         applicationLegalese: applicationLegalese,
         children: children,
+        dialogTheme: dialogTheme,
       );
     },
     routeSettings: routeSettings,
@@ -334,6 +337,7 @@ class AboutDialog extends StatelessWidget {
     this.applicationIcon,
     this.applicationLegalese,
     this.children,
+    this.dialogTheme,
   }) : super(key: key);
 
   /// The name of the application.
@@ -372,6 +376,9 @@ class AboutDialog extends StatelessWidget {
   /// Defaults to nothing.
   final List<Widget>? children;
 
+  /// A theme for customizing the backgroundColor, elevation, shape of a dialog.
+  final DialogTheme? dialogTheme;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -379,6 +386,9 @@ class AboutDialog extends StatelessWidget {
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget? icon = applicationIcon ?? _defaultApplicationIcon(context);
     return AlertDialog(
+      backgroundColor: dialogTheme?.backgroundColor,
+      elevation: dialogTheme?.elevation,
+      shape: dialogTheme?.shape,
       content: ListBody(
         children: <Widget>[
           Row(
@@ -390,10 +400,10 @@ class AboutDialog extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ListBody(
                     children: <Widget>[
-                      Text(name, style: Theme.of(context).textTheme.headline5),
-                      Text(version, style: Theme.of(context).textTheme.bodyText2),
+                      Text(name, style: dialogTheme?.titleTextStyle ?? Theme.of(context).textTheme.headline5),
+                      Text(version, style: dialogTheme?.contentTextStyle ?? Theme.of(context).textTheme.bodyText2),
                       const SizedBox(height: _textVerticalSeparation),
-                      Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
+                      Text(applicationLegalese ?? '', style: dialogTheme?.contentTextStyle ?? Theme.of(context).textTheme.caption),
                     ],
                   ),
                 ),

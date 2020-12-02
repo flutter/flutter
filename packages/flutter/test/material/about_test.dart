@@ -6,12 +6,17 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   tearDown(() {
     LicenseRegistry.reset();
   });
+
+  RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(AboutDialog), matching: find.text(text))).renderObject! as RenderParagraph;
+}
 
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
@@ -613,6 +618,63 @@ void main() {
       ),
       findsNothing,
     );
+  });
+
+  testWidgets('showAboutDialog uses custom elevation, shape, backgroundColor', (WidgetTester tester) async {
+    const String applicationName = 'Flutter App';
+    const String applicationLegalese = 'BSD-3-Clause License';
+    const double customElevation = 12.0;
+    const Color customBackgroundColor = Colors.purple;
+    const TextStyle customTitleTextStyle = TextStyle(fontSize: 14);
+    const TextStyle customContentTextStyle = TextStyle(fontSize: 10);
+    final ShapeBorder customShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
+
+    await tester.pumpWidget(MaterialApp(
+    home: Material(
+      child: Builder(
+        builder: (BuildContext context) {
+          return Center(
+            child: ElevatedButton(
+              child: const Text('Tap Me'),
+              onPressed: () {
+                showAboutDialog(
+                  context: context,
+                  applicationName: applicationName,
+                  applicationLegalese: applicationLegalese,
+                  applicationVersion: '2.1.0',
+                  dialogTheme: DialogTheme(
+                    backgroundColor: customBackgroundColor,
+                    elevation: customElevation,
+                    shape: customShape,
+                    titleTextStyle: customTitleTextStyle,
+                    contentTextStyle: customContentTextStyle,
+                  ),
+                );
+              },
+            ),
+          );
+        }
+      ),
+    ),
+  ));
+
+    await tester.tap(find.text('Tap Me'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = tester.firstWidget<Material>(
+      find.descendant(
+        of: find.byType(AboutDialog),
+        matching: find.byType(Material),
+        ));
+
+    final RenderParagraph title = _getTextRenderObjectFromDialog(tester, applicationName);
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, applicationLegalese);
+
+    expect(materialWidget.color, customBackgroundColor);
+    expect(materialWidget.elevation, customElevation);
+    expect(materialWidget.shape, customShape);
+    expect(title.text.style?.fontSize, customTitleTextStyle.fontSize);
+    expect(content.text.style?.fontSize, customContentTextStyle.fontSize);
   });
 
   testWidgets("AboutDialog's contents are scrollable", (WidgetTester tester) async {
