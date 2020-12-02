@@ -5,7 +5,8 @@
 #import "flutter/shell/platform/darwin/ios/ios_surface_metal.h"
 
 #include "flutter/shell/gpu/gpu_surface_metal.h"
-#import "flutter/shell/platform/darwin/ios/ios_context_metal.h"
+#include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
+#include "flutter/shell/platform/darwin/ios/ios_context_metal.h"
 
 namespace flutter {
 
@@ -15,17 +16,14 @@ static IOSContextMetal* CastToMetalContext(const std::shared_ptr<IOSContext>& co
 
 IOSSurfaceMetal::IOSSurfaceMetal(fml::scoped_nsobject<CAMetalLayer> layer,
                                  std::shared_ptr<IOSContext> context)
-    : IOSSurface(std::move(context)), layer_(std::move(layer)) {
-  if (!layer_) {
-    return;
-  }
-
+    : IOSSurface(std::move(context)),
+      GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer),
+      layer_(std::move(layer)) {
+  is_valid_ = layer_;
   auto metal_context = CastToMetalContext(GetContext());
-
-  layer_.get().device = metal_context->GetDevice().get();
-  layer_.get().presentsWithTransaction = YES;
-
-  is_valid_ = true;
+  auto darwin_context = metal_context->GetDarwinContext().get();
+  command_queue_ = darwin_context.mtlCommandQueue;
+  device_ = darwin_context.mtlDevice;
 }
 
 // |IOSSurface|
@@ -44,11 +42,60 @@ void IOSSurfaceMetal::UpdateStorageSizeIfNecessary() {
 // |IOSSurface|
 std::unique_ptr<Surface> IOSSurfaceMetal::CreateGPUSurface(GrDirectContext* /* unused */) {
   auto metal_context = CastToMetalContext(GetContext());
-
-  return std::make_unique<GPUSurfaceMetal>(layer_,                               // layer
-                                           metal_context->GetMainContext(),      // context
-                                           metal_context->GetMainCommandQueue()  // command queue
+  return std::make_unique<GPUSurfaceMetal>(this,                            // layer
+                                           metal_context->GetMainContext()  // context
   );
+}
+
+// |GPUSurfaceMetalDelegate|
+GPUCAMetalLayerHandle IOSSurfaceMetal::GetCAMetalLayer(const SkISize& frame_info) const {
+  CAMetalLayer* layer = layer_.get();
+  layer.device = device_;
+
+  layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+  // Flutter needs to read from the color attachment in cases where there are effects such as
+  // backdrop filters.
+  layer.framebufferOnly = NO;
+
+  const auto drawable_size = CGSizeMake(frame_info.width(), frame_info.height());
+  if (!CGSizeEqualToSize(drawable_size, layer.drawableSize)) {
+    layer.drawableSize = drawable_size;
+  }
+
+  // When there are platform views in the scene, the drawable needs to be presented in the same
+  // transaction as the one created for platform views. When the drawable are being presented from
+  // the raster thread, there is no such transaction.
+  layer.presentsWithTransaction = [[NSThread currentThread] isMainThread];
+
+  return layer;
+}
+
+// |GPUSurfaceMetalDelegate|
+bool IOSSurfaceMetal::PresentDrawable(GrMTLHandle drawable) const {
+  if (drawable == nullptr) {
+    FML_DLOG(ERROR) << "Could not acquire next Metal drawable from the SkSurface.";
+    return false;
+  }
+
+  auto command_buffer =
+      fml::scoped_nsprotocol<id<MTLCommandBuffer>>([[command_queue_ commandBuffer] retain]);
+  [command_buffer.get() commit];
+  [command_buffer.get() waitUntilScheduled];
+
+  [reinterpret_cast<id<CAMetalDrawable>>(drawable) present];
+  return true;
+}
+
+// |GPUSurfaceMetalDelegate|
+GPUMTLTextureInfo IOSSurfaceMetal::GetMTLTexture(const SkISize& frame_info) const {
+  FML_CHECK(false) << "render to texture not supported on ios";
+  return {.texture_id = -1, .texture = nullptr};
+}
+
+// |GPUSurfaceMetalDelegate|
+bool IOSSurfaceMetal::PresentTexture(intptr_t texture_id) const {
+  FML_CHECK(false) << "render to texture not supported on ios";
+  return false;
 }
 
 }  // namespace flutter
