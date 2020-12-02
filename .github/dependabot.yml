@@ -9,6 +9,8 @@ updates:
       interval: "weekly"
     reviewers:
       - "jmagman"
+      - "keyonghan"
+      - "yusufm"
     labels:
       - "team"
       - "team: infra"
