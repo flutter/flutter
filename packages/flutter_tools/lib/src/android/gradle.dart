@@ -324,9 +324,6 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.splitPerAbi) {
     command.add('-Psplit-per-abi=true');
   }
-  if (androidBuildInfo.shrink) {
-    command.add('-Pshrink=true');
-  }
   if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
     command.add('-Pdart-defines=${encodeDartDefines(androidBuildInfo.buildInfo.dartDefines)}');
   }

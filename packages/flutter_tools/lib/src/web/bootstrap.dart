@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 /// The JavaScript bootstrap script to support in-browser hot restart.
 ///
@@ -93,6 +94,75 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
   }
 });
 ''';
+}
+
+/// Generates the bootstrap logic required for a flutter test running in a browser.
+///
+/// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window size.
+String generateTestEntrypoint({
+  @required String relativeTestPath,
+  @required String absolutePath,
+  @required LanguageVersion languageVersion,
+}) {
+  return '''
+  // @dart = ${languageVersion.major}.${languageVersion.minor}
+  import 'org-dartlang-app:///$relativeTestPath' as test;
+  import 'dart:ui' as ui;
+  import 'dart:html';
+  import 'dart:js';
+  import 'package:stream_channel/stream_channel.dart';
+  import 'package:flutter_test/flutter_test.dart';
+  import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
+  import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
+  import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
+
+  Future<void> main() async {
+    ui.debugEmulateFlutterTesterEnvironment = true;
+    await ui.webOnlyInitializePlatform();
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$absolutePath'));
+    (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
+    (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
+    internalBootstrapBrowserTest(() => test.main);
+  }
+
+  void internalBootstrapBrowserTest(Function getMain()) {
+    var channel = serializeSuite(getMain, hidePrints: false);
+    postMessageChannel().pipe(channel);
+  }
+
+  StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
+
+  StreamChannel suiteChannel(String name) {
+    var manager = SuiteChannelManager.current;
+    if (manager == null) {
+      throw StateError('suiteChannel() may only be called within a test worker.');
+    }
+    return manager.connectOut(name);
+  }
+
+  StreamChannel postMessageChannel() {
+    var controller = StreamChannelController(sync: true);
+    window.onMessage.firstWhere((message) {
+      return message.origin == window.location.origin && message.data == "port";
+    }).then((message) {
+      var port = message.ports.first;
+      var portSubscription = port.onMessage.listen((message) {
+        controller.local.sink.add(message.data);
+      });
+      controller.local.stream.listen((data) {
+        port.postMessage({"data": data});
+      }, onDone: () {
+        port.postMessage({"event": "done"});
+        portSubscription.cancel();
+      });
+    });
+    context['parent'].callMethod('postMessage', [
+      JsObject.jsify({"href": window.location.href, "ready": true}),
+      window.location.origin,
+    ]);
+    return controller.foreign;
+  }
+  ''';
 }
 
 /// Generate the unit test bootstrap file.
