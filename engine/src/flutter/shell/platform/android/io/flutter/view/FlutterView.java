@@ -21,6 +21,7 @@ import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.DisplayCutout;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -265,6 +266,12 @@ public class FlutterView extends SurfaceView
   @NonNull
   public DartExecutor getDartExecutor() {
     return dartExecutor;
+  }
+
+  @Override
+  public boolean dispatchKeyEventPreIme(KeyEvent event) {
+    return (isAttached() && androidKeyProcessor.onKeyEvent(event))
+        || super.dispatchKeyEventPreIme(event);
   }
 
   public FlutterNativeView getFlutterNativeView() {

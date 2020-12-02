@@ -45,24 +45,24 @@ public class KeyEventChannelTest {
     BinaryMessenger fakeMessenger = mock(BinaryMessenger.class);
     KeyEventChannel keyEventChannel = new KeyEventChannel(fakeMessenger);
     final boolean[] handled = {false};
-    final KeyEvent[] handledKeyEvents = {null};
+    final long[] handledId = {-1};
     keyEventChannel.setEventResponseHandler(
         new KeyEventChannel.EventResponseHandler() {
-          public void onKeyEventHandled(@NonNull KeyEvent event) {
+          public void onKeyEventHandled(@NonNull long id) {
             handled[0] = true;
-            handledKeyEvents[0] = event;
+            handledId[0] = id;
           }
 
-          public void onKeyEventNotHandled(@NonNull KeyEvent event) {
+          public void onKeyEventNotHandled(@NonNull long id) {
             handled[0] = false;
-            handledKeyEvents[0] = event;
+            handledId[0] = id;
           }
         });
     verify(fakeMessenger, times(0)).send(any(), any(), any());
 
     KeyEvent event = new FakeKeyEvent(KeyEvent.ACTION_DOWN, 65);
     KeyEventChannel.FlutterKeyEvent flutterKeyEvent =
-        new KeyEventChannel.FlutterKeyEvent(event, null);
+        new KeyEventChannel.FlutterKeyEvent(event, null, 10);
     keyEventChannel.keyDown(flutterKeyEvent);
     ArgumentCaptor<ByteBuffer> byteBufferArgumentCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
     ArgumentCaptor<BinaryMessenger.BinaryReply> replyArgumentCaptor =
@@ -78,7 +78,7 @@ public class KeyEventChannelTest {
     // Simulate a reply, and see that it is handled.
     sendReply(true, replyArgumentCaptor.getValue());
     assertTrue(handled[0]);
-    assertEquals(event, handledKeyEvents[0]);
+    assertEquals(10, handledId[0]);
   }
 
   @Test
@@ -86,24 +86,24 @@ public class KeyEventChannelTest {
     BinaryMessenger fakeMessenger = mock(BinaryMessenger.class);
     KeyEventChannel keyEventChannel = new KeyEventChannel(fakeMessenger);
     final boolean[] handled = {false};
-    final KeyEvent[] handledKeyEvents = {null};
+    final long[] handledId = {-1};
     keyEventChannel.setEventResponseHandler(
         new KeyEventChannel.EventResponseHandler() {
-          public void onKeyEventHandled(@NonNull KeyEvent event) {
+          public void onKeyEventHandled(long id) {
             handled[0] = true;
-            handledKeyEvents[0] = event;
+            handledId[0] = id;
           }
 
-          public void onKeyEventNotHandled(@NonNull KeyEvent event) {
+          public void onKeyEventNotHandled(long id) {
             handled[0] = false;
-            handledKeyEvents[0] = event;
+            handledId[0] = id;
           }
         });
     verify(fakeMessenger, times(0)).send(any(), any(), any());
 
     KeyEvent event = new FakeKeyEvent(KeyEvent.ACTION_UP, 65);
     KeyEventChannel.FlutterKeyEvent flutterKeyEvent =
-        new KeyEventChannel.FlutterKeyEvent(event, null);
+        new KeyEventChannel.FlutterKeyEvent(event, null, 10);
     keyEventChannel.keyUp(flutterKeyEvent);
     ArgumentCaptor<ByteBuffer> byteBufferArgumentCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
     ArgumentCaptor<BinaryMessenger.BinaryReply> replyArgumentCaptor =
@@ -119,6 +119,6 @@ public class KeyEventChannelTest {
     // Simulate a reply, and see that it is handled.
     sendReply(true, replyArgumentCaptor.getValue());
     assertTrue(handled[0]);
-    assertEquals(event, handledKeyEvents[0]);
+    assertEquals(10, handledId[0]);
   }
 }
