@@ -91,8 +91,6 @@ bool rollDev({
   @required String usage,
   @required ArgResults argResults,
   @required Stdio stdio,
-  //@required Platform platform,
-  //@required FileSystem fileSystem,
   @required FrameworkRepository repository,
   String remoteName = 'origin',
 }) {
