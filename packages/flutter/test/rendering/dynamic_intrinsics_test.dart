@@ -84,12 +84,13 @@ void main() {
     expect(root.size, equals(inner.size));
   });
 
-  group('When RenderObject.debugCheckingIntrinsics is true', () {
-    setUp(() => RenderObject.debugCheckingIntrinsics = true);
-    tearDown(() => RenderObject.debugCheckingIntrinsics = false);
-    test('parent returns correct intrinsics', () {
+  test('When RenderObject.debugCheckingIntrinsics is true, parent returns correct intrinsics', () {
+    RenderObject.debugCheckingIntrinsics = true;
+
+    try {
       RenderParentSize parent;
       RenderFixedSize inner;
+
       layout(
         RenderIntrinsicSize(
           child: parent = RenderParentSize(
@@ -110,7 +111,9 @@ void main() {
       pumpFrame();
 
       _expectIntrinsicDimensions(parent, 200);
-    });
+    } finally {
+      RenderObject.debugCheckingIntrinsics = false;
+    }
   });
 }
 
