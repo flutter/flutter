@@ -114,10 +114,10 @@ class CodesignCommand extends Command<void> {
     if (argResults[kRevision] != null) {
       revision = argResults[kRevision] as String;
     } else {
-      revision = processManager.runSync(
+      revision = (processManager.runSync(
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: conductorDirectory.path,
-      ).stdout as String;
+      ).stdout as String).trim();
     }
     verify(revision);
   }
