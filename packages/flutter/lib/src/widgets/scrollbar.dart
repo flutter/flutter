@@ -690,6 +690,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   double? _dragScrollbarAxisPosition;
   Drag? _drag;
   ScrollController? _currentController;
+  Timer? _fadeoutTimer;
 
   /// A [GlobalKey] associated with the [painter], will be assigned to the
   /// [CustomPaint] of the scrollbar.
@@ -703,7 +704,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ScrollbarPainter? painter;
 
   /// Controls the fading in and out of the scrollbar thumb.
-  @protected
   AnimationController get fadeoutAnimationController => _fadeoutAnimationController;
   late AnimationController _fadeoutAnimationController;
   
@@ -711,11 +711,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   Animation<double> get fadeoutOpacityAnimation => _fadeoutOpacityAnimation;
   late Animation<double> _fadeoutOpacityAnimation;
-
-  /// Used to initiate the fade out animation upon completion.
-  @protected
-  Timer? get fadeoutTimer => _fadeoutTimer;
-  Timer? _fadeoutTimer;
   
   @override
   void initState() {
@@ -823,7 +818,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (getDirection() == null) {
       return;
     }
-    fadeoutTimer?.cancel();
+    _fadeoutTimer?.cancel();
   }
 
   /// Handler called when a long press gesture has started.
@@ -964,7 +959,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       if (_fadeoutAnimationController.status != AnimationStatus.forward)
         _fadeoutAnimationController.forward();
 
-      fadeoutTimer?.cancel();
+      _fadeoutTimer?.cancel();
       painter!.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisPosition == null)
@@ -976,7 +971,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Get the GestureRecognizerFactories used to detect gestures on the scrollbar
   /// thumb.
   @protected
-  Map<Type, GestureRecognizerFactory> get defaultGestures {
+  Map<Type, GestureRecognizerFactory> get gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
     if (controller == null)
@@ -1026,7 +1021,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
-          gestures: defaultGestures,
+          gestures: gestures,
           child: CustomPaint(
             key: customPaintKey,
             foregroundPainter: painter,

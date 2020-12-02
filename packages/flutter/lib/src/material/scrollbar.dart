@@ -25,7 +25,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// controlled by [showTrackOnHover]. The thickness of the track and scrollbar
 /// thumb will become larger when hovering, unless overridden by [thickness].
 ///
-/// //TODO(Piinks): Add code sample
+// TODO(Piinks): Add code sample
 ///
 /// See also:
 ///
@@ -219,7 +219,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
       onNotification: handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
-          gestures: defaultGestures,
+          gestures: gestures,
           child: MouseRegion(
             onExit: maybeHoverExit,
             onHover: maybeHovering,
