@@ -26,6 +26,20 @@ devices=(
 
   # Moto Z XT1650
   "model=griffin,version=24"
+
+  # Virtual devices for API level coverage.
+  "model=Nexus5,version=19"
+  # version 20 not available.
+  "model=Nexus5,version=21"
+  "model=Nexus5,version=22"
+  "model=Nexus5,version=23"
+  # SDK 24 is run on a physical griffin/Moto Z above.
+  "model=Nexus6P,version=25"
+  "model=Nexus6P,version=26"
+  "model=Nexus6P,version=27"
+  # SDK 28 is run on a physical blueline/Pixel 3 above.
+  # SDK 29 is run on a physical flame/Pixel 4 above.
+  "model=NexusLowRes,version=30"
 )
 
 GIT_REVISION=$(git rev-parse HEAD)
