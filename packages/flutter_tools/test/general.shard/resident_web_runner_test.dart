@@ -248,33 +248,6 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
-  testUsingContext('Exits on run if target file does not exist', () async {
-    fileSystem.file('.packages')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('\n');
-    final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
-      mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
-      stayResident: true,
-      urlTunneller: null,
-    ) as ResidentWebRunner;
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file(fileSystem.path.join('web', 'index.html'))
-      .createSync(recursive: true);
-
-    expect(await residentWebRunner.run(), 1);
-    final String absoluteMain = fileSystem.path.absolute(fileSystem.path.join('lib', 'main.dart'));
-    expect(testLogger.errorText, contains('Tried to run $absoluteMain, but that file does not exist.'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Pub: () => MockPub(),
-    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
-  });
-
   testUsingContext('Can successfully run and connect to vmservice', () async {
     fileSystem.file('.packages')
       ..createSync(recursive: true)

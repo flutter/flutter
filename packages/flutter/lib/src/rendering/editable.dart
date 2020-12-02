@@ -776,7 +776,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyX) {
+    if (key == LogicalKeyboardKey.keyX && !_readOnly) {
       if (!selection!.isCollapsed) {
         Clipboard.setData(ClipboardData(text: selection!.textInside(_plainText)));
         textSelectionDelegate.textEditingValue = TextEditingValue(
@@ -787,7 +787,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyV) {
+    if (key == LogicalKeyboardKey.keyV && !_readOnly) {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final TextEditingValue value = textSelectionDelegate.textEditingValue;
@@ -818,6 +818,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _handleDelete({ required bool forward }) {
     assert(_selection != null);
+    if (_readOnly) {
+      return;
+    }
     String textBefore = selection!.textBefore(_plainText);
     String textAfter = selection!.textAfter(_plainText);
     int cursorPosition = selection!.start;
@@ -2025,6 +2028,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, cursorHeight - 2.0 * _kCaretHeightOffset);
         break;
     }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    final double width = forceLine ? constraints.maxWidth : constraints
+        .constrainWidth(_textPainter.size.width + _caretMargin);
+    return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
 
   @override

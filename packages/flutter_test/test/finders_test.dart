@@ -199,6 +199,11 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
   bool get sizedByParent => true;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.smallest;
+  }
+
+  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config..label = label..textDirection = TextDirection.ltr;

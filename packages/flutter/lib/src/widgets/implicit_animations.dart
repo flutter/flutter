@@ -297,7 +297,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -812,6 +812,47 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// The following code implements the [AnimatedPadding] widget, using a [curve] of
+/// [Curves.easeInOut].
+///
+/// ```dart
+/// double padValue = 0.0;
+/// _updatePadding(double value) {
+///   setState(() {
+///     padValue = value;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: [
+///       AnimatedPadding(
+///         padding: EdgeInsets.all(padValue),
+///         duration: const Duration(seconds: 2),
+///         curve: Curves.easeInOut,
+///         child: Container(
+///           width: MediaQuery.of(context).size.width,
+///           height: MediaQuery.of(context).size.height / 5,
+///           color: Colors.blue,
+///         ),
+///       ),
+///       Text('Padding: $padValue'),
+///       ElevatedButton(
+///         child: Text('Change padding'),
+///         onPressed: () {
+///           _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
+///         }
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

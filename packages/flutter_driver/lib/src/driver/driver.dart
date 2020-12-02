@@ -777,7 +777,7 @@ class DriverOffset {
   final double dy;
 
   @override
-  String toString() => '$runtimeType($dx, $dy)';
+  String toString() => '$runtimeType($dx, $dy)'; // ignore: no_runtimetype_tostring, can't access package:flutter here to use objectRuntimeType
 
   @override
   bool operator ==(Object other) {

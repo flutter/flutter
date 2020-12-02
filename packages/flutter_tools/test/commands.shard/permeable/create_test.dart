@@ -32,6 +32,7 @@ import '../../src/context.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/testbed.dart';
 
+const String _kNoPlatformsMessage = 'Must specify at least one platform using --platforms.\n';
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 // TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
@@ -134,6 +135,7 @@ void main() {
       '.gitignore',
       '.ios/Flutter',
       '.ios/Flutter/flutter_project.podspec',
+      '.ios/Flutter/engine/Flutter.podspec',
       '.metadata',
       'lib/main.dart',
       'pubspec.yaml',
@@ -395,8 +397,6 @@ void main() {
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'lib/flutter_project_web.dart',
-        // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-        // https://github.com/flutter/flutter/issues/59787
       ],
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
@@ -427,6 +427,7 @@ void main() {
     // The platform is correctly registered
     expect(pubspec.flutter['plugin']['platforms']['web']['pluginClass'], 'FlutterProjectWeb');
     expect(pubspec.flutter['plugin']['platforms']['web']['fileName'], 'flutter_project_web.dart');
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Pub: () => Pub(
@@ -437,6 +438,7 @@ void main() {
       botDetector: globals.botDetector,
       platform: globals.platform,
     ),
+    Logger: ()=>logger,
   });
 
   testUsingContext('plugin example app depends on plugin', () async {
@@ -666,7 +668,9 @@ void main() {
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
-    expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+    expect(logger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+  }, overrides: <Type, Generator>{
+    Logger: () => logger,
   });
 
   testUsingContext('app does not include desktop or web by default', () async {
@@ -737,8 +741,10 @@ void main() {
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('plugin supports Linux if requested', () async {
@@ -772,8 +778,10 @@ void main() {
         ],
         pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('app supports macOS if requested', () async {
@@ -799,8 +807,10 @@ void main() {
     expect(projectDir.childDirectory('linux'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('plugin supports macOS if requested', () async {
@@ -831,8 +841,10 @@ void main() {
       'macos',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('app supports Windows if requested', () async {
@@ -857,8 +869,10 @@ void main() {
     expect(projectDir.childDirectory('linux'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('Windows has correct VERSIONINFO', () async {
@@ -919,8 +933,10 @@ void main() {
       'windows'
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('app supports web if requested', () async {
@@ -946,8 +962,10 @@ void main() {
     expect(projectDir.childDirectory('linux'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
     expect(projectDir.childDirectory('windows'), isNot(exists));
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('plugin uses new platform schema', () async {
@@ -1657,8 +1675,6 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-    // https://github.com/flutter/flutter/issues/59787
     expect(projectDir.childDirectory('ios'), isNot(exists));
     expect(projectDir.childDirectory('android'), isNot(exists));
     expect(projectDir.childDirectory('web'), isNot(exists));
@@ -1666,8 +1682,6 @@ void main() {
     expect(projectDir.childDirectory('windows'), isNot(exists));
     expect(projectDir.childDirectory('macos'), isNot(exists));
 
-    // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-    // https://github.com/flutter/flutter/issues/59787
     expect(projectDir.childDirectory('example').childDirectory('ios'),
         isNot(exists));
     expect(projectDir.childDirectory('example').childDirectory('android'),
@@ -1688,7 +1702,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
-
   testUsingContext('plugin supports ios if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -1705,8 +1718,10 @@ void main() {
       'ios',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    Logger: () => logger,
   });
 
   testUsingContext('plugin supports android if requested', () async {
@@ -1727,8 +1742,10 @@ void main() {
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project');
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    Logger: () => logger,
   });
 
   testUsingContext('plugin supports web if requested', () async {
@@ -1749,8 +1766,10 @@ void main() {
     unexpectedPlatforms: <String>['some_platform'],
     androidIdentifier: 'com.example.flutter_project',
     webFileName: 'flutter_project_web.dart');
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    Logger: () => logger,
   });
 
   testUsingContext('plugin doe not support web if feature is not enabled', () async {
@@ -1769,8 +1788,10 @@ void main() {
       'some_platform'
     ], pluginClass: 'somePluginClass',
     unexpectedPlatforms: <String>['web']);
+    expect(logger.errorText, contains(_kNoPlatformsMessage));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+    Logger: () => logger,
   });
 
   testUsingContext('create an empty plugin, then add ios', () async {
@@ -2086,7 +2107,9 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
-    expect(logger.statusText, isNot(contains('The `pubspec.yaml` under the project directory must be updated to support')));
+    final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
+    final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
+    expect(logger.statusText, isNot(contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n')));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
   });
@@ -2098,10 +2121,12 @@ void main() {
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
+    final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
+    final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
-    expect(logger.statusText, isNot(contains('The `pubspec.yaml` under the project directory must be updated to support')));
+    expect(logger.statusText, isNot(contains('You need to update $relativePluginPath/pubspec.yaml to support ios.\n')));
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
-    expect(logger.statusText, contains('The `pubspec.yaml` under the project directory must be updated to support'));
+    expect(logger.statusText, contains('You need to update $relativePluginPath/pubspec.yaml to support android.\n'));
   }, overrides: <Type, Generator> {
     Logger: () => logger,
   });
@@ -2121,7 +2146,7 @@ void main() {
     expect(env['flutter'].allows(Version(1, 19, 0)), false);
   });
 
-  testUsingContext('default app uses Android sdk 29', () async {
+  testUsingContext('default app uses Android SDK 30', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -2135,8 +2160,8 @@ void main() {
 
     final String buildContent = await globals.fs.file(projectDir.path + '/android/app/build.gradle').readAsString();
 
-    expect(buildContent.contains('compileSdkVersion 29'), true);
-    expect(buildContent.contains('targetSdkVersion 29'), true);
+    expect(buildContent.contains('compileSdkVersion 30'), true);
+    expect(buildContent.contains('targetSdkVersion 30'), true);
   });
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
@@ -2280,6 +2305,39 @@ void main() {
     expect(cmakeContents, contains('set(PLUGIN_NAME "foo_bar_plugin_plugin")'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('created plugin supports no platforms should print `no platforms` message', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.errorText, contains(_kNoPlatformsMessage));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    Logger: ()=> logger,
+  });
+
+  testUsingContext('created plugin with no --platforms flag should not print `no platforms` message if the existing plugin supports a platform.', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    Logger: () => logger,
   });
 }
 

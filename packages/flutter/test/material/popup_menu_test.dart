@@ -4,12 +4,14 @@
 
 import 'dart:ui' show window, SemanticsFlag;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 void main() {
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
@@ -123,7 +125,7 @@ void main() {
     await tester.tap(find.byKey(withCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    Navigator.of(popupContext)!.pop();
+    Navigator.of(popupContext).pop();
     await tester.pump();
     expect(cancels, equals(2));
   });
@@ -367,8 +369,8 @@ void main() {
 
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
     Widget build(TargetPlatform platform) {
+      debugDefaultTargetPlatformOverride = platform;
       return MaterialApp(
-        theme: ThemeData(platform: platform),
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
@@ -404,6 +406,8 @@ void main() {
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
+
+    debugDefaultTargetPlatformOverride = null;
   });
 
   group('PopupMenuButton with Icon', () {
@@ -1798,6 +1802,79 @@ void main() {
       tester.getBottomLeft(find.byKey(_lastKey)).dy,
       lessThan(600 - windowPaddingBottom), // Device height is 600.
     );
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    Widget buildFrame({ bool? widgetEnableFeedack, bool? themeEnableFeedback }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: PopupMenuTheme(
+            data: PopupMenuThemeData(
+              enableFeedback: themeEnableFeedback,
+            ),
+            child: PopupMenuButton<int>(
+              enableFeedback: widgetEnableFeedack,
+              child: const Text('Show Menu'),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  const PopupMenuItem<int>(
+                    value: 1,
+                    child: Text('One'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('PopupMenuButton enableFeedback works properly', (WidgetTester tester) async {
+      //PopupMenuButton with enabled feedback
+      await tester.pumpWidget(buildFrame(widgetEnableFeedack: true));
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+
+      //PopupMenuButton with disabled feedback
+      await tester.pumpWidget(buildFrame(widgetEnableFeedack: false));
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+
+      //PopupMenuButton with enabled feedback by default
+      await tester.pumpWidget(buildFrame());
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 0);
+
+      //PopupMenu with disabled feedback using PopupMenuButtonTheme
+      await tester.pumpWidget(buildFrame(themeEnableFeedback: false));
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 0);
+
+      //PopupMenu enableFeedback property overrides PopupMenuButtonTheme
+      await tester.pumpWidget(buildFrame(widgetEnableFeedack: false,themeEnableFeedback: true));
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }
 

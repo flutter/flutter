@@ -21,7 +21,7 @@ mixin SemanticsBinding on BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _accessibilityFeatures = platformDispatcher.accessibilityFeatures;
+    _accessibilityFeatures = window.accessibilityFeatures;
   }
 
   /// Called when the platform accessibility features change.
@@ -29,7 +29,7 @@ mixin SemanticsBinding on BindingBase {
   /// See [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures = platformDispatcher.accessibilityFeatures;
+    _accessibilityFeatures = window.accessibilityFeatures;
   }
 
   /// Creates an empty semantics update builder.

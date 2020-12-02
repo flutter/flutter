@@ -50,10 +50,8 @@ import 'src/globals.dart' as globals;
 import 'src/isolated/devtools_launcher.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
-import 'src/isolated/web_compilation_delegate.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
-import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
@@ -145,7 +143,6 @@ Future<void> main(List<String> args) async {
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp,
      overrides: <Type, Generator>{
-       WebCompilationProxy: () => BuildRunnerWebCompilationProxy(),
        // The web runner is not supported in google3 because it depends
        // on dwds.
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
