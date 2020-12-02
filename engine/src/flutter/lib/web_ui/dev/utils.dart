@@ -220,13 +220,13 @@ bool get isVerboseLoggingEnabled => GeneralTestsArgumentParser.instance.verbose;
 /// There might be proccesses started during the tests.
 ///
 /// Use this list to store those Processes, for cleaning up before shutdown.
-final List<io.Process> processesToCleanUp = List<io.Process>();
+final List<io.Process> processesToCleanUp = <io.Process>[];
 
 /// There might be temporary directories created during the tests.
 ///
 /// Use this list to store those directories and for deleteing them before
 /// shutdown.
-final List<io.Directory> temporaryDirectories = List<io.Directory>();
+final List<io.Directory> temporaryDirectories = <io.Directory>[];
 
 typedef AsyncCallback = Future<void> Function();
 
@@ -234,7 +234,7 @@ typedef AsyncCallback = Future<void> Function();
 ///
 /// Add these operations here to make sure that they will run before felt
 /// exit.
-final List<AsyncCallback> cleanupCallbacks = List<AsyncCallback>();
+final List<AsyncCallback> cleanupCallbacks = <AsyncCallback>[];
 
 /// Cleanup the remaning processes, close open browsers, delete temp files.
 void cleanup() async {
