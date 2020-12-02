@@ -195,13 +195,14 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
 
   public void downloadDynamicFeature(int loadingUnitId, String moduleName) {
     String resolvedModuleName =
-        moduleName == null ? moduleName : loadingUnitIdToModuleName(loadingUnitId);
+        moduleName != null ? moduleName : loadingUnitIdToModuleName(loadingUnitId);
     if (resolvedModuleName == null) {
       Log.d(TAG, "Dynamic feature module name was null.");
       return;
     }
 
-    SplitInstallRequest request = SplitInstallRequest.newBuilder().addModule(moduleName).build();
+    SplitInstallRequest request =
+        SplitInstallRequest.newBuilder().addModule(resolvedModuleName).build();
 
     splitInstallManager
         // Submits the request to install the module through the
@@ -212,7 +213,7 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
         // install which is handled in FeatureInstallStateUpdatedListener.
         .addOnSuccessListener(
             sessionId -> {
-              this.sessionIdToName.put(sessionId, moduleName);
+              this.sessionIdToName.put(sessionId, resolvedModuleName);
               this.sessionIdToLoadingUnitId.put(sessionId, loadingUnitId);
             })
         .addOnFailureListener(

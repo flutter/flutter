@@ -1185,11 +1185,12 @@ std::unique_ptr<std::vector<std::string>> Shell::ComputePlatformResolvedLocale(
   return platform_view_->ComputePlatformResolvedLocales(supported_locale_data);
 }
 
-void Shell::LoadDartDeferredLibrary(intptr_t loading_unit_id,
-                                    const uint8_t* snapshot_data,
-                                    const uint8_t* snapshot_instructions) {
-  engine_->LoadDartDeferredLibrary(loading_unit_id, snapshot_data,
-                                   snapshot_instructions);
+void Shell::LoadDartDeferredLibrary(
+    intptr_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  engine_->LoadDartDeferredLibrary(loading_unit_id, std::move(snapshot_data),
+                                   std::move(snapshot_instructions));
 }
 
 void Shell::UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager) {

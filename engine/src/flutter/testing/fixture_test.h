@@ -30,6 +30,8 @@ class FixtureTest : public ThreadTest {
 
   std::shared_ptr<TestDartNativeResolver> native_resolver_;
 
+  ELFAOTSymbols split_aot_symbols_;
+
  private:
   fml::UniqueFD assets_dir_;
   ELFAOTSymbols aot_symbols_;
