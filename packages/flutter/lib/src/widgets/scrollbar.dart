@@ -724,7 +724,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Can be overridden by subclasses to further customize scrollbar behavior.
   @protected
   ScrollbarPainter? scrollbarPainter;
-  
+
   /// The current value of the animation that fades the scrollbar in and out of
   /// view.
   ///
@@ -735,7 +735,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   Animation<double> get fadeoutOpacityAnimation => _fadeoutOpacityAnimation;
   late Animation<double> _fadeoutOpacityAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -955,6 +955,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Updates the scrollbar thumb and it's animations based on the received
   /// [ScrollNotification].
   @protected
+  @mustCallSuper
   bool handleScrollNotification(ScrollNotification notification) {
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent)

@@ -32,7 +32,8 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// See also:
 ///
-///  * [RawScrollbar], the simple base class this extends.
+///  * [RawScrollbar], a basic scrollbar that fade in and out that is extended
+///    by this class to add more animations and behaviors.
 ///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
@@ -150,7 +151,6 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     scrollbarPainter!
       ..thickness = _thickness
       ..radius = widget.radius ?? _kScrollbarRadius;
-
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {

@@ -46,7 +46,8 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
 ///  * [Scrollbar], a Material Design scrollbar.
-///  * [RawScrollbar], the simple base class this extends.
+///  * [RawScrollbar], a basic scrollbar that fade in and out that is extended
+///    by this class to add more animations and behaviors.
 class CupertinoScrollbar extends RawScrollbar {
   /// Creates an iOS style scrollbar that wraps the given [child].
   ///
@@ -151,9 +152,9 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
 
   @override
   void didUpdateWidget(CupertinoScrollbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
     assert(scrollbarPainter != null);
     scrollbarPainter!.updateThickness(_thickness, _radius);
-    super.didUpdateWidget(oldWidget);
   }
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
