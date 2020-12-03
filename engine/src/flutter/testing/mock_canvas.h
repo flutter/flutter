@@ -53,15 +53,11 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
   };
 
   struct ConcatMatrixData {
-    SkMatrix matrix;
-  };
-
-  struct ConcatMatrix44Data {
     SkM44 matrix;
   };
 
   struct SetMatrixData {
-    SkMatrix matrix;
+    SkM44 matrix;
   };
 
   struct DrawRectData {
@@ -118,7 +114,6 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
                                     SaveLayerData,
                                     RestoreData,
                                     ConcatMatrixData,
-                                    ConcatMatrix44Data,
                                     SetMatrixData,
                                     DrawRectData,
                                     DrawPathData,
@@ -149,11 +144,14 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
   SaveLayerStrategy getSaveLayerStrategy(const SaveLayerRec& rec) override;
   void willRestore() override;
   void didRestore() override {}
+#ifdef SK_SUPPORT_LEGACY_CANVASMATRIX33
   void didConcat(const SkMatrix& matrix) override;
+  void didSetMatrix(const SkMatrix& matrix) override;
+#endif
   void didConcat44(const SkM44&) override;
+  void didSetM44(const SkM44&) override;
   void didScale(SkScalar x, SkScalar y) override;
   void didTranslate(SkScalar x, SkScalar y) override;
-  void didSetMatrix(const SkMatrix& matrix) override;
 
   // Draw and clip operations that we track.
   void onDrawRect(const SkRect& rect, const SkPaint& paint) override;
@@ -264,10 +262,6 @@ extern bool operator==(const MockCanvas::ConcatMatrixData& a,
                        const MockCanvas::ConcatMatrixData& b);
 extern std::ostream& operator<<(std::ostream& os,
                                 const MockCanvas::ConcatMatrixData& data);
-extern bool operator==(const MockCanvas::ConcatMatrix44Data& a,
-                       const MockCanvas::ConcatMatrix44Data& b);
-extern std::ostream& operator<<(std::ostream& os,
-                                const MockCanvas::ConcatMatrix44Data& data);
 extern bool operator==(const MockCanvas::SetMatrixData& a,
                        const MockCanvas::SetMatrixData& b);
 extern std::ostream& operator<<(std::ostream& os,
