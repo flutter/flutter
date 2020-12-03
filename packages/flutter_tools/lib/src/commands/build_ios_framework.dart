@@ -109,6 +109,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   FlutterVersion _flutterVersion;
 
   @override
+  bool get reportNullSafety => false;
+
+  @override
   final String name = 'ios-framework';
 
   @override
