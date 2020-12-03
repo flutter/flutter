@@ -587,14 +587,10 @@ abstract class FlutterCommand extends Command<void> {
   void addShrinkingFlag() {
     argParser.addFlag('shrink',
       negatable: true,
-      defaultsTo: true,
-      help: 'Whether to enable code shrinking on release mode. '
-            'When enabling shrinking, you also benefit from obfuscation, '
-            'which shortens the names of your app’s classes and members, '
-            'and optimization, which applies more aggressive strategies to '
-            'further reduce the size of your app. '
-            'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-      );
+      hide: true,
+      help: 'This flag is deprecated. Code shrinking is always enabled in release builds. '
+            'To learn more, see: https://developer.android.com/studio/build/shrink-code'
+    );
   }
 
   void addNullSafetyModeOptions({ @required bool hide }) {
@@ -675,6 +671,19 @@ abstract class FlutterCommand extends Command<void> {
         "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
         'process to terminate after the build is completed',
       defaultsTo: true,
+    );
+  }
+
+  void addNativeNullAssertions({ bool hide = false }) {
+    argParser.addFlag('native-null-assertions',
+      defaultsTo: true,
+      hide: hide,
+      help: 'Enables additional runtime null checks in web applications to ensure '
+        'the correct nullability of native (such as in dart:html) and external '
+        '(such as with JS interop) types. This is enabled by default but only takes '
+        'effect in sound mode. To report an issue with a null assertion failure in '
+        'dart:html or the other dart web libraries, please file a bug at '
+        'https://github.com/dart-lang/sdk/issues/labels/web-libraries .'
     );
   }
 

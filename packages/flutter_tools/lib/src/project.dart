@@ -648,11 +648,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           ephemeralDirectory,
         );
       }
-      copyEngineArtifactToProject(BuildMode.debug);
+      copyEngineArtifactToProject(BuildMode.debug, EnvironmentType.physical);
     }
   }
 
-  void copyEngineArtifactToProject(BuildMode mode) {
+  void copyEngineArtifactToProject(BuildMode mode, EnvironmentType environmentType) {
     // Copy framework from engine cache. The actual build mode
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something
@@ -662,6 +662,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
         Artifact.flutterFramework,
         platform: TargetPlatform.ios,
         mode: mode,
+        environmentType: environmentType,
       )
     );
     if (framework.existsSync()) {

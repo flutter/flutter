@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
@@ -15,7 +14,7 @@ import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpHeaders, HttpStatus, ProcessException, SocketException;
+import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpHeaders, HttpStatus, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
@@ -1792,14 +1791,7 @@ class ArtifactUpdater {
 
       try {
         extractor(tempFile, location);
-      } on ProcessException {
-        retries -= 1;
-        if (retries == 0) {
-          rethrow;
-        }
-        _deleteIgnoringErrors(tempFile);
-        continue;
-      } on ArchiveException {
+      } on Exception {
         retries -= 1;
         if (retries == 0) {
           rethrow;

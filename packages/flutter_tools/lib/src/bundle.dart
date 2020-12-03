@@ -9,6 +9,7 @@ import 'package:pool/pool.dart';
 
 import 'asset.dart';
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
@@ -40,6 +41,8 @@ String getDefaultCachedKernelPath({
   @required bool trackWidgetCreation,
   @required List<String> dartDefines,
   @required List<String> extraFrontEndOptions,
+  FileSystem fileSystem,
+  Config config,
 }) {
   final StringBuffer buffer = StringBuffer();
   buffer.writeAll(dartDefines);
@@ -51,7 +54,10 @@ String getDefaultCachedKernelPath({
     buildPrefix = '${hex.encode(digest.bytes)}.';
   }
   return getKernelPathForTransformerOptions(
-    globals.fs.path.join(getBuildDirectory(), '${buildPrefix}cache.dill'),
+    (fileSystem ?? globals.fs).path.join(getBuildDirectory(
+      config ?? globals.config,
+     fileSystem ?? globals.fs
+    ), '${buildPrefix}cache.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
