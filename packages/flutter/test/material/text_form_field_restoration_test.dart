@@ -80,22 +80,22 @@ class TestWidget extends StatefulWidget {
   TestWidgetState createState() => TestWidgetState();
 }
 
-class TestWidgetState extends State<TestWidget> {
-  // final RestorableTextEditingController controller = RestorableTextEditingController();
+class TestWidgetState extends State<TestWidget> with RestorationMixin {
+  final RestorableTextEditingController controller = RestorableTextEditingController();
 
-  // @override
-  // String get restorationId => 'widget';
+  @override
+  String get restorationId => 'widget';
 
-  // @override
-  // void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-  //   registerForRestoration(controller, 'controller');
-  // }
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(controller, 'controller');
+  }
 
-  // @override
-  // void dispose() {
-  //   controller.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
