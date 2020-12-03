@@ -12,11 +12,11 @@
 
 G_BEGIN_DECLS
 
-G_DECLARE_FINAL_TYPE(FlTextInputPlugin,
-                     fl_text_input_plugin,
-                     FL,
-                     TEXT_INPUT_PLUGIN,
-                     GObject);
+G_DECLARE_DERIVABLE_TYPE(FlTextInputPlugin,
+                         fl_text_input_plugin,
+                         FL,
+                         TEXT_INPUT_PLUGIN,
+                         GObject);
 
 /**
  * FlTextInputPlugin:
@@ -24,6 +24,15 @@ G_DECLARE_FINAL_TYPE(FlTextInputPlugin,
  * #FlTextInputPlugin is a plugin that implements the shell side
  * of SystemChannels.textInput from the Flutter services library.
  */
+
+struct _FlTextInputPluginClass {
+  GObjectClass parent_class;
+
+  /**
+   * Virtual method called to filter a keypress.
+   */
+  gboolean (*filter_keypress)(FlTextInputPlugin* self, GdkEventKey* event);
+};
 
 /**
  * fl_text_input_plugin_new:
