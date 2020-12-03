@@ -187,6 +187,7 @@ class TextFormField extends FormField<String> {
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
     AutovalidateMode? autovalidateMode,
+    this.restorationId,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -290,23 +291,50 @@ class TextFormField extends FormField<String> {
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
 
+  /// {@macro flutter.material.textfield.restorationId}
+  final String? restorationId;
+
   @override
   _TextFormFieldState createState() => _TextFormFieldState();
 }
 
-class _TextFormFieldState extends FormFieldState<String> {
-  TextEditingController? _controller;
-
-  TextEditingController? get _effectiveController => widget.controller ?? _controller;
+class _TextFormFieldState extends FormFieldState<String> with RestorationMixin {
+  RestorableTextEditingController? _controller;
+  TextEditingController? get _effectiveController => widget.controller ?? _controller!.value;
 
   @override
   TextFormField get widget => super.widget as TextFormField;
 
   @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    if (_controller != null) {
+      _registerController();
+    }
+  }
+
+  void _registerController() {
+    assert(_controller != null);
+    registerForRestoration(_controller!, 'controller');
+  }
+
+  void _createLocalController([TextEditingValue? value]) {
+    assert(_controller == null);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
+    if (!restorePending) {
+      _registerController();
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     if (widget.controller == null) {
-      _controller = TextEditingController(text: widget.initialValue);
+      _createLocalController();
     } else {
       widget.controller!.addListener(_handleControllerChanged);
     }
@@ -320,11 +348,14 @@ class _TextFormFieldState extends FormFieldState<String> {
       widget.controller?.addListener(_handleControllerChanged);
 
       if (oldWidget.controller != null && widget.controller == null)
-        _controller = TextEditingController.fromValue(oldWidget.controller!.value);
+        _createLocalController(oldWidget.controller!.value);
       if (widget.controller != null) {
         setValue(widget.controller!.text);
-        if (oldWidget.controller == null)
+        if (oldWidget.controller == null) {
+          unregisterFromRestoration(_controller!);
+          _controller!.dispose();
           _controller = null;
+        }
       }
     }
   }
