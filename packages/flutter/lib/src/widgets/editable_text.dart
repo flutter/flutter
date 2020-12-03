@@ -154,7 +154,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
-  set text(String? newText) {
+  set text(String newText) {
     value = value.copyWith(
       text: newText,
       selection: const TextSelection.collapsed(offset: -1),
@@ -2088,6 +2088,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           context: ErrorDescription('while calling onSelectionChanged for $cause'),
         ));
       }
+    }
+
+    // To keep the cursor from blinking while it moves, restart the timer here.
+    if (_cursorTimer != null) {
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
     }
   }
 
