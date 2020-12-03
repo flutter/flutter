@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -142,6 +141,8 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   void didUpdateValue(T? oldValue);
 }
 
+/// A [RestorableProperty] almost identical to [RestorableValue], except
+/// that it also allows null values.
 abstract class RestorableValueN<T> extends RestorableProperty<T> {
   /// The current value stored in this property.
   ///
