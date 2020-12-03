@@ -364,7 +364,7 @@ class _TextFormFieldState extends FormFieldState<String> with RestorationMixin {
   @override
   void dispose() {
     widget.controller?.removeListener(_handleControllerChanged);
-    _effectiveController?.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 

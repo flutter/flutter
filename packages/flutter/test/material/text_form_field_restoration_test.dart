@@ -107,7 +107,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
           child: TextFormField(
             restorationId: 'text',
             maxLines: 3,
-            // controller: widget.useExternal ? controller.value : null,
+            controller: widget.useExternal ? controller.value : null,
           ),
         ),
       ),
