@@ -30,6 +30,19 @@ void main() {
       expect(strategy.getPath(), 'foo');
     });
 
+    test('path must be prepended with octothorpe', () {
+      final HashUrlStrategy strategy = HashUrlStrategy(location);
+
+      location.hash = '/';
+      expect(strategy.getPath(), '/');
+
+      location.hash = '/foo';
+      expect(strategy.getPath(), '/');
+
+      location.hash = 'foo';
+      expect(strategy.getPath(), '/');
+    });
+
     test('path should not be empty', () {
       final HashUrlStrategy strategy = HashUrlStrategy(location);
 
@@ -38,6 +51,44 @@ void main() {
 
       location.hash = '#';
       expect(strategy.getPath(), '/');
+    });
+
+    // test('internalUrl should not be empty', () {
+    //   final HashUrlStrategy strategy = HashUrlStrategy(location);
+
+    //   // location.hash = '';
+    //   expect(strategy.prepareExternalUrl("gdi"), '#gdi');
+
+    //   // location.hash = '#';
+    //   expect(strategy.prepareExternalUrl(""), '/');
+    // });
+
+    test('generates external path correctly in the presence of BrowserLocation',
+        () {
+      final HashUrlStrategy strategy1 = HashUrlStrategy();
+
+      expect(strategy1.prepareExternalUrl(''),
+          '/navigation/url_strategy_test.html');
+      expect(strategy1.prepareExternalUrl('/'), '#/');
+      expect(strategy1.prepareExternalUrl('bar'), '#bar');
+      expect(strategy1.prepareExternalUrl('/bar'), '#/bar');
+      expect(strategy1.prepareExternalUrl('/bar/'), '#/bar/');
+    });
+
+    test('pushState and replaceState', () {
+      final HashUrlStrategy strategy1 = HashUrlStrategy();
+
+      strategy1.pushState("state", "title", "url");
+      expect(strategy1.getState(), "state");
+
+      strategy1.pushState("", "title", "url");
+      expect(strategy1.getState(), "");
+
+      strategy1.replaceState("state", "title", "url");
+      expect(strategy1.getState(), "state");
+
+      strategy1.replaceState("", "title", "url");
+      expect(strategy1.getState(), "");
     });
   });
 
@@ -109,7 +160,6 @@ void main() {
       location.baseHref = 'https://example.com/foo/';
       location.pathname = '/foo/bar';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
-
 
       location.search = '?q=1';
       expect(strategy.getPath(), '/bar?q=1');
