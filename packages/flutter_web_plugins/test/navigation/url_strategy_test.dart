@@ -55,7 +55,7 @@ void main() {
 
     test('generates external path correctly in the presence of BrowserLocation',
         () {
-      final HashUrlStrategy strategy1 = HashUrlStrategy();
+      const HashUrlStrategy strategy1 = HashUrlStrategy();
 
       expect(strategy1.prepareExternalUrl(''),
           '/navigation/url_strategy_test.html');
@@ -66,7 +66,7 @@ void main() {
     });
 
     test('pushState and replaceState', () {
-      final HashUrlStrategy strategy1 = HashUrlStrategy();
+      const HashUrlStrategy strategy1 = HashUrlStrategy();
 
       strategy1.pushState("state", "title", "url");
       expect(strategy1.getState(), "state");
