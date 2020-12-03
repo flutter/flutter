@@ -98,7 +98,7 @@ class EngineTest : public ::testing::Test {
   EngineTest()
       : thread_host_("EngineTest",
                      ThreadHost::Type::Platform | ThreadHost::Type::IO |
-                         ThreadHost::Type::UI | ThreadHost::Type::GPU),
+                         ThreadHost::Type::UI | ThreadHost::Type::RASTER),
         task_runners_({
             "EngineTest",
             thread_host_.platform_thread->GetTaskRunner(),  // platform

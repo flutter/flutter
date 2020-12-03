@@ -42,7 +42,8 @@ AndroidShellHolder::AndroidShellHolder(
   if (is_background_view) {
     thread_host_ = {thread_label, ThreadHost::Type::UI};
   } else {
-    thread_host_ = {thread_label, ThreadHost::Type::UI | ThreadHost::Type::GPU |
+    thread_host_ = {thread_label, ThreadHost::Type::UI |
+                                      ThreadHost::Type::RASTER |
                                       ThreadHost::Type::IO};
   }
 
@@ -87,25 +88,25 @@ AndroidShellHolder::AndroidShellHolder(
   // The current thread will be used as the platform thread. Ensure that the
   // message loop is initialized.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
-  fml::RefPtr<fml::TaskRunner> gpu_runner;
+  fml::RefPtr<fml::TaskRunner> raster_runner;
   fml::RefPtr<fml::TaskRunner> ui_runner;
   fml::RefPtr<fml::TaskRunner> io_runner;
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
   if (is_background_view) {
     auto single_task_runner = thread_host_.ui_thread->GetTaskRunner();
-    gpu_runner = single_task_runner;
+    raster_runner = single_task_runner;
     ui_runner = single_task_runner;
     io_runner = single_task_runner;
   } else {
-    gpu_runner = thread_host_.raster_thread->GetTaskRunner();
+    raster_runner = thread_host_.raster_thread->GetTaskRunner();
     ui_runner = thread_host_.ui_thread->GetTaskRunner();
     io_runner = thread_host_.io_thread->GetTaskRunner();
   }
 
   flutter::TaskRunners task_runners(thread_label,     // label
                                     platform_runner,  // platform
-                                    gpu_runner,       // raster
+                                    raster_runner,    // raster
                                     ui_runner,        // ui
                                     io_runner         // io
   );
@@ -117,7 +118,7 @@ AndroidShellHolder::AndroidShellHolder(
       // Defensive fallback. Depending on the OEM, it may not be possible
       // to set priority to -5.
       if (::setpriority(PRIO_PROCESS, gettid(), -2) != 0) {
-        FML_LOG(ERROR) << "Failed to set GPU task runner priority";
+        FML_LOG(ERROR) << "Failed to set raster task runner priority";
       }
     }
   });
