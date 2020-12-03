@@ -253,11 +253,17 @@ class Repository {
 }
 
 class FrameworkRepository extends Repository {
-  FrameworkRepository(Checkouts checkouts, {bool useExistingCheckout = false})
-      : super(
-          name: 'framework',
-          upstream: defaultUpstream,
+  FrameworkRepository(
+    Checkouts checkouts, {
+    String name = 'framework',
+    String upstream = FrameworkRepository.defaultUpstream,
+    bool localUpstream = false,
+    bool useExistingCheckout = false,
+  }) : super(
+          name: name,
+          upstream: upstream,
           fileSystem: checkouts.fileSystem,
+          localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
           platform: checkouts.platform,
           processManager: checkouts.processManager,
@@ -265,7 +271,7 @@ class FrameworkRepository extends Repository {
           useExistingCheckout: useExistingCheckout,
         );
 
-  static String defaultUpstream = 'https://github.com/flutter/flutter.git';
+  static const String defaultUpstream = 'https://github.com/flutter/flutter.git';
 
   String get cacheDirectory => fileSystem.path.join(
         checkoutDirectory.path,
