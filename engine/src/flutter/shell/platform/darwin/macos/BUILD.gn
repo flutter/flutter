@@ -46,6 +46,8 @@ source_set("flutter_framework_source") {
 
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
+    "framework/Source/FlutterBackingStoreData.h",
+    "framework/Source/FlutterBackingStoreData.mm",
     "framework/Source/FlutterDartProject.mm",
     "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterEngine.mm",
@@ -54,6 +56,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterExternalTextureGL.mm",
     "framework/Source/FlutterFrameBufferProvider.h",
     "framework/Source/FlutterFrameBufferProvider.mm",
+    "framework/Source/FlutterGLCompositor.h",
+    "framework/Source/FlutterGLCompositor.mm",
     "framework/Source/FlutterIOSurfaceHolder.h",
     "framework/Source/FlutterIOSurfaceHolder.mm",
     "framework/Source/FlutterMouseCursorPlugin.h",
@@ -77,9 +81,12 @@ source_set("flutter_framework_source") {
   sources += _flutter_framework_headers
 
   deps = [
+    "//flutter/flow:flow",
+    "//flutter/fml",
     "//flutter/shell/platform/common/cpp:common_cpp_switches",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
+    "//third_party/skia",
   ]
 
   public_configs = [ "//flutter:config" ]
@@ -119,7 +126,10 @@ executable("flutter_desktop_darwin_unittests") {
 
   sources = [
     "framework/Source/FlutterEngineTest.mm",
+    "framework/Source/FlutterGLCompositorUnittests.mm",
     "framework/Source/FlutterViewControllerTest.mm",
+    "framework/Source/FlutterViewControllerTestUtils.h",
+    "framework/Source/FlutterViewControllerTestUtils.mm",
   ]
 
   cflags_objcc = [ "-fobjc-arc" ]
