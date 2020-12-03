@@ -13,6 +13,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_response.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "gtest/gtest.h"
@@ -310,6 +311,18 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
   } else if (strcmp(message->channel, "test/failure") == 0) {
     // Generates an internal error.
     return kInternalInconsistency;
+  } else if (strcmp(message->channel, "test/key-event-handled") == 0 ||
+             strcmp(message->channel, "test/key-event-not-handled") == 0) {
+    bool value = strcmp(message->channel, "test/key-event-handled") == 0;
+    g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
+    g_autoptr(FlValue) handledValue = fl_value_new_map();
+    fl_value_set_string_take(handledValue, "handled", fl_value_new_bool(value));
+    g_autoptr(GBytes) response = fl_message_codec_encode_message(
+        FL_MESSAGE_CODEC(codec), handledValue, nullptr);
+    send_response(
+        engine, message->channel, message->response_handle,
+        static_cast<const uint8_t*>(g_bytes_get_data(response, nullptr)),
+        g_bytes_get_size(response));
   }
 
   return kSuccess;

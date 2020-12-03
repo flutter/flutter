@@ -177,6 +177,7 @@ executable("flutter_linux_unittests") {
     "testing/mock_egl.cc",
     "testing/mock_engine.cc",
     "testing/mock_renderer.cc",
+    "testing/mock_text_input_plugin.cc",
   ]
 
   public_configs = [ "//flutter:config" ]
