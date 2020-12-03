@@ -364,7 +364,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.elevation}
   /// The z-coordinate at which to place this app bar relative to its parent.
   ///
-  /// This proprty controls the size of the shadow below the app bar.
+  /// This property controls the size of the shadow below the app bar.
   ///
   /// The value must be non-negative.
   ///
@@ -477,6 +477,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    default colors are based on.
   ///  * [ColorScheme.brightness], which indicates if the overall [Theme]
   ///    is light or dark.
+  ///  * [backwardsCompatibility], which forces AppBar to use this
+  ///    obsolete property.
   final Brightness? brightness;
 
   /// {@template flutter.material.appbar.iconTheme}
@@ -608,6 +610,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// the [textTheme] and [brightness] properties.
   ///
   /// This property is true by default.
+  ///
+  /// This is a temporary property. When setting it to false is no
+  /// longer considereed a breaking change, it will be depreacted and
+  /// its default value will be changed to false. App developers are
+  /// encouraged to opt into the new features by setting it to false
+  /// and using the [foreground] and [systemOverlay] properties as
+  /// needed.
   /// {@endtemplate}
   final bool backwardsCompatibility;
 
@@ -653,10 +662,11 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// overall theme is dark, [SystemUiOverlayStyle.dark] otherwise. Theme brightness
   /// is defined by [ColorScheme.brightness] for [ThemeData.colorScheme].
   ///
-  /// The AppBar is built within a `AnnotatedRegion<SystemUiOverlayStyle>`
-  /// which causes [SystemChrome.setSystemUIOverlayStyle] to be called
-  /// automatically.  Apps should not enclose the AppBar with
-  /// their own [AnnotatedRegion].
+  /// The AppBar's descendants are built within a
+  /// `AnnotatedRegion<SystemUiOverlayStyle>` widget, which causes
+  /// [SystemChrome.setSystemUIOverlayStyle] to be called
+  /// automatically.  Apps should not enclose an AppBar with their
+  /// own [AnnotatedRegion].
   /// {@endtemplate}
   //
   /// See also:
@@ -940,8 +950,9 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
+    final Brightness overlayStyleBrightness = widget.brightness ?? appBarTheme.brightness ?? colorScheme.brightness;
     final SystemUiOverlayStyle overlayStyle = widget.backwardsCompatibility
-      ? ((widget.brightness ?? appBarTheme.brightness ?? colorScheme.brightness) == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+      ? (overlayStyleBrightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
       : widget.systemOverlayStyle
         ?? appBarTheme.systemOverlayStyle
         ?? (colorScheme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);

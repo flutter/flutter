@@ -46,14 +46,16 @@ class AppBarTheme with Diagnosticable {
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
   ///
-  /// Overrides the default value of the obsolete property which
-  /// implicitly defines [AppBar.systemOverlayStyle] in all descendant
-  /// [AppBar] widgets.
+  /// Overrides the default value of the obsolete [AppBar.brightness]
+  /// property which implicitly defines [AppBar.systemOverlayStyle] in
+  /// all descendant [AppBar] widgets.
   ///
   /// See also:
   ///
   ///  * [systemOverlayStyle], which overrides the default value of
   ///    [AppBar.systemOverlayStyle] in all descendant [AppBar] widgets.
+  ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
+  ///    on this obsolete property.
   final Brightness? brightness;
 
   /// Obsolete property that overrides the default value of
@@ -63,6 +65,8 @@ class AppBarTheme with Diagnosticable {
   ///
   ///  * [backgroundColor], which serves this same purpose
   ///    as this property, but has a consistent name.
+  ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
+  ///    on this obsolete property.
   final Color? color;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
