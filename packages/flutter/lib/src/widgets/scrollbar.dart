@@ -922,7 +922,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       );
     } else {
       // Default page increment
-      scrollIncrement = 0.8 * widget.controller!.position.viewportDimension;
+      scrollIncrement = 0.8 * _currentController!.position.viewportDimension;
     }
 
     // Adjust scrollIncrement for direction
@@ -945,8 +945,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         break;
     }
 
-    widget.controller!.position.moveTo(
-      widget.controller!.position.pixels + scrollIncrement,
+    _currentController!.position.moveTo(
+      _currentController!.position.pixels + scrollIncrement,
       duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );
