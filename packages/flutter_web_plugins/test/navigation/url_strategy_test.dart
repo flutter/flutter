@@ -53,16 +53,6 @@ void main() {
       expect(strategy.getPath(), '/');
     });
 
-    // test('internalUrl should not be empty', () {
-    //   final HashUrlStrategy strategy = HashUrlStrategy(location);
-
-    //   // location.hash = '';
-    //   expect(strategy.prepareExternalUrl("gdi"), '#gdi');
-
-    //   // location.hash = '#';
-    //   expect(strategy.prepareExternalUrl(""), '/');
-    // });
-
     test('generates external path correctly in the presence of BrowserLocation',
         () {
       final HashUrlStrategy strategy1 = HashUrlStrategy();
