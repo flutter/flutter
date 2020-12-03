@@ -20,7 +20,7 @@ ThreadHost::ThreadHost(std::string name_prefix_arg, uint64_t mask)
     ui_thread = std::make_unique<fml::Thread>(name_prefix + ".ui");
   }
 
-  if (mask & ThreadHost::Type::GPU) {
+  if (mask & ThreadHost::Type::RASTER) {
     raster_thread = std::make_unique<fml::Thread>(name_prefix + ".raster");
   }
 

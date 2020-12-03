@@ -137,14 +137,14 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
     return nullptr;
   }
 
-  // If the embedder has not supplied a GPU task runner, one needs to be
+  // If the embedder has not supplied a raster task runner, one needs to be
   // created.
   if (!render_task_runner_pair.second) {
-    engine_thread_host_mask |= ThreadHost::Type::GPU;
+    engine_thread_host_mask |= ThreadHost::Type::RASTER;
   }
 
-  // If both the platform task runner and the GPU task runner are specified and
-  // have the same identifier, store only one.
+  // If both the platform task runner and the raster task runner are specified
+  // and have the same identifier, store only one.
   if (platform_task_runner_pair.second && render_task_runner_pair.second) {
     if (platform_task_runner_pair.second->GetEmbedderIdentifier() ==
         render_task_runner_pair.second->GetEmbedderIdentifier()) {
@@ -163,8 +163,8 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
                                         platform_task_runner_pair.second)
                                   : GetCurrentThreadTaskRunner();
 
-  // If the embedder has supplied a GPU task runner, use that. If not, use the
-  // one from our thread host.
+  // If the embedder has supplied a raster task runner, use that. If not, use
+  // the one from our thread host.
   auto render_task_runner = render_task_runner_pair.second
                                 ? static_cast<fml::RefPtr<fml::TaskRunner>>(
                                       render_task_runner_pair.second)
@@ -208,7 +208,7 @@ std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEngineManagedThreadHost() {
   // Create a thread host with the current thread as the platform thread and all
   // other threads managed.
-  ThreadHost thread_host(kFlutterThreadName, ThreadHost::Type::GPU |
+  ThreadHost thread_host(kFlutterThreadName, ThreadHost::Type::RASTER |
                                                  ThreadHost::Type::IO |
                                                  ThreadHost::Type::UI);
 
