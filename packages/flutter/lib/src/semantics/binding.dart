@@ -26,7 +26,7 @@ mixin SemanticsBinding on BindingBase {
 
   /// Called when the platform accessibility features change.
   ///
-  /// See [Window.onAccessibilityFeaturesChanged].
+  /// See [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
     _accessibilityFeatures = window.accessibilityFeatures;

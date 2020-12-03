@@ -31,5 +31,5 @@
   "selectAllButtonLabel": "Vybrat vše",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zavřít",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "Hledat"
 }

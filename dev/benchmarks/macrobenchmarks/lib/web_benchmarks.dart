@@ -20,10 +20,12 @@ import 'src/web/bench_dynamic_clip_on_static_picture.dart';
 import 'src/web/bench_mouse_region_grid_hover.dart';
 import 'src/web/bench_mouse_region_grid_scroll.dart';
 import 'src/web/bench_mouse_region_mixed_grid_hover.dart';
+import 'src/web/bench_pageview_scroll_linethrough.dart';
 import 'src/web/bench_paths.dart';
 import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
+import 'src/web/bench_wrapbox_scroll.dart';
 import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
@@ -46,11 +48,13 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
   BenchDynamicClipOnStaticPicture.benchmarkName: () => BenchDynamicClipOnStaticPicture(),
+  BenchPageViewScrollLineThrough.benchmarkName: () => BenchPageViewScrollLineThrough(),
   BenchPictureRecording.benchmarkName: () => BenchPictureRecording(),
   BenchUpdateManyChildLayers.benchmarkName: () => BenchUpdateManyChildLayers(),
   BenchMouseRegionGridScroll.benchmarkName: () => BenchMouseRegionGridScroll(),
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
   BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
+  BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
   if (isCanvasKit)
     BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
 

@@ -42,7 +42,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isWindowsEnabled) {
       throwToolExit('"build windows" is not currently supported.');
     }

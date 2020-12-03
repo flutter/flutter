@@ -159,8 +159,8 @@ class RenderBaselineDetector extends RenderBox {
   }
 
   @override
-  void performResize() {
-    size = constraints.smallest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.smallest;
   }
 
   @override

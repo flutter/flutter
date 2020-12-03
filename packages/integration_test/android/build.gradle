@@ -1,0 +1,46 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+group 'com.example.integration_test'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.0'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 16
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    dependencies {
+        api 'junit:junit:4.12'
+
+        // https://developer.android.com/jetpack/androidx/releases/test/#1.2.0
+        api 'androidx.test:runner:1.2.0'
+        api 'androidx.test:rules:1.2.0'
+        api 'androidx.test.espresso:espresso-core:3.2.0'
+
+        implementation 'com.google.guava:guava:28.1-android'
+    }
+}

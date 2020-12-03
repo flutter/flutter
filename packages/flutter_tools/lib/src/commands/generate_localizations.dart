@@ -206,10 +206,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           useSyntheticPackage: useSyntheticPackage,
           projectPathString: projectPathString,
           areResourceAttributesRequired: areResourceAttributesRequired,
+          untranslatedMessagesFile: untranslatedMessagesFile,
         )
         ..loadResources()
-        ..writeOutputFiles()
-        ..outputUnimplementedMessages(untranslatedMessagesFile, globals.logger);
+        ..writeOutputFiles(globals.logger);
     } on L10nException catch (e) {
       throwToolExit(e.message);
     }

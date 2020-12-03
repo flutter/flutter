@@ -21,5 +21,5 @@
   "selectAllButtonLabel": "Seleccionar todos",
   "tabSemanticsLabel": "Pestaña $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Cerrar",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "Buscar"
 }

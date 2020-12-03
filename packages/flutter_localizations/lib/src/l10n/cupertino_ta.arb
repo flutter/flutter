@@ -21,5 +21,5 @@
   "selectAllButtonLabel": "எல்லாம் தேர்ந்தெடு",
   "tabSemanticsLabel": "தாவல் $tabIndex / $tabCount",
   "modalBarrierDismissLabel": "நிராகரிக்கும்",
-  "searchTextFieldPlaceholerLabel": "Search"
+  "searchTextFieldPlaceholderLabel": "தேடுக"
 }
