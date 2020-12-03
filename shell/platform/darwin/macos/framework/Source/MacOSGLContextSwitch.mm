@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
 
-MacOSGLContextSwitch::MacOSGLContextSwitch(NSOpenGLContext* context) {
+MacOSGLContextSwitch::MacOSGLContextSwitch(const NSOpenGLContext* context) {
   previous_ = [NSOpenGLContext currentContext];
   [context makeCurrentContext];
 }

@@ -15,7 +15,7 @@
 @end
 
 @implementation FlutterFrameBufferProvider
-- (instancetype)initWithOpenGLContext:(NSOpenGLContext*)openGLContext {
+- (instancetype)initWithOpenGLContext:(const NSOpenGLContext*)openGLContext {
   if (self = [super init]) {
     MacOSGLContextSwitch context_switch(openGLContext);
 
