@@ -188,7 +188,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 
   @override
-  ui.Image clone() {
+  CkImage clone() {
     assert(_debugCheckIsNotDisposed());
     return CkImage.cloneOf(box);
   }

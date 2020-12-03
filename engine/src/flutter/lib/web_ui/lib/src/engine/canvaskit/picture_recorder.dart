@@ -15,13 +15,15 @@ class CkPictureRecorder implements ui.PictureRecorder {
     final SkPictureRecorder recorder = _skRecorder = SkPictureRecorder();
     final Float32List skRect = toSkRect(bounds);
     final SkCanvas skCanvas = recorder.beginRecording(skRect);
-    return _recordingCanvas = CkCanvas(skCanvas);
+    return _recordingCanvas = browserSupportsFinalizationRegistry
+      ? CkCanvas(skCanvas)
+      : RecordingCkCanvas(skCanvas, bounds);
   }
 
   CkCanvas? get recordingCanvas => _recordingCanvas;
 
   @override
-  ui.Picture endRecording() {
+  CkPicture endRecording() {
     final SkPictureRecorder? recorder = _skRecorder;
 
     if (recorder == null) {
@@ -31,7 +33,7 @@ class CkPictureRecorder implements ui.PictureRecorder {
     final SkPicture skPicture = recorder.finishRecordingAsPicture();
     recorder.delete();
     _skRecorder = null;
-    return CkPicture(skPicture, _cullRect);
+    return CkPicture(skPicture, _cullRect, _recordingCanvas!.pictureSnapshot);
   }
 
   @override

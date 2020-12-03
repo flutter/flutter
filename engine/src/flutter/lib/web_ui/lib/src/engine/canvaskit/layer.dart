@@ -128,7 +128,7 @@ class BackdropFilterLayer extends ContainerLayer {
 /// A layer that clips its child layers by a given [Path].
 class ClipPathLayer extends ContainerLayer {
   /// The path used to clip child layers.
-  final ui.Path _clipPath;
+  final CkPath _clipPath;
   final ui.Clip _clipBehavior;
 
   ClipPathLayer(this._clipPath, this._clipBehavior)
@@ -265,7 +265,7 @@ class OpacityLayer extends ContainerLayer implements ui.OpacityEngineLayer {
   void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    final ui.Paint paint = ui.Paint();
+    final CkPaint paint = CkPaint();
     paint.color = ui.Color.fromARGB(_alpha, 0, 0, 0);
 
     paintContext.internalNodesCanvas.save();
@@ -354,7 +354,7 @@ class ImageFilterLayer extends ContainerLayer implements ui.OpacityEngineLayer {
   @override
   void paint(PaintContext paintContext) {
     assert(needsPainting);
-    final ui.Paint paint = ui.Paint();
+    final CkPaint paint = CkPaint();
     paint.imageFilter = _filter;
     paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
     paintChildren(paintContext);
@@ -484,9 +484,9 @@ class PhysicalShapeLayer extends ContainerLayer
           _color.alpha != 0xff);
     }
 
-    final ui.Paint paint = ui.Paint()..color = _color;
+    final CkPaint paint = CkPaint()..color = _color;
     if (_clipBehavior != ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.leafNodesCanvas!.drawPath(_path, paint as CkPaint);
+      paintContext.leafNodesCanvas!.drawPath(_path, paint);
     }
 
     final int saveCount = paintContext.internalNodesCanvas.save();
@@ -510,7 +510,7 @@ class PhysicalShapeLayer extends ContainerLayer
       // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
       // using saveLayer, we have to call drawPaint instead of drawPath as
       // anti-aliased drawPath will always have such artifacts.
-      paintContext.leafNodesCanvas!.drawPaint(paint as CkPaint);
+      paintContext.leafNodesCanvas!.drawPaint(paint);
     }
 
     paintChildren(paintContext);
@@ -522,7 +522,7 @@ class PhysicalShapeLayer extends ContainerLayer
   ///
   /// The blur of the shadow is decided by the [elevation], and the
   /// shadow is painted with the given [color].
-  static void drawShadow(CkCanvas canvas, ui.Path path, ui.Color color,
+  static void drawShadow(CkCanvas canvas, CkPath path, ui.Color color,
       double elevation, bool transparentOccluder) {
     canvas.drawShadow(path, color, elevation, transparentOccluder);
   }
