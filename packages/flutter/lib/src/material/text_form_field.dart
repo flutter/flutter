@@ -238,6 +238,7 @@ class TextFormField extends FormField<String> {
              }
            }
            return TextField(
+             restorationId: restorationId != null ? '${restorationId}_text_field' : null,
              controller: state._effectiveController,
              focusNode: focusNode,
              decoration: effectiveDecoration.copyWith(errorText: field.errorText),
