@@ -2190,7 +2190,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // text in the composing region), or when the user committed the composing
     // text.
     // Gboard is very persistent in restoring the composing region. Applying
-    // input formatters on composing region only changes (except clearing the
+    // input formatters on composing-region-only changes (except clearing the
     // current composing region) is very infinite-loop-prone: the formatters
     // will keep trying to modify the composing region while Gboard will keep
     // trying to restore the original composing region.
