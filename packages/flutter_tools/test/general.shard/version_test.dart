@@ -514,6 +514,84 @@ void main() {
     });
   }
 
+  testUsingContext('newVersionAvailableMessage prints update message correctly', () async {
+    const String channel = 'dev';
+    final DateTime localCommitDate = _testClock.ago(const Duration(days: 3));
+    final DateTime remoteCommitDate = _testClock.ago(const Duration(days: 1));
+    const String localVersion = '1.2.3-4.5.pre';
+    const String localGitRef = 'abc12345';
+    const String remoteVersion = '6.7.8-9.0.pre';
+    const String remoteGitRef = 'def67890';
+    const String updateMessage = '''
+  ╔════════════════════════════════════════════════════════════════════════════╗
+  ║ A new version of Flutter is available on channel dev!                      ║
+  ║                                                                            ║
+  ║ The latest version: 6.7.8-9.0.pre (revision def67890)                      ║
+  ║ Your current version: 1.2.3-4.5.pre (revision abc12345)                    ║
+  ║                                                                            ║
+  ║ To update to the latest version, run "flutter upgrade".                    ║
+  ║ To view this information next time, run "flutter upgrade --verify-only".   ║
+  ╚════════════════════════════════════════════════════════════════════════════╝
+    ''';
+
+    fakeData(
+      mockProcessManager,
+      mockCache,
+      localCommitDate: localCommitDate,
+      localCommitGitRef: localGitRef,
+      localVersion: localVersion,
+      remoteCommitDate: remoteCommitDate,
+      remoteCommitGitRef: remoteGitRef,
+      remoteVersion: remoteVersion,
+      expectServerPing: true,
+      expectSetStamp: true,
+      channel: channel,
+    );
+    final FlutterVersion version = globals.flutterVersion;
+
+    await version.checkFlutterVersionFreshness();
+    _expectVersionMessage(updateMessage);
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => FlutterVersion(clock: _testClock),
+    ProcessManager: () => mockProcessManager,
+    Cache: () => mockCache,
+  });
+
+  testUsingContext('versionOutOfDateMessage prints message correctly', () async {
+    const String channel = 'dev';
+    final DateTime localCommitDate = _testClock.ago(const Duration(days: 42));
+    const String localVersion = '1.2.3-4.5.pre';
+    const String localGitRef = 'abc12345';
+    const String warningMessage = '''
+  ╔════════════════════════════════════════════════════════════════════════════╗
+  ║ WARNING: your installation of Flutter is 42 days old.                      ║
+  ║                                                                            ║
+  ║ To update to the latest version, run "flutter upgrade".                    ║
+  ║ To only check for updates, run "flutter upgrade --verify-only".            ║
+  ╚════════════════════════════════════════════════════════════════════════════╝
+    ''';
+
+    fakeData(
+      mockProcessManager,
+      mockCache,
+      localCommitDate: localCommitDate,
+      localCommitGitRef: localGitRef,
+      localVersion: localVersion,
+      errorOnFetch: true,
+      expectServerPing: true,
+      expectSetStamp: true,
+      channel: channel,
+    );
+    final FlutterVersion version = globals.flutterVersion;
+
+    await version.checkFlutterVersionFreshness();
+    _expectVersionMessage(warningMessage);
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => FlutterVersion(clock: _testClock),
+    ProcessManager: () => mockProcessManager,
+    Cache: () => mockCache,
+  });
+
   testUsingContext('GitTagVersion', () {
     const String hash = 'abcdef';
     GitTagVersion gitTagVersion;
