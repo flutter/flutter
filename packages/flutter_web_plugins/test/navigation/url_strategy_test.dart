@@ -68,17 +68,17 @@ void main() {
     test('pushState and replaceState', () {
       const HashUrlStrategy strategy1 = HashUrlStrategy();
 
-      strategy1.pushState("state", "title", "url");
-      expect(strategy1.getState(), "state");
+      strategy1.pushState('state', 'title', 'url');
+      expect(strategy1.getState(), 'state');
 
-      strategy1.pushState("", "title", "url");
-      expect(strategy1.getState(), "");
+      strategy1.pushState('', 'title', 'url');
+      expect(strategy1.getState(), '');
 
-      strategy1.replaceState("state", "title", "url");
-      expect(strategy1.getState(), "state");
+      strategy1.replaceState('state', 'title', 'url');
+      expect(strategy1.getState(), 'state');
 
-      strategy1.replaceState("", "title", "url");
-      expect(strategy1.getState(), "");
+      strategy1.replaceState('', 'title', 'url');
+      expect(strategy1.getState(), '');
     });
   });
 
