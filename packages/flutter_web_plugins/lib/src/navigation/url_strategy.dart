@@ -104,7 +104,9 @@ class HashUrlStrategy extends UrlStrategy {
     // the hash value is always prefixed with a `#`
     // and if it is empty then it will stay empty
     final String path = _platformLocation.hash;
-    assert(path.isEmpty || path.startsWith('#'));
+    // assert(path.isEmpty || path.startsWith('#'));
+
+    if (path.isNotEmpty || !path.startsWith('#')) return '/';
 
     // We don't want to return an empty string as a path. Instead we default to "/".
     if (path.isEmpty || path == '#') {
