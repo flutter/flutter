@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
+import 'material_state.dart';
+
 const double _kScrollbarThickness = 8.0;
 const double _kScrollbarHoverThickness = 12.0;
 const double _kScrollbarMargin = 2.0;
@@ -55,25 +57,22 @@ class Scrollbar extends RawScrollbar {
     ScrollController? controller,
     bool isAlwaysShown = false,
     this.showTrackOnHover = false,
-    // TODO(Piinks): should we include thickness[WithTrack/OnHover], a la
-    // CupertinoScrollbar thickness/thicknessWhileDragging?
-    // May be better to not introduce more properties in lieu of future ScrollbarTheme
     double? thickness,
     Radius? radius,
   }) : super(
-         key: key,
-         child: child,
-         controller: controller,
-         isAlwaysShown: isAlwaysShown,
-         thickness: thickness ?? _kScrollbarThickness,
-         radius: radius,
-         fadeDuration: _kScrollbarFadeDuration,
-         timeToFade: _kScrollbarTimeToFade,
-         pressDuration: Duration.zero,
-       );
+    key: key,
+    child: child,
+    controller: controller,
+    isAlwaysShown: isAlwaysShown,
+    thickness: thickness ?? _kScrollbarThickness,
+    radius: radius,
+    fadeDuration: _kScrollbarFadeDuration,
+    timeToFade: _kScrollbarTimeToFade,
+    pressDuration: Duration.zero,
+  );
 
   /// Controls if the track will show on hover and remain, including during drag.
-  /// 
+  ///
   /// Defaults to false, cannot be null.
   final bool showTrackOnHover;
 
@@ -86,36 +85,53 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   late TextDirection _textDirection;
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
-  
-  Color get _thumbColor {
-    if (_dragIsActive)
-      return const Color(0xFF616161);
 
-    // If the track is visible, the thumb color animation is ignored.
-    if (widget.showTrackOnHover && _hoverIsActive)
-      return const Color(0xFF757575);
+  Set<MaterialState> get _states => <MaterialState>{
+    if (_dragIsActive) MaterialState.dragged,
+    if (_hoverIsActive) MaterialState.hovered,
+  };
 
-    return Color.lerp(
-      const Color(0xFFE0E0E0),
-      const Color(0xFF757575),
-      _hoverAnimationController.value,
-    )!;
+  MaterialStateProperty<Color> get _thumbColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.dragged))
+        return const Color(0xFF616161);
+
+      // If the track is visible, the thumb color animation is ignored.
+      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover && _hoverIsActive)
+        return const Color(0xFF757575);
+
+      return Color.lerp(
+        const Color(0xFFE0E0E0),
+        const Color(0xFF757575),
+        _hoverAnimationController.value,
+      )!;
+    });
   }
 
-  Color get _trackColor => _hoverIsActive && widget.showTrackOnHover
-    ? const Color(0xFF424242).withOpacity(0.04)
-    : const Color(0x00000000);
+  MaterialStateProperty<Color> get _trackColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
+        return const Color(0xFF424242).withOpacity(0.04);
+      return const Color(0x00000000);
+    });
+  }
 
-  Color get _trackBorderColor => _hoverIsActive && widget.showTrackOnHover
-    ? const Color(0xFFE0E0E0)
-    : const Color(0x00000000);
+  MaterialStateProperty<Color> get _trackBorderColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
+        return const Color(0xFFE0E0E0);
+      return const Color(0x00000000);
+    });
+  }
 
-  double get _thickness {
-   if (widget.thickness != null)
-     return widget.thickness;
-   return _hoverIsActive && widget.showTrackOnHover
-     ? _kScrollbarHoverThickness
-     : _kScrollbarThickness;
+  MaterialStateProperty<double> get _thickness {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (widget.thickness != null)
+        return widget.thickness;
+      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
+        return _kScrollbarHoverThickness;
+      return _kScrollbarThickness;
+    });
   }
 
   @override
@@ -127,12 +143,12 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     );
     _hoverAnimationController.addListener(() {
       scrollbarPainter!.updateColors(
-        _thumbColor,
-        _trackColor,
-        _trackBorderColor,
+        _thumbColor.resolve(_states),
+        _trackColor.resolve(_states),
+        _trackBorderColor.resolve(_states),
       );
       scrollbarPainter!.updateThickness(
-        _thickness,
+        _thickness.resolve(_states),
         widget.radius ?? _kScrollbarRadius,
       );
     });
@@ -149,15 +165,15 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     scrollbarPainter!
-      ..thickness = _thickness
+      ..thickness = _thickness.resolve(_states)
       ..radius = widget.radius ?? _kScrollbarRadius;
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
     return ScrollbarPainter(
-      color: _thumbColor,
-      trackColor: _trackColor,
-      trackBorderColor: _trackBorderColor,
+      color: _thumbColor.resolve(_states),
+      trackColor: _trackColor.resolve(_states),
+      trackBorderColor: _trackBorderColor.resolve(_states),
       textDirection: _textDirection,
       thickness: widget.thickness,
       radius: widget.radius ?? _kScrollbarRadius,
@@ -171,22 +187,22 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   @override
   void handleThumbPressStart(LongPressStartDetails details) {
     super.handleThumbPressStart(details);
-    _dragIsActive = true;
+    setState(() { _dragIsActive = true; });
     scrollbarPainter!.updateColors(
-      _thumbColor,
-      _trackColor,
-      _trackBorderColor,
+      _thumbColor.resolve(_states),
+      _trackColor.resolve(_states),
+      _trackBorderColor.resolve(_states),
     );
   }
 
   @override
   void handleThumbPressEnd(LongPressEndDetails details) {
     super.handleThumbPressEnd(details);
-    _dragIsActive = false;
+    setState(() { _dragIsActive = false; });
     scrollbarPainter!.updateColors(
-      _thumbColor,
-      _trackColor,
-      _trackBorderColor,
+      _thumbColor.resolve(_states),
+      _trackColor.resolve(_states),
+      _trackBorderColor.resolve(_states),
     );
   }
 
@@ -204,17 +220,17 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     // Check is the position of the pointer falls over the painted scrollbar
     if (onScrollbar) {
       // Pointer exited hovering the scrollbar
-      _hoverIsActive = true;
+      setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();
     } else {
       // Pointer entered the area of the painted scrollbar
-      _hoverIsActive = false;
+      setState(() { _hoverIsActive = false; });
       _hoverAnimationController.reverse();
     }
   }
 
   void maybeHoverExit(PointerExitEvent event) {
-    _hoverIsActive = false;
+    setState(() { _hoverIsActive = false; });
     _hoverAnimationController.reverse();
   }
 
