@@ -118,7 +118,7 @@ int RunTester(const flutter::Settings& settings,
   if (multithreaded) {
     threadhost = std::make_unique<ThreadHost>(
         thread_label, ThreadHost::Type::Platform | ThreadHost::Type::IO |
-                          ThreadHost::Type::UI | ThreadHost::Type::GPU);
+                          ThreadHost::Type::UI | ThreadHost::Type::RASTER);
     platform_task_runner = current_task_runner;
     raster_task_runner = threadhost->raster_thread->GetTaskRunner();
     ui_task_runner = threadhost->ui_thread->GetTaskRunner();

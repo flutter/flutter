@@ -21,7 +21,7 @@ class Fixture : public testing::FixtureTest {
 static void BM_PlatformMessageResponseDartComplete(
     benchmark::State& state) {  // NOLINT
   ThreadHost thread_host("test",
-                         ThreadHost::Type::Platform | ThreadHost::Type::GPU |
+                         ThreadHost::Type::Platform | ThreadHost::Type::RASTER |
                              ThreadHost::Type::IO | ThreadHost::Type::UI);
   TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
                            thread_host.raster_thread->GetTaskRunner(),

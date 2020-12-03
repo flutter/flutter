@@ -253,7 +253,7 @@ class Shell final : public PlatformView::Delegate,
   const TaskRunners& GetTaskRunners() const override;
 
   //----------------------------------------------------------------------------
-  /// @brief      Rasterizers may only be accessed on the GPU task runner.
+  /// @brief      Rasterizers may only be accessed on the raster task runner.
   ///
   /// @return     A weak pointer to the rasterizer.
   ///
@@ -394,7 +394,7 @@ class Shell final : public PlatformView::Delegate,
   std::optional<fml::TimePoint> latest_frame_target_time_;
   std::unique_ptr<PlatformView> platform_view_;  // on platform task runner
   std::unique_ptr<Engine> engine_;               // on UI task runner
-  std::unique_ptr<Rasterizer> rasterizer_;       // on GPU task runner
+  std::unique_ptr<Rasterizer> rasterizer_;       // on raster task runner
   std::unique_ptr<ShellIOManager> io_manager_;   // on IO task runner
   std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch_;
 

@@ -22,7 +22,7 @@ namespace testing {
 ShellTest::ShellTest()
     : thread_host_("io.flutter.test." + GetCurrentTestName() + ".",
                    ThreadHost::Type::Platform | ThreadHost::Type::IO |
-                       ThreadHost::Type::UI | ThreadHost::Type::GPU) {}
+                       ThreadHost::Type::UI | ThreadHost::Type::RASTER) {}
 
 void ShellTest::SendEnginePlatformMessage(
     Shell* shell,
