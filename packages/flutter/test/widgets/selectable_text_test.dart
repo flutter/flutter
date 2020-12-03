@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import '../widgets/semantics_tester.dart';
+import '../widgets/text.dart' show textOffsetToPosition;
 
 class MockClipboard {
   dynamic _clipboardData = <String, dynamic>{
@@ -157,18 +158,6 @@ void main() {
         point.direction,
       );
     }).toList();
-  }
-
-  Offset textOffsetToPosition(WidgetTester tester, int offset) {
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(
-        TextSelection.collapsed(offset: offset),
-      ),
-      renderEditable,
-    );
-    expect(endpoints.length, 1);
-    return endpoints[0].point + const Offset(0.0, -2.0);
   }
 
   setUp(() {

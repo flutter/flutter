@@ -7,6 +7,51 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../widgets/text.dart' show textOffsetToPosition;
+
+// A custom text selection menu that just displays a single custom button.
+class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
+  static const double _kToolbarContentDistanceBelow = 20.0;
+  static const double _kToolbarContentDistance = 8.0;
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier clipboardStatus,
+  ) {
+    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
+      ? endpoints[1]
+      : endpoints[0];
+    final Offset anchorAbove = Offset(
+      globalEditableRegion.left + selectionMidpoint.dx,
+      globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance
+    );
+    final Offset anchorBelow = Offset(
+      globalEditableRegion.left + selectionMidpoint.dx,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+    );
+
+    return TextSelectionToolbar(
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
+      children: <Widget>[
+        TextSelectionToolbarTextButton(
+          index: 0,
+          total: 1,
+          onPressed: () {},
+          child: const Text('Custom button'),
+        ),
+      ],
+    );
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -131,5 +176,37 @@ void main() {
     await tester.pump();
     toolbarY = tester.getTopLeft(_findToolbar()).dy;
     expect(toolbarY, equals(anchorAboveY - height));
+  });
+
+  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SelectableText(
+              'Select me custom menu',
+              selectionControls: _CustomMaterialTextSelectionControls(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The selection menu is not initially shown.
+    expect(find.text('Custom button'), findsNothing);
+
+    // Long press on "custom" to select it.
+    final Offset customPos = textOffsetToPosition(tester, 11);
+    final TestGesture gesture = await tester.startGesture(customPos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+
+    // The custom selection menu is shown.
+    expect(find.text('Custom button'), findsOneWidget);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Select all'), findsNothing);
   });
 }
