@@ -262,7 +262,7 @@ class Overlay extends StatefulWidget {
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
@@ -639,7 +639,7 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
     }
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -716,9 +716,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
-    assert(size.isFinite);
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(constraints.biggest.isFinite);
+    return constraints.biggest;
   }
 
   @override

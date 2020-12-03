@@ -52,7 +52,7 @@
   "remainingTextFieldCharacterCountOther": "အက္ခရာ $remainingCount လုံးကျန်သည်",
   "refreshIndicatorSemanticLabel": "ပြန်လည်စတင်ရန်",
   "moreButtonTooltip": "နောက်ထပ်",
-  "dateSeparator": "/",
+  "dateSeparator": "-",
   "dateHelpText": "mm/dd/yyyy",
   "selectYearSemanticsLabel": "ခုနှစ် ရွေးရန်",
   "unspecifiedDate": "ရက်စွဲ",

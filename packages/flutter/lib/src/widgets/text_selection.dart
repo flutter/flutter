@@ -356,7 +356,7 @@ class TextSelectionOverlay {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
-  /// {@template flutter.widgets.textSelection.onSelectionHandleTapped}
+  /// {@template flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
   /// A callback that's invoked when a selection handle is tapped.
   ///
   /// Both regular taps and long presses invoke this callback, but a drag

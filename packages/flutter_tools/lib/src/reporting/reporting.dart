@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
 
+import '../base/async_guard.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';

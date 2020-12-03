@@ -23,7 +23,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context)!.textTheme.headline2!;
+              final TextStyle style = Theme.of(context).textTheme.headline2!;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -67,7 +67,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context)!.textTheme.headline2!;
+              final TextStyle style = Theme.of(context).textTheme.headline2!;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -118,7 +118,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context)!.textTheme.headline2!;
+              final TextStyle style = Theme.of(context).textTheme.headline2!;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),

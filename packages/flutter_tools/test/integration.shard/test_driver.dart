@@ -369,7 +369,7 @@ abstract class FlutterTestDriver {
       } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
         await subscription.cancel();
         final StringBuffer error = StringBuffer();
-        error.write('Received app.stop event while waiting for $interestingOccurrence\n\n');
+        error.write('Received app.stop event while waiting for $interestingOccurrence\n\n$_errorBuffer');
         if (json['params'] != null && json['params']['error'] != null) {
           error.write('${json['params']['error']}\n\n');
         }
@@ -451,6 +451,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool singleWidgetReloads = false,
     File pidFile,
     String script,
+    List<String> additionalCommandArgs,
   }) async {
     await _setupProcess(
       <String>[
@@ -471,6 +472,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           'flutter-tester',
         if (structuredErrors)
           '--dart-define=flutter.inspector.structuredErrors=true',
+        ...?additionalCommandArgs,
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,

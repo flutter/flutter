@@ -16,6 +16,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
+import 'layout_helper.dart';
 import 'mouse_cursor.dart';
 import 'mouse_tracking.dart';
 import 'object.dart';
@@ -106,13 +107,27 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      return child!.getDryLayout(constraints);
+    }
+    return computeSizeForNoChild(constraints);
+  }
+
+  @override
   void performLayout() {
     if (child != null) {
       child!.layout(constraints, parentUsesSize: true);
       size = child!.size;
     } else {
-      performResize();
+      size = computeSizeForNoChild(constraints);
     }
+  }
+
+  /// Calculate the size the [RenderProxyBox] would have under the given
+  /// [BoxConstraints] for the case where it does not have a child.
+  Size computeSizeForNoChild(BoxConstraints constraints) {
+    return constraints.smallest;
   }
 
   @override
@@ -271,6 +286,15 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      return child!.getDryLayout(_additionalConstraints.enforce(constraints));
+    } else {
+      return _additionalConstraints.enforce(constraints).constrain(Size.zero);
+    }
+  }
+
+  @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     super.debugPaintSize(context, offset);
     assert(() {
@@ -350,15 +374,28 @@ class RenderLimitedBox extends RenderProxyBox {
     );
   }
 
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild }) {
+    if (child != null) {
+      final Size childSize = layoutChild(child!, _limitConstraints(constraints));
+      return constraints.constrain(childSize);
+    }
+    return _limitConstraints(constraints).constrain(Size.zero);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
   @override
   void performLayout() {
-    if (child != null) {
-      final BoxConstraints constraints = this.constraints;
-      child!.layout(_limitConstraints(constraints), parentUsesSize: true);
-      size = constraints.constrain(child!.size);
-    } else {
-      size = _limitConstraints(constraints).constrain(Size.zero);
-    }
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
   }
 
   @override
@@ -520,8 +557,13 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _applyAspectRatio(constraints);
+  }
+
+  @override
   void performLayout() {
-    size = _applyAspectRatio(constraints);
+    size = computeDryLayout(constraints);
     if (child != null)
       child!.layout(BoxConstraints.tight(size));
   }
@@ -648,25 +690,38 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     return _applyStep(height, _stepHeight);
   }
 
-  @override
-  void performLayout() {
+  Size _computeSize({required ChildLayouter layoutChild, required BoxConstraints constraints}) {
     if (child != null) {
-      BoxConstraints childConstraints = constraints;
-      if (!childConstraints.hasTightWidth) {
-        final double width = child!.getMaxIntrinsicWidth(childConstraints.maxHeight);
+      if (!constraints.hasTightWidth) {
+        final double width = child!.getMaxIntrinsicWidth(constraints.maxHeight);
         assert(width.isFinite);
-        childConstraints = childConstraints.tighten(width: _applyStep(width, _stepWidth));
+        constraints = constraints.tighten(width: _applyStep(width, _stepWidth));
       }
       if (_stepHeight != null) {
-        final double height = child!.getMaxIntrinsicHeight(childConstraints.maxWidth);
+        final double height = child!.getMaxIntrinsicHeight(constraints.maxWidth);
         assert(height.isFinite);
-        childConstraints = childConstraints.tighten(height: _applyStep(height, _stepHeight));
+        constraints = constraints.tighten(height: _applyStep(height, _stepHeight));
       }
-      child!.layout(childConstraints, parentUsesSize: true);
-      size = child!.size;
+      return layoutChild(child!, constraints);
     } else {
-      performResize();
+      return constraints.smallest;
     }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      constraints: constraints,
+    );
+  }
+
+  @override
+  void performLayout() {
+    size = _computeSize(
+      layoutChild: ChildLayoutHelper.layoutChild,
+      constraints: constraints,
+    );
   }
 
   @override
@@ -736,22 +791,34 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     return computeMaxIntrinsicHeight(width);
   }
 
-  @override
-  void performLayout() {
+  Size _computeSize({required ChildLayouter layoutChild, required BoxConstraints constraints}) {
     if (child != null) {
-      BoxConstraints childConstraints = constraints;
-      if (!childConstraints.hasTightHeight) {
-        final double height = child!.getMaxIntrinsicHeight(childConstraints.maxWidth);
+      if (!constraints.hasTightHeight) {
+        final double height = child!.getMaxIntrinsicHeight(constraints.maxWidth);
         assert(height.isFinite);
-        childConstraints = childConstraints.tighten(height: height);
+        constraints = constraints.tighten(height: height);
       }
-      child!.layout(childConstraints, parentUsesSize: true);
-      size = child!.size;
+      return layoutChild(child!, constraints);
     } else {
-      performResize();
+      return constraints.smallest;
     }
   }
 
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      constraints: constraints,
+    );
+  }
+
+  @override
+  void performLayout() {
+    size = _computeSize(
+      layoutChild: ChildLayoutHelper.layoutChild,
+      constraints: constraints,
+    );
+  }
 }
 
 /// Makes its child partially transparent.
@@ -2418,6 +2485,42 @@ class RenderFittedBox extends RenderProxyBox {
   // TODO(ianh): The intrinsic dimensions of this box are wrong.
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      final Size childSize = child!.getDryLayout(const BoxConstraints());
+
+      // During [RenderObject.debugCheckingIntrinsics] a child that doesn't
+      // support dry layout may provide us with an invalid size that triggers
+      // assertions if we try to work with it. Instead of throwing, we bail
+      // out early in that case.
+      bool invalidChildSize = false;
+      assert(() {
+        if (RenderObject.debugCheckingIntrinsics && childSize.width * childSize.height == 0.0) {
+          invalidChildSize = true;
+        }
+        return true;
+      }());
+      if (invalidChildSize) {
+        assert(debugCannotComputeDryLayout(
+          reason: 'Child provided invalid size of $childSize.',
+        ));
+        return const Size(0, 0);
+      }
+
+      switch (fit) {
+        case BoxFit.scaleDown:
+          final BoxConstraints sizeConstraints = constraints.loosen();
+          final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(childSize);
+          return constraints.constrain(unconstrainedSize);
+        default:
+          return constraints.constrainSizeAndAttemptToPreserveAspectRatio(childSize);
+      }
+    } else {
+      return constraints.smallest;
+    }
+  }
+
+  @override
   void performLayout() {
     if (child != null) {
       child!.layout(const BoxConstraints(), parentUsesSize: true);
@@ -2440,7 +2543,7 @@ class RenderFittedBox extends RenderProxyBox {
   bool? _hasVisualOverflow;
   Matrix4? _transform;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -2709,8 +2812,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   PointerSignalEventListener? onPointerSignal;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  Size computeSizeForNoChild(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   @override
@@ -2777,11 +2880,13 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     this.onHover,
     this.onExit,
     MouseCursor cursor = MouseCursor.defer,
+    bool validForMouseTracker = true,
     bool opaque = true,
     RenderBox? child,
   }) : assert(opaque != null),
        assert(cursor != null),
        _cursor = cursor,
+       _validForMouseTracker = validForMouseTracker,
        _opaque = opaque,
        super(child);
 
@@ -2850,8 +2955,27 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   }
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  bool get validForMouseTracker => _validForMouseTracker;
+  bool _validForMouseTracker;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _validForMouseTracker = true;
+  }
+
+  @override
+  void detach() {
+    // It's possible that the renderObject be detached during mouse events
+    // dispatching, set the [MouseTrackerAnnotation.validForMouseTracker] false to prevent
+    // the callbacks from being called.
+    _validForMouseTracker = false;
+    super.detach();
+  }
+
+  @override
+  Size computeSizeForNoChild(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   @override
@@ -2868,6 +2992,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     ));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: MouseCursor.defer));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
+    properties.add(FlagProperty('validForMouseTracker', value: validForMouseTracker, defaultValue: true, ifFalse: 'invalid for MouseTracker'));
   }
 }
 
@@ -2914,9 +3039,9 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
-  /// [Window.devicePixelRatio] for the device, so specifying 1.0 (the default)
-  /// will give you a 1:1 mapping between logical pixels and the output pixels
-  /// in the image.
+  /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
+  /// (the default) will give you a 1:1 mapping between logical pixels and the
+  /// output pixels in the image.
   ///
   /// {@tool snippet}
   ///
@@ -3217,9 +3342,18 @@ class RenderOffstage extends RenderProxyBox {
   bool get sizedByParent => offstage;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (offstage) {
+      return constraints.smallest;
+    }
+    return super.computeDryLayout(constraints);
+  }
+
+
+  @override
   void performResize() {
     assert(offstage);
-    size = constraints.smallest;
+    super.performResize();
   }
 
   @override
@@ -3600,6 +3734,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SemanticsHintOverrides? hintOverrides,
     TextDirection? textDirection,
     SemanticsSortKey? sortKey,
+    SemanticsTag? tagForChildren,
     VoidCallback? onTap,
     VoidCallback? onDismiss,
     VoidCallback? onLongPress,
@@ -3655,6 +3790,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
+       _tagForChildren = tagForChildren,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -4070,6 +4206,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     _sortKey = value;
     markNeedsSemanticsUpdate();
+  }
+
+  /// Adds a semenatics tag to the semantics subtree.
+  SemanticsTag? get tagForChildren => _tagForChildren;
+  SemanticsTag? _tagForChildren;
+  set tagForChildren(SemanticsTag? value) {
+    if (_tagForChildren == value)
+      return;
+    markNeedsSemanticsUpdate();
+    _tagForChildren = value;
   }
 
   /// The handler for [SemanticsAction.tap].
@@ -4549,6 +4695,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.textDirection = textDirection;
     if (sortKey != null)
       config.sortKey = sortKey;
+    if (tagForChildren != null)
+      config.addTagForChildren(tagForChildren!);
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
@@ -4986,7 +5134,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// The anchor point on the linked [RenderLeaderLayer] that [followerAnchor]
   /// will line up with.
   ///
-  /// {@template flutter.rendering.followerLayer.anchor}
+  /// {@template flutter.rendering.RenderFollowerLayer.leaderAnchor}
   /// For example, when [leaderAnchor] and [followerAnchor] are both
   /// [Alignment.topLeft], this [RenderFollowerLayer] will be top left aligned
   /// with the linked [RenderLeaderLayer]. When [leaderAnchor] is
@@ -5010,7 +5158,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// The anchor point on this [RenderFollowerLayer] that will line up with
   /// [followerAnchor] on the linked [RenderLeaderLayer].
   ///
-  /// {@macro flutter.rendering.followerLayer.anchor}
+  /// {@macro flutter.rendering.RenderFollowerLayer.leaderAnchor}
   ///
   /// Defaults to [Alignment.topLeft].
   Alignment get followerAnchor => _followerAnchor;

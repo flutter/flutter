@@ -1805,6 +1805,11 @@ class RenderObjectWidgetSpy extends LeafRenderObjectWidget {
 
 class FakeLeafRenderObject extends RenderBox {
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
   void performLayout() {
     size = constraints.biggest;
   }

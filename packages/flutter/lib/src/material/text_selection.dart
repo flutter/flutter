@@ -83,7 +83,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     assert(isLast != null);
 
     // TODO(hansmuller): Should be colorScheme.onSurface
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;
     final Color primary = isDark ? Colors.white : Colors.black87;
 
@@ -576,7 +576,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   void performLayout() {
     _lastIndexThatFits = -1;
     if (firstChild == null) {
-      performResize();
+      size = constraints.smallest;
       return;
     }
 
@@ -797,7 +797,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final Color handleColor = TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary;
     final Widget handle = SizedBox(
       width: _kHandleSize,

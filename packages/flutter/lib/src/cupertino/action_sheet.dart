@@ -450,14 +450,14 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
     assert(debugCheckHasMediaQuery(context));
     return _RenderCupertinoAlert(
       dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
-      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoAlert renderObject) {
     super.updateRenderObject(context, renderObject);
-    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!;
+    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context);
   }
 
   @override
@@ -721,40 +721,58 @@ class _RenderCupertinoAlert extends RenderBox {
     return 0.0;
   }
 
+  double _computeDividerThickness(BoxConstraints constraints) {
+    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(constraints.maxWidth) > 0.0
+        && actionsSection!.getMaxIntrinsicHeight(constraints.maxWidth) > 0.0;
+    return hasDivider ? _dividerThickness : 0.0;
+  }
+
+  _AlertSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild, required double dividerThickness}) {
+    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(constraints.maxWidth);
+
+    final Size contentSize = layoutChild(
+      contentSection!,
+      constraints.deflate(EdgeInsets.only(bottom: minActionsHeight + dividerThickness)),
+    );
+
+    final Size actionsSize = layoutChild(
+      actionsSection!,
+      constraints.deflate(EdgeInsets.only(top: contentSize.height + dividerThickness)),
+    );
+
+    final double actionSheetHeight = contentSize.height + dividerThickness + actionsSize.height;
+    return _AlertSizes(
+      size: Size(constraints.maxWidth, actionSheetHeight),
+      contentHeight: contentSize.height,
+    );
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSizes(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      dividerThickness: _computeDividerThickness(constraints),
+    ).size;
+  }
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(constraints.maxWidth) > 0.0
-        && actionsSection!.getMaxIntrinsicHeight(constraints.maxWidth) > 0.0;
-    final double dividerThickness = hasDivider ? _dividerThickness : 0.0;
-
-    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(constraints.maxWidth);
-
-    // Size alert content.
-    contentSection!.layout(
-      constraints.deflate(EdgeInsets.only(bottom: minActionsHeight + dividerThickness)),
-      parentUsesSize: true,
+    final double dividerThickness = _computeDividerThickness(constraints);
+    final _AlertSizes alertSizes = _computeSizes(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+      dividerThickness: dividerThickness,
     );
-    final Size contentSize = contentSection!.size;
 
-    // Size alert actions.
-    actionsSection!.layout(
-      constraints.deflate(EdgeInsets.only(top: contentSize.height + dividerThickness)),
-      parentUsesSize: true,
-    );
-    final Size actionsSize = actionsSection!.size;
-
-    // Calculate overall alert height.
-    final double actionSheetHeight = contentSize.height + dividerThickness + actionsSize.height;
-
-    // Set our size now that layout calculations are complete.
-    size = Size(constraints.maxWidth, actionSheetHeight);
+    size = alertSizes.size;
 
     // Set the position of the actions box to sit at the bottom of the alert.
     // The content box defaults to the top left, which is where we want it.
     assert(actionsSection!.parentData is MultiChildLayoutParentData);
     final MultiChildLayoutParentData actionParentData = actionsSection!.parentData! as MultiChildLayoutParentData;
-    actionParentData.offset = Offset(0.0, contentSize.height + dividerThickness);
+    actionParentData.offset = Offset(0.0, alertSizes.contentHeight + dividerThickness);
   }
 
   @override
@@ -804,6 +822,13 @@ class _RenderCupertinoAlert extends RenderBox {
              },
            );
   }
+}
+
+class _AlertSizes {
+  const _AlertSizes({required this.size, required this.contentHeight});
+
+  final Size size;
+  final double contentHeight;
 }
 
 // Visual components of an alert that need to be explicitly sized and
@@ -1071,10 +1096,10 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoAlertActions(
       dividerThickness: _dividerThickness,
-      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
       hasCancelButton: _hasCancelButton,
-      backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context)!,
-      pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context)!,
+      backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+      pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
     );
   }
 
@@ -1082,10 +1107,10 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoAlertActions renderObject) {
     renderObject
       ..dividerThickness = _dividerThickness
-      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)!
+      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)
       ..hasCancelButton = _hasCancelButton
-      ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)!
-      ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context)!;
+      ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)
+      ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context);
   }
 }
 
@@ -1265,7 +1290,16 @@ class _RenderCupertinoAlertActions extends RenderBox
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _performLayout(constraints, dry: true);
+  }
+
+  @override
   void performLayout() {
+    size = _performLayout(constraints, dry: false);
+  }
+
+  Size _performLayout(BoxConstraints constraints, {bool dry = false}) {
     final BoxConstraints perButtonConstraints = constraints.copyWith(
       minHeight: 0.0,
       maxHeight: double.infinity,
@@ -1275,16 +1309,21 @@ class _RenderCupertinoAlertActions extends RenderBox
     int index = 0;
     double verticalOffset = 0.0;
     while (child != null) {
-      child.layout(
-        perButtonConstraints,
-        parentUsesSize: true,
-      );
+      final Size childSize;
+      if (!dry) {
+        child.layout(
+          perButtonConstraints,
+          parentUsesSize: true,
+        );
+        childSize = child.size;
+        assert(child.parentData is MultiChildLayoutParentData);
+        final MultiChildLayoutParentData parentData = child.parentData! as MultiChildLayoutParentData;
+        parentData.offset = Offset(0.0, verticalOffset);
+      } else {
+        childSize = child.getDryLayout(constraints);
+      }
 
-      assert(child.parentData is MultiChildLayoutParentData);
-      final MultiChildLayoutParentData parentData = child.parentData! as MultiChildLayoutParentData;
-      parentData.offset = Offset(0.0, verticalOffset);
-
-      verticalOffset += child.size.height;
+      verticalOffset += childSize.height;
       if (index < childCount - 1) {
         // Add a gap for the next divider.
         verticalOffset += dividerThickness;
@@ -1294,7 +1333,7 @@ class _RenderCupertinoAlertActions extends RenderBox
       child = childAfter(child);
     }
 
-    size = constraints.constrain(
+    return constraints.constrain(
       Size(constraints.maxWidth, verticalOffset)
     );
   }

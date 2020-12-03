@@ -18,6 +18,7 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
+import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'scroll_configuration.dart';
@@ -499,6 +500,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       return;
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
+      // Cancel the active hold/drag (if any) because the gesture recognizers
+      // will soon be disposed by our RawGestureDetector, and we won't be
+      // receiving pointer up events to cancel the hold/drag.
+      _handleDragCancel();
     } else {
       switch (widget.axis) {
         case Axis.vertical:
@@ -627,20 +632,29 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
   double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
+    final double delta = _pointerSignalEventDelta(event);
+    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
+      position.maxScrollExtent);
+  }
+
+  // Returns the delta that should result from applying [event] with axis and
+  // direction taken into account.
+  double _pointerSignalEventDelta(PointerScrollEvent event) {
     double delta = widget.axis == Axis.horizontal
-        ? event.scrollDelta.dx
-        : event.scrollDelta.dy;
+      ? event.scrollDelta.dx
+      : event.scrollDelta.dy;
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
     }
-
-    return math.min(math.max(position.pixels + delta, position.minScrollExtent),
-        position.maxScrollExtent);
+    return delta;
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
+      if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
+        return;
+      }
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
       if (targetScrollOffset != position.pixels) {
@@ -651,12 +665,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
-      return;
-    }
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
     if (targetScrollOffset != position.pixels) {
-      position.jumpTo(targetScrollOffset);
+      position.pointerScroll(_pointerSignalEventDelta(event));
     }
   }
 
@@ -880,7 +891,7 @@ typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails detai
 /// This is used to configure a [ScrollIncrementDetails] object to pass to a
 /// [ScrollIncrementCalculator] function on a [Scrollable].
 ///
-/// {@template flutter.widgets.scrollable.scroll_increment_type.intent}
+/// {@template flutter.widgets.ScrollIncrementType.intent}
 /// This indicates the *intent* of the scroll, not necessarily the size. Not all
 /// scrollable areas will have the concept of a "line" or "page", but they can
 /// respond to the different standard key bindings that cause scrolling, which
@@ -924,7 +935,7 @@ class ScrollIncrementDetails {
 
   /// The type of scroll this is (e.g. line, page, etc.).
   ///
-  /// {@macro flutter.widgets.scrollable.scroll_increment_type.intent}
+  /// {@macro flutter.widgets.ScrollIncrementType.intent}
   final ScrollIncrementType type;
 
   /// The current metrics of the scrollable that is being scrolled.
@@ -957,6 +968,10 @@ class ScrollIntent extends Intent {
 /// An [Action] that scrolls the [Scrollable] that encloses the current
 /// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
 ///
+/// If a Scrollable cannot be found above the current [primaryFocus], the
+/// [PrimaryScrollController] will be considered for default handling of
+/// [ScrollAction]s.
+///
 /// If [Scrollable.incrementCalculator] is null for the scrollable, the default
 /// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
 /// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
@@ -965,7 +980,21 @@ class ScrollAction extends Action<ScrollIntent> {
   @override
   bool isEnabled(ScrollIntent intent) {
     final FocusNode? focus = primaryFocus;
-    return focus != null && focus.context != null && Scrollable.of(focus.context!) != null;
+    final bool contextIsValid = focus != null && focus.context != null;
+    if (contextIsValid) {
+      // Check for primary scrollable within the current context
+      if (Scrollable.of(focus!.context!) != null)
+        return true;
+      // Check for fallback scrollable with context from PrimaryScrollController
+      if (PrimaryScrollController.of(focus.context!) != null) {
+        final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
+        return primaryScrollController != null
+          && primaryScrollController.hasClients
+          && primaryScrollController.position.context.notificationContext != null
+          && Scrollable.of(primaryScrollController.position.context.notificationContext!) != null;
+      }
+    }
+    return false;
   }
 
   // Returns the scroll increment for a single scroll request, for use when
@@ -1049,7 +1078,11 @@ class ScrollAction extends Action<ScrollIntent> {
 
   @override
   void invoke(ScrollIntent intent) {
-    final ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    if (state == null) {
+      final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
+      state = Scrollable.of(primaryScrollController!.position.context.notificationContext!);
+    }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
     assert(state!.position.viewportDimension != null);

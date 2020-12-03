@@ -767,38 +767,36 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Handles shortcut functionality including cut, copy, paste and select all
   // using control/command + (X, C, V, A).
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final String text = textSelectionDelegate.textEditingValue.text;
     assert(selection != null);
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
     if (key == LogicalKeyboardKey.keyC) {
-      if (!selection!.isCollapsed) {
+      if (!selection.isCollapsed) {
         Clipboard.setData(
-            ClipboardData(text: selection!.textInside(_plainText)));
+            ClipboardData(text: selection.textInside(text)));
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyX) {
-      if (!selection!.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection!.textInside(_plainText)));
+    if (key == LogicalKeyboardKey.keyX && !_readOnly) {
+      if (!selection.isCollapsed) {
+        Clipboard.setData(ClipboardData(text: selection.textInside(text)));
         textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: selection!.textBefore(_plainText)
-              + selection!.textAfter(_plainText),
-          selection: TextSelection.collapsed(offset: selection!.start),
+          text: selection.textBefore(text) + selection.textAfter(text),
+          selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
         );
       }
       return;
     }
-    if (key == LogicalKeyboardKey.keyV) {
+    if (key == LogicalKeyboardKey.keyV && !_readOnly) {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
-      final TextEditingValue value = textSelectionDelegate.textEditingValue;
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
         textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: value.selection.textBefore(value.text)
-              + data.text!
-              + value.selection.textAfter(value.text),
+          text: selection.textBefore(text) + data.text! + selection.textAfter(text),
           selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length
+            offset: math.min(selection.start, selection.end) + data.text!.length,
           ),
         );
       }
@@ -806,7 +804,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     if (key == LogicalKeyboardKey.keyA) {
       _handleSelectionChange(
-        selection!.copyWith(
+        selection.copyWith(
           baseOffset: 0,
           extentOffset: textSelectionDelegate.textEditingValue.text.length,
         ),
@@ -817,12 +815,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleDelete({ required bool forward }) {
+    final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
+    final String text = textSelectionDelegate.textEditingValue.text;
     assert(_selection != null);
-    String textBefore = selection!.textBefore(_plainText);
-    String textAfter = selection!.textAfter(_plainText);
-    int cursorPosition = selection!.start;
+    if (_readOnly) {
+      return;
+    }
+    String textBefore = selection.textBefore(text);
+    String textAfter = selection.textAfter(text);
+    int cursorPosition = math.min(selection.start, selection.end);
     // If not deleting a selection, delete the next/previous character.
-    if (selection!.isCollapsed) {
+    if (selection.isCollapsed) {
       if (!forward && textBefore.isNotEmpty) {
         final int characterBoundary = previousCharacter(textBefore.length, textBefore);
         textBefore = textBefore.substring(0, characterBoundary);
@@ -858,8 +861,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _textLayoutLastMinWidth = null;
   }
 
-  // Returns a cached plain text version of the text in the painter.
   String? _cachedPlainText;
+  // Returns a plain text version of the text in the painter.
+  //
+  // Returns the obscured text when [obscureText] is true. See
+  // [obscureText] and [obscuringCharacter].
   String get _plainText {
     _cachedPlainText ??= _textPainter.text!.toPlainText();
     return _cachedPlainText!;
@@ -1155,7 +1161,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsLayout();
   }
 
-  /// {@template flutter.rendering.editable.paintCursorOnTop}
+  /// {@template flutter.rendering.RenderEditable.paintCursorAboveText}
   /// If the cursor should be painted on top of the text or underneath it.
   ///
   /// By default, the cursor should be painted on top for iOS platforms and
@@ -1170,7 +1176,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsLayout();
   }
 
-  /// {@template flutter.rendering.editable.cursorOffset}
+  /// {@template flutter.rendering.RenderEditable.cursorOffset}
   /// The offset that is used, in pixels, when painting the cursor on screen.
   ///
   /// By default, the cursor position should be set to an offset of
@@ -1362,7 +1368,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   double get _caretMargin => _kCaretGap + cursorWidth;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -1818,7 +1824,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Move selection to the location of the last tap down.
   ///
-  /// {@template flutter.rendering.editable.select}
+  /// {@template flutter.rendering.RenderEditable.selectPosition}
   /// This method is mainly used to translate user inputs in global positions
   /// into a [TextSelection]. When used in conjunction with a [EditableText],
   /// the selection change is fed back into [TextEditingController.selection].
@@ -1861,7 +1867,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Select a word around the location of the last tap down.
   ///
-  /// {@macro flutter.rendering.editable.select}
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
@@ -1871,7 +1877,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// The first and last endpoints of the selection will always be at the
   /// beginning and end of a word respectively.
   ///
-  /// {@macro flutter.rendering.editable.select}
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     assert(cause != null);
     assert(from != null);
@@ -1896,7 +1902,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Move the selection to the beginning or end of a word.
   ///
-  /// {@macro flutter.rendering.editable.select}
+  /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordEdge({ required SelectionChangedCause cause }) {
     assert(cause != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
@@ -2025,6 +2031,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, cursorHeight - 2.0 * _kCaretHeightOffset);
         break;
     }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    final double width = forceLine ? constraints.maxWidth : constraints
+        .constrainWidth(_textPainter.size.width + _caretMargin);
+    return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
 
   @override

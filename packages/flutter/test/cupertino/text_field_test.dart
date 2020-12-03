@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
@@ -4288,5 +4289,17 @@ void main() {
 
     final EditableText widget = tester.widget(find.byType(EditableText));
     expect(widget.selectionControls, equals(selectionControl));
+  });
+
+  testWidgets('Do not add LengthLimiting formatter to the user supplied list', (WidgetTester tester) async {
+    final List<TextInputFormatter> formatters = <TextInputFormatter>[];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTextField(maxLength: 5, inputFormatters: formatters),
+      )
+    );
+
+    expect(formatters.isEmpty, isTrue);
   });
 }

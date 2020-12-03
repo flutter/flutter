@@ -89,7 +89,7 @@ class WaitUntilNoPendingFrame extends Command {
 /// A Flutter Driver command that waits until the Flutter engine rasterizes the
 /// first frame.
 ///
-/// {@template flutter.frame_rasterized_vs_presented}
+/// {@template flutter.flutter_driver.WaitUntilFirstFrameRasterized}
 /// Usually, the time that a frame is rasterized is very close to the time that
 /// it gets presented on the display. Specifically, rasterization is the last
 /// expensive phase of a frame that's still in Flutter's control.
