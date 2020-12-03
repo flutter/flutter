@@ -94,7 +94,7 @@ TEST_F(TransformLayerTest, Simple) {
       mock_canvas().draw_calls(),
       std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
                    MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{layer_transform}},
+                       1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawPathData{child_path, SkPaint()}},
                    MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
@@ -139,18 +139,18 @@ TEST_F(TransformLayerTest, Nested) {
       std::vector({Mutator(layer2_transform), Mutator(layer1_transform)}));
 
   layer1->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{layer1_transform}},
-                   MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::ConcatMatrixData{layer2_transform}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::DrawPathData{child_path, SkPaint()}},
-                   MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  EXPECT_EQ(mock_canvas().draw_calls(),
+            std::vector(
+                {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                 MockCanvas::DrawCall{
+                     1, MockCanvas::ConcatMatrixData{SkM44(layer1_transform)}},
+                 MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
+                 MockCanvas::DrawCall{
+                     2, MockCanvas::ConcatMatrixData{SkM44(layer2_transform)}},
+                 MockCanvas::DrawCall{
+                     2, MockCanvas::DrawPathData{child_path, SkPaint()}},
+                 MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                 MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 TEST_F(TransformLayerTest, NestedSeparated) {
@@ -206,22 +206,22 @@ TEST_F(TransformLayerTest, NestedSeparated) {
       std::vector({Mutator(layer2_transform), Mutator(layer1_transform)}));
 
   layer1->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{layer1_transform}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path,
-                                                   SkPaint(SkColors::kBlue)}},
-                   MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::ConcatMatrixData{layer2_transform}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::DrawPathData{child_path,
-                                                   SkPaint(SkColors::kGreen)}},
-                   MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  EXPECT_EQ(mock_canvas().draw_calls(),
+            std::vector(
+                {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                 MockCanvas::DrawCall{
+                     1, MockCanvas::ConcatMatrixData{SkM44(layer1_transform)}},
+                 MockCanvas::DrawCall{
+                     1, MockCanvas::DrawPathData{child_path,
+                                                 SkPaint(SkColors::kBlue)}},
+                 MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
+                 MockCanvas::DrawCall{
+                     2, MockCanvas::ConcatMatrixData{SkM44(layer2_transform)}},
+                 MockCanvas::DrawCall{
+                     2, MockCanvas::DrawPathData{child_path,
+                                                 SkPaint(SkColors::kGreen)}},
+                 MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                 MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 }  // namespace testing

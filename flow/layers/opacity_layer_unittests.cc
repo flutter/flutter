@@ -169,10 +169,11 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
       .roundOut(&opacity_bounds);
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{layer_transform}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
        MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{integral_layer_transform}},
+           1, MockCanvas::SetMatrixData{SkM44(integral_layer_transform)}},
 #endif
        MockCanvas::DrawCall{
            1, MockCanvas::SaveLayerData{opacity_bounds, opacity_paint, nullptr,
@@ -216,10 +217,11 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
 
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{layer_transform}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
        MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{integral_layer_transform}},
+           1, MockCanvas::SetMatrixData{SkM44(integral_layer_transform)}},
 #endif
        MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
        MockCanvas::DrawCall{
@@ -266,10 +268,11 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
       .roundOut(&opacity_bounds);
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{layer_transform}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
        MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{integral_layer_transform}},
+           1, MockCanvas::SetMatrixData{SkM44(integral_layer_transform)}},
 #endif
        MockCanvas::DrawCall{
            1, MockCanvas::SaveLayerData{opacity_bounds, opacity_paint, nullptr,
@@ -359,10 +362,11 @@ TEST_F(OpacityLayerTest, Nested) {
       .roundOut(&opacity2_bounds);
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{layer1_transform}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::ConcatMatrixData{SkM44(layer1_transform)}},
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
        MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{integral_layer1_transform}},
+           1, MockCanvas::SetMatrixData{SkM44(integral_layer1_transform)}},
 #endif
        MockCanvas::DrawCall{
            1, MockCanvas::SaveLayerData{opacity1_bounds, opacity1_paint,
@@ -370,10 +374,11 @@ TEST_F(OpacityLayerTest, Nested) {
        MockCanvas::DrawCall{
            2, MockCanvas::DrawPathData{child1_path, child1_paint}},
        MockCanvas::DrawCall{2, MockCanvas::SaveData{3}},
-       MockCanvas::DrawCall{3, MockCanvas::ConcatMatrixData{layer2_transform}},
+       MockCanvas::DrawCall{
+           3, MockCanvas::ConcatMatrixData{SkM44(layer2_transform)}},
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
        MockCanvas::DrawCall{
-           3, MockCanvas::SetMatrixData{integral_layer2_transform}},
+           3, MockCanvas::SetMatrixData{SkM44(integral_layer2_transform)}},
 #endif
        MockCanvas::DrawCall{
            3, MockCanvas::SaveLayerData{opacity2_bounds, opacity2_paint,
