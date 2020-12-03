@@ -1482,7 +1482,7 @@ void main() {
                   return const Text('B');
                 },
                 body: const SizedBox(height: 100.0),
-              )
+              ),
             ],
           ),
         ),
