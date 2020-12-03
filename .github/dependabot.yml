@@ -4,7 +4,7 @@
 version: 2
 updates:
   - package-ecosystem: "bundler"
-    directory: "/dev/ci"
+    directory: "/dev/ci/mac"
     schedule:
       interval: "weekly"
     reviewers:
