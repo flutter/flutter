@@ -47,6 +47,34 @@ void main() {
     );
   }
 
+  Widget yearPicker({
+    Key? key,
+    DateTime? selectedDate,
+    DateTime? initialDate,
+    DateTime? firstDate,
+    DateTime? lastDate,
+    DateTime? currentDate,
+    ValueChanged<DateTime>? onChanged,
+    TextDirection textDirection = TextDirection.ltr,
+  }) {
+    return MaterialApp(
+      home: Material(
+        child: Directionality(
+          textDirection: textDirection,
+          child: YearPicker(
+            key: key,
+            selectedDate: selectedDate ?? DateTime(2016, DateTime.january, 15),
+            initialDate: initialDate ?? DateTime(2016, DateTime.january, 15),
+            firstDate: firstDate ?? DateTime(2001, DateTime.january, 1),
+            lastDate: lastDate ?? DateTime(2031, DateTime.december, 31),
+            currentDate: currentDate ?? DateTime(2016, DateTime.january, 3),
+            onChanged: onChanged ?? (DateTime date) {},
+          ),
+        ),
+      ),
+    );
+  }
+
   group('CalendarDatePicker', () {
     testWidgets('Can select a day', (WidgetTester tester) async {
       DateTime? selectedDate;
@@ -163,13 +191,6 @@ void main() {
       expect(selectedDate, equals(DateTime(2017, DateTime.january, 19)));
     });
 
-    testWidgets('Current year is visible in year picker', (WidgetTester tester) async {
-      await tester.pumpWidget(calendarDatePicker());
-      await tester.tap(find.text('January 2016')); // Switch to year mode.
-      await tester.pumpAndSettle();
-      expect(find.text('2016'), findsOneWidget);
-    });
-
     testWidgets('Cannot select a day outside bounds', (WidgetTester tester) async {
       final DateTime validDate = DateTime(2017, DateTime.january, 15);
       DateTime? selectedDate;
@@ -193,8 +214,7 @@ void main() {
       expect(selectedDate, validDate);
     });
 
-    testWidgets('Cannot navigate to a month outside bounds', (
-        WidgetTester tester) async {
+    testWidgets('Cannot navigate to a month outside bounds', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, DateTime.december, 15),
@@ -830,6 +850,43 @@ void main() {
         }
       });
 
+    });
+  });
+
+  group('YearPicker', () {
+    testWidgets('Current year is visible in year picker', (WidgetTester tester) async {
+      await tester.pumpWidget(yearPicker());
+      expect(find.text('2016'), findsOneWidget);
+    });
+
+    testWidgets('Can select a year', (WidgetTester tester) async {
+      DateTime? selectedDate;
+      await tester.pumpWidget(yearPicker(
+        onChanged: (DateTime date) => selectedDate = date,
+      ));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('2018'));
+      await tester.pumpAndSettle();
+      expect(selectedDate, equals(DateTime(2018, DateTime.january, 1)));
+    });
+
+    testWidgets('Cannot select disabled year', (WidgetTester tester) async {
+      DateTime? selectedYear;
+      await tester.pumpWidget(yearPicker(
+        firstDate: DateTime(2018, DateTime.june, 9),
+        initialDate: DateTime(2018, DateTime.july, 4),
+        lastDate: DateTime(2018, DateTime.december, 15),
+        onChanged: (DateTime date) => selectedYear = date,
+      ));
+      await tester.tap(find.text('2016')); // Disabled, doesn't change the year.
+      await tester.pumpAndSettle();
+      expect(selectedYear, isNull);
+      await tester.tap(find.text('2020')); // Disabled, doesn't change the year.
+      await tester.pumpAndSettle();
+      expect(selectedYear, isNull);
+      await tester.tap(find.text('2018'));
+      await tester.pumpAndSettle();
+      expect(selectedYear, equals(DateTime(2018, DateTime.july, 1)));
     });
   });
 }

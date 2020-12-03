@@ -460,9 +460,7 @@ class _SnackBarState extends State<SnackBar> {
     final Color themeBackgroundColor = isThemeDark
       ? colorScheme.onSurface
       : Color.alphaBlend(colorScheme.onSurface.withOpacity(0.80), colorScheme.surface);
-    final ThemeData inverseTheme = ThemeData(
-      brightness: brightness,
-      backgroundColor: themeBackgroundColor,
+    final ThemeData inverseTheme = theme.copyWith(
       colorScheme: ColorScheme(
         primary: colorScheme.onPrimary,
         primaryVariant: colorScheme.onPrimary,
@@ -480,10 +478,9 @@ class _SnackBarState extends State<SnackBar> {
         onError: colorScheme.error,
         brightness: brightness,
       ),
-      snackBarTheme: snackBarTheme,
     );
 
-    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subtitle1;
+    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
@@ -539,7 +536,7 @@ class _SnackBarState extends State<SnackBar> {
     }
 
     final double elevation = widget.elevation ?? snackBarTheme.elevation ?? 6.0;
-    final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.backgroundColor;
+    final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.colorScheme.background;
     final ShapeBorder? shape = widget.shape
       ?? snackBarTheme.shape
       ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
