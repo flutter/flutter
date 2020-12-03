@@ -5,6 +5,10 @@
 // @dart = 2.12
 part of engine;
 
+/// Memoized value for ClipOp.Intersect, so we don't have to hit JS-interop
+/// every time we need it.
+final SkClipOp _clipOpIntersect = canvasKit.ClipOp.Intersect;
+
 /// A Dart wrapper around Skia's [SkCanvas].
 ///
 /// This is intentionally not memory-managing the underlying [SkCanvas]. See
@@ -20,12 +24,9 @@ class CkCanvas {
     skCanvas.clear(toSharedSkColor1(color));
   }
 
-  static final SkClipOp _clipOpIntersect = canvasKit.ClipOp.Intersect;
-
-  void clipPath(ui.Path path, bool doAntiAlias) {
-    final CkPath ckPath = path as CkPath;
+  void clipPath(CkPath path, bool doAntiAlias) {
     skCanvas.clipPath(
-      ckPath.skiaObject,
+      path.skiaObject,
       _clipOpIntersect,
       doAntiAlias,
     );
@@ -66,15 +67,14 @@ class CkCanvas {
 
   void drawAtlasRaw(
     CkPaint paint,
-    ui.Image atlas,
+    CkImage atlas,
     Float32List rstTransforms,
     Float32List rects,
     List<Float32List>? colors,
     ui.BlendMode blendMode,
   ) {
-    final CkImage skAtlas = atlas as CkImage;
     skCanvas.drawAtlas(
-      skAtlas.skImage,
+      atlas.skImage,
       rects,
       rstTransforms,
       paint.skiaObject,
@@ -107,20 +107,18 @@ class CkCanvas {
     );
   }
 
-  void drawImage(ui.Image image, ui.Offset offset, CkPaint paint) {
-    final CkImage skImage = image as CkImage;
+  void drawImage(CkImage image, ui.Offset offset, CkPaint paint) {
     skCanvas.drawImage(
-      skImage.skImage,
+      image.skImage,
       offset.dx,
       offset.dy,
       paint.skiaObject,
     );
   }
 
-  void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, CkPaint paint) {
-    final CkImage skImage = image as CkImage;
+  void drawImageRect(CkImage image, ui.Rect src, ui.Rect dst, CkPaint paint) {
     skCanvas.drawImageRect(
-      skImage.skImage,
+      image.skImage,
       toSkRect(src),
       toSkRect(dst),
       paint.skiaObject,
@@ -129,10 +127,9 @@ class CkCanvas {
   }
 
   void drawImageNine(
-      ui.Image image, ui.Rect center, ui.Rect dst, CkPaint paint) {
-    final CkImage skImage = image as CkImage;
+      CkImage image, ui.Rect center, ui.Rect dst, CkPaint paint) {
     skCanvas.drawImageNine(
-      skImage.skImage,
+      image.skImage,
       toSkRect(center),
       toSkRect(dst),
       paint.skiaObject,
@@ -173,7 +170,7 @@ class CkCanvas {
   }
 
   void drawPicture(CkPicture picture) {
-    skCanvas.drawPicture(picture.skiaObject.skiaObject);
+    skCanvas.drawPicture(picture.skiaObject);
   }
 
   void drawPoints(CkPaint paint, ui.PointMode pointMode, Float32List points) {
@@ -195,17 +192,16 @@ class CkCanvas {
     skCanvas.drawRect(toSkRect(rect), paint.skiaObject);
   }
 
-  void drawShadow(ui.Path path, ui.Color color, double elevation,
+  void drawShadow(CkPath path, ui.Color color, double elevation,
       bool transparentOccluder) {
-    drawSkShadow(skCanvas, path as CkPath, color, elevation,
+    drawSkShadow(skCanvas, path, color, elevation,
         transparentOccluder, ui.window.devicePixelRatio);
   }
 
   void drawVertices(
-      ui.Vertices vertices, ui.BlendMode blendMode, CkPaint paint) {
-    CkVertices skVertices = vertices as CkVertices;
+      CkVertices vertices, ui.BlendMode blendMode, CkPaint paint) {
     skCanvas.drawVertices(
-      skVertices.skiaObject,
+      vertices.skiaObject,
       toSkBlendMode(blendMode),
       paint.skiaObject,
     );
@@ -227,17 +223,17 @@ class CkCanvas {
     return skCanvas.save();
   }
 
-  void saveLayer(ui.Rect bounds, CkPaint paint) {
+  void saveLayer(ui.Rect bounds, CkPaint? paint) {
     skCanvas.saveLayer(
-      paint.skiaObject,
+      paint?.skiaObject,
       toSkRect(bounds),
       null,
       null,
     );
   }
 
-  void saveLayerWithoutBounds(CkPaint paint) {
-    skCanvas.saveLayer(paint.skiaObject, null, null, null);
+  void saveLayerWithoutBounds(CkPaint? paint) {
+    skCanvas.saveLayer(paint?.skiaObject, null, null, null);
   }
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
@@ -266,7 +262,811 @@ class CkCanvas {
     skCanvas.translate(dx, dy);
   }
 
-  void flush() {
-    skCanvas.flush();
+  CkPictureSnapshot? get pictureSnapshot => null;
+}
+
+class RecordingCkCanvas extends CkCanvas {
+  RecordingCkCanvas(SkCanvas skCanvas, ui.Rect bounds)
+    : pictureSnapshot = CkPictureSnapshot(bounds),
+      super(skCanvas);
+
+  @override
+  final CkPictureSnapshot pictureSnapshot;
+
+  void _addCommand(CkPaintCommand command) {
+    pictureSnapshot._commands.add(command);
+  }
+
+  @override
+  void clear(ui.Color color) {
+    super.clear(color);
+    _addCommand(CkClearCommand(color));
+  }
+
+  @override
+  void clipPath(CkPath path, bool doAntiAlias) {
+    super.clipPath(path, doAntiAlias);
+    _addCommand(CkClipPathCommand(path, doAntiAlias));
+  }
+
+  @override
+  void clipRRect(ui.RRect rrect, bool doAntiAlias) {
+    super.clipRRect(rrect, doAntiAlias);
+    _addCommand(CkClipRRectCommand(rrect, doAntiAlias));
+  }
+
+  @override
+  void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {
+    super.clipRect(rect, clipOp, doAntiAlias);
+    _addCommand(CkClipRectCommand(rect, clipOp, doAntiAlias));
+  }
+
+  @override
+  void drawArc(
+    ui.Rect oval,
+    double startAngle,
+    double sweepAngle,
+    bool useCenter,
+    CkPaint paint,
+  ) {
+    super.drawArc(oval, startAngle, sweepAngle, useCenter, paint);
+    _addCommand(CkDrawArcCommand(oval, startAngle, sweepAngle, useCenter, paint));
+  }
+
+  @override
+  void drawAtlasRaw(
+    CkPaint paint,
+    CkImage atlas,
+    Float32List rstTransforms,
+    Float32List rects,
+    List<Float32List>? colors,
+    ui.BlendMode blendMode,
+  ) {
+    super.drawAtlasRaw(paint, atlas, rstTransforms, rects, colors, blendMode);
+    _addCommand(CkDrawAtlasCommand(paint, atlas, rstTransforms, rects, colors, blendMode));
+  }
+
+  @override
+  void drawCircle(ui.Offset c, double radius, CkPaint paint) {
+    super.drawCircle(c, radius, paint);
+    _addCommand(CkDrawCircleCommand(c, radius, paint));
+  }
+
+  @override
+  void drawColor(ui.Color color, ui.BlendMode blendMode) {
+    super.drawColor(color, blendMode);
+    _addCommand(CkDrawColorCommand(color, blendMode));
+  }
+
+  @override
+  void drawDRRect(ui.RRect outer, ui.RRect inner, CkPaint paint) {
+    super.drawDRRect(outer, inner, paint);
+    _addCommand(CkDrawDRRectCommand(outer, inner, paint));
+  }
+
+  @override
+  void drawImage(CkImage image, ui.Offset offset, CkPaint paint) {
+    super.drawImage(image, offset, paint);
+    _addCommand(CkDrawImageCommand(image, offset, paint));
+  }
+
+  @override
+  void drawImageRect(CkImage image, ui.Rect src, ui.Rect dst, CkPaint paint) {
+    super.drawImageRect(image, src, dst, paint);
+    _addCommand(CkDrawImageRectCommand(image, src, dst, paint));
+  }
+
+  @override
+  void drawImageNine(
+      CkImage image, ui.Rect center, ui.Rect dst, CkPaint paint) {
+    super.drawImageNine(image, center, dst, paint);
+    _addCommand(CkDrawImageNineCommand(image, center, dst, paint));
+  }
+
+  @override
+  void drawLine(ui.Offset p1, ui.Offset p2, CkPaint paint) {
+    super.drawLine(p1, p2, paint);
+    _addCommand(CkDrawLineCommand(p1, p2, paint));
+  }
+
+  @override
+  void drawOval(ui.Rect rect, CkPaint paint) {
+    super.drawOval(rect, paint);
+    _addCommand(CkDrawOvalCommand(rect, paint));
+  }
+
+  @override
+  void drawPaint(CkPaint paint) {
+    super.drawPaint(paint);
+    _addCommand(CkDrawPaintCommand(paint));
+  }
+
+  @override
+  void drawParagraph(CkParagraph paragraph, ui.Offset offset) {
+    super.drawParagraph(paragraph, offset);
+    _addCommand(CkDrawParagraphCommand(paragraph, offset));
+  }
+
+  @override
+  void drawPath(CkPath path, CkPaint paint) {
+    super.drawPath(path, paint);
+    _addCommand(CkDrawPathCommand(path, paint));
+  }
+
+  @override
+  void drawPicture(CkPicture picture) {
+    super.drawPicture(picture);
+    _addCommand(CkDrawPictureCommand(picture));
+  }
+
+  @override
+  void drawPoints(CkPaint paint, ui.PointMode pointMode, Float32List points) {
+    super.drawPoints(paint, pointMode, points);
+    _addCommand(CkDrawPointsCommand(pointMode, points, paint));
+  }
+
+  @override
+  void drawRRect(ui.RRect rrect, CkPaint paint) {
+    super.drawRRect(rrect, paint);
+    _addCommand(CkDrawRRectCommand(rrect, paint));
+  }
+
+  @override
+  void drawRect(ui.Rect rect, CkPaint paint) {
+    super.drawRect(rect, paint);
+    _addCommand(CkDrawRectCommand(rect, paint));
+  }
+
+  @override
+  void drawShadow(CkPath path, ui.Color color, double elevation,
+      bool transparentOccluder) {
+    super.drawShadow(path, color, elevation, transparentOccluder);
+    _addCommand(CkDrawShadowCommand(path, color, elevation, transparentOccluder));
+  }
+
+  @override
+  void drawVertices(
+      CkVertices vertices, ui.BlendMode blendMode, CkPaint paint) {
+    super.drawVertices(vertices, blendMode, paint);
+    _addCommand(CkDrawVerticesCommand(vertices, blendMode, paint));
+  }
+
+  @override
+  void restore() {
+    super.restore();
+    _addCommand(const CkRestoreCommand());
+  }
+
+  @override
+  void restoreToCount(int count) {
+    super.restoreToCount(count);
+    _addCommand(CkRestoreToCountCommand(count));
+  }
+
+  @override
+  void rotate(double radians) {
+    super.rotate(radians);
+    _addCommand(CkRotateCommand(radians));
+  }
+
+  @override
+  int save() {
+    _addCommand(const CkSaveCommand());
+    return super.save();
+  }
+
+  @override
+  void saveLayer(ui.Rect bounds, CkPaint? paint) {
+    super.saveLayer(bounds, paint);
+    _addCommand(CkSaveLayerCommand(bounds, paint));
+  }
+
+  @override
+  void saveLayerWithoutBounds(CkPaint? paint) {
+    super.saveLayerWithoutBounds(paint);
+    _addCommand(CkSaveLayerWithoutBoundsCommand(paint));
+  }
+
+  @override
+  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
+    super.saveLayerWithFilter(bounds, filter);
+    _addCommand(CkSaveLayerWithFilterCommand(bounds, filter));
+  }
+
+  @override
+  void scale(double sx, double sy) {
+    super.scale(sx, sy);
+    _addCommand(CkScaleCommand(sx, sy));
+  }
+
+  @override
+  void skew(double sx, double sy) {
+    super.skew(sx, sy);
+    _addCommand(CkSkewCommand(sx, sy));
+  }
+
+  @override
+  void transform(Float32List matrix4) {
+    super.transform(matrix4);
+    _addCommand(CkTransformCommand(matrix4));
+  }
+
+  @override
+  void translate(double dx, double dy) {
+    super.translate(dx, dy);
+    _addCommand(CkTranslateCommand(dx, dy));
+  }
+}
+
+class CkPictureSnapshot {
+  CkPictureSnapshot(this._bounds);
+
+  final ui.Rect _bounds;
+  final List<CkPaintCommand> _commands = <CkPaintCommand>[];
+
+  SkPicture toPicture() {
+    final SkPictureRecorder recorder = SkPictureRecorder();
+    final Float32List skRect = toSkRect(_bounds);
+    final SkCanvas skCanvas = recorder.beginRecording(skRect);
+    for (final CkPaintCommand command in _commands) {
+      command.apply(skCanvas);
+    }
+    final SkPicture skPicture = recorder.finishRecordingAsPicture();
+    recorder.delete();
+    return skPicture;
+  }
+
+  void dispose() {
+    for (final CkPaintCommand command in _commands) {
+      command.dispose();
+    }
+  }
+}
+
+/// A paint command recorded by [RecordingCkCanvas].
+///
+/// # Special rules when drawing images
+///
+/// A command painting an image must clone the original image to bump the ref
+/// count. Otherwise when the framework decides it doesn't need the image any
+/// more it will bump the ref count down and delete the underlying Skia object,
+/// leaving the picture that recorded this paint command with a dangling
+/// pointer. If we attempt to resurrect the picture we'll hit a use-after-free
+/// error. The command must call [CkImage.dispose] in its [dispose]
+/// implementation.
+abstract class CkPaintCommand {
+  const CkPaintCommand();
+
+  /// Applies the command onto the [canvas].
+  void apply(SkCanvas canvas);
+
+  /// Frees resources associated with the command.
+  void dispose() {}
+}
+
+class CkClearCommand extends CkPaintCommand {
+  const CkClearCommand(this.color);
+
+  final ui.Color color;
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.clear(toSharedSkColor1(color));
+  }
+}
+
+class CkSaveCommand extends CkPaintCommand {
+  const CkSaveCommand();
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.save();
+  }
+}
+
+class CkRestoreCommand extends CkPaintCommand {
+  const CkRestoreCommand();
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.restore();
+  }
+}
+
+class CkRestoreToCountCommand extends CkPaintCommand {
+  const CkRestoreToCountCommand(this.count);
+
+  final int count;
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.restoreToCount(count);
+  }
+}
+
+class CkTranslateCommand extends CkPaintCommand {
+  final double dx;
+  final double dy;
+
+  CkTranslateCommand(this.dx, this.dy);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.translate(dx, dy);
+  }
+}
+
+class CkScaleCommand extends CkPaintCommand {
+  final double sx;
+  final double sy;
+
+  CkScaleCommand(this.sx, this.sy);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.scale(sx, sy);
+  }
+}
+
+class CkRotateCommand extends CkPaintCommand {
+  final double radians;
+
+  CkRotateCommand(this.radians);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.rotate(radians * 180.0 / math.pi, 0.0, 0.0);
+  }
+}
+
+class CkTransformCommand extends CkPaintCommand {
+  final Float32List matrix4;
+
+  CkTransformCommand(this.matrix4);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.concat(toSkMatrixFromFloat32(matrix4));
+ }
+}
+
+class CkSkewCommand extends CkPaintCommand {
+  final double sx;
+  final double sy;
+
+  CkSkewCommand(this.sx, this.sy);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.skew(sx, sy);
+  }
+}
+
+class CkClipRectCommand extends CkPaintCommand {
+  final ui.Rect rect;
+  final ui.ClipOp clipOp;
+  final bool doAntiAlias;
+
+  CkClipRectCommand(this.rect, this.clipOp, this.doAntiAlias);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.clipRect(
+      toSkRect(rect),
+      toSkClipOp(clipOp),
+      doAntiAlias,
+    );
+  }
+}
+
+class CkDrawArcCommand extends CkPaintCommand {
+  CkDrawArcCommand(this.oval, this.startAngle, this.sweepAngle, this.useCenter, this.paint);
+
+  final ui.Rect oval;
+  final double startAngle;
+  final double sweepAngle;
+  final bool useCenter;
+  final CkPaint paint;
+
+  @override
+  void apply(SkCanvas canvas) {
+    const double toDegrees = 180 / math.pi;
+    canvas.drawArc(
+      toSkRect(oval),
+      startAngle * toDegrees,
+      sweepAngle * toDegrees,
+      useCenter,
+      paint.skiaObject,
+    );
+  }
+}
+
+class CkDrawAtlasCommand extends CkPaintCommand {
+  CkDrawAtlasCommand(this.paint, this.atlas, this.rstTransforms, this.rects, this.colors, this.blendMode);
+
+  final CkPaint paint;
+  final CkImage atlas;
+  final Float32List rstTransforms;
+  final Float32List rects;
+  final List<Float32List>? colors;
+  final ui.BlendMode blendMode;
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawAtlas(
+      atlas.skImage,
+      rects,
+      rstTransforms,
+      paint.skiaObject,
+      toSkBlendMode(blendMode),
+      colors,
+    );
+  }
+}
+
+class CkClipRRectCommand extends CkPaintCommand {
+  final ui.RRect rrect;
+  final bool doAntiAlias;
+
+  CkClipRRectCommand(this.rrect, this.doAntiAlias);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.clipRRect(
+      toSkRRect(rrect),
+      _clipOpIntersect,
+      doAntiAlias,
+    );
+  }
+}
+
+class CkClipPathCommand extends CkPaintCommand {
+  final CkPath path;
+  final bool doAntiAlias;
+
+  CkClipPathCommand(this.path, this.doAntiAlias);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.clipPath(
+      path.skiaObject,
+      _clipOpIntersect,
+      doAntiAlias,
+    );
+  }
+}
+
+class CkDrawColorCommand extends CkPaintCommand {
+  final ui.Color color;
+  final ui.BlendMode blendMode;
+
+  CkDrawColorCommand(this.color, this.blendMode);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawColorInt(
+      color.value,
+      toSkBlendMode(blendMode),
+    );
+  }
+}
+
+class CkDrawLineCommand extends CkPaintCommand {
+  final ui.Offset p1;
+  final ui.Offset p2;
+  final CkPaint paint;
+
+  CkDrawLineCommand(this.p1, this.p2, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawLine(
+      p1.dx,
+      p1.dy,
+      p2.dx,
+      p2.dy,
+      paint.skiaObject,
+    );
+  }
+}
+
+class CkDrawPaintCommand extends CkPaintCommand {
+  final CkPaint paint;
+
+  CkDrawPaintCommand(this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawPaint(paint.skiaObject);
+  }
+}
+
+class CkDrawVerticesCommand extends CkPaintCommand {
+  final CkVertices vertices;
+  final ui.BlendMode blendMode;
+  final CkPaint paint;
+  CkDrawVerticesCommand(this.vertices, this.blendMode, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawVertices(
+      vertices.skiaObject,
+      toSkBlendMode(blendMode),
+      paint.skiaObject,
+    );
+  }
+}
+
+class CkDrawPointsCommand extends CkPaintCommand {
+  final Float32List points;
+  final ui.PointMode pointMode;
+  final CkPaint paint;
+  CkDrawPointsCommand(this.pointMode, this.points, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawPoints(
+      toSkPointMode(pointMode),
+      points,
+      paint.skiaObject,
+    );
+  }
+}
+
+class CkDrawRectCommand extends CkPaintCommand {
+  final ui.Rect rect;
+  final CkPaint paint;
+
+  CkDrawRectCommand(this.rect, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawRect(toSkRect(rect), paint.skiaObject);
+  }
+}
+
+class CkDrawRRectCommand extends CkPaintCommand {
+  final ui.RRect rrect;
+  final CkPaint paint;
+
+  CkDrawRRectCommand(this.rrect, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawRRect(
+      toSkRRect(rrect),
+      paint.skiaObject,
+    );
+  }
+}
+
+class CkDrawDRRectCommand extends CkPaintCommand {
+  final ui.RRect outer;
+  final ui.RRect inner;
+  final CkPaint paint;
+
+  CkDrawDRRectCommand(this.outer, this.inner, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawDRRect(
+      toSkRRect(outer),
+      toSkRRect(inner),
+      paint.skiaObject,
+    );
+  }
+}
+
+class CkDrawOvalCommand extends CkPaintCommand {
+  final ui.Rect rect;
+  final CkPaint paint;
+
+  CkDrawOvalCommand(this.rect, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawOval(
+      toSkRect(rect),
+      paint.skiaObject,
+    );
+  }
+}
+
+class CkDrawCircleCommand extends CkPaintCommand {
+  final ui.Offset c;
+  final double radius;
+  final CkPaint paint;
+
+  CkDrawCircleCommand(this.c, this.radius, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawCircle(
+      c.dx,
+      c.dy,
+      radius,
+      paint.skiaObject,
+    );
+  }
+}
+
+class CkDrawPathCommand extends CkPaintCommand {
+  final CkPath path;
+  final CkPaint paint;
+
+  CkDrawPathCommand(this.path, this.paint);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawPath(path.skiaObject, paint.skiaObject);
+  }
+}
+
+class CkDrawShadowCommand extends CkPaintCommand {
+  CkDrawShadowCommand(
+      this.path, this.color, this.elevation, this.transparentOccluder);
+
+  final CkPath path;
+  final ui.Color color;
+  final double elevation;
+  final bool transparentOccluder;
+
+  @override
+  void apply(SkCanvas canvas) {
+    drawSkShadow(canvas, path, color, elevation, transparentOccluder,
+        ui.window.devicePixelRatio);
+  }
+}
+
+class CkDrawImageCommand extends CkPaintCommand {
+  final CkImage image;
+  final ui.Offset offset;
+  final CkPaint paint;
+
+  CkDrawImageCommand(CkImage image, this.offset, this.paint)
+    : this.image = image.clone();
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawImage(
+      image.skImage,
+      offset.dx,
+      offset.dy,
+      paint.skiaObject,
+    );
+  }
+
+  @override
+  void dispose() {
+    image.dispose();
+  }
+}
+
+class CkDrawImageRectCommand extends CkPaintCommand {
+  final CkImage image;
+  final ui.Rect src;
+  final ui.Rect dst;
+  final CkPaint paint;
+
+  CkDrawImageRectCommand(CkImage image, this.src, this.dst, this.paint)
+    : this.image = image.clone();
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawImageRect(
+      image.skImage,
+      toSkRect(src),
+      toSkRect(dst),
+      paint.skiaObject,
+      false,
+    );
+  }
+
+  @override
+  void dispose() {
+    image.dispose();
+  }
+}
+
+class CkDrawImageNineCommand extends CkPaintCommand {
+  CkDrawImageNineCommand(CkImage image, this.center, this.dst, this.paint)
+    : this.image = image.clone();
+
+  final CkImage image;
+  final ui.Rect center;
+  final ui.Rect dst;
+  final CkPaint paint;
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawImageNine(
+      image.skImage,
+      toSkRect(center),
+      toSkRect(dst),
+      paint.skiaObject,
+    );
+  }
+
+  @override
+  void dispose() {
+    image.dispose();
+  }
+}
+
+class CkDrawParagraphCommand extends CkPaintCommand {
+  final CkParagraph paragraph;
+  final ui.Offset offset;
+
+  CkDrawParagraphCommand(this.paragraph, this.offset);
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawParagraph(
+      paragraph.skiaObject,
+      offset.dx,
+      offset.dy,
+    );
+  }
+}
+
+class CkDrawPictureCommand extends CkPaintCommand {
+  CkDrawPictureCommand(this.picture);
+
+  final CkPicture picture;
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.drawPicture(picture.skiaObject);
+  }
+}
+
+class CkSaveLayerCommand extends CkPaintCommand {
+  CkSaveLayerCommand(this.bounds, this.paint);
+
+  final ui.Rect bounds;
+  final CkPaint? paint;
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.saveLayer(
+      paint?.skiaObject,
+      toSkRect(bounds),
+      null,
+      null,
+    );
+  }
+}
+
+class CkSaveLayerWithoutBoundsCommand extends CkPaintCommand {
+  CkSaveLayerWithoutBoundsCommand(this.paint);
+
+  final CkPaint? paint;
+
+  @override
+  void apply(SkCanvas canvas) {
+    canvas.saveLayer(
+      paint?.skiaObject,
+      null,
+      null,
+      null,
+    );
+  }
+}
+
+class CkSaveLayerWithFilterCommand extends CkPaintCommand {
+  CkSaveLayerWithFilterCommand(this.bounds, this.filter);
+
+  final ui.Rect bounds;
+  final ui.ImageFilter filter;
+
+  @override
+  void apply(SkCanvas canvas) {
+    final _CkManagedSkImageFilterConvertible convertible = filter as _CkManagedSkImageFilterConvertible;
+    return canvas.saveLayer(
+      null,
+      toSkRect(bounds),
+      convertible._imageFilter.skiaObject,
+      0,
+    );
   }
 }

@@ -117,37 +117,6 @@ void _tests() {
     });
   });
 
-  group(OneShotSkiaObject, () {
-    test('is added to SkiaObjects cache', () {
-      TestOneShotSkiaObject.deleteCount = 0;
-      OneShotSkiaObject object1 = TestOneShotSkiaObject();
-      expect(SkiaObjects.oneShotCache.length, 1);
-      expect(SkiaObjects.oneShotCache.debugContains(object1), isTrue);
-
-      OneShotSkiaObject object2 = TestOneShotSkiaObject();
-      expect(SkiaObjects.oneShotCache.length, 2);
-      expect(SkiaObjects.oneShotCache.debugContains(object2), isTrue);
-
-      SkiaObjects.postFrameCleanUp();
-      expect(SkiaObjects.oneShotCache.length, 2);
-      expect(SkiaObjects.oneShotCache.debugContains(object1), isTrue);
-      expect(SkiaObjects.oneShotCache.debugContains(object2), isTrue);
-
-      // Add 3 more objects to the cache to overflow it.
-      TestOneShotSkiaObject();
-      TestOneShotSkiaObject();
-      TestOneShotSkiaObject();
-      expect(SkiaObjects.oneShotCache.length, 5);
-      expect(SkiaObjects.cachesToResize.length, 1);
-
-      SkiaObjects.postFrameCleanUp();
-      expect(TestOneShotSkiaObject.deleteCount, 2);
-      expect(SkiaObjects.oneShotCache.length, 3);
-      expect(SkiaObjects.oneShotCache.debugContains(object1), isFalse);
-      expect(SkiaObjects.oneShotCache.debugContains(object2), isFalse);
-    });
-  });
-
   group(SkiaObjectBox, () {
     test('Records stack traces and respects refcounts', () async {
       TestSkDeletable.deleteCount = 0;
@@ -295,27 +264,6 @@ class TestSkDeletable implements SkDeletable {
 
   @override
   JsConstructor get constructor => TestJsConstructor('TestSkDeletable');
-}
-
-class TestOneShotSkiaObject extends OneShotSkiaObject<SkPaint> implements SkDeletable {
-  static int deleteCount = 0;
-
-  TestOneShotSkiaObject() : super(SkPaint());
-
-  @override
-  bool isDeleted() => _isDeleted;
-  bool _isDeleted = false;
-
-  @override
-  void delete() {
-    expect(_isDeleted, isFalse,
-      reason: 'CanvasKit does not allow deleting the same object more than once.');
-    rawSkiaObject?.delete();
-    deleteCount++;
-  }
-
-  @override
-  JsConstructor get constructor => TestJsConstructor('TestOneShotSkiaObject');
 }
 
 class TestJsConstructor implements JsConstructor{

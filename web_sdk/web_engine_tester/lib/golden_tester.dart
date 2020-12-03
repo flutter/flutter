@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.12
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
 
+// ignore: implementation_imports
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
@@ -18,7 +21,7 @@ Future<dynamic> _callScreenshotServer(dynamic requestData) async {
     sendData: json.encode(requestData),
   );
 
-  return json.decode(request.responseText);
+  return json.decode(request.responseText!);
 }
 
 /// How to compare pixels within the image.
@@ -50,8 +53,8 @@ enum PixelComparison {
 /// [pixelComparison] determines the algorithm used to compare pixels. Uses
 /// fuzzy comparison by default.
 Future<void> matchGoldenFile(String filename,
-    {bool write = false, Rect region = null, double maxDiffRatePercent = null, PixelComparison pixelComparison = PixelComparison.fuzzy}) async {
-  Map<String, dynamic> serverParams = <String, dynamic>{
+    {bool write = false, Rect? region, double? maxDiffRatePercent, PixelComparison pixelComparison = PixelComparison.fuzzy}) async {
+  final Map<String, dynamic> serverParams = <String, dynamic>{
     'filename': filename,
     'write': write,
     'region': region == null

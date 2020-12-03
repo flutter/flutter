@@ -7,6 +7,7 @@ part of engine;
 
 /// A virtual canvas that applies operations to multiple canvases at once.
 class CkNWayCanvas {
+  // TODO(yjbanov): make this List<CkCanvas>
   final List<CkCanvas?> _canvases = <CkCanvas?>[];
 
   void addCanvas(CkCanvas? canvas) {
@@ -23,9 +24,9 @@ class CkNWayCanvas {
   }
 
   /// Calls [saveLayer] on all canvases.
-  void saveLayer(ui.Rect bounds, ui.Paint? paint) {
+  void saveLayer(ui.Rect bounds, CkPaint? paint) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i]!.saveLayer(bounds, paint as CkPaint);
+      _canvases[i]!.saveLayer(bounds, paint);
     }
   }
 
@@ -65,9 +66,9 @@ class CkNWayCanvas {
   }
 
   /// Calls [clipPath] on all canvases.
-  void clipPath(ui.Path? path, bool doAntiAlias) {
+  void clipPath(CkPath path, bool doAntiAlias) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i]!.clipPath(path!, doAntiAlias);
+      _canvases[i]!.clipPath(path, doAntiAlias);
     }
   }
 
