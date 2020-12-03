@@ -584,6 +584,13 @@ class FakeTargetCommand extends FlutterCommand {
 }
 
 class FakeReportingNullSafetyCommand extends FlutterCommand {
+  FakeReportingNullSafetyCommand() {
+    argParser.addFlag('debug');
+    argParser.addFlag('release');
+    argParser.addFlag('jit-release');
+    argParser.addFlag('profile');
+  }
+
   @override
   String get description => 'test';
 
