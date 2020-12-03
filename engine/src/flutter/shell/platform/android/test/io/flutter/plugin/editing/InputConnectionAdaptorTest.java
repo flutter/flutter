@@ -9,6 +9,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1029,18 +1030,46 @@ public class InputConnectionAdaptorTest {
   }
 
   @Test
+  public void testSendKeyEvent_sendSoftKeyEvents() {
+    ListenableEditingState editable = sampleEditable(5, 5);
+    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
+    when(mockKeyProcessor.isCurrentEvent(any())).thenReturn(true);
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable, mockKeyProcessor);
+
+    KeyEvent shiftKeyDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SHIFT_LEFT);
+
+    boolean didConsume = adaptor.sendKeyEvent(shiftKeyDown);
+    assertFalse(didConsume);
+    verify(mockKeyProcessor, never()).onKeyEvent(shiftKeyDown);
+  }
+
+  @Test
+  public void testSendKeyEvent_sendHardwareKeyEvents() {
+    ListenableEditingState editable = sampleEditable(5, 5);
+    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
+    when(mockKeyProcessor.isCurrentEvent(any())).thenReturn(false);
+    when(mockKeyProcessor.onKeyEvent(any())).thenReturn(true);
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable, mockKeyProcessor);
+
+    KeyEvent shiftKeyDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SHIFT_LEFT);
+
+    boolean didConsume = adaptor.sendKeyEvent(shiftKeyDown);
+    assertTrue(didConsume);
+    verify(mockKeyProcessor, times(1)).onKeyEvent(shiftKeyDown);
+  }
+
+  @Test
   public void testSendKeyEvent_delKeyNotConsumed() {
-    int selStart = 29;
-    ListenableEditingState editable = sampleEditable(selStart, selStart, SAMPLE_RTL_TEXT);
+    ListenableEditingState editable = sampleEditable(5, 5);
     InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
 
     KeyEvent downKeyDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 4; i++) {
       boolean didConsume = adaptor.sendKeyEvent(downKeyDown);
       assertFalse(didConsume);
     }
-    assertEquals(29, Selection.getSelectionStart(editable));
+    assertEquals(5, Selection.getSelectionStart(editable));
   }
 
   @Test
@@ -1097,11 +1126,15 @@ public class InputConnectionAdaptorTest {
 
   private static InputConnectionAdaptor sampleInputConnectionAdaptor(
       ListenableEditingState editable) {
+    return sampleInputConnectionAdaptor(editable, mock(AndroidKeyProcessor.class));
+  }
+
+  private static InputConnectionAdaptor sampleInputConnectionAdaptor(
+      ListenableEditingState editable, AndroidKeyProcessor mockKeyProcessor) {
     View testView = new View(RuntimeEnvironment.application);
     int client = 0;
     TextInputChannel textInputChannel = mock(TextInputChannel.class);
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     when(mockFlutterJNI.nativeFlutterTextUtilsIsEmoji(anyInt()))
         .thenAnswer((invocation) -> Emoji.isEmoji((int) invocation.getArguments()[0]));
     when(mockFlutterJNI.nativeFlutterTextUtilsIsEmojiModifier(anyInt()))
