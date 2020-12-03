@@ -695,6 +695,15 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   CkTextStyle _peekStyle() =>
       _styleStack.isEmpty ? _style.getTextStyle() : _styleStack.last;
 
+  // Used as the paint for background or foreground in the text style when
+  // the other one is not specified. CanvasKit either both background and
+  // foreground paints specified, or neither, but Flutter allows one of them
+  // to go unspecified.
+  //
+  // This object is never deleted. It is effectively a static global constant.
+  // Therefore it doesn't need to be wrapped in CkPaint.
+  static final SkPaint _defaultTextStylePaint = SkPaint();
+
   @override
   void pushStyle(ui.TextStyle style) {
     final CkTextStyle baseStyle = _peekStyle();
@@ -703,8 +712,8 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     _styleStack.add(skStyle);
     _commands.add(_ParagraphCommand.pushStyle(ckStyle));
     if (skStyle.foreground != null || skStyle.background != null) {
-      final SkPaint foreground = skStyle.foreground?.skiaObject ?? SkPaint();
-      final SkPaint background = skStyle.background?.skiaObject ?? SkPaint();
+      final SkPaint foreground = skStyle.foreground?.skiaObject ?? _defaultTextStylePaint;
+      final SkPaint background = skStyle.background?.skiaObject ?? _defaultTextStylePaint;
       _paragraphBuilder.pushPaintStyle(
           skStyle.skTextStyle, foreground, background);
     } else {
