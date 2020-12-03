@@ -24,9 +24,11 @@ typedef _ToolbarBuilder = Widget Function(BuildContext context, Widget child);
 
 /// A fully-functional Material-style text selection toolbar.
 ///
-/// Positions itself above or below the given anchor so that it fits on the
-/// screen.
+/// Tries to position itself above [anchorAbove], but if it doesn't fit, then
+/// it positions itself below [anchorBelow].
 ///
+/// If any children don't fit in the menu, an overflow menu will automatically
+/// be created.
 class TextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of TextSelectionToolbar.
   const TextSelectionToolbar({
@@ -37,13 +39,13 @@ class TextSelectionToolbar extends StatelessWidget {
     required this.children,
   }) : super(key: key);
 
-  /// The focal point that the toolbar attempts to position itself above.
+  /// The focal point above which the toolbar attempts to position itself.
   ///
   /// If there is not enough room above before reaching the top of the screen,
   /// then the toolbar will position itself below [anchorBelow].
   final Offset anchorAbove;
 
-  /// The focal point that the toolbar attempts to position itself below, if it
+  /// The focal point below which the toolbar attempts to position itself, if it
   /// doesn't fit above [anchorAbove].
   final Offset anchorBelow;
 
@@ -96,7 +98,7 @@ class TextSelectionToolbar extends StatelessWidget {
   }
 }
 
-// Centers the toolbar around the given anchor, ensuring that it remains on
+// Positions the toolbar at the given anchor, ensuring that it remains on
 // screen.
 class _TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   _TextSelectionToolbarLayoutDelegate(
@@ -213,10 +215,11 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   void didUpdateWidget(_TextSelectionToolbarOverflowable oldWidget) {
     super.didUpdateWidget(oldWidget);
     int childIndex = 0;
-    final bool childrenEqual = widget.children != oldWidget.children
+    final bool childrenEqual =
+        widget.children.length == oldWidget.children.length
         && widget.children.every((Widget child) {
-      return child == oldWidget.children[childIndex++];
-    });
+          return child == oldWidget.children[childIndex++];
+        });
     // If the children are changing at all, the current page should be reset.
     if (!childrenEqual) {
       _reset();
