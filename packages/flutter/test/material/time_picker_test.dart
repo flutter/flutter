@@ -300,10 +300,10 @@ void _tests() {
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
-    expect(primaryLabels.map<String>((dynamic tp) => tp.scrollbarPainter.text.text as String), labels12To11);
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
 
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
-    expect(secondaryLabels.map<String>((dynamic tp) => tp.scrollbarPainter.text.text as String), labels12To11);
+    expect(secondaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
   });
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
@@ -312,10 +312,10 @@ void _tests() {
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
-    expect(primaryLabels.map<String>((dynamic tp) => tp.scrollbarPainter.text.text as String), labels00To22);
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
 
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
-    expect(secondaryLabels.map<String>((dynamic tp) => tp.scrollbarPainter.text.text as String), labels00To22);
+    expect(secondaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
   });
 
   testWidgets('provides semantics information for AM/PM indicator', (WidgetTester tester) async {
