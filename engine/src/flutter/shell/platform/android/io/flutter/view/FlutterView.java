@@ -269,9 +269,20 @@ public class FlutterView extends SurfaceView
   }
 
   @Override
-  public boolean dispatchKeyEventPreIme(KeyEvent event) {
-    return (isAttached() && androidKeyProcessor.onKeyEvent(event))
-        || super.dispatchKeyEventPreIme(event);
+  public boolean dispatchKeyEvent(KeyEvent event) {
+    Log.e(TAG, "dispatchKeyEvent: " + event.toString());
+    if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+      // Tell Android to start tracking this event.
+      getKeyDispatcherState().startTracking(event, this);
+    } else if (event.getAction() == KeyEvent.ACTION_UP) {
+      // Stop tracking the event.
+      getKeyDispatcherState().handleUpEvent(event);
+    }
+    // If the key processor doesn't handle it, then send it on to the
+    // superclass. The key processor will typically handle all events except
+    // those where it has re-dispatched the event after receiving a reply from
+    // the framework that the framework did not handle it.
+    return (isAttached() && androidKeyProcessor.onKeyEvent(event)) || super.dispatchKeyEvent(event);
   }
 
   public FlutterNativeView getFlutterNativeView() {
