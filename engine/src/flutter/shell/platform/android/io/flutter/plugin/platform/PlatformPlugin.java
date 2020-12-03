@@ -310,7 +310,7 @@ public class PlatformPlugin {
   }
 
   private void popSystemNavigator() {
-    if (platformPluginDelegate.popSystemNavigator()) {
+    if (platformPluginDelegate != null && platformPluginDelegate.popSystemNavigator()) {
       // A custom behavior was executed by the delegate. Don't execute default behavior.
       return;
     }
