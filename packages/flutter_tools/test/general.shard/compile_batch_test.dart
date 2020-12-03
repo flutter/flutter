@@ -75,7 +75,6 @@ void main() {
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(logger.errorText, equals('line1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
   });
 
   testWithoutContext('passes correct AOT config to kernel compiler in aot/profile mode', () async {
