@@ -26,7 +26,8 @@ const String _kTestFlutterRoot = '/flutter';
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{
-    'FLUTTER_ROOT': _kTestFlutterRoot
+    'FLUTTER_ROOT': _kTestFlutterRoot,
+    'HOME': '/',
   }
 );
 final Platform notLinuxPlatform = FakePlatform(
