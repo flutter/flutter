@@ -117,7 +117,7 @@ public class AndroidKeyProcessorTest {
             });
 
     // Fake a response from the framework.
-    handlerCaptor.getValue().onKeyEventNotHandled(eventCaptor.getValue().eventId);
+    handlerCaptor.getValue().onKeyEventNotHandled(eventCaptor.getValue().event);
     verify(fakeView, times(1)).dispatchKeyEvent(fakeKeyEvent);
     assertEquals(false, dispatchResult[0]);
     verify(fakeKeyEventChannel, times(0)).keyUp(any(KeyEventChannel.FlutterKeyEvent.class));
@@ -167,7 +167,7 @@ public class AndroidKeyProcessorTest {
             });
 
     // Fake a response from the framework.
-    handlerCaptor.getValue().onKeyEventNotHandled(eventCaptor.getValue().eventId);
+    handlerCaptor.getValue().onKeyEventNotHandled(eventCaptor.getValue().event);
     verify(fakeView, times(1)).dispatchKeyEvent(fakeKeyEvent);
     assertEquals(false, dispatchResult[0]);
     verify(fakeKeyEventChannel, times(0)).keyUp(any(KeyEventChannel.FlutterKeyEvent.class));
