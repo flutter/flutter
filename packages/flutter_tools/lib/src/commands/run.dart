@@ -30,6 +30,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDartDefineOption();
     usesFlavorOption();
     usesWebRendererOption();
+    addNativeNullAssertions(hide: !verboseHelp);
     argParser
       ..addFlag('trace-startup',
         negatable: false,
@@ -205,6 +206,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
           && boolArg('fast-start')
           && !runningWithPrebuiltApplication,
         nullAssertions: boolArg('null-assertions'),
+        nativeNullAssertions: boolArg('native-null-assertions'),
       );
     }
   }
