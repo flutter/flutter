@@ -501,6 +501,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
+          nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -520,6 +521,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             false,
             kNoneWorker,
             true,
+            debuggingOptions.nativeNullAssertions,
           );
         }
         await device.device.startApp(
@@ -587,6 +589,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           false,
           kNoneWorker,
           true,
+          debuggingOptions.nativeNullAssertions,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

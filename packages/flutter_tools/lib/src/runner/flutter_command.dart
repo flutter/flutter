@@ -674,6 +674,19 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addNativeNullAssertions({ bool hide = false }) {
+    argParser.addFlag('native-null-assertions',
+      defaultsTo: true,
+      hide: hide,
+      help: 'Enables additional runtime null checks in web applications to ensure '
+        'the correct nullability of native (such as in dart:html) and external '
+        '(such as with JS interop) types. This is enabled by default but only takes '
+        'effect in sound mode. To report an issue with a null assertion failure in '
+        'dart:html or the other dart web libraries, please file a bug at '
+        'https://github.com/dart-lang/sdk/issues/labels/web-libraries .'
+    );
+  }
+
   /// Adds build options common to all of the desktop build commands.
   void addCommonDesktopBuildOptions({ bool verboseHelp = false }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
