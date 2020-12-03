@@ -96,33 +96,9 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// This sample shows an [AppBar] with two simple actions. The first action
 /// opens a [SnackBar], while the second action navigates to a new page.
 ///
-/// ```dart preamble
-/// final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-/// final SnackBar snackBar = const SnackBar(content: Text('Showing Snackbar'));
-///
-/// void openPage(BuildContext context) {
-///   Navigator.push(context, MaterialPageRoute(
-///     builder: (BuildContext context) {
-///       return Scaffold(
-///         appBar: AppBar(
-///           title: const Text('Next page'),
-///         ),
-///         body: const Center(
-///           child: Text(
-///             'This is the next page',
-///             style: TextStyle(fontSize: 24),
-///           ),
-///         ),
-///       );
-///     },
-///   ));
-/// }
-/// ```
-///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     key: scaffoldKey,
 ///     appBar: AppBar(
 ///       title: const Text('AppBar Demo'),
 ///       actions: <Widget>[
@@ -130,14 +106,30 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///           icon: const Icon(Icons.add_alert),
 ///           tooltip: 'Show Snackbar',
 ///           onPressed: () {
-///             ScaffoldMessenger.of(context).showSnackBar(snackBar);
+///             ScaffoldMessenger.of(context).showSnackBar(
+///               const SnackBar(content: Text('This is a snackbar'))
+///             );
 ///           },
 ///         ),
 ///         IconButton(
 ///           icon: const Icon(Icons.navigate_next),
-///           tooltip: 'Next page',
+///           tooltip: 'Go to the next page',
 ///           onPressed: () {
-///             openPage(context);
+///             Navigator.push(context, MaterialPageRoute(
+///               builder: (BuildContext context) {
+///                 return Scaffold(
+///                   appBar: AppBar(
+///                     title: const Text('Next page'),
+///                   ),
+///                   body: const Center(
+///                     child: Text(
+///                       'This is the next page',
+///                       style: TextStyle(fontSize: 24),
+///                     ),
+///                   ),
+///                 );
+///               },
+///             ));
 ///           },
 ///         ),
 ///       ],
@@ -418,7 +410,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.backgroundColor}
   /// The fill color to use for an app bar's [Material].
   ///
-  /// If null, then the [AppBarTheme.color] is used. If that value is also
+  /// If null, then the [AppBarTheme.backgroundColor] is used. If that value is also
   /// null, then [AppBar] uses the overall theme's [ColorScheme.primary] if the
   /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
   /// if the overall theme's [brightness] is [Brightness.dark].
@@ -462,6 +454,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final Color? foregroundColor;
 
   /// {@template flutter.material.appbar.brightness}
+  /// This property is obsolete, please use [systemOverlayStyle] instead.
+  ///
   /// Determines the brightness of the [SystemUiOverlayStyle]: for
   /// [Brightness.dark], [SystemUiOverlayStyle.light] is used and fo
   /// [Brightness.light], [SystemUiOverlayStyle.dark] is used.
@@ -612,6 +606,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// If true, preserves the original defaults for the [backgroundColor],
   /// [iconTheme], [actionsIconTheme] properties, and the original use of
   /// the [textTheme] and [brightness] properties.
+  ///
+  /// This property is true by default.
   /// {@endtemplate}
   final bool backwardsCompatibility;
 

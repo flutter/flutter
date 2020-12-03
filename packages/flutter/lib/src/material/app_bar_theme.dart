@@ -44,6 +44,8 @@ class AppBarTheme with Diagnosticable {
     this.systemOverlayStyle,
   });
 
+  /// This property is obsolete, please use [systemOverlayStyle] instead.
+  ///
   /// Overrides the default value of the obsolete property which
   /// implicitly defines [AppBar.systemOverlayStyle] in all descendant
   /// [AppBar] widgets.
