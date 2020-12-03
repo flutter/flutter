@@ -78,6 +78,7 @@ class ExpansionPanel {
     required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.panelColor,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -101,6 +102,10 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool canTapOnHeader;
 
+  /// Defines the color of panel.
+  ///
+  /// Defaults to [ThemeData.cardColor].
+  final Color? panelColor;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -123,11 +128,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required ExpansionPanelHeaderBuilder headerBuilder,
     required Widget body,
     bool canTapOnHeader = false,
+    Color? panelColor,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
+        panelColor: panelColor,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -530,6 +537,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       items.add(
         MaterialSlice(
           key: _SaltedKey<BuildContext, int>(context, index * 2),
+          color: child.panelColor,
           child: Column(
             children: <Widget>[
               header,

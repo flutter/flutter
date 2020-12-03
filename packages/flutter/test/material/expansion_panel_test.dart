@@ -1458,4 +1458,40 @@ void main() {
       ' possible elevation values.'
     ));
   });
+
+  testWidgets('ExpansionPanel.panelColor test', (WidgetTester tester) async {
+    const Color firstPanelColor = Colors.red;
+    const Color secondPanelColor = Colors.brown;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expansionCallback: (int _index, bool _isExpanded) {},
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                panelColor: firstPanelColor,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const Text('A');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+              ExpansionPanel(
+                panelColor: secondPanelColor,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const Text('B');
+                },
+                body: const SizedBox(height: 100.0),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
+
+    expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
+    expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
+  });
 }
