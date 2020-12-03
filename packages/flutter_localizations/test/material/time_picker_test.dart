@@ -348,13 +348,13 @@ void main() {
     final dynamic dialPainter = dialPaint.painter;
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      primaryLabels.map<String>((dynamic tp) => ((tp.scrollbarPainter as TextPainter).text! as TextSpan).text!),
       labels12To11,
     );
 
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
-      secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      secondaryLabels.map<String>((dynamic tp) => ((tp.scrollbarPainter as TextPainter).text! as TextSpan).text!),
       labels12To11,
     );
   });
@@ -366,13 +366,13 @@ void main() {
     final dynamic dialPainter = dialPaint.painter;
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      primaryLabels.map<String>((dynamic tp) => ((tp.scrollbarPainter as TextPainter).text! as TextSpan).text!),
       labels00To22TwoDigit,
     );
 
     final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
-      secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      secondaryLabels.map<String>((dynamic tp) => ((tp.scrollbarPainter as TextPainter).text! as TextSpan).text!),
       labels00To22TwoDigit,
     );
   });

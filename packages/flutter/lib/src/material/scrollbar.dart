@@ -25,19 +25,29 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// controlled by [showTrackOnHover]. The thickness of the track and scrollbar
 /// thumb will become larger when hovering, unless overridden by [thickness].
 ///
+/// Dynamically changes to an iOS style scrollbar that looks like
+/// [CupertinoScrollbar] on the iOS platform.
+///
 // TODO(Piinks): Add code sample
 ///
 /// See also:
 ///
 ///  * [RawScrollbar], the simple base class this extends.
 ///  * [CupertinoScrollbar], an iOS style scrollbar.
-///  * [ListView], which display a linear, scrollable list of children.
-///  * [GridView], which display a 2 dimensional, scrollable array of children.
+///  * [ListView], which displays a linear, scrollable list of children.
+///  * [GridView], which displays a 2 dimensional, scrollable array of children.
 class Scrollbar extends RawScrollbar {
-  /// Creates a material design scrollbar that wraps the given [child].
+  /// Creates a material design scrollbar that by default will connect to the
+  /// closest Scrollable descendant of [child].
   ///
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
+  ///
+  /// If the [controller] is null, the default behavior is to
+  /// enable scrollbar dragging using the [PrimaryScrollController].
+  ///
+  /// When null, [thickness] and [radius] defaults will result in a rectangular
+  /// painted thumb that is 6.0 pixels wide.
   const Scrollbar({
     Key? key,
     required Widget child,
@@ -54,7 +64,7 @@ class Scrollbar extends RawScrollbar {
          child: child,
          controller: controller,
          isAlwaysShown: isAlwaysShown,
-         thickness: thickness,
+         thickness: thickness ?? _kScrollbarThickness,
          radius: radius,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
@@ -101,7 +111,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   double get _thickness {
    if (widget.thickness != null)
-     return widget.thickness!;
+     return widget.thickness;
    return _hoverIsActive && widget.showTrackOnHover
      ? _kScrollbarHoverThickness
      : _kScrollbarThickness;
@@ -115,12 +125,12 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
       duration: const Duration(milliseconds: 200),
     );
     _hoverAnimationController.addListener(() {
-      painter!.updateColors(
+      scrollbarPainter!.updateColors(
         _thumbColor,
         _trackColor,
         _trackBorderColor,
       );
-      painter!.updateThickness(
+      scrollbarPainter!.updateThickness(
         _thickness,
         widget.radius ?? _kScrollbarRadius,
       );
@@ -130,16 +140,17 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   @override
   void didChangeDependencies() {
     _textDirection = Directionality.of(context);
-    painter = _buildMaterialScrollbarPainter();
+    scrollbarPainter = _buildMaterialScrollbarPainter();
     super.didChangeDependencies();
   }
 
   @override
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    painter!
+    scrollbarPainter!
       ..thickness = _thickness
       ..radius = widget.radius ?? _kScrollbarRadius;
+
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
@@ -148,7 +159,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
       trackColor: _trackColor,
       trackBorderColor: _trackBorderColor,
       textDirection: _textDirection,
-      thickness: widget.thickness ?? _kScrollbarThickness,
+      thickness: widget.thickness,
       radius: widget.radius ?? _kScrollbarRadius,
       crossAxisMargin: _kScrollbarMargin,
       minLength: _kScrollbarMinLength,
@@ -158,10 +169,10 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   }
 
   @override
-  void handleLongPressStart(LongPressStartDetails details) {
-    super.handleLongPressStart(details);
+  void handleThumbPressStart(LongPressStartDetails details) {
+    super.handleThumbPressStart(details);
     _dragIsActive = true;
-    painter!.updateColors(
+    scrollbarPainter!.updateColors(
       _thumbColor,
       _trackColor,
       _trackBorderColor,
@@ -169,10 +180,10 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   }
 
   @override
-  void handleLongPressEnd(LongPressEndDetails details) {
-    super.handleLongPressEnd(details);
+  void handleThumbPressEnd(LongPressEndDetails details) {
+    super.handleThumbPressEnd(details);
     _dragIsActive = false;
-    painter!.updateColors(
+    scrollbarPainter!.updateColors(
       _thumbColor,
       _trackColor,
       _trackBorderColor,
@@ -180,13 +191,13 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   }
 
   void maybeHovering(PointerHoverEvent event) {
-    if (customPaintKey.currentContext == null) {
+    if (scrollbarPainterKey.currentContext == null) {
       return;
     }
 
-    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+    final CustomPaint customPaint = scrollbarPainterKey.currentContext!.widget as CustomPaint;
     final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
-    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     final Offset localOffset = renderBox.globalToLocal(event.position);
     final bool onScrollbar = painter.hitTestInteractive(localOffset);
 
@@ -224,8 +235,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
             onExit: maybeHoverExit,
             onHover: maybeHovering,
             child: CustomPaint(
-              key: customPaintKey,
-              foregroundPainter: painter,
+              key: scrollbarPainterKey,
+              foregroundPainter: scrollbarPainter,
               child: RepaintBoundary(child: widget.child),
             ),
           ),

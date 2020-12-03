@@ -488,19 +488,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   SemanticsBuilderCallback? get semanticsBuilder => null;
 }
 
-/// An base class for building animated scrollbar thumbs.
+/// An extendable base class for building scrollbars that fade in and out.
 ///
-/// To add a scrollbar thumb to a [ScrollView], simply wrap the scroll view
-/// widget in a [RawScrollbar] widget.
+/// To add a scrollbar thumb to a [ScrollView], like a [ListView] or a
+/// [CustomScrollView], simply wrap the scroll view widget in a [RawScrollbar]
+/// widget.
 ///
 /// {@template flutter.widgets.Scrollbar}
-/// A scrollbar thumb indicates which portion of a [Scrollable] widget is actually
+/// A scrollbar thumb indicates which portion of a [ScrollView] is actually
 /// visible.
 ///
-/// By default, the thumb will fade in and out as the child scroll view widget
-/// scrolls. When [isAlwaysShown] is true, and the associated
-/// [ScrollController] is provided for [controller], the scrollbar thumb will
-/// remain visible without the fade animation.
+/// By default, the thumb will fade in and out as the child scroll view
+/// scrolls. When [isAlwaysShown] is true, and ta [controller] is specified, the
+/// scrollbar thumb will remain visible without the fade animation.
 ///
 /// Scrollbars are interactive and will use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
@@ -509,36 +509,42 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// the relative position to the thumb.
 /// {@endtemplate}
 ///
-/// //TODO(Piinks): Add code sample
+// TODO(Piinks): Add code sample
 ///
 /// See also:
 ///
 ///  * [RawScrollbar], the abstract base class this inherits from.
-///  * [ListView], which display a linear, scrollable list of children.
-///  * [GridView], which display a 2 dimensional, scrollable array of children.
+///  * [ListView], which displays a linear, scrollable list of children.
+///  * [GridView], which displays a 2 dimensional, scrollable array of children.
 class RawScrollbar extends StatefulWidget {
   /// Creates a basic raw scrollbar that wraps the given [child].
   ///
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   ///
-  /// The [child], [isAlwaysShown], [fadeDuration], and [timeToFade] arguments
-  /// must not be null.
+  /// The [child], [thickness], [thumbColor], [isAlwaysShown], [fadeDuration],
+  /// and [timeToFade] arguments must not be null.
   const RawScrollbar({
     Key? key,
     required this.child,
     this.controller,
     this.isAlwaysShown = false,
     this.radius,
-    this.thickness,
-    this.thumbColor,
+    this.thickness = _kScrollbarThickness,
+    this.thumbColor = const Color(0x66BCBCBC),
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
-  }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
+  }) : assert(
+         !isAlwaysShown || controller != null,
+         'When isAlwaysShown is true, a ScrollController must be provided.',
+       ),
        assert(child != null),
+       assert(thickness != null),
+       assert(thumbColor != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
+       assert(pressDuration != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -601,15 +607,14 @@ class RawScrollbar extends StatefulWidget {
   /// {@end-tool}
   final ScrollController? controller;
 
-  /// Indicates whether the [Scrollbar] should always be visible.
+  /// Indicates that the scrollbar should be visible, even when a scroll is not
+  /// underway.
   ///
   /// When false, the scrollbar will be shown during scrolling
   /// and will fade out otherwise.
   ///
-  /// When true, the scrollbar will always be visible and never fade out.
-  ///
-  /// The [controller] property must be set in this case.
-  /// It should be passed the relevant [Scrollable]'s [ScrollController].
+  /// When true, the scrollbar will always be visible and never fade out. The
+  /// [controller] property must be set in this case.
   ///
   /// Defaults to false.
   ///
@@ -622,7 +627,7 @@ class RawScrollbar extends StatefulWidget {
   /// build(BuildContext context) {
   /// return Column(
   ///   children: <Widget>[
-  ///     Container(
+  ///     SizedBox(
   ///        height: 200,
   ///        child: Scrollbar(
   ///          isAlwaysShown: true,
@@ -630,19 +635,24 @@ class RawScrollbar extends StatefulWidget {
   ///          child: ListView.builder(
   ///            controller: _controllerOne,
   ///            itemCount: 120,
-  ///            itemBuilder: (BuildContext context, int index)
-  ///                => Text('item $index'),
+  ///            itemBuilder: (BuildContext context, int index) {
+  ///              return  Text('item $index');
+  ///            },
   ///          ),
   ///        ),
   ///      ),
-  ///      Container(
+  ///      SizedBox(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
   ///          isAlwaysShown: true,
   ///          controller: _controllerTwo,
   ///          child: SingleChildScrollView(
   ///            controller: _controllerTwo,
-  ///            child: SizedBox(height: 2000, width: 500,),
+  ///            child: SizedBox(
+  ///              height: 2000,
+  ///              width: 500,
+  ///              child: Placeholder(),
+  ///            ),
   ///          ),
   ///        ),
   ///      ),
@@ -653,23 +663,30 @@ class RawScrollbar extends StatefulWidget {
   /// {@end-tool}
   final bool isAlwaysShown;
 
-  /// The radius of the corners of the scrollbar.
+  /// [Radius] of corners if the scrollbar should have rounded corners.
+  ///
+  /// Scrollbar will be rectangular if [radius] is null, which is the default
+  /// behavior.
   final Radius? radius;
 
-  /// The thickness of the scrollbar.
-  final double? thickness;
+  /// The thickness of the scrollbar in the cross axis of the scrollable.
+  ///
+  /// Cannot be null, defaults to 6.0 pixels.
+  final double thickness;
 
   /// The color of the scrollbar thumb.
-  final Color? thumbColor;
+  ///
+  /// Cannot be null, defaults to Color(0x66BCBCBC).
+  final Color thumbColor;
 
   /// The [Duration] of the fade animation.
   ///
-  /// Cannot be null.
+  /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
   final Duration fadeDuration;
 
   /// The [Duration] of time until the fade animation begins.
   ///
-  /// Cannot be null.
+  /// Cannot be null, defaults to a [Duration] of 600 milliseconds.
   final Duration timeToFade;
 
   /// The [Duration] of time that a LongPress will trigger the drag gesture of
@@ -686,28 +703,35 @@ class RawScrollbar extends StatefulWidget {
 /// [CupertinoScrollbar] widgets.
 ///
 /// Controls the animation that fades a scrollbar thumb in and out of view.
+///
+/// Provides defaults gestures for dragging the scrollbar thumb and tapping on the
+/// scrollbar track.
 class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProviderStateMixin<T> {
   double? _dragScrollbarAxisPosition;
-  Drag? _drag;
   ScrollController? _currentController;
   Timer? _fadeoutTimer;
+  late AnimationController _fadeoutAnimationController;
 
-  /// A [GlobalKey] associated with the [painter], will be assigned to the
-  /// [CustomPaint] of the scrollbar.
+  /// A [GlobalKey] associated with the [scrollbarPainter], must be assigned to
+  /// the [CustomPaint] of the scrollbar.
   @protected
-  GlobalKey get customPaintKey => _customPaintKey;
-  final GlobalKey _customPaintKey = GlobalKey();
+  GlobalKey get scrollbarPainterKey => _scrollbarPainterKey;
+  final GlobalKey _scrollbarPainterKey = GlobalKey();
 
 
   /// Used to paint the scrollbar.
+  ///
+  /// Can be overridden by subclasses to further customize scrollbar behavior.
   @protected
-  ScrollbarPainter? painter;
-
-  /// Controls the fading in and out of the scrollbar thumb.
-  AnimationController get fadeoutAnimationController => _fadeoutAnimationController;
-  late AnimationController _fadeoutAnimationController;
+  ScrollbarPainter? scrollbarPainter;
   
-  /// Used to animate the opacity of the scrollbar thumb.
+  /// The current value of the animation that fades the scrollbar in and out of
+  /// view.
+  ///
+  /// The animation is triggered by scroll events, fading the scrollbar into
+  /// view upon scrolling, and out of view upon stopping.
+  ///
+  /// If [isAlwaysShown] is true, the animation will not be triggered to fade out.
   @protected
   Animation<double> get fadeoutOpacityAnimation => _fadeoutOpacityAnimation;
   late Animation<double> _fadeoutOpacityAnimation;
@@ -730,16 +754,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.didChangeDependencies();
     // If a painter has not been created by a subclass, create a raw scrollbar
     // painter.
-    painter ??= _buildRawScrollbarPainter();
-    maybeTriggerScrollbar();
+    scrollbarPainter ??= _buildRawScrollbarPainter();
+    _maybeTriggerScrollbar();
   }
 
-  /// Waits one frame and cause an empty scroll event.
-  ///
-  /// This allows the thumb to show immediately when isAlwaysShown is true.
-  /// A scroll event is required in order to paint the thumb.
-  @protected
-  void maybeTriggerScrollbar() {
+  // Waits one frame and cause an empty scroll event (zero delta pixels).
+  //
+  // This allows the thumb to show immediately when isAlwaysShown is true.
+  // A scroll event is required in order to paint the thumb.
+  void _maybeTriggerScrollbar() {
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
       if (widget.isAlwaysShown) {
         _fadeoutTimer?.cancel();
@@ -753,9 +776,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   ScrollbarPainter _buildRawScrollbarPainter() {
     return ScrollbarPainter(
-      color: widget.thumbColor ?? const Color(0x66BCBCBC).withOpacity(1.0),
+      color: widget.thumbColor,
       textDirection: Directionality.of(context),
-      thickness: widget.thickness ?? _kScrollbarThickness,
+      thickness: widget.thickness,
       radius: widget.radius,
       fadeoutOpacityAnimation: fadeoutOpacityAnimation,
       padding: MediaQuery.of(context).padding,
@@ -767,16 +790,16 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.didUpdateWidget(oldWidget);
     if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       if (widget.isAlwaysShown == true) {
-        maybeTriggerScrollbar();
+        _maybeTriggerScrollbar();
         _fadeoutAnimationController.animateTo(1.0);
       } else {
         _fadeoutAnimationController.reverse();
       }
     }
-    painter!
-      ..thickness = widget.thickness ?? _kScrollbarThickness
+    scrollbarPainter!
+      ..thickness = widget.thickness
       ..radius = widget.radius
-      ..color = widget.thumbColor ?? const Color(0x66BCBCBC).withOpacity(1.0);
+      ..color = widget.thumbColor;
   }
 
   void _updateScrollPosition(double primaryDelta) {
@@ -785,7 +808,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Convert primaryDelta, the amount that the scrollbar moved since the last
     // time _dragScrollbar was called, into the coordinate space of the scroll
     // position, and jump to that position.
-    final double scrollOffsetLocal = painter!.getTrackToScroll(primaryDelta);
+    final double scrollOffsetLocal = scrollbarPainter!.getTrackToScroll(primaryDelta);
     final double scrollOffsetGlobal = scrollOffsetLocal + _currentController!.position.pixels;
     _currentController!.position.jumpTo(scrollOffsetGlobal);
   }
@@ -803,7 +826,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Returns the [Axis] of the child scroll view, or null if one is not
   /// determined.
   @protected
-  Axis? getDirection() {
+  Axis? getScrollbarDirection() {
     try {
       return _currentController!.position.axis;
     } catch (_) {
@@ -812,10 +835,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
-  /// Cancels the [fadeoutTimer] when a long press gesture has been recognized.
+  /// Handler called when a press on the scrollbar thumb has been recognized.
+  ///
+  /// Cancels the [Timer] associated with the fade animation of the scrollbar.
   @protected
-  void handleLongPress() {
-    if (getDirection() == null) {
+  @mustCallSuper
+  void handleThumbPress() {
+    if (getScrollbarDirection() == null) {
       return;
     }
     _fadeoutTimer?.cancel();
@@ -823,12 +849,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   /// Handler called when a long press gesture has started.
   ///
-  /// Begins the fade out animation and updates the position of the child
-  /// scrollable.
+  /// Begins the fade out animation and initializes dragging the scrollbar thumb.
   @protected
-  void handleLongPressStart(LongPressStartDetails details) {
+  @mustCallSuper
+  void handleThumbPressStart(LongPressStartDetails details) {
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
-    final Axis? direction = getDirection();
+    final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
@@ -848,8 +874,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Updates the position of the child scrollable.
   @protected
-  void handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    final Axis? direction = getDirection();
+  @mustCallSuper
+  void handleThumbPressUpdate(LongPressMoveUpdateDetails details) {
+    final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
@@ -866,38 +893,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   /// Handler called when a long press has ended.
-  ///
-  /// Finishes any active drag action on the child scroll view.
   @protected
-  void handleLongPressEnd(LongPressEndDetails details) {
-    final Axis? direction = getDirection();
+  @mustCallSuper
+  void handleThumbPressEnd(LongPressEndDetails details) {
+    final Axis? direction = getScrollbarDirection();
     if (direction == null)
       return;
-    final Offset pixelsPerSecond = details.velocity.pixelsPerSecond;
     _maybeStartFadeoutTimer();
     _dragScrollbarAxisPosition = null;
-    final double scrollVelocity = painter!.getTrackToScroll(
-      direction == Axis.vertical
-        ? pixelsPerSecond.dy
-        : pixelsPerSecond.dx
-    );
-    _drag?.end(DragEndDetails(
-      primaryVelocity: -scrollVelocity,
-      velocity: Velocity(
-        pixelsPerSecond: direction == Axis.vertical
-          ? Offset(0.0, -scrollVelocity)
-          : Offset(-scrollVelocity, 0.0),
-      ),
-    ));
-    _drag = null;
     _currentController = null;
   }
 
-  /// Handler for tapping on the scrollbar track.
-  ///
-  /// Will complete a [ScrollIncrementType.page] on the [child] [ScrollView].
-  @protected
-  void handleTrackTapDown(TapDownDetails details) {
+  void _handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
 
@@ -921,19 +928,19 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Adjust scrollIncrement for direction
     switch (_currentController!.position.axisDirection) {
       case AxisDirection.up:
-        if (details.localPosition.dy > painter!._thumbOffset)
+        if (details.localPosition.dy > scrollbarPainter!._thumbOffset)
           scrollIncrement = -scrollIncrement;
         break;
       case AxisDirection.down:
-        if (details.localPosition.dy < painter!._thumbOffset)
+        if (details.localPosition.dy < scrollbarPainter!._thumbOffset)
           scrollIncrement = -scrollIncrement;
         break;
       case AxisDirection.right:
-        if (details.localPosition.dx < painter!._thumbOffset)
+        if (details.localPosition.dx < scrollbarPainter!._thumbOffset)
           scrollIncrement = -scrollIncrement;
         break;
       case AxisDirection.left:
-        if (details.localPosition.dx > painter!._thumbOffset)
+        if (details.localPosition.dx > scrollbarPainter!._thumbOffset)
           scrollIncrement = -scrollIncrement;
         break;
     }
@@ -960,7 +967,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _fadeoutAnimationController.forward();
 
       _fadeoutTimer?.cancel();
-      painter!.update(notification.metrics, notification.metrics.axisDirection);
+      scrollbarPainter!.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisPosition == null)
         _maybeStartFadeoutTimer();
@@ -970,6 +977,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   /// Get the GestureRecognizerFactories used to detect gestures on the scrollbar
   /// thumb.
+  ///
+  /// The RawScrollbar provides for dragging gestures on the scrollbar thumb,
+  /// and tapping gestures on the area of the scrollbar track.
   @protected
   Map<Type, GestureRecognizerFactory> get gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
@@ -981,15 +991,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
           () => _ThumbPressGestureRecognizer(
           debugOwner: this,
-          customPaintKey: customPaintKey,
+          customPaintKey: scrollbarPainterKey,
           pressDuration: widget.pressDuration,
         ),
           (_ThumbPressGestureRecognizer instance) {
           instance
-            ..onLongPress = handleLongPress
-            ..onLongPressStart = handleLongPressStart
-            ..onLongPressMoveUpdate = handleLongPressMoveUpdate
-            ..onLongPressEnd = handleLongPressEnd;
+            ..onLongPress = handleThumbPress
+            ..onLongPressStart = handleThumbPressStart
+            ..onLongPressMoveUpdate = handleThumbPressUpdate
+            ..onLongPressEnd = handleThumbPressEnd;
         },
       );
 
@@ -997,10 +1007,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       GestureRecognizerFactoryWithHandlers<_TrackTapGestureRecognizer>(
           () => _TrackTapGestureRecognizer(
           debugOwner: this,
-          customPaintKey: customPaintKey,
+          customPaintKey: scrollbarPainterKey,
         ),
           (_TrackTapGestureRecognizer instance) {
-          instance.onTapDown = handleTrackTapDown;
+          instance.onTapDown = _handleTrackTapDown;
         },
       );
 
@@ -1011,7 +1021,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void dispose() {
     _fadeoutAnimationController.dispose();
     _fadeoutTimer?.cancel();
-    painter?.dispose();
+    scrollbarPainter?.dispose();
     super.dispose();
   }
 
@@ -1023,8 +1033,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         child: RawGestureDetector(
           gestures: gestures,
           child: CustomPaint(
-            key: customPaintKey,
-            foregroundPainter: painter,
+            key: scrollbarPainterKey,
+            foregroundPainter: scrollbarPainter,
             child: RepaintBoundary(child: widget.child),
           ),
         ),

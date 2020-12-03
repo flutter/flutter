@@ -37,14 +37,14 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///
 /// When dragging a [CupertinoScrollbar] thumb, the thickness and radius will
 /// animate from [thickness] and [radius] to [thicknessWhileDragging] and
-/// [radiusWhileDragging].
+/// [radiusWhileDragging], respectively.
 ///
-/// //TODO(Piinks): Add code sample
+// TODO(Piinks): Add code sample
 ///
 /// See also:
 ///
-///  * [ListView], which display a linear, scrollable list of children.
-///  * [GridView], which display a 2 dimensional, scrollable array of children.
+///  * [ListView], which displays a linear, scrollable list of children.
+///  * [GridView], which displays a 2 dimensional, scrollable array of children.
 ///  * [Scrollbar], a Material Design scrollbar.
 ///  * [RawScrollbar], the simple base class this extends.
 class CupertinoScrollbar extends RawScrollbar {
@@ -117,7 +117,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   late AnimationController _thicknessAnimationController;
 
   double get _thickness {
-    return widget.thickness! + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
+    return widget.thickness + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness);
   }
 
   Radius get _radius {
@@ -132,16 +132,16 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       duration: _kScrollbarResizeDuration,
     );
     _thicknessAnimationController.addListener(() {
-      painter!.updateThickness(_thickness, _radius);
+      scrollbarPainter!.updateThickness(_thickness, _radius);
     });
   }
 
   @override
   void didChangeDependencies() {
-    if (painter == null) {
-      painter = _buildCupertinoScrollbarPainter(context);
+    if (scrollbarPainter == null) {
+      scrollbarPainter = _buildCupertinoScrollbarPainter(context);
     } else {
-      painter!
+      scrollbarPainter!
         ..textDirection = Directionality.of(context)
         ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
         ..padding = MediaQuery.of(context).padding;
@@ -151,8 +151,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
 
   @override
   void didUpdateWidget(CupertinoScrollbar oldWidget) {
-    assert(painter != null);
-    painter!.updateThickness(_thickness, _radius);
+    assert(scrollbarPainter != null);
+    scrollbarPainter!.updateThickness(_thickness, _radius);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -178,9 +178,9 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   // on the scrollbar thumb and then drags the scrollbar without releasing.
 
   @override
-  void handleLongPressStart(LongPressStartDetails details) {
-    super.handleLongPressStart(details);
-    final Axis direction = getDirection()!;
+  void handleThumbPressStart(LongPressStartDetails details) {
+    super.handleThumbPressStart(details);
+    final Axis direction = getScrollbarDirection()!;
     switch (direction) {
       case Axis.vertical:
         _pressStartAxisPosition = details.localPosition.dy;
@@ -192,24 +192,24 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   }
 
   @override
-  void handleLongPress() {
-    if (getDirection() == null) {
+  void handleThumbPress() {
+    if (getScrollbarDirection() == null) {
       return;
     }
-    super.handleLongPress();
+    super.handleThumbPress();
     _thicknessAnimationController.forward().then<void>(
           (_) => HapticFeedback.mediumImpact(),
     );
   }
 
   @override
-  void handleLongPressEnd(LongPressEndDetails details) {
-    final Axis? direction = getDirection();
+  void handleThumbPressEnd(LongPressEndDetails details) {
+    final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     _thicknessAnimationController.reverse();
-    super.handleLongPressEnd(details);
+    super.handleThumbPressEnd(details);
     switch(direction) {
       case Axis.vertical:
         if (details.velocity.pixelsPerSecond.dy.abs() < 10 &&
