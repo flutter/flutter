@@ -48,6 +48,14 @@ class PointerDataConverter {
   // Map from browser pointer identifiers to PointerEvent pointer identifiers.
   final Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
+  /// This field is used to keep track of button state.
+  ///
+  /// To normalize pointer events, when we receive pointer down followed by
+  /// pointer up, we synthesize a move event. To make sure that button state
+  /// is correct for move regardless of button state at the time of up event
+  /// we store it on down,hover and move events.
+  int _activeButtons = 0;
+
   /// Clears the existing pointer states.
   ///
   /// This method is invoked during hot reload to make sure we have a clean
@@ -55,6 +63,7 @@ class PointerDataConverter {
   void clearPointerState() {
     _pointers.clear();
     _PointerState._pointerCount = 0;
+    _activeButtons = 0;
   }
 
   _PointerState _ensureStateForPointer(int device, double x, double y) {
@@ -328,6 +337,7 @@ class PointerDataConverter {
               scrollDeltaY: scrollDeltaY,
             )
           );
+          _activeButtons = buttons;
           break;
         case ui.PointerChange.down:
           final bool alreadyAdded = _pointers.containsKey(device);
@@ -426,6 +436,7 @@ class PointerDataConverter {
               scrollDeltaY: scrollDeltaY,
             )
           );
+          _activeButtons = buttons;
           break;
         case ui.PointerChange.move:
           assert(_pointers.containsKey(device));
@@ -459,6 +470,7 @@ class PointerDataConverter {
               scrollDeltaY: scrollDeltaY,
             )
           );
+          _activeButtons = buttons;
           break;
         case ui.PointerChange.up:
         case ui.PointerChange.cancel:
@@ -485,7 +497,7 @@ class PointerDataConverter {
                 device: device,
                 physicalX: physicalX,
                 physicalY: physicalY,
-                buttons: buttons,
+                buttons: _activeButtons,
                 obscured: obscured,
                 pressure: pressure,
                 pressureMin: pressureMin,
