@@ -10,7 +10,7 @@
  */
 class MacOSGLContextSwitch {
  public:
-  explicit MacOSGLContextSwitch(NSOpenGLContext* context);
+  explicit MacOSGLContextSwitch(const NSOpenGLContext* context);
   ~MacOSGLContextSwitch();
 
   MacOSGLContextSwitch(const MacOSGLContextSwitch&) = delete;

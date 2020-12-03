@@ -1053,6 +1053,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterPlug
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDelegate.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStoreData.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStoreData.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
@@ -1062,6 +1064,9 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExter
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositorUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h
@@ -1078,6 +1083,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTest.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.mm
