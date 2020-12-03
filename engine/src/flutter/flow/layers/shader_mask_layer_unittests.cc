@@ -73,7 +73,7 @@ TEST_F(ShaderMaskLayerTest, EmptyFilter) {
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawPathData{child_path, child_paint}},
                    MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkMatrix::Translate(
+                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
                               layer_bounds.fLeft, layer_bounds.fTop)}},
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawRectData{SkRect::MakeWH(
@@ -113,7 +113,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilter) {
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawPathData{child_path, child_paint}},
                    MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkMatrix::Translate(
+                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
                               layer_bounds.fLeft, layer_bounds.fTop)}},
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawRectData{SkRect::MakeWH(
@@ -167,7 +167,7 @@ TEST_F(ShaderMaskLayerTest, MultipleChildren) {
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawPathData{child_path2, child_paint2}},
                    MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkMatrix::Translate(
+                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
                               layer_bounds.fLeft, layer_bounds.fTop)}},
                    MockCanvas::DrawCall{
                        1, MockCanvas::DrawRectData{SkRect::MakeWH(
@@ -233,18 +233,18 @@ TEST_F(ShaderMaskLayerTest, Nested) {
                                             nullptr, 2}},
            MockCanvas::DrawCall{
                2, MockCanvas::DrawPathData{child_path2, child_paint2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::ConcatMatrixData{SkMatrix::Translate(
-                      layer_bounds.fLeft, layer_bounds.fTop)}},
+           MockCanvas::DrawCall{2,
+                                MockCanvas::ConcatMatrixData{SkM44::Translate(
+                                    layer_bounds.fLeft, layer_bounds.fTop)}},
            MockCanvas::DrawCall{
                2,
                MockCanvas::DrawRectData{
                    SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
                    filter_paint2}},
            MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ConcatMatrixData{SkMatrix::Translate(
-                      layer_bounds.fLeft, layer_bounds.fTop)}},
+           MockCanvas::DrawCall{1,
+                                MockCanvas::ConcatMatrixData{SkM44::Translate(
+                                    layer_bounds.fLeft, layer_bounds.fTop)}},
            MockCanvas::DrawCall{
                1,
                MockCanvas::DrawRectData{

@@ -53,8 +53,10 @@ static sk_sp<SkImage> ResizeRasterImage(sk_sp<SkImage> image,
     return nullptr;
   }
 
-  if (!image->scalePixels(scaled_bitmap.pixmap(), kLow_SkFilterQuality,
-                          SkImage::kDisallow_CachingHint)) {
+  if (!image->scalePixels(
+          scaled_bitmap.pixmap(),
+          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
+          SkImage::kDisallow_CachingHint)) {
     FML_LOG(ERROR) << "Could not scale pixels";
     return nullptr;
   }

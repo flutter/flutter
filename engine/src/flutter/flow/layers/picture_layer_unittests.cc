@@ -87,12 +87,12 @@ TEST_F(PictureLayerTest, SimplePicture) {
   layer->Paint(paint_context());
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{1,
-                            MockCanvas::ConcatMatrixData{layer_offset_matrix}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::ConcatMatrixData{SkM44(layer_offset_matrix)}},
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
        MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{RasterCache::GetIntegralTransCTM(
-                  layer_offset_matrix)}},
+           1, MockCanvas::SetMatrixData{SkM44(
+                  RasterCache::GetIntegralTransCTM(layer_offset_matrix))}},
 #endif
        MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);

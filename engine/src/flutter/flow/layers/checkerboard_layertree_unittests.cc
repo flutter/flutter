@@ -19,7 +19,7 @@ using CheckerBoardLayerTest = LayerTest;
 
 #ifndef NDEBUG
 TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerNotCheckBoard) {
-  const SkMatrix initial_matrix = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect cull_bounds = SkRect::MakeXYWH(0.0, 0.0, 2.0, 4.0);
   const SkRect child_bounds = SkRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
@@ -69,7 +69,7 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerNotCheckBoard) {
 }
 
 TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerCheckBoard) {
-  const SkMatrix initial_matrix = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect cull_bounds = SkRect::MakeXYWH(0.0, 0.0, 2.0, 4.0);
   const SkRect child_bounds = SkRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);

@@ -56,29 +56,29 @@ void MockCanvas::willRestore() {
   current_layer_--;  // Must go here; func params order of eval is undefined
 }
 
+#ifdef SK_SUPPORT_LEGACY_CANVASMATRIX33
 void MockCanvas::didConcat(const SkMatrix& matrix) {
+  this->didConcat44(SkM44(matrix));
+}
+void MockCanvas::didSetMatrix(const SkMatrix& matrix) {
+  this->didSetM44(SkM44(matrix));
+}
+#endif
+
+void MockCanvas::didConcat44(const SkM44& matrix) {
   draw_calls_.emplace_back(DrawCall{current_layer_, ConcatMatrixData{matrix}});
 }
 
-void MockCanvas::didConcat44(const SkM44& matrix) {
-  draw_calls_.emplace_back(
-      DrawCall{current_layer_, ConcatMatrix44Data{matrix}});
+void MockCanvas::didSetM44(const SkM44& matrix) {
+  draw_calls_.emplace_back(DrawCall{current_layer_, SetMatrixData{matrix}});
 }
 
 void MockCanvas::didScale(SkScalar x, SkScalar y) {
-  SkMatrix m;
-  m.setScale(x, y);
-  this->didConcat(m);
+  this->didConcat44(SkM44::Scale(x, y));
 }
 
 void MockCanvas::didTranslate(SkScalar x, SkScalar y) {
-  SkMatrix m;
-  m.setTranslate(x, y);
-  this->didConcat(m);
-}
-
-void MockCanvas::didSetMatrix(const SkMatrix& matrix) {
-  draw_calls_.emplace_back(DrawCall{current_layer_, SetMatrixData{matrix}});
+  this->didConcat44(SkM44::Translate(x, y));
 }
 
 void MockCanvas::onDrawTextBlob(const SkTextBlob* text,
@@ -335,16 +335,6 @@ bool operator==(const MockCanvas::ConcatMatrixData& a,
 
 std::ostream& operator<<(std::ostream& os,
                          const MockCanvas::ConcatMatrixData& data) {
-  return os << data.matrix;
-}
-
-bool operator==(const MockCanvas::ConcatMatrix44Data& a,
-                const MockCanvas::ConcatMatrix44Data& b) {
-  return a.matrix == b.matrix;
-}
-
-std::ostream& operator<<(std::ostream& os,
-                         const MockCanvas::ConcatMatrix44Data& data) {
   return os << data.matrix;
 }
 

@@ -36,7 +36,7 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithScale) {
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithTranslate) {
   MutatorsStack stack;
-  SkMatrix matrix = SkMatrix::MakeTrans(1, 1);
+  SkMatrix matrix = SkMatrix::Translate(1, 1);
   stack.PushTransform(matrix);
 
   EmbeddedViewParams params(matrix, SkSize::Make(1, 1), stack);
@@ -79,7 +79,7 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation45) {
 
 TEST(EmbeddedViewParams,
      GetBoundingRectAfterMutationsWithTranslateScaleAndRotation) {
-  SkMatrix matrix = SkMatrix::MakeTrans(2, 2);
+  SkMatrix matrix = SkMatrix::Translate(2, 2);
   matrix.preScale(3, 3);
   matrix.preRotate(90);
 
