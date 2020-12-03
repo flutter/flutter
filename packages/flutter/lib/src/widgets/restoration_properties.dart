@@ -126,7 +126,6 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   @mustCallSuper
   @override
   void initWithValue(T? value) {
-    assert(value != null);
     _value = value;
   }
 
