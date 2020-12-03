@@ -310,7 +310,7 @@ class Switch extends StatefulWidget {
   /// The color for the button's [Material] when it has the input focus.
   ///
   /// If [overlayColor] returns a non-null color in the [MaterialState.focused]
-  /// state, it will be used instead of this color.
+  /// state, it will be used instead.
   ///
   /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
   /// focused state. If that is also null, then the value of
@@ -320,7 +320,7 @@ class Switch extends StatefulWidget {
   /// The color for the button's [Material] when a pointer is hovering over it.
   ///
   /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
-  /// state, it will be used instead of this color.
+  /// state, it will be used instead.
   ///
   /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
