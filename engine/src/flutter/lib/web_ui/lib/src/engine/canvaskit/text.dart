@@ -667,7 +667,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   }
 
   @override
-  ui.Paragraph build() {
+  CkParagraph build() {
     final builtParagraph = _buildCkParagraph();
     return CkParagraph(builtParagraph, _style, _commands);
   }

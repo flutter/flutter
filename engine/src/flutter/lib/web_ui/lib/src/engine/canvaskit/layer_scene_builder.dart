@@ -86,7 +86,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  ui.Scene build() {
+  LayerScene build() {
     return LayerScene(rootLayer);
   }
 
@@ -113,7 +113,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.EngineLayer? oldLayer,
   }) {
-    pushLayer(ClipPathLayer(path, clipBehavior));
+    pushLayer(ClipPathLayer(path as CkPath, clipBehavior));
     return null;
   }
 
