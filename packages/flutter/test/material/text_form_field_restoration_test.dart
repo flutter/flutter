@@ -22,18 +22,18 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  // testWidgets('TextFormField restoration with external controller', (WidgetTester tester) async {
-  //   await tester.pumpWidget(
-  //     const MaterialApp(
-  //       restorationScopeId: 'root',
-  //       home: TestWidget(
-  //         useExternal: true,
-  //       ),
-  //     ),
-  //   );
+  testWidgets('TextFormField restoration with external controller', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        restorationScopeId: 'root',
+        home: TestWidget(
+          useExternal: true,
+        ),
+      ),
+    );
 
-  //   await restoreAndVerify(tester);
-  // });
+    await restoreAndVerify(tester);
+  });
 }
 
 Future<void> restoreAndVerify(WidgetTester tester) async {
@@ -44,7 +44,6 @@ Future<void> restoreAndVerify(WidgetTester tester) async {
   await skipPastScrollingAnimation(tester);
   expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
 
-  print(find.byType(Scrollable));
   await tester.drag(find.byType(Scrollable), const Offset(0, -80));
   await skipPastScrollingAnimation(tester);
 
