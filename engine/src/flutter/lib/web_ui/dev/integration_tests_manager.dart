@@ -663,8 +663,24 @@ const Map<String, List<String>> blockedTestsListsMapForModes =
 // TODO(nurhan): Remove the failing test after fixing.
 const Map<String, List<String>> blockedTestsListsMapForRenderBackends =
     <String, List<String>>{
-  'auto': [],
+  'auto': [
+    'image_loading_integration.dart',
+    'platform_messages_integration.dart',
+    'profile_diagnostics_integration.dart',
+    'scroll_wheel_integration.dart',
+    'text_editing_integration.dart',
+    'treeshaking_integration.dart',
+    'url_strategy_integration.dart',
+  ],
   'html': [],
   // This test failed on canvaskit on all three build modes.
-  'canvaskit': ['image_loading_integration.dart'],
+  'canvaskit': [
+    'image_loading_integration.dart',
+    'platform_messages_integration.dart',
+    'profile_diagnostics_integration.dart',
+    'scroll_wheel_integration.dart',
+    'text_editing_integration.dart',
+    'treeshaking_integration.dart',
+    'url_strategy_integration.dart',
+  ],
 };
