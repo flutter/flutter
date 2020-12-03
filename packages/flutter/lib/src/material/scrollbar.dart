@@ -27,9 +27,6 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// controlled by [showTrackOnHover]. The thickness of the track and scrollbar
 /// thumb will become larger when hovering, unless overridden by [thickness].
 ///
-/// Dynamically changes to an iOS style scrollbar that looks like
-/// [CupertinoScrollbar] on the iOS platform.
-///
 // TODO(Piinks): Add code sample
 ///
 /// See also:
