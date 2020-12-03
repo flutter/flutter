@@ -299,6 +299,8 @@ void main() {
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
+        'integration_test/app_test.dart',
+        'integration_test/driver.dart',
       ],
     );
   }, overrides: <Type, Generator>{
@@ -364,6 +366,8 @@ void main() {
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
+        'integration_test/app_test.dart',
+        'integration_test/driver.dart',
       ],
     );
     return _runFlutterTest(projectDir);
