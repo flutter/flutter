@@ -79,6 +79,11 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// will still be returned in the `response` field of the result JSON along
 /// with an `isError` boolean.
 ///
+/// `enableTextEntryEmulation` will enable text entry emulation.
+/// Defaults to true. False can be used to enable manual testing
+/// with automation builds, otherwise text entry isn't working
+/// (see [FlutterDriver.setTextEntryEmulation]).
+///
 /// The `finders` and `commands` parameters are optional and used to add custom
 /// finders or commands, as in the following example.
 ///
