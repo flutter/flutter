@@ -1232,13 +1232,16 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<bool> launchDevTools() async {
+  Future<bool> launchDevTools({bool openInBrowser = false}) async {
     if (!supportsServiceProtocol) {
       return false;
     }
     assert(supportsServiceProtocol);
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    await _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
+    await _devtoolsLauncher.launch(
+      flutterDevices.first.vmService.httpAddress,
+      openInBrowser: openInBrowser,
+    );
     return true;
   }
 
@@ -1531,7 +1534,7 @@ class TerminalHandler {
       case 'U':
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
-        return residentRunner.launchDevTools();
+        return residentRunner.launchDevTools(openInBrowser: true);
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
@@ -1626,10 +1629,10 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
 abstract class DevtoolsLauncher {
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
-  Future<void> launch(Uri vmServiceUri);
+  Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false});
 
   /// Serve Dart DevTools and return the host and port they are available on.
-  Future<DevToolsServerAddress> serve();
+  Future<DevToolsServerAddress> serve({bool openInBrowser = false});
 
   Future<void> close();
 

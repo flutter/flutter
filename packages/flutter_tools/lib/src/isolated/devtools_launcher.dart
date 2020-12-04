@@ -37,10 +37,12 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
   @override
-  Future<void> launch(Uri vmServiceUri) async {
+  Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false}) async {
     if (_devToolsProcess != null && _devToolsUri != null) {
-      // DevTools is already running - open a chrome window to _devToolsUri.
-      await Chrome.start(<String>[_devToolsUri.toString()]);
+      // DevTools is already running.
+      if (openInBrowser) {
+        await Chrome.start(<String>[_devToolsUri.toString()]);
+      }
       return;
     }
 
@@ -94,8 +96,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   }
 
   @override
-  Future<DevToolsServerAddress> serve() async {
-    await launch(null);
+  Future<DevToolsServerAddress> serve({bool openInBrowser = false}) async {
+    await launch(null, openInBrowser: openInBrowser);
     if (_devToolsUri == null) {
       return null;
     }
