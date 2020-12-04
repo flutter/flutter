@@ -12,8 +12,6 @@ import 'text_editing.dart';
 import 'text_input.dart';
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
-/// {@macro flutter.services.textFormatter.effectiveMaxLengthEnforcement}
-///
 /// ### [MaxLengthEnforcement.enforced] versus
 /// [MaxLengthEnforcement.truncateAfterCompositionEnds]
 ///
