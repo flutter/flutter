@@ -203,30 +203,22 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     );
   }
 
-  void maybeHovering(PointerHoverEvent event) {
-    if (scrollbarPainterKey.currentContext == null) {
-      return;
-    }
-
-    final CustomPaint customPaint = scrollbarPainterKey.currentContext!.widget as CustomPaint;
-    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
-    final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
-    final Offset localOffset = renderBox.globalToLocal(event.position);
-    final bool onScrollbar = painter.hitTestInteractive(localOffset);
-
-    // Check is the position of the pointer falls over the painted scrollbar
-    if (onScrollbar) {
+  @override
+  void handleHover(PointerHoverEvent event) {
+    // Check if the position of the pointer falls over the painted scrollbar
+    if (isPointerOverScrollbar(event.position)) {
       // Pointer exited hovering the scrollbar
       setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();
     } else {
-      // Pointer entered the area of the painted scrollbar
+      // Pointer is not over painted scrollbar.
       setState(() { _hoverIsActive = false; });
       _hoverAnimationController.reverse();
     }
   }
 
-  void maybeHoverExit(PointerExitEvent event) {
+  @override
+  void handleHoverExit(PointerExitEvent event) {
     setState(() { _hoverIsActive = false; });
     _hoverAnimationController.reverse();
   }
@@ -235,26 +227,5 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   void dispose() {
     _hoverAnimationController.dispose();
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: handleScrollNotification,
-      child: RepaintBoundary(
-        child: RawGestureDetector(
-          gestures: gestures,
-          child: MouseRegion(
-            onExit: maybeHoverExit,
-            onHover: maybeHovering,
-            child: CustomPaint(
-              key: scrollbarPainterKey,
-              foregroundPainter: scrollbarPainter,
-              child: RepaintBoundary(child: widget.child),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

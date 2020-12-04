@@ -711,17 +711,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ScrollController? _currentController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
-
-  /// A [GlobalKey] associated with the [scrollbarPainter], must be assigned to
-  /// the [CustomPaint] of the scrollbar.
-  @protected
-  GlobalKey get scrollbarPainterKey => _scrollbarPainterKey;
-  final GlobalKey _scrollbarPainterKey = GlobalKey();
+  final GlobalKey  _scrollbarPainterKey = GlobalKey();
 
 
   /// Used to paint the scrollbar.
   ///
-  /// Can be overridden by subclasses to further customize scrollbar behavior.
+  /// Can be customized by subclasses to further customize scrollbar behavior by
+  /// overriding [updateScrollbar].
   @protected
   ScrollbarPainter? scrollbarPainter;
 
@@ -992,7 +988,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
           () => _ThumbPressGestureRecognizer(
           debugOwner: this,
-          customPaintKey: scrollbarPainterKey,
+          customPaintKey: _scrollbarPainterKey,
           pressDuration: widget.pressDuration,
         ),
           (_ThumbPressGestureRecognizer instance) {
@@ -1008,7 +1004,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       GestureRecognizerFactoryWithHandlers<_TrackTapGestureRecognizer>(
           () => _TrackTapGestureRecognizer(
           debugOwner: this,
-          customPaintKey: scrollbarPainterKey,
+          customPaintKey: _scrollbarPainterKey,
         ),
           (_TrackTapGestureRecognizer instance) {
           instance.onTapDown = _handleTrackTapDown;
@@ -1017,6 +1013,44 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     return gestures;
   }
+  
+  ///
+  @protected
+  bool isPointerOverTrack(Offset position) {
+    if (_scrollbarPainterKey.currentContext == null) {
+      return false;
+    }
+    final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
+    return scrollbarPainter!.hitTestInteractive(localOffset) && scrollbarPainter!.hitTestOnlyThumbInteractive(localOffset);
+  }
+  
+  ///
+  @protected
+  bool isPointerOverThumb(Offset position) {
+    if (_scrollbarPainterKey.currentContext == null) {
+      return false;
+    }
+    final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
+    return scrollbarPainter!.hitTestOnlyThumbInteractive(localOffset);
+  }
+  
+  ///
+  @protected
+  bool isPointerOverScrollbar(Offset position) {
+    if (_scrollbarPainterKey.currentContext == null) {
+      return false;
+    }
+    final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
+    return scrollbarPainter!.hitTestInteractive(localOffset);
+  }
+  
+  /// Doc
+  @protected
+  void handleHover(PointerHoverEvent event) { }
+
+  /// Doc
+  @protected
+  void handleHoverExit(PointerExitEvent event) { }
 
   @override
   void dispose() {
@@ -1026,6 +1060,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
@@ -1033,10 +1068,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       child: RepaintBoundary(
         child: RawGestureDetector(
           gestures: gestures,
-          child: CustomPaint(
-            key: scrollbarPainterKey,
-            foregroundPainter: scrollbarPainter,
-            child: RepaintBoundary(child: widget.child),
+          child: MouseRegion(
+            onExit: handleHoverExit,
+            onHover: handleHover,
+            child: CustomPaint(
+              key: _scrollbarPainterKey,
+              foregroundPainter: scrollbarPainter,
+              child: RepaintBoundary(child: widget.child),
+            ),
           ),
         ),
       ),
@@ -1077,8 +1116,7 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
     }
     final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
     final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
-    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
-    final Offset localOffset = renderBox.globalToLocal(offset);
+    final Offset localOffset = _getLocalOffset(customPaintKey, offset);
     return painter.hitTestOnlyThumbInteractive(localOffset);
   }
 }
@@ -1108,9 +1146,13 @@ class _TrackTapGestureRecognizer extends TapGestureRecognizer {
     }
     final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
     final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
-    final RenderBox renderBox = customPaintKey.currentContext!.findRenderObject()! as RenderBox;
-    final Offset localOffset = renderBox.globalToLocal(offset);
+    final Offset localOffset = _getLocalOffset(customPaintKey, offset);
     // We only receive track taps that are not on the thumb.
     return painter.hitTestInteractive(localOffset) && !painter.hitTestOnlyThumbInteractive(localOffset);
   }
+}
+
+Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
+  final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+  return renderBox.globalToLocal(position);
 }
