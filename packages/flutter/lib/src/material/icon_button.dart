@@ -132,7 +132,7 @@ class IconButton extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   ///
-  /// The [iconSize], [padding], [autofocus], and [alignment] arguments must not
+  /// The [padding], [autofocus], and [alignment] arguments must not
   /// be null (though they each have default values).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
