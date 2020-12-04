@@ -34,13 +34,14 @@ import 'tooltip_theme.dart';
 ///
 /// This example show a basic [Tooltip] which has a [Text] as child.
 /// [message] contains your label to be shown by the tooltip when
-/// the child that Tooltip wraps is long pressed.
+/// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
+/// the tooltip is shown when the widget is long pressed.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Tooltip(
 ///     message: "I am a Tooltip",
-///     child: Text("Tap this text and hold down to show a tooltip."),
+///     child: Text("Hover over the text to show a tooltip."),
 ///   );
 /// }
 /// ```
