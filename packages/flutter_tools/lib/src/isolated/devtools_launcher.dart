@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -37,8 +38,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<void> launch(Uri vmServiceUri) async {
-    if (_devToolsProcess != null) {
-      // DevTools is already running.
+    if (_devToolsProcess != null && _devToolsUri != null) {
+      // DevTools is already running - open a chrome window to _devToolsUri.
+      await Chrome.start([_devToolsUri.toString()]);
       return;
     }
 
