@@ -115,7 +115,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
   local flutter_engine_flag=""
   local local_engine_flag=""
-  local flutter_framework="${framework_path}/Flutter.framework"
+  local flutter_framework="${framework_path}/Flutter.xcframework"
 
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -135,7 +135,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
       exit -1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
+    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.xcframework"
   fi
 
   local bitcode_flag=""
