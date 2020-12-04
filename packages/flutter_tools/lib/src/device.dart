@@ -835,6 +835,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.disableDds = false,
+    this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
@@ -862,9 +863,11 @@ class DebuggingOptions {
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
+    this.nativeNullAssertions = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
+      this.dartEntrypointArgs = const <String>[],
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
@@ -895,13 +898,15 @@ class DebuggingOptions {
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
-      nullAssertions = false;
+      nullAssertions = false,
+      nativeNullAssertions = false;
 
   final bool debuggingEnabled;
 
   final BuildInfo buildInfo;
   final bool startPaused;
   final String dartFlags;
+  final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
   final bool disableDds;
   final bool enableSoftwareRendering;
@@ -943,6 +948,12 @@ class DebuggingOptions {
   final bool fastStart;
 
   final bool nullAssertions;
+
+  /// Additional null runtime checks inserted for web applications.
+  ///
+  /// See also:
+  ///   * https://github.com/dart-lang/sdk/blob/master/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
+  final bool nativeNullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }

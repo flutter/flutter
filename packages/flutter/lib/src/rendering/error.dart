@@ -76,8 +76,8 @@ class RenderErrorBox extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  void performResize() {
-    size = constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
   }
 
   /// The distance to place around the text.

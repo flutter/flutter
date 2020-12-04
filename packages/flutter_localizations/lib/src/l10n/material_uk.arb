@@ -59,7 +59,7 @@
   "remainingTextFieldCharacterCountOther": "Залишилося $remainingCount символу",
   "refreshIndicatorSemanticLabel": "Оновити",
   "moreButtonTooltip": "Інші",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "дд/мм/рррр",
   "selectYearSemanticsLabel": "Виберіть рік",
   "unspecifiedDate": "Дата",

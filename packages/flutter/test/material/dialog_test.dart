@@ -1813,7 +1813,7 @@ void main() {
             SimpleDialogOption(
               child: const Text('X'),
               onPressed: () {
-                Navigator.of(context)!.pop();
+                Navigator.of(context).pop();
               },
             ),
           ],

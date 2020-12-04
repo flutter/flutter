@@ -108,7 +108,7 @@ abstract class CupertinoLocalizations {
 
   /// Semantics label for the given hour value in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
-  String datePickerHourSemanticsLabel(int hour);
+  String? datePickerHourSemanticsLabel(int hour);
 
   /// Minute that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given minute value.
@@ -122,7 +122,7 @@ abstract class CupertinoLocalizations {
 
   /// Semantics label for the given minute value in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
-  String datePickerMinuteSemanticsLabel(int minute);
+  String? datePickerMinuteSemanticsLabel(int minute);
 
   /// The order of the date elements that will be shown in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
@@ -190,7 +190,7 @@ abstract class CupertinoLocalizations {
   /// [CupertinoTimerPicker] when selected hour value is `hour`.
   /// This function will deal with pluralization based on the `hour` parameter.
   // The global version uses the translated string from the arb file.
-  String timerPickerHourLabel(int hour);
+  String? timerPickerHourLabel(int hour);
 
   /// All possible hour labels that appears next to the hour picker in
   /// [CupertinoTimerPicker]
@@ -200,7 +200,7 @@ abstract class CupertinoLocalizations {
   /// [CupertinoTimerPicker] when selected minute value is `minute`.
   /// This function will deal with pluralization based on the `minute` parameter.
   // The global version uses the translated string from the arb file.
-  String timerPickerMinuteLabel(int minute);
+  String? timerPickerMinuteLabel(int minute);
 
   /// All possible minute labels that appears next to the minute picker in
   /// [CupertinoTimerPicker]
@@ -210,7 +210,7 @@ abstract class CupertinoLocalizations {
   /// [CupertinoTimerPicker] when selected minute value is `second`.
   /// This function will deal with pluralization based on the `second` parameter.
   // The global version uses the translated string from the arb file.
-  String timerPickerSecondLabel(int second);
+  String? timerPickerSecondLabel(int second);
 
   /// All possible second labels that appears next to the second picker in
   /// [CupertinoTimerPicker]
@@ -234,7 +234,7 @@ abstract class CupertinoLocalizations {
 
   /// The default placeholder used in [CupertinoSearchTextField].
   // The global version uses the translated string from the arb file.
-  String get searchTextFieldPlaceholerLabel;
+  String get searchTextFieldPlaceholderLabel;
 
   /// Label read out by accessibility tools (VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
@@ -428,7 +428,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get selectAllButtonLabel => 'Select All';
 
   @override
-  String get searchTextFieldPlaceholerLabel => 'Search';
+  String get searchTextFieldPlaceholderLabel => 'Search';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';

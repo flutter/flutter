@@ -25,8 +25,6 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
-enum _TextFieldType { material, adaptive }
-
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(
   /// The build context for the TextField.
@@ -389,8 +387,7 @@ class TextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
-  }) : _textFieldType = _TextFieldType.material,
-       assert(textAlign != null),
+  }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -401,7 +398,6 @@ class TextField extends StatefulWidget {
        assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
-       assert(maxLengthEnforcement != null),
        assert(
          maxLengthEnforced || maxLengthEnforcement == MaxLengthEnforcement.enforced,
          'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
@@ -511,8 +507,7 @@ class TextField extends StatefulWidget {
     this.scrollPhysics,
     this.autofillHints,
     this.restorationId,
-  }) : _textFieldType = _TextFieldType.adaptive,
-       assert(textAlign != null),
+  }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -563,8 +558,6 @@ class TextField extends StatefulWidget {
            paste: true,
          )),
        super(key: key);
-
-  final _TextFieldType _textFieldType;
 
   /// Controls the text being edited.
   ///
@@ -767,9 +760,9 @@ class TextField extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [EditableText.onSubmitted] for an example of how to handle moving to
-  ///    the next/previous field when using [TextInputAction.next] and
-  ///    [TextInputAction.previous] for [textInputAction].
+  ///  * [TextInputAction.next] and [TextInputAction.previous], which
+  ///    automatically shift the focus to the next/previous focusable item when
+  ///    the user is done editing.
   final ValueChanged<String>? onSubmitted;
 
   /// {@macro flutter.widgets.editableText.onAppPrivateCommand}
@@ -1231,61 +1224,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
-  Widget _buildCupertinoTextField(BuildContext context) {
-    return CupertinoTextField(
-      key: widget.key,
-      controller: widget.controller,
-      focusNode: widget.focusNode,
-      placeholder: widget.decoration?.hintText,
-      placeholderStyle: widget.decoration?.hintStyle ?? const TextStyle(fontWeight: FontWeight.w400, color: CupertinoColors.placeholderText),
-      prefix: widget.decoration?.prefix,
-      suffix: widget.decoration?.suffix,
-      keyboardType: widget.keyboardType,
-      textInputAction: widget.textInputAction,
-      textCapitalization: widget.textCapitalization,
-      style: widget.style,
-      strutStyle: widget.strutStyle,
-      textAlign: widget.textAlign,
-      textAlignVertical: widget.textAlignVertical,
-      readOnly: widget.readOnly,
-      toolbarOptions: widget.toolbarOptions,
-      showCursor: widget.showCursor,
-      autofocus: widget.autofocus,
-      obscuringCharacter: widget.obscuringCharacter,
-      obscureText: widget.obscureText,
-      autocorrect: widget.autocorrect,
-      smartDashesType: widget.smartDashesType,
-      smartQuotesType: widget.smartQuotesType,
-      enableSuggestions: widget.enableSuggestions,
-      maxLines: widget.maxLines,
-      minLines: widget.minLines,
-      expands: widget.expands,
-      maxLength: widget.maxLength,
-      maxLengthEnforced: widget.maxLengthEnforced,
-      maxLengthEnforcement: widget.maxLengthEnforcement,
-      onChanged: widget.onChanged,
-      onEditingComplete: widget.onEditingComplete,
-      onSubmitted: widget.onSubmitted,
-      inputFormatters: widget.inputFormatters,
-      enabled: widget.enabled,
-      cursorWidth: widget.cursorWidth,
-      cursorHeight: widget.cursorHeight,
-      cursorColor: widget.cursorColor,
-      selectionHeightStyle: widget.selectionHeightStyle,
-      selectionWidthStyle: widget.selectionWidthStyle,
-      keyboardAppearance: widget.keyboardAppearance,
-      scrollPadding: widget.scrollPadding,
-      dragStartBehavior: widget.dragStartBehavior,
-      enableInteractiveSelection: widget.enableInteractiveSelection,
-      onTap: widget.onTap,
-      scrollController: widget.scrollController,
-      scrollPhysics: widget.scrollPhysics,
-      autofillHints: widget.autofillHints,
-      restorationId: widget.restorationId,
-    );
-  }
-
-  Widget _buildMaterialTextField(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
@@ -1476,28 +1416,5 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    switch (widget._textFieldType) {
-      case _TextFieldType.material:
-        return _buildMaterialTextField(context);
-
-      case _TextFieldType.adaptive: {
-        final ThemeData theme = Theme.of(context);
-        assert(theme.platform != null);
-        switch (theme.platform) {
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            return _buildCupertinoTextField(context);
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            return _buildMaterialTextField(context);
-        }
-      }
-    }
   }
 }
