@@ -222,4 +222,15 @@ public class PlatformPluginTest {
 
     verify(mockFragmentActivity, times(1)).setRequestedOrientation(0);
   }
+
+  @Test
+  public void performsDefaultBehaviorWhenNoDelegateProvided() {
+    Activity mockActivity = mock(Activity.class);
+    PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+
+    verify(mockActivity, times(1)).finish();
+  }
 }
