@@ -320,12 +320,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             runner,
             ({Completer<DebugConnectionInfo> connectionInfoCompleter,
               Completer<void> appStartedCompleter}) {
-                return runner.attach(
-                  connectionInfoCompleter: connectionInfoCompleter,
-                  appStartedCompleter: appStartedCompleter,
-                  allowExistingDdsInstance: true,
-                );
-              },
+              return runner.attach(
+                connectionInfoCompleter: connectionInfoCompleter,
+                appStartedCompleter: appStartedCompleter,
+                allowExistingDdsInstance: true,
+              );
+            },
             device,
             null,
             true,
