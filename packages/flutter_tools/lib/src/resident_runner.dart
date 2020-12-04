@@ -233,6 +233,7 @@ class FlutterDevice {
       // FYI, this message is used as a sentinel in tests.
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
+      bool existingDds = false;
       vm_service.VmService service;
       if (!disableDds) {
         void handleError(Exception e) {
@@ -256,6 +257,8 @@ class FlutterDevice {
               (e.errorCode != dds.DartDevelopmentServiceException.existingDdsInstanceError)) {
             handleError(e);
             return;
+          } else {
+            existingDds = true;
           }
         } on Exception catch (e) {
           handleError(e);
@@ -278,7 +281,8 @@ class FlutterDevice {
               printStructuredErrorLogMethod: printStructuredErrorLogMethod,
               device: device,
             ),
-            device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+            if (!existingDds)
+              device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
           ]
         ) as vm_service.VmService;
       } on Exception catch (exception) {
