@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
-import 'package:flutter_tools/src/test/web_test_compiler.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -38,6 +37,7 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'flutter_web_goldens.dart';
 import 'test_compiler.dart';
+import 'web_test_compiler.dart';
 
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(this._server, this._config, this._root, {
