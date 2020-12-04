@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
+import 'package:flutter_tools/src/test/web_test_compiler.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -45,7 +46,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     this.updateGoldens,
     this.nullAssertions,
     @required this.buildInfo,
-    @required this.webMemoryFS,
+    @required this.compiledTests,
     @required FileSystem fileSystem,
     @required PackageConfig flutterToolPackageConfig,
     @required ChromiumLauncher chromiumLauncher,
@@ -78,7 +79,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  final WebMemoryFS webMemoryFS;
+  final WebCompilationResult compiledTests;
   final BuildInfo buildInfo;
   final FileSystem _fileSystem;
   final PackageConfig _flutterToolPackageConfig;
@@ -106,7 +107,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     bool pauseAfterLoad = false,
     bool nullAssertions = false,
     @required BuildInfo buildInfo,
-    @required WebMemoryFS webMemoryFS,
+    @required WebCompilationResult compiledTests,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required ChromiumLauncher chromiumLauncher,
@@ -131,7 +132,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       shellPath: shellPath,
       updateGoldens: updateGoldens,
       buildInfo: buildInfo,
-      webMemoryFS: webMemoryFS,
+      compiledTests: compiledTests,
       flutterToolPackageConfig: packageConfig,
       fileSystem: fileSystem,
       chromiumLauncher: chromiumLauncher,
@@ -150,12 +151,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     return buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')
       ? WebRendererMode.canvaskit
       : WebRendererMode.html;
-  }
-
-  NullSafetyMode get _nullSafetyMode {
-    return buildInfo.nullSafetyMode == NullSafetyMode.sound
-      ? NullSafetyMode.sound
-      : NullSafetyMode.unsound;
   }
 
   final Configuration _config;
@@ -191,10 +186,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk => _fileSystem.file(
-    _artifacts.getArtifactPath(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
+    _artifacts.getArtifactPath(kDartSdkJsArtifactMap[_rendererMode][_currentMode]));
 
   File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
+    _artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[_rendererMode][_currentMode]));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
@@ -211,7 +206,14 @@ class FlutterWebPlatform extends PlatformPlugin {
     'host.dart.js',
   ));
 
+  // TODO(jonahwilliams): this only works because the runner loads a single
+  // test suite at a time.
+  NullSafetyMode _currentMode;
+
   Future<shelf.Response> _handleTestRequest(shelf.Request request) async {
+    assert(_currentMode != null);
+    final WebMemoryFS webMemoryFS = _currentMode == NullSafetyMode.sound ? compiledTests.nullSafeSet : compiledTests.nullUnsafeSet;
+
     if (request.url.path.endsWith('.dart.browser_test.dart.js')) {
       final String leadingPath = request.url.path.split('.browser_test.dart.js')[0];
       final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.bootstrap.js';
@@ -405,6 +407,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     final Uri suiteUrl = url.resolveUri(_fileSystem.path.toUri(_fileSystem.path.withoutExtension(
         _fileSystem.path.relative(path, from: _fileSystem.path.join(_root, 'test'))) + '.html'));
     final String relativePath = _fileSystem.path.relative(_fileSystem.path.normalize(path), from: _fileSystem.currentDirectory.path);
+    _currentMode = compiledTests.nullSafetyModes[path];
     final RunnerSuite suite = await _browserManager.load(relativePath, suiteUrl, suiteConfig, message, onDone: () async {
       await _browserManager.close();
       _browserManager = null;

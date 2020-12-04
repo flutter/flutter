@@ -42,30 +42,90 @@ class WebTestCompiler {
   final ProcessManager _processManager;
   final Config _config;
 
-  Future<WebMemoryFS> initialize({
+  Future<WebCompilationResult> initialize({
     @required Directory projectDirectory,
-    @required String testOutputDir,
     @required List<String> testFiles,
     @required BuildInfo buildInfo,
   }) async {
-    LanguageVersion languageVersion = LanguageVersion(2, 8);
-    Artifact platformDillArtifact;
-    // TODO(jonahwilliams): to support autodetect this would need to partition the source code into a
-    // a sound and unsound set and perform separate compilations.
-    final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
-    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
-      platformDillArtifact = Artifact.webPlatformKernelDill;
-      if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-        extraFrontEndOptions.add('--no-sound-null-safety');
+    final Map<String, NullSafetyMode> nullSafetyModes = <String, NullSafetyMode>{};
+    final List<String> nullSafeTestSet = <String>[];
+    final List<String> nonNullSafeTestSet = <String>[];
+    for (final String testFile in testFiles) {
+      LanguageVersion languageVersion;
+      switch (buildInfo.nullSafetyMode) {
+        case NullSafetyMode.sound:
+          languageVersion = nullSafeVersion;
+          break;
+        case NullSafetyMode.unsound:
+          languageVersion = LanguageVersion(2, 8);
+          break;
+        case NullSafetyMode.autodetect:
+          languageVersion = determineLanguageVersion(
+            _fileSystem.file(testFile),
+            buildInfo.packageConfig.packageOf(_fileSystem.file(testFile).absolute.uri),
+          );
+          break;
       }
-    } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-      languageVersion = nullSafeVersion;
-      if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-        extraFrontEndOptions.add('--sound-null-safety');
+      if (languageVersion.major >= nullSafeVersion.major &&
+          languageVersion.minor >= nullSafeVersion.minor) {
+        nullSafeTestSet.add(testFile);
+        nullSafetyModes[testFile] = NullSafetyMode.sound;
+      } else {
+        nonNullSafeTestSet.add(testFile);
+        nullSafetyModes[testFile] = NullSafetyMode.unsound;
       }
     }
-
+    final List<String> nonNullSafeOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
+    if (!nonNullSafeOptions.contains('--no-sound-null-safety')) {
+      nonNullSafeOptions.add('--no-sound-null-safety');
+    }
+    final List<String> nullSafeOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
+    if (!nullSafeOptions.contains('--sound-null-safety')) {
+      nullSafeOptions.add('--sound-null-safety');
+    }
+    final List<WebMemoryFS> results = await Future.wait(<Future<WebMemoryFS>>[
+      // not null safe
+      _compileTestSet(
+        nonNullSafeTestSet,
+        buildInfo,
+        projectDirectory,
+        LanguageVersion(2, 8),
+        nonNullSafeOptions,
+        Artifact.webPlatformKernelDill
+      ),
+      // null safe
+      _compileTestSet(
+        nullSafeTestSet,
+        buildInfo,
+        projectDirectory,
+        LanguageVersion(2, 12),
+        nullSafeOptions,
+        Artifact.webPlatformSoundKernelDill,
+      ),
+    ]);
+    return WebCompilationResult(
+      nullSafetyModes,
+      results[1],
+      results[0],
+    );
+  }
+  
+  Future<WebMemoryFS> _compileTestSet(
+    List<String> testFiles,
+    BuildInfo buildInfo,
+    Directory projectDirectory,
+    LanguageVersion languageVersion,
+    List<String> extraFrontEndOptions,
+    Artifact platformDillArtifact,
+  ) async {
+    if (testFiles.isEmpty) {
+      return null;
+    }
+    final String testOutputDir = _fileSystem.systemTempDirectory
+      .createTempSync('flutter_test.')
+      .absolute
+      .uri
+      .toFilePath();
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
     final List<File> generatedFiles = <File>[];
@@ -148,4 +208,12 @@ class WebTestCompiler {
     return WebMemoryFS()
       ..write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
+}
+
+class WebCompilationResult {
+  WebCompilationResult(this.nullSafetyModes, this.nullSafeSet, this.nullUnsafeSet);
+
+  final Map<String, NullSafetyMode> nullSafetyModes;
+  final WebMemoryFS nullSafeSet;
+  final WebMemoryFS nullUnsafeSet;
 }

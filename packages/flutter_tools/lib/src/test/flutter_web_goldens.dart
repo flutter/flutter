@@ -146,6 +146,7 @@ class TestGoldenComparatorProcess {
   }
 
   static String generateBootstrap(Uri testUri) {
+    final String embeddedUrl = Uri.encodeFull(testUri.toString());
     final File testConfigFile = findTestConfigFile(globals.fs.file(testUri));
     // Generate comparator process for the file.
     return '''
@@ -157,7 +158,7 @@ import 'package:flutter_test/flutter_test.dart';
 ${testConfigFile != null ? "import '${Uri.file(testConfigFile.path)}' as test_config;" : ""}
 
 void main() async {
-  LocalFileComparator comparator = LocalFileComparator(Uri.parse('$testUri'));
+  LocalFileComparator comparator = LocalFileComparator(Uri.parse('$embeddedUrl'));
   goldenFileComparator = comparator;
 
   ${testConfigFile != null ? 'test_config.testExecutable(() async {' : ''}

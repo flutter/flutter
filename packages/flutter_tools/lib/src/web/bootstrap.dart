@@ -104,6 +104,7 @@ String generateTestEntrypoint({
   @required String absolutePath,
   @required LanguageVersion languageVersion,
 }) {
+  final String embeddedUrl = Uri.encodeFull(absolutePath);
   return '''
   // @dart = ${languageVersion.major}.${languageVersion.minor}
   import 'org-dartlang-app:///$relativeTestPath' as test;
@@ -119,7 +120,7 @@ String generateTestEntrypoint({
   Future<void> main() async {
     ui.debugEmulateFlutterTesterEnvironment = true;
     await ui.webOnlyInitializePlatform();
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$absolutePath'));
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$embeddedUrl'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
     internalBootstrapBrowserTest(() => test.main);

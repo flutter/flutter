@@ -12,7 +12,6 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
-import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_wrapper.dart';
@@ -118,12 +117,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--exclude-tags', excludeTags],
     ];
     if (web) {
-      final String tempBuildDir = globals.fs.systemTempDirectory
-        .createTempSync('flutter_test.')
-        .absolute
-        .uri
-        .toFilePath();
-      final WebMemoryFS result = await WebTestCompiler(
+      final WebCompilationResult result = await WebTestCompiler(
         logger: globals.logger,
         fileSystem: globals.fs,
         platform: globals.platform,
@@ -132,9 +126,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         config: globals.config,
       ).initialize(
         projectDirectory: flutterProject.directory,
-        testOutputDir: tempBuildDir,
         testFiles: testFiles,
         buildInfo: buildInfo,
+
       );
       if (result == null) {
         throwToolExit('Failed to compile tests');
@@ -156,7 +150,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             pauseAfterLoad: startPaused,
             nullAssertions: nullAssertions,
             buildInfo: buildInfo,
-            webMemoryFS: result,
+            compiledTests: result,
             logger: globals.logger,
             fileSystem: globals.fs,
             artifacts: globals.artifacts,
