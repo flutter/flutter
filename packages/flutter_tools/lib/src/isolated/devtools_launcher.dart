@@ -40,7 +40,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   Future<void> launch(Uri vmServiceUri) async {
     if (_devToolsProcess != null && _devToolsUri != null) {
       // DevTools is already running - open a chrome window to _devToolsUri.
-      await Chrome.start([_devToolsUri.toString()]);
+      await Chrome.start(<String>[_devToolsUri.toString()]);
       return;
     }
 
