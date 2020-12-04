@@ -1249,7 +1249,6 @@ void main() {
       CupertinoApp(
         home: CupertinoPageScaffold(
           child: CustomScrollView(
-            controller: ScrollController(),
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
                 trailing: trailingText,
