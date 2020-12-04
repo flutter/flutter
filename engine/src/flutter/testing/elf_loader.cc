@@ -69,8 +69,8 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary() {
       fml::paths::JoinPaths({GetFixturesPath(), kAOTAppELFSplitFileName});
 
   if (!fml::IsFile(elf_path)) {
-    FML_LOG(ERROR) << "App AOT file does not exist for this fixture. Attempts "
-                      "to launch the Dart VM with these AOT symbols will fail.";
+    // We do not log here, as there is no expectation for a split library to
+    // exist.
     return {};
   }
 
