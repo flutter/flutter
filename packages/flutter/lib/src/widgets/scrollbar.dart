@@ -765,6 +765,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
+  bool _hoverIsActive = false;
 
 
   /// Used to paint the scrollbar.
@@ -1102,17 +1103,37 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return scrollbarPainter.hitTestInteractive(localOffset);
   }
 
+  /// Cancels the fade out animation so the scrollbar will remain visible for
+  /// interaction.
+  ///
   /// Can be overridden by subclasses to respond to a [PointerHoverEvent].
   ///
   /// Helper methods [isPointerOverScrollbar], [isPointerOverThumb], and
   /// [isPointerOverTrack] can be used to determine the location of the pointer
   /// relative to the painter scrollbar elements.
   @protected
-  void handleHover(PointerHoverEvent event) { }
+  @mustCallSuper
+  void handleHover(PointerHoverEvent event) {
+    // Check if the position of the pointer falls over the painted scrollbar
+    if (isPointerOverScrollbar(event.position)) {
+      _hoverIsActive = true;
+      _fadeoutTimer?.cancel();
+    } else if (_hoverIsActive) {
+      // Pointer is not over painted scrollbar.
+      _hoverIsActive = false;
+      _maybeStartFadeoutTimer();
+    }
+  }
 
+  /// Initiates the fade out animation.
+  ///
   /// Can be overridden by subclasses to respond to a [PointerExitEvent].
   @protected
-  void handleHoverExit(PointerExitEvent event) { }
+  @mustCallSuper
+  void handleHoverExit(PointerExitEvent event) {
+    _hoverIsActive = false;
+    _maybeStartFadeoutTimer();
+  }
 
   @override
   void dispose() {

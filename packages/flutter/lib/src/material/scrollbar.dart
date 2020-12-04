@@ -172,14 +172,13 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void handleHover(PointerHoverEvent event) {
+    super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position)) {
-      print('coming in');
       // Pointer exited hovering the scrollbar
       setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();
-    } else if (_hoverIsActive){
-      print('going away');
+    } else if (_hoverIsActive) {
       // Pointer is not over painted scrollbar.
       setState(() { _hoverIsActive = false; });
       _hoverAnimationController.reverse();
@@ -188,6 +187,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void handleHoverExit(PointerExitEvent event) {
+    super.handleHoverExit(event);
     setState(() { _hoverIsActive = false; });
     _hoverAnimationController.reverse();
   }
