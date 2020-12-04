@@ -1,12 +1,15 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_server/devtools_server.dart' as devtools_server;
+import 'dart:async';
+
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/io.dart' as io;
 import '../base/logger.dart';
+import '../convert.dart';
 import '../resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses the server package.
@@ -15,47 +18,75 @@ import '../resident_runner.dart';
 /// a devtools dep in google3.
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
+    @required ProcessManager processManager,
+    @required String pubExecutable,
     @required Logger logger,
-  }) : _logger = logger;
+  })  : _processManager = processManager,
+        _pubExecutable = pubExecutable,
+        _logger = logger;
 
+  final ProcessManager _processManager;
+  final String _pubExecutable;
   final Logger _logger;
 
-  io.HttpServer _devtoolsServer;
+  io.Process _devToolsProcess;
+  Uri _devToolsUri;
+
+  static final RegExp _devToolsPattern =
+      RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
   @override
-  Future<void> launch(Uri observatoryAddress) async {
+  Future<void> launch(Uri vmServiceUri) async {
     try {
-      await serve();
-      await devtools_server.launchDevTools(
-        <String, dynamic>{
-          'reuseWindows': true,
-        },
-        observatoryAddress,
-        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
-        false,  // headless mode,
-        false,  // machine mode
-      );
+      _devToolsProcess = await _processManager.start(<String>[
+        _pubExecutable,
+        'global',
+        'run',
+        'devtools',
+        if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
+      ]);
+      final Completer<Uri> completer = Completer<Uri>();
+      _devToolsProcess.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+            print(line);
+        final Match match = _devToolsPattern.firstMatch(line);
+        if (match != null) {
+          // We are trying to pull "http://127.0.0.1:9101" from "Serving
+          // DevTools at http://127.0.0.1:9101.". `match[1]` will return
+          // "http://127.0.0.1:9101.", and we need to trim the trailing period
+          // so that we don't throw an exception from `Uri.parse`.
+          String uri = match[1];
+          if (uri.endsWith('.')) {
+            uri = uri.substring(0, uri.length - 1);
+          }
+          completer.complete(Uri.parse(uri));
+        }
+        _logger.printTrace(line);
+      });
+      _devToolsProcess.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(_logger.printError);
+      _devToolsUri = await completer.future;
     } on Exception catch (e, st) {
-      _logger.printTrace('Failed to launch DevTools: $e\n$st');
+      _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
   }
 
   @override
   Future<DevToolsServerAddress> serve() async {
-    try {
-      _devtoolsServer ??= await devtools_server.serveDevTools(
-        enableStdinCommands: false,
-      );
-      return DevToolsServerAddress(_devtoolsServer.address.host, _devtoolsServer.port);
-    } on Exception catch (e, st) {
-      _logger.printTrace('Failed to serve DevTools: $e\n$st');
+    await launch(null);
+    if (_devToolsUri == null) {
       return null;
     }
+    return DevToolsServerAddress(_devToolsUri.host, _devToolsUri.port);
   }
 
   @override
   Future<void> close() async {
-    await _devtoolsServer?.close();
-    _devtoolsServer = null;
+    _devToolsProcess.kill();
+    await _devToolsProcess.exitCode;
   }
 }

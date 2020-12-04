@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/artifacts.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
@@ -150,7 +151,11 @@ Future<void> main(List<String> args) async {
        TemplateRenderer: () => const MustacheTemplateRenderer(),
        // The devtools launcher is not supported in google3 because it depends on
        // devtools source code.
-       DevtoolsLauncher: () => DevtoolsServerLauncher(logger: globals.logger),
+       DevtoolsLauncher: () => DevtoolsServerLauncher(
+         processManager: globals.processManager,
+         pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+         logger: globals.logger,
+       ),
        Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,

@@ -39,6 +39,7 @@ import 'ios/ios_workflow.dart';
 import 'ios/iproxy.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
+import 'isolated/devtools_launcher.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
@@ -46,6 +47,7 @@ import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
+import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
@@ -177,6 +179,11 @@ Future<T> runInContext<T>(
         ),
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
+      ),
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        logger: globals.logger,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,

@@ -1624,8 +1624,11 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
-  Future<void> launch(Uri observatoryAddress);
+  /// Launch a Dart DevTools process, optionally targeting a specific VM Service
+  /// URI if [vmServiceUri] is non-null.
+  Future<void> launch(Uri vmServiceUri);
 
+  /// Serve Dart DevTools and return the host and port they are available on.
   Future<DevToolsServerAddress> serve();
 
   Future<void> close();
