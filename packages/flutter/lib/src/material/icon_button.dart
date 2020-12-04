@@ -324,7 +324,7 @@ class IconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
-    
+
     final double currentIconSize = (iconSize ?? theme.iconTheme.size) ?? 24;
 
     Color? currentColor;

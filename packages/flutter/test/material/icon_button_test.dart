@@ -43,7 +43,7 @@ void main() {
     await tester.tap(find.byType(IconButton));
     expect(mockOnPressedFunction.called, 1);
   });
-  
+
   testWidgets('test icon respects icon theme size', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
