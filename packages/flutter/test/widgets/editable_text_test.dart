@@ -6581,8 +6581,11 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgets('default truncate behaviors with different platforms\'s', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
+    testWidgets('enforced composing truncated', (WidgetTester tester) async {
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        maxLength,
+        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+      );
       final Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -6621,7 +6624,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgets('enforced composing truncated', (WidgetTester tester) async {
+    testWidgets('default truncate behaviors with different platforms\'s', (WidgetTester tester) async {
       final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
       final Widget widget = MaterialApp(
         home: EditableText(
@@ -6669,8 +6672,12 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
-    testWidgets('composing range removed with different platforms\'s', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
+        maxLength,
+        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+      );
       final Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -6703,7 +6710,8 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
-    testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('composing range removed with different platforms\'s', (WidgetTester tester) async {
       final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
       final Widget widget = MaterialApp(
         home: EditableText(
