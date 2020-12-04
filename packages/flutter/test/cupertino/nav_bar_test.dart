@@ -1189,15 +1189,17 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends', 
     (WidgetTester tester) async {
+    const Text trailingText = Text('Bar Button');
+    const Text titleText = Text('Large Title');
+
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
           child: CustomScrollView(
-            controller: ScrollController(),
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
-                trailing: Text('Bar Button'),
-                largeTitle: Text('Large Title'),
+                trailing: trailingText,
+                largeTitle: titleText,
               ),
               SliverToBoxAdapter(
                 child: Container(
@@ -1209,34 +1211,40 @@ void main() {
         ),
       ),
     );
+    
+    final Finder trailingTextFinder = find.byWidget(trailingText).first;
+    final Finder titleTextFinder = find.byWidget(titleText).first;
 
-    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
     // Drag for overscroll
     await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
     await tester.pump();
 
-    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
     expect(
-      stretchedTrailingTextToLargeTitleOffset.dy, 
-      greaterThan(initialTrailingTextToLargeTitleOffset.dy)
+      stretchedTrailingTextToLargeTitleOffset.dy.abs(), 
+      greaterThan(initialTrailingTextToLargeTitleOffset.dy.abs())
     );
 
     // Ensure overscroll retracts to original size after releasing gesture
     await tester.pumpAndSettle();
 
-    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
     expect(
-      finalTrailingTextToLargeTitleOffset.dy,
-      initialTrailingTextToLargeTitleOffset.dy,
+      finalTrailingTextToLargeTitleOffset.dy.abs(),
+      initialTrailingTextToLargeTitleOffset.dy.abs(),
     );
   });
 
   testWidgets(
     'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false', 
     (WidgetTester tester) async {
+    const Text trailingText = Text('Bar Button');
+    const Text titleText = Text('Large Title');
+
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -1244,8 +1252,8 @@ void main() {
             controller: ScrollController(),
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
-                trailing: Text('Bar Button'),
-                largeTitle: Text('Large Title'),
+                trailing: trailingText,
+                largeTitle: titleText,
                 stretch: false,
               ),
               SliverToBoxAdapter(
@@ -1259,27 +1267,30 @@ void main() {
       ),
     );
 
-    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+    final Finder trailingTextFinder = find.byWidget(trailingText).first;
+    final Finder titleTextFinder = find.byWidget(titleText).first;
+
+    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
     // Drag for overscroll
     await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
     await tester.pump();
 
-    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
     expect(
-      stretchedTrailingTextToLargeTitleOffset.dy, 
-      initialTrailingTextToLargeTitleOffset.dy,
+      stretchedTrailingTextToLargeTitleOffset.dy.abs(), 
+      initialTrailingTextToLargeTitleOffset.dy.abs(),
     );
 
     // Ensure overscroll is zero after releasing gesture
     await tester.pumpAndSettle();
 
-    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
     expect(
-      finalTrailingTextToLargeTitleOffset.dy,
-      initialTrailingTextToLargeTitleOffset.dy,
+      finalTrailingTextToLargeTitleOffset.dy.abs(),
+      initialTrailingTextToLargeTitleOffset.dy.abs(),
     );
   });
 }
