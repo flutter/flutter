@@ -43,6 +43,26 @@ void main() {
     await tester.tap(find.byType(IconButton));
     expect(mockOnPressedFunction.called, 1);
   });
+  
+  testWidgets('test icon respects icon theme size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: Theme(
+          data: ThemeData(iconTheme: const IconThemeData(size: 10)),
+          child: IconButton(
+            onPressed: mockOnPressedFunction.handler,
+            icon: const Icon(Icons.link),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+    expect(iconButton.size, const Size(48.0, 48.0));
+
+    await tester.tap(find.byType(IconButton));
+    expect(mockOnPressedFunction.called, 1);
+  });
 
   testWidgets('test small icons are sized up to 48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
