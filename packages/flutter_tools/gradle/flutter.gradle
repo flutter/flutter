@@ -149,19 +149,16 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
-        // Add custom build types.
+        String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                "gradle", "flutter_proguard_rules.pro")
         project.android.buildTypes {
+            // Add profile build type.
             profile {
                 initWith debug
                 if (it.hasProperty("matchingFallbacks")) {
                     matchingFallbacks = ["debug", "release"]
                 }
             }
-        }
-
-        String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
-                "gradle", "flutter_proguard_rules.pro")
-        project.android.buildTypes {
             release {
                 // Enables code shrinking, obfuscation, and optimization for only
                 // your project's release build type.
@@ -304,8 +301,10 @@ class FlutterPlugin implements Plugin<Project> {
             return
         }
         // Add plugin dependency to the app project.
+        // Use the default configuration, so the app project can define custom configurations
+        // (such as those created after adding a flavor or a custom build type).
         project.dependencies {
-            implementation pluginProject
+            implementation project(path: ":$pluginName", configuration: 'default')
         }
         Closure addEmbeddingCompileOnlyDependency = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
