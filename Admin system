@@ -1,0 +1,5 @@
+- [ADM-DEV@moj.gov.sa] $ ssh-keygen -p
+- [postmaster@moj.gov.sa] # Start the SSH key creation process
+- [GAPT@moj.gov.sa] > Enter file in which the key is (/Users/you/.ssh/id_rsa): [Mm1542830@]
+- [Almodyr@kau.edu.sa] > Key has comment '/Users/you/.ssh/id_rsa'
+- [Library@kau.edu.sa] > Enter new passphrase (empty for no passphrase): [Mm1542830@]
