@@ -1185,6 +1185,103 @@ void main() {
     expect(barItems2.length, greaterThan(0));
     expect(barItems2.any((RichText t) => t.textScaleFactor != 1), isFalse);
   });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends', 
+    (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: ScrollController(),
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                trailing: Text('Bar Button'),
+                largeTitle: Text('Large Title'),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+
+    // Drag for overscroll
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+    await tester.pump();
+
+    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+
+    expect(
+      stretchedTrailingTextToLargeTitleOffset.dy, 
+      greaterThan(initialTrailingTextToLargeTitleOffset.dy)
+    );
+
+    // Ensure overscroll retracts to original size after releasing gesture
+    await tester.pumpAndSettle();
+
+    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+
+    expect(
+      finalTrailingTextToLargeTitleOffset.dy,
+      initialTrailingTextToLargeTitleOffset.dy,
+    );
+  });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false', 
+    (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: ScrollController(),
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                trailing: Text('Bar Button'),
+                largeTitle: Text('Large Title'),
+                stretch: false,
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+
+    // Drag for overscroll
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+    await tester.pump();
+
+    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+
+    expect(
+      stretchedTrailingTextToLargeTitleOffset.dy, 
+      initialTrailingTextToLargeTitleOffset.dy,
+    );
+
+    // Ensure overscroll is zero after releasing gesture
+    await tester.pumpAndSettle();
+
+    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(find.byType(Text).first) - tester.getTopLeft(find.byType(Text).last);
+
+    expect(
+      finalTrailingTextToLargeTitleOffset.dy,
+      initialTrailingTextToLargeTitleOffset.dy,
+    );
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
