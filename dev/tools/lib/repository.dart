@@ -28,13 +28,8 @@ class Repository {
     this.localUpstream = false,
     this.useExistingCheckout = false,
   })  : git = Git(processManager),
-        _checkoutDirectory = parentDirectory.childDirectory(name),
         assert(localUpstream != null),
         assert(useExistingCheckout != null) {
-    if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
-      stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
-      _checkoutDirectory.deleteSync(recursive: true);
-    }
   }
 
   final String name;
@@ -50,7 +45,21 @@ class Repository {
   /// If the repository will be used as an upstream for a test repo.
   final bool localUpstream;
 
-  void ensureCloned() {
+  Directory _checkoutDirectory;
+
+  /// Directory for the repository checkout.
+  ///
+  /// Since cloning a repository takes a long time, we do not ensure it is
+  /// cloned on the filesystem until this getter is accessed.
+  Directory get checkoutDirectory {
+    if (_checkoutDirectory != null) {
+      return _checkoutDirectory;
+    }
+    _checkoutDirectory = parentDirectory.childDirectory(name);
+    if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
+      stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
+      _checkoutDirectory.deleteSync(recursive: true);
+    }
     if (!_checkoutDirectory.existsSync()) {
       stdio.printTrace('Cloning $name to ${_checkoutDirectory.path}...');
       git.run(
@@ -70,13 +79,6 @@ class Repository {
         }
       }
     }
-  }
-
-  final Directory _checkoutDirectory;
-
-  /// Lazily-loaded directory for the repository checkout.
-  Directory get checkoutDirectory {
-    ensureCloned();
     return _checkoutDirectory;
   }
 
