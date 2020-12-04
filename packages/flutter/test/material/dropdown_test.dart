@@ -1341,6 +1341,131 @@ void main() {
     expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/70177
+  testWidgets('disabledHint behavior test', (WidgetTester tester) async {
+    Widget build({ List<String>? items, ValueChanged<String?>? onChanged, String? value, Widget? hint, Widget? disabledHint }) => buildFrame(
+      items: items,
+      onChanged: onChanged,
+      value: value,
+      hint: hint,
+      disabledHint: disabledHint,
+    );
+
+    // The selected value should be displayed when the button is disabled.
+    await tester.pumpWidget(build(items: menuItems, onChanged: null, value: 'two'));
+    // The dropdown icon and the selected menu item are vertically aligned.
+    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+
+    // If [value] is null, the button is enabled, hint is displayed.
+    await tester.pumpWidget(build(
+      items: menuItems,
+      onChanged: onChanged,
+      value: null,
+      hint: const Text('hint'),
+      disabledHint: const Text('disabledHint'),
+    ));
+    expect(tester.getCenter(find.text('hint')).dy, tester.getCenter(find.byType(Icon)).dy);
+
+    // If [value] is null, the button is disabled, [disabledHint] is displayed when [disabledHint] is non-null.
+    await tester.pumpWidget(build(
+      items: menuItems,
+      onChanged: null,
+      value: null,
+      hint: const Text('hint'),
+      disabledHint: const Text('disabledHint'),
+    ));
+    expect(tester.getCenter(find.text('disabledHint')).dy, tester.getCenter(find.byType(Icon)).dy);
+
+    // If [value] is null, the button is disabled, [hint] is displayed when [disabledHint] is null.
+    await tester.pumpWidget(build(
+      items: menuItems,
+      onChanged: null,
+      value: null,
+      hint: const Text('hint'),
+      disabledHint: null,
+    ));
+    expect(tester.getCenter(find.text('hint')).dy, tester.getCenter(find.byType(Icon)).dy);
+
+    int? getIndex() {
+      final IndexedStack stack = tester.element(find.byType(IndexedStack)).widget as IndexedStack;
+      return stack.index;
+    }
+
+    // If [value], [hint] and [disabledHint] are null, the button is disabled, nothing displayed.
+    await tester.pumpWidget(build(
+      items: menuItems,
+      onChanged: null,
+      value: null,
+      hint: null,
+      disabledHint: null,
+    ));
+    expect(getIndex(), null);
+
+    // If [value], [hint] and [disabledHint] are null, the button is enabled, nothing displayed.
+    await tester.pumpWidget(build(
+      items: menuItems,
+      onChanged: onChanged,
+      value: null,
+      hint: null,
+      disabledHint: null,
+    ));
+    expect(getIndex(), null);
+  });
+
+  testWidgets('DropdownButton selected item color test', (WidgetTester tester) async {
+    Widget build({ ValueChanged<String?>? onChanged, String? value, Widget? hint, Widget? disabledHint }) {
+      return MaterialApp(
+        theme: ThemeData(
+          disabledColor: Colors.pink,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: Column(children: <Widget>[
+              DropdownButtonFormField<String>(
+                style: const TextStyle(
+                  color: Colors.yellow
+                ),
+                disabledHint: disabledHint,
+                hint: hint,
+                items: const <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(
+                    child: Text('one'),
+                    value: 'one',
+                  ),
+                  DropdownMenuItem<String>(
+                    child: Text('two'),
+                    value: 'two',
+                  ),
+                ],
+              value: value,
+              onChanged: onChanged,
+              )
+            ]),
+          ),
+        ),
+      );
+    }
+
+    Color textColor(String text) {
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color!;
+    }
+
+    // The selected value should be displayed when the button is enabled.
+    await tester.pumpWidget(build(onChanged: onChanged, value: 'two'));
+    // The dropdown icon and the selected menu item are vertically aligned.
+    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+    // Selected item has a normal color from [DropdownButtonFormField.style]
+    // when the button is enabled.
+    expect(textColor('two'), Colors.yellow);
+
+    // The selected value should be displayed when the button is disabled.
+    await tester.pumpWidget(build(onChanged: null, value: 'two'));
+    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+    // Selected item has a disabled color from [theme.disabledColor]
+    // when the button is disable.
+    expect(textColor('two'), Colors.pink);
+  });
+
   testWidgets(
     'DropdowwnButton hint displays when the items list is empty, '
     'items is null, and disabledHint is null',

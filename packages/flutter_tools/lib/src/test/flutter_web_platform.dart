@@ -224,6 +224,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
         nullAssertions: nullAssertions,
+        nativeNullAssertions: true,
         bootstrapModule: _fileSystem.path.basename(leadingPath) + '.dart.bootstrap',
         entrypoint: '/' + generatedFile
        ), headers: <String, String>{

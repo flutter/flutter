@@ -1713,8 +1713,10 @@ plugin1=${plugin1.path}
 ''');
       fileSystem.file('out/android_arm/armeabi_v7a_release.pom').createSync(recursive: true);
       fileSystem.file('out/android_arm/armeabi_v7a_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_arm/armeabi_v7a_release.maven-metadata.xml').createSync(recursive: true);
       fileSystem.file('out/android_arm/flutter_embedding_release.jar').createSync(recursive: true);
       fileSystem.file('out/android_arm/flutter_embedding_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_arm/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
 
       fileSystem.file('android/gradlew').createSync(recursive: true);
 
@@ -1810,8 +1812,10 @@ plugin1=${plugin1.path}
 ''');
       fileSystem.file('out/android_arm64/arm64_v8a_release.pom').createSync(recursive: true);
       fileSystem.file('out/android_arm64/arm64_v8a_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/arm64_v8a_release.maven-metadata.xml').createSync(recursive: true);
       fileSystem.file('out/android_arm64/flutter_embedding_release.jar').createSync(recursive: true);
       fileSystem.file('out/android_arm64/flutter_embedding_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
 
       fileSystem.file('android/gradlew').createSync(recursive: true);
 
@@ -1907,8 +1911,10 @@ plugin1=${plugin1.path}
 ''');
       fileSystem.file('out/android_x86/x86_release.pom').createSync(recursive: true);
       fileSystem.file('out/android_x86/x86_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x86/x86_release.maven-metadata.xml').createSync(recursive: true);
       fileSystem.file('out/android_x86/flutter_embedding_release.jar').createSync(recursive: true);
       fileSystem.file('out/android_x86/flutter_embedding_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_x86/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
 
       fileSystem.file('android/gradlew').createSync(recursive: true);
 
@@ -2004,8 +2010,10 @@ plugin1=${plugin1.path}
 ''');
       fileSystem.file('out/android_x64/x86_64_release.pom').createSync(recursive: true);
       fileSystem.file('out/android_x64/x86_64_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x64/x86_64_release.maven-metadata.xml').createSync(recursive: true);
       fileSystem.file('out/android_x64/flutter_embedding_release.jar').createSync(recursive: true);
       fileSystem.file('out/android_x64/flutter_embedding_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_x64/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
 
       fileSystem.file('android/gradlew').createSync(recursive: true);
 
@@ -2153,8 +2161,10 @@ plugin1=${plugin1.path}
 ''');
       fileSystem.file('out/android_arm/armeabi_v7a_release.pom').createSync(recursive: true);
       fileSystem.file('out/android_arm/armeabi_v7a_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_arm/armeabi_v7a_release.maven-metadata.xml').createSync(recursive: true);
       fileSystem.file('out/android_arm/flutter_embedding_release.jar').createSync(recursive: true);
       fileSystem.file('out/android_arm/flutter_embedding_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_arm/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -2254,8 +2264,10 @@ plugin1=${plugin1.path}
 ''');
       fileSystem.file('out/android_arm64/arm64_v8a_release.pom').createSync(recursive: true);
       fileSystem.file('out/android_arm64/arm64_v8a_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/arm64_v8a_release.maven-metadata.xml').createSync(recursive: true);
       fileSystem.file('out/android_arm64/flutter_embedding_release.jar').createSync(recursive: true);
       fileSystem.file('out/android_arm64/flutter_embedding_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -2356,8 +2368,10 @@ plugin1=${plugin1.path}
 ''');
       fileSystem.file('out/android_x86/x86_release.pom').createSync(recursive: true);
       fileSystem.file('out/android_x86/x86_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x86/x86_release.maven-metadata.xml').createSync(recursive: true);
       fileSystem.file('out/android_x86/flutter_embedding_release.jar').createSync(recursive: true);
       fileSystem.file('out/android_x86/flutter_embedding_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_x86/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -2458,8 +2472,10 @@ plugin1=${plugin1.path}
 ''');
       fileSystem.file('out/android_x64/x86_64_release.pom').createSync(recursive: true);
       fileSystem.file('out/android_x64/x86_64_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x64/x86_64_release.maven-metadata.xml').createSync(recursive: true);
       fileSystem.file('out/android_x64/flutter_embedding_release.jar').createSync(recursive: true);
       fileSystem.file('out/android_x64/flutter_embedding_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_x64/flutter_embedding_release.maven-metadata.xml').createSync(recursive: true);
 
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
