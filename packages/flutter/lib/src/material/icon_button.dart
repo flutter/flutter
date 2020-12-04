@@ -158,12 +158,12 @@ class IconButton extends StatelessWidget {
     this.tooltip,
     this.enableFeedback = true,
     this.constraints,
-  })  : assert(padding != null),
-        assert(alignment != null),
-        assert(splashRadius == null || splashRadius > 0),
-        assert(autofocus != null),
-        assert(icon != null),
-        super(key: key);
+  }) : assert(padding != null),
+       assert(alignment != null),
+       assert(splashRadius == null || splashRadius > 0),
+       assert(autofocus != null),
+       assert(icon != null),
+       super(key: key);
 
   /// The size of the icon inside the button.
   ///
@@ -384,15 +384,15 @@ class IconButton extends StatelessWidget {
         highlightColor: highlightColor ?? theme.highlightColor,
         splashColor: splashColor ?? theme.splashColor,
         radius: splashRadius ?? math.max(
-              Material.defaultSplashRadius,
-              (currentIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-              // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-            ),
+          Material.defaultSplashRadius,
+          (currentIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+        ),
       ),
     );
   }
 
-@override
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Widget>('icon', icon, showName: false));
