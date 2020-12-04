@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -258,10 +259,10 @@ class CupertinoTextField extends StatefulWidget {
     @Deprecated(
       'Use maxLengthEnforcement parameter which provides more specific '
       'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.23.0-19.0.pre.'
+      'This feature was deprecated after v1.25.0-5.0.pre.'
     )
     this.maxLengthEnforced = true,
-    this.maxLengthEnforcement = MaxLengthEnforcement.enforced,
+    this.maxLengthEnforcement,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -294,9 +295,8 @@ class CupertinoTextField extends StatefulWidget {
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
-       assert(maxLengthEnforcement != null),
        assert(
-         maxLengthEnforced || maxLengthEnforcement == MaxLengthEnforcement.enforced,
+         maxLengthEnforced || maxLengthEnforcement != null,
          'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
        ),
        assert(scrollPadding != null),
@@ -505,19 +505,17 @@ class CupertinoTextField extends StatefulWidget {
   @Deprecated(
     'Use maxLengthEnforcement parameter which provides more specific '
     'behavior related to the maxLength limit. '
-    'This feature was deprecated after v1.23.0-19.0.pre.'
+    'This feature was deprecated after v1.25.0-5.0.pre.'
   )
   final bool maxLengthEnforced;
 
   /// Determines how the [maxLength] limit should be enforced.
   ///
-  /// Defaults to [MaxLengthEnforcement.enforced].
-  ///
   /// If [MaxLengthEnforcement.none] is set, additional input beyond [maxLength]
   /// will not be enforced by the limit.
   ///
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
-  final MaxLengthEnforcement maxLengthEnforcement;
+  final MaxLengthEnforcement? maxLengthEnforcement;
 
   /// {@macro flutter.widgets.editableText.onChanged}
   final ValueChanged<String>? onChanged;
@@ -637,7 +635,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
-    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: MaxLengthEnforcement.enforced));
+    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
@@ -659,6 +657,32 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+
+  MaxLengthEnforcement? _maxLengthEnforcement;
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
+    if (widget.maxLengthEnforcement != null) {
+      return widget.maxLengthEnforcement!;
+    }
+    if (_maxLengthEnforcement == null) {
+      if (kIsWeb) {
+        _maxLengthEnforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
+      } else {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.windows:
+            _maxLengthEnforcement = MaxLengthEnforcement.enforced;
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.fuchsia:
+            _maxLengthEnforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
+            break;
+        }
+      }
+    }
+    return _maxLengthEnforcement!;
+  }
 
   bool _showSelectionHandles = false;
 
@@ -905,9 +929,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
-    final MaxLengthEnforcement maxLengthEnforcement = widget.maxLengthEnforced
-      ? widget.maxLengthEnforcement
-      : MaxLengthEnforcement.none;
+    final MaxLengthEnforcement maxLengthEnforcement = _effectiveMaxLengthEnforcement;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       LengthLimitingTextInputFormatter(

@@ -359,10 +359,10 @@ class TextField extends StatefulWidget {
     @Deprecated(
       'Use maxLengthEnforcement parameter which provides more specific '
       'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.23.0-19.0.pre.'
+      'This feature was deprecated after v1.25.0-5.0.pre.'
     )
     this.maxLengthEnforced = true,
-    this.maxLengthEnforcement = MaxLengthEnforcement.enforced,
+    this.maxLengthEnforcement,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -399,7 +399,7 @@ class TextField extends StatefulWidget {
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(
-         maxLengthEnforced || maxLengthEnforcement == MaxLengthEnforcement.enforced,
+         maxLengthEnforced || maxLengthEnforcement != null,
          'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
        ),
        assert(scrollPadding != null),
@@ -479,10 +479,10 @@ class TextField extends StatefulWidget {
     @Deprecated(
       'Use maxLengthEnforcement parameter which provides more specific '
       'behavior related to the maxLength limit. '
-      'This feature was deprecated after v1.23.0-19.0.pre.'
+      'This feature was deprecated after v1.25.0-5.0.pre.'
     )
     this.maxLengthEnforced = true,
-    this.maxLengthEnforcement = MaxLengthEnforcement.enforced,
+    this.maxLengthEnforcement,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -518,9 +518,8 @@ class TextField extends StatefulWidget {
        assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
-       assert(maxLengthEnforcement != null),
        assert(
-         maxLengthEnforced || maxLengthEnforcement == MaxLengthEnforcement.enforced,
+         maxLengthEnforced || maxLengthEnforcement != null,
          'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
        ),
        assert(scrollPadding != null),
@@ -732,16 +731,14 @@ class TextField extends StatefulWidget {
   @Deprecated(
     'Use maxLengthEnforcement parameter which provides more specific '
     'behavior related to the maxLength limit. '
-    'This feature was deprecated after v1.23.0-19.0.pre.'
+    'This feature was deprecated after v1.25.0-5.0.pre.'
   )
   final bool maxLengthEnforced;
 
   /// Determines how the [maxLength] limit should be enforced.
   ///
-  /// Defaults to [MaxLengthEnforcement.enforced].
-  ///
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
-  final MaxLengthEnforcement maxLengthEnforcement;
+  final MaxLengthEnforcement? maxLengthEnforcement;
 
   /// {@macro flutter.widgets.editableText.onChanged}
   ///
@@ -957,7 +954,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, defaultValue: true, ifFalse: 'maxLength not enforced'));
-    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: MaxLengthEnforcement.enforced));
+    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
     properties.add(EnumProperty<TextInputAction>('textInputAction', textInputAction, defaultValue: null));
     properties.add(EnumProperty<TextCapitalization>('textCapitalization', textCapitalization, defaultValue: TextCapitalization.none));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
@@ -982,6 +979,32 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+
+  MaxLengthEnforcement? _maxLengthEnforcement;
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
+    if (widget.maxLengthEnforcement != null) {
+      return widget.maxLengthEnforcement!;
+    }
+    if (_maxLengthEnforcement == null) {
+      if (kIsWeb) {
+        _maxLengthEnforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
+      } else {
+        switch (Theme.of(context).platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.windows:
+            _maxLengthEnforcement = MaxLengthEnforcement.enforced;
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.fuchsia:
+            _maxLengthEnforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
+            break;
+        }
+      }
+    }
+    return _maxLengthEnforcement!;
+  }
 
   bool _isHovering = false;
 
@@ -1241,9 +1264,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final MaxLengthEnforcement maxLengthEnforcement = widget.maxLengthEnforced
-      ? widget.maxLengthEnforcement
-      : MaxLengthEnforcement.none;
+    final MaxLengthEnforcement maxLengthEnforcement = _effectiveMaxLengthEnforcement;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       LengthLimitingTextInputFormatter(

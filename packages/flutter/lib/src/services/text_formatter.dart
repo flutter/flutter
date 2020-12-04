@@ -12,6 +12,8 @@ import 'text_editing.dart';
 import 'text_input.dart';
 
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
+/// {@macro flutter.services.textFormatter.effectiveMaxLengthEnforcement}
+///
 /// ### [MaxLengthEnforcement.enforced] versus
 /// [MaxLengthEnforcement.truncateAfterCompositionEnds]
 ///
@@ -364,7 +366,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// then no limit is enforced.
   LengthLimitingTextInputFormatter(
     this.maxLength, {
-    this.maxLengthEnforcement = MaxLengthEnforcement.enforced,
+    this.maxLengthEnforcement,
   }) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   /// The limit on the number of user-perceived characters that this formatter
@@ -410,7 +412,41 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// Defaults to [MaxLengthEnforcement.enforced].
   ///
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
-  final MaxLengthEnforcement maxLengthEnforcement;
+  final MaxLengthEnforcement? maxLengthEnforcement;
+
+  /// {@template flutter.services.textFormatter.effectiveMaxLengthEnforcement}
+  /// ### Platform specific behaviors
+  ///
+  /// Different platforms follow different behaviors by default, according to
+  /// their native behavior.
+  ///  * Android, Windows: [MaxLengthEnforcement.enforced]. The native behavior
+  ///    of these platforms is enforced. The composing will be handled by the
+  ///    IME while users are entering CJK characters.
+  ///  * iOS: [MaxLengthEnforcement.truncateAfterCompositionEnds]. iOS has no
+  ///    default behavior and it requires users implement the behavior
+  ///    themselves. Allow the composition exceed to avoid breaking CJK input.
+  ///  * Web / macOS / linux / fuchsia:
+  ///    [MaxLengthEnforcement.truncateAfterCompositionEnds]. These platforms
+  ///    allow the composition exceed by default.
+  /// {@endtemplate}
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
+    if (maxLengthEnforcement != null) {
+      return maxLengthEnforcement!;
+    } else if (kIsWeb) {
+      return MaxLengthEnforcement.truncateAfterCompositionEnds;
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.windows:
+          return MaxLengthEnforcement.enforced;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.fuchsia:
+          return MaxLengthEnforcement.truncateAfterCompositionEnds;
+      }
+    }
+  }
 
   /// Truncate the given TextEditingValue to maxLength user-perceived
   /// characters.
@@ -456,7 +492,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
     assert(maxLength > 0);
 
-    switch (maxLengthEnforcement) {
+    switch (_effectiveMaxLengthEnforcement) {
       case MaxLengthEnforcement.none:
         return newValue;
       case MaxLengthEnforcement.enforced:
