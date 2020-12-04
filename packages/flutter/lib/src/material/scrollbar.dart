@@ -79,7 +79,6 @@ class Scrollbar extends RawScrollbar {
 
 class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   late AnimationController _hoverAnimationController;
-  late TextDirection _textDirection;
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
 
@@ -124,7 +123,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (widget.thickness != null)
-        return widget.thickness;
+        return widget.thickness!;
       if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
         return _kScrollbarHoverThickness;
       return _kScrollbarThickness;
@@ -139,78 +138,48 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
       duration: const Duration(milliseconds: 200),
     );
     _hoverAnimationController.addListener(() {
-      scrollbarPainter!.updateColors(
-        _thumbColor.resolve(_states),
-        _trackColor.resolve(_states),
-        _trackBorderColor.resolve(_states),
-      );
-      scrollbarPainter!.updateThickness(
-        _thickness.resolve(_states),
-        widget.radius ?? _kScrollbarRadius,
-      );
+      updateScrollbarPainter();
     });
   }
 
   @override
-  void didChangeDependencies() {
-    _textDirection = Directionality.of(context);
-    scrollbarPainter = _buildMaterialScrollbarPainter();
-    super.didChangeDependencies();
-  }
-
-  @override
-  void didUpdateWidget(Scrollbar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    scrollbarPainter!
-      ..thickness = _thickness.resolve(_states)
-      ..radius = widget.radius ?? _kScrollbarRadius;
-  }
-
-  ScrollbarPainter _buildMaterialScrollbarPainter() {
-    return ScrollbarPainter(
-      color: _thumbColor.resolve(_states),
-      trackColor: _trackColor.resolve(_states),
-      trackBorderColor: _trackBorderColor.resolve(_states),
-      textDirection: _textDirection,
-      thickness: widget.thickness,
-      radius: widget.radius ?? _kScrollbarRadius,
-      crossAxisMargin: _kScrollbarMargin,
-      minLength: _kScrollbarMinLength,
-      fadeoutOpacityAnimation: fadeoutOpacityAnimation,
-      padding: MediaQuery.of(context).padding,
-    );
+  void updateScrollbarPainter() {
+    scrollbarPainter
+      ..color = _thumbColor.resolve(_states)
+      ..trackColor = _trackColor.resolve(_states)
+      ..trackBorderColor = _trackBorderColor.resolve(_states)
+      ..textDirection = Directionality.of(context)
+      ..thickness = widget.thickness ?? _thickness.resolve(_states)
+      ..radius = widget.radius ?? _kScrollbarRadius
+      ..crossAxisMargin = _kScrollbarMargin
+      ..minLength = _kScrollbarMinLength
+      ..padding = MediaQuery.of(context).padding;
   }
 
   @override
   void handleThumbPressStart(LongPressStartDetails details) {
     super.handleThumbPressStart(details);
     setState(() { _dragIsActive = true; });
-    scrollbarPainter!.updateColors(
-      _thumbColor.resolve(_states),
-      _trackColor.resolve(_states),
-      _trackBorderColor.resolve(_states),
-    );
+    updateScrollbarPainter();
   }
 
   @override
   void handleThumbPressEnd(LongPressEndDetails details) {
     super.handleThumbPressEnd(details);
     setState(() { _dragIsActive = false; });
-    scrollbarPainter!.updateColors(
-      _thumbColor.resolve(_states),
-      _trackColor.resolve(_states),
-      _trackBorderColor.resolve(_states),
-    );
+    updateScrollbarPainter();
   }
 
   @override
   void handleHover(PointerHoverEvent event) {
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position)) {
+      print('coming in');
       // Pointer exited hovering the scrollbar
       setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();
-    } else {
+    } else if (_hoverIsActive){
+      print('going away');
       // Pointer is not over painted scrollbar.
       setState(() { _hoverIsActive = false; });
       _hoverAnimationController.reverse();

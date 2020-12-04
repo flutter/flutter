@@ -118,7 +118,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   late AnimationController _thicknessAnimationController;
 
   double get _thickness {
-    return widget.thickness + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness);
+    return widget.thickness! + _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
   }
 
   Radius get _radius {
@@ -133,44 +133,22 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       duration: _kScrollbarResizeDuration,
     );
     _thicknessAnimationController.addListener(() {
-      scrollbarPainter!.updateThickness(_thickness, _radius);
+      updateScrollbarPainter();
     });
   }
 
   @override
-  void didChangeDependencies() {
-    if (scrollbarPainter == null) {
-      scrollbarPainter = _buildCupertinoScrollbarPainter(context);
-    } else {
-      scrollbarPainter!
-        ..textDirection = Directionality.of(context)
-        ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
-        ..padding = MediaQuery.of(context).padding;
-    }
-    super.didChangeDependencies();
-  }
-
-  @override
-  void didUpdateWidget(CupertinoScrollbar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    assert(scrollbarPainter != null);
-    scrollbarPainter!.updateThickness(_thickness, _radius);
-  }
-
-  /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
-  ScrollbarPainter _buildCupertinoScrollbarPainter(BuildContext context) {
-    return ScrollbarPainter(
-      color: CupertinoDynamicColor.resolve(_kScrollbarColor, context),
-      textDirection: Directionality.of(context),
-      thickness: _thickness,
-      fadeoutOpacityAnimation: fadeoutOpacityAnimation,
-      mainAxisMargin: _kScrollbarMainAxisMargin,
-      crossAxisMargin: _kScrollbarCrossAxisMargin,
-      radius: _radius,
-      padding: MediaQuery.of(context).padding,
-      minLength: _kScrollbarMinLength,
-      minOverscrollLength: _kScrollbarMinOverscrollLength,
-    );
+  void updateScrollbarPainter() {
+    scrollbarPainter
+      ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
+      ..textDirection = Directionality.of(context)
+      ..thickness = _thickness
+      ..mainAxisMargin = _kScrollbarMainAxisMargin
+      ..crossAxisMargin = _kScrollbarCrossAxisMargin
+      ..radius = _radius
+      ..padding = MediaQuery.of(context).padding
+      ..minLength = _kScrollbarMinLength
+      ..minOverscrollLength = _kScrollbarMinOverscrollLength;
   }
 
   double _pressStartAxisPosition = 0.0;

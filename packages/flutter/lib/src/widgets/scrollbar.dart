@@ -61,19 +61,18 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
     required Color color,
+    required this.fadeoutOpacityAnimation,
     Color trackColor = const Color(0x00000000),
     Color trackBorderColor = const Color(0x00000000),
-    required TextDirection textDirection,
-    required this.thickness,
-    required this.fadeoutOpacityAnimation,
+    TextDirection? textDirection,
+    double thickness = _kScrollbarThickness,
     EdgeInsets padding = EdgeInsets.zero,
-    this.mainAxisMargin = 0.0,
-    this.crossAxisMargin = 0.0,
-    this.radius,
-    this.minLength = _kMinThumbExtent,
+    double mainAxisMargin = 0.0,
+    double crossAxisMargin = 0.0,
+    Radius? radius,
+    double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
   }) : assert(color != null),
-       assert(textDirection != null),
        assert(thickness != null),
        assert(fadeoutOpacityAnimation != null),
        assert(mainAxisMargin != null),
@@ -86,10 +85,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(padding.isNonNegative),
        _color = color,
        _textDirection = textDirection,
+       _thickness = thickness,
+       _radius = radius,
        _padding = padding,
+       _mainAxisMargin = mainAxisMargin,
+       _crossAxisMargin = crossAxisMargin,
+       _minLength = minLength,
        _trackColor = trackColor,
        _trackBorderColor = trackBorderColor,
-       minOverscrollLength = minOverscrollLength ?? minLength {
+       _minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -130,10 +134,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   /// [TextDirection] of the [BuildContext] which dictates the side of the
-  /// screen the scrollbar appears in (the trailing side). Mustn't be null.
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  /// screen the scrollbar appears in (the trailing side). Must be set prior to
+  /// calling paint.
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
     assert(value != null);
     if (textDirection == value)
       return;
@@ -143,7 +148,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   /// Thickness of the scrollbar in its cross-axis in logical pixels. Mustn't be null.
-  double thickness;
+  double get thickness => _thickness;
+  double _thickness;
+  set thickness(double value) {
+    assert(value != null);
+    if (thickness == value)
+      return;
+
+    _thickness = value;
+    notifyListeners();
+  }
 
   /// An opacity [Animation] that dictates the opacity of the thumb.
   /// Changes in value of this [Listenable] will automatically trigger repaints.
@@ -154,17 +168,43 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// in logical pixels. It affects the amount of available paint area.
   ///
   /// Mustn't be null and defaults to 0.
-  final double mainAxisMargin;
+  double get mainAxisMargin => _mainAxisMargin;
+  double _mainAxisMargin;
+  set mainAxisMargin(double value) {
+    assert(value != null);
+    if (mainAxisMargin == value)
+      return;
+
+    _mainAxisMargin = value;
+    notifyListeners();
+  }
 
   /// Distance from the scrollbar's side to the nearest edge in logical pixels.
   ///
   /// Must not be null and defaults to 0.
-  final double crossAxisMargin;
+  double get crossAxisMargin => _crossAxisMargin;
+  double _crossAxisMargin;
+  set crossAxisMargin(double value) {
+    assert(value != null);
+    if (crossAxisMargin == value)
+      return;
+
+    _crossAxisMargin = value;
+    notifyListeners();
+  }
 
   /// [Radius] of corners if the scrollbar should have rounded corners.
   ///
   /// Scrollbar will be rectangular if [radius] is null.
-  Radius? radius;
+  Radius? get radius => _radius;
+  Radius? _radius;
+  set radius(Radius? value) {
+    if (radius == value)
+      return;
+
+    _radius = value;
+    notifyListeners();
+  }
 
   /// The amount of space by which to inset the scrollbar's start and end, as
   /// well as its side to the nearest edge, in logical pixels.
@@ -198,7 +238,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// Mustn't be null and the value has to be within the range of 0 to
   /// [minOverscrollLength], inclusive. Defaults to 18.0.
-  final double minLength;
+  double get minLength => _minLength;
+  double _minLength;
+  set minLength(double value) {
+    assert(value != null);
+    if (minLength == value)
+      return;
+
+    _minLength = value;
+    notifyListeners();
+  }
 
   /// The preferred smallest size the scrollbar can shrink to when viewport is
   /// overscrolled.
@@ -210,7 +259,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// The value is less than or equal to [minLength] and greater than or equal to 0.
   /// If unspecified or set to null, it will defaults to the value of [minLength].
-  final double minOverscrollLength;
+  double get minOverscrollLength => _minOverscrollLength;
+  double _minOverscrollLength;
+  set minOverscrollLength(double value) {
+    assert(value != null);
+    if (minOverscrollLength == value)
+      return;
+
+    _minOverscrollLength = value;
+    notifyListeners();
+  }
 
   ScrollMetrics? _lastMetrics;
   AxisDirection? _lastAxisDirection;
@@ -235,15 +293,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   void updateThickness(double nextThickness, Radius nextRadius) {
     thickness = nextThickness;
     radius = nextRadius;
-    notifyListeners();
-  }
-
-  /// Update and redraw with new scrollbar color.
-  void updateColors(Color newThumbColor, Color newTrackColor, Color newTrackBorderColor) {
-    color = newThumbColor;
-    trackColor = newTrackColor;
-    trackBorderColor = newTrackBorderColor;
-    notifyListeners();
   }
 
   Paint get _thumbPaint {
@@ -262,6 +311,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _paintScrollbar(Canvas canvas, Size size, double thumbExtent, AxisDirection direction) {
+    assert(textDirection != null);
+
     final double x, y;
     final Size thumbSize, trackSize;
     final Offset trackOffset;
@@ -471,6 +522,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   bool shouldRepaint(ScrollbarPainter old) {
     // Should repaint if any properties changed.
     return color != old.color
+        || trackColor != old.trackColor
+        || trackBorderColor != old.trackBorderColor
         || textDirection != old.textDirection
         || thickness != old.thickness
         || fadeoutOpacityAnimation != old.fadeoutOpacityAnimation
@@ -478,7 +531,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || crossAxisMargin != old.crossAxisMargin
         || radius != old.radius
         || minLength != old.minLength
-        || padding != old.padding;
+        || padding != old.padding
+        || minOverscrollLength != old.minOverscrollLength;
   }
 
   @override
@@ -530,7 +584,7 @@ class RawScrollbar extends StatefulWidget {
     this.controller,
     this.isAlwaysShown = false,
     this.radius,
-    this.thickness = _kScrollbarThickness,
+    this.thickness,
     this.thumbColor = const Color(0x66BCBCBC),
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
@@ -540,7 +594,6 @@ class RawScrollbar extends StatefulWidget {
          'When isAlwaysShown is true, a ScrollController must be provided.',
        ),
        assert(child != null),
-       assert(thickness != null),
        assert(thumbColor != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
@@ -671,8 +724,8 @@ class RawScrollbar extends StatefulWidget {
 
   /// The thickness of the scrollbar in the cross axis of the scrollable.
   ///
-  /// Cannot be null, defaults to 6.0 pixels.
-  final double thickness;
+  /// If null, will default to 6.0 pixels.
+  final double? thickness;
 
   /// The color of the scrollbar thumb.
   ///
@@ -719,7 +772,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Can be customized by subclasses to further customize scrollbar behavior by
   /// overriding [updateScrollbar].
   @protected
-  ScrollbarPainter? scrollbarPainter;
+  late final ScrollbarPainter scrollbarPainter;
 
   /// The current value of the animation that fades the scrollbar in and out of
   /// view.
@@ -743,14 +796,17 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       parent: _fadeoutAnimationController,
       curve: Curves.fastOutSlowIn,
     );
+    scrollbarPainter = ScrollbarPainter(
+      color: widget.thumbColor,
+      thickness: widget.thickness ?? _kScrollbarThickness,
+      fadeoutOpacityAnimation: fadeoutOpacityAnimation,
+    );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // If a painter has not been created by a subclass, create a raw scrollbar
-    // painter.
-    scrollbarPainter ??= _buildRawScrollbarPainter();
+    updateScrollbarPainter();
     _maybeTriggerScrollbar();
   }
 
@@ -770,15 +826,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     });
   }
 
-  ScrollbarPainter _buildRawScrollbarPainter() {
-    return ScrollbarPainter(
-      color: widget.thumbColor,
-      textDirection: Directionality.of(context),
-      thickness: widget.thickness,
-      radius: widget.radius,
-      fadeoutOpacityAnimation: fadeoutOpacityAnimation,
-      padding: MediaQuery.of(context).padding,
-    );
+  /// Doc
+  @protected
+  void  updateScrollbarPainter() {
+    scrollbarPainter
+      ..color =  widget.thumbColor
+      ..textDirection = Directionality.of(context)
+      ..thickness = widget.thickness!
+      ..radius = widget.radius
+      ..padding = MediaQuery.of(context).padding;
   }
 
   @override
@@ -792,10 +848,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _fadeoutAnimationController.reverse();
       }
     }
-    scrollbarPainter!
-      ..thickness = widget.thickness
-      ..radius = widget.radius
-      ..color = widget.thumbColor;
+    updateScrollbarPainter();
   }
 
   void _updateScrollPosition(double primaryDelta) {
@@ -804,7 +857,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Convert primaryDelta, the amount that the scrollbar moved since the last
     // time _dragScrollbar was called, into the coordinate space of the scroll
     // position, and jump to that position.
-    final double scrollOffsetLocal = scrollbarPainter!.getTrackToScroll(primaryDelta);
+    final double scrollOffsetLocal = scrollbarPainter.getTrackToScroll(primaryDelta);
     final double scrollOffsetGlobal = scrollOffsetLocal + _currentController!.position.pixels;
     _currentController!.position.jumpTo(scrollOffsetGlobal);
   }
@@ -924,19 +977,19 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Adjust scrollIncrement for direction
     switch (_currentController!.position.axisDirection) {
       case AxisDirection.up:
-        if (details.localPosition.dy > scrollbarPainter!._thumbOffset)
+        if (details.localPosition.dy > scrollbarPainter._thumbOffset)
           scrollIncrement = -scrollIncrement;
         break;
       case AxisDirection.down:
-        if (details.localPosition.dy < scrollbarPainter!._thumbOffset)
+        if (details.localPosition.dy < scrollbarPainter._thumbOffset)
           scrollIncrement = -scrollIncrement;
         break;
       case AxisDirection.right:
-        if (details.localPosition.dx < scrollbarPainter!._thumbOffset)
+        if (details.localPosition.dx < scrollbarPainter._thumbOffset)
           scrollIncrement = -scrollIncrement;
         break;
       case AxisDirection.left:
-        if (details.localPosition.dx > scrollbarPainter!._thumbOffset)
+        if (details.localPosition.dx > scrollbarPainter._thumbOffset)
           scrollIncrement = -scrollIncrement;
         break;
     }
@@ -964,7 +1017,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _fadeoutAnimationController.forward();
 
       _fadeoutTimer?.cancel();
-      scrollbarPainter!.update(notification.metrics, notification.metrics.axisDirection);
+      scrollbarPainter.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       if (_dragScrollbarAxisPosition == null)
         _maybeStartFadeoutTimer();
@@ -1014,41 +1067,50 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return gestures;
   }
   
+  /// Returns true if the provided [Offset] is located over the track of the
+  /// [RawScrollbar].
   ///
+  /// Excludes the [RawScrollbar] thumb.
   @protected
   bool isPointerOverTrack(Offset position) {
     if (_scrollbarPainterKey.currentContext == null) {
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter!.hitTestInteractive(localOffset) && scrollbarPainter!.hitTestOnlyThumbInteractive(localOffset);
+    return scrollbarPainter.hitTestInteractive(localOffset) && scrollbarPainter.hitTestOnlyThumbInteractive(localOffset);
   }
   
-  ///
+  /// Returns true if the provided [Offset] is located over the thumb of the
+  /// [RawScrollbar].
   @protected
   bool isPointerOverThumb(Offset position) {
     if (_scrollbarPainterKey.currentContext == null) {
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter!.hitTestOnlyThumbInteractive(localOffset);
+    return scrollbarPainter.hitTestOnlyThumbInteractive(localOffset);
   }
   
-  ///
+  /// Returns true if the provided [Offset] is located over the track or thumb
+  /// of the [RawScrollbar].
   @protected
   bool isPointerOverScrollbar(Offset position) {
     if (_scrollbarPainterKey.currentContext == null) {
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter!.hitTestInteractive(localOffset);
+    return scrollbarPainter.hitTestInteractive(localOffset);
   }
-  
-  /// Doc
+
+  /// Can be overridden by subclasses to respond to a [PointerHoverEvent].
+  ///
+  /// Helper methods [isPointerOverScrollbar], [isPointerOverThumb], and
+  /// [isPointerOverTrack] can be used to determine the location of the pointer
+  /// relative to the painter scrollbar elements.
   @protected
   void handleHover(PointerHoverEvent event) { }
 
-  /// Doc
+  /// Can be overridden by subclasses to respond to a [PointerExitEvent].
   @protected
   void handleHoverExit(PointerExitEvent event) { }
 
@@ -1056,7 +1118,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void dispose() {
     _fadeoutAnimationController.dispose();
     _fadeoutTimer?.cancel();
-    scrollbarPainter?.dispose();
+    scrollbarPainter.dispose();
     super.dispose();
   }
 
