@@ -275,11 +275,6 @@ ThinAppFrameworks() {
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
-  local project_path="${SOURCE_ROOT}/.."
-  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
-    project_path="${FLUTTER_APPLICATION_PATH}"
-  fi
-
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
