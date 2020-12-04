@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -44,7 +43,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     }
 
     try {
-      final ProcessResult _devToolsActivateProcess = await _processManager.run(<String>[
+      final io.ProcessResult _devToolsActivateProcess = await _processManager.run(<String>[
         _pubExecutable,
         'global',
         'activate',
