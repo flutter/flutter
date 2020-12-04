@@ -34,38 +34,33 @@ class CanvasParagraph implements EngineParagraph {
   /// The number of placeholders in this paragraph.
   final int placeholderCount;
 
-  // Defaulting to -1 for non-laid-out paragraphs like the native engine does.
   @override
-  double width = -1.0;
+  double get width => _layoutService.width;
 
   @override
-  double height = 0.0;
+  double get height => _layoutService.height;
 
   @override
-  double get longestLine {
-    assert(isLaidOut);
-    // TODO(mdebbar): Use the line metrics generated during layout to find out
-    // the longest line.
-    return 0.0;
-  }
+  double get longestLine => _layoutService.longestLine;
 
   @override
-  double minIntrinsicWidth = 0.0;
+  double get minIntrinsicWidth => _layoutService.minIntrinsicWidth;
 
   @override
-  double maxIntrinsicWidth = 0.0;
+  double get maxIntrinsicWidth => _layoutService.maxIntrinsicWidth;
 
   @override
-  double alphabeticBaseline = -1.0;
+  double get alphabeticBaseline => _layoutService.alphabeticBaseline;
 
   @override
-  double ideographicBaseline = -1.0;
+  double get ideographicBaseline => _layoutService.ideographicBaseline;
 
   @override
-  bool get didExceedMaxLines => _didExceedMaxLines;
-  bool _didExceedMaxLines = false;
+  bool get didExceedMaxLines => _layoutService.didExceedMaxLines;
 
   ui.ParagraphConstraints? _lastUsedConstraints;
+
+  late final TextLayoutService _layoutService = TextLayoutService(this);
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
@@ -88,8 +83,7 @@ class CanvasParagraph implements EngineParagraph {
     if (Profiler.isBenchmarkMode) {
       stopwatch = Stopwatch()..start();
     }
-    // TODO(mdebbar): Perform the layout using a new rich text measurement service.
-    // TODO(mdebbar): Don't forget to update `_didExceedMaxLines`.
+    _layoutService.performLayout(constraints);
     if (Profiler.isBenchmarkMode) {
       stopwatch.stop();
       Profiler.instance
@@ -161,7 +155,7 @@ class CanvasParagraph implements EngineParagraph {
           isSpan: true,
         );
         domRenderer.append(element, spanElement);
-      } else if (span is ParagraphPlaceholder) {
+      } else if (span is PlaceholderSpan) {
         domRenderer.append(
           element,
           _createPlaceholderElement(placeholder: span),
@@ -234,8 +228,7 @@ class CanvasParagraph implements EngineParagraph {
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    // TODO(mdebbar): After layout, line metrics should be available.
-    return <ui.LineMetrics>[];
+    return _layoutService.lines;
   }
 }
 
@@ -243,7 +236,11 @@ class CanvasParagraph implements EngineParagraph {
 ///
 /// These spans are stored as a flat list in the paragraph object.
 abstract class ParagraphSpan {
-  const ParagraphSpan();
+  /// The index of the beginning of the range of text represented by this span.
+  int get start;
+
+  /// The index of the end of the range of text represented by this span.
+  int get end;
 }
 
 /// Represent a span of text in the paragraph.
@@ -254,7 +251,7 @@ abstract class ParagraphSpan {
 /// Instead of keeping spans and styles in a tree hierarchy like the framework
 /// does, we flatten the structure and resolve/merge all the styles from parent
 /// nodes.
-class FlatTextSpan extends ParagraphSpan {
+class FlatTextSpan implements ParagraphSpan {
   /// Creates a [FlatTextSpan] with the given [style], representing the span of
   /// text in the range between [start] and [end].
   FlatTextSpan({
@@ -266,10 +263,10 @@ class FlatTextSpan extends ParagraphSpan {
   /// The resolved style of the span.
   final EngineTextStyle style;
 
-  /// The index of the beginning of the range of text represented by this span.
+  @override
   final int start;
 
-  /// The index of the end of the range of text represented by this span.
+  @override
   final int end;
 
   String textOf(CanvasParagraph paragraph) {
@@ -277,6 +274,31 @@ class FlatTextSpan extends ParagraphSpan {
     assert(end <= text.length);
     return text.substring(start, end);
   }
+}
+
+class PlaceholderSpan extends ParagraphPlaceholder implements ParagraphSpan {
+  PlaceholderSpan(
+    int index,
+    double width,
+    double height,
+    ui.PlaceholderAlignment alignment, {
+    required double baselineOffset,
+    required ui.TextBaseline baseline,
+  })   : start = index,
+        end = index,
+        super(
+          width,
+          height,
+          alignment,
+          baselineOffset: baselineOffset,
+          baseline: baseline,
+        );
+
+  @override
+  final int start;
+
+  @override
+  final int end;
 }
 
 /// Represents a node in the tree of text styles pushed to [ui.ParagraphBuilder].
@@ -551,7 +573,8 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
 
     _placeholderCount++;
     _placeholderScales.add(scale);
-    _spans.add(ParagraphPlaceholder(
+    _spans.add(PlaceholderSpan(
+      _plainTextBuffer.length,
       width * scale,
       height * scale,
       alignment,
