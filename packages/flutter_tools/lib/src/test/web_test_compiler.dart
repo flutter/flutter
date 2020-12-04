@@ -109,7 +109,7 @@ class WebTestCompiler {
       results[0],
     );
   }
-  
+
   Future<WebMemoryFS> _compileTestSet(
     List<String> testFiles,
     BuildInfo buildInfo,
