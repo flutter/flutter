@@ -160,10 +160,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
   SkMatrix screenScaleMatrix =
-      SkMatrix::MakeScale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
   stack.PushTransform(screenScaleMatrix);
   // Push a translate matrix
-  SkMatrix translateMatrix = SkMatrix::MakeTrans(100, 100);
+  SkMatrix translateMatrix = SkMatrix::Translate(100, 100);
   stack.PushTransform(translateMatrix);
   SkMatrix finalMatrix;
   finalMatrix.setConcat(screenScaleMatrix, translateMatrix);
@@ -269,10 +269,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
   SkMatrix screenScaleMatrix =
-      SkMatrix::MakeScale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
   stack.PushTransform(screenScaleMatrix);
   // Push a translate matrix
-  SkMatrix translateMatrix = SkMatrix::MakeTrans(100, 100);
+  SkMatrix translateMatrix = SkMatrix::Translate(100, 100);
   stack.PushTransform(translateMatrix);
   SkMatrix finalMatrix;
   finalMatrix.setConcat(screenScaleMatrix, translateMatrix);
@@ -323,7 +323,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
   SkMatrix screenScaleMatrix =
-      SkMatrix::MakeScale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
   stack.PushTransform(screenScaleMatrix);
   // Push a rotate matrix
   SkMatrix rotateMatrix;
@@ -392,7 +392,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
   SkMatrix screenScaleMatrix =
-      SkMatrix::MakeScale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
   stack.PushTransform(screenScaleMatrix);
   // Push a clip rect
   SkRect rect = SkRect::MakeXYWH(2, 2, 3, 3);
@@ -463,7 +463,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
   SkMatrix screenScaleMatrix =
-      SkMatrix::MakeScale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
   stack.PushTransform(screenScaleMatrix);
   // Push a clip rrect
   SkRRect rrect = SkRRect::MakeRectXY(SkRect::MakeXYWH(2, 2, 6, 6), 1, 1);
@@ -534,7 +534,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
   SkMatrix screenScaleMatrix =
-      SkMatrix::MakeScale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
+      SkMatrix::Scale([UIScreen mainScreen].scale, [UIScreen mainScreen].scale);
   stack.PushTransform(screenScaleMatrix);
   // Push a clip path
   SkPath path;
