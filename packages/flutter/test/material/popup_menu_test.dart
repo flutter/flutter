@@ -14,6 +14,17 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main() {
+  
+  testWidgets('Popup Divider Color', (WidgetTester tester) async {
+    await tester.pumpWidget(MyDivider());
+
+    final menu = find.byIcon(Icons.more_vert);
+    expect(menu, findsOneWidget);
+    
+    await tester.tap(menu);
+  });
+  
+  
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
     final Key targetKey = UniqueKey();
     await tester.pumpWidget(
