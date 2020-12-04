@@ -173,7 +173,7 @@ class IconButton extends StatelessWidget {
   /// fit the [Icon]. If you were to set the size of the [Icon] using
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
-  final double iconSize;
+  final double? iconSize;
 
   /// Defines how compact the icon button's layout will be.
   ///
@@ -325,7 +325,7 @@ class IconButton extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
     
-    double currentIconSize = iconSize ?? theme.iconTheme.size;
+    final double currentIconSize = (iconSize ?? theme.iconTheme.size) ?? 24;
 
     Color? currentColor;
     if (onPressed != null)
@@ -385,7 +385,7 @@ class IconButton extends StatelessWidget {
         splashColor: splashColor ?? theme.splashColor,
         radius: splashRadius ?? math.max(
               Material.defaultSplashRadius,
-              (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+              (currentIconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
               // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
             ),
       ),
