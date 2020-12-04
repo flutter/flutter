@@ -16,6 +16,8 @@ import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 
+import 'package:dcache/dcache.dart';
+
 export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, ErrorSummary, ErrorDescription, ErrorHint, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
@@ -2364,6 +2366,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(child.parent == this);
   }
 
+  static Cache gtCache = new SimpleCache<int, Matrix4>(storage: new SimpleStorage(size: 40000));
+
+  int cantorHash(int a, int b)
+  {
+    return ((a+b)*(a+b+1)/2+b).toInt();
+  }
+
   /// Applies the paint transform up the tree to `ancestor`.
   ///
   /// Returns a matrix that maps the local paint coordinate system to the
@@ -2384,6 +2393,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       if (rootNode is RenderObject)
         ancestor = rootNode;
     }
+    int key = cantorHash(this.hashCode, ancestor.hashCode);
+    Matrix4 cacheValue = gtCache.get(key);
+    if(cacheValue != null) {
+      return cacheValue;
+    }
     final List<RenderObject> renderers = <RenderObject>[];
     for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
       assert(renderer != null); // Failed to find ancestor in parent chain.
@@ -2395,6 +2409,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     for (int index = renderers.length - 1; index > 0; index -= 1) {
       renderers[index].applyPaintTransform(renderers[index - 1], transform);
     }
+    gtCache.set(key, transform);
     return transform;
   }
 
