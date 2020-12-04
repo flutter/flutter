@@ -109,6 +109,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   FlutterVersion _flutterVersion;
 
   @override
+  bool get reportNullSafety => false;
+
+  @override
   final String name = 'ios-framework';
 
   @override
@@ -459,7 +462,7 @@ end
       // copy the corresponding engine.
       // A plugin framework built with bitcode must link against the bitcode version
       // of Flutter.framework (Release).
-      _project.ios.copyEngineArtifactToProject(mode);
+      _project.ios.copyEngineArtifactToProject(mode, EnvironmentType.physical);
 
       final String bitcodeGenerationMode = mode == BuildMode.release ?
           'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.

@@ -47,6 +47,10 @@ void main() {
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework'),
       );
       expect(
+        artifacts.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: BuildMode.release),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.xcframework'),
+      );
+      expect(
         artifacts.getArtifactPath(Artifact.flutterTester),
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
       );
@@ -135,6 +139,10 @@ void main() {
       expect(
         artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: BuildMode.release),
         fileSystem.path.join('/out', 'android_debug_unopt', 'Flutter.framework'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: BuildMode.release),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'Flutter.xcframework'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester),
