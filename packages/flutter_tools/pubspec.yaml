@@ -47,6 +47,7 @@ dependencies:
   mime: 0.9.7
   logging: 0.11.4
   http_multi_server: 2.2.0
+  devtools_server: 0.9.5
   convert: 2.1.1
   async: 2.5.0-nullsafety.3
 
