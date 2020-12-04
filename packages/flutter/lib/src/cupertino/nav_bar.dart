@@ -550,8 +550,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// desired [MediaQueryData.textScaleFactor] value. The text scale factor value
 /// from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
-/// 
-/// The [stretch] parameter determines whether the nav bar should stretch to 
+///
+/// The [stretch] parameter determines whether the nav bar should stretch to
 /// fill the over-scroll area. The nav bar can still expand and contract as the
 /// user scrolls, but it will also stretch when the user over-scrolls if the
 /// [stretch] value is `true`. Defaults to `true`.
