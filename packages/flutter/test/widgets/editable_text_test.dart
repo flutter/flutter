@@ -6581,7 +6581,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgets('enforced composing truncated', (WidgetTester tester) async {
+    testWidgets('default truncate behaviors with different platforms\'s', (WidgetTester tester) async {
       final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
       final Widget widget = MaterialApp(
         home: EditableText(
@@ -6620,7 +6620,56 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
-    testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('enforced composing truncated', (WidgetTester tester) async {
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          inputFormatters: <TextInputFormatter>[formatter],
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // When it's not longer than `maxLength`, it can still start composing.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
+      if (!kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.windows
+      ) {
+        // `newValue` will be truncated if it's not web and current target platform is Android or Windows.
+        expect(state.currentTextEditingValue.text, 'abcde');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+      } else {
+        // Other platforms will not be truncated if on web by default.
+        expect(state.currentTextEditingValue.text, 'abcdef');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 6));
+      }
+
+      // Reset the value.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing with a longer value, it should be the same state.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    testWidgets('composing range removed with different platforms\'s', (WidgetTester tester) async {
       final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
       final Widget widget = MaterialApp(
         home: EditableText(
@@ -6652,6 +6701,47 @@ void main() {
       // Start composing with a range already overflowed the truncated length.
       state.updateEditingValue(const TextEditingValue(text: 'abcdefgh', composing: TextRange(start: 5, end: 7)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
+      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          inputFormatters: <TextInputFormatter>[formatter],
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're not at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      // Reset the value.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing with a range already overflowed the truncated length.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdefgh', composing: TextRange(start: 5, end: 7)));
+      if (!kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.windows
+      ) {
+        expect(state.currentTextEditingValue.composing, TextRange.empty);
+      } else {
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 5, end: 7));
+      }
     });
 
     testWidgets('Composing range handled correctly when it\'s overflowed.', (WidgetTester tester) async {
