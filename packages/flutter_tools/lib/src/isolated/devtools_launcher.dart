@@ -38,6 +38,11 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<void> launch(Uri vmServiceUri) async {
+    if (_devToolsProcess != null) {
+      // DevTools is already running.
+      return;
+    }
+
     try {
       final ProcessResult _devToolsActivateProcess = await _processManager.run(<String>[
         _pubExecutable,
