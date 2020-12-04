@@ -582,7 +582,7 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///    final controller = PageController(initialPage: 0);
 ///    return PageView(
 ///      // scrollDirection property defaults to Axis.horizontal if not given explicitly
-///      // use Axis.verical for scrolling vertically
+///      // use Axis.vertical for scrolling vertically
 ///      scrollDirection: Axis.horizontal,
 ///      controller: controller,
 ///      children: [
