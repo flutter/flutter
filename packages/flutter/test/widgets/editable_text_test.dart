@@ -6618,8 +6618,12 @@ void main() {
       state.updateEditingValue(const TextEditingValue(text: 'abcde'));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
 
+      // Change the value in order to take effects on web test.
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
       // Start composing with a longer value, it should be the same state.
-      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友们', composing: TextRange(start: 3, end: 6)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
@@ -6642,33 +6646,36 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       // Initially we're at maxLength with no composing text.
-      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友'));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
 
       // When it's not longer than `maxLength`, it can still start composing.
-      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 3, end: 5)));
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友', composing: TextRange(start: 3, end: 5)));
       expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
 
-      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
-      if (!kIsWeb ||
-        defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.windows
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友们', composing: TextRange(start: 3, end: 6)));
+      if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.fuchsia
       ) {
-        // `newValue` will be truncated if it's not web and current target platform is Android or Windows.
-        expect(state.currentTextEditingValue.text, 'abcde');
-        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
-      } else {
-        // Other platforms will not be truncated if on web by default.
-        expect(state.currentTextEditingValue.text, 'abcdef');
+        // `newValue` will will not be truncated on couple platforms.
+        expect(state.currentTextEditingValue.text, '你好啊朋友们');
         expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 6));
+      } else {
+        // `newValue` on other platforms will be truncated.
+        expect(state.currentTextEditingValue.text, '你好啊朋友');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
       }
 
       // Reset the value.
-      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友'));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
 
       // Start composing with a longer value, it should be the same state.
-      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友们', composing: TextRange(start: 3, end: 6)));
+      expect(state.currentTextEditingValue.text, '你好啊朋友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
@@ -6742,13 +6749,15 @@ void main() {
 
       // Start composing with a range already overflowed the truncated length.
       state.updateEditingValue(const TextEditingValue(text: 'abcdefgh', composing: TextRange(start: 5, end: 7)));
-      if (!kIsWeb ||
-        defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.windows
+      if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.fuchsia
       ) {
-        expect(state.currentTextEditingValue.composing, TextRange.empty);
-      } else {
         expect(state.currentTextEditingValue.composing, const TextRange(start: 5, end: 7));
+      } else {
+        expect(state.currentTextEditingValue.composing, TextRange.empty);
       }
     });
 
