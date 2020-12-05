@@ -59,6 +59,17 @@ class Repository {
     if (!useExistingCheckout && _checkoutDirectory.existsSync()) {
       stdio.printTrace('Deleting $name from ${_checkoutDirectory.path}...');
       _checkoutDirectory.deleteSync(recursive: true);
+    } else if (useExistingCheckout && _checkoutDirectory.existsSync()) {
+      git.run(
+        <String>['checkout', 'master'],
+        'Checkout to master branch',
+        workingDirectory: _checkoutDirectory.path,
+      );
+      git.run(
+        <String>['pull', '--ff-only'],
+        'Updating $name repo',
+        workingDirectory: _checkoutDirectory.path,
+      );
     }
     if (!_checkoutDirectory.existsSync()) {
       stdio.printTrace('Cloning $name to ${_checkoutDirectory.path}...');

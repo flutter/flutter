@@ -41,7 +41,6 @@ Future<void> main(List<String> args) async {
     usageLineLength: 80,
   );
 
-  final File conductorBin = fileSystem.file(platform.script.toFilePath());
   <Command<void>>[
     RollDevCommand(
       checkouts: checkouts,
@@ -51,7 +50,6 @@ Future<void> main(List<String> args) async {
     ),
     CodesignCommand(
       checkouts: checkouts,
-      conductorDirectory: conductorBin.parent,
     ),
   ].forEach(runner.addCommand);
 

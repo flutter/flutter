@@ -50,7 +50,6 @@ const String kRevision = 'revision';
 class CodesignCommand extends Command<void> {
   CodesignCommand({
     @required this.checkouts,
-    @required this.conductorDirectory,
   })  : fileSystem = checkouts.fileSystem,
         platform = checkouts.platform,
         stdio = checkouts.stdio,
@@ -69,13 +68,11 @@ class CodesignCommand extends Command<void> {
     );
     argParser.addOption(
       kRevision,
-      help: 'The Flutter FRAMEWORK revision to use. If not provided, defaults '
-          'to the same revision as that of the conductor.',
+      help: 'The Flutter FRAMEWORK revision to use.',
     );
   }
 
   final Checkouts checkouts;
-  final Directory conductorDirectory;
   final FileSystem fileSystem;
   final Platform platform;
   final ProcessManager processManager;
@@ -83,7 +80,7 @@ class CodesignCommand extends Command<void> {
 
   FrameworkRepository _framework;
   FrameworkRepository get framework =>
-      _framework ??= FrameworkRepository(checkouts);
+      _framework ??= FrameworkRepository(checkouts, useExistingCheckout: true);
 
   @visibleForTesting
   set framework(FrameworkRepository framework) => _framework = framework;
@@ -110,19 +107,19 @@ class CodesignCommand extends Command<void> {
     }
 
     String revision;
-    if (argResults[kRevision] != null) {
+    if (argResults.wasParsed(kRevision)) {
       revision = argResults[kRevision] as String;
     } else {
       revision = (processManager.runSync(
         <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: conductorDirectory.path,
+        workingDirectory: framework.checkoutDirectory.path,
       ).stdout as String).trim();
     }
-    verify(revision);
+    verify(revision, argResults[kSignatures] as bool);
   }
 
   @visibleForTesting
-  void verify(String revision) {
+  void verify(String revision, bool signatures) {
     final List<String> unsignedBinaries = <String>[];
     final List<String> wrongEntitlementBinaries = <String>[];
 
