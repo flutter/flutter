@@ -281,7 +281,7 @@ subprojects {
   }
 
   /// Adds a plugin to the pubspec.
-  /// In pubpsec, each dependency is expressed as key, value pair joined by a colon `:`.
+  /// In pubspec, each dependency is expressed as key, value pair joined by a colon `:`.
   /// such as `plugin_a`:`^0.0.1` or `plugin_a`:`\npath: /some/path`.
   Future<void> addPlugin(String plugin, { String value = '' }) async {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
