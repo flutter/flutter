@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'text_editing.dart';
 import 'text_input.dart';
@@ -415,40 +416,6 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement? maxLengthEnforcement;
 
-  /// {@template flutter.services.textFormatter.effectiveMaxLengthEnforcement}
-  /// ### Platform specific behaviors
-  ///
-  /// Different platforms follow different behaviors by default, according to
-  /// their native behavior.
-  ///  * Android, Windows: [MaxLengthEnforcement.enforced]. The native behavior
-  ///    of these platforms is enforced. The composing will be handled by the
-  ///    IME while users are entering CJK characters.
-  ///  * iOS: [MaxLengthEnforcement.truncateAfterCompositionEnds]. iOS has no
-  ///    default behavior and it requires users implement the behavior
-  ///    themselves. Allow the composition to exceed to avoid breaking CJK input.
-  ///  * Web, macOS, linux, fuchsia:
-  ///    [MaxLengthEnforcement.truncateAfterCompositionEnds]. These platforms
-  ///    allow the composition to exceed by default.
-  /// {@endtemplate}
-  MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
-    if (maxLengthEnforcement != null) {
-      return maxLengthEnforcement!;
-    } else if (kIsWeb) {
-      return MaxLengthEnforcement.truncateAfterCompositionEnds;
-    } else {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.windows:
-          return MaxLengthEnforcement.enforced;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-        case TargetPlatform.linux:
-        case TargetPlatform.fuchsia:
-          return MaxLengthEnforcement.truncateAfterCompositionEnds;
-      }
-    }
-  }
-
   /// Truncate the given TextEditingValue to maxLength user-perceived
   /// characters.
   ///
@@ -493,7 +460,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
     assert(maxLength > 0);
 
-    switch (_effectiveMaxLengthEnforcement) {
+    switch (EditableText.defaultMaxLengthEnforcement(maxLengthEnforcement)) {
       case MaxLengthEnforcement.none:
         return newValue;
       case MaxLengthEnforcement.enforced:

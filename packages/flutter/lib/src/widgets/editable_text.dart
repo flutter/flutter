@@ -1261,6 +1261,50 @@ class EditableText extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
+  /// {@template flutter.services.textFormatter.effectiveMaxLengthEnforcement}
+  /// Return an effective [MaxLengthEnforcement] according the target platform.
+  ///
+  /// if [previousEnforcement] is not null, return it directly.
+  ///
+  /// if non of [platform] was specified, [defaultTargetPlatform] will be use.
+  ///
+  /// ### Platform specific behaviors
+  ///
+  /// Different platforms follow different behaviors by default, according to
+  /// their native behavior.
+  ///  * Android, Windows: [MaxLengthEnforcement.enforced]. The native behavior
+  ///    of these platforms is enforced. The composing will be handled by the
+  ///    IME while users are entering CJK characters.
+  ///  * iOS: [MaxLengthEnforcement.truncateAfterCompositionEnds]. iOS has no
+  ///    default behavior and it requires users implement the behavior
+  ///    themselves. Allow the composition to exceed to avoid breaking CJK input.
+  ///  * Web, macOS, linux, fuchsia:
+  ///    [MaxLengthEnforcement.truncateAfterCompositionEnds]. These platforms
+  ///    allow the composition to exceed by default.
+  /// {@endtemplate}
+  static MaxLengthEnforcement defaultMaxLengthEnforcement(
+    MaxLengthEnforcement? previousEnforcement, {
+    TargetPlatform? platform,
+  }) {
+    if (previousEnforcement != null) {
+      return previousEnforcement;
+    }
+    if (kIsWeb) {
+      return MaxLengthEnforcement.truncateAfterCompositionEnds;
+    } else {
+      switch (platform ?? defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.windows:
+          return MaxLengthEnforcement.enforced;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.fuchsia:
+          return MaxLengthEnforcement.truncateAfterCompositionEnds;
+      }
+    }
+  }
+
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,

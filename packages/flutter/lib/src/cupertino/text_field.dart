@@ -819,25 +819,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
-    if (widget.maxLengthEnforcement != null) {
-      return widget.maxLengthEnforcement!;
-    }
-    if (kIsWeb) {
-      return MaxLengthEnforcement.truncateAfterCompositionEnds;
-    } else {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.windows:
-        return MaxLengthEnforcement.enforced;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-        case TargetPlatform.linux:
-        case TargetPlatform.fuchsia:
-          return MaxLengthEnforcement.truncateAfterCompositionEnds;
-      }
-    }
-  }
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => EditableText.defaultMaxLengthEnforcement(widget.maxLengthEnforcement);
 
   bool _showSelectionHandles = false;
 

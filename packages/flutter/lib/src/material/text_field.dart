@@ -861,25 +861,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
-    if (widget.maxLengthEnforcement != null) {
-      return widget.maxLengthEnforcement!;
-    }
-    if (kIsWeb) {
-      return MaxLengthEnforcement.truncateAfterCompositionEnds;
-    } else {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.android:
-        case TargetPlatform.windows:
-          return MaxLengthEnforcement.enforced;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-        case TargetPlatform.linux:
-        case TargetPlatform.fuchsia:
-          return MaxLengthEnforcement.truncateAfterCompositionEnds;
-      }
-    }
-  }
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => EditableText.defaultMaxLengthEnforcement(
+    widget.maxLengthEnforcement,
+    platform: Theme.of(context).platform,
+  );
 
   bool _isHovering = false;
 
