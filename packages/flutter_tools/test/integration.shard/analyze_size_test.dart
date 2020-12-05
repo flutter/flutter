@@ -34,6 +34,7 @@ void main() {
 
     final String outputFilePath = line.split(apkDebugMessage).last.trim();
     expect(fileSystem.file(fileSystem.path.join(woringDirectory, outputFilePath)), exists);
+    expect(outputFilePath, contains('.flutter-devtools'));
     expect(result.exitCode, 0);
   });
 

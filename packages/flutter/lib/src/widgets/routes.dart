@@ -27,8 +27,6 @@ import 'transitions.dart';
 // dynamic routeObserver;
 // NavigatorState navigator;
 
-const Color _kTransparent = Color(0x00000000);
-
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
   /// Creates a route that knows how to interact with an [Overlay].
@@ -1475,10 +1473,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
     if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
-      assert(barrierColor != _kTransparent);
+      assert(barrierColor != barrierColor!.withOpacity(0.0));
       final Animation<Color?> color = animation!.drive(
         ColorTween(
-          begin: _kTransparent,
+          begin: barrierColor!.withOpacity(0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
         ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );

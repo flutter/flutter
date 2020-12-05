@@ -249,7 +249,7 @@ Future<void> main() async {
             output.contains('at org.gradle'))
           throw failure(
               'Gradle output should not contain stacktrace', result);
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
+        if (!output.contains('Build failed'))
           throw failure(
               'Gradle output should contain a readable error message',
               result);
@@ -285,11 +285,11 @@ Future<void> main() async {
           throw failure(
               'flutter build apk should fail when Gradle does', result);
         final String output = '${result.stdout}\n${result.stderr}';
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
+        if (!output.contains('Build failed'))
           throw failure(
               'flutter build apk output should contain a readable Gradle error message',
               result);
-        if (hasMultipleOccurrences(output, 'builTypes'))
+        if (hasMultipleOccurrences(output, 'Build failed'))
           throw failure(
               'flutter build apk should not invoke Gradle repeatedly on error',
               result);

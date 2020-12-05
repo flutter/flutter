@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // Regenerates the material icons file.
-// See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts
+// See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
 
 import 'dart:convert' show LineSplitter;
 import 'dart:io';

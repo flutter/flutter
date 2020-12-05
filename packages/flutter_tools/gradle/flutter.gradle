@@ -27,7 +27,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:4.1.0'
     }
 }
 
@@ -101,7 +101,8 @@ class FlutterPlugin implements Plugin<Project> {
         this.project = project
 
         project.extensions.create("flutter", FlutterExtension)
-        project.afterEvaluate this.&addFlutterTasks
+        this.addFlutterTasks(project)
+
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
         // This is a noop when building a bundle.
@@ -158,24 +159,23 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        if (shouldShrinkResources(project)) {
-            String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
-                    "gradle", "flutter_proguard_rules.pro")
-            project.android.buildTypes {
-                release {
-                    // Enables code shrinking, obfuscation, and optimization for only
-                    // your project's release build type.
-                    minifyEnabled true
-                    // Enables resource shrinking, which is performed by the
-                    // Android Gradle plugin.
-                    // NOTE: The resource shrinker can't be used for libraries.
-                    shrinkResources isBuiltAsApp(project)
-                    // Fallback to `android/app/proguard-rules.pro`.
-                    // This way, custom Proguard rules can be configured as needed.
-                    proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
-                }
+        String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                "gradle", "flutter_proguard_rules.pro")
+        project.android.buildTypes {
+            release {
+                // Enables code shrinking, obfuscation, and optimization for only
+                // your project's release build type.
+                minifyEnabled true
+                // Enables resource shrinking, which is performed by the
+                // Android Gradle plugin.
+                // NOTE: The resource shrinker can't be used for libraries.
+                shrinkResources isBuiltAsApp(project)
+                // Fallback to `android/app/proguard-rules.pro`.
+                // This way, custom Proguard rules can be configured as needed.
+                proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
             }
         }
+
         if (useLocalEngine()) {
             // This is required to pass the local engine to flutter build aot.
             String engineOutPath = project.property('local-engine-out')
@@ -322,13 +322,13 @@ class FlutterPlugin implements Plugin<Project> {
             )
         }
         pluginProject.afterEvaluate {
-            pluginProject.android.buildTypes {
-                profile {
-                    initWith debug
-                }
-            }
-            pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
-            pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
+          pluginProject.android.buildTypes {
+              profile {
+                  initWith debug
+              }
+          }
+          pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
+          pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
         }
     }
 
@@ -490,14 +490,6 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-
-    private static Boolean shouldShrinkResources(Project project) {
-        if (project.hasProperty("shrink")) {
-            return project.property("shrink").toBoolean()
-        }
-        return false
-    }
-
     private static Boolean isBuiltAsApp(Project project) {
         // Projects are built as applications when the they use the `com.android.application`
         // plugin.
@@ -570,19 +562,87 @@ class FlutterPlugin implements Plugin<Project> {
         return "${targetArch}-release"
     }
 
-    private void addFlutterTasks(Project project) {
-        if (project.state.failure) {
-            return
-        }
+    /**
+     * Gets the directory that contains the Flutter source code.
+     * This is the the directory containing the `android/` directory.
+     */
+    private File getFlutterSourceDirectory() {
         if (project.flutter.source == null) {
             throw new GradleException("Must provide Flutter source directory")
         }
+        return project.file(project.flutter.source)
+    }
+
+    /**
+     * Gets the target file. This is typically `lib/main.dart`.
+     */
+    private String getFlutterTarget() {
         String target = project.flutter.target
         if (target == null) {
             target = 'lib/main.dart'
         }
         if (project.hasProperty('target')) {
             target = project.property('target')
+        }
+        return target
+    }
+
+    // In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
+    // When building APKs, this causes an issue where building release requires the debug JAR,
+    // but Gradle won't build debug.
+    //
+    // To workaround this issue, only configure the JAR task that is required given the task
+    // from the command line.
+    //
+    // The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
+    // time of adding this code. Once released, this can be removed.
+    //
+    // Tested cases:
+    // * `./gradlew assembleRelease`
+    // * `./gradlew app:assembleRelease.`
+    // * `./gradlew assemble{flavorName}Release`
+    // * `./gradlew app:assemble{flavorName}Release`
+    // * `./gradlew assemble.`
+    // * `./gradlew app:assemble.`
+    // * `./gradlew bundle.`
+    // * `./gradlew bundleRelease.`
+    // * `./gradlew app:bundleRelease.`
+    //
+    // Related issues:
+    // https://issuetracker.google.com/issues/158060799
+    // https://issuetracker.google.com/issues/158753935
+    private boolean shouldConfigureFlutterTask(Task assembleTask) {
+        def cliTasksNames = project.gradle.startParameter.taskNames
+        if (cliTasksNames.size() != 1 || !cliTasksNames.first().contains("assemble")) {
+            return true
+        }
+        def taskName = cliTasksNames.first().split(":").last()
+        if (taskName == "assemble") {
+            return true
+        }
+        if (taskName == assembleTask.name) {
+            return true
+        }
+        if (taskName.endsWith("Release") && assembleTask.name.endsWith("Release")) {
+            return true
+        }
+        if (taskName.endsWith("Debug") && assembleTask.name.endsWith("Debug")) {
+            return true
+        }
+        if (taskName.endsWith("Profile") && assembleTask.name.endsWith("Profile")) {
+            return true
+        }
+        return false
+    }
+
+    private Task getAssembleTask(variant) {
+        // `assemble` became `assembleProvider` in AGP 3.3.0.
+        return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
+    }
+
+    private void addFlutterTasks(Project project) {
+        if (project.state.failure) {
+            return
         }
         String[] fileSystemRootsValue = null
         if (project.hasProperty('filesystem-roots')) {
@@ -655,14 +715,14 @@ class FlutterPlugin implements Plugin<Project> {
                 buildMode variantBuildMode
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
-                targetPath target
+                targetPath getFlutterTarget()
                 verbose isVerbose()
                 fastStart isFastStart()
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
                 targetPlatformValues = targetPlatforms
-                sourceDir project.file(project.flutter.source)
+                sourceDir getFlutterSourceDirectory()
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
@@ -734,48 +794,22 @@ class FlutterPlugin implements Plugin<Project> {
                 def processResources = variantOutput.hasProperty("processResourcesProvider") ?
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
-                return
             }
-            // Flutter module included as a subproject in add to app.
-            String hostAppProjectName = project.rootProject.hasProperty('flutter.hostAppProjectName') ? project.rootProject.property('flutter.hostAppProjectName')  : "app"
-            Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
-            assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To custom the host app project name, set `org.gradle.project.flutter.hostAppProjectName=<project-name>` in gradle.properties."
-            appProject.afterEvaluate {
-                assert appProject.android != null
-                appProject.android.applicationVariants.all { appProjectVariant ->
-                    // Find a compatible application variant in the host app.
-                    //
-                    // For example, consider a host app that defines the following variants:
-                    // | ----------------- | ----------------------------- |
-                    // |   Build Variant   |   Flutter Equivalent Variant  |
-                    // | ----------------- | ----------------------------- |
-                    // |   freeRelease     |   relese                      |
-                    // |   freeDebug       |   debug                       |
-                    // |   freeDevelop     |   debug                       |
-                    // |   profile         |   profile                     |
-                    // | ----------------- | ----------------------------- |
-                    //
-                    // This mapping is based on the following rules:
-                    // 1. If the host app build variant name is `profile` then the equivalent
-                    //    Flutter variant is `profile`.
-                    // 2. If the host app build variant is debuggable
-                    //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
-                    //    variant is `debug`.
-                    // 3. Otherwise, the equivalent Flutter variant is `release`.
-                    if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
-                        return
-                    }
-                    Task mergeAssets = project
-                        .tasks
-                        .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
-                    assert mergeAssets
-                    mergeAssets.dependsOn(copyFlutterAssetsTask)
-                }
-            }
+            return copyFlutterAssetsTask
         }
-        if (project.android.hasProperty("applicationVariants")) {
+        boolean isFlutterAppProject = project.android.hasProperty("applicationVariants")
+        if (isFlutterAppProject) {
             project.android.applicationVariants.all { variant ->
-                addFlutterDeps(variant)
+                Task assembleTask = getAssembleTask(variant)
+                if (!shouldConfigureFlutterTask(assembleTask)) {
+                  return
+                }
+                Task copyFlutterAssetsTask = addFlutterDeps(variant)
+                def variantOutput = variant.outputs.first()
+                def processResources = variantOutput.hasProperty("processResourcesProvider") ?
+                    variantOutput.processResourcesProvider.get() : variantOutput.processResources
+                processResources.dependsOn(copyFlutterAssetsTask)
+
                 // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
                 // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
                 //
@@ -785,10 +819,6 @@ class FlutterPlugin implements Plugin<Project> {
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.all { output ->
-                    // `assemble` became `assembleProvider` in AGP 3.3.0.
-                    def assembleTask = variant.hasProperty("assembleProvider")
-                        ? variant.assembleProvider.get()
-                        : variant.assemble
                     assembleTask.doLast {
                         // `packageApplication` became `packageApplicationProvider` in AGP 3.3.0.
                         def outputDirectory = variant.hasProperty("packageApplicationProvider")
@@ -817,8 +847,56 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-        } else {
-            project.android.libraryVariants.all addFlutterDeps
+            configurePlugins()
+            return
+        }
+        // Flutter host module project (Add-to-app).
+        String hostAppProjectName = project.rootProject.hasProperty('flutter.hostAppProjectName') ? project.rootProject.property('flutter.hostAppProjectName') : "app"
+        Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
+        assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To custom the host app project name, set `org.gradle.project.flutter.hostAppProjectName=<project-name>` in gradle.properties."
+        // Wait for the host app project configuration.
+        appProject.afterEvaluate {
+            assert appProject.android != null
+            project.android.libraryVariants.all { libraryVariant ->
+                Task copyFlutterAssetsTask
+                appProject.android.applicationVariants.all { appProjectVariant ->
+                    Task appAssembleTask = getAssembleTask(appProjectVariant)
+                    if (!shouldConfigureFlutterTask(appAssembleTask)) {
+                        return
+                    }
+                    // Find a compatible application variant in the host app.
+                    //
+                    // For example, consider a host app that defines the following variants:
+                    // | ----------------- | ----------------------------- |
+                    // |   Build Variant   |   Flutter Equivalent Variant  |
+                    // | ----------------- | ----------------------------- |
+                    // |   freeRelease     |   relese                      |
+                    // |   freeDebug       |   debug                       |
+                    // |   freeDevelop     |   debug                       |
+                    // |   profile         |   profile                     |
+                    // | ----------------- | ----------------------------- |
+                    //
+                    // This mapping is based on the following rules:
+                    // 1. If the host app build variant name is `profile` then the equivalent
+                    //    Flutter variant is `profile`.
+                    // 2. If the host app build variant is debuggable
+                    //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
+                    //    variant is `debug`.
+                    // 3. Otherwise, the equivalent Flutter variant is `release`.
+                    String variantBuildMode = buildModeFor(libraryVariant.buildType)
+                    if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
+                        return
+                    }
+                    if (copyFlutterAssetsTask == null) {
+                        copyFlutterAssetsTask = addFlutterDeps(libraryVariant)
+                    }
+                    Task mergeAssets = project
+                        .tasks
+                        .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
+                    assert mergeAssets
+                    mergeAssets.dependsOn(copyFlutterAssetsTask)
+                }
+            }
         }
         configurePlugins()
     }
