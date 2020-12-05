@@ -659,7 +659,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     // to be in this location.
     final Directory framework = globals.fs.directory(
       globals.artifacts.getArtifactPath(
-        Artifact.flutterFramework,
+        Artifact.flutterXcframework,
         platform: TargetPlatform.ios,
         mode: mode,
         environmentType: environmentType,
@@ -668,7 +668,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (framework.existsSync()) {
       globals.fsUtils.copyDirectorySync(
         framework,
-        engineCopyDirectory.childDirectory('Flutter.framework'),
+        engineCopyDirectory.childDirectory('Flutter.xcframework'),
       );
     }
   }

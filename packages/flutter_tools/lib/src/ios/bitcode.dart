@@ -13,16 +13,14 @@ import '../macos/xcode.dart';
 
 const bool kBitcodeEnabledDefault = false;
 
-Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform) async {
+Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform, EnvironmentType environmentType) async {
   final Artifacts localArtifacts = globals.artifacts;
   final String flutterFrameworkPath = localArtifacts.getArtifactPath(
     Artifact.flutterFramework,
     mode: buildMode,
     platform: targetPlatform,
+    environmentType: environmentType,
   );
-  if (!globals.fs.isDirectorySync(flutterFrameworkPath)) {
-    throwToolExit('Flutter.framework not found at $flutterFrameworkPath');
-  }
   final Xcode xcode = context.get<Xcode>();
 
   final RunResult clangResult = await xcode.clang(<String>['--version']);
