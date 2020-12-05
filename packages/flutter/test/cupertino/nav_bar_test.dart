@@ -1187,7 +1187,7 @@ void main() {
   });
 
   testWidgets(
-    'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends', 
+    'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends',
     (WidgetTester tester) async {
     const Text trailingText = Text('Bar Button');
     const Text titleText = Text('Large Title');
@@ -1211,7 +1211,7 @@ void main() {
         ),
       ),
     );
-    
+
     final Finder trailingTextFinder = find.byWidget(trailingText).first;
     final Finder titleTextFinder = find.byWidget(titleText).first;
 
@@ -1224,7 +1224,7 @@ void main() {
     final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
     expect(
-      stretchedTrailingTextToLargeTitleOffset.dy.abs(), 
+      stretchedTrailingTextToLargeTitleOffset.dy.abs(),
       greaterThan(initialTrailingTextToLargeTitleOffset.dy.abs())
     );
 
@@ -1240,7 +1240,7 @@ void main() {
   });
 
   testWidgets(
-    'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false', 
+    'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false',
     (WidgetTester tester) async {
     const Text trailingText = Text('Bar Button');
     const Text titleText = Text('Large Title');
@@ -1278,7 +1278,7 @@ void main() {
     final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
 
     expect(
-      stretchedTrailingTextToLargeTitleOffset.dy.abs(), 
+      stretchedTrailingTextToLargeTitleOffset.dy.abs(),
       initialTrailingTextToLargeTitleOffset.dy.abs(),
     );
 
