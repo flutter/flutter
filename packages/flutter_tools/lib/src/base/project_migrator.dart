@@ -4,14 +4,14 @@
 
 import 'package:meta/meta.dart';
 
-import '../../base/file_system.dart';
-import '../../base/logger.dart';
+import 'file_system.dart';
+import 'logger.dart';
 
-/// iOS project is generated from a template on Flutter project creation.
-/// Sometimes (due to behavior changes in Xcode, CocoaPods, etc) these files need to be altered
+/// Project is generated from a template on Flutter project creation.
+/// Sometimes (due to behavior changes in Xcode, Gradle, etc) these files need to be altered
 /// from the original template.
-abstract class IOSMigrator {
-  IOSMigrator(this.logger);
+abstract class ProjectMigrator {
+  ProjectMigrator(this.logger);
 
   @protected
   final Logger logger;
@@ -58,13 +58,13 @@ abstract class IOSMigrator {
   }
 }
 
-class IOSMigration {
-  IOSMigration(this.migrators);
+class ProjectMigration {
+  ProjectMigration(this.migrators);
 
-  final List<IOSMigrator> migrators;
+  final List<ProjectMigrator> migrators;
 
   bool run() {
-    for (final IOSMigrator migrator in migrators) {
+    for (final ProjectMigrator migrator in migrators) {
       if (!migrator.migrate()) {
         // Migration failures should be more robust, with transactions and fallbacks.
         // See https://github.com/flutter/flutter/issues/12573 and
