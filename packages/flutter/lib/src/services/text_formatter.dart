@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import 'text_editing.dart';
 import 'text_input.dart';
@@ -416,13 +415,13 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement? maxLengthEnforcement;
 
-  /// {@template flutter.services.textFormatter.effectiveMaxLengthEnforcement}
   /// Return an effective [MaxLengthEnforcement] according the target platform.
   ///
   /// if [previousEnforcement] is not null, return it directly.
   ///
   /// if non of [platform] was specified, [defaultTargetPlatform] will be use.
   ///
+  /// {@template flutter.services.textFormatter.effectiveMaxLengthEnforcement}
   /// ### Platform specific behaviors
   ///
   /// Different platforms follow different behaviors by default, according to
