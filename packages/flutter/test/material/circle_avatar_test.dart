@@ -72,6 +72,23 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
+    testWidgets('CircleAvatar with image foreground', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: CircleAvatar(
+          foregroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.fit, equals(BoxFit.cover));
+  });
+
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
