@@ -178,6 +178,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   late Future<void> _pendingRefreshFuture;
   bool? _isIndicatorAtTop;
   double? _dragOffset;
+  double _indicatorOffset = 0.0;
 
   static final Animatable<double> _threeQuarterTween = Tween<double>(begin: 0.0, end: 0.75);
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit);
@@ -281,6 +282,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   bool _handleGlowNotification(OverscrollIndicatorNotification notification) {
     if (notification.depth != 0 || !notification.leading)
       return false;
+    _indicatorOffset = notification.paintOffset;
     if (_mode == _RefreshIndicatorMode.drag) {
       notification.disallowGlow();
       return true;
@@ -452,30 +454,35 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           bottom: !_isIndicatorAtTop! ? 0.0 : null,
           left: 0.0,
           right: 0.0,
-          child: SizeTransition(
-            axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
-            sizeFactor: _positionFactor, // this is what brings it down
-            child: Container(
-              padding: _isIndicatorAtTop!
-                ? EdgeInsets.only(top: widget.displacement)
-                : EdgeInsets.only(bottom: widget.displacement),
-              alignment: _isIndicatorAtTop!
-                ? Alignment.topCenter
-                : Alignment.bottomCenter,
-              child: ScaleTransition(
-                scale: _scaleFactor,
-                child: AnimatedBuilder(
-                  animation: _positionController,
-                  builder: (BuildContext context, Widget? child) {
-                    return RefreshProgressIndicator(
-                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
-                      semanticsValue: widget.semanticsValue,
-                      value: showIndeterminateIndicator ? null : _value.value,
-                      valueColor: _valueColor,
-                      backgroundColor: widget.backgroundColor,
-                      strokeWidth: widget.strokeWidth,
-                    );
-                  },
+          child: Padding(
+            padding: _isIndicatorAtTop!
+                ? EdgeInsets.only(top: _indicatorOffset)
+                : EdgeInsets.only(bottom: _indicatorOffset),
+            child: SizeTransition(
+              axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
+              sizeFactor: _positionFactor, // this is what brings it down
+              child: Container(
+                padding: _isIndicatorAtTop!
+                    ? EdgeInsets.only(top: widget.displacement)
+                    : EdgeInsets.only(bottom: widget.displacement),
+                alignment: _isIndicatorAtTop!
+                    ? Alignment.topCenter
+                    : Alignment.bottomCenter,
+                child: ScaleTransition(
+                  scale: _scaleFactor,
+                  child: AnimatedBuilder(
+                    animation: _positionController,
+                    builder: (BuildContext context, Widget? child) {
+                      return RefreshProgressIndicator(
+                        semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+                        semanticsValue: widget.semanticsValue,
+                        value: showIndeterminateIndicator ? null : _value.value,
+                        valueColor: _valueColor,
+                        backgroundColor: widget.backgroundColor,
+                        strokeWidth: widget.strokeWidth,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

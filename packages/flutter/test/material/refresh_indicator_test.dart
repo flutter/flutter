@@ -569,4 +569,55 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, greaterThan(300.0));
   });
+
+  testWidgets('The position where RefreshIndicator appears is consistent with OverscrollIndicator appears',
+    (WidgetTester tester) async {
+    refreshCalled = false;
+    Widget buildFrame(double offset) {
+      return MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification notification) {
+              if (notification.leading)
+                notification.paintOffset = offset;
+              return false;
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[
+                SizedBox(
+                  height: 200.0,
+                  child: Text('X'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(0.0));
+
+    // Pull out the indicator a little.
+    TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    await gesture.moveBy(const Offset(0.0, 5.0));
+    await tester.pump();
+
+    // Record the offset when the OverscrollIndicator has a zero offset.
+    final double firstIndicatorOffset = tester.getCenter(find.byType(RefreshProgressIndicator)).dy;
+
+    await gesture.up();
+    await tester.pumpAndSettle(); // Finish the dismiss animation.
+
+    await tester.pumpWidget(buildFrame(30.0));
+
+    gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    await gesture.moveBy(const Offset(0.0, 5.0));
+    await tester.pump();
+
+    // Record the offset when the OverscrollIndicator has 30 pixels offset.
+    final double secondIndicatorOffset = tester.getCenter(find.byType(RefreshProgressIndicator)).dy;
+    expect(secondIndicatorOffset, firstIndicatorOffset + 30.0);
+  });
 }
