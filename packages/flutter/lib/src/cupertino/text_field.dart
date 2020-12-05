@@ -819,7 +819,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => EditableText.defaultMaxLengthEnforcement(widget.maxLengthEnforcement);
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => LengthLimitingTextInputFormatter.defaultMaxLengthEnforcement(widget.maxLengthEnforcement);
 
   bool _showSelectionHandles = false;
 
