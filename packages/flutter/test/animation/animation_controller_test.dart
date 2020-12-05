@@ -949,6 +949,29 @@ void main() {
 
     controller.dispose();
   });
+
+  test('Forward / AnimateTo will throw error without duration', () {
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    controller.dispose();
+
+    expect(() => controller.forward(), throwsAssertionError);
+    expect(() => controller.animateTo(0.8), throwsAssertionError);
+  });
+
+  test('Reverse / AnimateBack will throw error without duration and reverseDuration', () {
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    controller.dispose();
+
+    expect(() => controller.reverse(), throwsAssertionError);
+    expect(() => controller.animateBack(0.8), throwsAssertionError);
+  });
+
 }
 
 class TestSimulation extends Simulation {
