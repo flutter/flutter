@@ -16,20 +16,22 @@ import 'text_input.dart';
 /// [MaxLengthEnforcement.truncateAfterCompositionEnds]
 ///
 /// Both [MaxLengthEnforcement.enforced] and
-/// [MaxLengthEnforcement.truncateAfterCompositionEnds] make sure the
-/// final length of the text does not exceed the max length specified.
-/// The difference is that [MaxLengthEnforcement.enforced] truncates the text
-/// whenever a new character is inserted into the text field,
-/// while [MaxLengthEnforcement.truncateAfterCompositionEnds] does not truncate
-/// when the user has unfinished composing text, allowing the "placeholder" text
-/// to temporarily exceed the max length limit, which provides a better
-/// user experience for entering ideographic characters (e.g., CJK characters)
-/// via composing on phonetic keyboards.
+/// [MaxLengthEnforcement.truncateAfterCompositionEnds] make sure the final
+/// length of the text does not exceed the max length specified. The difference
+/// is that [MaxLengthEnforcement.enforced] truncates all text while
+/// [MaxLengthEnforcement.truncateAfterCompositionEnds] allows composing text to
+/// exceed the limit. Allowing this "placeholder" composing text to exceed the
+/// limit may provide a better user experience on some platforms for entering
+/// ideographic characters (e.g. CJK characters) via composing on phonetic
+/// keyboards.
 ///
-/// However, some input methods (Gboard for example) initiate text composition
-/// even for Latin characters. If the text field should only take
-/// Latin characters or numbers (e.g., verification code),
-/// [MaxLengthEnforcement.enforced] is generally a better fit.
+/// Some input methods (Gboard on Android for example) initiate text composition
+/// even for Latin characters, in which case the best experience may be to
+/// truncate those composing characters with [MaxLengthEnforcement.enforced].
+///
+/// In fields that strictly support only a small subset of characters, such as
+/// verification code fields, [MaxLengthEnforcement.enforced] may provide the
+/// best experience.
 /// {@endtemplate}
 ///
 /// See also:
@@ -38,7 +40,8 @@ import 'text_input.dart';
 ///  [TextField.maxLength] to limit the length of user input. [TextField] also
 ///  provides a character counter to provide visual feedback.
 enum MaxLengthEnforcement {
-  /// No enforcement applied to the editing value.
+  /// No enforcement applied to the editing value. It's possible to exceed the
+  /// max length.
   none,
 
   /// Keep the length of the text input from exceeding the max length even when
@@ -422,10 +425,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///    IME while users are entering CJK characters.
   ///  * iOS: [MaxLengthEnforcement.truncateAfterCompositionEnds]. iOS has no
   ///    default behavior and it requires users implement the behavior
-  ///    themselves. Allow the composition exceed to avoid breaking CJK input.
-  ///  * Web / macOS / linux / fuchsia:
+  ///    themselves. Allow the composition to exceed to avoid breaking CJK input.
+  ///  * Web, macOS, linux, fuchsia:
   ///    [MaxLengthEnforcement.truncateAfterCompositionEnds]. These platforms
-  ///    allow the composition exceed by default.
+  ///    allow the composition to exceed by default.
   /// {@endtemplate}
   MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
     if (maxLengthEnforcement != null) {

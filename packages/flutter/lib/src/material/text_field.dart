@@ -321,9 +321,9 @@ class TextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [maxLengthEnforcement], [scrollPadding], [maxLines],
-  /// [maxLength], [selectionHeightStyle], [selectionWidthStyle],
-  /// and [enableSuggestions] arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
+  /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
+  /// arguments must not be null.
   ///
   /// See also:
   ///
@@ -399,7 +399,7 @@ class TextField extends StatefulWidget {
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(
-         maxLengthEnforced || maxLengthEnforcement != null,
+         maxLengthEnforced || maxLengthEnforcement == null,
          'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
        ),
        assert(scrollPadding != null),
@@ -861,30 +861,24 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  MaxLengthEnforcement? _maxLengthEnforcement;
   MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
     if (widget.maxLengthEnforcement != null) {
       return widget.maxLengthEnforcement!;
     }
-    if (_maxLengthEnforcement == null) {
-      if (kIsWeb) {
-        _maxLengthEnforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
-      } else {
-        switch (Theme.of(context).platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.windows:
-            _maxLengthEnforcement = MaxLengthEnforcement.enforced;
-            break;
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.fuchsia:
-            _maxLengthEnforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
-            break;
-        }
+    if (kIsWeb) {
+      return MaxLengthEnforcement.truncateAfterCompositionEnds;
+    } else {
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.android:
+        case TargetPlatform.windows:
+          return MaxLengthEnforcement.enforced;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.fuchsia:
+          return MaxLengthEnforcement.truncateAfterCompositionEnds;
       }
     }
-    return _maxLengthEnforcement!;
   }
 
   bool _isHovering = false;
@@ -1145,12 +1139,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final MaxLengthEnforcement maxLengthEnforcement = _effectiveMaxLengthEnforcement;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
-      LengthLimitingTextInputFormatter(
+      if (widget.maxLength != null && widget.maxLengthEnforced) LengthLimitingTextInputFormatter(
         widget.maxLength,
-        maxLengthEnforcement: maxLengthEnforcement,
+        maxLengthEnforcement: _effectiveMaxLengthEnforcement,
       ),
     ];
 
@@ -1283,7 +1276,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     );
 
     final int? semanticsMaxValueLength;
-    if (maxLengthEnforcement != MaxLengthEnforcement.none &&
+    if (widget.maxLengthEnforced &&
+      _effectiveMaxLengthEnforcement != MaxLengthEnforcement.none &&
       widget.maxLength != null &&
       widget.maxLength! > 0) {
       semanticsMaxValueLength = widget.maxLength;

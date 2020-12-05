@@ -207,10 +207,9 @@ class CupertinoTextField extends StatefulWidget {
   /// must not be null.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [maxLengthEnforced], [maxLengthEnforcement], [obscureText],
-  /// [prefixMode], [readOnly], [scrollPadding], [suffixMode], [textAlign],
-  /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
-  /// properties must not be null.
+  /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
+  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
+  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
   ///
   /// See also:
   ///
@@ -296,7 +295,7 @@ class CupertinoTextField extends StatefulWidget {
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
        assert(
-         maxLengthEnforced || maxLengthEnforcement != null,
+         maxLengthEnforced || maxLengthEnforcement == null,
          'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
        ),
        assert(scrollPadding != null),
@@ -484,6 +483,10 @@ class CupertinoTextField extends StatefulWidget {
   /// The maximum number of characters (Unicode scalar values) to allow in the
   /// text field.
   ///
+  /// After [maxLength] characters have been input, additional input
+  /// is ignored, unless [maxLengthEnforcement] is set to
+  /// [MaxLengthEnforcement.none].
+  ///
   /// The TextField enforces the length with a
   /// [LengthLimitingTextInputFormatter], which is evaluated after the supplied
   /// [inputFormatters], if any.
@@ -659,30 +662,24 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  MaxLengthEnforcement? _maxLengthEnforcement;
   MaxLengthEnforcement get _effectiveMaxLengthEnforcement {
     if (widget.maxLengthEnforcement != null) {
       return widget.maxLengthEnforcement!;
     }
-    if (_maxLengthEnforcement == null) {
-      if (kIsWeb) {
-        _maxLengthEnforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
-      } else {
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.windows:
-            _maxLengthEnforcement = MaxLengthEnforcement.enforced;
-            break;
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.fuchsia:
-            _maxLengthEnforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
-            break;
-        }
+    if (kIsWeb) {
+      return MaxLengthEnforcement.truncateAfterCompositionEnds;
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.windows:
+        return MaxLengthEnforcement.enforced;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.fuchsia:
+          return MaxLengthEnforcement.truncateAfterCompositionEnds;
       }
     }
-    return _maxLengthEnforcement!;
   }
 
   bool _showSelectionHandles = false;
@@ -930,12 +927,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
-    final MaxLengthEnforcement maxLengthEnforcement = _effectiveMaxLengthEnforcement;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
-      LengthLimitingTextInputFormatter(
+      if (widget.maxLength != null && widget.maxLengthEnforced) LengthLimitingTextInputFormatter(
         widget.maxLength,
-        maxLengthEnforcement: maxLengthEnforcement,
+        maxLengthEnforcement: _effectiveMaxLengthEnforcement,
       ),
     ];
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
