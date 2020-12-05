@@ -412,7 +412,13 @@ class CupertinoTextField extends StatefulWidget {
     this.minLines,
     this.expands = false,
     this.maxLength,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provides more specific '
+      'behavior related to the maxLength limit. '
+      'This feature was deprecated after v1.25.0-5.0.pre.'
+    )
     this.maxLengthEnforced = true,
+    this.maxLengthEnforcement,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -445,6 +451,10 @@ class CupertinoTextField extends StatefulWidget {
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
+       assert(
+         maxLengthEnforced || maxLengthEnforcement == null,
+         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
+       ),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(selectionHeightStyle != null),
