@@ -65,6 +65,8 @@ void main() {
       testWithoutContext('eulaSigned is false when clang is not installed', () {
         when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
 
+        when(processManager.runSync(<String>['which', 'sysctl']))
+            .thenReturn(ProcessResult(1, 0, '', ''));
         when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
             .thenReturn(ProcessResult(123, 1, '', ''));
         when(processManager.runSync(<String>['xcrun', 'clang']))

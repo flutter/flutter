@@ -28,6 +28,7 @@ final Platform windowsPlatform = FakePlatform(
   environment: <String, String>{
     'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
     'FLUTTER_ROOT': flutterRoot,
+    'USERPROFILE': '/',
   }
 );
 final Platform notWindowsPlatform = FakePlatform(
