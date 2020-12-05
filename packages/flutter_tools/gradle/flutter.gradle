@@ -301,10 +301,8 @@ class FlutterPlugin implements Plugin<Project> {
             return
         }
         // Add plugin dependency to the app project.
-        // Use the default configuration, so the app project can define custom configurations
-        // (such as those created after adding a flavor or a custom build type).
         project.dependencies {
-            implementation project(path: ":$pluginName", configuration: 'default')
+            implementation pluginProject
         }
         Closure addEmbeddingCompileOnlyDependency = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
@@ -314,20 +312,21 @@ class FlutterPlugin implements Plugin<Project> {
             if (!supportsBuildMode(flutterBuildMode)) {
                 return
             }
+            // Copy build types from the app to the plugin.
+            // This allows to build apps with plugins and custom build types or flavors.
+            pluginProject.android.buildTypes {
+              "${buildType.name}" {}
+            }
             addApiDependencies(
                 pluginProject,
                 buildType.name,
                 "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
             )
         }
+        // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
-          pluginProject.android.buildTypes {
-              profile {
-                  initWith debug
-              }
-          }
-          pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
-          pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
+          project.android.buildTypes.each addEmbeddingCompileOnlyDependency
+          project.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
         }
     }
 
