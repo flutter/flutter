@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/win32_task_runner.h"
+#include "flutter/shell/platform/windows/task_runner_win32.h"
 
 #include <atomic>
 #include <iostream>
@@ -10,20 +10,29 @@
 
 namespace flutter {
 
-Win32TaskRunner::Win32TaskRunner(DWORD main_thread_id,
+// static
+std::unique_ptr<TaskRunner> TaskRunner::Create(
+    DWORD main_thread_id,
+    CurrentTimeProc get_current_time,
+    const TaskExpiredCallback& on_task_expired) {
+  return std::make_unique<TaskRunnerWin32>(main_thread_id, get_current_time,
+                                           on_task_expired);
+}
+
+TaskRunnerWin32::TaskRunnerWin32(DWORD main_thread_id,
                                  CurrentTimeProc get_current_time,
                                  const TaskExpiredCallback& on_task_expired)
     : main_thread_id_(main_thread_id),
       get_current_time_(get_current_time),
       on_task_expired_(std::move(on_task_expired)) {}
 
-Win32TaskRunner::~Win32TaskRunner() = default;
+TaskRunnerWin32::~TaskRunnerWin32() = default;
 
-bool Win32TaskRunner::RunsTasksOnCurrentThread() const {
+bool TaskRunnerWin32::RunsTasksOnCurrentThread() const {
   return GetCurrentThreadId() == main_thread_id_;
 }
 
-std::chrono::nanoseconds Win32TaskRunner::ProcessTasks() {
+std::chrono::nanoseconds TaskRunnerWin32::ProcessTasks() {
   const TaskTimePoint now = TaskTimePoint::clock::now();
 
   std::vector<FlutterTask> expired_tasks;
@@ -68,14 +77,14 @@ std::chrono::nanoseconds Win32TaskRunner::ProcessTasks() {
   }
 }
 
-Win32TaskRunner::TaskTimePoint Win32TaskRunner::TimePointFromFlutterTime(
+TaskRunnerWin32::TaskTimePoint TaskRunnerWin32::TimePointFromFlutterTime(
     uint64_t flutter_target_time_nanos) const {
   const auto now = TaskTimePoint::clock::now();
   const auto flutter_duration = flutter_target_time_nanos - get_current_time_();
   return now + std::chrono::nanoseconds(flutter_duration);
 }
 
-void Win32TaskRunner::PostTask(FlutterTask flutter_task,
+void TaskRunnerWin32::PostTask(FlutterTask flutter_task,
                                uint64_t flutter_target_time_nanos) {
   static std::atomic_uint64_t sGlobalTaskOrder(0);
 

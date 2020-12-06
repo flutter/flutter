@@ -29,6 +29,7 @@ FlutterViewController::~FlutterViewController() {
   }
 }
 
+#ifndef WINUWP
 std::optional<LRESULT> FlutterViewController::HandleTopLevelWindowProc(
     HWND hwnd,
     UINT message,
@@ -39,5 +40,6 @@ std::optional<LRESULT> FlutterViewController::HandleTopLevelWindowProc(
       controller_, hwnd, message, wparam, lparam, &result);
   return handled ? result : std::optional<LRESULT>(std::nullopt);
 }
+#endif
 
 }  // namespace flutter
