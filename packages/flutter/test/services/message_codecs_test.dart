@@ -82,12 +82,16 @@ void main() {
         details: 'errorDetails',
       );
       expect(
-          () => method.decodeEnvelope(errorData),
-          throwsA(predicate((PlatformException e) =>
-              e is PlatformException &&
+        () => method.decodeEnvelope(errorData),
+        throwsA(
+          predicate((PlatformException e) {
+            return e is PlatformException &&
               e.code == 'errorCode' &&
               e.message == null &&
-              e.details == 'errorDetails')));
+              e.details == 'errorDetails';
+          }),
+        ),
+      );
     });
   });
   group('Json method codec', () {
