@@ -46,6 +46,7 @@ class FlutterViewController {
   // Returns the view managed by this controller.
   FlutterView* view() { return view_.get(); }
 
+#ifndef WINUWP
   // Allows the Flutter engine and any interested plugins an opportunity to
   // handle the given message.
   //
@@ -55,6 +56,7 @@ class FlutterViewController {
                                                   UINT message,
                                                   WPARAM wparam,
                                                   LPARAM lparam);
+#endif
 
  private:
   // Handle for interacting with the C API's view controller, if any.

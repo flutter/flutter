@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <iostream>
 
-#include "flutter/shell/platform/common/cpp/engine_switches.h"
+#include "flutter/shell/platform/common/cpp/engine_switches.h"  // nogncheck
 #include "flutter/shell/platform/common/cpp/path_utils.h"
 
 namespace flutter {

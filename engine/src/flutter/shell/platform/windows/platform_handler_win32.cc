@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/win32_platform_handler.h"
+#include "flutter/shell/platform/windows/platform_handler_win32.h"
 
 #include <windows.h>
 
@@ -10,21 +10,8 @@
 #include <iostream>
 #include <optional>
 
-#include "flutter/shell/platform/common/cpp/json_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/string_conversion.h"
-
-static constexpr char kChannelName[] = "flutter/platform";
-
-static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
-static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
-
-static constexpr char kTextPlainFormat[] = "text/plain";
-static constexpr char kTextKey[] = "text";
-
-static constexpr char kClipboardError[] = "Clipboard error";
-static constexpr char kUnknownClipboardFormatMessage[] =
-    "Unknown clipboard format";
 
 namespace flutter {
 
@@ -198,88 +185,67 @@ bool ScopedClipboard::SetString(const std::wstring string) {
 
 }  // namespace
 
-PlatformHandler::PlatformHandler(flutter::BinaryMessenger* messenger,
-                                 FlutterWindowsView* view)
-    : channel_(std::make_unique<flutter::MethodChannel<rapidjson::Document>>(
-          messenger,
-          kChannelName,
-          &flutter::JsonMethodCodec::GetInstance())),
-      view_(view) {
-  channel_->SetMethodCallHandler(
-      [this](
-          const flutter::MethodCall<rapidjson::Document>& call,
-          std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
-        HandleMethodCall(call, std::move(result));
-      });
+// static
+std::unique_ptr<PlatformHandler> PlatformHandler::Create(
+    BinaryMessenger* messenger,
+    FlutterWindowsView* view) {
+  return std::make_unique<PlatformHandlerWin32>(messenger, view);
 }
 
-void PlatformHandler::HandleMethodCall(
-    const flutter::MethodCall<rapidjson::Document>& method_call,
-    std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
-  const std::string& method = method_call.method_name();
-  if (method.compare(kGetClipboardDataMethod) == 0) {
-    // Only one string argument is expected.
-    const rapidjson::Value& format = method_call.arguments()[0];
+PlatformHandlerWin32::PlatformHandlerWin32(BinaryMessenger* messenger,
+                                           FlutterWindowsView* view)
+    : PlatformHandler(messenger), view_(view) {}
 
-    if (strcmp(format.GetString(), kTextPlainFormat) != 0) {
-      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
-      return;
-    }
-    ScopedClipboard clipboard;
-    if (!clipboard.Open(std::get<HWND>(*view_->GetRenderTarget()))) {
-      rapidjson::Document error_code;
-      error_code.SetInt(::GetLastError());
-      result->Error(kClipboardError, "Unable to open clipboard", error_code);
-      return;
-    }
-    if (!clipboard.HasString()) {
-      result->Success(rapidjson::Document());
-      return;
-    }
-    std::optional<std::wstring> clipboard_string = clipboard.GetString();
-    if (!clipboard_string) {
-      rapidjson::Document error_code;
-      error_code.SetInt(::GetLastError());
-      result->Error(kClipboardError, "Unable to get clipboard data",
-                    error_code);
-      return;
-    }
+PlatformHandlerWin32::~PlatformHandlerWin32() = default;
 
-    rapidjson::Document document;
-    document.SetObject();
-    rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
-    document.AddMember(
-        rapidjson::Value(kTextKey, allocator),
-        rapidjson::Value(Utf8FromUtf16(*clipboard_string), allocator),
-        allocator);
-    result->Success(document);
-  } else if (method.compare(kSetClipboardDataMethod) == 0) {
-    const rapidjson::Value& document = *method_call.arguments();
-    rapidjson::Value::ConstMemberIterator itr = document.FindMember(kTextKey);
-    if (itr == document.MemberEnd()) {
-      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
-      return;
-    }
-
-    ScopedClipboard clipboard;
-
-    if (!clipboard.Open(std::get<HWND>(*view_->GetRenderTarget()))) {
-      rapidjson::Document error_code;
-      error_code.SetInt(::GetLastError());
-      result->Error(kClipboardError, "Unable to open clipboard", error_code);
-      return;
-    }
-    if (!clipboard.SetString(Utf16FromUtf8(itr->value.GetString()))) {
-      rapidjson::Document error_code;
-      error_code.SetInt(::GetLastError());
-      result->Error(kClipboardError, "Unable to set clipboard data",
-                    error_code);
-      return;
-    }
-    result->Success();
-  } else {
-    result->NotImplemented();
+void PlatformHandlerWin32::GetPlainText(
+    std::unique_ptr<MethodResult<rapidjson::Document>> result,
+    std::string_view key) {
+  ScopedClipboard clipboard;
+  if (!clipboard.Open(std::get<HWND>(*view_->GetRenderTarget()))) {
+    rapidjson::Document error_code;
+    error_code.SetInt(::GetLastError());
+    result->Error(kClipboardError, "Unable to open clipboard", error_code);
+    return;
   }
+  if (!clipboard.HasString()) {
+    result->Success(rapidjson::Document());
+    return;
+  }
+  std::optional<std::wstring> clipboard_string = clipboard.GetString();
+  if (!clipboard_string) {
+    rapidjson::Document error_code;
+    error_code.SetInt(::GetLastError());
+    result->Error(kClipboardError, "Unable to get clipboard data", error_code);
+    return;
+  }
+
+  rapidjson::Document document;
+  document.SetObject();
+  rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+  document.AddMember(
+      rapidjson::Value(key.data(), allocator),
+      rapidjson::Value(Utf8FromUtf16(*clipboard_string), allocator), allocator);
+  result->Success(document);
+}
+
+void PlatformHandlerWin32::SetPlainText(
+    const std::string& text,
+    std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+  ScopedClipboard clipboard;
+  if (!clipboard.Open(std::get<HWND>(*view_->GetRenderTarget()))) {
+    rapidjson::Document error_code;
+    error_code.SetInt(::GetLastError());
+    result->Error(kClipboardError, "Unable to open clipboard", error_code);
+    return;
+  }
+  if (!clipboard.SetString(Utf16FromUtf8(text))) {
+    rapidjson::Document error_code;
+    error_code.SetInt(::GetLastError());
+    result->Error(kClipboardError, "Unable to set clipboard data", error_code);
+    return;
+  }
+  result->Success();
 }
 
 }  // namespace flutter

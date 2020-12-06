@@ -143,6 +143,8 @@ def to_gn_args(args):
     elif args.target_os == 'fuchsia':
         gn_args['target_os'] = 'fuchsia'
         gn_args['flutter_enable_legacy_fuchsia_embedder'] = args.fuchsia_legacy
+    elif args.target_os == 'winuwp':
+        gn_args['target_os'] = 'winuwp'
     elif args.target_os is not None:
         gn_args['target_os'] = args.target_os
 
@@ -328,6 +330,7 @@ def parse_args(args):
   parser.add_argument('--fuchsia', dest='target_os', action='store_const', const='fuchsia')
   parser.add_argument('--fuchsia-legacy', default=True, action='store_true')
   parser.add_argument('--no-fuchsia-legacy', dest='fuchsia_legacy', action='store_false')
+  parser.add_argument('--winuwp', dest='target_os', action='store_const', const='winuwp')
 
   parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')

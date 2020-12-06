@@ -64,9 +64,11 @@ void FlutterEngine::ShutDown() {
   engine_ = nullptr;
 }
 
+#ifndef WINUWP
 std::chrono::nanoseconds FlutterEngine::ProcessMessages() {
   return std::chrono::nanoseconds(FlutterDesktopEngineProcessMessages(engine_));
 }
+#endif
 
 void FlutterEngine::ReloadSystemFonts() {
   FlutterDesktopEngineReloadSystemFonts(engine_);
