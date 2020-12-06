@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_runner/mustache_template.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -293,6 +294,9 @@ class MockSimControl extends Mock implements SimControl {
 class FakeOperatingSystemUtils implements OperatingSystemUtils {
   @override
   ProcessResult makeExecutable(File file) => null;
+
+  @override
+  HostPlatform hostPlatform = HostPlatform.linux_x64;
 
   @override
   void chmod(FileSystemEntity entity, String mode) { }

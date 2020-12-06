@@ -457,6 +457,13 @@ void main() {
         '--lazy-async-stacks',
         '$build/app.dill',
       ]),
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        exitCode: 1,
+      ),
       const FakeCommand(command: <String>[
         'xcrun',
         '--sdk',
@@ -498,7 +505,7 @@ void main() {
         'clang',
         '-arch',
         'armv7',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -521,7 +528,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -575,6 +582,13 @@ void main() {
         '--lazy-async-stacks',
         '$build/app.dill',
       ]),
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        exitCode: 1,
+      ),
       const FakeCommand(command: <String>[
         'xcrun',
         '--sdk',
@@ -600,7 +614,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -657,6 +671,13 @@ void main() {
         '--lazy-async-stacks',
         '$build/app.dill',
       ]),
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        exitCode: 1,
+      ),
       const FakeCommand(command: <String>[
         'xcrun',
         '--sdk',
@@ -682,7 +703,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
