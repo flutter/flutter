@@ -740,8 +740,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   final ObserverList<_ParentInkResponseState> _activeChildren = ObserverList<_ParentInkResponseState>();
 
-  bool _deactivated = false;
-
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
     assert(childState != null);
@@ -789,7 +787,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void dispose() {
-    _deactivate();
+    _dispose();
     FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
     super.dispose();
   }
@@ -829,13 +827,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     void handleInkRemoval() {
       assert(_highlights[type] != null);
       _highlights[type] = null;
-      updateKeepAlive();
+      if (active)
+        updateKeepAlive();
     }
 
     if (type == _HighlightType.pressed) {
       widget.parentState?.markChildInkResponsePressed(this, value);
     }
-    if (value == (highlight != null && highlight.active))
+    if (value == (highlight != null && highlight.showing))
       return;
     if (value) {
       if (highlight == null) {
@@ -855,12 +854,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         );
         updateKeepAlive();
       } else {
-        highlight.activate();
+        highlight.show();
       }
     } else {
-      highlight!.deactivate();
+      highlight!.hide();
     }
-    assert(value == (_highlights[type] != null && _highlights[type]!.active));
+    assert(value == (_highlights[type] != null && _highlights[type]!.showing));
 
     switch (type) {
       case _HighlightType.pressed:
@@ -1020,22 +1019,30 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
+  void _setInkFeature(bool active) {
+    final List<InkFeature?> inkFeatures = <InkFeature?>[];
+    if (_splashes != null)
+      inkFeatures.addAll(_splashes!);
+    inkFeatures.addAll(_highlights.values);
+
+    for (final InkFeature? splash in inkFeatures)
+      splash?.active = active;
+  }
+
   @override
   void deactivate() {
-    _deactivated = true;
+    _setInkFeature(false);
     super.deactivate();
   }
 
   @override
-  void updateKeepAlive() {
-    // call [AutomaticKeepAliveClientMixin._releaseKeepAlive] when
-    // [_deactivated] is true.
-    if (!_deactivated)
-      super.updateKeepAlive();
+  void activate() {
+    _setInkFeature(true);
+    super.activate();
   }
 
-  // deactivate splashes and highlights
-  void _deactivate() {
+  // dispose splashes and highlights
+  void _dispose() {
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes!;
       _splashes = null;
@@ -1089,7 +1096,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
-    _deactivated = false;
     for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);
     }

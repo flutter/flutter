@@ -83,23 +83,23 @@ class InkHighlight extends InteractiveInkFeature {
   late AnimationController _alphaController;
 
   /// Whether this part of the material is being visually emphasized.
-  bool get active => _active;
-  bool _active = true;
+  bool get showing => _showing;
+  bool _showing = true;
 
   /// Start visually emphasizing this part of the material.
-  void activate() {
-    _active = true;
+  void show() {
+    _showing = true;
     _alphaController.forward();
   }
 
   /// Stop visually emphasizing this part of the material.
-  void deactivate() {
-    _active = false;
+  void hide() {
+    _showing = false;
     _alphaController.reverse();
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed && !_active)
+    if (status == AnimationStatus.dismissed && !_showing)
       dispose();
   }
 

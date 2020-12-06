@@ -544,8 +544,10 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Offset.zero & size);
-      for (final InkFeature inkFeature in _inkFeatures!)
-        inkFeature._paint(canvas);
+      for (final InkFeature inkFeature in _inkFeatures!) {
+        if (inkFeature.active)
+          inkFeature._paint(canvas);
+      }
       canvas.restore();
     }
     super.paint(context, offset);
@@ -624,6 +626,9 @@ abstract class InkFeature {
 
   bool _debugDisposed = false;
 
+  /// Whether or not visual reaction is activated.
+  bool active = true;
+
   /// Free up the resources associated with this ink feature.
   @mustCallSuper
   void dispose() {
@@ -638,11 +643,7 @@ abstract class InkFeature {
   }
 
   void _paint(Canvas canvas) {
-    // The referenceBox may be removed temporarily, but may dispose or rejoin
-    // the tree in the next frame.
-    if (!referenceBox.attached) {
-      return;
-    }
+    assert(referenceBox.attached);
     assert(!_debugDisposed);
     // find the chain of renderers from us to the feature's referenceBox
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
