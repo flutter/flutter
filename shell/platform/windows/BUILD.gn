@@ -29,14 +29,20 @@ source_set("flutter_windows_headers") {
   public_deps =
       [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
 
-  configs +=
-      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
+  if (target_os == "winuwp") {
+    configs +=
+        [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
+  } else {
+    configs +=
+        [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
+  }
 
   public_configs =
       [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
 }
 
 source_set("flutter_windows_source") {
+  # Common Windows sources.
   sources = [
     "angle_surface_manager.cc",
     "angle_surface_manager.h",
@@ -52,28 +58,47 @@ source_set("flutter_windows_source") {
     "key_event_handler.cc",
     "key_event_handler.h",
     "keyboard_hook_handler.h",
+    "platform_handler.cc",
+    "platform_handler.h",
     "string_conversion.cc",
     "string_conversion.h",
     "system_utils.h",
-    "system_utils_win32.cc",
+    "task_runner.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
-    "win32_dpi_utils.cc",
-    "win32_dpi_utils.h",
-    "win32_flutter_window.cc",
-    "win32_flutter_window.h",
-    "win32_platform_handler.cc",
-    "win32_platform_handler.h",
-    "win32_task_runner.cc",
-    "win32_task_runner.h",
-    "win32_window.cc",
-    "win32_window.h",
-    "win32_window_proc_delegate_manager.cc",
-    "win32_window_proc_delegate_manager.h",
     "window_binding_handler.h",
     "window_binding_handler_delegate.h",
     "window_state.h",
   ]
+
+  # Target-specific sources.
+  if (target_os == "winuwp") {
+    sources += [
+      "flutter_windows_winuwp.cc",
+      "platform_handler_winuwp.cc",
+      "platform_handler_winuwp.h",
+      "system_utils_winuwp.cc",
+      "task_runner_winuwp.cc",
+      "task_runner_winuwp.h",
+    ]
+  } else {
+    sources += [
+      "flutter_windows_win32.cc",
+      "platform_handler_win32.cc",
+      "platform_handler_win32.h",
+      "system_utils_win32.cc",
+      "task_runner_win32.cc",
+      "task_runner_win32.h",
+      "win32_dpi_utils.cc",
+      "win32_dpi_utils.h",
+      "win32_flutter_window.cc",
+      "win32_flutter_window.h",
+      "win32_window.cc",
+      "win32_window.h",
+      "win32_window_proc_delegate_manager.cc",
+      "win32_window_proc_delegate_manager.h",
+    ]
+  }
 
   configs += [
     "//flutter/shell/platform/common/cpp:desktop_library_implementation",
@@ -116,40 +141,51 @@ shared_library("flutter_windows") {
   public_configs = [ "//flutter:config" ]
 }
 
+shared_library("flutter_windows_winuwp") {
+  deps = [ ":flutter_windows_source" ]
+  libs = [ "windowsapp.lib" ]
+  public_configs = [ "//flutter:config" ]
+}
+
 test_fixtures("flutter_windows_fixtures") {
   fixtures = []
 }
 
-executable("flutter_windows_unittests") {
-  testonly = true
+if (target_os == "winuwp") {
+  # disabled until the uwp implementation is present
+} else {
+  executable("flutter_windows_unittests") {
+    testonly = true
 
-  sources = [
-    "flutter_project_bundle_unittests.cc",
-    "flutter_windows_engine_unittests.cc",
-    "string_conversion_unittests.cc",
-    "system_utils_unittests.cc",
-    "testing/engine_embedder_api_modifier.h",
-    "testing/mock_win32_window.cc",
-    "testing/mock_win32_window.h",
-    "testing/win32_flutter_window_test.cc",
-    "testing/win32_flutter_window_test.h",
-    "win32_dpi_utils_unittests.cc",
-    "win32_flutter_window_unittests.cc",
-    "win32_window_proc_delegate_manager_unittests.cc",
-    "win32_window_unittests.cc",
-  ]
+    sources = [
+      "flutter_project_bundle_unittests.cc",
+      "flutter_windows_engine_unittests.cc",
+      "string_conversion_unittests.cc",
+      "system_utils_unittests.cc",
+      "testing/engine_embedder_api_modifier.h",
+      "testing/mock_win32_window.cc",
+      "testing/mock_win32_window.h",
+      "testing/win32_flutter_window_test.cc",
+      "testing/win32_flutter_window_test.h",
+      "win32_dpi_utils_unittests.cc",
+      "win32_flutter_window_unittests.cc",
+      "win32_window_proc_delegate_manager_unittests.cc",
+      "win32_window_unittests.cc",
+    ]
 
-  public_configs = [ "//flutter:config" ]
+    public_configs = [ "//flutter:config" ]
 
-  deps = [
-    ":flutter_windows_fixtures",
-    ":flutter_windows_headers",
-    ":flutter_windows_source",
-    "//flutter/shell/platform/embedder:embedder_as_internal_library",
-    "//flutter/shell/platform/embedder:embedder_test_utils",
-    "//flutter/testing",
-    "//third_party/rapidjson",
-  ]
+    deps = [
+      ":flutter_windows_fixtures",
+      ":flutter_windows_headers",
+      ":flutter_windows_source",
+      "//flutter/shell/platform/common/cpp:common_cpp",
+      "//flutter/shell/platform/embedder:embedder_as_internal_library",
+      "//flutter/shell/platform/embedder:embedder_test_utils",
+      "//flutter/testing",
+      "//third_party/rapidjson",
+    ]
+  }
 }
 
 shared_library("flutter_windows_glfw") {
@@ -168,11 +204,20 @@ group("windows_glfw") {
 }
 
 group("windows") {
-  deps = [
-    ":flutter_windows",
-    ":publish_headers_windows",
-    "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
-  ]
+  if (target_os == "winuwp") {
+    deps = [
+      ":flutter_windows_winuwp",
+      ":publish_headers_windows",
+      "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
+    ]
+  } else {
+    deps = [
+      ":flutter_windows",
+      ":publish_headers_windows",
+      "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
+    ]
+  }
+
   if (build_glfw_shell) {
     deps += [ ":windows_glfw" ]
   }

@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/string_conversion.h"
 #include "flutter/shell/platform/windows/system_utils.h"
+#include "flutter/shell/platform/windows/task_runner.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
 
 namespace flutter {
@@ -99,7 +100,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   embedder_api_.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&embedder_api_);
 
-  task_runner_ = std::make_unique<Win32TaskRunner>(
+  task_runner_ = TaskRunner::Create(
       GetCurrentThreadId(), embedder_api_.GetCurrentTime,
       [this](const auto* task) {
         if (!engine_) {
@@ -121,8 +122,10 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   messenger_wrapper_ = std::make_unique<BinaryMessengerImpl>(messenger_.get());
   message_dispatcher_ =
       std::make_unique<IncomingMessageDispatcher>(messenger_.get());
+#ifndef WINUWP
   window_proc_delegate_manager_ =
       std::make_unique<Win32WindowProcDelegateManager>();
+#endif
 
   // Set up internal channels.
   // TODO: Replace this with an embedder.h API. See
@@ -175,12 +178,12 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
   platform_task_runner.user_data = task_runner_.get();
   platform_task_runner.runs_task_on_current_thread_callback =
       [](void* user_data) -> bool {
-    return static_cast<Win32TaskRunner*>(user_data)->RunsTasksOnCurrentThread();
+    return static_cast<TaskRunner*>(user_data)->RunsTasksOnCurrentThread();
   };
   platform_task_runner.post_task_callback = [](FlutterTask task,
                                                uint64_t target_time_nanos,
                                                void* user_data) -> void {
-    static_cast<Win32TaskRunner*>(user_data)->PostTask(task, target_time_nanos);
+    static_cast<TaskRunner*>(user_data)->PostTask(task, target_time_nanos);
   };
   FlutterCustomTaskRunners custom_task_runners = {};
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
@@ -201,7 +204,9 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
     return host->HandlePlatformMessage(engine_message);
   };
+
   args.custom_task_runners = &custom_task_runners;
+
   if (aot_data_) {
     args.aot_data = aot_data_.get();
   }
