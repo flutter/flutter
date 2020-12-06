@@ -16,6 +16,12 @@ import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
 
+// Matches the following error and warning patterns:
+// - <file path>:<line>:<column>: error: <error...>
+// - <file path>:<line>:<column>: warning: <warning...>
+// - clang: error: <link error...>
+final RegExp errorMatcher = RegExp(r'(?:.*:\d+:\d+|clang):\s?(?:error|warning):\s.*', caseSensitive: false);
+
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
   LinuxProject linuxProject,
@@ -130,6 +136,7 @@ Future<void> _runBuild(Directory buildDir) async {
           'VERBOSE_SCRIPT_LOGGING': 'true'
       },
       trace: true,
+      stdoutErrorMatcher: errorMatcher,
     );
   } on ArgumentError {
     throwToolExit("ninja not found. Run 'flutter doctor' for more information.");

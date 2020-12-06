@@ -1092,6 +1092,21 @@ Directory _getLocalEngineRepo({
       ),
     );
   }
+  for (final String artifact in <String>['flutter_embedding_$buildMode', '${abi}_$buildMode']) {
+    _createSymlink(
+      globals.fs.path.join(
+        engineOutPath,
+        '$artifact.maven-metadata.xml',
+      ),
+      globals.fs.path.join(
+        localEngineRepo.path,
+        'io',
+        'flutter',
+        artifact,
+        'maven-metadata.xml',
+      ),
+    );
+  }
   return localEngineRepo;
 }
 

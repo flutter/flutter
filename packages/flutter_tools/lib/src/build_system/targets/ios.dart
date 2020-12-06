@@ -249,7 +249,7 @@ abstract class UnpackIOS extends Target {
         const Source.pattern(
             '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
         Source.artifact(
-          Artifact.flutterFramework,
+          Artifact.flutterXcframework,
           platform: TargetPlatform.ios,
           mode: buildMode,
         ),
