@@ -432,6 +432,7 @@ void main() {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
+                  behavior: SnackBarBehavior.fixed,
                   duration: const Duration(seconds: 2),
                 ));
               },
@@ -477,6 +478,7 @@ void main() {
                 snackBarCount += 1;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
+                  behavior: SnackBarBehavior.fixed,
                   duration: const Duration(seconds: 2),
                 ));
               },
@@ -601,6 +603,7 @@ void main() {
                   Scaffold.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('I am a snack bar.'),
+                      behavior: SnackBarBehavior.fixed,
                       duration: const Duration(seconds: 2),
                       action: SnackBarAction(
                         label: 'ACTION',
@@ -643,6 +646,7 @@ void main() {
                   Scaffold.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('I am a snack bar.'),
+                      behavior: SnackBarBehavior.fixed,
                       duration: const Duration(seconds: 2),
                       action: SnackBarAction(
                         label: 'ACTION',
@@ -1094,6 +1098,7 @@ void main() {
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
+                    behavior: SnackBarBehavior.fixed,
                     duration: const Duration(seconds: 2),
                     action: SnackBarAction(label: 'ACTION', onPressed: () { }),
                   ));
@@ -1149,6 +1154,7 @@ void main() {
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: const Text('I am a snack bar.'),
+                      behavior: SnackBarBehavior.fixed,
                       duration: const Duration(seconds: 2),
                       action: SnackBarAction(label: 'ACTION', onPressed: () {}),
                     ));
@@ -1200,6 +1206,7 @@ void main() {
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
+                    behavior: SnackBarBehavior.fixed,
                     duration: const Duration(seconds: 2),
                     action: SnackBarAction(label: 'ACTION', onPressed: () {}),
                   ));

@@ -339,7 +339,7 @@ class SnackBar extends StatefulWidget {
   ///
   /// If this property is null, then [SnackBarThemeData.behavior] of
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
-  /// [SnackBarBehavior.fixed].
+  /// [SnackBarBehavior.floating].
   final SnackBarBehavior? behavior;
 
   /// (optional) An action that the user can take based on the snack bar.
@@ -481,7 +481,7 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.subtitle1;
-    final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
+    final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.floating;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
     final EdgeInsetsGeometry padding = widget.padding

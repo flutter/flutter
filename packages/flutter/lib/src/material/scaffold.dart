@@ -3010,7 +3010,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_messengerSnackBar != null) {
       final SnackBarBehavior snackBarBehavior = _messengerSnackBar?._widget.behavior
         ?? themeData.snackBarTheme.behavior
-        ?? SnackBarBehavior.fixed;
+        ?? SnackBarBehavior.floating;
       isSnackBarFloating = snackBarBehavior == SnackBarBehavior.floating;
       snackBarWidth = _messengerSnackBar?._widget.width;
 
@@ -3031,7 +3031,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isNotEmpty) {
       final SnackBarBehavior snackBarBehavior = _snackBars.first._widget.behavior
         ?? themeData.snackBarTheme.behavior
-        ?? SnackBarBehavior.fixed;
+        ?? SnackBarBehavior.floating;
       isSnackBarFloating = snackBarBehavior == SnackBarBehavior.floating;
       snackBarWidth = _snackBars.first._widget.width;
 

@@ -73,6 +73,7 @@ void main() {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: const Text(text),
+                  behavior: SnackBarBehavior.fixed,
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),
                 ));

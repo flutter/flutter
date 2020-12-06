@@ -648,7 +648,10 @@ void main() {
                 return FloatingActionButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Snacky!')),
+                      const SnackBar(
+                        content: Text('Snacky!'),
+                        behavior: SnackBarBehavior.fixed,
+                        ),
                     );
                   },
                   child: const Text('FAB'),
