@@ -30,12 +30,11 @@ Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
   );
 }
 
-Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items, { ScrollController? controller }) {
+Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) {
   return tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
-        controller: controller,
         slivers: <Widget>[
           SliverFixedExtentList(
             itemExtent: 900,
