@@ -12,6 +12,13 @@ void main() {
     expect(Icons.account_balance, hasOneLineDescription);
   });
 
+  testWidgets('Certain icons (and their variants) match text direction', (WidgetTester tester) async {
+    expect(Icons.arrow_back.matchTextDirection, true);
+    expect(Icons.arrow_back_rounded.matchTextDirection, true);
+    expect(Icons.arrow_back_outlined.matchTextDirection, true);
+    expect(Icons.arrow_back_sharp.matchTextDirection, true);
+  });
+
   testWidgets('Icons specify the material font', (WidgetTester tester) async {
     expect(Icons.clear.fontFamily, 'MaterialIcons');
     expect(Icons.search.fontFamily, 'MaterialIcons');
