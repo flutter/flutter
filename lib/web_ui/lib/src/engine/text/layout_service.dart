@@ -41,7 +41,9 @@ class TextLayoutService {
 
   int? get maxLines => paragraph.paragraphStyle._maxLines;
   bool get unlimitedLines => maxLines == null;
-  bool get hasEllipsis => paragraph.paragraphStyle._ellipsis != null;
+
+  String? get ellipsis => paragraph.paragraphStyle._ellipsis;
+  bool get hasEllipsis => ellipsis != null;
 
   /// Performs the layout on a paragraph given the [constraints].
   ///
@@ -73,13 +75,13 @@ class TextLayoutService {
 
     int spanIndex = 0;
     ParagraphSpan span = paragraph.spans[0];
-    LineBuilder currentLine = LineBuilder.first(paragraph, spanometer);
-    LineBuilder maxIntrinsicLine = LineBuilder.first(paragraph, spanometer);
+    LineBuilder currentLine =
+        LineBuilder.first(paragraph, spanometer, maxWidth: constraints.width);
 
-    // The only way to exit this while loop is by hitting the `break;` statement
-    // when we reach the `endOfText` line break.
+    // The only way to exit this while loop is by hitting one of the `break;`
+    // statements (e.g. when we reach `endOfText`, when ellipsis has been
+    // appended).
     while (true) {
-
       // *********************************************** //
       // *** HANDLE HARD LINE BREAKS AND END OF TEXT *** //
       // *********************************************** //
@@ -103,7 +105,6 @@ class TextLayoutService {
       if (span is PlaceholderSpan) {
         spanometer.currentSpan = null;
         final double lineWidth = currentLine.width + span.width;
-        // TODO(mdebbar): Consider how placeholders affect min/max intrinsics.
         if (lineWidth <= constraints.width) {
           // The placeholder fits on the current line.
           // TODO(mdebbar):
@@ -122,12 +123,6 @@ class TextLayoutService {
         final double additionalWidth =
             currentLine.getAdditionalWidthTo(nextBreak);
 
-        // For the purpose of max intrinsic width, we don't care if the line
-        // fits within the constraints or not. So we always extend it.
-        if (maxIntrinsicLine.end != nextBreak) {
-          maxIntrinsicLine.extendTo(nextBreak);
-        }
-
         if (currentLine.width + additionalWidth <= constraints.width) {
           // TODO(mdebbar): Handle the case when `nextBreak` is just a span end
           //                that shouldn't extend the line yet.
@@ -138,19 +133,23 @@ class TextLayoutService {
           // The chunk of text can't fit into the current line.
           final bool isLastLine =
               (hasEllipsis && unlimitedLines) || lines.length + 1 == maxLines;
+
           if (isLastLine && hasEllipsis) {
             // We've reached the line that requires an ellipsis to be appended
             // to it.
 
-            // TODO(mdebbar): Remove this line and implement overflow ellipsis.
-            currentLine.extendTo(nextBreak);
+            currentLine.forceBreak(nextBreak,
+                allowEmpty: true, ellipsis: ellipsis);
+            lines.add(currentLine.build(ellipsis: ellipsis));
+            break;
           } else if (currentLine.isEmpty) {
             // The current line is still empty, which means we are dealing
             // with a single block of text that doesn't fit in a single line.
-            // We need to force-break it.
+            // We need to force-break it without adding an ellipsis.
 
-            // TODO(mdebbar): Remove this line and implement force-breaking.
-            currentLine.extendTo(nextBreak);
+            currentLine.forceBreak(nextBreak, allowEmpty: false);
+            lines.add(currentLine.build());
+            currentLine = currentLine.nextLine();
           } else {
             // Normal line break.
             lines.add(currentLine.build());
@@ -161,24 +160,8 @@ class TextLayoutService {
         throw UnimplementedError('Unknown span type: ${span.runtimeType}');
       }
 
-      // ************************************************ //
-      // *** LONGEST LINE && MAX/MIN INTRINSIC WIDTHS *** //
-      // ************************************************ //
-
-      if (longestLine < currentLine.width) {
-        longestLine = currentLine.width;
-      }
-
-      if (minIntrinsicWidth < currentLine.widthOfLastExtension) {
-        minIntrinsicWidth = currentLine.widthOfLastExtension;
-      }
-
-      if (maxIntrinsicLine.end.isHard) {
-        // Max intrinsic width includes the width of trailing spaces.
-        if (maxIntrinsicWidth < maxIntrinsicLine.widthIncludingSpace) {
-          maxIntrinsicWidth = maxIntrinsicLine.widthIncludingSpace;
-        }
-        maxIntrinsicLine = maxIntrinsicLine.nextLine();
+      if (lines.length == maxLines) {
+        break;
       }
 
       // ********************************************* //
@@ -190,7 +173,83 @@ class TextLayoutService {
         span = paragraph.spans[++spanIndex];
       }
     }
+
+    // ******************************** //
+    // *** MAX/MIN INTRINSIC WIDTHS *** //
+    // ******************************** //
+
+    spanIndex = 0;
+    span = paragraph.spans[0];
+    currentLine =
+        LineBuilder.first(paragraph, spanometer, maxWidth: constraints.width);
+
+    while (currentLine.end.type != LineBreakType.endOfText) {
+      if (span is PlaceholderSpan) {
+        // TODO(mdebbar): Do placeholders affect min/max intrinsic width?
+      } else if (span is FlatTextSpan) {
+        final LineBreakResult nextBreak = currentLine.findNextBreak(span.end);
+
+        // For the purpose of max intrinsic width, we don't care if the line
+        // fits within the constraints or not. So we always extend it.
+        currentLine.extendTo(nextBreak);
+
+        final double widthOfLastSegment = currentLine.lastSegment.width;
+        if (minIntrinsicWidth < widthOfLastSegment) {
+          minIntrinsicWidth = widthOfLastSegment;
+        }
+
+        if (currentLine.end.isHard) {
+          // Max intrinsic width includes the width of trailing spaces.
+          if (maxIntrinsicWidth < currentLine.widthIncludingSpace) {
+            maxIntrinsicWidth = currentLine.widthIncludingSpace;
+          }
+          currentLine = currentLine.nextLine();
+        }
+
+        // Only go to the next span if we've reached the end of this span.
+        if (currentLine.end.index >= span.end && spanIndex < spanCount - 1) {
+          span = paragraph.spans[++spanIndex];
+        }
+      }
+    }
   }
+}
+
+/// Represents a segment in a line of a paragraph.
+///
+/// For example, this line: "Lorem ipsum dolor sit" is broken up into the
+/// following segments:
+///
+/// - "Lorem "
+/// - "ipsum "
+/// - "dolor "
+/// - "sit"
+class LineSegment {
+  LineSegment({
+    required this.span,
+    required this.start,
+    required this.end,
+    required this.width,
+    required this.widthIncludingSpace,
+  });
+
+  /// The span that this segment belongs to.
+  final ParagraphSpan span;
+
+  /// The index of the beginning of the segment in the paragraph.
+  final LineBreakResult start;
+
+  /// The index of the end of the segment in the paragraph.
+  final LineBreakResult end;
+
+  /// The width of the segment excluding any trailing white space.
+  final double width;
+
+  /// The width of the segment including any trailing white space.
+  final double widthIncludingSpace;
+
+  /// The width of the trailing white space in the segment.
+  double get widthOfTrailingSpace => widthIncludingSpace - width;
 }
 
 /// Builds instances of [EngineLineMetrics] for the given [paragraph].
@@ -209,20 +268,29 @@ class LineBuilder {
   LineBuilder._(
     this.paragraph,
     this.spanometer, {
+    required this.maxWidth,
     required this.start,
     required this.lineNumber,
   }) : end = start;
 
   /// Creates a [LineBuilder] for the first line in a paragraph.
-  factory LineBuilder.first(CanvasParagraph paragraph, Spanometer spanometer) {
+  factory LineBuilder.first(
+    CanvasParagraph paragraph,
+    Spanometer spanometer, {
+    required double maxWidth,
+  }) {
     return LineBuilder._(
       paragraph,
       spanometer,
+      maxWidth: maxWidth,
       lineNumber: 0,
       start: LineBreakResult.sameIndex(0, LineBreakType.prohibited),
     );
   }
 
+  final List<LineSegment> _segments = <LineSegment>[];
+
+  final double maxWidth;
   final CanvasParagraph paragraph;
   final Spanometer spanometer;
   final LineBreakResult start;
@@ -233,17 +301,17 @@ class LineBuilder {
   /// The width of the line so far, excluding trailing white space.
   double width = 0.0;
 
-  /// The width of trailing white space in the line.
-  double widthOfTrailingSpace = 0.0;
-
   /// The width of the line so far, including trailing white space.
-  double get widthIncludingSpace => width + widthOfTrailingSpace;
+  double widthIncludingSpace = 0.0;
 
-  /// The width of the last extension to the line made via [extendTo].
-  double widthOfLastExtension = 0.0;
+  /// The width of trailing white space in the line.
+  double get widthOfTrailingSpace => widthIncludingSpace - width;
 
-  bool get isEmpty => start == end;
-  bool get isNotEmpty => !isEmpty;
+  /// The last segment in this line.
+  LineSegment get lastSegment => _segments.last;
+
+  bool get isEmpty => _segments.isEmpty;
+  bool get isNotEmpty => _segments.isNotEmpty;
 
   /// Measures the width of text between the end of this line and [newEnd].
   double getAdditionalWidthTo(LineBreakResult newEnd) {
@@ -265,28 +333,137 @@ class LineBuilder {
       'Cannot extend a line that ends with a hard break.',
     );
 
-    // TODO(mdebbar): Handle the case where the entire extension is made of spaces.
-    widthOfLastExtension = spanometer.measure(end, newEnd);
-    final double additionalWidthIncludingSpace =
-        spanometer.measureIncludingSpace(end, newEnd);
+    _addSegment(_createSegment(newEnd));
+  }
+
+  /// Creates a new segment to be appended to the end of this line.
+  LineSegment _createSegment(LineBreakResult segmentEnd) {
+    // The segment starts at the end of the line.
+    final LineBreakResult segmentStart = end;
+    return LineSegment(
+      span: spanometer.currentSpan!,
+      start: segmentStart,
+      end: segmentEnd,
+      width: spanometer.measure(segmentStart, segmentEnd),
+      widthIncludingSpace:
+          spanometer.measureIncludingSpace(segmentStart, segmentEnd),
+    );
+  }
+
+  /// Adds a segment to this line.
+  ///
+  /// It adjusts the width properties to accommodate the new segment. It also
+  /// sets the line end to the end of the segment.
+  void _addSegment(LineSegment segment) {
+    _segments.add(segment);
 
     // Add the width of previous trailing space.
-    width += widthOfTrailingSpace + widthOfLastExtension;
-    widthOfTrailingSpace = additionalWidthIncludingSpace - widthOfLastExtension;
-    end = newEnd;
+    width += widthOfTrailingSpace + segment.width;
+    widthIncludingSpace += segment.widthIncludingSpace;
+    end = segment.end;
+  }
+
+  /// Removes the latest [LineSegment] added by [_addSegment].
+  ///
+  /// It re-adjusts the width properties and the end of the line.
+  LineSegment _popSegment() {
+    final LineSegment poppedSegment = _segments.removeLast();
+
+    double widthOfPrevTrailingSpace;
+    if (_segments.isEmpty) {
+      widthOfPrevTrailingSpace = 0.0;
+      end = start;
+    } else {
+      widthOfPrevTrailingSpace = lastSegment.widthOfTrailingSpace;
+      end = lastSegment.end;
+    }
+
+    width = width - poppedSegment.width - widthOfPrevTrailingSpace;
+    widthIncludingSpace -= poppedSegment.widthIncludingSpace;
+
+    return poppedSegment;
+  }
+
+  /// Force-breaks the line in order to fit in [maxWidth] while trying to extend
+  /// to [nextBreak].
+  ///
+  /// This should only be called when there isn't enough width to extend to
+  /// [nextBreak], and either of the following is true:
+  ///
+  /// 1. An ellipsis is being appended to this line, OR
+  /// 2. The line doesn't have any line break opportunities and has to be
+  ///    force-broken.
+  void forceBreak(
+    LineBreakResult nextBreak, {
+    required bool allowEmpty,
+    String? ellipsis,
+  }) {
+    if (ellipsis == null) {
+      final double availableWidth = maxWidth - widthIncludingSpace;
+      final LineBreakResult breakingPoint = spanometer.forceBreak(
+        end.index,
+        nextBreak.indexWithoutTrailingSpaces,
+        availableWidth: availableWidth,
+        allowEmpty: allowEmpty,
+      );
+      extendTo(breakingPoint);
+      return;
+    }
+
+    // For example: "foo bar baz". Let's say all characters have the same width, and
+    // the constraint width can only fit 9 characters "foo bar b". So if the
+    // paragraph has an ellipsis, we can't just remove the last segment "baz"
+    // and replace it with "..." because that would overflow.
+    //
+    // We need to keep popping segments until we are able to fit the "..."
+    // without overflowing. In this example, that would be: "foo ba..."
+
+    final double ellipsisWidth = spanometer.measureText(ellipsis);
+    final double availableWidth = maxWidth - ellipsisWidth;
+
+    // First, we create the new segment until `nextBreak`.
+    LineSegment segmentToBreak = _createSegment(nextBreak);
+
+    // Then, we keep popping until we find the segment that has to be broken.
+    // After the loop ends, two things are correct:
+    // 1. All remaining segments in `_segments` can fit within constraints.
+    // 2. Adding `segmentToBreak` causes the line to overflow.
+    while (_segments.isNotEmpty && width > availableWidth) {
+      segmentToBreak = _popSegment();
+    }
+
+    spanometer.currentSpan = segmentToBreak.span as FlatTextSpan;
+    final double availableWidthForSegment =
+        availableWidth - widthIncludingSpace;
+    final LineBreakResult breakingPoint = spanometer.forceBreak(
+      segmentToBreak.start.index,
+      segmentToBreak.end.indexWithoutTrailingSpaces,
+      availableWidth: availableWidthForSegment,
+      allowEmpty: allowEmpty,
+    );
+    extendTo(breakingPoint);
   }
 
   /// Builds the [EngineLineMetrics] instance that represents this line.
-  EngineLineMetrics build() {
-    final String text = paragraph.toPlainText();
+  EngineLineMetrics build({String? ellipsis}) {
+    double ellipsisWidth = 0.0;
+    String text = paragraph
+        .toPlainText()
+        .substring(start.index, end.indexWithoutTrailingNewlines);
+
+    if (ellipsis != null) {
+      ellipsisWidth = spanometer.measureText(ellipsis);
+      text += ellipsis;
+    }
+
     return EngineLineMetrics.withText(
-      text.substring(start.index, end.indexWithoutTrailingNewlines),
+      text,
       startIndex: start.index,
       endIndex: end.index,
       endIndexWithoutNewlines: end.indexWithoutTrailingNewlines,
       hardBreak: end.isHard,
-      width: width,
-      widthWithTrailingSpaces: width + widthOfTrailingSpace,
+      width: width + ellipsisWidth,
+      widthWithTrailingSpaces: widthIncludingSpace + ellipsisWidth,
       // TODO(mdebbar): Calculate actual align offset.
       left: 0.0,
       lineNumber: lineNumber,
@@ -303,6 +480,7 @@ class LineBuilder {
     return LineBuilder._(
       paragraph,
       spanometer,
+      maxWidth: maxWidth,
       start: end,
       lineNumber: lineNumber + 1,
     );
@@ -328,6 +506,7 @@ class Spanometer {
   double? get letterSpacing => _currentSpan!.style._letterSpacing;
 
   FlatTextSpan? _currentSpan;
+  FlatTextSpan? get currentSpan => _currentSpan;
   set currentSpan(FlatTextSpan? span) {
     if (span == _currentSpan) {
       return;
@@ -359,6 +538,49 @@ class Spanometer {
   /// Includes the width of trailing white space, if any.
   double measureIncludingSpace(LineBreakResult start, LineBreakResult end) {
     return _measure(start.index, end.indexWithoutTrailingNewlines);
+  }
+
+  double measureText(String text) {
+    return _measureSubstring(context, text, 0, text.length);
+  }
+
+  LineBreakResult forceBreak(
+    int start,
+    int end, {
+    required double availableWidth,
+    required bool allowEmpty,
+  }) {
+    assert(_currentSpan != null);
+
+    final FlatTextSpan span = _currentSpan!;
+
+    // Make sure the range is within the current span.
+    assert(start >= span.start && start <= span.end);
+    assert(end >= span.start && end <= span.end);
+
+    if (availableWidth <= 0.0) {
+      return LineBreakResult.sameIndex(
+          allowEmpty ? start : start + 1, LineBreakType.prohibited);
+    }
+
+    int low = start;
+    int high = end;
+    do {
+      final int mid = (low + high) ~/ 2;
+      final double width = _measure(start, mid);
+      if (width < availableWidth) {
+        low = mid;
+      } else if (width > availableWidth) {
+        high = mid;
+      } else {
+        low = high = mid;
+      }
+    } while (high - low > 1);
+
+    if (low == start && !allowEmpty) {
+      low++;
+    }
+    return LineBreakResult.sameIndex(low, LineBreakType.prohibited);
   }
 
   double _measure(int start, int end) {
