@@ -21,11 +21,11 @@ import 'package:flutter/widgets.dart';
 ///   cupertino_icons: ^1.0.0
 /// ```
 ///
-/// For a map of available icons for use, see <https://flutter.github.io/cupertino_icons>
-/// for cupertino_icons version >1.0.0.
+/// [![icon gallery preview](https://raw.githubusercontent.com/flutter/cupertino_icons/master/gallery_preview_1.0.0.png)](https://flutter.github.io/cupertino_icons)
 ///
-/// See <https://github.com/flutter/cupertino_icons/blob/master/map.png> for
-/// cupertino_icons version <0.1.3.
+/// For versions 1.0.0 and above (available only on Flutter SDK versions 1.22+), see the [Cupertino Icons Gallery](https://flutter.github.io/cupertino_icons).
+///
+/// For versions 0.1.3 and below, see this [glyph map](https://raw.githubusercontent.com/flutter/cupertino_icons/master/map.png).
 ///
 /// See also:
 ///
