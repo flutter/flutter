@@ -1,9 +1,9 @@
-/* <!-- Keep this file and CupertinoIcons.ttf in sync with https://github.com/flutter/cupertino_icons --> */
+/* <!-- Keep this file in sync with https://github.com/flutter/cupertino_icons/blob/master/css/icons.css --> */
 @font-face {
   font-family: 'Cupertino Icons';
   font-style: normal;
   font-weight: 400;
-  src: url("../assets/CupertinoIcons.ttf") format("truetype");
+  src: url("https://flutter.github.io/cupertino_icons/assets/CupertinoIcons.ttf") format("truetype");
 }
 
 .cupertino-icons, .cupertino-icons {
