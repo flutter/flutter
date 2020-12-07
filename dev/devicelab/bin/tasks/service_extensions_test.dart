@@ -61,9 +61,8 @@ void main() {
 
       final Completer<vms.Event> frameEventCompleter = Completer<vms.Event>();
       final Completer<vms.Event> navigationEventCompleter = Completer<vms.Event>();
+      await client.streamListen(vms.EventStreams.kExtension);
       client.onExtensionEvent.listen((vms.Event event) {
-        print(event);
-        print(event.extensionKind);
         if (event.extensionKind == 'Flutter.Frame' && !frameEventCompleter.isCompleted) {
           frameEventCompleter.complete(event);
         } else if (event.extensionKind == 'Flutter.Navigation' && !navigationEventCompleter.isCompleted) {
@@ -76,27 +75,27 @@ void main() {
 
       // ensure we get an event
       final vms.Event event = await frameEventCompleter.future;
-      print('${event.kind}: ${event.json}');
+      print('${event.extensionKind}: ${event.extensionData.data}');
 
       // validate the fields
       // {number: 8, startTime: 0, elapsed: 1437, build: 600, raster: 800}
-      expect(event.json['number'] is int);
-      expect((event.json['number'] as int) >= 0);
-      expect(event.json['startTime'] is int);
-      expect((event.json['startTime'] as int) >= 0);
-      expect(event.json['elapsed'] is int);
-      expect((event.json['elapsed'] as int) >= 0);
-      expect(event.json['build'] is int);
-      expect((event.json['build'] as int) >= 0);
-      expect(event.json['raster'] is int);
-      expect((event.json['raster'] as int) >= 0);
+      expect(event.extensionData.data['number'] is int);
+      expect((event.extensionData.data['number'] as int) >= 0);
+      expect(event.extensionData.data['startTime'] is int);
+      expect((event.extensionData.data['startTime'] as int) >= 0);
+      expect(event.extensionData.data['elapsed'] is int);
+      expect((event.extensionData.data['elapsed'] as int) >= 0);
+      expect(event.extensionData.data['build'] is int);
+      expect((event.extensionData.data['build'] as int) >= 0);
+      expect(event.extensionData.data['raster'] is int);
+      expect((event.extensionData.data['raster'] as int) >= 0);
 
       device.tap(100, 200);
 
       final vms.Event navigationEvent = await navigationEventCompleter.future;
       // validate the fields
-      expect(navigationEvent.json['route'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> route = navigationEvent.json['route'] as Map<dynamic, dynamic>;
+      expect(navigationEvent.extensionData.data['route'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> route = navigationEvent.extensionData.data['route'] as Map<dynamic, dynamic>;
       expect(route['description'] is String);
       expect(route['settings'] is Map<dynamic, dynamic>);
       final Map<dynamic, dynamic> settings = route['settings'] as Map<dynamic, dynamic>;
