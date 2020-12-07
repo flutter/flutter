@@ -12,8 +12,6 @@ import 'package:ui/ui.dart' as ui;
 import 'layout_service_helper.dart';
 
 const bool skipForceBreak = true;
-const bool skipOverflow = true;
-const bool skipMaxLines = true;
 const bool skipTextAlign = true;
 const bool skipWordSpacing = true;
 
@@ -443,7 +441,7 @@ void testMain() async {
     expectLines(paragraph, [
       l('...', 0, 0, hardBreak: false, width: 30.0, left: 0.0),
     ]);
-  }, skip: skipOverflow);
+  });
 
   test('respects max lines', () {
     final EngineParagraphStyle maxlinesStyle = EngineParagraphStyle(
@@ -491,7 +489,7 @@ void testMain() async {
       l('AAA ', 0, 4, hardBreak: false, width: 30.0, left: 0.0),
       l('AAAAA', 4, 9, hardBreak: false, width: 50.0, left: 0.0),
     ]);
-  }, skip: skipMaxLines);
+  });
 
   test('respects text overflow and max lines combined', () {
     final EngineParagraphStyle onelineStyle = EngineParagraphStyle(
@@ -573,7 +571,7 @@ void testMain() async {
       l('abcdef', 0, 6, hardBreak: false, width: 60.0, left: 0.0),
       l('g h...', 6, 9, hardBreak: false, width: 60.0, left: 0.0),
     ]);
-  }, skip: skipOverflow || skipMaxLines);
+  });
 
   test('handles textAlign', () {
     CanvasParagraph paragraph;
