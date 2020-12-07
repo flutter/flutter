@@ -311,7 +311,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _paintScrollbar(Canvas canvas, Size size, double thumbExtent, AxisDirection direction) {
-    assert(textDirection != null);
+    assert(
+      textDirection != null,
+      'A TextDirection must be provided before a Scrollbar can be painted.',
+    );
 
     final double x, y;
     final Size thumbSize, trackSize;
@@ -570,10 +573,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///  * [RawScrollbar], the abstract base class this inherits from.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
-// TODO(Piinks): Add support for passing a Shape instead of thickness/radius.
+// TODO(Piinks): Add support for passing a shape instead of thickness/radius.
 // Will need to update painter to support as well.
 // Also, expose helpful properties like main/crossAxis margins, minThumbLength,
-// etc. in follow-up changes in part of https://github.com/flutter/flutter/issues/13253
+// etc. on the RawScrollbar in follow-up changes
+// part of https://github.com/flutter/flutter/issues/13253
 class RawScrollbar extends StatefulWidget {
   /// Creates a basic raw scrollbar that wraps the given [child].
   ///
@@ -1067,7 +1071,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter.hitTestInteractive(localOffset) && scrollbarPainter.hitTestOnlyThumbInteractive(localOffset);
+    return scrollbarPainter.hitTestInteractive(localOffset)
+      && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset);
   }
   
   /// Returns true if the provided [Offset] is located over the thumb of the
