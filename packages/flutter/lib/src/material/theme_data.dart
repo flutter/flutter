@@ -1825,7 +1825,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     required ThemeData materialTheme,
   }) : this._(
     materialTheme,
-    (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData()).noDefault(),
+    materialTheme.cupertinoOverrideTheme?.noDefault() ?? const NoDefaultCupertinoThemeData(),
   );
 
   MaterialBasedCupertinoThemeData._(
@@ -1890,16 +1890,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
         barBackgroundColor: barBackgroundColor,
         scaffoldBackgroundColor: scaffoldBackgroundColor,
       ),
-    );
-  }
-
-  @override
-  CupertinoThemeData resolveFrom(BuildContext context) {
-    // Only the cupertino override theme part will be resolved.
-    // If the color comes from the material theme it's not resolved.
-    return MaterialBasedCupertinoThemeData._(
-      _materialTheme,
-      _cupertinoOverrideTheme.resolveFrom(context),
     );
   }
 }

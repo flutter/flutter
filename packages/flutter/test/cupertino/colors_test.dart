@@ -553,30 +553,60 @@ void main() {
       expect(typedColor().value, dynamicColor.darkHighContrastElevatedColor.value);
     });
 
-    testWidgets('dynamic color does not work in a material theme', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          // This will create a MaterialBasedCupertinoThemeData with primaryColor set to `dynamicColor`.
-          theme: ThemeData(colorScheme: const ColorScheme.dark(primary: dynamicColor)),
-          home: MediaQuery(
-            data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
-            child: CupertinoUserInterfaceLevel(
-              data: CupertinoUserInterfaceLevelData.elevated,
-              child: Builder(
-                builder: (BuildContext context) {
-                  color = CupertinoTheme.of(context).primaryColor;
-                  return const Placeholder();
-                }
+    testWidgets(
+      'Specs not specified in the cupertino override or the material theme'
+      "defaults to CupertinoThemeData's defaults",
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(colorScheme: const ColorScheme.dark()),
+            home: MediaQuery(
+              data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
+              child: CupertinoUserInterfaceLevel(
+                data: CupertinoUserInterfaceLevelData.elevated,
+                child: Builder(
+                  builder: (BuildContext context) {
+                    color = CupertinoTheme.of(context).barBackgroundColor;
+                    return const Placeholder();
+                  }
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      // The color is not resolved.
-      expect(color, dynamicColor);
-      expect(color, isNot(dynamicColor.darkHighContrastElevatedColor));
-    });
+        // the default barBackgroundColor should be properly resolved.
+        expect(color, isSameColorAs(const Color(0xF01D1D1D)));
+        expect(color, isInstanceOf<CupertinoDynamicColor>());
+      },
+    );
+
+    testWidgets('default textTheme is derived from the right primary color',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(colorScheme: const ColorScheme.dark()),
+            home: MediaQuery(
+              data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
+              child: CupertinoUserInterfaceLevel(
+                data: CupertinoUserInterfaceLevelData.elevated,
+                child: Builder(
+                  builder: (BuildContext context) {
+                    // The default actionTextStyle's color is the primary color
+                    // of the theme.
+                    color = CupertinoTheme.of(context).textTheme.actionTextStyle.color;
+                    return const Placeholder();
+                  }
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // the default barBackgroundColor should be properly resolved.
+        expect(color, const ColorScheme.dark().primary);
+      },
+    );
   });
 }
 

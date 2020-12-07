@@ -448,6 +448,7 @@ void main() {
       expect(theme.primaryColor, Colors.blue);
       expect(theme.scaffoldBackgroundColor, Colors.grey[50]);
       expect(theme.primaryContrastingColor, Colors.white);
+      expect(theme.barBackgroundColor, isSameColorAs(const Color(0xF0F9F9F9)));
       expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
       expect(theme.textTheme.textStyle.fontSize, 17.0);
     });
@@ -459,6 +460,7 @@ void main() {
       expect(theme.primaryColor, Colors.blue);
       expect(theme.primaryContrastingColor, Colors.white);
       expect(theme.scaffoldBackgroundColor, Colors.grey[850]);
+      expect(theme.barBackgroundColor, isSameColorAs(const Color(0xF01D1D1D)));
       expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
       expect(theme.textTheme.textStyle.fontSize, 17.0);
     });
