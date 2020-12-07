@@ -617,6 +617,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       nullAssertions: true,
+      nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -732,6 +733,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       nullAssertions: true,
+      nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -850,6 +852,7 @@ void main() {
       expressionCompiler: null,
       chromiumLauncher: null,
       nullAssertions: true,
+      nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -886,6 +889,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       nullAssertions: true,
+      nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -936,6 +940,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       nullAssertions: true,
+      nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
