@@ -516,8 +516,8 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(794.0, 240.6, 797.0, 597.0),
-          const Radius.circular(1.5),
+          const Rect.fromLTRB(790.0, 240.0, 798.0, 600.0),
+          const Radius.circular(8.0),
         ),
       )
     );
@@ -546,29 +546,50 @@ void main() {
       ),
     );
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-    await gesture.moveBy(const Offset(0.0, -10.0));
+    await gesture.moveBy(const Offset(0.0, -20.0));
     await tester.pump();
     // Scrollbar fully showing
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.byType(Scrollbar), paints..rect(
-      color: const Color(0xffbcbcbc),
-    ));
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 3.0, 798.0, 93.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0xFFE0E0E0),
+      ),
+    );
 
     await tester.pump(const Duration(seconds: 3));
     await tester.pump(const Duration(seconds: 3));
     // Still there.
-    expect(find.byType(Scrollbar), paints..rect(
-      color: const Color(0xffbcbcbc),
-    ));
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 3.0, 798.0, 93.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0xFFE0E0E0),
+      ),
+    );
 
     await gesture.up();
     await tester.pump(_kScrollbarTimeToFade);
     await tester.pump(_kScrollbarFadeDuration * 0.5);
 
     // Opacity going down now.
-    expect(find.byType(Scrollbar), paints..rect(
-      color: const Color(0xc6bcbcbc),
-    ));
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 3.0, 798.0, 93.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0xc6e0e0e0),
+      ),
+    );
   });
 
   testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
@@ -589,10 +610,16 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
-    expect(find.byType(Scrollbar), paints..rect(
-      color: const Color(0xffbcbcbc),
-      rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 90.0),
-    ));
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0xFFE0E0E0),
+      ),
+    );
 
     // Drag the thumb down to scroll down.
     const double scrollAmount = 10.0;
@@ -606,9 +633,15 @@ void main() {
     // The view has scrolled more than it would have by a swipe gesture of the
     // same distance.
     expect(scrollController.offset, greaterThan(scrollAmount * 2));
-    expect(find.byType(Scrollbar), paints..rect(
-      color: const Color(0xffbcbcbc),
-      rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
-    ));
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0xFFE0E0E0),
+      ),
+    );
   });
 }

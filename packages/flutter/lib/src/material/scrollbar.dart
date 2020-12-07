@@ -93,7 +93,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
         return const Color(0xFF616161);
 
       // If the track is visible, the thumb color animation is ignored.
-      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover && _hoverIsActive)
+      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
         return const Color(0xFF757575);
 
       return Color.lerp(
@@ -160,14 +160,12 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   void handleThumbPressStart(LongPressStartDetails details) {
     super.handleThumbPressStart(details);
     setState(() { _dragIsActive = true; });
-    updateScrollbarPainter();
   }
 
   @override
   void handleThumbPressEnd(LongPressEndDetails details) {
     super.handleThumbPressEnd(details);
     setState(() { _dragIsActive = false; });
-    updateScrollbarPainter();
   }
 
   @override

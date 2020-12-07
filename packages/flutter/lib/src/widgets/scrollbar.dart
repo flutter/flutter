@@ -303,11 +303,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Paint _trackPaint({ bool isBorder = false }) {
     if (isBorder)
       return Paint()
-        ..color = _trackBorderColor.withOpacity(trackBorderColor.opacity * fadeoutOpacityAnimation.value)
+        ..color = trackBorderColor.withOpacity(trackBorderColor.opacity * fadeoutOpacityAnimation.value)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
     return Paint()
-      ..color = _trackColor.withOpacity(trackColor.opacity * fadeoutOpacityAnimation.value);
+      ..color = trackColor.withOpacity(trackColor.opacity * fadeoutOpacityAnimation.value);
   }
 
   void _paintScrollbar(Canvas canvas, Size size, double thumbExtent, AxisDirection direction) {
@@ -570,6 +570,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///  * [RawScrollbar], the abstract base class this inherits from.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
+// TODO(Piinks): Add support for passing a Shape instead of thickness/radius.
+// Will need to update painter to support as well.
+// Also, expose helpful properties like main/crossAxis margins, minThumbLength,
+// etc. in follow-up changes in part of https://github.com/flutter/flutter/issues/13253
 class RawScrollbar extends StatefulWidget {
   /// Creates a basic raw scrollbar that wraps the given [child].
   ///
@@ -797,7 +801,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    updateScrollbarPainter();
     _maybeTriggerScrollbar();
   }
 
@@ -817,13 +820,20 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     });
   }
 
-  /// Doc
+  /// Called when the [RawScrollbar] is built to update any properties of the
+  /// [ScrollbarPainter] that may have changed, for example as the result of an
+  /// animation.
+  ///
+  /// Can be invoked as a listener of additional animations created in subclasses.
+  ///
+  /// Subclasses can override to customize the appearance and behavior
+  /// of the RawScrollbar.
   @protected
   void  updateScrollbarPainter() {
     scrollbarPainter
       ..color =  widget.thumbColor
       ..textDirection = Directionality.of(context)
-      ..thickness = widget.thickness!
+      ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
       ..padding = MediaQuery.of(context).padding;
   }
@@ -839,7 +849,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _fadeoutAnimationController.reverse();
       }
     }
-    updateScrollbarPainter();
   }
 
   void _updateScrollPosition(double primaryDelta) {
@@ -1126,6 +1135,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   @override
   Widget build(BuildContext context) {
+    updateScrollbarPainter();
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: RepaintBoundary(
