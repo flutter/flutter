@@ -318,4 +318,9 @@ class SystemChannels {
     'flutter/restoration',
     StandardMethodCodec(),
   );
+
+  static const MethodChannel dynamicfeatures = OptionalMethodChannel(
+    'flutter/dynamicfeatures',
+    JSONMethodCodec()(),
+  );
 }
