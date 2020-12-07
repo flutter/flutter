@@ -1186,8 +1186,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       renderObject.debugChildIntegrityEnabled = false; // Moving children will temporary violate the integrity.
       newChildren.keys.forEach(processElement);
       final int newLastIndex = _childElements.lastKey() ?? -1;
-      // We only don't worry about underflow if we are not at the end of the
-      // child list after the update.
+      // We don't worry about underflow if the last child is not longer at the
+      // end of the child list.
       if (_didUnderflow && newLastIndex >= oldLastIndex) {
         final int lastKey = _childElements.lastKey() ?? -1;
         final int rightBoundary = lastKey + 1;
