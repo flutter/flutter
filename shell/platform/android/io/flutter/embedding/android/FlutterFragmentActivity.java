@@ -358,7 +358,7 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @NonNull
   private View createFragmentContainer() {
-    FrameLayout container = new FrameLayout(this);
+    FrameLayout container = provideRootLayout(this);
     container.setId(FRAGMENT_CONTAINER_ID);
     container.setLayoutParams(
         new ViewGroup.LayoutParams(
@@ -740,5 +740,11 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   private boolean isDebuggable() {
     return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+  }
+
+  /** Returns a {@link FrameLayout} that is used as the content view of this activity. */
+  @NonNull
+  protected FrameLayout provideRootLayout(Context context) {
+    return new FrameLayout(context);
   }
 }
