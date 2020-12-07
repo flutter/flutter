@@ -66,7 +66,7 @@ class Cocoon {
 
   /// Parse the local repo for the current running branch.
   String _readCommitBranch() {
-    final ProcessResult result = processRunSync('git', <String>['rev-parse', '--abbrev-ref', 'HEAD']);
+    final ProcessResult result = processRunSync('git', <String>['branch', '--show-current']);
     if (result.exitCode != 0) {
       throw CocoonException(result.stderr as String);
     }
