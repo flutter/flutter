@@ -2536,30 +2536,17 @@ abstract class BuildContext {
   DiagnosticsNode describeOwnershipChain(String name);
 }
 
-/// Manager class for the widgets framework.
+/// Mixin that contains required instance members for [BuildOwner].
 ///
-/// This class tracks which widgets need rebuilding, and handles other tasks
-/// that apply to widget trees as a whole, such as managing the inactive element
-/// list for the tree and triggering the "reassemble" command when necessary
-/// during hot reload when debugging.
+/// Custom implementations of [BuildOwner] are required to include this mixin
+/// in their class in order for their custom build owner to work properly:
 ///
-/// The main build owner is typically owned by the [WidgetsBinding], and is
-/// driven from the operating system along with the rest of the
-/// build/layout/paint pipeline.
-///
-/// Additional build owners can be built to manage off-screen widget trees.
-///
-/// To assign a build owner to a tree, use the
-/// [RootRenderObjectElement.assignOwner] method on the root element of the
-/// widget tree.
-class BuildOwner {
-  /// Creates an object that manages widgets.
-  BuildOwner({ this.onBuildScheduled });
-
-  /// Called on each build pass when the first buildable element is marked
-  /// dirty.
-  VoidCallback? onBuildScheduled;
-
+/// ```dart
+/// class MyBuildOwner with BuildOwnerDefaultsMixin implements BuildOwner {
+///   ...
+/// }
+/// ```
+mixin BuildOwnerDefaultsMixin {
   final _InactiveElements _inactiveElements = _InactiveElements();
 
   final List<Element> _dirtyElements = <Element>[];
@@ -2579,16 +2566,21 @@ class BuildOwner {
   /// [scheduleBuildFor] should only be called when this value is true.
   bool get _debugIsInBuildScope => _dirtyElementsNeedsResorting != null;
 
+  /// Called on each build pass when the first buildable element is marked
+  /// dirty.
+  VoidCallback? get onBuildScheduled;
+
   /// The object in charge of the focus tree.
   ///
   /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  FocusManager focusManager = FocusManager();
+  FocusManager get focusManager;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
+  @mustCallSuper
   void scheduleBuildFor(Element element) {
     assert(element != null);
     assert(element.owner == this);
@@ -2600,12 +2592,12 @@ class BuildOwner {
           ErrorSummary('scheduleBuildFor() called for a widget that is not marked as dirty.'),
           element.describeElement('The method was called for the following element'),
           ErrorDescription(
-            'This element is not current marked as dirty. Make sure to set the dirty flag before '
-            'calling scheduleBuildFor().'),
+              'This element is not current marked as dirty. Make sure to set the dirty flag before '
+                  'calling scheduleBuildFor().'),
           ErrorHint(
-            'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
-            'indicates a bug in the widgets framework. Please report it:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+              'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
+                  'indicates a bug in the widgets framework. Please report it:\n'
+                  '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
           ),
         ]);
       }
@@ -2619,8 +2611,8 @@ class BuildOwner {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
             ErrorHint(
-              'The BuildOwner.scheduleBuildFor() method should only be called while the '
-              'buildScope() method is actively rebuilding the widget tree.'
+                'The BuildOwner.scheduleBuildFor() method should only be called while the '
+                    'buildScope() method is actively rebuilding the widget tree.'
             ),
           ]);
         }
@@ -2648,6 +2640,7 @@ class BuildOwner {
   /// Whether this widget tree is in the build phase.
   ///
   /// Only valid when asserts are enabled.
+  @nonVirtual
   bool get debugBuilding => _debugBuilding;
   bool _debugBuilding = false;
   Element? _debugCurrentBuildTarget;
@@ -2657,6 +2650,7 @@ class BuildOwner {
   ///
   /// This mechanism is used to ensure that, for instance, [State.dispose] does
   /// not call [State.setState].
+  @mustCallSuper
   void lockState(void callback()) {
     assert(callback != null);
     assert(_debugStateLockLevel >= 0);
@@ -2700,6 +2694,7 @@ class BuildOwner {
   /// [debugPrintBuildScope] to true. This is useful when debugging problems
   /// involving widgets not getting marked dirty, or getting marked dirty too
   /// often.
+  @mustCallSuper
   void buildScope(Element context, [ VoidCallback? callback ]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
@@ -2751,13 +2746,13 @@ class BuildOwner {
               ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
               ErrorDescription(
                 'A widget which was marked as dirty and is still active was scheduled to be built, '
-                'but the current build scope unexpectedly does not contain that widget.',
+                    'but the current build scope unexpectedly does not contain that widget.',
               ),
               ErrorHint(
                 'Sometimes this is detected when an element is removed from the widget tree, but the '
-                'element somehow did not get marked as inactive. In that case, it might be caused by '
-                'an ancestor element failing to implement visitChildren correctly, thus preventing '
-                'some or all of its descendants from being correctly deactivated.',
+                    'element somehow did not get marked as inactive. In that case, it might be caused by '
+                    'an ancestor element failing to implement visitChildren correctly, thus preventing '
+                    'some or all of its descendants from being correctly deactivated.',
               ),
               DiagnosticsProperty<Element>(
                 'The root of the build scope was',
@@ -2843,7 +2838,7 @@ class BuildOwner {
   void _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans(Element node, GlobalKey key) {
     _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans ??= HashMap<Element, Set<GlobalKey>>();
     final Set<GlobalKey> keys = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!
-      .putIfAbsent(node, () => HashSet<GlobalKey>());
+        .putIfAbsent(node, () => HashSet<GlobalKey>());
     keys.add(key);
   }
 
@@ -2861,6 +2856,7 @@ class BuildOwner {
   ///
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
+  @mustCallSuper
   void finalizeTree() {
     Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
@@ -2930,18 +2926,18 @@ class BuildOwner {
                 // TODO(jacobr): refactor this code so the elements are clickable
                 // in GUI debug tools.
                 ErrorDescription(
-                  'The following GlobalKey$s $were specified multiple times in the widget tree. This will lead to '
-                  'parts of the widget tree being truncated unexpectedly, because the second time a key is seen, '
-                  'the previous instance is moved to the new location. The key$s $were:\n'
-                  '- ${keyLabels.join("\n  ")}\n'
-                  'This was determined by noticing that after$the widget$s with the above global key$s $were moved '
-                  'out of $their$respective previous parent$s2, $those2 previous parent$s2 never updated during this frame, meaning '
-                  'that $they either did not update at all or updated before the widget$s $were moved, in either case '
-                  'implying that $they still $think that $they should have a child with $those global key$s.\n'
-                  'The specific parent$s2 that did not update after having one or more children forcibly removed '
-                  'due to GlobalKey reparenting $are:\n'
-                  '- ${elementLabels.join("\n  ")}'
-                  '\nA GlobalKey can only be specified on one widget at a time in the widget tree.'
+                    'The following GlobalKey$s $were specified multiple times in the widget tree. This will lead to '
+                        'parts of the widget tree being truncated unexpectedly, because the second time a key is seen, '
+                        'the previous instance is moved to the new location. The key$s $were:\n'
+                        '- ${keyLabels.join("\n  ")}\n'
+                        'This was determined by noticing that after$the widget$s with the above global key$s $were moved '
+                        'out of $their$respective previous parent$s2, $those2 previous parent$s2 never updated during this frame, meaning '
+                        'that $they either did not update at all or updated before the widget$s $were moved, in either case '
+                        'implying that $they still $think that $they should have a child with $those global key$s.\n'
+                        'The specific parent$s2 that did not update after having one or more children forcibly removed '
+                        'due to GlobalKey reparenting $are:\n'
+                        '- ${elementLabels.join("\n  ")}'
+                        '\nA GlobalKey can only be specified on one widget at a time in the widget tree.'
                 ),
               ]);
             }
@@ -2967,6 +2963,7 @@ class BuildOwner {
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
+  @mustCallSuper
   void reassemble(Element root) {
     Timeline.startSync('Dirty Element Tree');
     try {
@@ -2977,6 +2974,45 @@ class BuildOwner {
       Timeline.finishSync();
     }
   }
+}
+
+/// Manager class for the widgets framework.
+///
+/// This class tracks which widgets need rebuilding, and handles other tasks
+/// that apply to widget trees as a whole, such as managing the inactive element
+/// list for the tree and triggering the "reassemble" command when necessary
+/// during hot reload when debugging.
+///
+/// The main build owner is typically owned by the [WidgetsBinding], and is
+/// driven from the operating system along with the rest of the
+/// build/layout/paint pipeline.
+///
+/// Additional build owners can be built to manage off-screen widget trees.
+///
+/// To assign a build owner to a tree, use the
+/// [RootRenderObjectElement.assignOwner] method on the root element of the
+/// widget tree.
+///
+/// Clients who like to create custom build owners should mix-in
+/// [BuildOwnerDefaultsMixin] in order to create a working implementation. See
+/// that class for more information.
+class BuildOwner with BuildOwnerDefaultsMixin {
+  /// Creates an object that manages widgets.
+  BuildOwner({ this.onBuildScheduled });
+
+  /// Called on each build pass when the first buildable element is marked
+  /// dirty.
+  @override
+  VoidCallback? onBuildScheduled;
+
+  /// The object in charge of the focus tree.
+  ///
+  /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
+  /// the [FocusScopeNode] for a given [BuildContext].
+  ///
+  /// See [FocusManager] for more details.
+  @override
+  FocusManager focusManager = FocusManager();
 }
 
 /// An instantiation of a [Widget] at a particular location in the tree.
