@@ -102,7 +102,7 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool canTapOnHeader;
 
-  /// Defines the background color of panel.
+  /// Defines the background color of the panel.
   ///
   /// Defaults to [ThemeData.cardColor].
   final Color? backgroundColor;
