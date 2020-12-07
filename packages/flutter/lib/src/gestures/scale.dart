@@ -229,7 +229,21 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }) : assert(dragStartBehavior != null),
     super(debugOwner: debugOwner, kind: kind);
 
-  /// TODO(justinmc): Document.
+  /// Determines at what point the gesture is calculated from.
+  ///
+  /// When set to [DragStartBehavior.down], the scale is calculated starting
+  /// from the position where the pointer first contacted the screen.
+  ///
+  /// When set to [DragStartBehavior.start], the scale is calculated starting
+  /// from the position where the scale gesture began. The scale gesture may
+  /// begin after the time that the pointer first contacted the screen if there
+  /// are multiple listeners competing for the gesture. In that case, the
+  /// gesture arena waits to determine whether or not the gesture is a scale
+  /// gesture before giving the gesture to this GestureRecognizer. This happens
+  /// in the case of nested GestureDetectors, for example.
+  ///
+  /// For more information about the gesture arena:
+  /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
   ///
   /// Defaults to [DragStartBehavior.down].
   DragStartBehavior dragStartBehavior;
@@ -435,6 +449,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
     if (_state == _ScaleState.accepted && shouldStartIfAccepted) {
       _state = _ScaleState.started;
+      if (dragStartBehavior == DragStartBehavior.start) {
+        _initialSpan = _currentSpan;
+      }
       _dispatchOnStartCallbackIfNeeded();
     }
 
