@@ -56,6 +56,42 @@ enum _RefreshIndicatorMode {
 /// scrollable's contents and then complete the [Future] it returns. The refresh
 /// indicator disappears after the callback's [Future] has completed.
 ///
+/// The animated [RefreshIndicator] will appear from the top of the dragged widget
+/// where the [GlowingOverscrollIndicator] (if have) appears position. If you provide a
+/// [OverscrollIndicatorNotification.paintOffset] to custom the position of
+/// GlowingOverscrollIndicator, you should insert the [NotificationListener] add between
+/// the [RefreshIndicator] and scrollable widgets, otherwise, the RefreshIndicator
+/// will cancel the notification bubbling:
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
+///   return RefreshIndicator(
+///     child: NotificationListener<OverscrollIndicatorNotification>(
+///       onNotification: (notification) {
+///         if (notification.leading) {
+///           notification.paintOffset = leadingPaintOffset;
+///         }
+///         return false;
+///       },
+///       child: CustomScrollView(
+///         slivers: [
+///           SliverAppBar(title: Text('Custom PaintOffset')),
+///           SliverToBoxAdapter(
+///             child: Container(
+///               color: Colors.amberAccent,
+///               height: 100,
+///               child: Center(child: Text('I love Flutter!', style: TextStyle(fontSize: 18.0),)),
+///             ),
+///           ),
+///           SliverFillRemaining(child: FlutterLogo()),
+///         ],
+///       ),
+///     ),
+///   )
+/// }
+/// ```
+///
 /// ## Troubleshooting
 ///
 /// ### Refresh indicator does not show up
