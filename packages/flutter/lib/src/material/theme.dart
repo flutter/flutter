@@ -42,7 +42,7 @@ class Theme extends StatelessWidget {
     required this.data,
     required this.child,
   }) : assert(child != null),
-       assert(data != null)
+       assert(data != null),
        super(key: key);
 
   /// Specifies the color and typography values for descendant widgets.
