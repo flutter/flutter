@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -1483,6 +1485,26 @@ void main() {
       )
     );
   });
+
+  testWidgets('Custom build owners do not interfere with pointer router or raw key event handler', (WidgetTester tester) async {
+    final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount!;
+    final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
+    expect(rawKeyEventHandler, isNotNull);
+    _FakeBuilderOwner();
+    expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
+    expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
+  });
+}
+
+class _FakeBuilderOwner with BuildOwnerDefaultsMixin implements BuildOwner {
+  @override
+  FocusManager get focusManager => throw UnsupportedError('Unsupported');
+
+  @override
+  set focusManager(FocusManager _focusManager) => throw UnsupportedError('Unsupported');
+
+  @override
+  VoidCallback? onBuildScheduled;
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {

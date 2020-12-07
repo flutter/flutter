@@ -71,6 +71,18 @@ class PointerRouter {
     _globalRoutes.remove(route);
   }
 
+  /// The number of global routes that have been registered.
+  ///
+  /// This will be non-null (and valid) in debug builds only.
+  int? get debugGlobalRouteCount {
+    int? count;
+    assert(() {
+      count = _globalRoutes.length;
+      return true;
+    }());
+    return count;
+  }
+
   void _dispatch(PointerEvent event, PointerRoute route, Matrix4? transform) {
     try {
       event = event.transformed(transform);

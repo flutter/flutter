@@ -2592,12 +2592,12 @@ mixin BuildOwnerDefaultsMixin {
           ErrorSummary('scheduleBuildFor() called for a widget that is not marked as dirty.'),
           element.describeElement('The method was called for the following element'),
           ErrorDescription(
-              'This element is not current marked as dirty. Make sure to set the dirty flag before '
-                  'calling scheduleBuildFor().'),
+            'This element is not current marked as dirty. Make sure to set the dirty flag before '
+            'calling scheduleBuildFor().'),
           ErrorHint(
-              'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
-                  'indicates a bug in the widgets framework. Please report it:\n'
-                  '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+            'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
+            'indicates a bug in the widgets framework. Please report it:\n'
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md'
           ),
         ]);
       }
@@ -2611,8 +2611,8 @@ mixin BuildOwnerDefaultsMixin {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
             ErrorHint(
-                'The BuildOwner.scheduleBuildFor() method should only be called while the '
-                    'buildScope() method is actively rebuilding the widget tree.'
+              'The BuildOwner.scheduleBuildFor() method should only be called while the '
+              'buildScope() method is actively rebuilding the widget tree.'
             ),
           ]);
         }
@@ -2746,13 +2746,13 @@ mixin BuildOwnerDefaultsMixin {
               ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
               ErrorDescription(
                 'A widget which was marked as dirty and is still active was scheduled to be built, '
-                    'but the current build scope unexpectedly does not contain that widget.',
+                'but the current build scope unexpectedly does not contain that widget.',
               ),
               ErrorHint(
                 'Sometimes this is detected when an element is removed from the widget tree, but the '
-                    'element somehow did not get marked as inactive. In that case, it might be caused by '
-                    'an ancestor element failing to implement visitChildren correctly, thus preventing '
-                    'some or all of its descendants from being correctly deactivated.',
+                'element somehow did not get marked as inactive. In that case, it might be caused by '
+                'an ancestor element failing to implement visitChildren correctly, thus preventing '
+                'some or all of its descendants from being correctly deactivated.',
               ),
               DiagnosticsProperty<Element>(
                 'The root of the build scope was',
@@ -2838,7 +2838,7 @@ mixin BuildOwnerDefaultsMixin {
   void _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans(Element node, GlobalKey key) {
     _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans ??= HashMap<Element, Set<GlobalKey>>();
     final Set<GlobalKey> keys = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!
-        .putIfAbsent(node, () => HashSet<GlobalKey>());
+      .putIfAbsent(node, () => HashSet<GlobalKey>());
     keys.add(key);
   }
 
@@ -2926,18 +2926,18 @@ mixin BuildOwnerDefaultsMixin {
                 // TODO(jacobr): refactor this code so the elements are clickable
                 // in GUI debug tools.
                 ErrorDescription(
-                    'The following GlobalKey$s $were specified multiple times in the widget tree. This will lead to '
-                        'parts of the widget tree being truncated unexpectedly, because the second time a key is seen, '
-                        'the previous instance is moved to the new location. The key$s $were:\n'
-                        '- ${keyLabels.join("\n  ")}\n'
-                        'This was determined by noticing that after$the widget$s with the above global key$s $were moved '
-                        'out of $their$respective previous parent$s2, $those2 previous parent$s2 never updated during this frame, meaning '
-                        'that $they either did not update at all or updated before the widget$s $were moved, in either case '
-                        'implying that $they still $think that $they should have a child with $those global key$s.\n'
-                        'The specific parent$s2 that did not update after having one or more children forcibly removed '
-                        'due to GlobalKey reparenting $are:\n'
-                        '- ${elementLabels.join("\n  ")}'
-                        '\nA GlobalKey can only be specified on one widget at a time in the widget tree.'
+                  'The following GlobalKey$s $were specified multiple times in the widget tree. This will lead to '
+                  'parts of the widget tree being truncated unexpectedly, because the second time a key is seen, '
+                  'the previous instance is moved to the new location. The key$s $were:\n'
+                  '- ${keyLabels.join("\n  ")}\n'
+                  'This was determined by noticing that after$the widget$s with the above global key$s $were moved '
+                  'out of $their$respective previous parent$s2, $those2 previous parent$s2 never updated during this frame, meaning '
+                  'that $they either did not update at all or updated before the widget$s $were moved, in either case '
+                  'implying that $they still $think that $they should have a child with $those global key$s.\n'
+                  'The specific parent$s2 that did not update after having one or more children forcibly removed '
+                  'due to GlobalKey reparenting $are:\n'
+                  '- ${elementLabels.join("\n  ")}'
+                  '\nA GlobalKey can only be specified on one widget at a time in the widget tree.'
                 ),
               ]);
             }
