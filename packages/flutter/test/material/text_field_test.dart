@@ -7524,7 +7524,7 @@ void main() {
 
     expect(description, <String>[
       'enabled: false',
-      'decoration: InputDecoration(labelText: "foo", floatingLabelBehavior: FloatingLabelBehavior.auto)',
+      'decoration: InputDecoration(labelText: "foo")',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'autocorrect: false',
@@ -8690,5 +8690,59 @@ void main() {
     inputWidth = editable.size.width;
     expect(inputWidth, wideWidth);
     expect(cursorRight, inputWidth - kCaretGap);
+  });
+
+  // Regressing test for https://github.com/flutter/flutter/issues/70625
+  testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    Widget textFieldBuilder({FloatingLabelBehavior behavior = FloatingLabelBehavior.auto, }) {
+      return MaterialApp(
+        theme: ThemeData(
+          inputDecorationTheme: InputDecorationTheme(
+            floatingLabelBehavior: behavior,
+          ),
+        ),
+        home: Scaffold(
+          body: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              labelText: 'Label',
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(textFieldBuilder(behavior: FloatingLabelBehavior.auto));
+    // The label will be positioned within the content when unfocused.
+    expect(tester.getTopLeft(find.text('Label')).dy, 20.0);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle(); // label animation.
+    // The label will float above the content when focused.
+    expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle(); // label animation.
+
+    await tester.pumpWidget(textFieldBuilder(behavior: FloatingLabelBehavior.never));
+    await tester.pumpAndSettle(); // theme animation.
+    // The label will be positioned within the content.
+    expect(tester.getTopLeft(find.text('Label')).dy, 20.0);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle(); // label animation.
+    // The label will always be positioned within the content.
+    expect(tester.getTopLeft(find.text('Label')).dy, 20.0);
+
+    await tester.pumpWidget(textFieldBuilder(behavior: FloatingLabelBehavior.always));
+    await tester.pumpAndSettle(); // theme animation.
+    // The label will always float above the content.
+    expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle(); // label animation.
+    // The label will always float above the content.
+    expect(tester.getTopLeft(find.text('Label')).dy, 12.0);
   });
 }

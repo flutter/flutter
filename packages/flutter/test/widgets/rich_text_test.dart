@@ -80,4 +80,42 @@ void main() {
 
     expect(tester.getSize(find.byType(IntrinsicHeight)).height, 3 * 16);
   });
+
+  testWidgets('RichText implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    RichText(
+      text: const TextSpan(text: 'rich text'),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.rtl,
+      softWrap: false,
+      overflow: TextOverflow.ellipsis,
+      textScaleFactor: 1.3,
+      maxLines: 1,
+      locale: const Locale('zh', 'HK'),
+      strutStyle: const StrutStyle(
+        fontSize: 16,
+      ),
+      textWidthBasis: TextWidthBasis.longestLine,
+      textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'textAlign: center',
+      'textDirection: rtl',
+      'softWrap: no wrapping except at line break characters',
+      'overflow: ellipsis',
+      'textScaleFactor: 1.3',
+      'maxLines: 1',
+      'textWidthBasis: longestLine',
+      'text: "rich text"',
+      'locale: zh_HK',
+      'strutStyle: StrutStyle(size: 16.0)',
+      'textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: true)'
+    ]);
+  });
 }
