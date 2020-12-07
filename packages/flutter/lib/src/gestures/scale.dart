@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 
 import 'package:vector_math/vector_math_64.dart';
@@ -226,7 +225,14 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ScaleGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    this.dragStartBehavior = DragStartBehavior.down,
+  }) : assert(dragStartBehavior != null),
+    super(debugOwner: debugOwner, kind: kind);
+
+  /// TODO(justinmc): Document.
+  ///
+  /// Defaults to [DragStartBehavior.down].
+  DragStartBehavior dragStartBehavior;
 
   /// The pointers in contact with the screen have established a focal point and
   /// initial scale of 1.0.
@@ -460,6 +466,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     if (_state == _ScaleState.possible) {
       _state = _ScaleState.started;
+      if (dragStartBehavior == DragStartBehavior.start) {
+        _initialSpan = _currentSpan;
+      }
       _dispatchOnStartCallbackIfNeeded();
     }
   }
