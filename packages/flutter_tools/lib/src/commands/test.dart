@@ -251,7 +251,8 @@ class TestCommand extends FlutterCommand {
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
         // TODO(jonahwilliams): file bug for incorrect URI handling on windows
-        packagesPath: globals.fs.path.absolute('.packages'),
+        packagesPath: globals.fs.file(buildInfo.packagesPath)
+          .parent.parent.childFile('.packages').path
       );
     }
 

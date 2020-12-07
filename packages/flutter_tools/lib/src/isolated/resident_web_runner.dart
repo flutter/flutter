@@ -501,6 +501,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
+          nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -520,6 +521,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             false,
             kNoneWorker,
             true,
+            debuggingOptions.nativeNullAssertions,
           );
         }
         await device.device.startApp(
@@ -587,6 +589,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           false,
           kNoneWorker,
           true,
+          debuggingOptions.nativeNullAssertions,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -683,7 +686,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
         if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistry);',
+          '  registerPlugins(webPluginRegistrar);',
         '  await ui.webOnlyInitializePlatform();',
         '  if (entrypoint.main is _UnaryFunction) {',
         '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
@@ -745,6 +748,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool allowExistingDdsInstance = false,
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher.connectedInstance;

@@ -5835,12 +5835,15 @@ void main() {
     expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // No text change, does not format
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2))); // Composing change triggers reformat
-    expect(formatter.formatCallCount, 4);
+
+    // Composing changes should not trigger reformat, as it could cause infinite loops on some IMEs.
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2)));
+    expect(formatter.formatCallCount, 3);
     expect(formatter.lastOldValue.composing, const TextRange(start: -1, end: -1));
-    expect(formatter.lastNewValue.composing, const TextRange(start: 1, end: 2)); // The new composing was registered in formatter.
+    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1)); // The new composing was registered in formatter.
+    // Clearing composing region should trigger reformat.
     state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2))); // Formats, with oldValue containing composing region.
-    expect(formatter.formatCallCount, 5);
+    expect(formatter.formatCallCount, 4);
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
     expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
 
@@ -5851,10 +5854,8 @@ void main() {
       '[2]: normal aaaa',
       '[3]: 012, 0123',
       '[3]: normal aaaaaa',
-      '[4]: 0123, 0123',
+      '[4]: 0123, 01234',
       '[4]: normal aaaaaaaa',
-      '[5]: 0123, 01234',
-      '[5]: normal aaaaaaaaaa',
     ];
 
     expect(formatter.log, referenceLog);
