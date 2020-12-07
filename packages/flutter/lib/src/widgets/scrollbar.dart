@@ -764,27 +764,17 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ScrollController? _currentController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
+  late Animation<double> _fadeoutOpacityAnimation;
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
 
 
   /// Used to paint the scrollbar.
   ///
-  /// Can be customized by subclasses to further customize scrollbar behavior by
-  /// overriding [updateScrollbar].
+  /// Can be customized by subclasses to change scrollbar behavior by overriding
+  /// [updateScrollbar].
   @protected
   late final ScrollbarPainter scrollbarPainter;
-
-  /// The current value of the animation that fades the scrollbar in and out of
-  /// view.
-  ///
-  /// The animation is triggered by scroll events, fading the scrollbar into
-  /// view upon scrolling, and out of view upon stopping.
-  ///
-  /// If [isAlwaysShown] is true, the animation will not be triggered to fade out.
-  @protected
-  Animation<double> get fadeoutOpacityAnimation => _fadeoutOpacityAnimation;
-  late Animation<double> _fadeoutOpacityAnimation;
 
   @override
   void initState() {
@@ -800,7 +790,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     scrollbarPainter = ScrollbarPainter(
       color: widget.thumbColor,
       thickness: widget.thickness ?? _kScrollbarThickness,
-      fadeoutOpacityAnimation: fadeoutOpacityAnimation,
+      fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
     );
   }
 
@@ -1001,12 +991,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       curve: Curves.easeInOut,
     );
   }
-
-  /// Updates the scrollbar thumb and it's animations based on the received
-  /// [ScrollNotification].
-  @protected
-  @mustCallSuper
-  bool handleScrollNotification(ScrollNotification notification) {
+  
+  bool _handleScrollNotification(ScrollNotification notification) {
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent)
       return false;
@@ -1026,13 +1012,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return false;
   }
 
-  /// Get the GestureRecognizerFactories used to detect gestures on the scrollbar
-  /// thumb.
-  ///
-  /// The RawScrollbar provides for dragging gestures on the scrollbar thumb,
-  /// and tapping gestures on the area of the scrollbar track.
-  @protected
-  Map<Type, GestureRecognizerFactory> get gestures {
+  Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
     if (controller == null)
@@ -1147,10 +1127,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      onNotification: handleScrollNotification,
+      onNotification: _handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
-          gestures: gestures,
+          gestures: _gestures,
           child: MouseRegion(
             onExit: handleHoverExit,
             onHover: handleHover,
