@@ -44,6 +44,7 @@ class Dialog extends StatelessWidget {
     Key? key,
     this.backgroundColor,
     this.elevation,
+    this.maxWidth,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
     this.insetPadding = _defaultInsetPadding,
@@ -51,6 +52,7 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.child,
   }) : assert(clipBehavior != null),
+       assert(maxWidth == null || maxWidth >= 280.0),
        super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
@@ -70,6 +72,15 @@ class Dialog extends StatelessWidget {
   /// {@endtemplate}
   /// {@macro flutter.material.material.elevation}
   final double? elevation;
+
+  /// {@template flutter.material.dialog.maxWidth}
+  /// The maximum width of the [Dialog].
+  ///
+  /// Value must be greater or equal to 280.0
+  ///
+  /// If null then the dialog's maxWidth is [double.infinity].
+  /// {@endtemplate}
+  final double? maxWidth;
 
   /// {@template flutter.material.dialog.insetAnimationDuration}
   /// The duration of the animation to show when the system keyboard intrudes
@@ -141,7 +152,10 @@ class Dialog extends StatelessWidget {
         context: context,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 280.0),
+            constraints: BoxConstraints(
+              minWidth: 280.0,
+              maxWidth: maxWidth ?? double.infinity,
+              ),
             child: Material(
               color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
@@ -249,12 +263,14 @@ class AlertDialog extends StatelessWidget {
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
+    this.maxWidth,
     this.semanticLabel,
     this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
   }) : assert(contentPadding != null),
+       assert(maxWidth == null || maxWidth >= 280.0),
        assert(clipBehavior != null),
        super(key: key);
 
@@ -407,6 +423,9 @@ class AlertDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.elevation}
   /// {@macro flutter.material.material.elevation}
   final double? elevation;
+
+  /// {@macro flutter.material.dialog.maxWidth}
+  final double? maxWidth;
 
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
@@ -571,6 +590,7 @@ class AlertDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
+      maxWidth: maxWidth,
       insetPadding: insetPadding,
       clipBehavior: clipBehavior,
       shape: shape,
@@ -732,10 +752,12 @@ class SimpleDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
     this.backgroundColor,
     this.elevation,
+    this.maxWidth,
     this.semanticLabel,
     this.shape,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
+       assert(maxWidth == null || maxWidth >= 280.0),
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -787,6 +809,9 @@ class SimpleDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.elevation}
   /// {@macro flutter.material.material.elevation}
   final double? elevation;
+
+  /// {@macro flutter.material.dialog.maxWidth}
+  final double? maxWidth;
 
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
@@ -887,6 +912,7 @@ class SimpleDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
+      maxWidth: maxWidth,
       shape: shape,
       child: dialogChild,
     );

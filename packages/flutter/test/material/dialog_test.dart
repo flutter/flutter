@@ -109,6 +109,29 @@ void main() {
     expect(materialWidget.elevation, 24.0);
   });
 
+  testWidgets('Custom alert dialog maxWidth', (WidgetTester tester) async {
+    const double maxWidth = 340.0;
+    final AlertDialog dialog = AlertDialog(
+      title:const Text('Title'),
+      content: Container(width: 360.0),
+      actions:const <Widget>[ ],
+      maxWidth: maxWidth,
+    );
+
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Size dialogWidth = tester.getSize(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(Material),
+      ).first,
+    );
+
+    expect(dialogWidth.width, maxWidth);
+  });
+
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
     const AlertDialog dialog = AlertDialog(
@@ -324,6 +347,28 @@ void main() {
     expect(textRect.top, dialogRect.top + customPadding.top);
     expect(textRect.right, dialogRect.right - customPadding.right);
     expect(textRect.bottom, dialogRect.bottom - customPadding.bottom);
+  });
+
+    testWidgets('Custom Simple dialog maxWidth', (WidgetTester tester) async {
+    const double maxWidth = 340.0;
+    final SimpleDialog dialog = SimpleDialog(
+      title:const Text('Title'),
+      children: <Widget>[Container(width: 360.0)],
+      maxWidth: maxWidth,
+    );
+
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Size dialogWidth = tester.getSize(
+      find.descendant(
+        of: find.byType(SimpleDialog),
+        matching: find.byType(Material),
+      ).first,
+    );
+
+    expect(dialogWidth.width, maxWidth);
   });
 
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
