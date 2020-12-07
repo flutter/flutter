@@ -135,7 +135,6 @@ Future<_ClientAndIsolate> _connectToRunnerIsolate(Uri vmServiceUri) async {
 
       final _ClientAndIsolate client = await _ClientAndIsolate.fromUri(uri);
       final vms.Response response = await client.callServiceExtension('ext.cocoonRunnerReady');
-      print('response: ${response.json}');
       if (response.json['result'] != 'ready')
         throw 'not ready yet';
       return client;
