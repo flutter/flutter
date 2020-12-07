@@ -192,6 +192,7 @@ void main() {
   });
 
   testWidgets('SizedBox constrains intrinsics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27293.
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
