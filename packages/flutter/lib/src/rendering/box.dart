@@ -2296,8 +2296,25 @@ abstract class RenderBox extends RenderObject {
     }());
   }
 
+  void _debugClearCachedIntrinsicDimensionsForChecks() {
+    assert(() {
+      _debugCachedIntrinsicDimensionsForChecks?.clear();
+
+      final AbstractNode? currentParent = parent;
+      if (currentParent is RenderBox) {
+        currentParent._debugClearCachedIntrinsicDimensionsForChecks();
+      }
+      return true;
+    }());
+  }
+
   @override
   void markNeedsLayout() {
+    assert(() {
+      _debugClearCachedIntrinsicDimensionsForChecks();
+      return true;
+    }());
+
     if ((_cachedBaselines != null && _cachedBaselines!.isNotEmpty) ||
         (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions!.isNotEmpty) ||
         (_cachedDryLayoutSizes != null && _cachedDryLayoutSizes!.isNotEmpty)) {
@@ -2309,10 +2326,6 @@ abstract class RenderBox extends RenderObject {
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
       _cachedDryLayoutSizes?.clear();
-      assert(() {
-        _debugCachedIntrinsicDimensionsForChecks?.clear();
-        return true;
-      }());
       if (parent is RenderObject) {
         markParentNeedsLayout();
         return;
