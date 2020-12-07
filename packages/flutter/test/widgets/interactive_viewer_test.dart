@@ -877,6 +877,7 @@ void main() {
 
     testWidgets('scale does not jump when wrapped in GestureDetector', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
+      double? initialScale;
       double? scale;
       await tester.pumpWidget(
         MaterialApp(
@@ -886,6 +887,7 @@ void main() {
                 onTapUp: (TapUpDetails details) {},
                 child: InteractiveViewer(
                   onInteractionUpdate: (ScaleUpdateDetails details) {
+                    initialScale ??= details.scale;
                     scale = details.scale;
                   },
                   transformationController: transformationController,
@@ -898,6 +900,7 @@ void main() {
       );
 
       expect(transformationController.value, equals(Matrix4.identity()));
+      expect(initialScale, null);
       expect(scale, null);
 
       // Pinch to zoom isn't immediately detected for a small amount of
@@ -925,9 +928,11 @@ void main() {
       await gesture2.up();
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
+      expect(initialScale, null);
       expect(scale, null);
 
-      // Pinch to zoom for a larger amount is detected.
+      // Pinch to zoom for a larger amount is detected. It starts smoothly at
+      // 1.0 despite the fact that the gesture has already moved a bit.
       scaleEnd1 = Offset(childInterior.dx - 38.0, childInterior.dy);
       scaleEnd2 = Offset(childInterior.dx + 48.0, childInterior.dy);
       gesture = await tester.createGesture();
@@ -943,12 +948,9 @@ void main() {
       await gesture.up();
       await gesture2.up();
       await tester.pumpAndSettle();
+      expect(initialScale, 1.0);
       expect(scale, greaterThan(1.0));
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
-      // The scale given by the gesture is greater than the scale that was
-      // applied to the child because the jump caused by GestureDetector has
-      // been factored out.
-      expect(scale, greaterThan(transformationController.value.getMaxScaleOnAxis()));
     });
   });
 
