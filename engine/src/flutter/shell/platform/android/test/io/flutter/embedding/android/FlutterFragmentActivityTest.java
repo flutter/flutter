@@ -12,6 +12,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
@@ -127,6 +129,24 @@ public class FlutterFragmentActivityTest {
     assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
   }
 
+  @Test
+  public void itAllowsRootLayoutOverride() {
+    FlutterFragmentActivityWithRootLayout activity =
+        Robolectric.buildActivity(FlutterFragmentActivityWithRootLayout.class).get();
+
+    activity.onCreate(null);
+    ViewGroup contentView = (ViewGroup) activity.findViewById(android.R.id.content);
+    boolean foundCustomView = false;
+    for (int i = 0; i < contentView.getChildCount(); i++) {
+      foundCustomView =
+          contentView.getChildAt(i) instanceof FlutterFragmentActivityWithRootLayout.CustomLayout;
+      if (foundCustomView) {
+        break;
+      }
+    }
+    assertTrue(foundCustomView);
+  }
+
   static class FlutterFragmentActivityWithProvidedEngine extends FlutterFragmentActivity {
     @Override
     protected FlutterFragment createFlutterFragment() {
@@ -168,6 +188,20 @@ public class FlutterFragmentActivityTest {
     @Override
     protected boolean shouldHandleDeeplinking() {
       return false;
+    }
+  }
+
+  private static class FlutterFragmentActivityWithRootLayout
+      extends FlutterFragmentActivityWithProvidedEngine {
+    public static class CustomLayout extends FrameLayout {
+      public CustomLayout(Context context) {
+        super(context);
+      }
+    }
+
+    @Override
+    protected FrameLayout provideRootLayout(Context context) {
+      return new CustomLayout(context);
     }
   }
 
