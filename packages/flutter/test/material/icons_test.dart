@@ -12,6 +12,11 @@ void main() {
     expect(Icons.account_balance, hasOneLineDescription);
   });
 
+  testWidgets('Icons specify the material font', (WidgetTester tester) async {
+    expect(Icons.clear.fontFamily, 'MaterialIcons');
+    expect(Icons.search.fontFamily, 'MaterialIcons');
+  });
+
   testWidgets('Certain icons (and their variants) match text direction', (WidgetTester tester) async {
     expect(Icons.arrow_back.matchTextDirection, true);
     expect(Icons.arrow_back_rounded.matchTextDirection, true);
@@ -22,11 +27,6 @@ void main() {
     expect(Icons.access_time_rounded.matchTextDirection, false);
     expect(Icons.access_time_outlined.matchTextDirection, false);
     expect(Icons.access_time_sharp.matchTextDirection, false);
-  });
-
-  testWidgets('Icons specify the material font', (WidgetTester tester) async {
-    expect(Icons.clear.fontFamily, 'MaterialIcons');
-    expect(Icons.search.fontFamily, 'MaterialIcons');
   });
 
   testWidgets('Adaptive icons are correct on cupertino platforms',
