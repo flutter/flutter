@@ -55,7 +55,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
         _logger.printError('Error running `pub global activate '
-            'devtools`. Could not activate devtools.');
+            'devtools`:\n${_devToolsActivateProcess.stderr}');
         return;
       }
 
@@ -106,7 +106,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<void> close() async {
-    _devToolsProcess.kill();
-    await _devToolsProcess.exitCode;
+    if (_devToolsProcess != null) {
+      _devToolsProcess.kill();
+      await _devToolsProcess.exitCode;
+    }
   }
 }

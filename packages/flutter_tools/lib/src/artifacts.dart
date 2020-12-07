@@ -674,7 +674,7 @@ class LocalEngineArtifacts implements Artifacts {
       case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
       case Artifact.pubExecutable:
-        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin',  _artifactToFileName(artifact, platform, mode));
+        return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _artifactToFileName(artifact, platform, mode));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

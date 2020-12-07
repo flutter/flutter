@@ -1238,10 +1238,10 @@ abstract class ResidentRunner {
     }
     assert(supportsServiceProtocol);
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    await _devtoolsLauncher.launch(
+    unawaited(_devtoolsLauncher.launch(
       flutterDevices.first.vmService.httpAddress,
       openInBrowser: openInBrowser,
-    );
+    ));
     return true;
   }
 

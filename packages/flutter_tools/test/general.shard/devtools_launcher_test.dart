@@ -19,6 +19,15 @@ void main() {
       pubExecutable: 'pub',
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'activate',
+            'devtools',
+          ],
+          stdout: 'Activated DevTools 0.9.5',
+        ),
         FakeCommand(
           command: const <String>[
             'pub',
@@ -28,7 +37,7 @@ void main() {
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
           completer: completer,
-        )
+        ),
       ]),
     );
 
@@ -43,6 +52,15 @@ void main() {
       pubExecutable: 'pub',
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'activate',
+            'devtools',
+          ],
+          stdout: 'Activated DevTools 0.9.5',
+        ),
         FakeCommand(
             command: const <String>[
               'pub',
