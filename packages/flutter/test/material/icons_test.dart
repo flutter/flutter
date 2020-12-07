@@ -17,6 +17,11 @@ void main() {
     expect(Icons.arrow_back_rounded.matchTextDirection, true);
     expect(Icons.arrow_back_outlined.matchTextDirection, true);
     expect(Icons.arrow_back_sharp.matchTextDirection, true);
+
+    expect(Icons.access_time.matchTextDirection, false);
+    expect(Icons.access_time_rounded.matchTextDirection, false);
+    expect(Icons.access_time_outlined.matchTextDirection, false);
+    expect(Icons.access_time_sharp.matchTextDirection, false);
   });
 
   testWidgets('Icons specify the material font', (WidgetTester tester) async {
