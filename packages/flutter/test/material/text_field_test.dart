@@ -8751,17 +8751,13 @@ void main() {
 
     Future<void> setupWidget(
       WidgetTester tester,
-      TextEditingController controller,
-      MaxLengthEnforcement enforcement,
+      MaxLengthEnforcement? enforcement,
     ) async {
       final Widget widget = MaterialApp(
         home: Material(
           child: TextField(
-            controller: controller,
             maxLength: maxLength,
             maxLengthEnforcement: enforcement,
-            // TODO(AlexV525): Remove this param once it's deprecated.
-            maxLengthEnforced: true,
           ),
         ),
       );
@@ -8772,9 +8768,8 @@ void main() {
 
     testWidgets('using none enforcement.', (WidgetTester tester) async {
       const MaxLengthEnforcement enforcement = MaxLengthEnforcement.none;
-      final TextEditingController controller = TextEditingController();
 
-      await setupWidget(tester, controller, enforcement);
+      await setupWidget(tester, enforcement);
 
       final EditableTextState state = tester.state(find.byType(EditableText));
 
@@ -8793,9 +8788,8 @@ void main() {
 
     testWidgets('using enforced.', (WidgetTester tester) async {
       const MaxLengthEnforcement enforcement = MaxLengthEnforcement.enforced;
-      final TextEditingController controller = TextEditingController();
 
-      await setupWidget(tester, controller, enforcement);
+      await setupWidget(tester, enforcement);
 
       final EditableTextState state = tester.state(find.byType(EditableText));
 
@@ -8818,9 +8812,8 @@ void main() {
 
     testWidgets('using truncateAfterCompositionEnds.', (WidgetTester tester) async {
       const MaxLengthEnforcement enforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
-      final TextEditingController controller = TextEditingController();
 
-      await setupWidget(tester, controller, enforcement);
+      await setupWidget(tester, enforcement);
 
       final EditableTextState state = tester.state(find.byType(EditableText));
 
@@ -8838,6 +8831,38 @@ void main() {
 
       state.updateEditingValue(const TextEditingValue(text: 'abcdef'));
       expect(state.currentTextEditingValue.text, 'abcde');
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    testWidgets('using default behavior for different platforms.', (WidgetTester tester) async {
+      await setupWidget(tester, null);
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+
+      state.updateEditingValue(const TextEditingValue(text: '侬好啊'));
+      expect(state.currentTextEditingValue.text, '侬好啊');
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      state.updateEditingValue(const TextEditingValue(text: '侬好啊旁友', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.text, '侬好啊旁友');
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      state.updateEditingValue(const TextEditingValue(text: '侬好啊旁友们', composing: TextRange(start: 3, end: 6)));
+      if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.fuchsia
+      ) {
+        expect(state.currentTextEditingValue.text, '侬好啊旁友们');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 6));
+      } else {
+        expect(state.currentTextEditingValue.text, '侬好啊旁友');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+      }
+
+      state.updateEditingValue(const TextEditingValue(text: '侬好啊旁友'));
+      expect(state.currentTextEditingValue.text, '侬好啊旁友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
   });
