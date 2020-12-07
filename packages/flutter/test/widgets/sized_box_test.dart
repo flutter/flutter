@@ -190,4 +190,22 @@ void main() {
     );
     expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
   });
+
+  testWidgets('SizedBox constrains intrinsics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: IntrinsicHeight(
+            child: SizedBox(
+              width: 100,
+              child: Text('This is a multi-line text.', style: TextStyle(height: 1.0, fontSize: 16)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('This is a multi-line text.')).height, greaterThan(16));
+  });
 }
