@@ -31,6 +31,21 @@ class B extends A with ChangeNotifier {
   }
 }
 
+class Counter with ChangeNotifier {
+  int get value => _value;
+  int _value = 0;
+  set value(int value) {
+    if (_value != value) {
+      _value = value;
+      notifyListeners();
+    }
+  }
+
+  void notify() {
+    notifyListeners();
+  }
+}
+
 void main() {
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -396,4 +411,28 @@ void main() {
     ));
   });
 
+  test('notifyListener can be called recursively', () {
+    final Counter counter = Counter();
+    final List<String> log = <String>[];
+
+    final VoidCallback listener1 = () {
+      log.add('listener1');
+      if (counter.value < 0) {
+        counter.value = 0;
+      }
+    };
+
+    counter.addListener(listener1);
+    counter.notify();
+    expect(log, <String>['listener1']);
+    log.clear();
+
+    counter.value = 3;
+    expect(log, <String>['listener1']);
+    log.clear();
+
+    counter.value = -2;
+    expect(log, <String>['listener1', 'listener1']);
+    log.clear();
+  });
 }
