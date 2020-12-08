@@ -104,7 +104,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     // TODO(ianh): Remove this complexity once these bugs are fixed.
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
-      rawLicenses.complete(await rootBundle.loadString('NOTICES', cache: false));
+      rawLicenses.complete(
+        await rootBundle.loadString('NOTICES.gz', cache: false, unzip: true)
+      );
     }, Priority.animation);
     await rawLicenses.future;
     final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();

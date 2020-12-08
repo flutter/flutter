@@ -7,6 +7,7 @@ import 'package:package_config/package_config.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
@@ -121,7 +122,7 @@ class ManifestAssetBundle implements AssetBundle {
   DateTime _lastBuildTimestamp;
 
   static const String _kAssetManifestJson = 'AssetManifest.json';
-  static const String _kNoticeFile = 'NOTICES';
+  static const String _kNoticeFile = 'NOTICES.gz';
 
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
@@ -320,7 +321,7 @@ class ManifestAssetBundle implements AssetBundle {
     final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig);
-    final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
+    final List<int> licenseBytes = utf8.encode(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
     if (wildcardDirectories.isNotEmpty) {
@@ -338,7 +339,17 @@ class ManifestAssetBundle implements AssetBundle {
 
     _setIfChanged(_kAssetManifestJson, assetManifest);
     _setIfChanged(kFontManifestJson, fontManifest);
-    _setIfChanged(_kNoticeFile, licenses);
+    if (entries[_kNoticeFile] == null ||
+        gzip.decode((entries[_kNoticeFile] as DevFSByteContent).bytes)
+            != licenseBytes) {
+      entries[_kNoticeFile] = DevFSByteContent(
+        ZLibEncoder(
+          dictionary: utf8.encode('copyrightsoftwaretothisinandorofthe'),
+          gzip: true,
+          level: 9,
+        ).convert(licenseBytes)
+      );
+    }
     return 0;
   }
 
