@@ -93,7 +93,7 @@ void main() {
 
   testWithoutContext('skips migrating script with embed', () {
     const String contents = r'''
-shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
+shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
 			''';
     xcodeProjectInfoFile.writeAsStringSync(contents);
 
@@ -136,7 +136,7 @@ keep this 2
 
     expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
-			shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
+			shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
 keep this 2
 ''');
     expect(testLogger.statusText, contains('Upgrading project.pbxproj'));

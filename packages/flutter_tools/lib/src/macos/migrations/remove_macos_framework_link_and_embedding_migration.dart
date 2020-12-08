@@ -85,7 +85,7 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     const String thinBinaryScript = r'/Flutter/ephemeral/.app_filename';
     if (line.contains(thinBinaryScript) && !line.contains(' embed')) {
       return line.replaceFirst(
-          thinBinaryScript, r'/Flutter/ephemeral/.app_filename\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed');
+          thinBinaryScript, r'/Flutter/ephemeral/.app_filename && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed');
     }
 
     if (line.contains('/* App.framework ') ||
