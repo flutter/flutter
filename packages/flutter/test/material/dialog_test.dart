@@ -122,14 +122,14 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Size dialogWidth = tester.getSize(
+    final Size dialogSize = tester.getSize(
       find.descendant(
         of: find.byType(AlertDialog),
         matching: find.byType(Material),
       ).first,
     );
 
-    expect(dialogWidth.width, maxWidth);
+    expect(dialogSize.width, maxWidth);
   });
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
@@ -361,14 +361,14 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Size dialogWidth = tester.getSize(
+    final Size dialogSize = tester.getSize(
       find.descendant(
         of: find.byType(SimpleDialog),
         matching: find.byType(Material),
       ).first,
     );
 
-    expect(dialogWidth.width, maxWidth);
+    expect(dialogSize.width, maxWidth);
   });
 
   testWidgets('Barrier dismissible', (WidgetTester tester) async {

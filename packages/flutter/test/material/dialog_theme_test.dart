@@ -47,6 +47,7 @@ void main() {
     const DialogTheme(
       backgroundColor: Color(0xff123456),
       elevation: 8.0,
+      maxWidth: 300.0,
       shape: null,
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
       contentTextStyle: TextStyle(color: Color(0xff000000)),
@@ -57,6 +58,7 @@ void main() {
     expect(description, <String>[
       'backgroundColor: Color(0xff123456)',
       'elevation: 8.0',
+      'maxWidth: 300.0',
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
     ]);
@@ -94,6 +96,30 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.elevation, customElevation);
+  });
+
+  testWidgets('Custom dialog maxWidth', (WidgetTester tester) async {
+    const double customMaxWidth = 310.0;
+    final AlertDialog dialog = AlertDialog(
+      title:const Text('Title'),
+      actions: <Widget>[Container(width: 330.0)],
+    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(maxWidth: customMaxWidth));
+
+    await tester.pumpWidget(
+        _appWithDialog(tester, dialog, theme: theme)
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Size dialogSize= tester.getSize(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(Material),
+      ).first,
+    );
+
+    expect(dialogSize.width, customMaxWidth);
   });
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {

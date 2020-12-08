@@ -33,6 +33,7 @@ class DialogTheme with Diagnosticable {
   const DialogTheme({
     this.backgroundColor,
     this.elevation,
+    this.maxWidth,
     this.shape,
     this.titleTextStyle,
     this.contentTextStyle,
@@ -48,6 +49,11 @@ class DialogTheme with Diagnosticable {
   ///
   /// If null, the [Dialog] elevation defaults to `24.0`.
   final double? elevation;
+
+  /// Default value for [Dialog.maxWidth]
+  ///
+  /// If null, the [Dialog] maxWidth defaults to [double.infinity].
+  final double? maxWidth;
 
   /// Default value for [Dialog.shape].
   final ShapeBorder? shape;
@@ -67,6 +73,7 @@ class DialogTheme with Diagnosticable {
   DialogTheme copyWith({
     Color? backgroundColor,
     double? elevation,
+    double? maxWidth,
     ShapeBorder? shape,
     TextStyle? titleTextStyle,
     TextStyle? contentTextStyle,
@@ -74,6 +81,7 @@ class DialogTheme with Diagnosticable {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
+      maxWidth: maxWidth ?? this.maxWidth,
       shape: shape ?? this.shape,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
@@ -95,6 +103,7 @@ class DialogTheme with Diagnosticable {
     return DialogTheme(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      maxWidth: lerpDouble(a?.maxWidth, b?.maxWidth, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
@@ -113,6 +122,7 @@ class DialogTheme with Diagnosticable {
     return other is DialogTheme
         && other.backgroundColor == backgroundColor
         && other.elevation == elevation
+        && other.maxWidth == maxWidth
         && other.shape == shape
         && other.titleTextStyle == titleTextStyle
         && other.contentTextStyle == contentTextStyle;
@@ -124,6 +134,7 @@ class DialogTheme with Diagnosticable {
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation));
+    properties.add(DoubleProperty('maxWidth', maxWidth));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }

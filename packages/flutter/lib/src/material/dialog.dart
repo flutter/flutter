@@ -78,7 +78,8 @@ class Dialog extends StatelessWidget {
   ///
   /// Value must be greater or equal to 280.0
   ///
-  /// If null then the dialog's maxWidth is [double.infinity].
+  /// If null then [DialogTheme.maxWidth] is used, and if that's null then
+  /// the dialog's maxWidth is [double.infinity].
   /// {@endtemplate}
   final double? maxWidth;
 
@@ -154,7 +155,7 @@ class Dialog extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minWidth: 280.0,
-              maxWidth: maxWidth ?? double.infinity,
+              maxWidth: maxWidth ?? dialogTheme.maxWidth ?? double.infinity,
               ),
             child: Material(
               color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
