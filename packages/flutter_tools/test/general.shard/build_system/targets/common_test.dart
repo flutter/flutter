@@ -89,7 +89,6 @@ void main() {
         ) + '/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=false',
         ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
@@ -126,7 +125,6 @@ void main() {
         ) + '/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=false',
         ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
@@ -163,7 +161,6 @@ void main() {
         ) + '/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=false',
         ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
@@ -201,7 +198,6 @@ void main() {
         ) + '/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=false',
         ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
@@ -241,7 +237,6 @@ void main() {
         ) + '/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=true',
         ...buildModeOptions(BuildMode.debug, <String>[]),
         '--no-link-platform',
         '--packages',
@@ -279,7 +274,6 @@ void main() {
         ) + '/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=true',
         ...buildModeOptions(BuildMode.debug, <String>[]),
         '--packages',
         '/.dart_tool/package_config.json',
@@ -329,7 +323,6 @@ void main() {
         ) + '/',
         '--target=flutter',
         '--no-print-incremental-dependencies',
-        '-Ddart.developer.causal_async_stacks=true',
         ...buildModeOptions(BuildMode.debug, <String>[]),
         '--track-widget-creation',
         '--no-link-platform',
@@ -363,8 +356,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ])
     ]);
@@ -393,8 +384,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ])
     ]);
@@ -463,8 +452,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -474,8 +461,6 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -582,8 +567,6 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -659,8 +642,6 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -741,8 +722,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
     ]);

@@ -487,6 +487,9 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
+  /// Whether this command should report null safety analytics.
+  bool get reportNullSafety => false;
+
   Duration get deviceDiscoveryTimeout {
     if (_deviceDiscoveryTimeout == null
         && argResults.options.contains(FlutterOptions.kDeviceTimeout)
@@ -671,6 +674,19 @@ abstract class FlutterCommand extends Command<void> {
         "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
         'process to terminate after the build is completed',
       defaultsTo: true,
+    );
+  }
+
+  void addNativeNullAssertions({ bool hide = false }) {
+    argParser.addFlag('native-null-assertions',
+      defaultsTo: true,
+      hide: hide,
+      help: 'Enables additional runtime null checks in web applications to ensure '
+        'the correct nullability of native (such as in dart:html) and external '
+        '(such as with JS interop) types. This is enabled by default but only takes '
+        'effect in sound mode. To report an issue with a null assertion failure in '
+        'dart:html or the other dart web libraries, please file a bug at '
+        'https://github.com/dart-lang/sdk/issues/labels/web-libraries .'
     );
   }
 
@@ -1099,6 +1115,9 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
+      if (reportNullSafety) {
+        await _sendNullSafetyAnalyticsEvents(project);
+      }
     }
 
     setupApplicationPackages();
@@ -1113,6 +1132,16 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return await runCommand();
+  }
+
+  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
+    final BuildInfo buildInfo = await getBuildInfo();
+    NullSafetyAnalysisEvent(
+      buildInfo.packageConfig,
+      buildInfo.nullSafetyMode,
+      project.manifest.appName,
+      globals.flutterUsage,
+    ).send();
   }
 
   /// The set of development artifacts required for this command.

@@ -97,7 +97,6 @@ Future<void> buildMacOS({
         '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
       'EXCLUDED_ARCHS=arm64', // TODO(jmagman): Allow ARM https://github.com/flutter/flutter/issues/69221
-      ...environmentVariablesAsXcodeBuildSettings(globals.platform)
     ],
     trace: true,
     stdoutErrorMatcher: verboseLogging ? null : _anyOutput,
