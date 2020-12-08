@@ -6587,7 +6587,7 @@ void main() {
         tester,
         LengthLimitingTextInputFormatter(
           maxLength,
-          maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
+          maxLengthEnforcement: MaxLengthEnforcement.enforced,
         ),
       );
 
