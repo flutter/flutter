@@ -1304,7 +1304,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// In some cases, the framework will reinsert the [State] object into
   /// another part of the tree (e.g., if the subtree containing this [State]
   /// object is grafted from one location in the tree to another). If that
-  /// happens, the framework will ensure that it calls [activate] to give the
+  /// happens, the framework will ensure that it calls [reactivate] to give the
   /// [State] object a chance to adapt to its new location in the tree. If the
   /// framework does reinsert this subtree, it will do so before the end of the
   /// animation frame in which the subtree was removed from the tree. For this
