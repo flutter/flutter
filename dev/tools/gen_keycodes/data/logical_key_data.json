@@ -6,14 +6,12 @@
     "names": {
       "web": [
         "Unidentified"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1
-      ],
-      "gtk": []
+      ]
     }
   },
   "backspace": {
@@ -26,6 +24,9 @@
       ],
       "gtk": [
         "BackSpace"
+      ],
+      "windows": [
+        "BACK"
       ]
     },
     "values": {
@@ -34,6 +35,9 @@
       ],
       "gtk": [
         65288
+      ],
+      "windows": [
+        8
       ]
     }
   },
@@ -49,6 +53,9 @@
         "Tab",
         "KP_Tab",
         "ISO_Left_Tab"
+      ],
+      "windows": [
+        "TAB"
       ]
     },
     "values": {
@@ -59,6 +66,9 @@
         65289,
         65417,
         65056
+      ],
+      "windows": [
+        9
       ]
     }
   },
@@ -74,6 +84,9 @@
         "Return",
         "ISO_Enter",
         "3270_Enter"
+      ],
+      "windows": [
+        "RETURN"
       ]
     },
     "values": {
@@ -84,6 +97,9 @@
         65293,
         65076,
         64798
+      ],
+      "windows": [
+        13
       ]
     }
   },
@@ -97,6 +113,9 @@
       ],
       "gtk": [
         "Escape"
+      ],
+      "windows": [
+        "ESCAPE"
       ]
     },
     "values": {
@@ -105,6 +124,9 @@
       ],
       "gtk": [
         65307
+      ],
+      "windows": [
+        27
       ]
     }
   },
@@ -113,15 +135,19 @@
     "english": "Space",
     "value": 32,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Space"
+      ],
+      "windows": [
+        "SPACE"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65408
+      ],
+      "windows": [
+        32
       ]
     }
   },
@@ -129,156 +155,92 @@
     "constant": "exclamation",
     "english": "Exclamation",
     "value": 33,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "quoteDouble": {
     "constant": "quoteDouble",
     "english": "Quote Double",
     "value": 34,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "numberSign": {
     "constant": "numberSign",
     "english": "Number Sign",
     "value": 35,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "dollar": {
     "constant": "dollar",
     "english": "Dollar",
     "value": 36,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "percent": {
     "constant": "percent",
     "english": "Percent",
     "value": 37,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "ampersand": {
     "constant": "ampersand",
     "english": "Ampersand",
     "value": 38,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "quoteSingle": {
     "constant": "quoteSingle",
     "english": "Quote Single",
     "value": 39,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "parenthesisLeft": {
     "constant": "parenthesisLeft",
     "english": "Parenthesis Left",
     "value": 40,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "parenthesisRight": {
     "constant": "parenthesisRight",
     "english": "Parenthesis Right",
     "value": 41,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "asterisk": {
     "constant": "asterisk",
     "english": "Asterisk",
     "value": 42,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "add": {
     "constant": "add",
     "english": "Add",
     "value": 43,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "comma": {
     "constant": "comma",
     "english": "Comma",
     "value": 44,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_COMMA"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        188
+      ]
     }
   },
   "minus": {
@@ -286,12 +248,14 @@
     "english": "Minus",
     "value": 45,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_MINUS"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        189
+      ]
     }
   },
   "period": {
@@ -299,15 +263,19 @@
     "english": "Period",
     "value": 46,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Decimal"
+      ],
+      "windows": [
+        "OEM_PERIOD"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65454
+      ],
+      "windows": [
+        190
       ]
     }
   },
@@ -316,246 +284,164 @@
     "english": "Slash",
     "value": 47,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_2"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        191
+      ]
     }
   },
   "digit0": {
     "constant": "digit0",
     "english": "Digit 0",
     "value": 48,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit1": {
     "constant": "digit1",
     "english": "Digit 1",
     "value": 49,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit2": {
     "constant": "digit2",
     "english": "Digit 2",
     "value": 50,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit3": {
     "constant": "digit3",
     "english": "Digit 3",
     "value": 51,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit4": {
     "constant": "digit4",
     "english": "Digit 4",
     "value": 52,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit5": {
     "constant": "digit5",
     "english": "Digit 5",
     "value": 53,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit6": {
     "constant": "digit6",
     "english": "Digit 6",
     "value": 54,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit7": {
     "constant": "digit7",
     "english": "Digit 7",
     "value": 55,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit8": {
     "constant": "digit8",
     "english": "Digit 8",
     "value": 56,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "digit9": {
     "constant": "digit9",
     "english": "Digit 9",
     "value": 57,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "colon": {
     "constant": "colon",
     "english": "Colon",
     "value": 58,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "semicolon": {
     "constant": "semicolon",
     "english": "Semicolon",
     "value": 59,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_1"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        186
+      ]
     }
   },
   "less": {
     "constant": "less",
     "english": "Less",
     "value": 60,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "equal": {
     "constant": "equal",
     "english": "Equal",
     "value": 61,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_PLUS"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        187
+      ]
     }
   },
   "greater": {
     "constant": "greater",
     "english": "Greater",
     "value": 62,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "question": {
     "constant": "question",
     "english": "Question",
     "value": 63,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "at": {
     "constant": "at",
     "english": "At",
     "value": 64,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "bracketLeft": {
     "constant": "bracketLeft",
     "english": "Bracket Left",
     "value": 91,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_4"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        219
+      ]
     }
   },
   "backslash": {
@@ -563,12 +449,14 @@
     "english": "Backslash",
     "value": 92,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_5"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        220
+      ]
     }
   },
   "bracketRight": {
@@ -576,442 +464,254 @@
     "english": "Bracket Right",
     "value": 93,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_6"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        221
+      ]
     }
   },
   "caret": {
     "constant": "caret",
     "english": "Caret",
     "value": 94,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "underscore": {
     "constant": "underscore",
     "english": "Underscore",
     "value": 95,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "backquote": {
     "constant": "backquote",
     "english": "Backquote",
     "value": 96,
     "names": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        "OEM_3"
+      ]
     },
     "values": {
-      "web": [],
-      "gtk": []
+      "windows": [
+        192
+      ]
     }
   },
   "keyA": {
     "constant": "keyA",
     "english": "Key A",
     "value": 97,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyB": {
     "constant": "keyB",
     "english": "Key B",
     "value": 98,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyC": {
     "constant": "keyC",
     "english": "Key C",
     "value": 99,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyD": {
     "constant": "keyD",
     "english": "Key D",
     "value": 100,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyE": {
     "constant": "keyE",
     "english": "Key E",
     "value": 101,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyF": {
     "constant": "keyF",
     "english": "Key F",
     "value": 102,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyG": {
     "constant": "keyG",
     "english": "Key G",
     "value": 103,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyH": {
     "constant": "keyH",
     "english": "Key H",
     "value": 104,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyI": {
     "constant": "keyI",
     "english": "Key I",
     "value": 105,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyJ": {
     "constant": "keyJ",
     "english": "Key J",
     "value": 106,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyK": {
     "constant": "keyK",
     "english": "Key K",
     "value": 107,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyL": {
     "constant": "keyL",
     "english": "Key L",
     "value": 108,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyM": {
     "constant": "keyM",
     "english": "Key M",
     "value": 109,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyN": {
     "constant": "keyN",
     "english": "Key N",
     "value": 110,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyO": {
     "constant": "keyO",
     "english": "Key O",
     "value": 111,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyP": {
     "constant": "keyP",
     "english": "Key P",
     "value": 112,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyQ": {
     "constant": "keyQ",
     "english": "Key Q",
     "value": 113,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyR": {
     "constant": "keyR",
     "english": "Key R",
     "value": 114,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyS": {
     "constant": "keyS",
     "english": "Key S",
     "value": 115,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyT": {
     "constant": "keyT",
     "english": "Key T",
     "value": 116,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyU": {
     "constant": "keyU",
     "english": "Key U",
     "value": 117,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyV": {
     "constant": "keyV",
     "english": "Key V",
     "value": 118,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyW": {
     "constant": "keyW",
     "english": "Key W",
     "value": 119,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyX": {
     "constant": "keyX",
     "english": "Key X",
     "value": 120,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyY": {
     "constant": "keyY",
     "english": "Key Y",
     "value": 121,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "keyZ": {
     "constant": "keyZ",
     "english": "Key Z",
     "value": 122,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "braceLeft": {
     "constant": "braceLeft",
     "english": "Brace Left",
     "value": 123,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "bar": {
     "constant": "bar",
     "english": "Bar",
     "value": 124,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "braceRight": {
     "constant": "braceRight",
     "english": "Brace Right",
     "value": 125,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "tilde": {
     "constant": "tilde",
     "english": "Tilde",
     "value": 126,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "delete": {
     "constant": "delete",
@@ -1023,6 +723,9 @@
       ],
       "gtk": [
         "Delete"
+      ],
+      "windows": [
+        "DELETE"
       ]
     },
     "values": {
@@ -1031,6 +734,9 @@
       ],
       "gtk": [
         65535
+      ],
+      "windows": [
+        46
       ]
     }
   },
@@ -1041,14 +747,12 @@
     "names": {
       "web": [
         "Accel"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         257
-      ],
-      "gtk": []
+      ]
     }
   },
   "altGraph": {
@@ -1058,14 +762,12 @@
     "names": {
       "web": [
         "AltGraph"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         259
-      ],
-      "gtk": []
+      ]
     }
   },
   "capsLock": {
@@ -1078,6 +780,9 @@
       ],
       "gtk": [
         "Caps_Lock"
+      ],
+      "windows": [
+        "CAPITAL"
       ]
     },
     "values": {
@@ -1086,6 +791,9 @@
       ],
       "gtk": [
         65509
+      ],
+      "windows": [
+        20
       ]
     }
   },
@@ -1096,14 +804,12 @@
     "names": {
       "web": [
         "Fn"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         262
-      ],
-      "gtk": []
+      ]
     }
   },
   "fnLock": {
@@ -1113,14 +819,12 @@
     "names": {
       "web": [
         "FnLock"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         263
-      ],
-      "gtk": []
+      ]
     }
   },
   "hyper": {
@@ -1156,6 +860,9 @@
       ],
       "gtk": [
         "Num_Lock"
+      ],
+      "windows": [
+        "NUMLOCK"
       ]
     },
     "values": {
@@ -1164,6 +871,9 @@
       ],
       "gtk": [
         65407
+      ],
+      "windows": [
+        144
       ]
     }
   },
@@ -1177,6 +887,9 @@
       ],
       "gtk": [
         "Scroll_Lock"
+      ],
+      "windows": [
+        "SCROLL"
       ]
     },
     "values": {
@@ -1185,6 +898,9 @@
       ],
       "gtk": [
         65300
+      ],
+      "windows": [
+        145
       ]
     }
   },
@@ -1218,14 +934,12 @@
     "names": {
       "web": [
         "Symbol"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         271
-      ],
-      "gtk": []
+      ]
     }
   },
   "symbolLock": {
@@ -1235,14 +949,12 @@
     "names": {
       "web": [
         "SymbolLock"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         272
-      ],
-      "gtk": []
+      ]
     }
   },
   "shiftLevel5": {
@@ -1252,14 +964,12 @@
     "names": {
       "web": [
         "ShiftLevel5"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         273
-      ],
-      "gtk": []
+      ]
     }
   },
   "altGraphLatch": {
@@ -1269,14 +979,12 @@
     "names": {
       "web": [
         "AltGraphLatch"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         274
-      ],
-      "gtk": []
+      ]
     }
   },
   "arrowDown": {
@@ -1289,6 +997,9 @@
       ],
       "gtk": [
         "Down"
+      ],
+      "windows": [
+        "DOWN"
       ]
     },
     "values": {
@@ -1297,6 +1008,9 @@
       ],
       "gtk": [
         65364
+      ],
+      "windows": [
+        40
       ]
     }
   },
@@ -1310,6 +1024,9 @@
       ],
       "gtk": [
         "Left"
+      ],
+      "windows": [
+        "LEFT"
       ]
     },
     "values": {
@@ -1318,6 +1035,9 @@
       ],
       "gtk": [
         65361
+      ],
+      "windows": [
+        37
       ]
     }
   },
@@ -1331,6 +1051,9 @@
       ],
       "gtk": [
         "Right"
+      ],
+      "windows": [
+        "RIGHT"
       ]
     },
     "values": {
@@ -1339,6 +1062,9 @@
       ],
       "gtk": [
         65363
+      ],
+      "windows": [
+        39
       ]
     }
   },
@@ -1352,6 +1078,9 @@
       ],
       "gtk": [
         "Up"
+      ],
+      "windows": [
+        "UP"
       ]
     },
     "values": {
@@ -1360,6 +1089,9 @@
       ],
       "gtk": [
         65362
+      ],
+      "windows": [
+        38
       ]
     }
   },
@@ -1373,6 +1105,9 @@
       ],
       "gtk": [
         "End"
+      ],
+      "windows": [
+        "END"
       ]
     },
     "values": {
@@ -1381,6 +1116,9 @@
       ],
       "gtk": [
         65367
+      ],
+      "windows": [
+        35
       ]
     }
   },
@@ -1394,6 +1132,9 @@
       ],
       "gtk": [
         "Home"
+      ],
+      "windows": [
+        "HOME"
       ]
     },
     "values": {
@@ -1402,6 +1143,9 @@
       ],
       "gtk": [
         65360
+      ],
+      "windows": [
+        36
       ]
     }
   },
@@ -1415,6 +1159,9 @@
       ],
       "gtk": [
         "Page_Down"
+      ],
+      "windows": [
+        "NEXT"
       ]
     },
     "values": {
@@ -1423,6 +1170,9 @@
       ],
       "gtk": [
         65366
+      ],
+      "windows": [
+        34
       ]
     }
   },
@@ -1436,6 +1186,9 @@
       ],
       "gtk": [
         "Page_Up"
+      ],
+      "windows": [
+        "PRIOR"
       ]
     },
     "values": {
@@ -1444,6 +1197,9 @@
       ],
       "gtk": [
         65365
+      ],
+      "windows": [
+        33
       ]
     }
   },
@@ -1457,6 +1213,9 @@
       ],
       "gtk": [
         "Clear"
+      ],
+      "windows": [
+        "CLEAR"
       ]
     },
     "values": {
@@ -1465,6 +1224,9 @@
       ],
       "gtk": [
         65291
+      ],
+      "windows": [
+        12
       ]
     }
   },
@@ -1498,14 +1260,12 @@
     "names": {
       "web": [
         "CrSel"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1027
-      ],
-      "gtk": []
+      ]
     }
   },
   "cut": {
@@ -1581,6 +1341,9 @@
       ],
       "gtk": [
         "Insert"
+      ],
+      "windows": [
+        "INSERT"
       ]
     },
     "values": {
@@ -1589,6 +1352,9 @@
       ],
       "gtk": [
         65379
+      ],
+      "windows": [
+        45
       ]
     }
   },
@@ -1663,13 +1429,17 @@
       "web": [
         "Accept"
       ],
-      "gtk": []
+      "windows": [
+        "ACCEPT"
+      ]
     },
     "values": {
       "web": [
         1281
       ],
-      "gtk": []
+      "windows": [
+        30
+      ]
     }
   },
   "again": {
@@ -1679,14 +1449,12 @@
     "names": {
       "web": [
         "Again"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1282
-      ],
-      "gtk": []
+      ]
     }
   },
   "attn": {
@@ -1699,6 +1467,9 @@
       ],
       "gtk": [
         "3270_Attn"
+      ],
+      "windows": [
+        "ATTN"
       ]
     },
     "values": {
@@ -1707,6 +1478,9 @@
       ],
       "gtk": [
         64782
+      ],
+      "windows": [
+        246
       ]
     }
   },
@@ -1720,6 +1494,9 @@
       ],
       "gtk": [
         "Cancel"
+      ],
+      "windows": [
+        "CANCEL"
       ]
     },
     "values": {
@@ -1728,6 +1505,9 @@
       ],
       "gtk": [
         65385
+      ],
+      "windows": [
+        3
       ]
     }
   },
@@ -1741,6 +1521,9 @@
       ],
       "gtk": [
         "Menu"
+      ],
+      "windows": [
+        "APPS"
       ]
     },
     "values": {
@@ -1749,6 +1532,9 @@
       ],
       "gtk": [
         65383
+      ],
+      "windows": [
+        93
       ]
     }
   },
@@ -1762,6 +1548,9 @@
       ],
       "gtk": [
         "Execute"
+      ],
+      "windows": [
+        "EXECUTE"
       ]
     },
     "values": {
@@ -1770,6 +1559,9 @@
       ],
       "gtk": [
         65378
+      ],
+      "windows": [
+        43
       ]
     }
   },
@@ -1804,6 +1596,9 @@
       ],
       "gtk": [
         "Help"
+      ],
+      "windows": [
+        "HELP"
       ]
     },
     "values": {
@@ -1812,6 +1607,9 @@
       ],
       "gtk": [
         65386
+      ],
+      "windows": [
+        47
       ]
     }
   },
@@ -1825,6 +1623,9 @@
       ],
       "gtk": [
         "Pause"
+      ],
+      "windows": [
+        "PAUSE"
       ]
     },
     "values": {
@@ -1833,6 +1634,9 @@
       ],
       "gtk": [
         65299
+      ],
+      "windows": [
+        19
       ]
     }
   },
@@ -1844,13 +1648,17 @@
       "web": [
         "Play"
       ],
-      "gtk": []
+      "windows": [
+        "PLAY"
+      ]
     },
     "values": {
       "web": [
         1290
       ],
-      "gtk": []
+      "windows": [
+        250
+      ]
     }
   },
   "props": {
@@ -1860,14 +1668,12 @@
     "names": {
       "web": [
         "Props"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1291
-      ],
-      "gtk": []
+      ]
     }
   },
   "select": {
@@ -1880,6 +1686,9 @@
       ],
       "gtk": [
         "Select"
+      ],
+      "windows": [
+        "SELECT"
       ]
     },
     "values": {
@@ -1888,6 +1697,9 @@
       ],
       "gtk": [
         65376
+      ],
+      "windows": [
+        41
       ]
     }
   },
@@ -1982,14 +1794,12 @@
     "names": {
       "web": [
         "Camera"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1539
-      ],
-      "gtk": []
+      ]
     }
   },
   "eject": {
@@ -2041,14 +1851,12 @@
     "names": {
       "web": [
         "Power"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1542
-      ],
-      "gtk": []
+      ]
     }
   },
   "powerOff": {
@@ -2100,14 +1908,12 @@
     "names": {
       "web": [
         "Hibernate"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1545
-      ],
-      "gtk": []
+      ]
     }
   },
   "standby": {
@@ -2159,14 +1965,12 @@
     "names": {
       "web": [
         "AllCandidates"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1793
-      ],
-      "gtk": []
+      ]
     }
   },
   "alphanumeric": {
@@ -2176,14 +1980,12 @@
     "names": {
       "web": [
         "Alphanumeric"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1794
-      ],
-      "gtk": []
+      ]
     }
   },
   "codeInput": {
@@ -2214,14 +2016,12 @@
     "names": {
       "web": [
         "Compose"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1796
-      ],
-      "gtk": []
+      ]
     }
   },
   "convert": {
@@ -2232,13 +2032,17 @@
       "web": [
         "Convert"
       ],
-      "gtk": []
+      "windows": [
+        "CONVERT"
+      ]
     },
     "values": {
       "web": [
         1797
       ],
-      "gtk": []
+      "windows": [
+        28
+      ]
     }
   },
   "finalMode": {
@@ -2248,14 +2052,12 @@
     "names": {
       "web": [
         "FinalMode"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1798
-      ],
-      "gtk": []
+      ]
     }
   },
   "groupFirst": {
@@ -2352,6 +2154,9 @@
       ],
       "gtk": [
         "Mode_switch"
+      ],
+      "windows": [
+        "MODECHANGE"
       ]
     },
     "values": {
@@ -2360,6 +2165,9 @@
       ],
       "gtk": [
         65406
+      ],
+      "windows": [
+        31
       ]
     }
   },
@@ -2370,14 +2178,12 @@
     "names": {
       "web": [
         "NextCandidate"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1804
-      ],
-      "gtk": []
+      ]
     }
   },
   "nonConvert": {
@@ -2387,14 +2193,12 @@
     "names": {
       "web": [
         "NonConvert"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1805
-      ],
-      "gtk": []
+      ]
     }
   },
   "previousCandidate": {
@@ -2425,14 +2229,12 @@
     "names": {
       "web": [
         "Process"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1807
-      ],
-      "gtk": []
+      ]
     }
   },
   "singleCandidate": {
@@ -2505,14 +2307,12 @@
     "names": {
       "web": [
         "JunjaMode"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         1811
-      ],
-      "gtk": []
+      ]
     }
   },
   "eisu": {
@@ -2736,6 +2536,9 @@
       "gtk": [
         "KP_F1",
         "F1"
+      ],
+      "windows": [
+        "F1"
       ]
     },
     "values": {
@@ -2745,6 +2548,9 @@
       "gtk": [
         65425,
         65470
+      ],
+      "windows": [
+        112
       ]
     }
   },
@@ -2759,6 +2565,9 @@
       "gtk": [
         "KP_F2",
         "F2"
+      ],
+      "windows": [
+        "F2"
       ]
     },
     "values": {
@@ -2768,6 +2577,9 @@
       "gtk": [
         65426,
         65471
+      ],
+      "windows": [
+        113
       ]
     }
   },
@@ -2782,6 +2594,9 @@
       "gtk": [
         "KP_F3",
         "F3"
+      ],
+      "windows": [
+        "F3"
       ]
     },
     "values": {
@@ -2791,6 +2606,9 @@
       "gtk": [
         65427,
         65472
+      ],
+      "windows": [
+        114
       ]
     }
   },
@@ -2805,6 +2623,9 @@
       "gtk": [
         "KP_F4",
         "F4"
+      ],
+      "windows": [
+        "F4"
       ]
     },
     "values": {
@@ -2814,6 +2635,9 @@
       "gtk": [
         65428,
         65473
+      ],
+      "windows": [
+        115
       ]
     }
   },
@@ -2827,6 +2651,9 @@
       ],
       "gtk": [
         "F5"
+      ],
+      "windows": [
+        "F5"
       ]
     },
     "values": {
@@ -2835,6 +2662,9 @@
       ],
       "gtk": [
         65474
+      ],
+      "windows": [
+        116
       ]
     }
   },
@@ -2848,6 +2678,9 @@
       ],
       "gtk": [
         "F6"
+      ],
+      "windows": [
+        "F6"
       ]
     },
     "values": {
@@ -2856,6 +2689,9 @@
       ],
       "gtk": [
         65475
+      ],
+      "windows": [
+        117
       ]
     }
   },
@@ -2869,6 +2705,9 @@
       ],
       "gtk": [
         "F7"
+      ],
+      "windows": [
+        "F7"
       ]
     },
     "values": {
@@ -2877,6 +2716,9 @@
       ],
       "gtk": [
         65476
+      ],
+      "windows": [
+        118
       ]
     }
   },
@@ -2890,6 +2732,9 @@
       ],
       "gtk": [
         "F8"
+      ],
+      "windows": [
+        "F8"
       ]
     },
     "values": {
@@ -2898,6 +2743,9 @@
       ],
       "gtk": [
         65477
+      ],
+      "windows": [
+        119
       ]
     }
   },
@@ -2911,6 +2759,9 @@
       ],
       "gtk": [
         "F9"
+      ],
+      "windows": [
+        "F9"
       ]
     },
     "values": {
@@ -2919,6 +2770,9 @@
       ],
       "gtk": [
         65478
+      ],
+      "windows": [
+        120
       ]
     }
   },
@@ -2932,6 +2786,9 @@
       ],
       "gtk": [
         "F10"
+      ],
+      "windows": [
+        "F10"
       ]
     },
     "values": {
@@ -2940,6 +2797,9 @@
       ],
       "gtk": [
         65479
+      ],
+      "windows": [
+        121
       ]
     }
   },
@@ -2953,6 +2813,9 @@
       ],
       "gtk": [
         "F11"
+      ],
+      "windows": [
+        "F11"
       ]
     },
     "values": {
@@ -2961,6 +2824,9 @@
       ],
       "gtk": [
         65480
+      ],
+      "windows": [
+        122
       ]
     }
   },
@@ -2974,6 +2840,9 @@
       ],
       "gtk": [
         "F12"
+      ],
+      "windows": [
+        "F12"
       ]
     },
     "values": {
@@ -2982,6 +2851,9 @@
       ],
       "gtk": [
         65481
+      ],
+      "windows": [
+        123
       ]
     }
   },
@@ -2995,6 +2867,9 @@
       ],
       "gtk": [
         "F13"
+      ],
+      "windows": [
+        "F13"
       ]
     },
     "values": {
@@ -3003,6 +2878,9 @@
       ],
       "gtk": [
         65482
+      ],
+      "windows": [
+        124
       ]
     }
   },
@@ -3016,6 +2894,9 @@
       ],
       "gtk": [
         "F14"
+      ],
+      "windows": [
+        "F14"
       ]
     },
     "values": {
@@ -3024,6 +2905,9 @@
       ],
       "gtk": [
         65483
+      ],
+      "windows": [
+        125
       ]
     }
   },
@@ -3037,6 +2921,9 @@
       ],
       "gtk": [
         "F15"
+      ],
+      "windows": [
+        "F15"
       ]
     },
     "values": {
@@ -3045,6 +2932,9 @@
       ],
       "gtk": [
         65484
+      ],
+      "windows": [
+        126
       ]
     }
   },
@@ -3058,6 +2948,9 @@
       ],
       "gtk": [
         "F16"
+      ],
+      "windows": [
+        "F16"
       ]
     },
     "values": {
@@ -3066,6 +2959,9 @@
       ],
       "gtk": [
         65485
+      ],
+      "windows": [
+        127
       ]
     }
   },
@@ -3079,6 +2975,9 @@
       ],
       "gtk": [
         "F17"
+      ],
+      "windows": [
+        "F17"
       ]
     },
     "values": {
@@ -3087,6 +2986,9 @@
       ],
       "gtk": [
         65486
+      ],
+      "windows": [
+        128
       ]
     }
   },
@@ -3100,6 +3002,9 @@
       ],
       "gtk": [
         "F18"
+      ],
+      "windows": [
+        "F18"
       ]
     },
     "values": {
@@ -3108,6 +3013,9 @@
       ],
       "gtk": [
         65487
+      ],
+      "windows": [
+        129
       ]
     }
   },
@@ -3121,6 +3029,9 @@
       ],
       "gtk": [
         "F19"
+      ],
+      "windows": [
+        "F19"
       ]
     },
     "values": {
@@ -3129,6 +3040,9 @@
       ],
       "gtk": [
         65488
+      ],
+      "windows": [
+        130
       ]
     }
   },
@@ -3142,6 +3056,9 @@
       ],
       "gtk": [
         "F20"
+      ],
+      "windows": [
+        "F20"
       ]
     },
     "values": {
@@ -3150,6 +3067,9 @@
       ],
       "gtk": [
         65489
+      ],
+      "windows": [
+        131
       ]
     }
   },
@@ -3163,6 +3083,9 @@
       ],
       "gtk": [
         "F21"
+      ],
+      "windows": [
+        "F21"
       ]
     },
     "values": {
@@ -3171,6 +3094,9 @@
       ],
       "gtk": [
         65490
+      ],
+      "windows": [
+        132
       ]
     }
   },
@@ -3184,6 +3110,9 @@
       ],
       "gtk": [
         "F22"
+      ],
+      "windows": [
+        "F22"
       ]
     },
     "values": {
@@ -3192,6 +3121,9 @@
       ],
       "gtk": [
         65491
+      ],
+      "windows": [
+        133
       ]
     }
   },
@@ -3205,6 +3137,9 @@
       ],
       "gtk": [
         "F23"
+      ],
+      "windows": [
+        "F23"
       ]
     },
     "values": {
@@ -3213,6 +3148,9 @@
       ],
       "gtk": [
         65492
+      ],
+      "windows": [
+        134
       ]
     }
   },
@@ -3226,6 +3164,9 @@
       ],
       "gtk": [
         "F24"
+      ],
+      "windows": [
+        "F24"
       ]
     },
     "values": {
@@ -3234,6 +3175,9 @@
       ],
       "gtk": [
         65493
+      ],
+      "windows": [
+        135
       ]
     }
   },
@@ -3244,14 +3188,12 @@
     "names": {
       "web": [
         "Soft1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2305
-      ],
-      "gtk": []
+      ]
     }
   },
   "soft2": {
@@ -3261,14 +3203,12 @@
     "names": {
       "web": [
         "Soft2"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2306
-      ],
-      "gtk": []
+      ]
     }
   },
   "soft3": {
@@ -3278,14 +3218,12 @@
     "names": {
       "web": [
         "Soft3"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2307
-      ],
-      "gtk": []
+      ]
     }
   },
   "soft4": {
@@ -3295,14 +3233,12 @@
     "names": {
       "web": [
         "Soft4"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2308
-      ],
-      "gtk": []
+      ]
     }
   },
   "soft5": {
@@ -3312,14 +3248,12 @@
     "names": {
       "web": [
         "Soft5"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2309
-      ],
-      "gtk": []
+      ]
     }
   },
   "soft6": {
@@ -3329,14 +3263,12 @@
     "names": {
       "web": [
         "Soft6"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2310
-      ],
-      "gtk": []
+      ]
     }
   },
   "soft7": {
@@ -3346,14 +3278,12 @@
     "names": {
       "web": [
         "Soft7"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2311
-      ],
-      "gtk": []
+      ]
     }
   },
   "soft8": {
@@ -3363,14 +3293,12 @@
     "names": {
       "web": [
         "Soft8"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2312
-      ],
-      "gtk": []
+      ]
     }
   },
   "close": {
@@ -3465,13 +3393,17 @@
       "web": [
         "MediaPlayPause"
       ],
-      "gtk": []
+      "windows": [
+        "MEDIA_PLAY_PAUSE"
+      ]
     },
     "values": {
       "web": [
         2565
       ],
-      "gtk": []
+      "windows": [
+        179
+      ]
     }
   },
   "mediaStop": {
@@ -3484,6 +3416,9 @@
       ],
       "gtk": [
         "AudioStop"
+      ],
+      "windows": [
+        "MEDIA_STOP"
       ]
     },
     "values": {
@@ -3492,6 +3427,9 @@
       ],
       "gtk": [
         269025045
+      ],
+      "windows": [
+        178
       ]
     }
   },
@@ -3589,6 +3527,9 @@
       ],
       "gtk": [
         "Print"
+      ],
+      "windows": [
+        "PRINT"
       ]
     },
     "values": {
@@ -3597,6 +3538,9 @@
       ],
       "gtk": [
         65377
+      ],
+      "windows": [
+        42
       ]
     }
   },
@@ -3652,6 +3596,9 @@
       ],
       "gtk": [
         "AudioLowerVolume"
+      ],
+      "windows": [
+        "VOLUME_DOWN"
       ]
     },
     "values": {
@@ -3660,6 +3607,9 @@
       ],
       "gtk": [
         269025041
+      ],
+      "windows": [
+        174
       ]
     }
   },
@@ -3673,6 +3623,9 @@
       ],
       "gtk": [
         "AudioRaiseVolume"
+      ],
+      "windows": [
+        "VOLUME_UP"
       ]
     },
     "values": {
@@ -3681,6 +3634,9 @@
       ],
       "gtk": [
         269025043
+      ],
+      "windows": [
+        175
       ]
     }
   },
@@ -3694,6 +3650,9 @@
       ],
       "gtk": [
         "AudioMute"
+      ],
+      "windows": [
+        "VOLUME_MUTE"
       ]
     },
     "values": {
@@ -3702,6 +3661,9 @@
       ],
       "gtk": [
         269025042
+      ],
+      "windows": [
+        173
       ]
     }
   },
@@ -3712,14 +3674,12 @@
     "names": {
       "web": [
         "LaunchApplication2"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2817
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchCalendar": {
@@ -3753,6 +3713,9 @@
       ],
       "gtk": [
         "Mail"
+      ],
+      "windows": [
+        "LAUNCH_MAIL"
       ]
     },
     "values": {
@@ -3761,6 +3724,9 @@
       ],
       "gtk": [
         269025049
+      ],
+      "windows": [
+        180
       ]
     }
   },
@@ -3771,14 +3737,12 @@
     "names": {
       "web": [
         "LaunchMediaPlayer"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2820
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchMusicPlayer": {
@@ -3788,14 +3752,12 @@
     "names": {
       "web": [
         "LaunchMusicPlayer"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2821
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchApplication1": {
@@ -3805,14 +3767,12 @@
     "names": {
       "web": [
         "LaunchApplication1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2822
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchScreenSaver": {
@@ -3843,14 +3803,12 @@
     "names": {
       "web": [
         "LaunchSpreadsheet"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2824
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchWebBrowser": {
@@ -3860,14 +3818,12 @@
     "names": {
       "web": [
         "LaunchWebBrowser"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2825
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchWebCam": {
@@ -3877,14 +3833,12 @@
     "names": {
       "web": [
         "LaunchWebCam"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2826
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchWordProcessor": {
@@ -3894,14 +3848,12 @@
     "names": {
       "web": [
         "LaunchWordProcessor"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2827
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchContacts": {
@@ -3911,14 +3863,12 @@
     "names": {
       "web": [
         "LaunchContacts"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2828
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchPhone": {
@@ -3949,14 +3899,12 @@
     "names": {
       "web": [
         "LaunchAssistant"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2830
-      ],
-      "gtk": []
+      ]
     }
   },
   "launchControlPanel": {
@@ -3966,14 +3914,12 @@
     "names": {
       "web": [
         "LaunchControlPanel"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         2831
-      ],
-      "gtk": []
+      ]
     }
   },
   "browserBack": {
@@ -3986,6 +3932,9 @@
       ],
       "gtk": [
         "Back"
+      ],
+      "windows": [
+        "BROWSER_BACK"
       ]
     },
     "values": {
@@ -3994,6 +3943,9 @@
       ],
       "gtk": [
         269025062
+      ],
+      "windows": [
+        166
       ]
     }
   },
@@ -4007,6 +3959,9 @@
       ],
       "gtk": [
         "Favorites"
+      ],
+      "windows": [
+        "BROWSER_FAVORITES"
       ]
     },
     "values": {
@@ -4015,6 +3970,9 @@
       ],
       "gtk": [
         269025072
+      ],
+      "windows": [
+        171
       ]
     }
   },
@@ -4028,6 +3986,9 @@
       ],
       "gtk": [
         "Forward"
+      ],
+      "windows": [
+        "BROWSER_FORWARD"
       ]
     },
     "values": {
@@ -4036,6 +3997,9 @@
       ],
       "gtk": [
         269025063
+      ],
+      "windows": [
+        167
       ]
     }
   },
@@ -4049,6 +4013,9 @@
       ],
       "gtk": [
         "HomePage"
+      ],
+      "windows": [
+        "BROWSER_HOME"
       ]
     },
     "values": {
@@ -4057,6 +4024,9 @@
       ],
       "gtk": [
         269025048
+      ],
+      "windows": [
+        172
       ]
     }
   },
@@ -4070,6 +4040,9 @@
       ],
       "gtk": [
         "Refresh"
+      ],
+      "windows": [
+        "BROWSER_REFRESH"
       ]
     },
     "values": {
@@ -4078,6 +4051,9 @@
       ],
       "gtk": [
         269025065
+      ],
+      "windows": [
+        168
       ]
     }
   },
@@ -4091,6 +4067,9 @@
       ],
       "gtk": [
         "Search"
+      ],
+      "windows": [
+        "BROWSER_SEARCH"
       ]
     },
     "values": {
@@ -4099,6 +4078,9 @@
       ],
       "gtk": [
         269025051
+      ],
+      "windows": [
+        170
       ]
     }
   },
@@ -4112,6 +4094,9 @@
       ],
       "gtk": [
         "Stop"
+      ],
+      "windows": [
+        "BROWSER_STOP"
       ]
     },
     "values": {
@@ -4120,6 +4105,9 @@
       ],
       "gtk": [
         269025064
+      ],
+      "windows": [
+        169
       ]
     }
   },
@@ -4130,14 +4118,12 @@
     "names": {
       "web": [
         "AudioBalanceLeft"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3329
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioBalanceRight": {
@@ -4147,14 +4133,12 @@
     "names": {
       "web": [
         "AudioBalanceRight"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3330
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioBassBoostDown": {
@@ -4164,14 +4148,12 @@
     "names": {
       "web": [
         "AudioBassBoostDown"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3331
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioBassBoostUp": {
@@ -4181,14 +4163,12 @@
     "names": {
       "web": [
         "AudioBassBoostUp"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3332
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioFaderFront": {
@@ -4198,14 +4178,12 @@
     "names": {
       "web": [
         "AudioFaderFront"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3333
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioFaderRear": {
@@ -4215,14 +4193,12 @@
     "names": {
       "web": [
         "AudioFaderRear"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3334
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioSurroundModeNext": {
@@ -4232,14 +4208,12 @@
     "names": {
       "web": [
         "AudioSurroundModeNext"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3335
-      ],
-      "gtk": []
+      ]
     }
   },
   "avrInput": {
@@ -4249,14 +4223,12 @@
     "names": {
       "web": [
         "AVRInput"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3336
-      ],
-      "gtk": []
+      ]
     }
   },
   "avrPower": {
@@ -4266,14 +4238,12 @@
     "names": {
       "web": [
         "AVRPower"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3337
-      ],
-      "gtk": []
+      ]
     }
   },
   "channelDown": {
@@ -4283,14 +4253,12 @@
     "names": {
       "web": [
         "ChannelDown"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3338
-      ],
-      "gtk": []
+      ]
     }
   },
   "channelUp": {
@@ -4300,14 +4268,12 @@
     "names": {
       "web": [
         "ChannelUp"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3339
-      ],
-      "gtk": []
+      ]
     }
   },
   "colorF0Red": {
@@ -4317,14 +4283,12 @@
     "names": {
       "web": [
         "ColorF0Red"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3340
-      ],
-      "gtk": []
+      ]
     }
   },
   "colorF1Green": {
@@ -4334,14 +4298,12 @@
     "names": {
       "web": [
         "ColorF1Green"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3341
-      ],
-      "gtk": []
+      ]
     }
   },
   "colorF2Yellow": {
@@ -4351,14 +4313,12 @@
     "names": {
       "web": [
         "ColorF2Yellow"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3342
-      ],
-      "gtk": []
+      ]
     }
   },
   "colorF3Blue": {
@@ -4368,14 +4328,12 @@
     "names": {
       "web": [
         "ColorF3Blue"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3343
-      ],
-      "gtk": []
+      ]
     }
   },
   "colorF4Grey": {
@@ -4385,14 +4343,12 @@
     "names": {
       "web": [
         "ColorF4Grey"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3344
-      ],
-      "gtk": []
+      ]
     }
   },
   "colorF5Brown": {
@@ -4402,14 +4358,12 @@
     "names": {
       "web": [
         "ColorF5Brown"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3345
-      ],
-      "gtk": []
+      ]
     }
   },
   "closedCaptionToggle": {
@@ -4419,14 +4373,12 @@
     "names": {
       "web": [
         "ClosedCaptionToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3346
-      ],
-      "gtk": []
+      ]
     }
   },
   "dimmer": {
@@ -4436,14 +4388,12 @@
     "names": {
       "web": [
         "Dimmer"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3347
-      ],
-      "gtk": []
+      ]
     }
   },
   "displaySwap": {
@@ -4453,14 +4403,12 @@
     "names": {
       "web": [
         "DisplaySwap"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3348
-      ],
-      "gtk": []
+      ]
     }
   },
   "exit": {
@@ -4470,14 +4418,12 @@
     "names": {
       "web": [
         "Exit"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3349
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteClear0": {
@@ -4487,14 +4433,12 @@
     "names": {
       "web": [
         "FavoriteClear0"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3350
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteClear1": {
@@ -4504,14 +4448,12 @@
     "names": {
       "web": [
         "FavoriteClear1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3351
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteClear2": {
@@ -4521,14 +4463,12 @@
     "names": {
       "web": [
         "FavoriteClear2"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3352
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteClear3": {
@@ -4538,14 +4478,12 @@
     "names": {
       "web": [
         "FavoriteClear3"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3353
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteRecall0": {
@@ -4555,14 +4493,12 @@
     "names": {
       "web": [
         "FavoriteRecall0"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3354
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteRecall1": {
@@ -4572,14 +4508,12 @@
     "names": {
       "web": [
         "FavoriteRecall1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3355
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteRecall2": {
@@ -4589,14 +4523,12 @@
     "names": {
       "web": [
         "FavoriteRecall2"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3356
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteRecall3": {
@@ -4606,14 +4538,12 @@
     "names": {
       "web": [
         "FavoriteRecall3"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3357
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteStore0": {
@@ -4623,14 +4553,12 @@
     "names": {
       "web": [
         "FavoriteStore0"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3358
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteStore1": {
@@ -4640,14 +4568,12 @@
     "names": {
       "web": [
         "FavoriteStore1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3359
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteStore2": {
@@ -4657,14 +4583,12 @@
     "names": {
       "web": [
         "FavoriteStore2"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3360
-      ],
-      "gtk": []
+      ]
     }
   },
   "favoriteStore3": {
@@ -4674,14 +4598,12 @@
     "names": {
       "web": [
         "FavoriteStore3"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3361
-      ],
-      "gtk": []
+      ]
     }
   },
   "guide": {
@@ -4691,14 +4613,12 @@
     "names": {
       "web": [
         "Guide"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3362
-      ],
-      "gtk": []
+      ]
     }
   },
   "guideNextDay": {
@@ -4708,14 +4628,12 @@
     "names": {
       "web": [
         "GuideNextDay"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3363
-      ],
-      "gtk": []
+      ]
     }
   },
   "guidePreviousDay": {
@@ -4725,14 +4643,12 @@
     "names": {
       "web": [
         "GuidePreviousDay"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3364
-      ],
-      "gtk": []
+      ]
     }
   },
   "info": {
@@ -4742,14 +4658,12 @@
     "names": {
       "web": [
         "Info"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3365
-      ],
-      "gtk": []
+      ]
     }
   },
   "instantReplay": {
@@ -4759,14 +4673,12 @@
     "names": {
       "web": [
         "InstantReplay"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3366
-      ],
-      "gtk": []
+      ]
     }
   },
   "link": {
@@ -4776,14 +4688,12 @@
     "names": {
       "web": [
         "Link"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3367
-      ],
-      "gtk": []
+      ]
     }
   },
   "listProgram": {
@@ -4793,14 +4703,12 @@
     "names": {
       "web": [
         "ListProgram"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3368
-      ],
-      "gtk": []
+      ]
     }
   },
   "liveContent": {
@@ -4810,14 +4718,12 @@
     "names": {
       "web": [
         "LiveContent"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3369
-      ],
-      "gtk": []
+      ]
     }
   },
   "lock": {
@@ -4827,14 +4733,12 @@
     "names": {
       "web": [
         "Lock"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3370
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaApps": {
@@ -4844,14 +4748,12 @@
     "names": {
       "web": [
         "MediaApps"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3371
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaFastForward": {
@@ -4882,14 +4784,12 @@
     "names": {
       "web": [
         "MediaLast"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3373
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaPause": {
@@ -4985,14 +4885,12 @@
     "names": {
       "web": [
         "MediaSkip"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3378
-      ],
-      "gtk": []
+      ]
     }
   },
   "nextFavoriteChannel": {
@@ -5002,14 +4900,12 @@
     "names": {
       "web": [
         "NextFavoriteChannel"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3379
-      ],
-      "gtk": []
+      ]
     }
   },
   "nextUserProfile": {
@@ -5019,14 +4915,12 @@
     "names": {
       "web": [
         "NextUserProfile"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3380
-      ],
-      "gtk": []
+      ]
     }
   },
   "onDemand": {
@@ -5036,14 +4930,12 @@
     "names": {
       "web": [
         "OnDemand"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3381
-      ],
-      "gtk": []
+      ]
     }
   },
   "pInPDown": {
@@ -5053,14 +4945,12 @@
     "names": {
       "web": [
         "PinPDown"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3382
-      ],
-      "gtk": []
+      ]
     }
   },
   "pInPMove": {
@@ -5070,14 +4960,12 @@
     "names": {
       "web": [
         "PinPMove"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3383
-      ],
-      "gtk": []
+      ]
     }
   },
   "pInPToggle": {
@@ -5087,14 +4975,12 @@
     "names": {
       "web": [
         "PinPToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3384
-      ],
-      "gtk": []
+      ]
     }
   },
   "pInPUp": {
@@ -5104,14 +4990,12 @@
     "names": {
       "web": [
         "PinPUp"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3385
-      ],
-      "gtk": []
+      ]
     }
   },
   "playSpeedDown": {
@@ -5121,14 +5005,12 @@
     "names": {
       "web": [
         "PlaySpeedDown"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3386
-      ],
-      "gtk": []
+      ]
     }
   },
   "playSpeedReset": {
@@ -5138,14 +5020,12 @@
     "names": {
       "web": [
         "PlaySpeedReset"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3387
-      ],
-      "gtk": []
+      ]
     }
   },
   "playSpeedUp": {
@@ -5155,14 +5035,12 @@
     "names": {
       "web": [
         "PlaySpeedUp"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3388
-      ],
-      "gtk": []
+      ]
     }
   },
   "randomToggle": {
@@ -5172,14 +5050,12 @@
     "names": {
       "web": [
         "RandomToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3389
-      ],
-      "gtk": []
+      ]
     }
   },
   "rcLowBattery": {
@@ -5189,14 +5065,12 @@
     "names": {
       "web": [
         "RcLowBattery"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3390
-      ],
-      "gtk": []
+      ]
     }
   },
   "recordSpeedNext": {
@@ -5206,14 +5080,12 @@
     "names": {
       "web": [
         "RecordSpeedNext"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3391
-      ],
-      "gtk": []
+      ]
     }
   },
   "rfBypass": {
@@ -5223,14 +5095,12 @@
     "names": {
       "web": [
         "RfBypass"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3392
-      ],
-      "gtk": []
+      ]
     }
   },
   "scanChannelsToggle": {
@@ -5240,14 +5110,12 @@
     "names": {
       "web": [
         "ScanChannelsToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3393
-      ],
-      "gtk": []
+      ]
     }
   },
   "screenModeNext": {
@@ -5257,14 +5125,12 @@
     "names": {
       "web": [
         "ScreenModeNext"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3394
-      ],
-      "gtk": []
+      ]
     }
   },
   "settings": {
@@ -5274,14 +5140,12 @@
     "names": {
       "web": [
         "Settings"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3395
-      ],
-      "gtk": []
+      ]
     }
   },
   "splitScreenToggle": {
@@ -5291,14 +5155,12 @@
     "names": {
       "web": [
         "SplitScreenToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3396
-      ],
-      "gtk": []
+      ]
     }
   },
   "stbInput": {
@@ -5308,14 +5170,12 @@
     "names": {
       "web": [
         "STBInput"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3397
-      ],
-      "gtk": []
+      ]
     }
   },
   "stbPower": {
@@ -5325,14 +5185,12 @@
     "names": {
       "web": [
         "STBPower"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3398
-      ],
-      "gtk": []
+      ]
     }
   },
   "subtitle": {
@@ -5342,14 +5200,12 @@
     "names": {
       "web": [
         "Subtitle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3399
-      ],
-      "gtk": []
+      ]
     }
   },
   "teletext": {
@@ -5359,14 +5215,12 @@
     "names": {
       "web": [
         "Teletext"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3400
-      ],
-      "gtk": []
+      ]
     }
   },
   "tv": {
@@ -5376,14 +5230,12 @@
     "names": {
       "web": [
         "TV"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3401
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInput": {
@@ -5393,14 +5245,12 @@
     "names": {
       "web": [
         "TVInput"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3402
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvPower": {
@@ -5410,14 +5260,12 @@
     "names": {
       "web": [
         "TVPower"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3403
-      ],
-      "gtk": []
+      ]
     }
   },
   "videoModeNext": {
@@ -5427,14 +5275,12 @@
     "names": {
       "web": [
         "VideoModeNext"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3404
-      ],
-      "gtk": []
+      ]
     }
   },
   "wink": {
@@ -5444,14 +5290,12 @@
     "names": {
       "web": [
         "Wink"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3405
-      ],
-      "gtk": []
+      ]
     }
   },
   "zoomToggle": {
@@ -5461,14 +5305,12 @@
     "names": {
       "web": [
         "ZoomToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3406
-      ],
-      "gtk": []
+      ]
     }
   },
   "dvr": {
@@ -5478,14 +5320,12 @@
     "names": {
       "web": [
         "DVR"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3407
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaAudioTrack": {
@@ -5495,14 +5335,12 @@
     "names": {
       "web": [
         "MediaAudioTrack"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3408
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaSkipBackward": {
@@ -5512,14 +5350,12 @@
     "names": {
       "web": [
         "MediaSkipBackward"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3409
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaSkipForward": {
@@ -5529,14 +5365,12 @@
     "names": {
       "web": [
         "MediaSkipForward"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3410
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaStepBackward": {
@@ -5546,14 +5380,12 @@
     "names": {
       "web": [
         "MediaStepBackward"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3411
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaStepForward": {
@@ -5563,14 +5395,12 @@
     "names": {
       "web": [
         "MediaStepForward"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3412
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaTopMenu": {
@@ -5580,14 +5410,12 @@
     "names": {
       "web": [
         "MediaTopMenu"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3413
-      ],
-      "gtk": []
+      ]
     }
   },
   "navigateIn": {
@@ -5597,14 +5425,12 @@
     "names": {
       "web": [
         "NavigateIn"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3414
-      ],
-      "gtk": []
+      ]
     }
   },
   "navigateNext": {
@@ -5614,14 +5440,12 @@
     "names": {
       "web": [
         "NavigateNext"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3415
-      ],
-      "gtk": []
+      ]
     }
   },
   "navigateOut": {
@@ -5631,14 +5455,12 @@
     "names": {
       "web": [
         "NavigateOut"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3416
-      ],
-      "gtk": []
+      ]
     }
   },
   "navigatePrevious": {
@@ -5648,14 +5470,12 @@
     "names": {
       "web": [
         "NavigatePrevious"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3417
-      ],
-      "gtk": []
+      ]
     }
   },
   "pairing": {
@@ -5665,14 +5485,12 @@
     "names": {
       "web": [
         "Pairing"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3418
-      ],
-      "gtk": []
+      ]
     }
   },
   "mediaClose": {
@@ -5682,14 +5500,12 @@
     "names": {
       "web": [
         "MediaClose"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3419
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioBassBoostToggle": {
@@ -5699,14 +5515,12 @@
     "names": {
       "web": [
         "AudioBassBoostToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3586
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioTrebleDown": {
@@ -5716,14 +5530,12 @@
     "names": {
       "web": [
         "AudioTrebleDown"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3588
-      ],
-      "gtk": []
+      ]
     }
   },
   "audioTrebleUp": {
@@ -5733,14 +5545,12 @@
     "names": {
       "web": [
         "AudioTrebleUp"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3589
-      ],
-      "gtk": []
+      ]
     }
   },
   "microphoneToggle": {
@@ -5750,14 +5560,12 @@
     "names": {
       "web": [
         "MicrophoneToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3590
-      ],
-      "gtk": []
+      ]
     }
   },
   "microphoneVolumeDown": {
@@ -5767,14 +5575,12 @@
     "names": {
       "web": [
         "MicrophoneVolumeDown"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3591
-      ],
-      "gtk": []
+      ]
     }
   },
   "microphoneVolumeUp": {
@@ -5784,14 +5590,12 @@
     "names": {
       "web": [
         "MicrophoneVolumeUp"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3592
-      ],
-      "gtk": []
+      ]
     }
   },
   "microphoneVolumeMute": {
@@ -5801,14 +5605,12 @@
     "names": {
       "web": [
         "MicrophoneVolumeMute"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3593
-      ],
-      "gtk": []
+      ]
     }
   },
   "speechCorrectionList": {
@@ -5818,14 +5620,12 @@
     "names": {
       "web": [
         "SpeechCorrectionList"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3841
-      ],
-      "gtk": []
+      ]
     }
   },
   "speechInputToggle": {
@@ -5835,14 +5635,12 @@
     "names": {
       "web": [
         "SpeechInputToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         3842
-      ],
-      "gtk": []
+      ]
     }
   },
   "appSwitch": {
@@ -5852,14 +5650,12 @@
     "names": {
       "web": [
         "AppSwitch"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4097
-      ],
-      "gtk": []
+      ]
     }
   },
   "call": {
@@ -5869,14 +5665,12 @@
     "names": {
       "web": [
         "Call"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4098
-      ],
-      "gtk": []
+      ]
     }
   },
   "cameraFocus": {
@@ -5886,14 +5680,12 @@
     "names": {
       "web": [
         "CameraFocus"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4099
-      ],
-      "gtk": []
+      ]
     }
   },
   "endCall": {
@@ -5903,14 +5695,12 @@
     "names": {
       "web": [
         "EndCall"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4100
-      ],
-      "gtk": []
+      ]
     }
   },
   "goBack": {
@@ -5920,14 +5710,12 @@
     "names": {
       "web": [
         "GoBack"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4101
-      ],
-      "gtk": []
+      ]
     }
   },
   "goHome": {
@@ -5937,14 +5725,12 @@
     "names": {
       "web": [
         "GoHome"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4102
-      ],
-      "gtk": []
+      ]
     }
   },
   "headsetHook": {
@@ -5954,14 +5740,12 @@
     "names": {
       "web": [
         "HeadsetHook"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4103
-      ],
-      "gtk": []
+      ]
     }
   },
   "lastNumberRedial": {
@@ -5971,14 +5755,12 @@
     "names": {
       "web": [
         "LastNumberRedial"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4104
-      ],
-      "gtk": []
+      ]
     }
   },
   "notification": {
@@ -5988,14 +5770,12 @@
     "names": {
       "web": [
         "Notification"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4105
-      ],
-      "gtk": []
+      ]
     }
   },
   "mannerMode": {
@@ -6005,14 +5785,12 @@
     "names": {
       "web": [
         "MannerMode"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4106
-      ],
-      "gtk": []
+      ]
     }
   },
   "voiceDial": {
@@ -6022,14 +5800,12 @@
     "names": {
       "web": [
         "VoiceDial"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4107
-      ],
-      "gtk": []
+      ]
     }
   },
   "tV3DMode": {
@@ -6039,14 +5815,12 @@
     "names": {
       "web": [
         "TV3DMode"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4353
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvAntennaCable": {
@@ -6056,14 +5830,12 @@
     "names": {
       "web": [
         "TVAntennaCable"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4354
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvAudioDescription": {
@@ -6073,14 +5845,12 @@
     "names": {
       "web": [
         "TVAudioDescription"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4355
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvAudioDescriptionMixDown": {
@@ -6090,14 +5860,12 @@
     "names": {
       "web": [
         "TVAudioDescriptionMixDown"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4356
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvAudioDescriptionMixUp": {
@@ -6107,14 +5875,12 @@
     "names": {
       "web": [
         "TVAudioDescriptionMixUp"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4357
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvContentsMenu": {
@@ -6124,14 +5890,12 @@
     "names": {
       "web": [
         "TVContentsMenu"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4358
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvDataService": {
@@ -6141,14 +5905,12 @@
     "names": {
       "web": [
         "TVDataService"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4359
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputComponent1": {
@@ -6158,14 +5920,12 @@
     "names": {
       "web": [
         "TVInputComponent1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4360
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputComponent2": {
@@ -6175,14 +5935,12 @@
     "names": {
       "web": [
         "TVInputComponent2"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4361
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputComposite1": {
@@ -6192,14 +5950,12 @@
     "names": {
       "web": [
         "TVInputComposite1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4362
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputComposite2": {
@@ -6209,14 +5965,12 @@
     "names": {
       "web": [
         "TVInputComposite2"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4363
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputHDMI1": {
@@ -6226,14 +5980,12 @@
     "names": {
       "web": [
         "TVInputHDMI1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4364
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputHDMI2": {
@@ -6243,14 +5995,12 @@
     "names": {
       "web": [
         "TVInputHDMI2"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4365
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputHDMI3": {
@@ -6260,14 +6010,12 @@
     "names": {
       "web": [
         "TVInputHDMI3"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4366
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputHDMI4": {
@@ -6277,14 +6025,12 @@
     "names": {
       "web": [
         "TVInputHDMI4"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4367
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvInputVGA1": {
@@ -6294,14 +6040,12 @@
     "names": {
       "web": [
         "TVInputVGA1"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4368
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvMediaContext": {
@@ -6311,14 +6055,12 @@
     "names": {
       "web": [
         "TVMediaContext"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4369
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvNetwork": {
@@ -6328,14 +6070,12 @@
     "names": {
       "web": [
         "TVNetwork"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4370
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvNumberEntry": {
@@ -6345,14 +6085,12 @@
     "names": {
       "web": [
         "TVNumberEntry"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4371
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvRadioService": {
@@ -6362,14 +6100,12 @@
     "names": {
       "web": [
         "TVRadioService"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4372
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvSatellite": {
@@ -6379,14 +6115,12 @@
     "names": {
       "web": [
         "TVSatellite"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4373
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvSatelliteBS": {
@@ -6396,14 +6130,12 @@
     "names": {
       "web": [
         "TVSatelliteBS"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4374
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvSatelliteCS": {
@@ -6413,14 +6145,12 @@
     "names": {
       "web": [
         "TVSatelliteCS"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4375
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvSatelliteToggle": {
@@ -6430,14 +6160,12 @@
     "names": {
       "web": [
         "TVSatelliteToggle"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4376
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvTerrestrialAnalog": {
@@ -6447,14 +6175,12 @@
     "names": {
       "web": [
         "TVTerrestrialAnalog"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4377
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvTerrestrialDigital": {
@@ -6464,14 +6190,12 @@
     "names": {
       "web": [
         "TVTerrestrialDigital"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4378
-      ],
-      "gtk": []
+      ]
     }
   },
   "tvTimer": {
@@ -6481,14 +6205,12 @@
     "names": {
       "web": [
         "TVTimer"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4379
-      ],
-      "gtk": []
+      ]
     }
   },
   "key11": {
@@ -6498,14 +6220,12 @@
     "names": {
       "web": [
         "Key11"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4609
-      ],
-      "gtk": []
+      ]
     }
   },
   "key12": {
@@ -6515,14 +6235,12 @@
     "names": {
       "web": [
         "Key12"
-      ],
-      "gtk": []
+      ]
     },
     "values": {
       "web": [
         4610
-      ],
-      "gtk": []
+      ]
     }
   },
   "numpadEnter": {
@@ -6530,13 +6248,11 @@
     "english": "Numpad Enter",
     "value": 8589934605,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Enter"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65421
       ]
@@ -6546,42 +6262,34 @@
     "constant": "numpadParenLeft",
     "english": "Numpad Paren Left",
     "value": 8589934632,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "numpadParenRight": {
     "constant": "numpadParenRight",
     "english": "Numpad Paren Right",
     "value": 8589934633,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "numpadMultiply": {
     "constant": "numpadMultiply",
     "english": "Numpad Multiply",
     "value": 8589934634,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Multiply"
+      ],
+      "windows": [
+        "MULTIPLY"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65450
+      ],
+      "windows": [
+        106
       ]
     }
   },
@@ -6590,15 +6298,19 @@
     "english": "Numpad Add",
     "value": 8589934635,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Add"
+      ],
+      "windows": [
+        "ADD"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65451
+      ],
+      "windows": [
+        107
       ]
     }
   },
@@ -6606,29 +6318,27 @@
     "constant": "numpadComma",
     "english": "Numpad Comma",
     "value": 8589934636,
-    "names": {
-      "web": [],
-      "gtk": []
-    },
-    "values": {
-      "web": [],
-      "gtk": []
-    }
+    "names": {},
+    "values": {}
   },
   "numpadSubtract": {
     "constant": "numpadSubtract",
     "english": "Numpad Subtract",
     "value": 8589934637,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Subtract"
+      ],
+      "windows": [
+        "SUBTRACT"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65453
+      ],
+      "windows": [
+        109
       ]
     }
   },
@@ -6637,15 +6347,19 @@
     "english": "Numpad Decimal",
     "value": 8589934638,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Delete"
+      ],
+      "windows": [
+        "DECIMAL"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65439
+      ],
+      "windows": [
+        110
       ]
     }
   },
@@ -6654,15 +6368,19 @@
     "english": "Numpad Divide",
     "value": 8589934639,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Divide"
+      ],
+      "windows": [
+        "DIVIDE"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65455
+      ],
+      "windows": [
+        111
       ]
     }
   },
@@ -6671,17 +6389,21 @@
     "english": "Numpad 0",
     "value": 8589934640,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Insert",
         "KP_0"
+      ],
+      "windows": [
+        "NUMPAD0"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65438,
         65456
+      ],
+      "windows": [
+        96
       ]
     }
   },
@@ -6690,17 +6412,21 @@
     "english": "Numpad 1",
     "value": 8589934641,
     "names": {
-      "web": [],
       "gtk": [
         "KP_End",
         "KP_1"
+      ],
+      "windows": [
+        "NUMPAD1"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65436,
         65457
+      ],
+      "windows": [
+        97
       ]
     }
   },
@@ -6709,17 +6435,21 @@
     "english": "Numpad 2",
     "value": 8589934642,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Down",
         "KP_2"
+      ],
+      "windows": [
+        "NUMPAD2"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65433,
         65458
+      ],
+      "windows": [
+        98
       ]
     }
   },
@@ -6728,17 +6458,21 @@
     "english": "Numpad 3",
     "value": 8589934643,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Page_Down",
         "KP_3"
+      ],
+      "windows": [
+        "NUMPAD3"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65435,
         65459
+      ],
+      "windows": [
+        99
       ]
     }
   },
@@ -6747,17 +6481,21 @@
     "english": "Numpad 4",
     "value": 8589934644,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Left",
         "KP_4"
+      ],
+      "windows": [
+        "NUMPAD4"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65430,
         65460
+      ],
+      "windows": [
+        100
       ]
     }
   },
@@ -6766,15 +6504,19 @@
     "english": "Numpad 5",
     "value": 8589934645,
     "names": {
-      "web": [],
       "gtk": [
         "KP_5"
+      ],
+      "windows": [
+        "NUMPAD5"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65461
+      ],
+      "windows": [
+        101
       ]
     }
   },
@@ -6783,17 +6525,21 @@
     "english": "Numpad 6",
     "value": 8589934646,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Right",
         "KP_6"
+      ],
+      "windows": [
+        "NUMPAD6"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65432,
         65462
+      ],
+      "windows": [
+        102
       ]
     }
   },
@@ -6802,17 +6548,21 @@
     "english": "Numpad 7",
     "value": 8589934647,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Home",
         "KP_7"
+      ],
+      "windows": [
+        "NUMPAD7"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65429,
         65463
+      ],
+      "windows": [
+        103
       ]
     }
   },
@@ -6821,17 +6571,21 @@
     "english": "Numpad 8",
     "value": 8589934648,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Up",
         "KP_8"
+      ],
+      "windows": [
+        "NUMPAD8"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65431,
         65464
+      ],
+      "windows": [
+        104
       ]
     }
   },
@@ -6840,17 +6594,21 @@
     "english": "Numpad 9",
     "value": 8589934649,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Page_Up",
         "KP_9"
+      ],
+      "windows": [
+        "NUMPAD9"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65434,
         65465
+      ],
+      "windows": [
+        105
       ]
     }
   },
@@ -6859,15 +6617,19 @@
     "english": "Numpad Equal",
     "value": 8589934653,
     "names": {
-      "web": [],
       "gtk": [
         "KP_Equal"
+      ],
+      "windows": [
+        "OEM_NEC_EQUAL"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65469
+      ],
+      "windows": [
+        146
       ]
     }
   },
@@ -6876,15 +6638,19 @@
     "english": "Alt Left",
     "value": 12884902146,
     "names": {
-      "web": [],
       "gtk": [
         "Alt_L"
+      ],
+      "windows": [
+        "LMENU"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65513
+      ],
+      "windows": [
+        164
       ]
     }
   },
@@ -6893,15 +6659,21 @@
     "english": "Control Left",
     "value": 12884902149,
     "names": {
-      "web": [],
       "gtk": [
         "Control_L"
+      ],
+      "windows": [
+        "CONTROL",
+        "LCONTROL"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65507
+      ],
+      "windows": [
+        17,
+        162
       ]
     }
   },
@@ -6910,15 +6682,19 @@
     "english": "Meta Left",
     "value": 12884902153,
     "names": {
-      "web": [],
       "gtk": [
         "Meta_L"
+      ],
+      "windows": [
+        "LWIN"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65511
+      ],
+      "windows": [
+        91
       ]
     }
   },
@@ -6927,15 +6703,21 @@
     "english": "Shift Left",
     "value": 12884902157,
     "names": {
-      "web": [],
       "gtk": [
         "Shift_L"
+      ],
+      "windows": [
+        "SHIFT",
+        "LSHIFT"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65505
+      ],
+      "windows": [
+        16,
+        160
       ]
     }
   },
@@ -6944,15 +6726,19 @@
     "english": "Alt Right",
     "value": 17179869442,
     "names": {
-      "web": [],
       "gtk": [
         "Alt_R"
+      ],
+      "windows": [
+        "RMENU"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65514
+      ],
+      "windows": [
+        165
       ]
     }
   },
@@ -6961,15 +6747,19 @@
     "english": "Control Right",
     "value": 17179869445,
     "names": {
-      "web": [],
       "gtk": [
         "Control_R"
+      ],
+      "windows": [
+        "RCONTROL"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65508
+      ],
+      "windows": [
+        163
       ]
     }
   },
@@ -6978,15 +6768,19 @@
     "english": "Meta Right",
     "value": 17179869449,
     "names": {
-      "web": [],
       "gtk": [
         "Meta_R"
+      ],
+      "windows": [
+        "RWIN"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65512
+      ],
+      "windows": [
+        92
       ]
     }
   },
@@ -6995,15 +6789,19 @@
     "english": "Shift Right",
     "value": 17179869453,
     "names": {
-      "web": [],
       "gtk": [
         "Shift_R"
+      ],
+      "windows": [
+        "RSHIFT"
       ]
     },
     "values": {
-      "web": [],
       "gtk": [
         65506
+      ],
+      "windows": [
+        161
       ]
     }
   }

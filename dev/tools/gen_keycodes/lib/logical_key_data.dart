@@ -21,6 +21,13 @@ class _ModifierPair {
   final String right;
 }
 
+Map<String, List<String>> parseMapOfListOfString(String jsonString) {
+  final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
+  return dynamicMap.map<String, List<String>>((String key, List<dynamic> value) {
+    return MapEntry<String, List<String>>(key, value.cast<String>());
+  });
+}
+
 /// The data structure used to manage keyboard key entries.
 ///
 /// The main constructor parses the given input data into the data structure.
@@ -36,17 +43,16 @@ class LogicalKeyData {
     String chromiumKeys,
     String gtkKeyCodeHeader,
     String gtkNameMap,
+    String windowsKeyCodeHeader,
+    String windowsNameMap,
   )   : assert(chromiumKeys != null),
         assert(gtkKeyCodeHeader != null),
         assert(gtkNameMap != null) {
     _readPrintables(data);
     _readHidEntries(data, chromiumKeys);
+    _readWindowsKeyCodes(data, windowsKeyCodeHeader, parseMapOfListOfString(windowsNameMap));
     // Cast GTK dom map
-    final Map<String, List<dynamic>> dynamicGtkNames = (json.decode(gtkNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
-    final Map<String, List<String>> nameToGtkName = dynamicGtkNames.map<String, List<String>>((String key, List<dynamic> value) {
-      return MapEntry<String, List<String>>(key, value.cast<String>());
-    });
-    _readGtkKeyCodes(data, gtkKeyCodeHeader, nameToGtkName);
+    _readGtkKeyCodes(data, gtkKeyCodeHeader, parseMapOfListOfString(gtkNameMap));
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) => a.value.value.compareTo(b.value.value)
@@ -77,7 +83,7 @@ class LogicalKeyData {
   /// Keys mapped from their constant names.
   final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
 
-  Map<String, LogicalKeyEntry> _readPrintables(Map<String, LogicalKeyEntry> data) {
+  void _readPrintables(Map<String, LogicalKeyEntry> data) {
     final Map<String, String> unusedNumpad = Map<String, String>.from(printableToNumpads);
 
     printable.forEach((String name, String char) {
@@ -85,18 +91,16 @@ class LogicalKeyData {
       // If it has a numpad counterpart, also add the numpad key.
       if (printableToNumpads.containsKey(char)) {
         final String numpadName = printableToNumpads[char];
-        data[LogicalKeyEntry.computeConstantName(numpadName)] = LogicalKeyEntry(
+        data[LogicalKeyEntry.computeConstantName(numpadName)] = LogicalKeyEntry.fromName(
           value: char.codeUnitAt(0) + kNumpadPlane,
-          commentName: LogicalKeyEntry.computeCommentName(numpadName),
-          constantName: LogicalKeyEntry.computeConstantName(numpadName),
+          name: numpadName,
         );
         unusedNumpad.remove(char);
       }
 
-      data[LogicalKeyEntry.computeConstantName(name)] = LogicalKeyEntry(
+      data[LogicalKeyEntry.computeConstantName(name)] = LogicalKeyEntry.fromName(
         value: char.codeUnitAt(0),
-        commentName: LogicalKeyEntry.computeCommentName(name),
-        constantName: LogicalKeyEntry.computeConstantName(name),
+        name: name,
       );
     });
 
@@ -116,7 +120,6 @@ class LogicalKeyData {
   /// The UNI lines are ignored. Their entries have been included in the
   /// printable file.
   void _readHidEntries(Map<String, LogicalKeyEntry> data, String input) {
-    final List<LogicalKeyEntry> entries = <LogicalKeyEntry>[];
     final RegExp domKeyRegExp = RegExp(
         r'DOM_KEY_(?:UNI|MAP)\s*\(\s*"([^\s]+?)",\s*([^\s]+?),\s*0x([a-fA-F0-9]+)\s*\)',
         multiLine: true);
@@ -132,23 +135,20 @@ class LogicalKeyData {
       // Don't add web names and values; they're solved with locations.
       if (chromeModifiers.containsKey(name)) {
         final _ModifierPair pair = chromeModifiers[name];
-        data[LogicalKeyEntry.computeConstantName(pair.left)] = LogicalKeyEntry(
+        data[LogicalKeyEntry.computeConstantName(pair.left)] = LogicalKeyEntry.fromName(
           value: value + kLeftModifierPlane,
-          commentName: LogicalKeyEntry.computeCommentName(pair.left),
-          constantName: LogicalKeyEntry.computeConstantName(pair.left),
+          name: pair.left,
         );
-        data[LogicalKeyEntry.computeConstantName(pair.right)] = LogicalKeyEntry(
+        data[LogicalKeyEntry.computeConstantName(pair.right)] = LogicalKeyEntry.fromName(
           value: value + kRightModifierPlane,
-          commentName: LogicalKeyEntry.computeCommentName(pair.right),
-          constantName: LogicalKeyEntry.computeConstantName(pair.right),
+          name: pair.right,
         );
         return match.group(0);
       }
 
-      final LogicalKeyEntry entry = data.putIfAbsent(LogicalKeyEntry.computeConstantName(name), () => LogicalKeyEntry(
+      final LogicalKeyEntry entry = data.putIfAbsent(LogicalKeyEntry.computeConstantName(name), () => LogicalKeyEntry.fromName(
         value: value,
-        commentName: LogicalKeyEntry.computeCommentName(name),
-        constantName: LogicalKeyEntry.computeConstantName(name),
+        name: name,
       ));
       entry
         ..webNames.add(name)
@@ -166,7 +166,7 @@ class LogicalKeyData {
     final RegExp definedCodes = RegExp(r'#define GDK_KEY_([a-zA-Z0-9_]+)\s*0x([0-9a-f]+),?');
     final Map<String, String> gtkNameToFlutterName = <String, String>{};
     nameToGtkName.forEach((String flutterName, List<String> gtkNames) {
-      for (String gtkName in gtkNames) {
+      for (final String gtkName in gtkNames) {
         if (gtkNameToFlutterName.containsKey(gtkName)) {
           print('Duplicate GTK logical name $gtkName');
           continue;
@@ -175,26 +175,66 @@ class LogicalKeyData {
       }
     });
 
-    final Map<String, int> replaced = <String, int>{};
-    headerFile.replaceAllMapped(definedCodes, (Match match) {
-      if (match != null) {
-        final String gtkName = match.group(1);
-        final String name = gtkNameToFlutterName[gtkName];
-        final int value = int.parse(match.group(2), radix: 16);
-        if (name == null)
-          return match.group(0);
-
-        final LogicalKeyEntry entry = data[name];
-        if (entry == null) {
-          print('Invalid logical entry by name $name');
-          return match.group(0);
-        }
-        entry
-          ..gtkNames.add(gtkName)
-          ..gtkValues.add(value);
+    for (final Match match in definedCodes.allMatches(headerFile)) {
+      final String gtkName = match.group(1);
+      final String name = gtkNameToFlutterName[gtkName];
+      final int value = int.parse(match.group(2), radix: 16);
+      if (name == null) {
+        // print('Unmapped GTK logical entry $gtkName');
+        continue;
       }
-      return match.group(0);
+
+      final LogicalKeyEntry entry = data[name];
+      if (entry == null) {
+        print('Invalid logical entry by name $name (from GTK $gtkName)');
+        continue;
+      }
+      entry
+        ..gtkNames.add(gtkName)
+        ..gtkValues.add(value);
+    }
+  }
+
+  void _readWindowsKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
+    // The mapping from the Flutter name (e.g. "enter") to the Windows name (e.g.
+    // "RETURN").
+    final Map<String, String> nameToFlutterName = <String, String>{};
+    nameMap.forEach((String flutterName, List<String> windowsNames) {
+      for (final String windowsName in windowsNames) {
+        if (nameToFlutterName.containsKey(windowsName)) {
+          print('Duplicate Windows logical name $windowsName');
+          continue;
+        }
+        nameToFlutterName[windowsName] = flutterName;
+      }
     });
+
+    final RegExp definedCodes = RegExp(r'define VK_([A-Z0-9_]+)\s*([A-Z0-9_x]+),?');
+    for (final Match match in definedCodes.allMatches(headerFile)) {
+      final String windowsName = match.group(1);
+      final String name = nameToFlutterName[windowsName];
+      final int value = int.tryParse(match.group(2));
+      if (name == null) {
+        print('Unmapped Windows logical entry $windowsName');
+        continue;
+      }
+      final LogicalKeyEntry entry = data[name];
+      if (entry == null) {
+        print('Invalid logical entry by name $name (from Windows $windowsName)');
+        continue;
+      }
+      entry
+        ..windowsNames.add(windowsName)
+        ..windowsValues.add(value);
+    }
+    // // The header doesn't explicitly define the [0-9] and [A-Z], but they mention that the range
+    // // is equivalent to the ASCII value.
+    // for (int i = 0x30; i <= 0x39; i++) {
+    //   replaced[String.fromCharCode(i)] = i;
+    // }
+    // for (int i = 0x41; i <= 0x5A; i++) {
+    //   replaced[String.fromCharCode(i)] = i;
+    // }
   }
 
   /// Returns the static map of printable representations.
@@ -242,30 +282,36 @@ class LogicalKeyEntry {
     @required this.value,
     @required this.constantName,
     @required this.commentName,
-    List<String> webNames,
-    List<int> webValues,
-    List<String> gtkNames,
-    List<int> gtkValues,
   })  : assert(constantName != null),
         assert(commentName != null),
         assert(value != null),
-        this.webNames = webNames ?? <String>[],
-        this.webValues = webValues ?? <int>[],
-        this.gtkNames = gtkNames ?? <String>[],
-        this.gtkValues = gtkValues ?? <int>[];
+        webNames = <String>[],
+        webValues = <int>[],
+        gtkNames = <String>[],
+        gtkValues = <int>[],
+        windowsNames = <String>[],
+        windowsValues = <int>[];
+
+  LogicalKeyEntry.fromName({
+    @required int value,
+    @required String name,
+  })  : this(
+          value: value,
+          commentName: LogicalKeyEntry.computeCommentName(name),
+          constantName: LogicalKeyEntry.computeConstantName(name),
+        );
 
   /// Populates the key from a JSON map.
-  factory LogicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map) {
-    return LogicalKeyEntry(
-      value: map['value'] as int,
-      constantName: map['constant'] as String,
-      commentName: map['english'] as String,
-      webNames: (map['names']['web'] as List<dynamic>)?.cast<String>(),
-      webValues: (map['values']['web'] as List<dynamic>)?.cast<int>(),
-      gtkNames: (map['names']['gtk'] as List<dynamic>)?.cast<String>(),
-      gtkValues: (map['values']['gtk'] as List<dynamic>)?.cast<int>(),
-    );
-  }
+  LogicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map)
+    : value = map['value'] as int,
+      constantName = map['constant'] as String,
+      commentName = map['english'] as String,
+      webNames = (map['names']['web'] as List<dynamic>)?.cast<String>(),
+      webValues = (map['values']['web'] as List<dynamic>)?.cast<int>(),
+      gtkNames = (map['names']['gtk'] as List<dynamic>)?.cast<String>(),
+      gtkValues = (map['values']['gtk'] as List<dynamic>)?.cast<int>(),
+      windowsNames = (map['names']['windows'] as List<dynamic>)?.cast<String>(),
+      windowsValues = (map['values']['windows'] as List<dynamic>)?.cast<int>();
 
   final int value;
 
@@ -291,21 +337,32 @@ class LogicalKeyEntry {
   /// value.
   final List<int> gtkValues;
 
+  /// The list of names that Windows gives to this key (symbol names minus the
+  /// prefix).
+  final List<String> windowsNames;
+
+  /// The list of Windows key codes matching this key, created by looking up the
+  /// Windows name in the Chromium data, and substituting the Windows key code
+  /// value.
+  final List<int> windowsValues;
+
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
+    return removeEmptyValues(<String, dynamic>{
       'constant': constantName,
       'english': commentName,
       'value': value,
-      'names': <String, dynamic>{
+      'names': removeEmptyValues(<String, dynamic>{
         'web': webNames,
         'gtk': gtkNames,
-      },
-      'values': <String, List<int>>{
+        'windows': windowsNames,
+      }),
+      'values': removeEmptyValues(<String, List<int>>{
         'web': webValues,
         'gtk': gtkValues,
-      },
-    };
+        'windows': windowsValues,
+      }),
+    });
   }
 
   @override
@@ -329,7 +386,7 @@ class LogicalKeyEntry {
   /// name isn't a Dart reserved word (if it is, then it adds the word "Key" to
   /// the end of the name).
   static String computeConstantName(String name) {
-    String result = upperCamelToLowerCamel(_computeConstantNameBase(name));
+    final String result = upperCamelToLowerCamel(_computeConstantNameBase(name));
     if (kDartReservedWords.contains(result)) {
       return '${result}Key';
     }

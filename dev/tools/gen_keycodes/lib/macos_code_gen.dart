@@ -5,9 +5,9 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'mask_constants.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
-import 'mask_constants.dart';
 
 // Map from keys of synonyms.json to macOS's modifier flag constants.
 const Map<String, String> kSynonymToModifierFlag = {
@@ -18,7 +18,7 @@ const Map<String, String> kSynonymToModifierFlag = {
 };
 
 // The name of keys that require special attention.
-const List<String> kSpecialKeys = ['CapsLock'];
+const List<String> kSpecialKeys = <String>['CapsLock'];
 
 String _toConstantVariableName(String variableName) {
   return 'k${variableName[0].toUpperCase()}${variableName.substring(1)}';

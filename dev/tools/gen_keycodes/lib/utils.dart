@@ -156,3 +156,11 @@ void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1,
     fn(it1.current, it2.current);
   }
 }
+
+/// Remove entries whose value `isEmpty` or is null, and return the map.
+///
+/// Will modify the input map.
+Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
+  return map..removeWhere((String key, dynamic value) =>
+      value == null || (value is List<dynamic> && value.isEmpty));
+}

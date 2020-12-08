@@ -143,26 +143,26 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of Windows number pad key codes to logical keys.
   String get windowsNumpadMap {
     final StringBuffer windowsNumPadMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in numpadKeyData) {
-      if (entry.windowsKeyCodes != null){
-        for (final int code in entry.windowsKeyCodes) {
-          windowsNumPadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
-      }
-    }
+    // for (final PhysicalKeyEntry entry in numpadKeyData) {
+    //   if (entry.windowsKeyCodes != null){
+    //     for (final int code in entry.windowsKeyCodes) {
+    //       windowsNumPadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
+    //     }
+    //   }
+    // }
     return windowsNumPadMap.toString().trimRight();
   }
 
   /// This generates the map of Windows key codes to logical keys.
   String get windowsKeyCodeMap {
     final StringBuffer windowsKeyCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
-      if (entry.windowsKeyCodes != null) {
-        for (final int code in entry.windowsKeyCodes) {
-          windowsKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
-      }
-    }
+    // for (final PhysicalKeyEntry entry in keyData.data) {
+    //   if (entry.windowsKeyCodes != null) {
+    //     for (final int code in entry.windowsKeyCodes) {
+    //       windowsKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
+    //     }
+    //   }
+    // }
     return windowsKeyCodeMap.toString().trimRight();
   }
 
