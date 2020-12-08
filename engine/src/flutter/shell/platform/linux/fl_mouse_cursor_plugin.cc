@@ -140,20 +140,13 @@ static void method_call_cb(FlMethodChannel* channel,
   }
 }
 
-static void view_weak_notify_cb(gpointer user_data,
-                                GObject* where_the_object_was) {
-  FlMouseCursorPlugin* self = FL_MOUSE_CURSOR_PLUGIN(user_data);
-  self->view = nullptr;
-}
-
 static void fl_mouse_cursor_plugin_dispose(GObject* object) {
   FlMouseCursorPlugin* self = FL_MOUSE_CURSOR_PLUGIN(object);
 
   g_clear_object(&self->channel);
-  if (self->view != nullptr) {
-    g_object_weak_unref(G_OBJECT(self->view), view_weak_notify_cb, self);
-    self->view = nullptr;
-  }
+  g_object_remove_weak_pointer(G_OBJECT(self->view),
+                               reinterpret_cast<gpointer*>(&(self->view)));
+  self->view = nullptr;
 
   g_clear_pointer(&self->system_cursor_table, g_hash_table_unref);
 
@@ -179,7 +172,10 @@ FlMouseCursorPlugin* fl_mouse_cursor_plugin_new(FlBinaryMessenger* messenger,
   fl_method_channel_set_method_call_handler(self->channel, method_call_cb, self,
                                             nullptr);
   self->view = view;
-  g_object_weak_ref(G_OBJECT(view), view_weak_notify_cb, self);
+  if (view != nullptr) {
+    g_object_add_weak_pointer(G_OBJECT(view),
+                              reinterpret_cast<gpointer*>(&(self->view)));
+  }
 
   return self;
 }
