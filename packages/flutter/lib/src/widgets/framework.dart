@@ -1113,8 +1113,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// Usually starts with true when calling [initState].
   ///
-  /// If [widget] or ancestor widget has [GlobalKey], then active is changed in
-  /// [deactivate] and [activate].
+  /// If the [widget] or one of its ancestors has a [GlobalKey], then active is
+  /// changed in [deactivate] and [activate].
   bool get active => _element?._lifecycleState == _ElementLifecycle.active;
 
   /// Called when this object is inserted into the tree.
@@ -1326,10 +1326,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void deactivate() { }
 
-  /// Called when this object is reactivate.
+  /// Called when this object is reactivated.
   ///
-  /// If [widget] or ancestor widget has GlobalKey possible to call [activate]
-  /// after [deactivate] called.
+  /// If the [widget] or one of its ancestors has a [GlobalKey], it is possible
+  /// for a State to be reactivated after being [deactivate]d, as part of being
+  /// reparented in the tree.
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.activate().
