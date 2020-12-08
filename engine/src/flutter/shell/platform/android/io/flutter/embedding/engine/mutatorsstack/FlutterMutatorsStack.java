@@ -47,6 +47,7 @@ public class FlutterMutatorsStack {
     @Nullable private Matrix matrix;
     @Nullable private Rect rect;
     @Nullable private Path path;
+    @Nullable private float[] radiis;
 
     private FlutterMutatorType type;
 
@@ -58,6 +59,19 @@ public class FlutterMutatorsStack {
     public FlutterMutator(Rect rect) {
       this.type = FlutterMutatorType.CLIP_RECT;
       this.rect = rect;
+    }
+
+    /**
+     * Initialize a clip rrect mutator.
+     *
+     * @param rect the rect of the rrect
+     * @param radiis the radiis of the rrect. Array of 8 values, 4 pairs of [X,Y]. This value cannot
+     *     be null.
+     */
+    public FlutterMutator(Rect rect, float[] radiis) {
+      this.type = FlutterMutatorType.CLIP_RRECT;
+      this.rect = rect;
+      this.radiis = radiis;
     }
 
     /**
@@ -150,6 +164,26 @@ public class FlutterMutatorsStack {
     mutators.add(mutator);
     Path path = new Path();
     path.addRect(new RectF(rect), Path.Direction.CCW);
+    path.transform(finalMatrix);
+    finalClippingPaths.add(path);
+  }
+
+  /**
+   * Push a clipRRect {@link io.flutter.embedding.engine.mutatorsstack.Mutator} to the stack.
+   *
+   * @param left left offset of the rrect.
+   * @param top top offset of the rrect.
+   * @param right right position of the rrect.
+   * @param bottom bottom position of the rrect.
+   * @param radiis the radiis of the rrect. It must be size of 8, including an x and y for each
+   *     corner.
+   */
+  public void pushClipRRect(int left, int top, int right, int bottom, float[] radiis) {
+    Rect rect = new Rect(left, top, right, bottom);
+    FlutterMutator mutator = new FlutterMutator(rect, radiis);
+    mutators.add(mutator);
+    Path path = new Path();
+    path.addRoundRect(new RectF(rect), radiis, Path.Direction.CCW);
     path.transform(finalMatrix);
     finalClippingPaths.add(path);
   }
