@@ -46,6 +46,42 @@ void main() {
     expect(address.port, 9100);
   });
 
+  testWithoutContext('DevtoolsLauncher prints error if exception is thrown during activate', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: logger,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'activate',
+            'devtools',
+          ],
+          stderr: 'Error - could not activate devtools',
+          exitCode: 1,
+        ),
+        FakeCommand(
+            command: const <String>[
+              'pub',
+              'global',
+              'run',
+              'devtools',
+              '--vm-uri=http://127.0.0.1:1234/abcdefg',
+            ],
+            onRun: () {
+              throw const ProcessException('pub', <String>[]);
+            }
+        )
+      ]),
+    );
+
+    await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
+
+    expect(logger.errorText, contains('Error running `pub global activate devtools`:\nError - could not activate devtools'));
+  });
+
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during launch', () async {
     final BufferLogger logger = BufferLogger.test();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
