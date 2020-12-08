@@ -89,7 +89,8 @@ class Square4x4Image {
 
   static List<int> get bytes {
     const int bytesPerChannel = 4;
-    final List<int> result = List<int>(_kWidth * _kWidth * bytesPerChannel);
+    final List<int> result = List<int>.filled(
+        _kWidth * _kWidth * bytesPerChannel, 0);
 
     void fillWithColor(Color color, int min, int max) {
       for (int i = min; i < max; i++) {
