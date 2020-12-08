@@ -723,17 +723,15 @@ class _AppBarState extends State<AppBar> {
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
-    bool? implyLeadingPopButton = previouslyImplyLeadingPopButton;
     if (parentRoute == null) {
-      implyLeadingPopButton = false;
+      previouslyImplyLeadingPopButton = false;
     } else {
-      if (implyLeadingPopButton == null || parentRoute.isActive) {
-        implyLeadingPopButton = parentRoute.canPop;
+      if (previouslyImplyLeadingPopButton == null || parentRoute.isActive) {
+        previouslyImplyLeadingPopButton = parentRoute.canPop;
       }
       // If the route is not active, it is in the middle of being removed. In
       // this case, we should not update the decision.
     }
-    previouslyImplyLeadingPopButton = implyLeadingPopButton;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     final double toolbarHeight = widget.toolbarHeight ?? kToolbarHeight;
@@ -802,7 +800,7 @@ class _AppBarState extends State<AppBar> {
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
-        if (!hasEndDrawer && implyLeadingPopButton)
+        if (!hasEndDrawer && previouslyImplyLeadingPopButton!)
           leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
