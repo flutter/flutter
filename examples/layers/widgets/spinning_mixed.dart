@@ -33,7 +33,7 @@ class Rectangle extends StatelessWidget {
 
 double? value;
 RenderObjectToWidgetElement<RenderBox>? element;
-BuildOwner owner = BuildOwner();
+BuildOwner owner = DefaultBuildOwner();
 void attachWidgetTreeToRenderTree(RenderProxyBox container) {
   element = RenderObjectToWidgetAdapter<RenderBox>(
     container: container,

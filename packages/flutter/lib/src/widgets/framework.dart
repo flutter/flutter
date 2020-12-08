@@ -2986,9 +2986,9 @@ abstract class BuildOwner {
 }
 
 /// Concrete implementation of [BuildOwner] for the widgets library.
-class WidgetsBuildOwner extends BuildOwner {
+class DefaultBuildOwner extends BuildOwner {
   /// Creates an object that manages widgets.
-  WidgetsBuildOwner({ VoidCallback? onBuildScheduled }) : super(
+  DefaultBuildOwner({ VoidCallback? onBuildScheduled }) : super(
     onBuildScheduled: onBuildScheduled,
     focusManager: FocusManager(),
   );
