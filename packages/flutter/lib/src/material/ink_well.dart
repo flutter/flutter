@@ -787,7 +787,19 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void dispose() {
-    _dispose();
+    if (_splashes != null) {
+      final Set<InteractiveInkFeature> splashes = _splashes!;
+      _splashes = null;
+      for (final InteractiveInkFeature splash in splashes)
+        splash.dispose();
+      _currentSplash = null;
+    }
+    assert(_currentSplash == null);
+    for (final _HighlightType highlight in _highlights.keys) {
+      _highlights[highlight]?.dispose();
+      _highlights[highlight] = null;
+    }
+    widget.parentState?.markChildInkResponsePressed(this, false);
     FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
     super.dispose();
   }
@@ -1039,23 +1051,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void activate() {
     _setInkFeature(true);
     super.activate();
-  }
-
-  // dispose splashes and highlights
-  void _dispose() {
-    if (_splashes != null) {
-      final Set<InteractiveInkFeature> splashes = _splashes!;
-      _splashes = null;
-      for (final InteractiveInkFeature splash in splashes)
-        splash.dispose();
-      _currentSplash = null;
-    }
-    assert(_currentSplash == null);
-    for (final _HighlightType highlight in _highlights.keys) {
-      _highlights[highlight]?.dispose();
-      _highlights[highlight] = null;
-    }
-    widget.parentState?.markChildInkResponsePressed(this, false);
   }
 
   bool _isWidgetEnabled(_InkResponseStateWidget widget) {
