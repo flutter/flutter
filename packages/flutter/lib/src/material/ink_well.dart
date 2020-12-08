@@ -1032,7 +1032,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void _setInkFeature(bool visible) {
-    for (final InkFeature? splash in <InkFeature?>[ ...?_splashes, ..._highlights.values ])
+    for (final InkFeature? splash in <InkFeature?>[...?_splashes, ..._highlights.values])
       splash?.visible = visible;
   }
 
