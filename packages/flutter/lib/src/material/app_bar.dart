@@ -1320,7 +1320,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///             children: <Widget>[
 ///               Row(
 ///                 children: <Widget>[
-///                   Text('pinned'),
+///                   const Text('pinned'),
 ///                   Switch(
 ///                     onChanged: (bool val) {
 ///                       setState(() {
@@ -1333,7 +1333,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///               ),
 ///               Row(
 ///                 children: <Widget>[
-///                   Text('snap'),
+///                   const Text('snap'),
 ///                   Switch(
 ///                     onChanged: (bool val) {
 ///                       setState(() {
