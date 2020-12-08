@@ -714,6 +714,7 @@ class _TextSelectionToolbarOverflowButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       type: MaterialType.card,
+      color: const Color(0x00000000),
       child: IconButton(
         // TODO(justinmc): This should be an AnimatedIcon, but
         // AnimatedIcons doesn't yet support arrow_back to more_vert.
