@@ -973,6 +973,7 @@ Future<T?> showDialog<T>({
   Widget? child,
 }) {
   assert(child == null || builder == null);
+  assert(child != null || builder != null);
   assert(barrierDismissible != null);
   assert(useSafeArea != null);
   assert(useRootNavigator != null);
