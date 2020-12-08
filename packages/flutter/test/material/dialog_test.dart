@@ -217,7 +217,7 @@ void main() {
     expect(materialWidget.shape, customBorder);
   });
 
-   testWidgets('showDialog child and builder cannot be simultaneously defined', (WidgetTester tester) async {
+  testWidgets('showDialog child and builder cannot be simultaneously defined', (WidgetTester tester) async {
     late BuildContext currentBuildContext;
     await tester.pumpWidget(
       MaterialApp(
