@@ -512,7 +512,8 @@ class AnimationController extends Animation<double>
       if (this.duration == null && duration == null) {
         throw FlutterError(
           'AnimationController.animateTo() called with no explicit duration and no default duration.\n'
-          'The "duration" property should be set, either in the constructor or later, before '
+          'Either the "duration" argument to the animateTo() method should be provided, or the '
+          '"duration" property should be set, either in the constructor or later, before '
           'calling the animateTo() function.'
         );
       }
@@ -544,7 +545,8 @@ class AnimationController extends Animation<double>
       if (this.duration == null && reverseDuration == null && duration == null) {
         throw FlutterError(
           'AnimationController.animateBack() called with no explicit duration and no default duration or reverseDuration.\n'
-          'The "duration" or "reverseDuration" property should be set, either in the constructor or later, before '
+          'Either the "duration" argument to the animateBack() method should be provided, or the '
+          '"duration" or "reverseDuration" property should be set, either in the constructor or later, before '
           'calling the animateBack() function.'
         );
       }
