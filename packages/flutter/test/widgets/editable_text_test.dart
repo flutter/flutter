@@ -6720,8 +6720,8 @@ void main() {
       }
     });
 
-    testWidgets('Composing range handled correctly when it\'s overflowed.', (WidgetTester tester) async {
-      const String string = '👨‍👩‍012';
+    testWidgets('composing range handled correctly when it\'s overflowed', (WidgetTester tester) async {
+      const String string = '👨‍👩‍👦0123456';
 
       await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
 
@@ -6732,11 +6732,11 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
 
       // Clearing composing range if collapsed.
-      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 5, end: 5)));
+      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 10, end: 10)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
 
       // Clearing composing range if overflowed.
-      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 5, end: 6)));
+      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 10, end: 11)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
