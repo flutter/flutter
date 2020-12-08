@@ -780,7 +780,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Used to paint the scrollbar.
   ///
   /// Can be customized by subclasses to change scrollbar behavior by overriding
-  /// [updateScrollbar].
+  /// [updateScrollbarPainter].
   @protected
   late final ScrollbarPainter scrollbarPainter;
 
