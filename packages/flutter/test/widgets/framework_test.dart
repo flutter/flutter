@@ -1486,18 +1486,14 @@ void main() {
     );
   });
 
-  testWidgets('Custom build owners do not interfere with pointer router or raw key event handler', (WidgetTester tester) async {
+  testWidgets('Can create BuildOwner that does not interfere with pointer router or raw key event handler', (WidgetTester tester) async {
     final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
     final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
     expect(rawKeyEventHandler, isNotNull);
-    _FakeBuilderOwner();
+    BuildOwner(focusManager: _FakeFocusManager());
     expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
-}
-
-class _FakeBuilderOwner extends BuildOwner {
-  _FakeBuilderOwner() : super(focusManager: _FakeFocusManager());
 }
 
 class _FakeFocusManager implements FocusManager {

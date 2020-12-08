@@ -2552,9 +2552,10 @@ abstract class BuildContext {
 /// To assign a build owner to a tree, use the
 /// [RootRenderObjectElement.assignOwner] method on the root element of the
 /// widget tree.
-abstract class BuildOwner {
+class BuildOwner {
   /// Creates an object that manages widgets.
-  BuildOwner({ this.onBuildScheduled, required this.focusManager });
+  BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
+      focusManager = focusManager ?? FocusManager();
 
   /// Called on each build pass when the first buildable element is marked
   /// dirty.
@@ -2589,7 +2590,6 @@ abstract class BuildOwner {
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
-  @mustCallSuper
   void scheduleBuildFor(Element element) {
     assert(element != null);
     assert(element.owner == this);
@@ -2649,7 +2649,6 @@ abstract class BuildOwner {
   /// Whether this widget tree is in the build phase.
   ///
   /// Only valid when asserts are enabled.
-  @nonVirtual
   bool get debugBuilding => _debugBuilding;
   bool _debugBuilding = false;
   Element? _debugCurrentBuildTarget;
@@ -2659,7 +2658,6 @@ abstract class BuildOwner {
   ///
   /// This mechanism is used to ensure that, for instance, [State.dispose] does
   /// not call [State.setState].
-  @mustCallSuper
   void lockState(void callback()) {
     assert(callback != null);
     assert(_debugStateLockLevel >= 0);
@@ -2703,7 +2701,6 @@ abstract class BuildOwner {
   /// [debugPrintBuildScope] to true. This is useful when debugging problems
   /// involving widgets not getting marked dirty, or getting marked dirty too
   /// often.
-  @mustCallSuper
   void buildScope(Element context, [ VoidCallback? callback ]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
@@ -2865,7 +2862,6 @@ abstract class BuildOwner {
   ///
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
-  @mustCallSuper
   void finalizeTree() {
     Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
@@ -2972,7 +2968,6 @@ abstract class BuildOwner {
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
-  @mustCallSuper
   void reassemble(Element root) {
     Timeline.startSync('Dirty Element Tree');
     try {
@@ -2983,15 +2978,6 @@ abstract class BuildOwner {
       Timeline.finishSync();
     }
   }
-}
-
-/// Concrete implementation of [BuildOwner] for the widgets library.
-class DefaultBuildOwner extends BuildOwner {
-  /// Creates an object that manages widgets.
-  DefaultBuildOwner({ VoidCallback? onBuildScheduled }) : super(
-    onBuildScheduled: onBuildScheduled,
-    focusManager: FocusManager(),
-  );
 }
 
 /// An instantiation of a [Widget] at a particular location in the tree.
