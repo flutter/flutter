@@ -249,9 +249,9 @@ class _InkState extends State<Ink> {
   }
 
   @override
-  void activate() {
+  void reactivate() {
     _ink?.visible = true;
-    super.activate();
+    super.reactivate();
   }
 
   @override
