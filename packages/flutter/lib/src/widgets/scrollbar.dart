@@ -1004,7 +1004,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       curve: Curves.easeInOut,
     );
   }
-  
   bool _handleScrollNotification(ScrollNotification notification) {
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent)
@@ -1060,7 +1059,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     return gestures;
   }
-  
   /// Returns true if the provided [Offset] is located over the track of the
   /// [RawScrollbar].
   ///
@@ -1074,7 +1072,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return scrollbarPainter.hitTestInteractive(localOffset)
       && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset);
   }
-  
   /// Returns true if the provided [Offset] is located over the thumb of the
   /// [RawScrollbar].
   @protected
@@ -1085,7 +1082,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
     return scrollbarPainter.hitTestOnlyThumbInteractive(localOffset);
   }
-  
   /// Returns true if the provided [Offset] is located over the track or thumb
   /// of the [RawScrollbar].
   @protected
