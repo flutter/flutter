@@ -5,11 +5,9 @@ A package allows the creation of modular code that cen easily be shared. For exa
 can enable use cases to make network requests, integrate with device APIs, and so on. The minimal
 components of a package include:
 
-**`pubspec.yaml`**
-A metadata file declaring package name, version, author, etc.
+* **`pubspec.yaml`** A metadata file declaring package name, version, author, etc.
 
-**`lib`**
-The lib directory containing the package's public code and minimally contains a single `<package-name>.dart` file.
+* **`lib`** The lib directory containing the package's public code and minimally contains a single `<package-name>.dart` file.
 
 To implement a pure Dart package, you can either add the functionality inside `lib/<package name>.dart` or add 
 the functionality in several files inside the `lib` directory. 
