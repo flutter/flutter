@@ -122,6 +122,7 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_mutators_stack_class = nullptr;
 static jmethodID g_mutators_stack_init_method = nullptr;
 static jmethodID g_mutators_stack_push_transform_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprect_method = nullptr;
+static jmethodID g_mutators_stack_push_cliprrect_method = nullptr;
 
 // Called By Java
 static jlong AttachJNI(JNIEnv* env,
@@ -918,7 +919,15 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       g_mutators_stack_class->obj(), "pushClipRect", "(IIII)V");
   if (g_mutators_stack_push_cliprect_method == nullptr) {
     FML_LOG(ERROR)
-        << "Could not locate FlutterMutatorsStack.pushCilpRect method";
+        << "Could not locate FlutterMutatorsStack.pushClipRect method";
+    return false;
+  }
+
+  g_mutators_stack_push_cliprrect_method = env->GetMethodID(
+      g_mutators_stack_class->obj(), "pushClipRRect", "(IIII[F)V");
+  if (g_mutators_stack_push_cliprect_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushClipRRect method";
     return false;
   }
 
@@ -1288,9 +1297,28 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
             static_cast<int>(rect.right()), static_cast<int>(rect.bottom()));
         break;
       }
+      case clip_rrect: {
+        const SkRRect& rrect = (*iter)->GetRRect();
+        const SkRect& rect = rrect.rect();
+        const SkVector& upper_left = rrect.radii(SkRRect::kUpperLeft_Corner);
+        const SkVector& upper_right = rrect.radii(SkRRect::kUpperRight_Corner);
+        const SkVector& lower_right = rrect.radii(SkRRect::kLowerRight_Corner);
+        const SkVector& lower_left = rrect.radii(SkRRect::kLowerLeft_Corner);
+        SkScalar radiis[8] = {
+            upper_left.x(),  upper_left.y(),  upper_right.x(), upper_right.y(),
+            lower_right.x(), lower_right.y(), lower_left.x(),  lower_left.y(),
+        };
+        fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
+            env, env->NewFloatArray(8));
+        env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_cliprrect_method,
+            (int)rect.left(), (int)rect.top(), (int)rect.right(),
+            (int)rect.bottom(), radiisArray.obj());
+        break;
+      }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
-      case clip_rrect:
       case clip_path:
       case opacity:
         break;
