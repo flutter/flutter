@@ -795,9 +795,13 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       _currentSplash = null;
     }
     assert(_currentSplash == null);
-    for (final _HighlightType highlight in _highlights.keys) {
-      _highlights[highlight]?.dispose();
-      _highlights[highlight] = null;
+    final List<InkHighlight?> inkHighlights = _highlights.keys.fold<List<InkHighlight?>>(<InkHighlight?>[], (List<InkHighlight?> inkHighlights, _HighlightType type) {
+      inkHighlights.add(_highlights[type]);
+      _highlights[type] = null;
+      return inkHighlights;
+    });
+    for (final InkHighlight? highlight in inkHighlights) {
+      highlight?.dispose();
     }
     widget.parentState?.markChildInkResponsePressed(this, false);
     FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
@@ -837,10 +841,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void updateHighlight(_HighlightType type, { required bool value, bool callOnHover = true }) {
     final InkHighlight? highlight = _highlights[type];
     void handleInkRemoval() {
-      assert(_highlights[type] != null);
+      // assert(_highlights[type] != null);
       _highlights[type] = null;
-      if (active)
-        updateKeepAlive();
+      updateKeepAlive();
     }
 
     if (type == _HighlightType.pressed) {
@@ -1043,9 +1046,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   @override
-  void activate() {
+  void reactivate() {
     _setInkFeature(true);
-    super.activate();
+    super.reactivate();
   }
 
   bool _isWidgetEnabled(_InkResponseStateWidget widget) {

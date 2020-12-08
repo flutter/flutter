@@ -1114,7 +1114,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Usually starts with true when calling [initState].
   ///
   /// If the [widget] or one of its ancestors has a [GlobalKey], then active is
-  /// changed in [deactivate] and [activate].
+  /// changed in [deactivate] and [reactivate].
   bool get active => _element?._lifecycleState == _ElementLifecycle.active;
 
   /// Called when this object is inserted into the tree.
@@ -1336,7 +1336,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// super.activate().
   @protected
   @mustCallSuper
-  void activate() { }
+  void reactivate() { }
 
   /// Called when this object is removed from the tree permanently.
   ///
@@ -4911,7 +4911,7 @@ class StatefulElement extends ComponentElement {
 
   @override
   void activate() {
-    state.activate();
+    state.reactivate();
     super.activate();
     // Since the State could have observed the deactivate() and thus disposed of
     // resources allocated in the build method, we have to rebuild the widget
