@@ -451,6 +451,7 @@ void main() {
       expect(theme.barBackgroundColor, isSameColorAs(const Color(0xF0F9F9F9)));
       expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
       expect(theme.textTheme.textStyle.fontSize, 17.0);
+      expect(theme.textTheme.textStyle.color, isSameColorAs(CupertinoColors.label.color));
     });
 
     testWidgets('Dark theme has defaults', (WidgetTester tester) async {
@@ -463,6 +464,7 @@ void main() {
       expect(theme.barBackgroundColor, isSameColorAs(const Color(0xF01D1D1D)));
       expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
       expect(theme.textTheme.textStyle.fontSize, 17.0);
+      expect(theme.textTheme.textStyle.color, isSameColorAs(CupertinoColors.label.darkColor));
     });
 
     testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
