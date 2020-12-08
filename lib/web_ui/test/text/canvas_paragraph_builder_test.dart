@@ -35,7 +35,22 @@ void testMain() {
     expect(span, isA<FlatTextSpan>());
     final FlatTextSpan textSpan = span as FlatTextSpan;
     expect(textSpan.textOf(paragraph), 'Hello');
-    expect(textSpan.style, TextStyle(fontSize: 13.0));
+    expect(textSpan.style, styleWithDefaults(fontSize: 13.0));
+  });
+
+  test('Correct defaults', () {
+    final EngineParagraphStyle style = EngineParagraphStyle();
+    final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
+
+    builder.addText('Hello');
+
+    final CanvasParagraph paragraph = builder.build();
+    expect(paragraph.paragraphStyle, style);
+    expect(paragraph.toPlainText(), 'Hello');
+    expect(paragraph.spans, hasLength(1));
+
+    final FlatTextSpan textSpan = paragraph.spans.single as FlatTextSpan;
+    expect(textSpan.style, styleWithDefaults());
   });
 
   test('Builds a single-span paragraph with complex styles', () {
@@ -59,7 +74,7 @@ void testMain() {
     expect(span.textOf(paragraph), 'Hello');
     expect(
       span.style,
-      TextStyle(
+      styleWithDefaults(
         height: 1.5,
         fontSize: 9.0,
         fontWeight: FontWeight.bold,
@@ -87,7 +102,7 @@ void testMain() {
     expect(hello.textOf(paragraph), 'Hello');
     expect(
       hello.style,
-      TextStyle(
+      styleWithDefaults(
         fontSize: 13.0,
         fontWeight: FontWeight.bold,
       ),
@@ -97,7 +112,7 @@ void testMain() {
     expect(world.textOf(paragraph), ' world');
     expect(
       world.style,
-      TextStyle(
+      styleWithDefaults(
         fontSize: 13.0,
         fontStyle: FontStyle.italic,
       ),
@@ -125,14 +140,18 @@ void testMain() {
     expect(hello.textOf(paragraph), 'Hello');
     expect(
       hello.style,
-      TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, height: 2.0),
+      styleWithDefaults(
+        fontSize: 13.0,
+        fontWeight: FontWeight.bold,
+        height: 2.0,
+      ),
     );
 
     final FlatTextSpan world = paragraph.spans[1] as FlatTextSpan;
     expect(world.textOf(paragraph), ' world');
     expect(
       world.style,
-      TextStyle(
+      styleWithDefaults(
         fontSize: 13.0,
         fontWeight: FontWeight.bold,
         fontStyle: FontStyle.italic,
@@ -143,11 +162,31 @@ void testMain() {
     expect(bang.textOf(paragraph), '!');
     expect(
       bang.style,
-      TextStyle(
+      styleWithDefaults(
         fontSize: 13.0,
         fontWeight: FontWeight.normal,
         fontStyle: FontStyle.italic,
       ),
     );
   });
+}
+
+TextStyle styleWithDefaults({
+  Color color = const Color(0xFFFF0000),
+  String fontFamily = DomRenderer.defaultFontFamily,
+  double fontSize = DomRenderer.defaultFontSize,
+  FontWeight? fontWeight,
+  FontStyle? fontStyle,
+  double? height,
+  double? letterSpacing,
+}) {
+  return TextStyle(
+    color: color,
+    fontFamily: fontFamily,
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    fontStyle: fontStyle,
+    height: height,
+    letterSpacing: letterSpacing,
+  );
 }
