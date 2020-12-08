@@ -46,7 +46,12 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       return;
     }
 
+    final Status status = _logger.startProgress(
+      'Activating Dart DevTools...',
+    );
     try {
+      // TODO(kenz): https://github.com/dart-lang/pub/issues/2791 - calling `pub
+      // global activate` adds ~ 4.5 seconds of latency.
       final io.ProcessResult _devToolsActivateProcess = await _processManager.run(<String>[
         _pubExecutable,
         'global',
@@ -54,10 +59,12 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'devtools'
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
+        status.cancel();
         _logger.printError('Error running `pub global activate '
             'devtools`:\n${_devToolsActivateProcess.stderr}');
         return;
       }
+      status.stop();
 
       _devToolsProcess = await _processManager.start(<String>[
         _pubExecutable,
@@ -91,6 +98,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .listen(_logger.printError);
       _devToolsUri = await completer.future;
     } on Exception catch (e, st) {
+      status.cancel();
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
   }
