@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -625,6 +627,19 @@ void main() {
     const double scrollAmount = 10.0;
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        // Drag color
+        color: const Color(0xFF616161),
+      ),
+    );
+
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
     await dragScrollbarGesture.up();
@@ -641,6 +656,113 @@ void main() {
           const Radius.circular(8.0),
         ),
         color: const Color(0xFFE0E0E0),
+      ),
+    );
+  });
+
+  testWidgets('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0xFFE0E0E0),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        // Hover color
+        color: const Color(0xFF757575),
+      ),
+    );
+  });
+
+  testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            isAlwaysShown: true,
+            showTrackOnHover: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0xFFE0E0E0),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pump();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(788.0, 0.0, 800.0, 600.0),
+          color: const Color(0xFF424242).withOpacity(0.04),
+        )
+        ..line(
+          p1: const Offset(788.0, 0.0),
+          p2: const Offset(788.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0xFFE0E0E0),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+            const Radius.circular(8.0),
+          ),
+          // Hover color
+          color: const Color(0xFF757575),
       ),
     );
   });

@@ -92,7 +92,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
       if (states.contains(MaterialState.dragged))
         return const Color(0xFF616161);
 
-      // If the track is visible, the thumb color animation is ignored.
+      // If the track is visible, the thumb color hover animation is ignored and
+      // changes immediately.
       if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
         return const Color(0xFF757575);
 
@@ -173,11 +174,11 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position)) {
-      // Pointer exited hovering the scrollbar
+      // Pointer is hovering over the scrollbar
       setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();
     } else if (_hoverIsActive) {
-      // Pointer is not over painted scrollbar.
+      // Pointer was, but is no longer over painted scrollbar.
       setState(() { _hoverIsActive = false; });
       _hoverAnimationController.reverse();
     }
