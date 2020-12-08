@@ -11,7 +11,6 @@ import 'package:ui/ui.dart' as ui;
 
 import 'layout_service_helper.dart';
 
-const bool skipForceBreak = true;
 const bool skipTextAlign = true;
 const bool skipWordSpacing = true;
 
@@ -147,6 +146,17 @@ void testMain() async {
       l('k lm', 10, 14, hardBreak: true, width: 40.0, left: 0.0),
     ]);
 
+    // Constraints enough only for "abcdef" but not for the trailing space.
+    paragraph = plain(ahemStyle, 'abcdef gh')..layout(constrain(60.0));
+    expect(paragraph.maxIntrinsicWidth, 90);
+    expect(paragraph.minIntrinsicWidth, 60);
+    expect(paragraph.width, 60);
+    // expect(paragraph.height, 20);
+    expectLines(paragraph, [
+      l('abcdef ', 0, 7, hardBreak: false, width: 60.0, left: 0.0),
+      l('gh', 7, 9, hardBreak: true, width: 20.0, left: 0.0),
+    ]);
+
     // Constraints aren't enough even for a single character. In this case,
     // we show a minimum of one character per line.
     paragraph = plain(ahemStyle, 'AA')..layout(constrain(8.0));
@@ -183,7 +193,7 @@ void testMain() async {
       l('A', 2, 4, hardBreak: true, width: 10.0, left: 0.0),
       l('', 4, 4, hardBreak: true, width: 0.0, left: 0.0),
     ]);
-  }, skip: skipForceBreak);
+  });
 
   test('uses multi-line for text that contains new-line', () {
     final CanvasParagraph paragraph = plain(ahemStyle, '12\n34')
@@ -315,16 +325,14 @@ void testMain() async {
       l('defg', 8, 12, hardBreak: true, width: 40.0, left: 0.0),
     ]);
 
-    if (!skipForceBreak) {
-      // Very long text.
-      paragraph = plain(ahemStyle, 'AAAAAAAAAAAA')..layout(constrain(50.0));
-      expect(paragraph.minIntrinsicWidth, 120);
-      expectLines(paragraph, [
-        l('AAAAA', 0, 5, hardBreak: false, width: 50.0, left: 0.0),
-        l('AAAAA', 5, 10, hardBreak: false, width: 50.0, left: 0.0),
-        l('AA', 10, 12, hardBreak: true, width: 20.0, left: 0.0),
-      ]);
-    }
+    // Very long text.
+    paragraph = plain(ahemStyle, 'AAAAAAAAAAAA')..layout(constrain(50.0));
+    expect(paragraph.minIntrinsicWidth, 120);
+    expectLines(paragraph, [
+      l('AAAAA', 0, 5, hardBreak: false, width: 50.0, left: 0.0),
+      l('AAAAA', 5, 10, hardBreak: false, width: 50.0, left: 0.0),
+      l('AA', 10, 12, hardBreak: true, width: 20.0, left: 0.0),
+    ]);
   });
 
   test('maxIntrinsicWidth', () {
@@ -372,16 +380,14 @@ void testMain() async {
       l('def   ', 5, 11, hardBreak: true, width: 30.0, left: 0.0),
     ]);
 
-    if (!skipForceBreak) {
-      // Very long text.
-      paragraph = plain(ahemStyle, 'AAAAAAAAAAAA')..layout(constrain(50.0));
-      expect(paragraph.maxIntrinsicWidth, 120);
-      expectLines(paragraph, [
-        l('AAAAA', 0, 5, hardBreak: false, width: 50.0, left: 0.0),
-        l('AAAAA', 5, 10, hardBreak: false, width: 50.0, left: 0.0),
-        l('AA', 10, 12, hardBreak: true, width: 20.0, left: 0.0),
-      ]);
-    }
+    // Very long text.
+    paragraph = plain(ahemStyle, 'AAAAAAAAAAAA')..layout(constrain(50.0));
+    expect(paragraph.maxIntrinsicWidth, 120);
+    expectLines(paragraph, [
+      l('AAAAA', 0, 5, hardBreak: false, width: 50.0, left: 0.0),
+      l('AAAAA', 5, 10, hardBreak: false, width: 50.0, left: 0.0),
+      l('AA', 10, 12, hardBreak: true, width: 20.0, left: 0.0),
+    ]);
   });
 
   test('respects text overflow', () {
@@ -416,6 +422,17 @@ void testMain() async {
     expectLines(longTextShortPrefix, [
       l('AAA', 0, 4, hardBreak: true, width: 30.0, left: 0.0),
       l('AA...', 4, 6, hardBreak: false, width: 50.0, left: 0.0),
+    ]);
+
+    // Constraints only enough to fit "AA" with the ellipsis, but not the
+    // trailing white space.
+    final CanvasParagraph trailingSpace = plain(overflowStyle, 'AA AAA')
+      ..layout(constrain(50.0));
+    expect(trailingSpace.minIntrinsicWidth, 30);
+    expect(trailingSpace.maxIntrinsicWidth, 60);
+    // expect(trailingSpace.height, 10);
+    expectLines(trailingSpace, [
+      l('AA...', 0, 2, hardBreak: false, width: 50.0, left: 0.0),
     ]);
 
     // Tiny constraints.
