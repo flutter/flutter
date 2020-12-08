@@ -137,22 +137,25 @@ void main() {
     },
   );
 
-  testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
-    const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
-    const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
+  testWidgets(
+    "Theme has default IconThemeData, which is derived from the theme's primary color",
+    (WidgetTester tester) async {
+      const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
+      const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
-    final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
+      final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
-    expect(resultingIconTheme.color, isSameColorAs(primaryColor));
+      expect(resultingIconTheme.color, isSameColorAs(primaryColor));
 
-    // Works in dark mode if primaryColor is a CupertinoDynamicColor.
-    final Color darkColor = (await testIconTheme(
-      tester,
-      themeData.copyWith(brightness: Brightness.dark),
-    )).color!;
+      // Works in dark mode if primaryColor is a CupertinoDynamicColor.
+      final Color darkColor = (await testIconTheme(
+        tester,
+        themeData.copyWith(brightness: Brightness.dark),
+      )).color!;
 
-    expect(darkColor, isSameColorAs(primaryColor.darkColor));
-  });
+      expect(darkColor, isSameColorAs(primaryColor.darkColor));
+    },
+  );
 
   testWidgets('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
     IconThemeData iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
@@ -257,4 +260,51 @@ void main() {
 
   currentBrightness = Brightness.dark;
   group('dark colors', dynamicColorsTestGroup);
+
+  testWidgets(
+    'color resolution is lazy and does not declare unnessary dependencies',
+    (WidgetTester tester) async {
+      late StateSetter setState;
+      Brightness brightness = Brightness.dark;
+
+      // Prevent rebuilding if there's no dependency changes.
+      final Widget leafWidget = StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          buildCount++;
+          return Placeholder(color: CupertinoTheme.of(context).barBackgroundColor);
+        },
+      );
+      await tester.pumpWidget(
+        CupertinoTheme(
+          data: const CupertinoThemeData(barBackgroundColor: Color(0x11223344)),
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MediaQuery(
+              data: MediaQueryData(platformBrightness: brightness),
+              child: leafWidget,
+            );
+          }),
+        ),
+      );
+
+      expect(buildCount, 1);
+      expect(find.byType(Placeholder), findsOneWidget);
+      expect(
+        tester.widget<Placeholder>(find.byType(Placeholder)).color,
+        const Color(0x11223344),
+      );
+
+      setState(() { brightness = Brightness.light; });
+      // Changes the platform brightness. Since the builder widget is not
+      // depending on any dynamic colors, it shouldn't rebuild.
+      await tester.pump();
+
+      expect(buildCount, 1);
+      expect(find.byType(Placeholder), findsOneWidget);
+      expect(
+        tester.widget<Placeholder>(find.byType(Placeholder)).color,
+        const Color(0x11223344),
+      );
+    },
+  );
 }
