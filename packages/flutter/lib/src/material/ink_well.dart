@@ -1217,9 +1217,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// during animation. You should avoid using InkWells within [Material] widgets
 /// that are changing size.
 ///
-/// If [InkWell] or ancestor widget has [GlobalKey], then splashes will not
-/// stop animation even if the widget with [GlobalKey] move (e.g. depth of
-/// change) during splashes animation.
+/// If the [widget] or one of its ancestors has a [GlobalKey], then splashes
+/// will not stop animation even if the widget with [GlobalKey] move (e.g.
+/// depth of change) during splashes animation.
 ///
 /// See also:
 ///

@@ -1299,17 +1299,17 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 
   /// Called when this object is removed from the tree.
   ///
-  /// If [widget] or ancestor widget has [GlobalKey] the framework calls this
-  /// method whenever it removes this [State] object from the tree. In some
-  /// cases, the framework will reinsert the [State] object into another part
-  /// of the tree (e.g., if the subtree containing this [State] object is
-  /// grafted from one location in the tree to another). If that happens, the
-  /// framework will ensure that it calls [activate] to give the [State] object
-  /// a chance to adapt to its new location in the tree. If the framework does
-  /// reinsert this subtree, it will do so before the end of the animation
-  /// frame in which the subtree was removed from the tree. For this reason,
-  /// [State] objects can defer releasing most resources until the framework
-  /// calls their [dispose] method.
+  /// If the [widget] or one of its ancestors has a [GlobalKey], the framework
+  /// calls this method whenever it removes this [State] object from the tree.
+  /// In some cases, the framework will reinsert the [State] object into
+  /// another part of the tree (e.g., if the subtree containing this [State]
+  /// object is grafted from one location in the tree to another). If that
+  /// happens, the framework will ensure that it calls [activate] to give the
+  /// [State] object a chance to adapt to its new location in the tree. If the
+  /// framework does reinsert this subtree, it will do so before the end of the
+  /// animation frame in which the subtree was removed from the tree. For this
+  /// reason, [State] objects can defer releasing most resources until the
+  /// framework calls their [dispose] method.
   ///
   /// Subclasses should override this method to clean up any links between
   /// this object and other elements in the tree (e.g. if you have provided an
