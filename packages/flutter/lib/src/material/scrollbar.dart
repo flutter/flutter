@@ -23,9 +23,11 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// {@macro flutter.widgets.Scrollbar}
 ///
-/// A scrollbar track can been drawn when triggered by a hover event, which is
-/// controlled by [showTrackOnHover]. The thickness of the track and scrollbar
-/// thumb will become larger when hovering, unless overridden by [thickness].
+/// The color of the Scrollbar will change when dragged,  as well as when
+/// hovered over. A scrollbar track can also been drawn when triggered by a
+/// hover event, which is controlled by [showTrackOnHover]. The thickness of the
+/// track and scrollbar thumb will become larger when hovering, unless
+/// overridden by [thickness].
 ///
 // TODO(Piinks): Add code sample
 ///
@@ -46,8 +48,8 @@ class Scrollbar extends RawScrollbar {
   /// If the [controller] is null, the default behavior is to
   /// enable scrollbar dragging using the [PrimaryScrollController].
   ///
-  /// When null, [thickness] and [radius] defaults will result in a rectangular
-  /// painted thumb that is 6.0 pixels wide.
+  /// When null, [thickness] and [radius] defaults will result in a rounded
+  /// rectangular thumb that is 8.0 sp wide with a radius of 8.0 pixels.
   const Scrollbar({
     Key? key,
     required Widget child,
