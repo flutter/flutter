@@ -71,6 +71,11 @@ class PaintContext {
 abstract class ContainerLayer extends Layer {
   final List<Layer> _layers = <Layer>[];
 
+  /// The list of child layers.
+  ///
+  /// Useful in tests.
+  List<Layer> get debugLayers => _layers;
+
   /// Register [child] as a child of this layer.
   void add(Layer child) {
     child.parent = this;
@@ -294,44 +299,8 @@ class TransformLayer extends ContainerLayer
     final Matrix4 childMatrix = matrix * _transform;
     context.mutatorsStack.pushTransform(_transform);
     final ui.Rect childPaintBounds = prerollChildren(context, childMatrix);
-    paintBounds = _transformRect(_transform, childPaintBounds);
+    paintBounds = transformRect(_transform, childPaintBounds);
     context.mutatorsStack.pop();
-  }
-
-  /// Applies the given matrix as a perspective transform to the given point.
-  ///
-  /// This function assumes the given point has a z-coordinate of 0.0. The
-  /// z-coordinate of the result is ignored.
-  static ui.Offset _transformPoint(Matrix4 transform, ui.Offset point) {
-    final Vector3 position3 = Vector3(point.dx, point.dy, 0.0);
-    final Vector3 transformed3 = transform.perspectiveTransform(position3);
-    return ui.Offset(transformed3.x, transformed3.y);
-  }
-
-  /// Returns a rect that bounds the result of applying the given matrix as a
-  /// perspective transform to the given rect.
-  ///
-  /// This function assumes the given rect is in the plane with z equals 0.0.
-  /// The transformed rect is then projected back into the plane with z equals
-  /// 0.0 before computing its bounding rect.
-  static ui.Rect _transformRect(Matrix4 transform, ui.Rect rect) {
-    final ui.Offset point1 = _transformPoint(transform, rect.topLeft);
-    final ui.Offset point2 = _transformPoint(transform, rect.topRight);
-    final ui.Offset point3 = _transformPoint(transform, rect.bottomLeft);
-    final ui.Offset point4 = _transformPoint(transform, rect.bottomRight);
-    return ui.Rect.fromLTRB(
-        _min4(point1.dx, point2.dx, point3.dx, point4.dx),
-        _min4(point1.dy, point2.dy, point3.dy, point4.dy),
-        _max4(point1.dx, point2.dx, point3.dx, point4.dx),
-        _max4(point1.dy, point2.dy, point3.dy, point4.dy));
-  }
-
-  static double _min4(double a, double b, double c, double d) {
-    return math.min(a, math.min(b, math.min(c, d)));
-  }
-
-  static double _max4(double a, double b, double c, double d) {
-    return math.max(a, math.max(b, math.max(c, d)));
   }
 
   @override
