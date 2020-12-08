@@ -46,7 +46,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
 ///  * [Scrollbar], a Material Design scrollbar.
-///  * [RawScrollbar], a basic scrollbar that fade in and out that is extended
+///  * [RawScrollbar], a basic scrollbar that fades in and out, extended
 ///    by this class to add more animations and behaviors.
 class CupertinoScrollbar extends RawScrollbar {
   /// Creates an iOS style scrollbar that wraps the given [child].
@@ -108,7 +108,6 @@ class CupertinoScrollbar extends RawScrollbar {
   /// from [radius] to this value, then animate back when the user stops
   /// dragging the scrollbar.
   final Radius radiusWhileDragging;
-
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();

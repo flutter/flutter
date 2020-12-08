@@ -31,7 +31,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// See also:
 ///
-///  * [RawScrollbar], a basic scrollbar that fade in and out that is extended
+///  * [RawScrollbar], a basic scrollbar that fades in and out, extended
 ///    by this class to add more animations and behaviors.
 ///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which displays a linear, scrollable list of children.
@@ -123,10 +123,10 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (widget.thickness != null)
-        return widget.thickness!;
       if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
         return _kScrollbarHoverThickness;
+      if (widget.thickness != null)
+        return widget.thickness!;
       return _kScrollbarThickness;
     });
   }
@@ -150,7 +150,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
-      ..thickness = widget.thickness ?? _thickness.resolve(_states)
+      ..thickness = _thickness.resolve(_states)
       ..radius = widget.radius ?? _kScrollbarRadius
       ..crossAxisMargin = _kScrollbarMargin
       ..minLength = _kScrollbarMinLength
