@@ -11,11 +11,13 @@ import '../base/io.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../web/compile.dart';
+import '../web/chrome.dart';
+import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'test_wrapper.dart';
 import 'watcher.dart';
+import 'web_test_compiler.dart';
 
 /// A class that abstracts launching the test process from the test runner.
 abstract class FlutterTestRunner {
@@ -90,9 +92,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
-    if (!globals.processManager.canRun(shellPath)) {
-      throwToolExit('Cannot execute Flutter tester at $shellPath');
-    }
 
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = <String>[
@@ -124,31 +123,51 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         .absolute
         .uri
         .toFilePath();
-      final bool result = await webCompilationProxy.initialize(
+      final WebMemoryFS result = await WebTestCompiler(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        artifacts: globals.artifacts,
+        processManager: globals.processManager,
+        config: globals.config,
+      ).initialize(
         projectDirectory: flutterProject.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
-        projectName: flutterProject.manifest.appName,
-        initializePlatform: true,
+        buildInfo: buildInfo,
       );
-      if (!result) {
+      if (result == null) {
         throwToolExit('Failed to compile tests');
       }
       testArgs
         ..add('--platform=chrome')
-        ..add('--precompiled=$tempBuildDir')
         ..add('--')
         ..addAll(testFiles);
       testWrapper.registerPlatformPlugin(
         <Runtime>[Runtime.chrome],
         () {
+          // TODO(jonahwilliams): refactor this into a factory that handles
+          // providing dependencies.
           return FlutterWebPlatform.start(
             flutterProject.directory.path,
             updateGoldens: updateGoldens,
             shellPath: shellPath,
             flutterProject: flutterProject,
             pauseAfterLoad: startPaused,
+            nullAssertions: nullAssertions,
             buildInfo: buildInfo,
+            webMemoryFS: result,
+            logger: globals.logger,
+            fileSystem: globals.fs,
+            artifacts: globals.artifacts,
+            chromiumLauncher: ChromiumLauncher(
+              fileSystem: globals.fs,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              operatingSystemUtils: globals.os,
+              browserFinder: findChromeExecutable,
+              logger: globals.logger,
+            ),
           );
         },
       );

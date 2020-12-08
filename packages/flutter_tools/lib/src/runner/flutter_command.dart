@@ -341,10 +341,27 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get disableDds => boolArg('disable-dds');
 
+  bool get _hostVmServicePortProvided => argResults.wasParsed('observatory-port') ||
+                                         argResults.wasParsed('host-vmservice-port');
+
+  int _tryParseHostVmservicePort() {
+    try {
+      return int.parse(stringArg('observatory-port') ?? stringArg('host-vmservice-port'));
+    } on FormatException catch (error) {
+      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
+    }
+    return null;
+  }
+
   int get ddsPort {
-    if (argResults.wasParsed('dds-port')) {
+    if (!argResults.wasParsed('dds-port') && _hostVmServicePortProvided) {
+      // If an explicit DDS port is _not_ provided, use the host-vmservice-port for DDS.
+      return _tryParseHostVmservicePort();
+    } else if (argResults.wasParsed('dds-port')) {
+      // If an explicit DDS port is provided, use dds-port for DDS.
       return int.tryParse(stringArg('dds-port')) ?? 0;
     }
+    // Otherwise, DDS can bind to a random port.
     return 0;
   }
 
@@ -356,9 +373,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int get hostVmservicePort {
-    if (!_usesPortOption ||
-        (argResults['observatory-port'] == null &&
-      argResults['host-vmservice-port'] == null)) {
+    if (!_usesPortOption || !_hostVmServicePortProvided) {
       return null;
     }
     if (argResults.wasParsed('observatory-port') &&
@@ -366,12 +381,13 @@ abstract class FlutterCommand extends Command<void> {
       throwToolExit('Only one of "--observatory-port" and '
         '"--host-vmservice-port" may be specified.');
     }
-    try {
-      return int.parse(stringArg('observatory-port') ?? stringArg('host-vmservice-port'));
-    } on FormatException catch (error) {
-      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
+    // If DDS is enabled and no explicit DDS port is provided, use the
+    // host-vmservice-port for DDS instead and bind the VM service to a random
+    // port.
+    if (!disableDds && !argResults.wasParsed('dds-port')) {
+      return null;
     }
-    return null;
+    return _tryParseHostVmservicePort();
   }
 
   /// Gets the vmservice port provided to in the 'device-vmservice-port' option.
@@ -447,11 +463,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption('web-renderer',
       defaultsTo: 'html',
       allowed: <String>['auto', 'canvaskit', 'html'],
-      help: 'Which rendering backend to use for Flutter for Web.'
-          'auto      - Use the HTML renderer on mobile devices,'
-          '            and CanvasKit on desktop devices.'
-          'canvaskit - Always use the CanvasKit renderer.'
-          'html      - Default. Always use the HTML renderer.',
+      help: 'The renderer implementation to use when building for the web. Possible values are:\n'
+            'html - always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.\n'
+            'canvaskit - always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.\n'
+            'auto - use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
     );
   }
 
@@ -471,6 +486,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
+
+  /// Whether this command should report null safety analytics.
+  bool get reportNullSafety => false;
 
   Duration get deviceDiscoveryTimeout {
     if (_deviceDiscoveryTimeout == null
@@ -572,14 +590,10 @@ abstract class FlutterCommand extends Command<void> {
   void addShrinkingFlag() {
     argParser.addFlag('shrink',
       negatable: true,
-      defaultsTo: true,
-      help: 'Whether to enable code shrinking on release mode. '
-            'When enabling shrinking, you also benefit from obfuscation, '
-            'which shortens the names of your app’s classes and members, '
-            'and optimization, which applies more aggressive strategies to '
-            'further reduce the size of your app. '
-            'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-      );
+      hide: true,
+      help: 'This flag is deprecated. Code shrinking is always enabled in release builds. '
+            'To learn more, see: https://developer.android.com/studio/build/shrink-code'
+    );
   }
 
   void addNullSafetyModeOptions({ @required bool hide }) {
@@ -660,6 +674,19 @@ abstract class FlutterCommand extends Command<void> {
         "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
         'process to terminate after the build is completed',
       defaultsTo: true,
+    );
+  }
+
+  void addNativeNullAssertions({ bool hide = false }) {
+    argParser.addFlag('native-null-assertions',
+      defaultsTo: true,
+      hide: hide,
+      help: 'Enables additional runtime null checks in web applications to ensure '
+        'the correct nullability of native (such as in dart:html) and external '
+        '(such as with JS interop) types. This is enabled by default but only takes '
+        'effect in sound mode. To report an issue with a null assertion failure in '
+        'dart:html or the other dart web libraries, please file a bug at '
+        'https://github.com/dart-lang/sdk/issues/labels/web-libraries .'
     );
   }
 
@@ -1088,6 +1115,9 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
+      if (reportNullSafety) {
+        await _sendNullSafetyAnalyticsEvents(project);
+      }
     }
 
     setupApplicationPackages();
@@ -1102,6 +1132,16 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return await runCommand();
+  }
+
+  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
+    final BuildInfo buildInfo = await getBuildInfo();
+    NullSafetyAnalysisEvent(
+      buildInfo.packageConfig,
+      buildInfo.nullSafetyMode,
+      project.manifest.appName,
+      globals.flutterUsage,
+    ).send();
   }
 
   /// The set of development artifacts required for this command.

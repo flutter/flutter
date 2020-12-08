@@ -117,7 +117,6 @@ class CoverageCollector extends TestWatcher {
   Future<String> finalizeCoverage({
     coverage.Formatter formatter,
     Directory coverageDirectory,
-    String packagesPath,
   }) async {
     if (_globalHitmap == null) {
       return null;

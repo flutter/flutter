@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -904,5 +905,70 @@ void main() {
 
     await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('Horizontal wrap - IntrinsicsHeight', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/48679.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: IntrinsicHeight(
+            child: Container(
+              color: Colors.green,
+              child: Wrap(
+                children: <Widget>[
+                  const Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
+                  Row(
+                    children: const <Widget>[
+                      SizedBox(height: 40, width: 60),
+                    ],
+                  ),
+                  const Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The row takes up the full width, therefore the "Start" and "End" text
+    // are placed before and after it and the total height is the sum of the
+    // individual heights.
+    expect(tester.getSize(find.byType(IntrinsicHeight)).height, 2 * 16 + 40);
+  });
+
+  testWidgets('Vertical wrap - IntrinsicsWidth', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/48679.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: IntrinsicWidth(
+            child: Container(
+              color: Colors.green,
+              child: Wrap(
+                direction: Axis.vertical,
+                children: <Widget>[
+                  const Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
+                  Column(
+                    children: const <Widget>[
+                      SizedBox(height: 40, width: 60),
+                    ],
+                  ),
+                  const Text('End', style: TextStyle(height: 1.0, fontSize: 16)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The column takes up the full height, therefore the "Start" and "End" text
+    // are placed to the left and right of it and the total width is the sum of
+    // the individual widths.
+    expect(tester.getSize(find.byType(IntrinsicWidth)).width, 5 * 16 + 60 + 3 * 16);
   });
 }

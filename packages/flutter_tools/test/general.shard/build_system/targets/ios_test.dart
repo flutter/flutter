@@ -187,6 +187,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kTargetPlatform: 'ios',
+        kSdkRoot: 'path/to/sdk',
       },
       processManager: processManager,
       artifacts: artifacts,
@@ -207,5 +208,95 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macPlatform,
+  });
+
+  testUsingContext('AotAssemblyRelease throws exception if sdk root is missing', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kTargetPlatform: 'ios',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kIosArchs] = 'x86_64';
+
+    expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
+        .having(
+          (Exception exception) => exception.toString(),
+      'description',
+      contains('required define SdkRoot but it was not provided'),
+    )
+    ));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => macPlatform,
+  });
+
+  group('copy engine Flutter.framework', () {
+    testWithoutContext('iphonesimulator', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('output');
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+          outputDir.path,
+        ]),
+      );
+
+      await const DebugUnpackIOS().build(environment);
+    });
+
+    testWithoutContext('iphoneos', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('output');
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+          outputDir.path,
+        ]),
+      );
+
+      await const DebugUnpackIOS().build(environment);
+    });
   });
 }

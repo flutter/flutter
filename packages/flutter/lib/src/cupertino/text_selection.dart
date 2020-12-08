@@ -312,6 +312,11 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     size = constraints.biggest;
@@ -968,7 +973,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   @override
   void performLayout() {
     if (firstChild == null) {
-      performResize();
+      size = constraints.smallest;
       return;
     }
 

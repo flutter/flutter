@@ -72,8 +72,6 @@ abstract class AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
-    bool includeDefaultFonts = true,
-    bool reportLicensedPackages = false,
   });
 }
 
@@ -162,8 +160,6 @@ class ManifestAssetBundle implements AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
-    bool includeDefaultFonts = true,
-    bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
@@ -224,7 +220,6 @@ class ManifestAssetBundle implements AssetBundle {
     final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
     final List<Map<String, dynamic>> fonts = _parseFonts(
       flutterManifest,
-      includeDefaultFonts,
       packageConfig,
       primary: true,
     );
@@ -272,7 +267,6 @@ class ManifestAssetBundle implements AssetBundle {
         }
         fonts.addAll(_parseFonts(
           packageFlutterManifest,
-          includeDefaultFonts,
           packageConfig,
           packageName: package.name,
           primary: false,
@@ -309,7 +303,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     final List<_Asset> materialAssets = <_Asset>[
-      if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
+      if (flutterManifest.usesMaterialDesign)
         ..._getMaterialAssets(),
     ];
     for (final _Asset asset in materialAssets) {
@@ -381,13 +375,12 @@ class ManifestAssetBundle implements AssetBundle {
 
   List<Map<String, dynamic>> _parseFonts(
     FlutterManifest manifest,
-    bool includeDefaultFonts,
     PackageConfig packageConfig, {
     String packageName,
     @required bool primary,
   }) {
     return <Map<String, dynamic>>[
-      if (primary && manifest.usesMaterialDesign && includeDefaultFonts)
+      if (primary && manifest.usesMaterialDesign)
         ...kMaterialFonts,
       if (packageName == null)
         ...manifest.fontsDescriptor
