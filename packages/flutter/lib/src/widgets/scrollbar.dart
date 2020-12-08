@@ -569,6 +569,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
 /// exclusive of the thumb will trigger a [ScrollIncrementType.page] based on
 /// the relative position to the thumb.
+///
+/// If the child [ScrollView] is infinitely long, the [RawScrollbar] will not be
+/// painted. In this case, the scrollbar cannot accurately represent the
+/// relative location of the visible area, or calculate the accurate delta to
+/// apply when  dragging on the thumb or tapping on the track.
 /// {@endtemplate}
 ///
 // TODO(Piinks): Add code sample
