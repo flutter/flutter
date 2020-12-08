@@ -1487,7 +1487,7 @@ void main() {
   });
 
   testWidgets('Custom build owners do not interfere with pointer router or raw key event handler', (WidgetTester tester) async {
-    final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount!;
+    final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
     final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
     expect(rawKeyEventHandler, isNotNull);
     _FakeBuilderOwner();
@@ -1496,15 +1496,20 @@ void main() {
   });
 }
 
-class _FakeBuilderOwner with BuildOwnerDefaultsMixin implements BuildOwner {
+class _FakeBuilderOwner extends BuildOwner {
+  _FakeBuilderOwner() : super(focusManager: _FakeFocusManager());
+}
+
+class _FakeFocusManager implements FocusManager {
   @override
-  FocusManager get focusManager => throw UnsupportedError('Unsupported');
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
 
   @override
-  set focusManager(FocusManager _focusManager) => throw UnsupportedError('Unsupported');
-
-  @override
-  VoidCallback? onBuildScheduled;
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return '_FakeFocusManager';
+  }
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
