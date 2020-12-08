@@ -4,6 +4,7 @@
 
 import '../base/fingerprint.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
@@ -28,6 +29,13 @@ Future<void> processPodsIfNeeded(
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
       xcodeProject.generatedXcodePropertiesFile.path,
+      globals.fs.path.join(
+        Cache.flutterRoot,
+        'packages',
+        'flutter_tools',
+        'bin',
+        'podhelper.rb',
+      ),
     ],
     fileSystem: globals.fs,
     logger: globals.logger,

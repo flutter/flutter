@@ -35,13 +35,27 @@ def flutter_additional_ios_build_settings(target)
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
   artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
-  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios'), __FILE__)
-  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios-release'), __FILE__)
+  debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios', 'Flutter.xcframework'), __FILE__)
+
+  unless Dir.exist?(debug_framework_dir)
+    # iOS artifacts have not been downloaded.
+    raise "#{debug_framework_dir} must exist. If you're running pod install manually, make sure flutter build ios is executed first"
+  end
+
+  release_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios-release', 'Flutter.xcframework'), __FILE__)
 
   target.build_configurations.each do |build_configuration|
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
-    build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"
+    Dir.new(configuration_engine_dir).each_child do |xcframework_file|
+      if xcframework_file.end_with?("-simulator") # ios-x86_64-simulator
+        build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
+      elsif xcframework_file.start_with?("ios-") # ios-armv7_arm64
+        build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
+      else
+        # Info.plist or another platform.
+      end
+    end
     build_configuration.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Flutter'
 
     build_configuration.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
