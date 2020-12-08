@@ -1,4 +1,4 @@
-Signature: 78c2d032f584b8c8642fe77a105756ba
+Signature: 0e93e587e495f9cde8be64237e5b3d7e
 
 UNUSED LICENSES:
 
@@ -9139,6 +9139,7 @@ FILE: ../../../third_party/dart/runtime/platform/undefined_behavior_sanitizer.h
 FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/bin/main.dart
 FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/cquery_driver.dart
 FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/xref_extractor.dart
+FILE: ../../../third_party/dart/runtime/vm/canonical_tables.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/precompiler_tracer.cc
@@ -10792,12 +10793,10 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/scrip
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/sentinel.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/source_location.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/target.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/thread.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/timeline_event.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/type_arguments.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/unknown.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/vm.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/zone.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/allocation_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/breakpoint.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/class.dart
@@ -10939,12 +10938,10 @@ FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/scr
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/sentinel.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/source_location.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/target.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/thread.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/timeline_event.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/type_arguments.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/unknown.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/vm.dart
-FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/objects/zone.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/allocation_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/breakpoint.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/models/repositories/class.dart
