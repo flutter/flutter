@@ -1031,14 +1031,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  void _setInkFeature(bool active) {
+  void _setInkFeature(bool visible) {
     final List<InkFeature?> inkFeatures = <InkFeature?>[];
     if (_splashes != null)
       inkFeatures.addAll(_splashes!);
     inkFeatures.addAll(_highlights.values);
 
     for (final InkFeature? splash in inkFeatures)
-      splash?.active = active;
+      splash?.visible = visible;
   }
 
   @override

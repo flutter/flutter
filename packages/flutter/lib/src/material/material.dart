@@ -545,7 +545,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Offset.zero & size);
       for (final InkFeature inkFeature in _inkFeatures!) {
-        if (inkFeature.active)
+        if (inkFeature.visible)
           inkFeature._paint(canvas);
       }
       canvas.restore();
@@ -627,7 +627,7 @@ abstract class InkFeature {
   bool _debugDisposed = false;
 
   /// Whether or not visual reaction is activated.
-  bool active = true;
+  bool visible = true;
 
   /// Free up the resources associated with this ink feature.
   @mustCallSuper
