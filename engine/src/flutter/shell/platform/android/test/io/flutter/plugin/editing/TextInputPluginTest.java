@@ -1067,8 +1067,8 @@ public class TextInputPluginTest {
     ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
         ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
 
-    imeSyncCallback.onApplyWindowInsets(testView, deferredInsets);
-    imeSyncCallback.onApplyWindowInsets(testView, noneInsets);
+    imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, deferredInsets);
+    imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, noneInsets);
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
     assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
@@ -1076,11 +1076,11 @@ public class TextInputPluginTest {
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
-    imeSyncCallback.onPrepare(animation);
-    imeSyncCallback.onApplyWindowInsets(testView, deferredInsets);
-    imeSyncCallback.onStart(animation, null);
+    imeSyncCallback.getAnimationCallback().onPrepare(animation);
+    imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, deferredInsets);
+    imeSyncCallback.getAnimationCallback().onStart(animation, null);
     // Only the final state call is saved, extra calls are passed on.
-    imeSyncCallback.onApplyWindowInsets(testView, imeInsets2);
+    imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, imeInsets2);
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
     // No change, as deferredInset is stored to be passed in onEnd()
@@ -1089,7 +1089,7 @@ public class TextInputPluginTest {
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
-    imeSyncCallback.onProgress(imeInsets0, animationList);
+    imeSyncCallback.getAnimationCallback().onProgress(imeInsets0, animationList);
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
     assertEquals(40, viewportMetricsCaptor.getValue().viewPaddingBottom);
@@ -1097,7 +1097,7 @@ public class TextInputPluginTest {
     assertEquals(60, viewportMetricsCaptor.getValue().viewInsetBottom);
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
-    imeSyncCallback.onProgress(imeInsets1, animationList);
+    imeSyncCallback.getAnimationCallback().onProgress(imeInsets1, animationList);
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
     assertEquals(40, viewportMetricsCaptor.getValue().viewPaddingBottom);
@@ -1105,7 +1105,7 @@ public class TextInputPluginTest {
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom); // Cannot be negative
     assertEquals(0, viewportMetricsCaptor.getValue().viewInsetTop);
 
-    imeSyncCallback.onEnd(animation);
+    imeSyncCallback.getAnimationCallback().onEnd(animation);
 
     verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
     // Values should be of deferredInsets, not imeInsets2
