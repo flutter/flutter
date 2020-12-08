@@ -89,12 +89,13 @@ class TextLayoutService {
       if (currentLine.end.isHard) {
         if (currentLine.isNotEmpty) {
           lines.add(currentLine.build());
+          if (currentLine.end.type != LineBreakType.endOfText) {
+            currentLine = currentLine.nextLine();
+          }
         }
 
         if (currentLine.end.type == LineBreakType.endOfText) {
           break;
-        } else {
-          currentLine = currentLine.nextLine();
         }
       }
 
@@ -400,13 +401,27 @@ class LineBuilder {
   }) {
     if (ellipsis == null) {
       final double availableWidth = maxWidth - widthIncludingSpace;
-      final LineBreakResult breakingPoint = spanometer.forceBreak(
+      final int breakingPoint = spanometer.forceBreak(
         end.index,
         nextBreak.indexWithoutTrailingSpaces,
         availableWidth: availableWidth,
         allowEmpty: allowEmpty,
       );
-      extendTo(breakingPoint);
+
+      // This condition can be true in the following case:
+      // 1. Next break is only one character away, with zero or many spaces. AND
+      // 2. There isn't enough width to fit the single character. AND
+      // 3. `allowEmpty` is false.
+      if (breakingPoint == nextBreak.indexWithoutTrailingSpaces) {
+        // In this case, we just extend to `nextBreak` instead of creating a new
+        // artifical break. It's safe (and better) to do so, because we don't
+        // want the trailing white space to go to the next line.
+        extendTo(nextBreak);
+      } else {
+        extendTo(
+          LineBreakResult.sameIndex(breakingPoint, LineBreakType.prohibited),
+        );
+      }
       return;
     }
 
@@ -428,20 +443,20 @@ class LineBuilder {
     // After the loop ends, two things are correct:
     // 1. All remaining segments in `_segments` can fit within constraints.
     // 2. Adding `segmentToBreak` causes the line to overflow.
-    while (_segments.isNotEmpty && width > availableWidth) {
+    while (_segments.isNotEmpty && widthIncludingSpace > availableWidth) {
       segmentToBreak = _popSegment();
     }
 
     spanometer.currentSpan = segmentToBreak.span as FlatTextSpan;
     final double availableWidthForSegment =
         availableWidth - widthIncludingSpace;
-    final LineBreakResult breakingPoint = spanometer.forceBreak(
+    final int breakingPoint = spanometer.forceBreak(
       segmentToBreak.start.index,
-      segmentToBreak.end.indexWithoutTrailingSpaces,
+      segmentToBreak.end.index,
       availableWidth: availableWidthForSegment,
       allowEmpty: allowEmpty,
     );
-    extendTo(breakingPoint);
+    extendTo(LineBreakResult.sameIndex(breakingPoint, LineBreakType.prohibited));
   }
 
   /// Builds the [EngineLineMetrics] instance that represents this line.
@@ -544,7 +559,19 @@ class Spanometer {
     return _measureSubstring(context, text, 0, text.length);
   }
 
-  LineBreakResult forceBreak(
+  /// In a continuous, unbreakable block of text from [start] to [end], finds
+  /// the point where text should be broken to fit in the given [availableWidth].
+  ///
+  /// The [start] and [end] indices have to be within the same text span.
+  ///
+  /// When [allowEmpty] is true, the result is guaranteed to be at least one
+  /// character after [start]. But if [allowEmpty] is false and there isn't
+  /// enough [availableWidth] to fit the first character, then [start] is
+  /// returned.
+  ///
+  /// See also:
+  /// - [LineBuilder.forceBreak].
+  int forceBreak(
     int start,
     int end, {
     required double availableWidth,
@@ -559,8 +586,7 @@ class Spanometer {
     assert(end >= span.start && end <= span.end);
 
     if (availableWidth <= 0.0) {
-      return LineBreakResult.sameIndex(
-          allowEmpty ? start : start + 1, LineBreakType.prohibited);
+      return allowEmpty ? start : start + 1;
     }
 
     int low = start;
@@ -580,7 +606,7 @@ class Spanometer {
     if (low == start && !allowEmpty) {
       low++;
     }
-    return LineBreakResult.sameIndex(low, LineBreakType.prohibited);
+    return low;
   }
 
   double _measure(int start, int end) {
