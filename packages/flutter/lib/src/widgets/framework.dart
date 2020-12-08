@@ -2657,6 +2657,7 @@ class BuildOwner {
   ///
   /// This is valid in debug builds only. In release builds, this will throw an
   /// [UnsupportedError].
+  @visibleForTesting
   Element? get debugCurrentBuildTarget {
     Element? result;
     bool isSupportedOperation = false;

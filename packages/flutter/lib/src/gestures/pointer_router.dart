@@ -75,6 +75,7 @@ class PointerRouter {
   ///
   /// This is valid in debug builds only. In release builds, this will throw an
   /// [UnsupportedError].
+  @visibleForTesting
   int get debugGlobalRouteCount {
     int? count;
     assert(() {
