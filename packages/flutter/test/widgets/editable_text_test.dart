@@ -6503,12 +6503,10 @@ void main() {
   group('Length formatter', () {
     const int maxLength = 5;
 
-    // Regression test for https://github.com/flutter/flutter/issues/65374.
-    testWidgets('will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
-        maxLength,
-        maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
-      );
+    Future<void> setupWidget(
+      WidgetTester tester,
+      LengthLimitingTextInputFormatter formatter,
+    ) async {
       final Widget widget = MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -6522,6 +6520,18 @@ void main() {
       );
 
       await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+    }
+
+    // Regression test for https://github.com/flutter/flutter/issues/65374.
+    testWidgets('will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
+      await setupWidget(
+        tester,
+        LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
+        ),
+      );
 
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       state.updateEditingValue(const TextEditingValue(text: 'abcde'));
@@ -6541,23 +6551,14 @@ void main() {
     });
 
     testWidgets('handles composing text correctly, continued', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
-        maxLength,
-        maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
-      );
-      final Widget widget = MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          inputFormatters: <TextInputFormatter>[formatter],
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
+      await setupWidget(
+        tester,
+        LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
         ),
       );
 
-      await tester.pumpWidget(widget);
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       // Initially we're at maxLength with no composing text.
@@ -6582,23 +6583,14 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
     testWidgets('enforced composing truncated', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
-        maxLength,
-        maxLengthEnforcement: MaxLengthEnforcement.enforced,
-      );
-      final Widget widget = MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          inputFormatters: <TextInputFormatter>[formatter],
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
+      await setupWidget(
+        tester,
+        LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
         ),
       );
 
-      await tester.pumpWidget(widget);
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       // Initially we're at maxLength with no composing text.
@@ -6628,21 +6620,9 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgets('default truncate behaviors with different platforms\'s', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
-      final Widget widget = MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          inputFormatters: <TextInputFormatter>[formatter],
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      );
+    testWidgets('default truncate behaviors with different platforms', (WidgetTester tester) async {
+      await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
 
-      await tester.pumpWidget(widget);
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       // Initially we're at maxLength with no composing text.
@@ -6681,23 +6661,14 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
     testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(
-        maxLength,
-        maxLengthEnforcement: MaxLengthEnforcement.enforced,
-      );
-      final Widget widget = MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          inputFormatters: <TextInputFormatter>[formatter],
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
+      await setupWidget(
+        tester,
+        LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthEnforcement: MaxLengthEnforcement.enforced,
         ),
       );
 
-      await tester.pumpWidget(widget);
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       // Initially we're not at maxLength with no composing text.
@@ -6718,21 +6689,9 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgets('composing range removed with different platforms\'s', (WidgetTester tester) async {
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
-      final Widget widget = MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          inputFormatters: <TextInputFormatter>[formatter],
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      );
+    testWidgets('composing range removed with different platforms', (WidgetTester tester) async {
+      await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
 
-      await tester.pumpWidget(widget);
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       // Initially we're not at maxLength with no composing text.
@@ -6762,21 +6721,10 @@ void main() {
     });
 
     testWidgets('Composing range handled correctly when it\'s overflowed.', (WidgetTester tester) async {
-      const String string = '👨‍👩‍👦0123456';
-      final TextInputFormatter formatter = LengthLimitingTextInputFormatter(maxLength);
-      final Widget widget = MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          inputFormatters: <TextInputFormatter>[formatter],
-          style: textStyle,
-          cursorColor: cursorColor,
-          selectionControls: materialTextSelectionControls,
-        ),
-      );
+      const String string = '👨‍👩‍012';
 
-      await tester.pumpWidget(widget);
+      await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
+
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
       // Initially we're not at maxLength with no composing text.
@@ -6784,11 +6732,48 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
 
       // Clearing composing range if collapsed.
-      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 10, end: 10)));
+      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 5, end: 5)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
 
       // Clearing composing range if overflowed.
-      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 10, end: 11)));
+      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 5, end: 6)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('typing in the middle with different platforms.', (WidgetTester tester) async {
+      await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're not at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start typing in the middle.
+      state.updateEditingValue(const TextEditingValue(text: 'abDEc', composing: TextRange(start: 3, end: 4)));
+      expect(state.currentTextEditingValue.text, 'abDEc');
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 4));
+
+      // Keep typing when the value has exceed the limitation.
+      state.updateEditingValue(const TextEditingValue(text: 'abDEFc', composing: TextRange(start: 3, end: 5)));
+      if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.fuchsia
+      ) {
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+      } else {
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 4));
+      }
+
+      // Reset the value according to the limit.
+      state.updateEditingValue(const TextEditingValue(text: 'abDEc'));
+      expect(state.currentTextEditingValue.text, 'abDEc');
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      state.updateEditingValue(const TextEditingValue(text: 'abDEFc', composing: TextRange(start: 4, end: 5)));
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
   });
