@@ -75,25 +75,36 @@ class TextSelectionToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final double paddingTop = MediaQuery.of(context).padding.top
         + _kToolbarScreenPadding;
-    final double availableHeight = anchorAbove.dy
-      - paddingTop;
+    final double availableHeight = anchorAbove.dy - paddingTop;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
+    final Offset anchor = fitsAbove ? anchorAbove : anchorBelow;
+    final Offset localAnchor = Offset(
+      anchor.dx - _kToolbarScreenPadding,
+      anchor.dy - paddingTop,
+    );
 
-    return Stack(
-      children: <Widget>[
-        CustomSingleChildLayout(
-          delegate: _TextSelectionToolbarLayoutDelegate(
-            fitsAbove ? anchorAbove : anchorBelow,
-            paddingTop,
-            fitsAbove,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        _kToolbarScreenPadding,
+        paddingTop,
+        _kToolbarScreenPadding,
+        _kToolbarScreenPadding,
+      ),
+      child: Stack(
+        children: <Widget>[
+          CustomSingleChildLayout(
+            delegate: _TextSelectionToolbarLayoutDelegate(
+              localAnchor,
+              fitsAbove,
+            ),
+            child: _TextSelectionToolbarOverflowable(
+              isAbove: fitsAbove,
+              toolbarBuilder: toolbarBuilder,
+              children: children,
+            ),
           ),
-          child: _TextSelectionToolbarOverflowable(
-            isAbove: fitsAbove,
-            toolbarBuilder: toolbarBuilder,
-            children: children,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -103,29 +114,25 @@ class TextSelectionToolbar extends StatelessWidget {
 class _TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   _TextSelectionToolbarLayoutDelegate(
     this.anchor,
-    this.upperBounds,
     this.fitsAbove,
   );
 
-  /// Anchor position of the toolbar in global coordinates.
+  // Anchor position of the toolbar in global coordinates.
   final Offset anchor;
 
-  /// The upper-most valid y value for the anchor.
-  final double upperBounds;
-
-  /// Whether the closed toolbar fits above the anchor position.
-  ///
-  /// If the closed toolbar doesn't fit, then the menu is rendered below the
-  /// anchor position. It should never happen that the toolbar extends below the
-  /// padded bottom of the screen.
+  // Whether the closed toolbar fits above the anchor position.
+  //
+  // If the closed toolbar doesn't fit, then the menu is rendered below the
+  // anchor position. It should never happen that the toolbar extends below the
+  // padded bottom of the screen.
   final bool fitsAbove;
 
   // Return the value that centers width as closely as possible to position
   // while fitting inside of min and max.
-  static double _centerOn(double position, double width, double min, double max) {
+  static double _centerOn(double position, double width, double max) {
     // If it overflows on the left, put it as far left as possible.
-    if (position - width / 2.0 < min) {
-      return min;
+    if (position - width / 2.0 < 0.0) {
+      return 0.0;
     }
 
     // If it overflows on the right, put it as far right as possible.
@@ -148,11 +155,10 @@ class _TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
       _centerOn(
         anchor.dx,
         childSize.width,
-        _kToolbarScreenPadding,
-        size.width - _kToolbarScreenPadding,
+        size.width,
       ),
       fitsAbove
-        ? math.max(upperBounds, anchor.dy - childSize.height)
+        ? math.max(0.0, anchor.dy - childSize.height)
         : anchor.dy,
     );
   }
