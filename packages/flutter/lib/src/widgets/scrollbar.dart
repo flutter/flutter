@@ -464,6 +464,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
     }
 
+    // Do not paint a scrollbar if the scroll view is infinitely long.
+    // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
+    if (_lastMetrics!.maxScrollExtent.isInfinite)
+      return;
+
     final double beforePadding = _isVertical ? padding.top : padding.left;
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
