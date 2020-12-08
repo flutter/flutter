@@ -223,7 +223,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     // appearance.
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<_TextSelectionToolbarItemData> itemDatas = <_TextSelectionToolbarItemData>[
+    final Map<int, _TextSelectionToolbarItemData> itemDatas = <_TextSelectionToolbarItemData>[
       if (widget.handleCut != null)
         _TextSelectionToolbarItemData(
           label: localizations.cutButtonLabel,
@@ -245,23 +245,22 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
           label: localizations.selectAllButtonLabel,
           onPressed: widget.handleSelectAll!,
         ),
-    ];
+    ].asMap();
 
     // If there is no option available, build an empty widget.
     if (itemDatas.isEmpty) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    int childIndex = 0;
     return TextSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      children: itemDatas.map((_TextSelectionToolbarItemData itemData) {
+      children: itemDatas.entries.map((MapEntry<int, _TextSelectionToolbarItemData> entry) {
         return TextSelectionToolbarTextButton(
-          index: childIndex++,
+          index: entry.key,
           total: itemDatas.length,
-          onPressed: itemData.onPressed,
-          child: Text(itemData.label),
+          onPressed: entry.value.onPressed,
+          child: Text(entry.value.label),
         );
       }).toList(),
     );
