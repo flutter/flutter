@@ -846,7 +846,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     if (type == _HighlightType.pressed) {
       widget.parentState?.markChildInkResponsePressed(this, value);
     }
-    if (value == (highlight != null && highlight.showing))
+    if (value == (highlight != null && highlight.active))
       return;
     if (value) {
       if (highlight == null) {
@@ -866,12 +866,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         );
         updateKeepAlive();
       } else {
-        highlight.show();
+        highlight.activate();
       }
     } else {
-      highlight!.hide();
+      highlight!.deactivate();
     }
-    assert(value == (_highlights[type] != null && _highlights[type]!.showing));
+    assert(value == (_highlights[type] != null && _highlights[type]!.active));
 
     switch (type) {
       case _HighlightType.pressed:
