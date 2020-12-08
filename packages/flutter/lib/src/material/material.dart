@@ -552,6 +552,12 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     }
     super.paint(context, offset);
   }
+
+  void dispose() {
+    // [InkFeature.dispose] will eventually call [_inkFeatures!.remove].
+    while (_inkFeatures?.isNotEmpty ?? false)
+      _inkFeatures!.first.dispose();
+  }
 }
 
 class _InkFeatures extends SingleChildRenderObjectWidget {
@@ -590,9 +596,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 
   @override
   void didUnmountRenderObject(_RenderInkFeatures renderObject) {
-    while (renderObject._inkFeatures?.isNotEmpty ?? false) {
-      renderObject._inkFeatures!.first.dispose();
-    }
+    renderObject.dispose();
   }
 }
 
