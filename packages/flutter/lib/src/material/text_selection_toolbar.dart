@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -220,14 +221,8 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   @override
   void didUpdateWidget(_TextSelectionToolbarOverflowable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    int childIndex = 0;
-    final bool childrenEqual =
-        widget.children.length == oldWidget.children.length
-        && widget.children.every((Widget child) {
-          return child == oldWidget.children[childIndex++];
-        });
     // If the children are changing at all, the current page should be reset.
-    if (!childrenEqual) {
+    if (!listEquals(widget.children, oldWidget.children)) {
       _reset();
     }
   }
