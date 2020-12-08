@@ -22,20 +22,12 @@ G_MODULE_EXPORT GType fl_plugin_registrar_get_type();
 
 G_DEFINE_TYPE(FlPluginRegistrar, fl_plugin_registrar, G_TYPE_OBJECT)
 
-static void view_weak_notify_cb(gpointer user_data,
-                                GObject* where_the_object_was) {
-  FlPluginRegistrar* self = FL_PLUGIN_REGISTRAR(user_data);
-  self->view = nullptr;
-}
-
 static void fl_plugin_registrar_dispose(GObject* object) {
   FlPluginRegistrar* self = FL_PLUGIN_REGISTRAR(object);
 
-  if (self->view != nullptr) {
-    g_object_weak_unref(G_OBJECT(self->view), view_weak_notify_cb, self);
-    self->view = nullptr;
-  }
-
+  g_object_remove_weak_pointer(G_OBJECT(self->view),
+                               reinterpret_cast<gpointer*>(&(self->view)));
+  self->view = nullptr;
   g_clear_object(&self->messenger);
 
   G_OBJECT_CLASS(fl_plugin_registrar_parent_class)->dispose(object);
@@ -56,8 +48,10 @@ FlPluginRegistrar* fl_plugin_registrar_new(FlView* view,
       g_object_new(fl_plugin_registrar_get_type(), nullptr));
 
   self->view = view;
-  if (view != nullptr)
-    g_object_weak_ref(G_OBJECT(view), view_weak_notify_cb, self);
+  if (view != nullptr) {
+    g_object_add_weak_pointer(G_OBJECT(view),
+                              reinterpret_cast<gpointer*>(&(self->view)));
+  }
   self->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
 
   return self;
