@@ -374,6 +374,7 @@ Future<void> _runWebToolTests() async {
 /// target app.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
