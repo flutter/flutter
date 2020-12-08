@@ -62,8 +62,9 @@ class CupertinoTheme extends StatelessWidget {
   /// widget, or a default [CupertinoThemeData] if no [CupertinoTheme] ancestor
   /// exists.
   ///
-  /// Resolves all the colors defined in that [CupertinoThemeData] against the
-  /// given [BuildContext] on a best-effort basis.
+  /// Lazily resolves all the colors defined in that [CupertinoThemeData]
+  /// against the given [BuildContext] on a best-effort basis, when they're
+  /// first accessed.
   static CupertinoThemeData of(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
     return (inheritedTheme?.theme.data ?? const CupertinoThemeData()).resolveFrom(context);
@@ -253,7 +254,20 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     );
   }
 
-  @override
+  /// Returns a new theme data that lazily resolves its [CupertinoDynamicColor]
+  /// attributes when accessed.
+  ///
+  /// Under the hood, this method returns a [CupertinoThemeData] that captures
+  /// the given [BuildContext], and resolves attributes against the captured
+  /// [BuildContext] when they're accessed for the first time. The results are
+  /// cached, subsequent accesses to the same attribute will get the cached
+  /// value. For this reason, the resulting theme data generally should not be
+  /// passed to other widgets or render objects, as the captured [BuildContext]
+  /// may become stale or deactivated.
+  ///
+  /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
+  /// [CupertinoThemeData].
+  @protected
   CupertinoThemeData resolveFrom(BuildContext context) {
     return _CupertinoDynamicThemeData(baseThemeData: this, context: context);
   }
@@ -461,23 +475,6 @@ class NoDefaultCupertinoThemeData {
   /// Used in Material themes to let unspecified properties fallback to Material
   /// theme properties instead of iOS defaults.
   NoDefaultCupertinoThemeData noDefault() => this;
-
-  /// Returns a new theme data with all its colors resolved against the
-  /// given [BuildContext].
-  ///
-  /// Called by [CupertinoTheme.of] to resolve colors defined in the retrieved
-  /// [CupertinoThemeData].
-  @protected
-  NoDefaultCupertinoThemeData resolveFrom(BuildContext context) {
-    return NoDefaultCupertinoThemeData(
-      brightness: brightness,
-      primaryColor: CupertinoDynamicColor.maybeResolve(primaryColor, context),
-      primaryContrastingColor: CupertinoDynamicColor.maybeResolve(primaryContrastingColor, context),
-      textTheme: textTheme?.resolveFrom(context),
-      barBackgroundColor: CupertinoDynamicColor.maybeResolve(barBackgroundColor, context),
-      scaffoldBackgroundColor: CupertinoDynamicColor.maybeResolve(scaffoldBackgroundColor, context),
-    );
-  }
 
   /// Creates a copy of the theme data with specified attributes overridden.
   ///

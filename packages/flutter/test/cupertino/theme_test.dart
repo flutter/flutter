@@ -295,8 +295,8 @@ void main() {
       );
 
       setState(() { brightness = Brightness.light; });
-      // Changes the platform brightness. Since the builder widget is not
-      // depending on any dynamic colors, it shouldn't rebuild.
+      // Changes the platform brightness. Since "leafWidget" does not depend on
+      // any dynamic colors, it shouldn't rebuild.
       await tester.pump();
 
       expect(buildCount, 1);
