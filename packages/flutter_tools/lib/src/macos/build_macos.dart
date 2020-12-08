@@ -8,12 +8,14 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
+import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 
 /// When run in -quiet mode, Xcode only prints from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -32,6 +34,19 @@ Future<void> buildMacOS({
     throwToolExit('No macOS desktop project configured. '
       'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
       'to learn about adding macOS support to a project.');
+  }
+
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+    RemoveMacOSFrameworkLinkAndEmbeddingMigration(
+      flutterProject.macos,
+      globals.logger,
+      globals.flutterUsage,
+    ),
+  ];
+
+  final ProjectMigration migration = ProjectMigration(migrators);
+  if (!migration.run()) {
+    throwToolExit('Could not migrate project file');
   }
 
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
