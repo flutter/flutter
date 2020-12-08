@@ -417,9 +417,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
   /// Return an effective [MaxLengthEnforcement] according the target platform.
   ///
-  /// if [previousEnforcement] is not null, return it directly.
-  ///
-  /// if non of [platform] was specified, [defaultTargetPlatform] will be use.
+  /// If [platform] was not specified, [defaultTargetPlatform] will be used.
   ///
   /// {@template flutter.services.textFormatter.effectiveMaxLengthEnforcement}
   /// ### Platform specific behaviors

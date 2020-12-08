@@ -1126,10 +1126,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
-      if (widget.maxLength != null && widget.maxLengthEnforced) LengthLimitingTextInputFormatter(
-        widget.maxLength,
-        maxLengthEnforcement: _effectiveMaxLengthEnforcement,
-      ),
+      if (widget.maxLength != null && widget.maxLengthEnforced)
+        LengthLimitingTextInputFormatter(
+          widget.maxLength,
+          maxLengthEnforcement: _effectiveMaxLengthEnforcement,
+        ),
     ];
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
