@@ -1333,7 +1333,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// reparented in the tree.
   ///
   /// If you override this, make sure to end your method with a call to
-  /// super.activate().
+  /// super.reactivate().
   @protected
   @mustCallSuper
   void reactivate() { }
