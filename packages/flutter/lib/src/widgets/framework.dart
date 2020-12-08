@@ -2536,17 +2536,30 @@ abstract class BuildContext {
   DiagnosticsNode describeOwnershipChain(String name);
 }
 
-/// Mixin that contains required instance members for [BuildOwner].
+/// Manager class for the widgets framework.
 ///
-/// Custom implementations of [BuildOwner] are required to include this mixin
-/// in their class in order for their custom build owner to work properly:
+/// This class tracks which widgets need rebuilding, and handles other tasks
+/// that apply to widget trees as a whole, such as managing the inactive element
+/// list for the tree and triggering the "reassemble" command when necessary
+/// during hot reload when debugging.
 ///
-/// ```dart
-/// class MyBuildOwner with BuildOwnerDefaultsMixin implements BuildOwner {
-///   ...
-/// }
-/// ```
-mixin BuildOwnerDefaultsMixin {
+/// The main build owner is typically owned by the [WidgetsBinding], and is
+/// driven from the operating system along with the rest of the
+/// build/layout/paint pipeline.
+///
+/// Additional build owners can be built to manage off-screen widget trees.
+///
+/// To assign a build owner to a tree, use the
+/// [RootRenderObjectElement.assignOwner] method on the root element of the
+/// widget tree.
+abstract class BuildOwner {
+  /// Creates an object that manages widgets.
+  BuildOwner({ this.onBuildScheduled, required this.focusManager });
+
+  /// Called on each build pass when the first buildable element is marked
+  /// dirty.
+  VoidCallback? onBuildScheduled;
+
   final _InactiveElements _inactiveElements = _InactiveElements();
 
   final List<Element> _dirtyElements = <Element>[];
@@ -2566,17 +2579,13 @@ mixin BuildOwnerDefaultsMixin {
   /// [scheduleBuildFor] should only be called when this value is true.
   bool get _debugIsInBuildScope => _dirtyElementsNeedsResorting != null;
 
-  /// Called on each build pass when the first buildable element is marked
-  /// dirty.
-  VoidCallback? get onBuildScheduled;
-
   /// The object in charge of the focus tree.
   ///
   /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  FocusManager get focusManager;
+  FocusManager focusManager;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
@@ -2976,43 +2985,13 @@ mixin BuildOwnerDefaultsMixin {
   }
 }
 
-/// Manager class for the widgets framework.
-///
-/// This class tracks which widgets need rebuilding, and handles other tasks
-/// that apply to widget trees as a whole, such as managing the inactive element
-/// list for the tree and triggering the "reassemble" command when necessary
-/// during hot reload when debugging.
-///
-/// The main build owner is typically owned by the [WidgetsBinding], and is
-/// driven from the operating system along with the rest of the
-/// build/layout/paint pipeline.
-///
-/// Additional build owners can be built to manage off-screen widget trees.
-///
-/// To assign a build owner to a tree, use the
-/// [RootRenderObjectElement.assignOwner] method on the root element of the
-/// widget tree.
-///
-/// Clients who like to create custom build owners should mix-in
-/// [BuildOwnerDefaultsMixin] in order to create a working implementation. See
-/// that class for more information.
-class BuildOwner with BuildOwnerDefaultsMixin {
+/// Concrete implementation of [BuildOwner] for the widgets library.
+class WidgetsBuildOwner extends BuildOwner {
   /// Creates an object that manages widgets.
-  BuildOwner({ this.onBuildScheduled });
-
-  /// Called on each build pass when the first buildable element is marked
-  /// dirty.
-  @override
-  VoidCallback? onBuildScheduled;
-
-  /// The object in charge of the focus tree.
-  ///
-  /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
-  /// the [FocusScopeNode] for a given [BuildContext].
-  ///
-  /// See [FocusManager] for more details.
-  @override
-  FocusManager focusManager = FocusManager();
+  WidgetsBuildOwner({ VoidCallback? onBuildScheduled }) : super(
+    onBuildScheduled: onBuildScheduled,
+    focusManager: FocusManager(),
+  );
 }
 
 /// An instantiation of a [Widget] at a particular location in the tree.
