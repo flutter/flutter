@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 
 const double _kScrollbarThickness = 8.0;
-const double _kScrollbarHoverThickness = 12.0;
+const double _kScrollbarThicknessWithTrack = 12.0;
 const double _kScrollbarMargin = 2.0;
 const double _kScrollbarMinLength = 48.0;
 const Radius _kScrollbarRadius = Radius.circular(8.0);
@@ -27,7 +27,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// hovered over. A scrollbar track can also been drawn when triggered by a
 /// hover event, which is controlled by [showTrackOnHover]. The thickness of the
 /// track and scrollbar thumb will become larger when hovering, unless
-/// overridden by [thickness].
+/// overridden by [thicknessWithTrack].
 ///
 // TODO(Piinks): Add code sample
 ///
@@ -49,13 +49,14 @@ class Scrollbar extends RawScrollbar {
   /// enable scrollbar dragging using the [PrimaryScrollController].
   ///
   /// When null, [thickness] and [radius] defaults will result in a rounded
-  /// rectangular thumb that is 8.0 sp wide with a radius of 8.0 pixels.
+  /// rectangular thumb that is 8.0 dp wide with a radius of 8.0 pixels.
   const Scrollbar({
     Key? key,
     required Widget child,
     ScrollController? controller,
     bool isAlwaysShown = false,
     this.showTrackOnHover = false,
+    this.thicknessWithTrack,
     double? thickness,
     Radius? radius,
   }) : super(
@@ -74,6 +75,12 @@ class Scrollbar extends RawScrollbar {
   ///
   /// Defaults to false, cannot be null.
   final bool showTrackOnHover;
+
+  /// The thickness of the scrollbar when a hover state is active and
+  /// [showTrackOnHover] is true.
+  ///
+  /// Defaults to 12.0 dp when null.
+  final double? thicknessWithTrack;
 
   @override
   _ScrollbarState createState() => _ScrollbarState();
@@ -126,10 +133,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
-        return _kScrollbarHoverThickness;
-      if (widget.thickness != null)
-        return widget.thickness!;
-      return _kScrollbarThickness;
+        return widget.thicknessWithTrack ?? _kScrollbarThicknessWithTrack;
+      return widget.thickness ?? _kScrollbarThickness;
     });
   }
 
