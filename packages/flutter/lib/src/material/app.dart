@@ -739,7 +739,6 @@ class _MaterialAppState extends State<MaterialApp> {
       key: widget.scaffoldMessengerKey,
       child: AnimatedTheme(
         data: theme,
-        isMaterialAppTheme: true,
         child: widget.builder != null
           ? Builder(
               builder: (BuildContext context) {
