@@ -65,6 +65,8 @@ class MockRuntimeController : public RuntimeController {
       : RuntimeController(client, p_task_runners) {}
   MOCK_METHOD0(IsRootIsolateRunning, bool());
   MOCK_METHOD1(DispatchPlatformMessage, bool(fml::RefPtr<PlatformMessage>));
+  MOCK_METHOD3(LoadDartDeferredLibraryError,
+               void(intptr_t, const std::string, bool));
 };
 
 fml::RefPtr<PlatformMessage> MakePlatformMessage(
@@ -234,6 +236,32 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRouteIgnored) {
         MakePlatformMessage("flutter/navigation", values, response);
     engine->DispatchPlatformMessage(message);
     EXPECT_EQ(engine->InitialRoute(), "");
+  });
+}
+
+TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
+  PostUITaskSync([this] {
+    intptr_t error_id = 123;
+    const std::string error_message = "error message";
+    MockRuntimeDelegate client;
+    auto mock_runtime_controller =
+        std::make_unique<MockRuntimeController>(client, task_runners_);
+    EXPECT_CALL(*mock_runtime_controller, IsRootIsolateRunning())
+        .WillRepeatedly(::testing::Return(true));
+    EXPECT_CALL(*mock_runtime_controller,
+                LoadDartDeferredLibraryError(error_id, error_message, true))
+        .Times(1);
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*dispatcher_maker=*/dispatcher_maker_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings_,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*runtime_controller=*/std::move(mock_runtime_controller));
+
+    engine->LoadDartDeferredLibraryError(error_id, error_message, true);
   });
 }
 

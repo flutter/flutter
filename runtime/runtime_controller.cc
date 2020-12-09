@@ -424,6 +424,14 @@ void RuntimeController::LoadDartDeferredLibrary(
                                         std::move(snapshot_instructions));
 }
 
+void RuntimeController::LoadDartDeferredLibraryError(
+    intptr_t loading_unit_id,
+    const std::string error_message,
+    bool transient) {
+  root_isolate_.lock()->LoadLoadingUnitError(loading_unit_id, error_message,
+                                             transient);
+}
+
 void RuntimeController::RequestDartDeferredLibrary(intptr_t loading_unit_id) {
   return client_.RequestDartDeferredLibrary(loading_unit_id);
 }
