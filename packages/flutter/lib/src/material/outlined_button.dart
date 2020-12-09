@@ -89,7 +89,7 @@ class OutlinedButton extends ButtonStyleButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-    IconAlignment? iconAlignment,
+    ButtonIconAlignment? iconAlignment,
   }) = _OutlinedButtonWithIcon;
 
   /// A static convenience method that constructs an outlined button
@@ -317,7 +317,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-    IconAlignment? iconAlignment,
+    ButtonIconAlignment? iconAlignment,
   }) : assert(icon != null),
        assert(label != null),
        super(
@@ -328,7 +328,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
          focusNode: focusNode,
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _OutlinedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? IconAlignment.left),
+         child: _OutlinedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? ButtonIconAlignment.left),
       );
 }
 
@@ -342,7 +342,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 
   final Widget label;
   final Widget icon;
-  final IconAlignment iconAlignment;
+  final ButtonIconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -351,9 +351,9 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 
     List<Widget> _renderButtonChildren() {
       switch (iconAlignment) {
-        case IconAlignment.left:
+        case ButtonIconAlignment.left:
           return <Widget>[icon, SizedBox(width: gap), label];
-        case IconAlignment.right:
+        case ButtonIconAlignment.right:
           return <Widget>[label, SizedBox(width: gap), icon];
       }
     }

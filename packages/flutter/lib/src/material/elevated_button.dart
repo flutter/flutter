@@ -92,7 +92,7 @@ class ElevatedButton extends ButtonStyleButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-    IconAlignment? iconAlignment,
+    ButtonIconAlignment? iconAlignment,
   }) = _ElevatedButtonWithIcon;
 
   /// A static convenience method that constructs an elevated button
@@ -385,7 +385,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-    IconAlignment? iconAlignment,
+    ButtonIconAlignment? iconAlignment,
   }) : assert(icon != null),
        assert(label != null),
        super(
@@ -396,7 +396,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
          focusNode: focusNode,
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _ElevatedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? IconAlignment.left),
+         child: _ElevatedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? ButtonIconAlignment.left),
       );
 
   @override
@@ -423,7 +423,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 
   final Widget label;
   final Widget icon;
-  final IconAlignment iconAlignment;
+  final ButtonIconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -432,9 +432,9 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 
     List<Widget> _renderButtonChildren() {
       switch (iconAlignment) {
-        case IconAlignment.left:
+        case ButtonIconAlignment.left:
           return <Widget>[icon, SizedBox(width: gap), label];
-        case IconAlignment.right:
+        case ButtonIconAlignment.right:
           return <Widget>[label, SizedBox(width: gap), icon];
       }
     }

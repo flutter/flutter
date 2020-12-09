@@ -96,7 +96,7 @@ class TextButton extends ButtonStyleButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-    IconAlignment? iconAlignment,
+    ButtonIconAlignment? iconAlignment,
   }) = _TextButtonWithIcon;
 
   /// A static convenience method that constructs a text button
@@ -347,7 +347,7 @@ class _TextButtonWithIcon extends TextButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-    IconAlignment? iconAlignment,
+    ButtonIconAlignment? iconAlignment,
    }) : assert(icon != null),
         assert(label != null),
         super(
@@ -358,7 +358,7 @@ class _TextButtonWithIcon extends TextButton {
           focusNode: focusNode,
           autofocus: autofocus ?? false,
           clipBehavior: clipBehavior ?? Clip.none,
-          child: _TextButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? IconAlignment.left),
+          child: _TextButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? ButtonIconAlignment.left),
         );
 
   @override
@@ -385,7 +385,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 
   final Widget label;
   final Widget icon;
-  final IconAlignment iconAlignment;
+  final ButtonIconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -394,9 +394,9 @@ class _TextButtonWithIconChild extends StatelessWidget {
 
     List<Widget> _renderButtonChildren() {
       switch (iconAlignment) {
-        case IconAlignment.left:
+        case ButtonIconAlignment.left:
           return <Widget>[icon, SizedBox(width: gap), label];
-        case IconAlignment.right:
+        case ButtonIconAlignment.right:
           return <Widget>[label, SizedBox(width: gap), icon];
       }
     }
