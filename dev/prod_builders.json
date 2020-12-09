@@ -247,6 +247,12 @@
          "flaky": false
       },
       {
+         "name": "Mac ios_content_validation_test",
+         "repo": "flutter",
+         "task_name": "mac_ios_content_validation_test",
+         "flaky": true
+      },
+      {
          "name": "Mac plugin_lint_mac",
          "repo": "flutter",
          "task_name": "mac_plugin_lint_mac",

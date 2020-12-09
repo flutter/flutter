@@ -277,11 +277,18 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
+         "name":"Mac ios_content_validation_test",
+         "repo":"flutter",
+         "task_name":"mac_ios_content_validation_test",
+         "enabled":true,
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
+      },
+      {
          "name":"Mac plugin_lint_mac",
          "repo":"flutter",
          "task_name":"mac_plugin_lint_mac",
          "enabled":true,
-         "run_if":["dev/**", "bin/**"]
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
          "name":"Mac plugin_test",
