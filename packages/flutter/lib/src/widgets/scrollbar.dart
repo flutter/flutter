@@ -915,7 +915,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Begins the fade out animation and initializes dragging the scrollbar thumb.
   @protected
   @mustCallSuper
-  void handleThumbPressStart(LongPressStartDetails details) {
+  void handleThumbPressStart(Offset localPosition) {
     _currentController = widget.controller ?? PrimaryScrollController.of(context);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -925,10 +925,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _fadeoutAnimationController.forward();
     switch (direction) {
       case Axis.vertical:
-        _dragScrollbarAxisPosition = details.localPosition.dy;
+        _dragScrollbarAxisPosition = localPosition.dy;
         break;
       case Axis.horizontal:
-        _dragScrollbarAxisPosition = details.localPosition.dx;
+        _dragScrollbarAxisPosition = localPosition.dx;
         break;
     }
   }
@@ -938,19 +938,19 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Updates the position of the child scrollable.
   @protected
   @mustCallSuper
-  void handleThumbPressUpdate(LongPressMoveUpdateDetails details) {
+  void handleThumbPressUpdate(Offset localPosition) {
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     switch(direction) {
       case Axis.vertical:
-        _updateScrollPosition(details.localPosition.dy - _dragScrollbarAxisPosition!);
-        _dragScrollbarAxisPosition = details.localPosition.dy;
+        _updateScrollPosition(localPosition.dy - _dragScrollbarAxisPosition!);
+        _dragScrollbarAxisPosition = localPosition.dy;
         break;
       case Axis.horizontal:
-        _updateScrollPosition(details.localPosition.dx - _dragScrollbarAxisPosition!);
-        _dragScrollbarAxisPosition = details.localPosition.dx;
+        _updateScrollPosition(localPosition.dx - _dragScrollbarAxisPosition!);
+        _dragScrollbarAxisPosition = localPosition.dx;
         break;
     }
   }
@@ -958,7 +958,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Handler called when a long press has ended.
   @protected
   @mustCallSuper
-  void handleThumbPressEnd(LongPressEndDetails details) {
+  void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
     final Axis? direction = getScrollbarDirection();
     if (direction == null)
       return;
@@ -1048,11 +1048,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           pressDuration: widget.pressDuration,
         ),
           (_ThumbPressGestureRecognizer instance) {
-          instance
-            ..onLongPress = handleThumbPress
-            ..onLongPressStart = handleThumbPressStart
-            ..onLongPressMoveUpdate = handleThumbPressUpdate
-            ..onLongPressEnd = handleThumbPressEnd;
+          instance.onLongPress = handleThumbPress;
+          instance.onLongPressStart = (LongPressStartDetails details) => handleThumbPressStart(details.localPosition);
+          instance.onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) => handleThumbPressUpdate(details.localPosition);
+          instance.onLongPressEnd = (LongPressEndDetails details) => handleThumbPressEnd(details.localPosition, details.velocity);
         },
       );
 

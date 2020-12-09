@@ -156,15 +156,15 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   // on the scrollbar thumb and then drags the scrollbar without releasing.
 
   @override
-  void handleThumbPressStart(LongPressStartDetails details) {
-    super.handleThumbPressStart(details);
+  void handleThumbPressStart(Offset localPosition) {
+    super.handleThumbPressStart(localPosition);
     final Axis direction = getScrollbarDirection()!;
     switch (direction) {
       case Axis.vertical:
-        _pressStartAxisPosition = details.localPosition.dy;
+        _pressStartAxisPosition = localPosition.dy;
         break;
       case Axis.horizontal:
-        _pressStartAxisPosition = details.localPosition.dx;
+        _pressStartAxisPosition = localPosition.dx;
         break;
     }
   }
@@ -181,23 +181,23 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   }
 
   @override
-  void handleThumbPressEnd(LongPressEndDetails details) {
+  void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     _thicknessAnimationController.reverse();
-    super.handleThumbPressEnd(details);
+    super.handleThumbPressEnd(localPosition, velocity);
     switch(direction) {
       case Axis.vertical:
-        if (details.velocity.pixelsPerSecond.dy.abs() < 10 &&
-          (details.localPosition.dy - _pressStartAxisPosition).abs() > 0) {
+        if (velocity.pixelsPerSecond.dy.abs() < 10 &&
+          (localPosition.dy - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
         break;
       case Axis.horizontal:
-        if (details.velocity.pixelsPerSecond.dx.abs() < 10 &&
-          (details.localPosition.dx - _pressStartAxisPosition).abs() > 0) {
+        if (velocity.pixelsPerSecond.dx.abs() < 10 &&
+          (localPosition.dx - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
         break;
