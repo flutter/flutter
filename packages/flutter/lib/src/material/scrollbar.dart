@@ -23,11 +23,11 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// {@macro flutter.widgets.Scrollbar}
 ///
-/// The color of the Scrollbar will change when dragged,  as well as when
+/// The color of the Scrollbar will change when dragged, as well as when
 /// hovered over. A scrollbar track can also been drawn when triggered by a
 /// hover event, which is controlled by [showTrackOnHover]. The thickness of the
 /// track and scrollbar thumb will become larger when hovering, unless
-/// overridden by [thicknessWithTrack].
+/// overridden by [hoverThickness].
 ///
 // TODO(Piinks): Add code sample
 ///
@@ -56,7 +56,7 @@ class Scrollbar extends RawScrollbar {
     ScrollController? controller,
     bool isAlwaysShown = false,
     this.showTrackOnHover = false,
-    this.thicknessWithTrack,
+    this.hoverThickness,
     double? thickness,
     Radius? radius,
   }) : super(
@@ -80,7 +80,7 @@ class Scrollbar extends RawScrollbar {
   /// [showTrackOnHover] is true.
   ///
   /// Defaults to 12.0 dp when null.
-  final double? thicknessWithTrack;
+  final double? hoverThickness;
 
   @override
   _ScrollbarState createState() => _ScrollbarState();
@@ -133,7 +133,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
-        return widget.thicknessWithTrack ?? _kScrollbarThicknessWithTrack;
+        return widget.hoverThickness ?? _kScrollbarThicknessWithTrack;
       return widget.thickness ?? _kScrollbarThickness;
     });
   }

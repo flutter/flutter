@@ -29,7 +29,7 @@ const double _kScrollbarThickness = 6.0;
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
-/// A [CustomPainter] for painting scrollbars.
+/// Paints a scrollbar's track and thumb.
 ///
 /// The size of the scrollbar along its scroll direction is typically
 /// proportional to the percentage of content completely visible on screen,
@@ -301,11 +301,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   Paint _trackPaint({ bool isBorder = false }) {
-    if (isBorder)
+    if (isBorder) {
       return Paint()
         ..color = trackBorderColor.withOpacity(trackBorderColor.opacity * fadeoutOpacityAnimation.value)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
+    }
     return Paint()
       ..color = trackColor.withOpacity(trackColor.opacity * fadeoutOpacityAnimation.value);
   }
@@ -464,15 +465,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       return;
     }
 
-    // Do not paint a scrollbar if the scroll view is infinitely long.
-    // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
-    if (_lastMetrics!.maxScrollExtent.isInfinite)
-      return;
-
     final double beforePadding = _isVertical ? padding.top : padding.left;
     final double thumbExtent = _thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics!, thumbExtent);
     _thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
+
+    // Do not paint a scrollbar if the scroll view is infinitely long.
+    // TODO(Piinks): Special handling for infinite scroll views, https://github.com/flutter/flutter/issues/41434
+    if (_lastMetrics!.maxScrollExtent.isInfinite)
+      return;
 
     return _paintScrollbar(canvas, size, thumbExtent, _lastAxisDirection!);
   }
@@ -483,7 +484,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (_thumbRect == null) {
       return false;
     }
-    // The thumb is not able to be hit when transparent.
+    // The scrollbar is not able to be hit when transparent.
     if (fadeoutOpacityAnimation.value == 0.0) {
       return false;
     }
@@ -552,9 +553,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
 /// An extendable base class for building scrollbars that fade in and out.
 ///
-/// To add a scrollbar thumb to a [ScrollView], like a [ListView] or a
-/// [CustomScrollView], simply wrap the scroll view widget in a [RawScrollbar]
-/// widget.
+/// To add a scrollbar to a [ScrollView], like a [ListView] or a
+/// [CustomScrollView], wrap the scroll view widget in a [RawScrollbar] widget.
 ///
 /// {@template flutter.widgets.Scrollbar}
 /// A scrollbar thumb indicates which portion of a [ScrollView] is actually
@@ -580,7 +580,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///
 /// See also:
 ///
-///  * [RawScrollbar], the abstract base class this inherits from.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
 // TODO(Piinks): Add support for passing a shape instead of thickness/radius.
@@ -591,8 +590,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 class RawScrollbar extends StatefulWidget {
   /// Creates a basic raw scrollbar that wraps the given [child].
   ///
-  /// The [child] should be a source of [ScrollNotification] notifications,
-  /// typically a [Scrollable] widget.
+  /// The [child], or a descendant of the [child], should be a source of
+  /// [ScrollNotification] notifications, typically a [Scrollable] widget.
   ///
   /// The [child], [thickness], [thumbColor], [isAlwaysShown], [fadeDuration],
   /// and [timeToFade] arguments must not be null.
@@ -603,7 +602,7 @@ class RawScrollbar extends StatefulWidget {
     this.isAlwaysShown = false,
     this.radius,
     this.thickness,
-    this.thumbColor = const Color(0x66BCBCBC),
+    this.thumbColor,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
@@ -612,7 +611,6 @@ class RawScrollbar extends StatefulWidget {
          'When isAlwaysShown is true, a ScrollController must be provided.',
        ),
        assert(child != null),
-       assert(thumbColor != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
        assert(pressDuration != null),
@@ -632,24 +630,23 @@ class RawScrollbar extends StatefulWidget {
   /// enable scrollbar dragging on the nearest ScrollController using
   /// [PrimaryScrollController.of].
   ///
-  /// If a ScrollController is passed, then scrollbar dragging will be enabled on
-  /// the given ScrollController. A stateful ancestor of this widget needs to
-  /// manage the ScrollController and either pass it to a scrollable descendant
-  /// or use a PrimaryScrollController to share it.
-  ///
-  /// Here is an example of using the `controller` parameter to enable
-  /// scrollbar dragging for multiple independent ListViews:
+  /// If a ScrollController is passed, then dragging on the scrollbar thumb will
+  /// update the [ScrollPosition] attached to the controller. A stateful ancestor
+  /// of this widget needs to manage the ScrollController and either pass it to
+  /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
   /// {@tool snippet}
+  /// Here is an example of using the `controller` parameter to enable
+  /// scrollbar dragging for multiple independent ListViews:
   ///
   /// ```dart
   /// final ScrollController _controllerOne = ScrollController();
   /// final ScrollController _controllerTwo = ScrollController();
   ///
   /// build(BuildContext context) {
-  /// return Column(
-  ///   children: <Widget>[
-  ///     Container(
+  ///   return Column(
+  ///     children: <Widget>[
+  ///       Container(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
   ///          controller: _controllerOne,
@@ -734,7 +731,7 @@ class RawScrollbar extends StatefulWidget {
   /// {@end-tool}
   final bool isAlwaysShown;
 
-  /// [Radius] of corners if the scrollbar should have rounded corners.
+  /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
   ///
   /// Scrollbar will be rectangular if [radius] is null, which is the default
   /// behavior.
@@ -747,8 +744,8 @@ class RawScrollbar extends StatefulWidget {
 
   /// The color of the scrollbar thumb.
   ///
-  /// Cannot be null, defaults to Color(0x66BCBCBC).
-  final Color thumbColor;
+  /// If null, defaults to Color(0x66BCBCBC).
+  final Color? thumbColor;
 
   /// The [Duration] of the fade animation.
   ///
@@ -773,7 +770,7 @@ class RawScrollbar extends StatefulWidget {
 /// The state for a [RawScrollbar] widget, also shared by the [Scrollbar] and
 /// [CupertinoScrollbar] widgets.
 ///
-/// Controls the animation that fades a scrollbar thumb in and out of view.
+/// Controls the animation that fades a scrollbar's thumb in and out of view.
 ///
 /// Provides defaults gestures for dragging the scrollbar thumb and tapping on the
 /// scrollbar track.
@@ -806,7 +803,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       curve: Curves.fastOutSlowIn,
     );
     scrollbarPainter = ScrollbarPainter(
-      color: widget.thumbColor,
+      color: widget.thumbColor ?? const Color(0x66BCBCBC),
       thickness: widget.thickness ?? _kScrollbarThickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
     );
@@ -834,18 +831,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     });
   }
 
-  /// Called when the [RawScrollbar] is built to update any properties of the
-  /// [ScrollbarPainter] that may have changed, for example as the result of an
-  /// animation.
+  /// This method is responsible for configuring the [scrollbarPainter]
+  /// according to the [widget]'s properties and any inherited widgets the
+  /// painter depends on, like [Directionality] and [MediaQuery].
   ///
-  /// Can be invoked as a listener of additional animations created in subclasses.
-  ///
-  /// Subclasses can override to customize the appearance and behavior
-  /// of the RawScrollbar.
+  /// Subclasses can override to configure the [scrollbarPainter].
   @protected
   void  updateScrollbarPainter() {
     scrollbarPainter
-      ..color =  widget.thumbColor
+      ..color =  widget.thumbColor ?? const Color(0x66BCBCBC)
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
@@ -1015,6 +1009,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
   }
   bool _handleScrollNotification(ScrollNotification notification) {
+
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent)
       return false;
