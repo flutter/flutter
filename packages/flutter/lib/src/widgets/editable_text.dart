@@ -2222,7 +2222,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
 
-    _value = value;
     if (textChanged) {
       try {
         widget.onChanged?.call(value.text);
@@ -2236,6 +2235,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    if (_value.selection != value.selection) {
+      try {
+        widget.onSelectionChanged?.call(value.selection, null);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onSelectionChanged'),
+        ));
+      }
+    }
+
+    _value = value;
     endBatchEdit();
   }
 
