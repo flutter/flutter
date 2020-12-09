@@ -435,3 +435,19 @@ class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
     return ShapeBorder.lerp(resolvedA, resolvedB, t) as OutlinedBorder?;
   }
 }
+
+/// How the icon in any `button.icon` should be placed, where `button` could be:
+/// * [TextButton]
+/// * [ElevatedButton]
+/// * [OutlinedButton]
+///
+/// See also:
+///
+/// * [TextButton], [ElevatedButton], [OutlinedButton], the button widgets
+enum ButtonIconAlignment {
+  /// Places the icon to the start of the button
+  start,
+
+  /// Places the icon to the end of the button
+  end,
+}
