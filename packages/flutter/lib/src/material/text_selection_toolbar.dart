@@ -201,14 +201,14 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   // menu items are shown.
   bool _overflowOpen = false;
 
-  // The key for _TextSelectionToolbarRightEdgeAlign.
+  // The key for _TextSelectionToolbarTrailingEdgeAlign.
   UniqueKey _containerKey = UniqueKey();
 
   // Close the menu and reset layout calculations, as in when the menu has
   // changed and saved values are no longer relevant. This should be called in
   // setState or another context where a rebuild is happening.
   void _reset() {
-    // Change _TextSelectionToolbarRightEdgeAlign's key when the menu changes in
+    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes in
     // order to cause it to rebuild. This lets it recalculate its
     // saved width for the new set of children, and it prevents AnimatedSize
     // from animating the size change.
@@ -232,9 +232,10 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
-    return _TextSelectionToolbarRightEdgeAlign(
+    return _TextSelectionToolbarTrailingEdgeAlign(
       key: _containerKey,
       overflowOpen: _overflowOpen,
+      textDirection: Directionality.of(context),
       child: AnimatedSize(
         vsync: this,
         // This duration was eyeballed on a Pixel 2 emulator running Android
@@ -269,41 +270,48 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   }
 }
 
-// When the overflow menu is open, it tries to align its right edge to the right
-// edge of the closed menu. This widget handles this effect by measuring and
-// maintaining the width of the closed menu and aligning the child to the right.
-class _TextSelectionToolbarRightEdgeAlign extends SingleChildRenderObjectWidget {
-  const _TextSelectionToolbarRightEdgeAlign({
+// When the overflow menu is open, it tries to align its trailing edge to the
+// trailing edge of the closed menu. This widget handles this effect by
+// measuring and maintaining the width of the closed menu and aligning the child
+// to that side.
+class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidget {
+  const _TextSelectionToolbarTrailingEdgeAlign({
     Key? key,
     required Widget child,
     required this.overflowOpen,
+    required this.textDirection,
   }) : assert(child != null),
        assert(overflowOpen != null),
        super(key: key, child: child);
 
   final bool overflowOpen;
+  final TextDirection textDirection;
 
   @override
-  _TextSelectionToolbarRightEdgeAlignRenderBox createRenderObject(BuildContext context) {
-    return _TextSelectionToolbarRightEdgeAlignRenderBox(overflowOpen: overflowOpen);
+  _TextSelectionToolbarTrailingEdgeAlignRenderBox createRenderObject(BuildContext context) {
+    return _TextSelectionToolbarTrailingEdgeAlignRenderBox(
+      overflowOpen: overflowOpen,
+      textDirection: textDirection,
+    );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _TextSelectionToolbarRightEdgeAlignRenderBox renderObject) {
+  void updateRenderObject(BuildContext context, _TextSelectionToolbarTrailingEdgeAlignRenderBox renderObject) {
     renderObject.overflowOpen = overflowOpen;
   }
 }
 
-class _TextSelectionToolbarRightEdgeAlignRenderBox extends RenderProxyBox {
-  _TextSelectionToolbarRightEdgeAlignRenderBox({
+class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
+  _TextSelectionToolbarTrailingEdgeAlignRenderBox({
     required bool overflowOpen,
-  }) : assert(overflowOpen != null),
+    required TextDirection textDirection,
+  }) : _textDirection = textDirection,
        _overflowOpen = overflowOpen,
        super();
 
   // The width of the menu when it was closed. This is used to achieve the
-  // behavior where the open menu aligns its right edge to the closed menu's
-  // right edge.
+  // behavior where the open menu aligns its trailing edge to the closed menu's
+  // trailing edge.
   double? _closedWidth;
 
   bool _overflowOpen;
@@ -316,6 +324,16 @@ class _TextSelectionToolbarRightEdgeAlignRenderBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  TextDirection _textDirection;
+  TextDirection get textDirection => _textDirection;
+  set textDirection(TextDirection value) {
+    if (value == textDirection) {
+      return;
+    }
+    _textDirection = value;
+    markNeedsLayout();
+  }
+
   @override
   void performLayout() {
     child!.layout(constraints.loosen(), parentUsesSize: true);
@@ -323,25 +341,25 @@ class _TextSelectionToolbarRightEdgeAlignRenderBox extends RenderProxyBox {
     // Save the width when the menu is closed. If the menu changes, this width
     // is invalid, so it's important that this RenderBox be recreated in that
     // case. Currently, this is achieved by providing a new key to
-    // _TextSelectionToolbarRightEdgeAlign.
+    // _TextSelectionToolbarTrailingEdgeAlign.
     if (!overflowOpen && _closedWidth == null) {
       _closedWidth = child!.size.width;
     }
 
     size = constraints.constrain(Size(
       // If the open menu is wider than the closed menu, just use its own width
-      // and don't worry about aligning the right edges.
+      // and don't worry about aligning the trailing edges.
       // _closedWidth is used even when the menu is closed to allow it to
-      // animate its size while keeping the same right alignment.
+      // animate its size while keeping the same edge alignment.
       _closedWidth == null || child!.size.width > _closedWidth! ? child!.size.width : _closedWidth!,
       child!.size.height,
     ));
 
     // Set the offset in the parent data such that the child will be aligned to
-    // the right.
+    // the trailing edge, depending on the text direction.
     final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
     childParentData.offset = Offset(
-      size.width - child!.size.width,
+      textDirection == TextDirection.rtl ? 0.0 : size.width - child!.size.width,
       0.0,
     );
   }

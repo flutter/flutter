@@ -567,20 +567,27 @@ class TextSelectionOverlay {
       endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
-    return FadeTransition(
-      opacity: _toolbarOpacity,
-      child: CompositedTransformFollower(
-        link: toolbarLayerLink,
-        showWhenUnlinked: false,
-        offset: -editingRegion.topLeft,
-        child: selectionControls!.buildToolbar(
-          context,
-          editingRegion,
-          renderObject.preferredLineHeight,
-          midpoint,
-          endpoints,
-          selectionDelegate!,
-          clipboardStatus!,
+    return Directionality(
+      textDirection: Directionality.of(this.context),
+      child: FadeTransition(
+        opacity: _toolbarOpacity,
+        child: CompositedTransformFollower(
+          link: toolbarLayerLink,
+          showWhenUnlinked: false,
+          offset: -editingRegion.topLeft,
+          child: Builder(
+            builder: (BuildContext context) {
+              return selectionControls!.buildToolbar(
+                context,
+                editingRegion,
+                renderObject.preferredLineHeight,
+                midpoint,
+                endpoints,
+                selectionDelegate!,
+                clipboardStatus!,
+              );
+            },
+          ),
         ),
       ),
     );
