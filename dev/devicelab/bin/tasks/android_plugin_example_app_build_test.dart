@@ -104,6 +104,7 @@ Future<void> main() async {
       });
 
       section('Remove Gradle wrapper');
+
       Directory(path.join(exampleAppDir.path, 'android', 'gradle', 'wrapper'))
           .deleteSync(recursive: true);
 
