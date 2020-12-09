@@ -924,14 +924,11 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
       _makeFilesExecutable(dir, operatingSystemUtils);
 
-      const List<String> frameworkNames = <String>['Flutter', 'FlutterMacOS'];
-      for (final String frameworkName in frameworkNames) {
-        final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, '$frameworkName.framework.zip'));
-        if (frameworkZip.existsSync()) {
-          final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, '$frameworkName.framework'));
-          framework.createSync();
-          operatingSystemUtils.unzip(frameworkZip, framework);
-        }
+      final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, 'FlutterMacOS.framework.zip'));
+      if (frameworkZip.existsSync()) {
+        final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, 'FlutterMacOS.framework'));
+        framework.createSync();
+        operatingSystemUtils.unzip(frameworkZip, framework);
       }
     }
 

@@ -39,7 +39,7 @@
             </BuildableReference>
             <SkippedTests>
                <Test
-                  Identifier = "FlutterUITests/testFlutterViewWarm">
+                  Identifier = "FlutterUITests">
                </Test>
             </SkippedTests>
          </TestableReference>
