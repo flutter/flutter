@@ -17,8 +17,8 @@ import 'theme_data.dart';
 /// such an image, the user's initials. A given user's initials should
 /// always be paired with the same background color, for consistency.
 ///
-/// If [foregroundImage] fails then [backgroundImage] is used. If that fails
-/// too, [backgroundColor] is considered.
+/// If [foregroundImage] fails then [backgroundImage] is used. If
+/// [backgroundImage] fails too, [backgroundColor] is used.
 ///
 /// The [onBackgroundImageError] parameter must be null if the [backgroundImage]
 /// is null.
@@ -108,7 +108,7 @@ class CircleAvatar extends StatelessWidget {
   /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
   final ImageProvider? backgroundImage;
 
-  /// The foregroundImage image of the circle.
+  /// The foreground image of the circle.
   ///
   /// Typically used as profile image. For fallback use [backgroundImage].
   final ImageProvider? foregroundImage;
@@ -118,7 +118,7 @@ class CircleAvatar extends StatelessWidget {
   final ImageErrorListener? onBackgroundImageError;
 
   /// An optional error callback for errors emitted when loading
-  /// [foregroundColor].
+  /// [foregroundImage].
   final ImageErrorListener? onForegroundImageError;
 
   /// The size of the avatar, expressed as the radius (half the diameter).
