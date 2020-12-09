@@ -4253,7 +4253,7 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 10,
+          baseOffset: 4,
           extentOffset: 4,
           affinity: TextAffinity.downstream,
         ),
@@ -4289,7 +4289,7 @@ void main() {
       equals(
         const TextSelection(
           baseOffset: 10,
-          extentOffset: 4,
+          extentOffset: 10,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4335,7 +4335,7 @@ void main() {
       equals(
         const TextSelection(
           baseOffset: 0,
-          extentOffset: 72,
+          extentOffset: 0,
           affinity: TextAffinity.downstream,
         ),
       ),
