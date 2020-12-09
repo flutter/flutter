@@ -7238,23 +7238,26 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// the user would not be able to be sure that they were related.
 ///
 /// {@tool snippet}
-/// This snippet shows how to use [MergeSemantics] to merge the semantics of
-/// a [Checkbox] and [Text] widget.
 ///
-/// ```dart
-/// MergeSemantics(
-///   child: Row(
-///     children: <Widget>[
-///       Checkbox(
-///         value: true,
-///         onChanged: (bool value) => null,
-///       ),
-///       const Text("Settings"),
-///     ],
-///   ),
-/// )
-/// ```
+/// here is the sample code to use[MergeSemantics] to merge the semantics of  a [checkbox] and [Text] widget.
+///
+/// ...dart
+/// MergeSemantics{
+///  child: ROW{
+///    children:{
+///     value: true,
+///     onChanged:(value){},
+///    },
+///    Text("Settings"),
+///    ],
+///  ),
+/// ),
+/// ...
+///
 /// {@end-tool}
+///
+///
+///
 ///
 /// Be aware that if two nodes in the subtree have conflicting
 /// semantics, the result may be nonsensical. For example, a subtree
