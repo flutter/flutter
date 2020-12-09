@@ -354,6 +354,15 @@ void PlatformViewAndroid::LoadDartDeferredLibrary(
 }
 
 // |PlatformView|
+void PlatformViewAndroid::LoadDartDeferredLibraryError(
+    intptr_t loading_unit_id,
+    const std::string error_message,
+    bool transient) {
+  delegate_.LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                         transient);
+}
+
+// |PlatformView|
 void PlatformViewAndroid::UpdateAssetManager(
     std::shared_ptr<AssetManager> asset_manager) {
   delegate_.UpdateAssetManager(std::move(asset_manager));
