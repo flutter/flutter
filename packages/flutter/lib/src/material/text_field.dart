@@ -608,6 +608,7 @@ class TextField extends StatefulWidget {
   /// Determines how the [maxLength] limit should be enforced.
   ///
   /// {@macro flutter.services.textFormatter.effectiveMaxLengthEnforcement}
+  ///
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement? maxLengthEnforcement;
 

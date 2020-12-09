@@ -6763,8 +6763,10 @@ void main() {
         defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.fuchsia
       ) {
+        expect(state.currentTextEditingValue.text, 'abDEFc');
         expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
       } else {
+        expect(state.currentTextEditingValue.text, 'abDEc');
         expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 4));
       }
 
