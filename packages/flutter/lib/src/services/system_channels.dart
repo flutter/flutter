@@ -340,6 +340,6 @@ class SystemChannels {
   ///    into the "Downloading" and finally the "Installed" state.
   static const MethodChannel dynamicfeatures = OptionalMethodChannel(
     'flutter/dynamicfeatures',
-    JSONMethodCodec()(),
+    StandardMethodCodec(),
   );
 }
