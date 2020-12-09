@@ -69,12 +69,21 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// text field. If you build a text field with a controller that already has
 /// [text], the text field will use that text as its initial value.
 ///
-/// The [text] or [selection] properties can be set from within a listener
-/// added to this controller. If both properties need to be changed then the
-/// controller's [value] should be set instead.
+/// The [value] (as well as [text] and [selection]) of this controller can be
+/// updated from within a listener added to this controller. Be aware of
+/// infinite loops since the listener will also be notified of the changes made
+/// from within itself. Modifying the composing region from within a listener
+/// can also have a bad interaction with some input methods. Gboard, for
+/// example, will try to restore the composing region of the text if it was
+/// modified programmatically, creating an infinite loop of communications
+/// between the framework and the input method. Consider using
+/// [TextInputFormatter]s instead for as-you-type text modification.
 ///
-/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
-/// This will ensure we discard any resources used by the object.
+/// If both the [text] or [selection] properties need to be changed, set the
+/// controller's [value] instead.
+///
+/// Remember to [dispose] of the [TextEditingController] when it is no longer
+/// needed. This will ensure we discard any resources used by the object.
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
@@ -154,7 +163,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
-  set text(String? newText) {
+  set text(String newText) {
     value = value.copyWith(
       text: newText,
       selection: const TextSelection.collapsed(offset: -1),
@@ -1021,63 +1030,6 @@ class EditableText extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the
   /// field.
   /// {@endtemplate}
-  ///
-  /// {@tool dartpad --template=stateful_widget_material}
-  /// When a non-completion action is pressed, such as "next" or "previous", it
-  /// is often desirable to move the focus to the next or previous field.  To do
-  /// this, handle it as in this example, by calling [FocusNode.nextFocus] in
-  /// the `onFieldSubmitted` callback of [TextFormField]. ([TextFormField] wraps
-  /// [EditableText] internally, and uses the value of `onFieldSubmitted` as its
-  /// [onSubmitted]).
-  ///
-  /// ```dart
-  /// FocusScopeNode _focusScopeNode = FocusScopeNode();
-  /// final _controller1 = TextEditingController();
-  /// final _controller2 = TextEditingController();
-  ///
-  /// void dispose() {
-  ///   _focusScopeNode.dispose();
-  ///   _controller1.dispose();
-  ///   _controller2.dispose();
-  ///   super.dispose();
-  /// }
-  ///
-  /// void _handleSubmitted(String value) {
-  ///   _focusScopeNode.nextFocus();
-  /// }
-  ///
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: FocusScope(
-  ///       node: _focusScopeNode,
-  ///       child: Column(
-  ///         mainAxisAlignment: MainAxisAlignment.center,
-  ///         children: <Widget>[
-  ///           Padding(
-  ///             padding: const EdgeInsets.all(8.0),
-  ///             child: TextFormField(
-  ///               textInputAction: TextInputAction.next,
-  ///               onFieldSubmitted: _handleSubmitted,
-  ///               controller: _controller1,
-  ///               decoration: InputDecoration(border: OutlineInputBorder()),
-  ///             ),
-  ///           ),
-  ///           Padding(
-  ///             padding: const EdgeInsets.all(8.0),
-  ///             child: TextFormField(
-  ///               textInputAction: TextInputAction.next,
-  ///               onFieldSubmitted: _handleSubmitted,
-  ///               controller: _controller2,
-  ///               decoration: InputDecoration(border: OutlineInputBorder()),
-  ///             ),
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
   final ValueChanged<String>? onSubmitted;
 
   /// {@template flutter.widgets.editableText.onAppPrivateCommand}
@@ -2146,6 +2098,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ));
       }
     }
+
+    // To keep the cursor from blinking while it moves, restart the timer here.
+    if (_cursorTimer != null) {
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   bool _textChangedSinceLastCaretUpdate = false;
@@ -2234,14 +2192,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
   void _formatAndSetValue(TextEditingValue value) {
-    // Check if the new value is the same as the current local value, or is the same
-    // as the pre-formatting value of the previous pass (repeat call).
-    final bool textChanged = _value.text != value.text || _value.composing != value.composing;
+    // Only apply input formatters if the text has changed (including uncommited
+    // text in the composing region), or when the user committed the composing
+    // text.
+    // Gboard is very persistent in restoring the composing region. Applying
+    // input formatters on composing-region-only changes (except clearing the
+    // current composing region) is very infinite-loop-prone: the formatters
+    // will keep trying to modify the composing region while Gboard will keep
+    // trying to restore the original composing region.
+    final bool textChanged = _value.text != value.text
+                          || (!_value.composing.isCollapsed && value.composing.isCollapsed);
 
     if (textChanged) {
-      // Only format when the text has changed and there are available formatters.
-      // Pass through the formatter regardless of repeat status if the input value is
-      // different than the stored value.
       value = widget.inputFormatters?.fold<TextEditingValue>(
         value,
         (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),

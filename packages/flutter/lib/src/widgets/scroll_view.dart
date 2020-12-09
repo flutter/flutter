@@ -149,6 +149,11 @@ abstract class ScrollView extends StatelessWidget {
   /// sufficient content to actually scroll. Otherwise, by default the user can
   /// only scroll the view if it has sufficient content. See [physics].
   ///
+  /// Also when true, the scroll view is used for default [ScrollAction]s. If a
+  /// ScrollAction is not handled by an otherwise focused part of the application,
+  /// the ScrollAction will be evaluated using this scroll view, for example,
+  /// when executing [Shortcuts] key events like page up and down.
+  ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
   ///
@@ -1508,28 +1513,6 @@ class ListView extends BoxScrollView {
 /// [CustomScrollView.slivers] property instead of the grid itself, and having
 /// the [SliverGrid] instead be a child of the [SliverPadding].
 ///
-/// By default, [ListView] will automatically pad the list's scrollable
-/// extremities to avoid partial obstructions indicated by [MediaQuery]'s
-/// padding. To avoid this behavior, override with a zero [padding] property.
-///
-/// {@tool snippet}
-/// The following example demonstrates how to override the default top padding
-/// using [MediaQuery.removePadding].
-///
-/// ```dart
-/// Widget myWidget(BuildContext context) {
-///   return MediaQuery.removePadding(
-///     context: context,
-///     removeTop: true,
-///     child: ListView.builder(
-///       itemCount: 25,
-///       itemBuilder: (BuildContext context, int index) => ListTile(title: Text('item $index')),
-///     )
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
 /// [SliverList] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
 /// list.
@@ -1636,6 +1619,37 @@ class ListView extends BoxScrollView {
 ///     ),
 ///   ],
 /// )
+/// ```
+/// {@end-tool}
+///
+/// By default, [GridView] will automatically pad the limits of the
+/// grids's scrollable to avoid partial obstructions indicated by
+/// [MediaQuery]'s padding. To avoid this behavior, override with a
+/// zero [padding] property.
+///
+/// {@tool snippet}
+/// The following example demonstrates how to override the default top padding
+/// using [MediaQuery.removePadding].
+///
+/// ```dart
+/// Widget myWidget(BuildContext context) {
+///   return MediaQuery.removePadding(
+///     context: context,
+///     removeTop: true,
+///     child: GridView.builder(
+///       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+///         crossAxisCount: 3,
+///       ),
+///       itemCount: 300,
+///       itemBuilder: (BuildContext context, int index) {
+///         return Card(
+///           color: Colors.amber,
+///           child: Center(child: Text('$index')),
+///         );
+///       }
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///

@@ -63,6 +63,9 @@ class BuildAarCommand extends BuildSubCommand {
   final String name = 'aar';
 
   @override
+  bool get reportNullSafety => false;
+
+  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
   };
@@ -112,7 +115,7 @@ class BuildAarCommand extends BuildSubCommand {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
-            getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
+            await getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
             targetArchs: targetArchitectures,
           )
         );

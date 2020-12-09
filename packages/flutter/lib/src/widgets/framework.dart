@@ -936,7 +936,7 @@ abstract class StatefulWidget extends Widget {
   /// [State] objects.
   @protected
   @factory
-  State createState();
+  State createState(); // ignore: no_logic_in_create_state, this is the original sin
 }
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
@@ -2554,7 +2554,8 @@ abstract class BuildContext {
 /// widget tree.
 class BuildOwner {
   /// Creates an object that manages widgets.
-  BuildOwner({ this.onBuildScheduled });
+  BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
+      focusManager = focusManager ?? FocusManager();
 
   /// Called on each build pass when the first buildable element is marked
   /// dirty.
@@ -2585,7 +2586,7 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  FocusManager focusManager = FocusManager();
+  FocusManager focusManager;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
@@ -2650,6 +2651,26 @@ class BuildOwner {
   /// Only valid when asserts are enabled.
   bool get debugBuilding => _debugBuilding;
   bool _debugBuilding = false;
+
+  /// The element currently being built, or null if no element is actively
+  /// being built.
+  ///
+  /// This is valid in debug builds only. In release builds, this will throw an
+  /// [UnsupportedError].
+  @visibleForTesting
+  Element? get debugCurrentBuildTarget {
+    Element? result;
+    bool isSupportedOperation = false;
+    assert(() {
+      result = _debugCurrentBuildTarget;
+      isSupportedOperation = true;
+      return true;
+    }());
+    if (isSupportedOperation) {
+      return result;
+    }
+    throw UnsupportedError('debugCurrentBuildTarget is not supported in release builds');
+  }
   Element? _debugCurrentBuildTarget;
 
   /// Establishes a scope in which calls to [State.setState] are forbidden, and
@@ -2673,6 +2694,25 @@ class BuildOwner {
       }());
     }
     assert(_debugStateLockLevel >= 0);
+  }
+
+  void _runWithCurrentBuildTarget(Element element, VoidCallback callback) {
+    assert(_debugStateLocked);
+    Element? debugPreviousBuildTarget;
+    assert(() {
+      debugPreviousBuildTarget = _debugCurrentBuildTarget;
+      _debugCurrentBuildTarget = element;
+      return true;
+    }());
+    try {
+      callback();
+    } finally {
+      assert(() {
+        assert(_debugCurrentBuildTarget == element);
+        _debugCurrentBuildTarget = debugPreviousBuildTarget;
+        return true;
+      }());
+    }
   }
 
   /// Establishes a scope for updating the widget tree, and calls the given
@@ -2717,26 +2757,22 @@ class BuildOwner {
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
-        assert(_debugStateLocked);
-        Element? debugPreviousBuildTarget;
-        assert(() {
-          context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-          debugPreviousBuildTarget = _debugCurrentBuildTarget;
-          _debugCurrentBuildTarget = context;
-          return true;
-        }());
-        _dirtyElementsNeedsResorting = false;
-        try {
-          callback();
-        } finally {
+        _runWithCurrentBuildTarget(context, () {
           assert(() {
-            context._debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
-            assert(_debugCurrentBuildTarget == context);
-            _debugCurrentBuildTarget = debugPreviousBuildTarget;
-            _debugElementWasRebuilt(context);
+            context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
             return true;
           }());
-        }
+          _dirtyElementsNeedsResorting = false;
+          try {
+            callback();
+          } finally {
+            assert(() {
+              context._debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
+              _debugElementWasRebuilt(context);
+              return true;
+            }());
+          }
+        });
       }
       _dirtyElements.sort(Element._sort);
       _dirtyElementsNeedsResorting = false;
@@ -3326,6 +3362,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// | :-----------------: | :--------------------- | :---------------------- |
   /// |  **child == null**  |  Returns null.         |  Returns new [Element]. |
   /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
+  ///
+  /// The `newSlot` argument is used only if `newWidget` is not null. If `child`
+  /// is null (or if the old child cannot be updated), then the `newSlot` is
+  /// given to the new [Element] that is created for the child, via
+  /// [inflateWidget]. If `child` is not null (and the old child _can_ be
+  /// updated), then the `newSlot` is given to [updateSlotForChild] to update
+  /// its slot, in case it has moved around since it was last built.
+  ///
+  /// See the [RenderObjectElement] documentation for more information on slots.
   @protected
   Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
     if (newWidget == null) {
@@ -4359,19 +4404,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return true;
     }());
     assert(_lifecycleState == _ElementLifecycle.active);
-    assert(owner!._debugStateLocked);
-    Element? debugPreviousBuildTarget;
-    assert(() {
-      debugPreviousBuildTarget = owner!._debugCurrentBuildTarget;
-      owner!._debugCurrentBuildTarget = this;
-      return true;
-    }());
-    performRebuild();
-    assert(() {
-      assert(owner!._debugCurrentBuildTarget == this);
-      owner!._debugCurrentBuildTarget = debugPreviousBuildTarget;
-      return true;
-    }());
+    owner!._runWithCurrentBuildTarget(this, performRebuild);
     assert(!_dirty);
   }
 
@@ -5336,10 +5369,10 @@ class InheritedElement extends ProxyElement {
 /// class FooElement extends RenderObjectElement {
 ///
 ///   @override
-///   Foo get widget => super.widget;
+///   Foo get widget => super.widget as Foo;
 ///
 ///   @override
-///   RenderFoo get renderObject => super.renderObject;
+///   RenderFoo get renderObject => super.renderObject as RenderFoo;
 ///
 ///   // ...
 /// }
@@ -5397,13 +5430,13 @@ class InheritedElement extends ProxyElement {
 ///
 /// #### Dynamically determining the children during layout
 ///
-/// If the widgets are to be generated at layout time, then generating them when
-/// the [update] method won't work: layout of this element's render object
-/// hasn't started yet at that point. Instead, the [update] method can mark the
-/// render object as needing layout (see [RenderObject.markNeedsLayout]), and
-/// then the render object's [RenderObject.performLayout] method can call back
-/// to the element to have it generate the widgets and call [updateChild]
-/// accordingly.
+/// If the widgets are to be generated at layout time, then generating them in
+/// the [mount] and [update] methods won't work: layout of this element's render
+/// object hasn't started yet at that point. Instead, the [update] method can
+/// mark the render object as needing layout (see
+/// [RenderObject.markNeedsLayout]), and then the render object's
+/// [RenderObject.performLayout] method can call back to the element to have it
+/// generate the widgets and call [updateChild] accordingly.
 ///
 /// For a render object to call an element during layout, it must use
 /// [RenderObject.invokeLayoutCallback]. For an element to call [updateChild]
@@ -5576,6 +5609,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
+  @mustCallSuper
   void performRebuild() {
     assert(() {
       _debugDoingBuild = true;

@@ -167,6 +167,10 @@ class Slider extends StatefulWidget {
        assert(divisions == null || divisions > 0),
        super(key: key);
 
+  /// Creates an adaptive [Slider] based on the target platform, following
+  /// Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  ///
   /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
   /// Material Design slider otherwise.
   ///
@@ -1330,8 +1334,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool get sizedByParent => true;
 
   @override
-  void performResize() {
-    size = Size(
+  Size computeDryLayout(BoxConstraints constraints) {
+    return Size(
       constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _maxSliderPartWidth,
       constraints.hasBoundedHeight ? constraints.maxHeight : math.max(_minPreferredTrackHeight, _maxSliderPartHeight),
     );
@@ -1584,5 +1588,10 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
     if (_state.paintValueIndicator != null) {
       _state.paintValueIndicator!(context, offset);
     }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.smallest;
   }
 }

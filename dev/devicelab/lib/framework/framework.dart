@@ -13,6 +13,7 @@ import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'adb.dart';
+import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
@@ -39,7 +40,7 @@ bool _isTaskRegistered = false;
 ///
 /// It is OK for a [task] to perform many things. However, only one task can be
 /// registered per Dart VM.
-Future<TaskResult> task(TaskFunction task) {
+Future<TaskResult> task(TaskFunction task) async {
   if (_isTaskRegistered)
     throw StateError('A task is already registered');
 
@@ -90,6 +91,18 @@ class _TaskRunner {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
+      final String exe = Platform.isWindows ? '.exe' : '';
+      section('Checking running Dart$exe processes');
+      final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toSet();
+      final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
+      beforeRunningDartInstances.forEach(print);
+      for (final RunningProcessInfo info in allProcesses) {
+        if (info.commandLine.contains('iproxy')) {
+          print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
+        }
+      }
       print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
         'config',
@@ -107,7 +120,26 @@ class _TaskRunner {
       if (taskTimeout != null)
         futureResult = futureResult.timeout(taskTimeout);
 
-      final TaskResult result = await futureResult;
+      TaskResult result = await futureResult;
+
+      section('Checking running Dart$exe processes after task...');
+      final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toList();
+      for (final RunningProcessInfo info in afterRunningDartInstances) {
+        if (!beforeRunningDartInstances.contains(info)) {
+          print('$info was leaked by this test.');
+          if (result is TaskResultCheckProcesses) {
+            result = TaskResult.failure('This test leaked dart processes');
+          }
+          final bool killed = await killProcess(info.pid);
+          if (!killed) {
+            print('Failed to kill process ${info.pid}.');
+          } else {
+            print('Killed process id ${info.pid}.');
+          }
+        }
+      }
       _completer.complete(result);
       return result;
     } on TimeoutException catch (err, stackTrace) {
@@ -116,16 +148,16 @@ class _TaskRunner {
       print(stackTrace);
       return TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
-      print('Cleaning up after task...');
-      await forceQuitRunningProcesses();
       await checkForRebootRequired();
+      await forceQuitRunningProcesses();
       _closeKeepAlivePort();
     }
   }
 
   Future<void> checkForRebootRequired() async {
+    print('Checking for reboot');
     try {
-      final Device device = await devices.workingDevice.timeout(const Duration(seconds: 15));
+      final Device device = await devices.workingDevice;
       if (noRebootForbidList.contains(device.deviceId)) {
         return;
       }
@@ -143,7 +175,7 @@ class _TaskRunner {
         return;
       }
       rebootFile.deleteSync();
-      print('Rebooting ${device.deviceId}');
+      print('rebooting');
       await device.reboot();
     } on TimeoutException {
       // Could not find device in order to reboot.

@@ -65,6 +65,9 @@ const String kFileSystemRoots = 'FileSystemRoots';
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
+/// Path to the SDK root to be used as the isysroot.
+const String kSdkRoot = 'SdkRoot';
+
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
 

@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:file/file.dart' as fs;
+import 'package:file/local.dart';
 import 'package:googleapis/bigquery/v2.dart' as bq;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
@@ -37,6 +39,7 @@ final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pu
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+final String flutterPluginsVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_plugins.version');
 
 String get platformFolderName {
   if (Platform.isWindows)
@@ -52,6 +55,8 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
+
+final Map<String, String> localEngineEnv = <String, String>{};
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
@@ -80,23 +85,12 @@ int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
 /// WARNING: this number must match the shard count in LUCI configs.
 const int kWebLongRunningTestShardCount = 3;
 
-/// Tests that we don't run on Web for various reasons.
+/// Tests that we don't run on Web for compilation reasons.
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileKnownFailures = <String>[
-  // This test doesn't compile because it depends on code outside the flutter package.
+  'test/services/message_codecs_vm_test.dart',
   'test/examples/sector_layout_test.dart',
-  // This test relies on widget tracking capability in the VM.
-  'test/widgets/widget_inspector_test.dart',
-
-  'test/widgets/selectable_text_test.dart',
-  'test/widgets/color_filter_test.dart',
-  'test/widgets/editable_text_cursor_test.dart',
-  'test/material/data_table_test.dart',
-  'test/cupertino/nav_bar_transition_test.dart',
-  'test/cupertino/refresh_test.dart',
-  'test/cupertino/text_field_test.dart',
-  'test/cupertino/route_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -113,6 +107,13 @@ Future<void> main(List<String> args) async {
   print('$clock STARTING ANALYSIS');
   try {
     flutterTestArgs.addAll(args);
+    for (final String arg in args) {
+      if (arg.startsWith('--local-engine='))
+        localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
+      if (arg.startsWith('--local-engine-src-path='))
+        localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
+    }
+
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
@@ -125,9 +126,11 @@ Future<void> main(List<String> args) async {
       'framework_tests': _runFrameworkTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
+      'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
+      'flutter_plugins': _runFlutterPluginsTests,
     });
   } on ExitException catch (error) {
     error.apply();
@@ -313,6 +316,7 @@ Future<void> _runToolCoverage() async {
 
 Future<void> _runToolTests() async {
   const String kDotShard = '.shard';
+  const String kWeb = 'web';
   const String kTest = 'test';
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
@@ -321,6 +325,7 @@ Future<void> _runToolTests() async {
       .listSync()
       .map<String>((FileSystemEntity entry) => entry.path)
       .where((String name) => name.endsWith(kDotShard))
+      .where((String name) => path.basenameWithoutExtension(name) != kWeb)
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
@@ -337,6 +342,27 @@ Future<void> _runToolTests() async {
       );
     },
   );
+
+  await selectSubshard(subshards);
+}
+
+Future<void> _runWebToolTests() async {
+  const String kDotShard = '.shard';
+  const String kWeb = 'web';
+  const String kTest = 'test';
+  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+
+  final Map<String, ShardRunner> subshards = <String, ShardRunner>{
+      kWeb:
+      () async {
+        await _pubRunTest(
+          toolsPath,
+          forceSingleCore: true,
+          testPaths: <String>[path.join(kTest, '$kWeb$kDotShard', '')],
+          enableFlutterToolAsserts: true,
+        );
+      }
+  };
 
   await selectSubshard(subshards);
 }
@@ -383,7 +409,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = hasNullSafety
-    ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
+    ? <String>['--no-sound-null-safety']
     : <String>[];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -589,8 +615,8 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
-  final List<String> soundNullSafetyOptions     = <String>['--enable-experiment=non-nullable', '--null-assertions', '--sound-null-safety'];
-  final List<String> mixedModeNullSafetyOptions = <String>['--enable-experiment=non-nullable', '--null-assertions', '--no-sound-null-safety'];
+  final List<String> soundNullSafetyOptions     = <String>['--null-assertions', '--sound-null-safety'];
+  final List<String> mixedModeNullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -611,6 +637,13 @@ Future<void> _runFrameworkTests() async {
         tableData: bigqueryApi?.tabledata,
       );
     }
+    // Run release mode tests (see packages/flutter/test_release/README.md)
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
+      tableData: bigqueryApi?.tabledata,
+      tests: <String>[ 'test_release' + path.separator ],
+    );
   }
 
   Future<void> runLibraries() async {
@@ -634,7 +667,6 @@ Future<void> _runFrameworkTests() async {
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
       'run',
-      '--enable-experiment=non-nullable',
       '--sound-null-safety',
       'test_private.dart',
     ];
@@ -671,6 +703,7 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'benchmarks', 'metrics_center'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
@@ -678,8 +711,9 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
@@ -757,7 +791,7 @@ Future<void> _runWebUnitTests() async {
     )
     .whereType<File>()
     .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
-    .where((String filePath) => !kWebTestFileKnownFailures.contains(filePath))
+    .where((String filePath) => !kWebTestFileKnownFailures.contains(path.split(filePath).join('/')))
     .toList()
     // Finally we shuffle the list because we want the average cost per file to be uniformly
     // distributed. If the list is not sorted then different shards and batches may have
@@ -820,6 +854,77 @@ Future<void> _runWebLongRunningTests() async {
   await _ensureChromeDriverIsRunning();
   await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
   await _stopChromeDriver();
+}
+
+/// Returns the commit hash of the flutter/plugins repository that's rolled in.
+///
+/// The flutter/plugins repository is a downstream dependency, it is only used
+/// by flutter/flutter for testing purposes, to assure stable tests for a given
+/// flutter commit the flutter/plugins commit hash to test against is coded in
+/// the bin/internal/flutter_plugins.version file.
+///
+/// The `filesystem` parameter specified filesystem to read the plugins version file from.
+/// The `pluginsVersionFile` parameter allows specifying an alternative path for the
+/// plugins version file, when null [flutterPluginsVersionFile] is used.
+Future<String> getFlutterPluginsVersion({
+  fs.FileSystem fileSystem = const LocalFileSystem(),
+  String pluginsVersionFile,
+}) async {
+  final File versionFile = fileSystem.file(pluginsVersionFile ?? flutterPluginsVersionFile);
+  final String versionFileContents = await versionFile.readAsString();
+  return versionFileContents.trim();
+}
+
+/// Executes the test suite for the flutter/plugins repo.
+Future<void> _runFlutterPluginsTests() async {
+  Future<void> runAnalyze() async {
+    print('${green}Running analysis for flutter/plugins$reset');
+    final Directory checkout = Directory.systemTemp.createTempSync('plugins');
+    await runCommand(
+      'git',
+      <String>[
+        '-c',
+        'core.longPaths=true',
+        'clone',
+        'https://github.com/flutter/plugins.git',
+        '.'
+      ],
+      workingDirectory: checkout.path,
+    );
+    final String pluginsCommit = await getFlutterPluginsVersion();
+    await runCommand(
+      'git',
+      <String>[
+        '-c',
+        'core.longPaths=true',
+        'checkout',
+        pluginsCommit,
+      ],
+      workingDirectory: checkout.path,
+    );
+    await runCommand(
+      pub,
+      <String>[
+        'global',
+        'activate',
+        'flutter_plugin_tools',
+      ],
+      workingDirectory: checkout.path,
+    );
+    await runCommand(
+      pub,
+      <String>[
+        'global',
+        'run',
+        'flutter_plugin_tools',
+        'analyze',
+      ],
+      workingDirectory: checkout.path,
+    );
+  }
+  await selectSubshard(<String, ShardRunner>{
+    'analyze': runAnalyze,
+  });
 }
 
 // The `chromedriver` process created by this test.
@@ -937,13 +1042,9 @@ Future<void> _runWebIntegrationTests() async {
     ]
   );
   await _runWebDebugTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--enable-experiment',
-    'non-nullable',
     '--sound-null-safety',
   ]);
   await _runWebReleaseTest('lib/sound_mode.dart', additionalArguments: <String>[
-    '--enable-experiment',
-    'non-nullable',
     '--sound-null-safety',
   ]);
 }
@@ -1048,8 +1149,6 @@ Future<void> _runWebDebugTest(String target, {
       '--debug',
       if (enableNullSafety)
         ...<String>[
-          '--enable-experiment',
-          'non-nullable',
           '--no-sound-null-safety',
           '--null-assertions',
         ],
@@ -1094,13 +1193,13 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
         '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
+      '--sound-null-safety', // web tests do not autodetect yet.
       ...?flutterTestArgs,
       ...tests,
     ],
     workingDirectory: workingDirectory,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
-      'FLUTTER_LOW_RESOURCE_MODE': 'true',
     },
   );
 }
@@ -1152,6 +1251,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
+    ...localEngineEnv
   };
   if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;

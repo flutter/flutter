@@ -779,9 +779,6 @@ const String _dartPluginRegistryTemplate = '''
 // Generated file. Do not edit.
 //
 
-// ignore: unused_import
-import 'dart:ui';
-
 {{#plugins}}
 import 'package:{{name}}/{{file}}';
 {{/plugins}}
@@ -789,11 +786,11 @@ import 'package:{{name}}/{{file}}';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
-void registerPlugins(PluginRegistry registry) {
+void registerPlugins(Registrar registrar) {
 {{#plugins}}
-  {{class}}.registerWith(registry.registrarFor({{class}}));
+  {{class}}.registerWith(registrar);
 {{/plugins}}
-  registry.registerMessageHandler();
+  registrar.registerMessageHandler();
 }
 ''';
 
@@ -897,36 +894,24 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
     'framework': 'Flutter',
     'plugins': iosPlugins,
   };
-  final String registryDirectory = project.ios.pluginRegistrantHost.path;
   if (project.isModule) {
-    final String registryClassesDirectory = globals.fs.path.join(registryDirectory, 'Classes');
+    final String registryDirectory = project.ios.pluginRegistrantHost.path;
     _renderTemplateToFile(
       _pluginRegistrantPodspecTemplate,
       context,
       globals.fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
     );
-    _renderTemplateToFile(
-      _objcPluginRegistryHeaderTemplate,
-      context,
-      globals.fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
-    );
-    _renderTemplateToFile(
-      _objcPluginRegistryImplementationTemplate,
-      context,
-      globals.fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
-    );
-  } else {
-    _renderTemplateToFile(
-      _objcPluginRegistryHeaderTemplate,
-      context,
-      globals.fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.h'),
-    );
-    _renderTemplateToFile(
-      _objcPluginRegistryImplementationTemplate,
-      context,
-      globals.fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.m'),
-    );
   }
+  _renderTemplateToFile(
+    _objcPluginRegistryHeaderTemplate,
+    context,
+    project.ios.pluginRegistrantHeader.path,
+  );
+  _renderTemplateToFile(
+    _objcPluginRegistryImplementationTemplate,
+    context,
+    project.ios.pluginRegistrantImplementation.path,
+  );
 }
 
 /// The relative path from a project's main CMake file to the plugin symlink
@@ -1100,7 +1085,7 @@ void handleSymlinkException(FileSystemException e, {
   if (platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
     final String versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
     final Version version = Version.parse(versionString);
-    // Window 10 14972 is the oldest version that allows creating symlinks
+    // Windows 10 14972 is the oldest version that allows creating symlinks
     // just by enabling developer mode; before that it requires running the
     // terminal as Administrator.
     // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/

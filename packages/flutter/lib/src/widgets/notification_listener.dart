@@ -11,9 +11,84 @@ import 'framework.dart';
 /// Return true to cancel the notification bubbling. Return false to allow the
 /// notification to continue to be dispatched to further ancestors.
 ///
+/// [NotificationListener] is useful when listening scroll events
+/// in [ListView],[NestedScrollView],[GridView] or any Scrolling widgets.
 /// Used by [NotificationListener.onNotification].
+
 typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
 
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example shows a [NotificationListener] widget
+/// that listens for [ScrollNotification] notifications. When a scroll
+/// event occurs in the [NestedScrollView],
+/// this widget is notified. The events could be either a
+/// [ScrollStartNotification]or[ScrollEndNotification].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+/// const List<String> _tabs = ["Months", "Days"];
+/// const List<String> _months = [ "January","February","March", ];
+/// const List<String> _days = [ "Sunday", "Monday","Tuesday", ];
+///   return DefaultTabController(
+///     length: _tabs.length,
+///     child: Scaffold(
+///       // Listens to the scroll events and returns the current position.
+///       body: NotificationListener<ScrollNotification>(
+///         onNotification: (scrollNotification) {
+///           if (scrollNotification is ScrollStartNotification) {
+///             print('Scrolling has started');
+///           } else if (scrollNotification is ScrollEndNotification) {
+///             print("Scrolling has ended");
+///           }
+///           // Return true to cancel the notification bubbling.
+///           return true;
+///         },
+///         child: NestedScrollView(
+///           headerSliverBuilder:
+///               (BuildContext context, bool innerBoxIsScrolled) {
+///             return <Widget>[
+///               SliverAppBar(
+///                 title: const Text("Flutter Code Sample"),
+///                 pinned: true,
+///                 floating: true,
+///                 bottom: TabBar(
+///                   tabs: _tabs.map((name) => Tab(text: name)).toList(),
+///                 ),
+///               ),
+///             ];
+///           },
+///           body: TabBarView(
+///             children: [
+///               ListView.builder(
+///                 itemCount: _months.length,
+///                 itemBuilder: (context, index) {
+///                   return ListTile(title: Text(_months[index]));
+///                 },
+///               ),
+///               ListView.builder(
+///                 itemCount: _days.length,
+///                 itemBuilder: (context, index) {
+///                   return ListTile(title: Text(_days[index]));
+///                 },
+///               ),
+///            ],
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [ScrollNotification] which describes the notification lifecycle.
+///  * [ScrollStartNotification] which returns the start position of scrolling.
+///  * [ScrollEndNotification] which returns the end position of scrolling.
+///  * [NestedScrollView] which creates a nested scroll view.
+///
 /// A notification that can bubble up the widget tree.
 ///
 /// You can determine the type of a notification using the `is` operator to
