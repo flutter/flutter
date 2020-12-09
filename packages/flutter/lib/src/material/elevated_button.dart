@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -91,6 +92,7 @@ class ElevatedButton extends ButtonStyleButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
+    IconAlignment? iconAlignment,
   }) = _ElevatedButtonWithIcon;
 
   /// A static convenience method that constructs an elevated button
@@ -383,6 +385,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
+    IconAlignment? iconAlignment,
   }) : assert(icon != null),
        assert(label != null),
        super(
@@ -393,7 +396,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
          focusNode: focusNode,
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _ElevatedButtonWithIconChild(icon: icon, label: label),
+         child: _ElevatedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? IconAlignment.left),
       );
 
   @override
@@ -411,18 +414,34 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
 }
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {
-  const _ElevatedButtonWithIconChild({ Key? key, required this.label, required this.icon }) : super(key: key);
+  const _ElevatedButtonWithIconChild({
+    Key? key,
+    required this.label,
+    required this.icon,
+    required this.iconAlignment
+  }) : super(key: key);
 
   final Widget label;
   final Widget icon;
+  final IconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
     final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
+    
+    List<Widget> _renderButtonChildren() {
+      switch (iconAlignment) {
+        case IconAlignment.left:
+          return <Widget>[icon, SizedBox(width: gap), label];
+        case IconAlignment.right:
+          return <Widget>[label, SizedBox(width: gap), icon];
+      }
+    }
+
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
+      children: _renderButtonChildren(),
     );
   }
 }
