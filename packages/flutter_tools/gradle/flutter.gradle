@@ -317,9 +317,11 @@ class FlutterPlugin implements Plugin<Project> {
             pluginProject.android.buildTypes {
                 "${buildType.name}" {}
             }
-            pluginProject.dependencies.add(
-                "${buildType.name}CompileOnly",
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
+            addApiDependencies(
+                pluginProject,
+                buildType.name,
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
+            )
         }
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
