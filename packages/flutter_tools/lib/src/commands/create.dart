@@ -505,4 +505,3 @@ For more information, see https://flutter.dev/go/plugin-platforms.
 
 ''');
 }
-
