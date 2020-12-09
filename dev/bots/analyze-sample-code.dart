@@ -8,9 +8,11 @@
 //   bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
+import 'package:watcher/watcher.dart';
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
@@ -36,6 +38,11 @@ void main(List<String> arguments) {
     defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
+  );
+  argParser.addOption(
+    'interactive',
+    abbr: 'i',
+    help: 'Analyzes the sample code in the specified file interactivly.',
   );
 
   final ArgResults parsedArguments = argParser.parse(arguments);
@@ -69,15 +76,20 @@ void main(List<String> arguments) {
     }
     tempDirectory.createSync();
   }
-  try {
-    exitCode = SampleChecker(
-      flutterPackage,
-      tempDirectory: tempDirectory,
-      verbose: parsedArguments['verbose'] as bool,
-    ).checkSamples();
-  } on SampleCheckerException catch (e) {
-    stderr.write(e);
-    exit(1);
+
+  if (parsedArguments['interactive'] != null) {
+    _runInteractive(tempDirectory, flutterPackage, parsedArguments['interactive'] as String);
+  } else {
+    try {
+      exitCode = SampleChecker(
+        flutterPackage,
+        tempDirectory: tempDirectory,
+        verbose: parsedArguments['verbose'] as bool,
+      ).checkSamples();
+    } on SampleCheckerException catch (e) {
+      stderr.write(e);
+      exit(1);
+    }
   }
 }
 
@@ -211,7 +223,7 @@ class SampleChecker {
     try {
       final Map<String, Section> sections = <String, Section>{};
       final Map<String, Sample> snippets = <String, Sample>{};
-      _extractSamples(sections, snippets);
+      _extractSamples(_listDartFiles(_flutterPackage, recursive: true), sectionMap: sections, sampleMap: snippets);
       errors = _analyze(_tempDirectory, sections, snippets);
     } finally {
       if (errors.isNotEmpty) {
@@ -305,13 +317,13 @@ class SampleChecker {
     return outputFile;
   }
 
-  /// Extracts the samples from the Dart files in [_flutterPackage], writes them
+  /// Extracts the samples from the Dart files in [files], writes them
   /// to disk, and adds them to the appropriate [sectionMap] or [sampleMap].
-  void _extractSamples(Map<String, Section> sectionMap, Map<String, Sample> sampleMap) {
+  void _extractSamples(List<File> files, {Map<String, Section> sectionMap, Map<String, Sample> sampleMap, bool silent = false}) {
     final List<Section> sections = <Section>[];
     final List<Sample> samples = <Sample>[];
 
-    for (final File file in _listDartFiles(_flutterPackage, recursive: true)) {
+    for (final File file in files) {
       final String relativeFilePath = path.relative(file.path, from: _flutterPackage.path);
       final List<String> sampleLines = file.readAsLinesSync();
       final List<Section> preambleSections = <Section>[];
@@ -434,14 +446,19 @@ class SampleChecker {
         }
       }
     }
-    print('Found ${sections.length} sample code sections.');
+    if (!silent)
+      print('Found ${sections.length} sample code sections.');
     for (final Section section in sections) {
-      sectionMap[_writeSection(section).path] = section;
+      final String path = _writeSection(section).path;
+      if (sectionMap != null)
+        sectionMap[path] = section;
     }
     for (final Sample sample in samples) {
       final File snippetFile = _writeSample(sample);
-      sample.contents = snippetFile.readAsLinesSync();
-      sampleMap[snippetFile.absolute.path] = sample;
+      if (sampleMap != null) {
+        sample.contents = snippetFile.readAsLinesSync();
+        sampleMap[snippetFile.absolute.path] = sample;
+      }
     }
   }
 
@@ -907,4 +924,46 @@ class AnalysisError {
       return '<source unknown>:$line:$column\n>>> $message ($errorCode)';
     }
   }
+}
+
+Future<void> _runInteractive(Directory tempDir, Directory flutterPackage, String filePath) async {
+  print('Starting up in interactive mode...');
+  filePath = path.isAbsolute(filePath) ? filePath : path.join(path.current, filePath);
+  final File file = File(filePath);
+  if (!file.existsSync()) {
+    throw 'Path ${file.absolute.path} does not exist.';
+  }
+  if (!path.isWithin(_flutterRoot, file.absolute.path)) {
+    throw 'Path ${file.absolute.path} is not within the flutter root: $_flutterRoot';
+  }
+
+  if (tempDir == null) {
+    tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
+    ProcessSignal.sigint.watch().listen((_) {
+      print('Deleting temp files...');
+      tempDir.deleteSync(recursive: true);
+      exit(0);
+    });
+  }
+
+  final SampleChecker checker = SampleChecker(flutterPackage, tempDirectory: tempDir)
+    .._createConfigurationFiles(tempDir)
+    .._extractSamples(<File>[file], silent: true);
+
+  await Isolate.spawn(_watcher, <dynamic>[checker, file]);
+
+  await Process.start(
+    _flutter,
+    <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', '--watch', '.'],
+    workingDirectory: tempDir.absolute.path,
+    mode: ProcessStartMode.inheritStdio
+  );
+}
+
+void _watcher(List<dynamic> args) {
+  final File file = args.last as File;
+  final SampleChecker checker = args.first as SampleChecker;
+  Watcher(file.absolute.path).events.listen((_) {
+    checker._extractSamples(<File>[file], silent: true);
+  });
 }
