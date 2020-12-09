@@ -350,17 +350,17 @@ bool DartIsolate::LoadLoadingUnit(
       loading_unit_id, dart_snapshot->GetDataMapping(),
       dart_snapshot->GetInstructionsMapping());
   if (tonic::LogIfError(result)) {
-    LoadLoadingUnitFailure(loading_unit_id, Dart_GetError(result),
-                           /*transient*/ true);
+    LoadLoadingUnitError(loading_unit_id, Dart_GetError(result),
+                         /*transient*/ true);
     return false;
   }
   loading_unit_snapshots_.insert(dart_snapshot);
   return true;
 }
 
-void DartIsolate::LoadLoadingUnitFailure(intptr_t loading_unit_id,
-                                         const std::string error_message,
-                                         bool transient) {
+void DartIsolate::LoadLoadingUnitError(intptr_t loading_unit_id,
+                                       const std::string error_message,
+                                       bool transient) {
   tonic::DartState::Scope scope(this);
   Dart_Handle result = Dart_DeferredLoadCompleteError(
       loading_unit_id, error_message.c_str(), transient);

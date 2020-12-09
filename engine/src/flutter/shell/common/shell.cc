@@ -1193,6 +1193,13 @@ void Shell::LoadDartDeferredLibrary(
                                    std::move(snapshot_instructions));
 }
 
+void Shell::LoadDartDeferredLibraryError(intptr_t loading_unit_id,
+                                         const std::string error_message,
+                                         bool transient) {
+  engine_->LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                        transient);
+}
+
 void Shell::UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager) {
   engine_->UpdateAssetManager(std::move(asset_manager));
 }
