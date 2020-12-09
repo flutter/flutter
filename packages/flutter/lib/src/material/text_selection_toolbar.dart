@@ -418,15 +418,15 @@ class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
   final bool overflowOpen;
 
   @override
-  _TextSelectionToolbarItemsLayoutRenderBox createRenderObject(BuildContext context) {
-    return _TextSelectionToolbarItemsLayoutRenderBox(
+  _RenderTextSelectionToolbarItemsLayout createRenderObject(BuildContext context) {
+    return _RenderTextSelectionToolbarItemsLayout(
       isAbove: isAbove,
       overflowOpen: overflowOpen,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _TextSelectionToolbarItemsLayoutRenderBox renderObject) {
+  void updateRenderObject(BuildContext context, _RenderTextSelectionToolbarItemsLayout renderObject) {
     renderObject
       ..isAbove = isAbove
       ..overflowOpen = overflowOpen;
@@ -451,8 +451,8 @@ class _TextSelectionToolbarItemsLayoutElement extends MultiChildRenderObjectElem
   }
 }
 
-class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData> {
-  _TextSelectionToolbarItemsLayoutRenderBox({
+class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData> {
+  _RenderTextSelectionToolbarItemsLayout({
     required bool isAbove,
     required bool overflowOpen,
   }) : assert(overflowOpen != null),
@@ -546,7 +546,7 @@ class _TextSelectionToolbarItemsLayoutRenderBox extends RenderBox with Container
     return (index > _lastIndexThatFits) == overflowOpen;
   }
 
-  // Decide which children will be pained and set their shouldPaint, and set the
+  // Decide which children will be painted, set their shouldPaint, and set the
   // offset that painted children will be placed at.
   void _placeChildren() {
     int i = -1;
