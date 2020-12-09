@@ -65,6 +65,8 @@ void main() {
       testWithoutContext('eulaSigned is false when clang is not installed', () {
         when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
 
+        when(processManager.runSync(<String>['which', 'sysctl']))
+            .thenReturn(ProcessResult(1, 0, '', ''));
         when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
             .thenReturn(ProcessResult(123, 1, '', ''));
         when(processManager.runSync(<String>['xcrun', 'clang']))
@@ -300,9 +302,8 @@ void main() {
         });
 
         testWithoutContext('SDK name', () {
-          expect(getNameForSdk(SdkType.iPhone), 'iphoneos');
-          expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
-          expect(getNameForSdk(SdkType.macOS), 'macosx');
+          expect(getSDKNameForIOSEnvironmentType(EnvironmentType.physical), 'iphoneos');
+          expect(getSDKNameForIOSEnvironmentType(EnvironmentType.simulator), 'iphonesimulator');
         });
 
         group('SDK location', () {
@@ -314,17 +315,7 @@ void main() {
               stdout: sdkroot,
             ));
 
-            expect(await xcode.sdkLocation(SdkType.iPhone), sdkroot);
-            expect(fakeProcessManager.hasRemainingExpectations, isFalse);
-          });
-
-          testWithoutContext('--show-sdk-path macosx', () async {
-            fakeProcessManager.addCommand(const FakeCommand(
-              command: <String>['xcrun', '--sdk', 'macosx', '--show-sdk-path'],
-              stdout: sdkroot,
-            ));
-
-            expect(await xcode.sdkLocation(SdkType.macOS), sdkroot);
+            expect(await xcode.sdkLocation(EnvironmentType.physical), sdkroot);
             expect(fakeProcessManager.hasRemainingExpectations, isFalse);
           });
 
@@ -335,7 +326,7 @@ void main() {
               stderr: 'xcrun: error:',
             ));
 
-            expect(() async => await xcode.sdkLocation(SdkType.iPhone),
+            expect(() async => await xcode.sdkLocation(EnvironmentType.physical),
               throwsToolExit(message: 'Could not find SDK location'));
             expect(fakeProcessManager.hasRemainingExpectations, isFalse);
           });
