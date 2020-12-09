@@ -65,14 +65,14 @@ Future<void> main() async {
       final RegExp androidPluginRegExp =
           RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
-      section('Use AGP 4.1.1');
+      section('Use AGP 4.1.0');
 
       String newBuildGradle = buildGradle.replaceAll(
-          androidPluginRegExp, 'com.android.tools.build:gradle:4.1.1');
+          androidPluginRegExp, 'com.android.tools.build:gradle:4.1.0');
       print(newBuildGradle);
       buildGradleFile.writeAsString(newBuildGradle);
 
-      section('Run flutter build apk using AGP 4.1.1');
+      section('Run flutter build apk using AGP 4.1.0');
 
       await inDirectory(exampleAppDir, () async {
         await flutter(
@@ -114,6 +114,21 @@ Future<void> main() async {
           androidPluginRegExp, 'com.android.tools.build:gradle:3.3.0');
       print(newBuildGradle);
       buildGradleFile.writeAsString(newBuildGradle);
+
+      section('Enable R8 in gradle.properties');
+
+      final File gradleProperties =
+          File(path.join(exampleAppDir.path, 'android', 'gradle.properties'));
+
+      if (!exists(gradleProperties)) {
+        return TaskResult.failure('$gradleProperties doesn\'t exist');
+      }
+
+      gradleProperties.writeAsString('''
+org.gradle.jvmargs=-Xmx1536M
+android.useAndroidX=true
+android.enableJetifier=true
+android.enableR8=true''');
 
       section('Run flutter build apk using AGP 3.3.0');
 
