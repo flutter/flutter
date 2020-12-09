@@ -211,11 +211,11 @@ void main() {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -251,11 +251,11 @@ void main() {
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                  title: const Text('Tab 1'),
+                  label: 'Tab 1',
                 ),
                 BottomNavigationBarItem(
                   icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                  title: const Text('Tab 2'),
+                  label: 'Tab 2',
                 ),
               ],
             ),
@@ -301,11 +301,11 @@ void main() {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 1'),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                title: const Text('Tab 2'),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -322,7 +322,7 @@ void main() {
                     child: CupertinoButton(
                       child: const Text('Next'),
                       onPressed: () {
-                        Navigator.of(context)!.push(
+                        Navigator.of(context).push(
                           CupertinoPageRoute<void>(
                             builder: (BuildContext context) {
                               return CupertinoPageScaffold(
@@ -333,7 +333,7 @@ void main() {
                                   child: CupertinoButton(
                                     child: const Text('Back'),
                                     onPressed: () {
-                                      Navigator.of(context)!.pop();
+                                      Navigator.of(context).pop();
                                     },
                                   ),
                                 ),

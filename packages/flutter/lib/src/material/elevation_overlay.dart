@@ -48,7 +48,7 @@ class ElevationOverlay {
         theme.applyElevationOverlayColor &&
         theme.brightness == Brightness.dark &&
         color.withOpacity(1.0) == theme.colorScheme.surface.withOpacity(1.0)) {
-      return Color.alphaBlend(overlayColor(context, elevation), color);
+      return colorWithOverlay(color, theme.colorScheme.onSurface, elevation);
     }
     return color;
   }
@@ -62,10 +62,26 @@ class ElevationOverlay {
   ///    specifies the exact overlay values for a given elevation.
   static Color overlayColor(BuildContext context, double elevation) {
     final ThemeData theme = Theme.of(context);
+    return _overlayColor(theme.colorScheme.onSurface, elevation);
+  }
+
+  /// Returns a color blended by laying a semi-transparent overlay (using the
+  /// [overlay] color) on top of a surface (using the [surface] color).
+  ///
+  /// The opacity of the overlay depends on [elevation]. As [elevation]
+  /// increases, the opacity will also increase.
+  ///
+  /// See https://material.io/design/color/dark-theme.html#properties.
+  static Color colorWithOverlay(Color surface, Color overlay, double elevation) {
+    return Color.alphaBlend(_overlayColor(overlay, elevation), surface);
+  }
+
+  /// Applies an opacity to [color] based on [elevation].
+  static Color _overlayColor(Color color, double elevation) {
     // Compute the opacity for the given elevation
     // This formula matches the values in the spec:
     // https://material.io/design/color/dark-theme.html#properties
     final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
-    return theme.colorScheme.onSurface.withOpacity(opacity);
+    return color.withOpacity(opacity);
   }
 }

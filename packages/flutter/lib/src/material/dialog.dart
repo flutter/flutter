@@ -58,7 +58,7 @@ class Dialog extends StatelessWidget {
   ///
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
-  /// If `null`, [ThemeData.cardColor] is used.
+  /// If `null`, [ThemeData.dialogBackgroundColor] is used.
   /// {@endtemplate}
   final Color? backgroundColor;
 
@@ -973,12 +973,13 @@ Future<T?> showDialog<T>({
   Widget? child,
 }) {
   assert(child == null || builder == null);
+  assert(child != null || builder != null);
   assert(barrierDismissible != null);
   assert(useSafeArea != null);
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final CapturedThemes themes = InheritedTheme.capture(from: context, to: Navigator.of(context, rootNavigator: useRootNavigator)!.context);
+  final CapturedThemes themes = InheritedTheme.capture(from: context, to: Navigator.of(context, rootNavigator: useRootNavigator).context);
   return showGeneralDialog(
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {

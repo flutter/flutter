@@ -1280,6 +1280,14 @@ class _RenderDecoration extends RenderBox {
   Matrix4? _labelTransform;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
+    ));
+    return const Size(0, 0);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _labelTransform = null;
@@ -2510,7 +2518,7 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
@@ -2556,7 +2564,7 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.hintStyle,
     this.filled = false,
     this.fillColor,
@@ -2744,9 +2752,9 @@ class InputDecoration {
   ///
   /// When [FloatingLabelBehavior.never] the label will always appear in an empty
   /// field in place of the content.
-  ///
-  /// Defaults to [FloatingLabelBehavior.auto].
   /// {@endtemplate}
+  ///
+  /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
@@ -3692,6 +3700,8 @@ class InputDecorationTheme with Diagnosticable {
   final bool hasFloatingPlaceholder;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
+  ///
+  /// Defaults to [FloatingLabelBehavior.auto].
   final FloatingLabelBehavior floatingLabelBehavior;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -1483,6 +1485,65 @@ void main() {
       )
     );
   });
+
+  testWidgets('Can create BuildOwner that does not interfere with pointer router or raw key event handler', (WidgetTester tester) async {
+    final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
+    final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
+    expect(rawKeyEventHandler, isNotNull);
+    BuildOwner(focusManager: _FakeFocusManager());
+    expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
+    expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
+  });
+
+  testWidgets('Errors in build', (WidgetTester tester) async {
+    final ErrorWidgetBuilder oldErrorBuilder = ErrorWidget.builder;
+    ErrorWidget.builder = (FlutterErrorDetails detail) => throw AssertionError();
+    try {
+      final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails detail) {};
+      try {
+        int buildCount = 0;
+        void handleBuild() => buildCount++;
+        expect(tester.binding.buildOwner!.debugCurrentBuildTarget, isNull);
+        await tester.pumpWidget(_WidgetThatCanThrowInBuild(onBuild: handleBuild));
+        expect(buildCount, 1);
+        await tester.pumpWidget(_WidgetThatCanThrowInBuild(onBuild: handleBuild, shouldThrow: true));
+        tester.takeException();
+        expect(buildCount, 2);
+        expect(tester.binding.buildOwner!.debugCurrentBuildTarget, isNull);
+      } finally {
+        FlutterError.onError = oldErrorHandler;
+      }
+    } finally {
+      ErrorWidget.builder = oldErrorBuilder;
+    }
+  });
+}
+
+class _WidgetThatCanThrowInBuild extends StatelessWidget {
+  const _WidgetThatCanThrowInBuild({required this.onBuild, this.shouldThrow = false});
+
+  final VoidCallback onBuild;
+  final bool shouldThrow;
+
+  @override
+  Widget build(BuildContext context) {
+    onBuild();
+    assert(!shouldThrow);
+    return Container();
+  }
+}
+
+class _FakeFocusManager implements FocusManager {
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
+
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return '_FakeFocusManager';
+  }
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
@@ -1804,6 +1865,11 @@ class RenderObjectWidgetSpy extends LeafRenderObjectWidget {
 }
 
 class FakeLeafRenderObject extends RenderBox {
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
   @override
   void performLayout() {
     size = constraints.biggest;

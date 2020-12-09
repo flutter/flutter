@@ -627,32 +627,45 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
   }
 
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
+  Size _calculateChildSize(BoxConstraints constraints) {
     double maxHeight = _kMinSegmentedControlHeight;
-
     double childWidth = constraints.minWidth / childCount;
-    for (final RenderBox child in getChildrenAsList()) {
+    RenderBox? child = firstChild;
+    while (child != null) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
+      child = childAfter(child);
     }
     childWidth = math.min(childWidth, constraints.maxWidth / childCount);
-
-    RenderBox? child = firstChild;
+    child = firstChild;
     while (child != null) {
       final double boxHeight = child.getMaxIntrinsicHeight(childWidth);
       maxHeight = math.max(maxHeight, boxHeight);
       child = childAfter(child);
     }
+    return Size(childWidth, maxHeight);
+  }
 
-    constraints.constrainHeight(maxHeight);
+  Size _computeOverallSizeFromChildSize(Size childSize) {
+    return constraints.constrain(Size(childSize.width * childCount, childSize.height));
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final Size childSize = _calculateChildSize(constraints);
+    return _computeOverallSizeFromChildSize(childSize);
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    final Size childSize = _calculateChildSize(constraints);
 
     final BoxConstraints childConstraints = BoxConstraints.tightFor(
-      width: childWidth,
-      height: maxHeight,
+      width: childSize.width,
+      height: childSize.height,
     );
 
-    child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       child.layout(childConstraints, parentUsesSize: true);
       child = childAfter(child);
@@ -675,7 +688,7 @@ class _RenderSegmentedControl<T> extends RenderBox
         break;
     }
 
-    size = constraints.constrain(Size(childWidth * childCount, maxHeight));
+    size = _computeOverallSizeFromChildSize(childSize);
   }
 
   @override

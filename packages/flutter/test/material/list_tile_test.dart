@@ -1929,6 +1929,54 @@ void main() {
     expect(right('title'), 728.0);
   });
 
+  testWidgets('ListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
+    Widget buildFrame({
+      double? horizontalTitleGap,
+      VisualDensity? visualDensity
+    }) {
+      return MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          textScaleFactor: 1.0,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: ListTile(
+                visualDensity: visualDensity,
+                horizontalTitleGap: horizontalTitleGap,
+                leading: const Text('L'),
+                title: const Text('title'),
+                trailing: const Text('T'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+
+    await tester.pumpWidget(buildFrame(
+      horizontalTitleGap: 10.0,
+      visualDensity: const VisualDensity(horizontal: VisualDensity.minimumDensity),
+    ));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 58.0);
+
+    // Pump another frame of the same widget to ensure the underlying render
+    // object did not cache the original horizontalTitleGap calculation based on the
+    // visualDensity
+    await tester.pumpWidget(buildFrame(
+      horizontalTitleGap: 10.0,
+      visualDensity: const VisualDensity(horizontal: VisualDensity.minimumDensity),
+    ));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+    expect(left('title'), 58.0);
+  });
+
   testWidgets('ListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection, { double? themeMinVerticalPadding, double? widgetMinVerticalPadding }) {
       return MediaQuery(

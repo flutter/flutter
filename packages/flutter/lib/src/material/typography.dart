@@ -96,12 +96,12 @@ class Typography with Diagnosticable {
     'This feature was deprecated after v1.13.8.'
   )
   factory Typography({
-    TargetPlatform platform,
-    TextTheme black,
-    TextTheme white,
-    TextTheme englishLike,
-    TextTheme dense,
-    TextTheme tall,
+    TargetPlatform? platform,
+    TextTheme? black,
+    TextTheme? white,
+    TextTheme? englishLike,
+    TextTheme? dense,
+    TextTheme? tall,
   }) = Typography.material2014;
 
   /// Creates a typography instance using material design's 2014 defaults.
