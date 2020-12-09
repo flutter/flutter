@@ -655,6 +655,18 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
+  Future<void> runFixTests() async {
+    final List<String> args = <String>[
+      'fix',
+      '--compare-to-golden',
+    ];
+    await runCommand(
+      dart,
+      args,
+      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_fixes'),
+    );
+  }
+
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
       'run',
@@ -713,6 +725,7 @@ Future<void> _runFrameworkTests() async {
       options: <String>['--enable-vmservice'],
       tableData: bigqueryApi?.tabledata,
     );
+    await runFixTests();
     await runPrivateTests();
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
