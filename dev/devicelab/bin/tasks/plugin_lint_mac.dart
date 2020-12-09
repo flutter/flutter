@@ -199,6 +199,8 @@ Future<void> main() async {
       final String objcAppPath = path.join(tempDir.path, objcAppName);
       final File objcPubspec = File(path.join(objcAppPath, 'pubspec.yaml'));
       String pubspecContent = objcPubspec.readAsStringSync();
+      // Add (randomly selected) first-party plugins that support iOS and macOS.
+      // Add the new plugins we just made.
       pubspecContent = pubspecContent.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n  url_launcher:\n  url_launcher_macos:\n',
