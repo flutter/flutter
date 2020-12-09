@@ -429,7 +429,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
   Widget build(BuildContext context) {
     final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
-    
+
     List<Widget> _renderButtonChildren() {
       switch (iconAlignment) {
         case IconAlignment.left:
