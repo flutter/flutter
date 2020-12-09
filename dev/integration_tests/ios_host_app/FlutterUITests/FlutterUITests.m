@@ -7,6 +7,7 @@
 @interface FlutterUITests : XCTestCase
 @end
 
+// TODO(jmagman): These tests has become flaky and are disabled in the test scheme. Fix https://github.com/flutter/flutter/issues/70630 and re-enable.
 @implementation FlutterUITests
 
 - (void)setUp {

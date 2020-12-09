@@ -146,13 +146,21 @@ void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1,
   if (list1 == null && list2 == null)
     return;
   if ((list1?.length ?? 0) != (list2?.length ?? 0)) {
-    print('Mismatched lists ${list1} to ${list2}');
+    print('Mismatched lists $list1 to $list2');
     return;
   }
-  Iterator<T1> it1 = list1.iterator;
-  Iterator<T2> it2 = list2.iterator;
+  final Iterator<T1> it1 = list1.iterator;
+  final Iterator<T2> it2 = list2.iterator;
   while (it1.moveNext()) {
     it2.moveNext();
     fn(it1.current, it2.current);
   }
+}
+
+/// Remove entries whose value `isEmpty` or is null, and return the map.
+///
+/// Will modify the input map.
+Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
+  return map..removeWhere((String key, dynamic value) =>
+      value == null || (value is List<dynamic> && value.isEmpty));
 }

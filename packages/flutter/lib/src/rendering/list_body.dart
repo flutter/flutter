@@ -62,8 +62,33 @@ class RenderListBody extends RenderBox
   Axis get mainAxis => axisDirectionToAxis(axisDirection);
 
   @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(_debugCheckConstraints(constraints));
+    double mainAxisExtent = 0.0;
+    RenderBox? child = firstChild;
+    switch (axisDirection) {
+      case AxisDirection.right:
+      case AxisDirection.left:
+        final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        while (child != null) {
+          final Size childSize = child.getDryLayout(innerConstraints);
+          mainAxisExtent += childSize.width;
+          child = childAfter(child);
+        }
+        return constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
+      case AxisDirection.up:
+      case AxisDirection.down:
+        final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+        while (child != null) {
+          final Size childSize = child.getDryLayout(innerConstraints);
+          mainAxisExtent += childSize.height;
+          child = childAfter(child);
+        }
+        return constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
+    }
+  }
+
+  bool _debugCheckConstraints(BoxConstraints constraints) {
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:
@@ -120,6 +145,13 @@ class RenderListBody extends RenderBox
         )
       ]);
     }());
+    return true;
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    assert(_debugCheckConstraints(constraints));
     double mainAxisExtent = 0.0;
     RenderBox? child = firstChild;
     switch (axisDirection) {

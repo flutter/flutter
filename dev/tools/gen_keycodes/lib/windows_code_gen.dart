@@ -2,62 +2,83 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
+import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
-
 
 /// Generates the key mapping of Windows, based on the information in the key
 /// data structure given to it.
 class WindowsCodeGenerator extends PlatformCodeGenerator {
-  WindowsCodeGenerator(PhysicalKeyData keyData) : super(keyData);
+  WindowsCodeGenerator(PhysicalKeyData physicalData, this.logicalData) : super(physicalData);
+
+  final LogicalKeyData logicalData;
 
   /// This generates the map of Windows scan codes to physical keys.
   String get _windowsScanCodeMap {
     final StringBuffer windowsScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.windowsScanCode != null) {
-        windowsScanCodeMap.writeln('  { ${entry.windowsScanCode}, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
+        windowsScanCodeMap.writeln('  { ${toHex(entry.windowsScanCode)}, ${toHex(entry.usbHidCode)} },    // ${entry.constantName}');
       }
     }
     return windowsScanCodeMap.toString().trimRight();
   }
 
-  /// This generates the map of Windows number pad key codes to logical keys.
-  String get _windowsNumpadMap {
-    final StringBuffer windowsNumPadMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in numpadKeyData) {
-      if (entry.windowsScanCode != null) {
-        windowsNumPadMap.writeln('  { ${toHex(entry.windowsScanCode)}, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
+  /// This generates the map of Windows key codes to logical keys.
+  String get _windowsLogicalKeyCodeMap {
+    final StringBuffer result = StringBuffer();
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
+      for (final int windowsValue in entry.windowsValues) {
+        result.writeln('  { ${toHex(windowsValue)}, ${toHex(entry.value, digits: 11)} },    // ${entry.constantName}');
       }
     }
-    return windowsNumPadMap.toString().trimRight();
+    return result.toString().trimRight();
   }
 
-  /// This generates the map of Android key codes to logical keys.
-  String get _windowsKeyCodeMap {
-    final StringBuffer windowsKeyCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
-      if (entry.windowsKeyCodes != null) {
-        for (final int code in entry.windowsKeyCodes.cast<int>()) {
-          windowsKeyCodeMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
-        }
+  /// This generates the map from scan code to logical keys.
+  ///
+  /// Normally logical keys should only be derived from key codes, but since some
+  /// key codes are either 0 or ambiguous (multiple keys using the same key
+  /// code), these keys are resolved by scan codes.
+  String get _scanCodeToLogicalMap {
+    final Map<String, dynamic> source = json.decode(File(
+      path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'windows_scancode_logical_map.json')
+    ).readAsStringSync()) as Map<String, dynamic>;
+    final StringBuffer result = StringBuffer();
+    source.forEach((String scanCodeName, dynamic logicalName) {
+      final PhysicalKeyEntry physicalEntry = keyData.getEntryByName(scanCodeName);
+      final int logicalValue = logicalData.data[logicalName]?.value;
+      if (physicalEntry == null) {
+        print('Unexpected scan code $scanCodeName specified for scanCodeToLogicalMap.');
+        return;
       }
-    }
-    return windowsKeyCodeMap.toString().trimRight();
+      if (logicalValue == null) {
+        print('Unexpected logical key $logicalName specified for scanCodeToLogicalMap.');
+        return;
+      }
+      result.writeln('  { ${toHex(physicalEntry.windowsScanCode)}, ${toHex(logicalValue, digits: 10)} },    // ${physicalEntry.name}');
+    });
+    return result.toString().trimRight();
   }
 
   @override
-  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_map_windows_cc.tmpl');
+  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'windows_flutter_key_map_cc.tmpl');
+
+  @override
+  String outputPath(String platform) => path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', path.join('shell', 'platform', 'windows', 'flutter_key_map.cc'));
 
   @override
   Map<String, String> mappings() {
     return <String, String>{
       'WINDOWS_SCAN_CODE_MAP': _windowsScanCodeMap,
-      'WINDOWS_NUMPAD_MAP': _windowsNumpadMap,
-      'WINDOWS_KEY_CODE_MAP': _windowsKeyCodeMap,
+      'WINDOWS_SCAN_CODE_TO_LOGICAL_MAP': _scanCodeToLogicalMap,
+      'WINDOWS_KEY_CODE_MAP': _windowsLogicalKeyCodeMap,
     };
   }
 }

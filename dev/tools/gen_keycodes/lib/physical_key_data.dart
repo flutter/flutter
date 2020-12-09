@@ -28,20 +28,15 @@ class PhysicalKeyData {
     String androidNameMap,
     String glfwKeyCodeHeader,
     String glfwNameMap,
-    String windowsKeyCodeHeader,
-    String windowsNameMap,
   )   : assert(chromiumHidCodes != null),
         assert(androidKeyboardLayout != null),
         assert(androidKeyCodeHeader != null),
         assert(androidNameMap != null),
         assert(glfwKeyCodeHeader != null),
-        assert(glfwNameMap != null),
-        assert(windowsKeyCodeHeader != null),
-        assert(windowsNameMap != null) {
+        assert(glfwNameMap != null) {
     _nameToAndroidScanCodes = _readAndroidScanCodes(androidKeyboardLayout);
     _nameToAndroidKeyCode = _readAndroidKeyCodes(androidKeyCodeHeader);
     _nameToGlfwKeyCode = _readGlfwKeyCodes(glfwKeyCodeHeader);
-    _nameToWindowsKeyCode = _readWindowsKeyCodes(windowsKeyCodeHeader);
     // Cast Android dom map
     final Map<String, List<dynamic>> dynamicAndroidNames = (json.decode(androidNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
     _nameToAndroidName = dynamicAndroidNames.map<String, List<String>>((String key, List<dynamic> value) {
@@ -50,11 +45,6 @@ class PhysicalKeyData {
     // Cast GLFW dom map
     final Map<String, List<dynamic>> dynamicGlfwNames = (json.decode(glfwNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
     _nameToGlfwName = dynamicGlfwNames.map<String, List<String>>((String key, List<dynamic> value) {
-      return MapEntry<String, List<String>>(key, value.cast<String>());
-    });
-    // Cast Windows dom map
-    final Map<String, List<dynamic>> dynamicWindowsNames = (json.decode(windowsNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
-    _nameToWindowsName = dynamicWindowsNames.map<String, List<String>>((String key, List<dynamic> value) {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
     data = _readHidEntries(chromiumHidCodes);
@@ -96,17 +86,6 @@ class PhysicalKeyData {
           }
         }
       }
-
-      // Windows key names
-      entry.windowsKeyNames = _nameToWindowsName[entry.constantName]?.cast<String>();
-      if (entry.windowsKeyNames != null && entry.windowsKeyNames.isNotEmpty) {
-        for (final String windowsKeyName in entry.windowsKeyNames) {
-          if (_nameToWindowsKeyCode[windowsKeyName] != null) {
-            entry.windowsKeyCodes ??= <int>[];
-            entry.windowsKeyCodes.add(_nameToWindowsKeyCode[windowsKeyName]);
-          }
-        }
-      }
     }
 
     final Map<String, dynamic> outputMap = <String, dynamic>{};
@@ -118,6 +97,15 @@ class PhysicalKeyData {
 
   /// The list of keys.
   List<PhysicalKeyEntry> data;
+  PhysicalKeyEntry getEntryByName(String name) {
+    if (_dataByName.isEmpty) {
+      for (final PhysicalKeyEntry entry in data) {
+        _dataByName[entry.name] = entry;
+      }
+    }
+    return _dataByName[name];
+  }
+  final Map<String, PhysicalKeyEntry> _dataByName = <String, PhysicalKeyEntry>{};
 
   /// The mapping from the Flutter name (e.g. "eject") to the Android name (e.g.
   /// "MEDIA_EJECT").
@@ -153,21 +141,6 @@ class PhysicalKeyData {
   /// Only populated if data is parsed from the source files, not if parsed from
   /// JSON.
   Map<String, int> _nameToGlfwKeyCode;
-
-  /// The mapping from Widows name (e.g. "RETURN") to the integer key code
-  /// (logical meaning) of the key.
-  ///
-  /// Only populated if data is parsed from the source files, not if parsed from
-  /// JSON.
-  Map<String, int> _nameToWindowsKeyCode;
-
-  /// The mapping from the Flutter name (e.g. "enter") to the Windows name (e.g.
-  /// "RETURN").
-  ///
-  /// Only populated if data is parsed from the source files, not if parsed from
-  /// JSON.
-  Map<String, List<String>> _nameToWindowsName;
-
 
   /// Parses entries from Androids Generic.kl scan code data file.
   ///
@@ -244,23 +217,6 @@ class PhysicalKeyData {
     return result;
   }
 
-  Map<String, int> _readWindowsKeyCodes(String headerFile) {
-    final RegExp definedCodes = RegExp(r'define VK_([A-Z0-9_]+)\s*([A-Z0-9_x]+),?');
-    final Map<String, int> replaced = <String, int>{};
-    for (final Match match in definedCodes.allMatches(headerFile)) {
-      replaced[match.group(1)] = int.tryParse(match.group(2));
-    }
-    // The header doesn't explicitly define the [0-9] and [A-Z], but they mention that the range
-    // is equivalent to the ASCII value.
-    for (int i = 0x30; i <= 0x39; i++) {
-      replaced[String.fromCharCode(i)] = i;
-    }
-    for (int i = 0x41; i <= 0x5A; i++) {
-      replaced[String.fromCharCode(i)] = i;
-    }
-    return replaced;
-  }
-
   /// Parses entries from Chromium's HID code mapping header file.
   ///
   /// Lines in this file look like this (without the ///):
@@ -325,8 +281,6 @@ class PhysicalKeyEntry {
     this.linuxScanCode,
     this.xKbScanCode,
     this.windowsScanCode,
-    this.windowsKeyNames,
-    this.windowsKeyCodes,
     this.macOsScanCode,
     this.iosScanCode,
     @required this.chromiumName,
@@ -352,8 +306,6 @@ class PhysicalKeyEntry {
       linuxScanCode: map['scanCodes']['linux'] as int,
       xKbScanCode: map['scanCodes']['xkb'] as int,
       windowsScanCode: map['scanCodes']['windows'] as int,
-      windowsKeyCodes: (map['keyCodes']['windows'] as List<dynamic>)?.cast<int>(),
-      windowsKeyNames: (map['names']['windows'] as List<dynamic>)?.cast<String>(),
       macOsScanCode: map['scanCodes']['macos'] as int,
       iosScanCode: map['scanCodes']['ios'] as int,
       glfwKeyNames: (map['names']['glfw'] as List<dynamic>)?.cast<String>(),
@@ -370,13 +322,6 @@ class PhysicalKeyEntry {
   int xKbScanCode;
   /// The Windows scan code of the key from Chromium's header file.
   int windowsScanCode;
-  /// The list of Windows key codes matching this key, created by looking up the
-  /// Windows name in the Chromium data, and substituting the Windows key code
-  /// value.
-  List<int> windowsKeyCodes;
-  /// The list of names that Windows gives to this key (symbol names minus the
-  /// prefix).
-  List<String> windowsKeyNames;
   /// The macOS scan code of the key from Chromium's header file.
   int macOsScanCode;
   /// The iOS scan code of the key from UIKey's documentation (USB Hid table)
@@ -410,16 +355,15 @@ class PhysicalKeyEntry {
 
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'names': <String, dynamic>{
+    return removeEmptyValues(<String, dynamic>{
+      'names': removeEmptyValues(<String, dynamic>{
         'domkey': name,
         'android': androidKeyNames,
         'english': commentName,
         'chromium': chromiumName,
         'glfw': glfwKeyNames,
-        'windows': windowsKeyNames,
-      },
-      'scanCodes': <String, dynamic>{
+      }),
+      'scanCodes': removeEmptyValues(<String, dynamic>{
         'android': androidScanCodes,
         'usb': usbHidCode,
         'linux': linuxScanCode,
@@ -427,13 +371,12 @@ class PhysicalKeyEntry {
         'windows': windowsScanCode,
         'macos': macOsScanCode,
         'ios': iosScanCode,
-      },
-      'keyCodes': <String, List<int>>{
+      }),
+      'keyCodes': removeEmptyValues(<String, List<int>>{
         'android': androidKeyCodes,
         'glfw': glfwKeyCodes,
-        'windows': windowsKeyCodes,
-      },
-    };
+      }),
+    });
   }
 
   /// Returns the printable representation of this key, if any.

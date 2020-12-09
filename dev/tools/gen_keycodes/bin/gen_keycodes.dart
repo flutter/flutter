@@ -236,13 +236,7 @@ Future<void> main(List<String> rawArguments) async {
 
     final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
 
-    final String windowsKeyCodes = parsedArguments['windows-keycodes'] == null ?
-      await getWindowsKeyCodes() :
-      File(parsedArguments['windows-keycodes'] as String).readAsStringSync();
-
-    final String windowsToDomKey = File(parsedArguments['windows-domkey'] as String).readAsStringSync();
-
-    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey, windowsKeyCodes, windowsToDomKey);
+    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
 
     // Logical
     final String gtkKeyCodes = parsedArguments['gtk-keycodes'] == null ?
@@ -255,7 +249,13 @@ Future<void> main(List<String> rawArguments) async {
 
     final String gtkToDomKey = File(parsedArguments['gtk-domkey'] as String).readAsStringSync();
 
-    logicalData = LogicalKeyData(webLogicalKeys, gtkKeyCodes, gtkToDomKey);
+    final String windowsKeyCodes = parsedArguments['windows-keycodes'] == null ?
+      await getWindowsKeyCodes() :
+      File(parsedArguments['windows-keycodes'] as String).readAsStringSync();
+
+    final String windowsToDomKey = File(parsedArguments['windows-domkey'] as String).readAsStringSync();
+
+    logicalData = LogicalKeyData(webLogicalKeys, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey);
 
     // Write data files
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
@@ -266,7 +266,7 @@ Future<void> main(List<String> rawArguments) async {
     logicalData = LogicalKeyData.fromJson(json.decode(await File(parsedArguments['logical-data'] as String).readAsString()) as Map<String, dynamic>);
   }
 
-  List<MaskConstant> maskConstants = parseMaskConstants(json.decode(await File(parsedArguments['mask-constants'] as String).readAsString()));
+  final List<MaskConstant> maskConstants = parseMaskConstants(json.decode(await File(parsedArguments['mask-constants'] as String).readAsString()));
 
   final File codeFile = File(parsedArguments['code'] as String);
   if (!codeFile.existsSync()) {
@@ -301,7 +301,7 @@ Future<void> main(List<String> rawArguments) async {
         codeGenerator = IosCodeGenerator(physicalData);
         break;
       case 'windows':
-        codeGenerator = WindowsCodeGenerator(physicalData);
+        codeGenerator = WindowsCodeGenerator(physicalData, logicalData);
         break;
       case 'linux':
         codeGenerator = GtkCodeGenerator(physicalData, logicalData);

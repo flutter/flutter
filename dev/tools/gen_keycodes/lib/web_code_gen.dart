@@ -8,8 +8,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'physical_key_data.dart';
 import 'logical_key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 /// Generates the key mapping of Web, based on the information in the key
@@ -24,7 +24,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer result = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.webValues, entry.webNames, (int value, String name) {
-        result.writeln("  '${name}': ${toHex(value, digits: 10)},");
+        result.writeln("  '$name': ${toHex(value, digits: 10)},");
       });
     }
     return result.toString().trimRight();
@@ -53,8 +53,8 @@ class WebCodeGenerator extends PlatformCodeGenerator {
           print('Error during web location map: $value is not a valid logical key.');
           return null;
         }
-        return value == null ? 'null' : '${toHex(logicalData.data[value].value, digits: 10)}';
-      }).join(", ");
+        return value == null ? 'null' : toHex(logicalData.data[value].value, digits: 10);
+      }).join(', ');
       result.writeln("  '$webKey': <int?>[$valuesString],");
     });
     return result.toString().trimRight();

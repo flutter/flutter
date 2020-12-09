@@ -12,10 +12,10 @@
 // Edit the template dev/tools/gen_keycodes/data/keyboard_map_linux_cc.tmpl instead.
 // See dev/tools/gen_keycodes/README.md for more information.
 
-// Insert a new entry into a hashtable from uint32 to uint32.
+// Insert a new entry into a hashtable from uint64 to uint64.
 //
 // Returns whether the newly added value was already in the hash table or not.
-static bool insert_record(GHashTable* table, guint32 xkb, guint32 fl_key) {
+static bool insert_record(GHashTable* table, guint64 xkb, guint64 fl_key) {
   return g_hash_table_insert(table, GUINT_TO_POINTER(xkb), GUINT_TO_POINTER(fl_key));
 }
 

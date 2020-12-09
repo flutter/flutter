@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
@@ -616,6 +617,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       nullAssertions: true,
+      nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -731,6 +733,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       nullAssertions: true,
+      nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -849,6 +852,7 @@ void main() {
       expressionCompiler: null,
       chromiumLauncher: null,
       nullAssertions: true,
+      nativeNullAssertions: true,
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -885,6 +889,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       nullAssertions: true,
+      nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -935,6 +940,7 @@ void main() {
       useSseForDebugProxy: true,
       useSseForDebugBackend: true,
       nullAssertions: true,
+      nativeNullAssertions: true,
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',

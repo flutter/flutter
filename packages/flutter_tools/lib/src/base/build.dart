@@ -180,8 +180,6 @@ class AOTSnapshotter {
     // Optimization arguments.
     genSnapshotArgs.addAll(<String>[
       // Faster async/await
-      '--no-causal-async-stacks',
-      '--lazy-async-stacks',
       if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
         '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo, debugFilename)}'

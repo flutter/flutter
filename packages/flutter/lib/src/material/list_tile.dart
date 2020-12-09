@@ -1669,6 +1669,14 @@ class _RenderListTile extends RenderBox {
     parentData.offset = offset;
   }
 
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.'
+    ));
+    return const Size(0, 0);
+  }
+
   // All of the dimensions below were taken from the Material Design spec:
   // https://material.io/design/components/lists.html#specs
   @override
