@@ -500,7 +500,7 @@ void _printNoPluginMessage(String pluginPath) {
     globals.printError('''
 
 Must specify at least one platform using --platforms.
-If you want to add new platforms to this plugin, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
+To add platforms, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
 For more information, see https://flutter.dev/go/plugin-platforms.
 
 ''');
