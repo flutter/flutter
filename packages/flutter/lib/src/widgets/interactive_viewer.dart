@@ -930,14 +930,16 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
       }
-      final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
-      final Size childSize = childRenderBox.size;
-      //Ignore left and right scroll
+      
+      // Ignore left and right scroll.
       if (event.scrollDelta.dy == 0.0) {
         return;
       }
-      //Jump by 0.1 per scroll
-      final double scaleChange = (event.scrollDelta.dy < 0) ? 1.1 : 0.9;
+
+      // The mouseWheel scroll amount is hardcoded to 20 while a trackpad scroll can be any amount
+      // by dividing the scroll amount by 200 it scale 0.1 units per mouseWheels scroll and feel natural for trackpads.
+      // See https://github.com/flutter/flutter/pull/71266
+      final double scaleChange = 1.0 - event.scrollDelta.dy / 200;
       final Offset focalPointScene = _transformationController!.toScene(
         event.localPosition,
       );
