@@ -589,3 +589,16 @@ class _RenderInputPadding extends RenderShiftedBox {
     );
   }
 }
+
+/// How the icon in any `button.icon` should be placed
+/// 
+/// See also:
+/// 
+/// * [TextButton], the button widgets
+enum IconAlignment {
+  /// Places the icon to the left side of the button
+  left,
+
+  /// Places the icons the right side of the button
+  right,
+}
