@@ -11,6 +11,7 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/41859
   - title: 'Removed brightness'
     date: 2020-09-24
     element:
@@ -21,7 +22,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'brightness'
 
-
+  # Changes made in https://github.com/flutter/flutter/pull/41859
   - title: 'Removed brightness'
     date: 2020-09-24
     element:
