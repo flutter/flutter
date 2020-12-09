@@ -10,8 +10,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable =
-    Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
 /// Tests that a plugin example app can be built using the current Flutter Gradle plugin.
 Future<void> main() async {
@@ -43,7 +42,7 @@ Future<void> main() async {
           options: <String>[
             '--template=plugin',
             '--platforms=android',
-            'plugin_test'
+            'plugin_test',
           ],
         );
       });
