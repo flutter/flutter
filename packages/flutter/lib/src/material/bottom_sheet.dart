@@ -191,7 +191,7 @@ class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStat
     return renderBox.size.height;
   }
 
-  late final AnimationController _effectiveAnimationController =
+  late AnimationController _effectiveAnimationController =
       widget.animationController ?? BottomSheet.createAnimationController(this);
 
   bool get _dismissUnderway => _effectiveAnimationController.status == AnimationStatus.reverse;
@@ -247,6 +247,23 @@ class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStat
       widget.onClosing();
     }
     return false;
+  }
+
+  @override
+  void dispose() {
+    _effectiveAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant BottomSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animationController != null) {
+      _effectiveAnimationController.dispose();
+      _effectiveAnimationController = widget.animationController!;
+    } else {
+      _effectiveAnimationController = BottomSheet.createAnimationController(this);
+    }
   }
 
   @override
