@@ -32,29 +32,4 @@ transforms:
       - kind: 'removeParameter'
         name: 'brightness'
 
-  # Change made in https://github.com/flutter/flutter/pull/20649
-  - title: 'Migrate to CupertinoPopupSurface'
-    date: 2020-09-24
-    bulkApply: false
-    element:
-      uris: [ 'cupertino.dart' ]
-      class: 'CupertinoDialog'
-    changes:
-      - kind: 'rename'
-        newName: 'CupertinoPopupSurface'
-
-  # Change made in https://github.com/flutter/flutter/pull/20649
-  - title: 'Migrate to CupertinoAlertDialog'
-    date: 2020-09-24
-    bulkApply: false
-    element:
-      uris: [ 'cupertino.dart' ]
-      class: 'CupertinoDialog'
-    changes:
-      - kind: 'rename'
-        newName: 'CupertinoAlertDialog'
-      - kind: 'renameParameter'
-        oldName: 'child'
-        newName: 'content'
-
-# Before adding a new fix: read instructions at the top wof this file.
+# Before adding a new fix: read instructions at the top of this file.
