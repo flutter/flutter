@@ -852,10 +852,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => LengthLimitingTextInputFormatter.defaultMaxLengthEnforcement(
-    widget.maxLengthEnforcement,
-    platform: Theme.of(context).platform,
-  );
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => widget.maxLengthEnforcement
+    ?? LengthLimitingTextInputFormatter.inferredDefaultMaxLengthEnforcement;
 
   bool _isHovering = false;
 
