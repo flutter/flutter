@@ -96,7 +96,7 @@ class TextButton extends ButtonStyleButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
-    IconAlignment iconAlignment,
+    IconAlignment? iconAlignment,
   }) = _TextButtonWithIcon;
 
   /// A static convenience method that constructs a text button
