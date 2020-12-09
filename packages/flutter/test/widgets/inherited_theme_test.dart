@@ -59,7 +59,7 @@ void main() {
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
                             navigatorContext = context;
-                            Navigator.of(context)!.push(
+                            Navigator.of(context).push(
                               TestRoute(
                                 useCaptureAll
                                   ? InheritedTheme.captureAll(context, const IconTextBox('Hello'))
@@ -121,7 +121,7 @@ void main() {
 
     // Return to the home route
     useCaptureAll = true;
-    Navigator.of(navigatorContext)!.pop();
+    Navigator.of(navigatorContext).pop();
     await tester.pumpAndSettle(); // route transition
 
     // Verify that all is the same as it was when the test started

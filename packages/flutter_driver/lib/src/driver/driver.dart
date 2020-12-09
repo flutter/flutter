@@ -205,6 +205,14 @@ abstract class FlutterDriver {
   }
 
   /// Waits until [finder] locates the target.
+  ///
+  /// The [finder] will wait until there is no pending frame scheduled
+  /// in the app under test before executing an action.
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterDriver.runUnsynchronized], which will execute an action
+  ///    with frame sync disabled even while frames are pending.
   Future<void> waitFor(SerializableFinder finder, { Duration timeout }) async {
     await sendCommand(WaitFor(finder, timeout: timeout));
   }
@@ -777,7 +785,7 @@ class DriverOffset {
   final double dy;
 
   @override
-  String toString() => '$runtimeType($dx, $dy)';
+  String toString() => '$runtimeType($dx, $dy)'; // ignore: no_runtimetype_tostring, can't access package:flutter here to use objectRuntimeType
 
   @override
   bool operator ==(Object other) {

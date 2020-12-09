@@ -435,10 +435,9 @@ class RenderParagraph extends RenderBox
     // span will be scale up when it paints.
     width = width / textScaleFactor;
     while (child != null) {
-      final double intrinsicHeight = child.getMinIntrinsicHeight(width);
-      final double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
+      final Size size = child.getDryLayout(BoxConstraints(maxWidth: width));
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(intrinsicWidth, intrinsicHeight),
+        size: size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
@@ -546,40 +545,47 @@ class RenderParagraph extends RenderBox
   // children to _textPainter so that appropriate placeholders can be inserted
   // into the LibTxt layout. This does not do anything if no inline widgets were
   // specified.
-  void _layoutChildren(BoxConstraints constraints) {
+  List<PlaceholderDimensions> _layoutChildren(BoxConstraints constraints, {bool dry = false}) {
     if (childCount == 0) {
-      return;
+      return <PlaceholderDimensions>[];
     }
     RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
+    // Only constrain the width to the maximum width of the paragraph.
+    // Leave height unconstrained, which will overflow if expanded past.
     BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
     // The content will be enlarged by textScaleFactor during painting phase.
     // We reduce constraint by textScaleFactor so that the content will fit
     // into the box once it is enlarged.
     boxConstraints = boxConstraints / textScaleFactor;
     while (child != null) {
-      // Only constrain the width to the maximum width of the paragraph.
-      // Leave height unconstrained, which will overflow if expanded past.
-      child.layout(
-        boxConstraints,
-        parentUsesSize: true,
-      );
       double? baselineOffset;
-      switch (_placeholderSpans[childIndex].alignment) {
-        case ui.PlaceholderAlignment.baseline: {
-          baselineOffset = child.getDistanceToBaseline(
-            _placeholderSpans[childIndex].baseline!
-          );
-          break;
+      final Size childSize;
+      if (!dry) {
+        child.layout(
+          boxConstraints,
+          parentUsesSize: true,
+        );
+        childSize = child.size;
+        switch (_placeholderSpans[childIndex].alignment) {
+          case ui.PlaceholderAlignment.baseline: {
+            baselineOffset = child.getDistanceToBaseline(
+              _placeholderSpans[childIndex].baseline!
+            );
+            break;
+          }
+          default: {
+            baselineOffset = null;
+            break;
+          }
         }
-        default: {
-          baselineOffset = null;
-          break;
-        }
+      } else {
+        assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
+        childSize = child.getDryLayout(boxConstraints);
       }
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: child.size,
+        size: childSize,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
         baselineOffset: baselineOffset,
@@ -587,7 +593,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _placeholderDimensions = placeholderDimensions;
+    return placeholderDimensions;
   }
 
   // Iterate through the laid-out children and set the parentData offsets based
@@ -607,10 +613,44 @@ class RenderParagraph extends RenderBox
     }
   }
 
+  bool _canComputeDryLayout() {
+    // Dry layout cannot be calculated without a full layout for
+    // alignments that require the baseline (baseline, aboveBaseline,
+    // belowBaseline).
+    for (final PlaceholderSpan span in _placeholderSpans) {
+      switch (span.alignment) {
+        case ui.PlaceholderAlignment.baseline:
+        case ui.PlaceholderAlignment.aboveBaseline:
+        case ui.PlaceholderAlignment.belowBaseline: {
+          return false;
+        }
+        case ui.PlaceholderAlignment.top:
+        case ui.PlaceholderAlignment.middle:
+        case ui.PlaceholderAlignment.bottom: {
+          continue;
+        }
+      }
+    }
+    return true;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (!_canComputeDryLayout()) {
+      assert(debugCannotComputeDryLayout(
+        reason: 'Dry layout not available for alignments that require baseline.',
+      ));
+      return const Size(0, 0);
+    }
+    _textPainter.setPlaceholderDimensions(_layoutChildren(constraints, dry: true));
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    return constraints.constrain(_textPainter.size);
+  }
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _layoutChildren(constraints);
+    _placeholderDimensions = _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();
 
@@ -902,38 +942,11 @@ class RenderParagraph extends RenderBox
     RenderBox? child = firstChild;
     final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
     for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
-      final TextDirection initialDirection = currentDirection;
       final TextSelection selection = TextSelection(
         baseOffset: start,
         extentOffset: start + info.text.length,
       );
-      final List<ui.TextBox> rects = getBoxesForSelection(selection);
       start += info.text.length;
-      if (rects.isEmpty) {
-        continue;
-      }
-      Rect rect = rects.first.toRect();
-      currentDirection = rects.first.direction;
-      for (final ui.TextBox textBox in rects.skip(1)) {
-        rect = rect.expandToInclude(textBox.toRect());
-        currentDirection = textBox.direction;
-      }
-      // Any of the text boxes may have had infinite dimensions.
-      // We shouldn't pass infinite dimensions up to the bridges.
-      rect = Rect.fromLTWH(
-        math.max(0.0, rect.left),
-        math.max(0.0, rect.top),
-        math.min(rect.width, constraints.maxWidth),
-        math.min(rect.height, constraints.maxHeight),
-      );
-      // round the current rectangle to make this API testable and add some
-      // padding so that the accessibility rects do not overlap with the text.
-      currentRect = Rect.fromLTRB(
-        rect.left.floorToDouble() - 4.0,
-        rect.top.floorToDouble() - 4.0,
-        rect.right.ceilToDouble() + 4.0,
-        rect.bottom.ceilToDouble() + 4.0,
-      );
 
       if (info.isPlaceholder) {
         // A placeholder span may have 0 to multple semantics nodes, we need
@@ -954,6 +967,33 @@ class RenderParagraph extends RenderBox
         child = childAfter(child!);
         placeholderIndex += 1;
       } else {
+        final TextDirection initialDirection = currentDirection;
+        final List<ui.TextBox> rects = getBoxesForSelection(selection);
+        if (rects.isEmpty) {
+          continue;
+        }
+        Rect rect = rects.first.toRect();
+        currentDirection = rects.first.direction;
+        for (final ui.TextBox textBox in rects.skip(1)) {
+          rect = rect.expandToInclude(textBox.toRect());
+          currentDirection = textBox.direction;
+        }
+        // Any of the text boxes may have had infinite dimensions.
+        // We shouldn't pass infinite dimensions up to the bridges.
+        rect = Rect.fromLTWH(
+          math.max(0.0, rect.left),
+          math.max(0.0, rect.top),
+          math.min(rect.width, constraints.maxWidth),
+          math.min(rect.height, constraints.maxHeight),
+        );
+        // round the current rectangle to make this API testable and add some
+        // padding so that the accessibility rects do not overlap with the text.
+        currentRect = Rect.fromLTRB(
+          rect.left.floorToDouble() - 4.0,
+          rect.top.floorToDouble() - 4.0,
+          rect.right.ceilToDouble() + 4.0,
+          rect.bottom.ceilToDouble() + 4.0,
+        );
         final SemanticsConfiguration configuration = SemanticsConfiguration()
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection

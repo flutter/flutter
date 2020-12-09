@@ -854,9 +854,8 @@ void main() {
     );
   });
 
-
-  testWidgets('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'checkbox');
+  testWidgets('Radio fill color resolves in hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
     const Color focusedFillColor = Color(0xFF000002);
@@ -933,6 +932,150 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
         ..circle(color: Colors.black12)
         ..circle(color: hoveredFillColor),
+    );
+  });
+
+  testWidgets('Radio overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color fillColor = Color(0xFF000000);
+    const Color activePressedOverlayColor = Color(0xFF000001);
+    const Color inactivePressedOverlayColor = Color(0xFF000002);
+    const Color hoverOverlayColor = Color(0xFF000003);
+    const Color focusOverlayColor = Color(0xFF000004);
+    const Color hoverColor = Color(0xFF000005);
+    const Color focusColor = Color(0xFF000006);
+
+    Color? getOverlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.selected)) {
+          return activePressedOverlayColor;
+        }
+        return inactivePressedOverlayColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverOverlayColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusOverlayColor;
+      }
+      return null;
+    }
+    const double splashRadius = 24.0;
+
+    Finder _findRadio() {
+      return find.byWidgetPredicate((Widget widget) => widget is Radio<bool>);
+    }
+
+    MaterialInkController? _getRadioMaterial(WidgetTester tester) {
+      return Material.of(tester.element(_findRadio()));
+    }
+
+    Widget buildRadio({bool active = false, bool focused = false, bool useOverlay = true}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Radio<bool>(
+            focusNode: focusNode,
+            autofocus: focused,
+            value: active,
+            groupValue: true,
+            onChanged: (_) { },
+            fillColor: MaterialStateProperty.all(fillColor),
+            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            hoverColor: hoverColor,
+            focusColor: focusColor,
+            splashRadius: splashRadius,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildRadio(active: false, useOverlay: false));
+    await tester.press(_findRadio());
+    await tester.pumpAndSettle();
+
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(
+          color: fillColor.withAlpha(kRadialReactionAlpha),
+          radius: splashRadius,
+        ),
+      reason: 'Default inactive pressed Radio should have overlay color from fillColor',
+    );
+
+    await tester.pumpWidget(buildRadio(active: true, useOverlay: false));
+    await tester.press(_findRadio());
+    await tester.pumpAndSettle();
+
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(
+          color: fillColor.withAlpha(kRadialReactionAlpha),
+          radius: splashRadius,
+        ),
+      reason: 'Default active pressed Radio should have overlay color from fillColor',
+    );
+
+    await tester.pumpWidget(buildRadio(active: false));
+    await tester.press(_findRadio());
+    await tester.pumpAndSettle();
+
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Inactive pressed Radio should have overlay color: $inactivePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildRadio(active: true));
+    await tester.press(_findRadio());
+    await tester.pumpAndSettle();
+
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildRadio(focused: true));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(
+          color: focusOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Focused Radio should use overlay color $focusOverlayColor over $focusColor',
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(_findRadio()));
+    await tester.pumpAndSettle();
+
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(
+          color: hoverOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Hovered Radio should use overlay color $hoverOverlayColor over $hoverColor',
     );
   });
 }

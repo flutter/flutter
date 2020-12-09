@@ -211,6 +211,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<void> _attachToDevice(Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
+
     Future<int> getDevicePort() async {
       if (debugPort != null) {
         return debugPort;
@@ -317,7 +318,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         try {
           app = await daemon.appDomain.launch(
             runner,
-            runner.attach,
+            ({Completer<DebugConnectionInfo> connectionInfoCompleter,
+              Completer<void> appStartedCompleter}) {
+              return runner.attach(
+                connectionInfoCompleter: connectionInfoCompleter,
+                appStartedCompleter: appStartedCompleter,
+                allowExistingDdsInstance: true,
+              );
+            },
             device,
             null,
             true,
@@ -353,6 +361,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         }));
         result = await runner.attach(
           appStartedCompleter: onAppStart,
+          allowExistingDdsInstance: true,
         );
         if (result != 0) {
           throwToolExit(null, exitCode: result);
@@ -388,7 +397,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       device,
       fileSystemRoots: stringsArg('filesystem-root'),
       fileSystemScheme: stringArg('filesystem-scheme'),
-      target: stringArg('target'),
+      target: targetFile,
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,

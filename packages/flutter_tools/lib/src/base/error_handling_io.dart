@@ -289,12 +289,9 @@ class ErrorHandlingFile
     // Next check if the destination file can be written. If not, bail through
     // error handling.
     _runSync<void>(
-      ()  {
-        resultFile.createSync(recursive: true);
-        resultFile.openSync(mode: FileMode.writeOnly).closeSync();
-      },
+      () => resultFile.createSync(recursive: true),
       platform: _platform,
-      failureMessage: 'Flutter faiuled to copy $path to $newPath due to destination location error'
+      failureMessage: 'Flutter failed to copy $path to $newPath due to destination location error'
     );
     // If both of the above checks passed, attempt to copy the file and catch
     // any thrown errors.

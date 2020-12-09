@@ -31,6 +31,7 @@ class TestCommand extends FlutterCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    usesDartDefineOption();
     argParser
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
@@ -184,6 +185,18 @@ class TestCommand extends FlutterCommand {
     final String excludeTags = stringArg('exclude-tags');
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
 
+    if (buildInfo.packageConfig['test_api'] == null) {
+      globals.printError(
+        '\n'
+        'Error: cannot run without a dependency on either "package:flutter_test" or "package:test". '
+        'Ensure the following lines are present in your pubspec.yaml:'
+        '\n\n'
+        'dev_dependencies:\n'
+        '  flutter_test:\n'
+        '    sdk: flutter\n',
+      );
+    }
+
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
     }
@@ -238,7 +251,8 @@ class TestCommand extends FlutterCommand {
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
         // TODO(jonahwilliams): file bug for incorrect URI handling on windows
-        packagesPath: globals.fs.path.absolute('.packages'),
+        packagesPath: globals.fs.file(buildInfo.packagesPath)
+          .parent.parent.childFile('.packages').path
       );
     }
 
