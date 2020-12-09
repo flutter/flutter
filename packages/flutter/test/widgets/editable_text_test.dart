@@ -6500,75 +6500,284 @@ void main() {
     expect(state.currentTextEditingValue.composing, TextRange.empty);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/65374.
-  testWidgets('Length formatter will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
-    final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);
-    final Widget widget = MaterialApp(
-      home: EditableText(
-        backgroundCursorColor: Colors.grey,
-        controller: controller,
-        focusNode: focusNode,
-        inputFormatters: <TextInputFormatter>[formatter],
-        style: textStyle,
-        cursorColor: cursorColor,
-        selectionControls: materialTextSelectionControls,
-      ),
-    );
+  group('Length formatter', () {
+    const int maxLength = 5;
 
-    await tester.pumpWidget(widget);
+    Future<void> setupWidget(
+      WidgetTester tester,
+      LengthLimitingTextInputFormatter formatter,
+    ) async {
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          inputFormatters: <TextInputFormatter>[formatter],
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      );
 
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    state.updateEditingValue(const TextEditingValue(text: '12345'));
-    expect(state.currentTextEditingValue.composing, TextRange.empty);
-    state.updateEditingValue(const TextEditingValue(text: '12345', composing: TextRange(start: 2, end: 4)));
-    expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+    }
 
-    // Formatter will not update format while the editing value is composing.
-    state.updateEditingValue(const TextEditingValue(text: '123456', composing: TextRange(start: 2, end: 5)));
-    expect(state.currentTextEditingValue.text, '123456');
-    expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 5));
+    // Regression test for https://github.com/flutter/flutter/issues/65374.
+    testWidgets('will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
+      await setupWidget(
+        tester,
+        LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
+        ),
+      );
 
-    // After composing ends, formatter will update.
-    state.updateEditingValue(const TextEditingValue(text: '123456'));
-    expect(state.currentTextEditingValue.text, '12345');
-    expect(state.currentTextEditingValue.composing, TextRange.empty);
-  });
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 2, end: 4)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
 
-  testWidgets('Length formatter handles composing text correctly, continued', (WidgetTester tester) async {
-    final TextInputFormatter formatter = LengthLimitingTextInputFormatter(5);
-    final Widget widget = MaterialApp(
-      home: EditableText(
-        backgroundCursorColor: Colors.grey,
-        controller: controller,
-        focusNode: focusNode,
-        inputFormatters: <TextInputFormatter>[formatter],
-        style: textStyle,
-        cursorColor: cursorColor,
-        selectionControls: materialTextSelectionControls,
-      ),
-    );
+      // Formatter will not update format while the editing value is composing.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 2, end: 5)));
+      expect(state.currentTextEditingValue.text, 'abcdef');
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 5));
 
-    await tester.pumpWidget(widget);
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      // After composing ends, formatter will update.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdef'));
+      expect(state.currentTextEditingValue.text, 'abcde');
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
 
-    // Initially we're at maxLength with no composing text.
-    controller.text = '12345' ;
-    assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
+    testWidgets('handles composing text correctly, continued', (WidgetTester tester) async {
+      await setupWidget(
+        tester,
+        LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
+        ),
+      );
 
-    // Should be able to change the editing value if the new value is still shorter
-    // than maxLength.
-    state.updateEditingValue(const TextEditingValue(text: '12345', composing: TextRange(start: 2, end: 4)));
-    expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
-    // Reset.
-    controller.text = '12345' ;
-    assert(state.currentTextEditingValue == const TextEditingValue(text: '12345'));
+      // Initially we're at maxLength with no composing text.
+      controller.text = 'abcde' ;
+      assert(state.currentTextEditingValue == const TextEditingValue(text: 'abcde'));
 
-    // The text should not change when trying to insert when the text is already
-    // at maxLength.
-    state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 5, end: 6)));
-    expect(state.currentTextEditingValue.text, '12345');
-    expect(state.currentTextEditingValue.composing, TextRange.empty);
+      // Should be able to change the editing value if the new value is still shorter
+      // than maxLength.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 2, end: 4)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 2, end: 4));
+
+      // Reset.
+      controller.text = 'abcde' ;
+      assert(state.currentTextEditingValue == const TextEditingValue(text: 'abcde'));
+
+      // The text should not change when trying to insert when the text is already
+      // at maxLength.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 5, end: 6)));
+      expect(state.currentTextEditingValue.text, 'abcde');
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('enforced composing truncated', (WidgetTester tester) async {
+      await setupWidget(
+        tester,
+        LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // When it's not longer than `maxLength`, it can still start composing.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      // `newValue` will be truncated if `composingMaxLengthEnforced`.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdef', composing: TextRange(start: 3, end: 6)));
+      expect(state.currentTextEditingValue.text, 'abcde');
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      // Reset the value.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Change the value in order to take effects on web test.
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing with a longer value, it should be the same state.
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友们', composing: TextRange(start: 3, end: 6)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('default truncate behaviors with different platforms', (WidgetTester tester) async {
+      await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // When it's not longer than `maxLength`, it can still start composing.
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友们', composing: TextRange(start: 3, end: 6)));
+      if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.fuchsia
+      ) {
+        // `newValue` will will not be truncated on couple platforms.
+        expect(state.currentTextEditingValue.text, '你好啊朋友们');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 6));
+      } else {
+        // `newValue` on other platforms will be truncated.
+        expect(state.currentTextEditingValue.text, '你好啊朋友');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+      }
+
+      // Reset the value.
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing with a longer value, it should be the same state.
+      state.updateEditingValue(const TextEditingValue(text: '你好啊朋友们', composing: TextRange(start: 3, end: 6)));
+      expect(state.currentTextEditingValue.text, '你好啊朋友');
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
+      await setupWidget(
+        tester,
+        LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're not at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      // Reset the value.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing with a range already overflowed the truncated length.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdefgh', composing: TextRange(start: 5, end: 7)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('composing range removed with different platforms', (WidgetTester tester) async {
+      await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're not at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing.
+      state.updateEditingValue(const TextEditingValue(text: 'abcde', composing: TextRange(start: 3, end: 5)));
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+
+      // Reset the value.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start composing with a range already overflowed the truncated length.
+      state.updateEditingValue(const TextEditingValue(text: 'abcdefgh', composing: TextRange(start: 5, end: 7)));
+      if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.fuchsia
+      ) {
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 5, end: 7));
+      } else {
+        expect(state.currentTextEditingValue.composing, TextRange.empty);
+      }
+    });
+
+    testWidgets('composing range handled correctly when it\'s overflowed', (WidgetTester tester) async {
+      const String string = '👨‍👩‍👦0123456';
+
+      await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're not at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: string));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Clearing composing range if collapsed.
+      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 10, end: 10)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Clearing composing range if overflowed.
+      state.updateEditingValue(const TextEditingValue(text: string, composing: TextRange(start: 10, end: 11)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/68086.
+    testWidgets('typing in the middle with different platforms.', (WidgetTester tester) async {
+      await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Initially we're not at maxLength with no composing text.
+      state.updateEditingValue(const TextEditingValue(text: 'abc'));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      // Start typing in the middle.
+      state.updateEditingValue(const TextEditingValue(text: 'abDEc', composing: TextRange(start: 3, end: 4)));
+      expect(state.currentTextEditingValue.text, 'abDEc');
+      expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 4));
+
+      // Keep typing when the value has exceed the limitation.
+      state.updateEditingValue(const TextEditingValue(text: 'abDEFc', composing: TextRange(start: 3, end: 5)));
+      if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.fuchsia
+      ) {
+        expect(state.currentTextEditingValue.text, 'abDEFc');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
+      } else {
+        expect(state.currentTextEditingValue.text, 'abDEc');
+        expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 4));
+      }
+
+      // Reset the value according to the limit.
+      state.updateEditingValue(const TextEditingValue(text: 'abDEc'));
+      expect(state.currentTextEditingValue.text, 'abDEc');
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+
+      state.updateEditingValue(const TextEditingValue(text: 'abDEFc', composing: TextRange(start: 4, end: 5)));
+      expect(state.currentTextEditingValue.composing, TextRange.empty);
+    });
   });
 
   group('callback errors', () {
