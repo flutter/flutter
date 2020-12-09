@@ -1598,6 +1598,53 @@ void main() {
     expect(controller.selection.extentOffset, 31);
   });
 
+  testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    TextSelection? newSelection;
+    const String testValue = 'a big house\njumped over a mouse';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child: SelectableText(
+              testValue,
+              maxLines: 3,
+              onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+                expect(newSelection, isNull);
+                newSelection = selection;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+    focusNode.requestFocus();
+    await tester.pump();
+
+    await tester.tap(find.byType(SelectableText));
+    await tester.pumpAndSettle();
+    expect(newSelection!.baseOffset, 31);
+    expect(newSelection!.extentOffset, 31);
+    newSelection = null;
+
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+
+    // Select the first 5 characters
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    for (int i = 0; i < 5; i += 1) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(newSelection!.baseOffset, 0);
+      expect(newSelection!.extentOffset, i + 1);
+      newSelection = null;
+    }
+  });
+
   testWidgets('Changing positions of selectable text', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<RawKeyEvent> events = <RawKeyEvent>[];

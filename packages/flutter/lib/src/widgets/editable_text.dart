@@ -2202,6 +2202,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // trying to restore the original composing region.
     final bool textChanged = _value.text != value.text
                           || (!_value.composing.isCollapsed && value.composing.isCollapsed);
+    final bool selectionChanged = _value.selection != value.selection;
 
     if (textChanged) {
       value = widget.inputFormatters?.fold<TextEditingValue>(
@@ -2221,7 +2222,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
-
+    _value = value;
     if (textChanged) {
       try {
         widget.onChanged?.call(value.text);
@@ -2235,7 +2236,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
-    if (_value.selection != value.selection) {
+    if (selectionChanged) {
       try {
         widget.onSelectionChanged?.call(value.selection, null);
       } catch (exception, stack) {
@@ -2248,7 +2249,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
-    _value = value;
     endBatchEdit();
   }
 

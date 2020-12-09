@@ -756,12 +756,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
     }
 
-    // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
     );
+    // Update the text selection delegate so that the engine knows what we did.
+    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
   }
 
   // Handles shortcut functionality including cut, copy, paste and select all
