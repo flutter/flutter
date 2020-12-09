@@ -130,13 +130,13 @@ MaterialApp buildNestedScrollViewWithTab({
 }) {
   return MaterialApp(home: Material(child:
   // THE FOLLOWING SECTION IS FROM THE NestedScrollView DOCUMENTATION
-  // (EXCEPT FOR THE CHANGES TO THE buildCount COUNTER)
+  // (EXCEPT FOR THE ADDITION OF THE onBuildHeaderSliver METHOD CALL)
   DefaultTabController(
     length: tabs.length, // This is the number of tabs.
     child: NestedScrollView(
       dragStartBehavior: DragStartBehavior.down,
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        onBuildHeaderSliver?.call();
+        onBuildHeaderSliver?.call(); // THIS LINE IS NOT IN THE ORIGINAL -- ADDED FOR TEST
         // These are the slivers that show up in the "outer" scroll view.
         return <Widget>[
           SliverOverlapAbsorber(
@@ -603,7 +603,7 @@ void main() {
       buildNestedScrollViewWithTab(
         tabs: tabs,
         onBuildHeaderSliver: () {
-            buildCount += 1; // THIS LINE IS NOT IN THE ORIGINAL -- ADDED FOR TEST
+          buildCount += 1;
         }),
     );
 
