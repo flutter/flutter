@@ -181,17 +181,6 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
   }
 
-  if (!project.isModule && useMacOSConfig) {
-    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
-    // explicitly. Rather we rely on the xcode backend script and the Podfile
-    // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
-    // However, this is necessary for regular macOS projects using Cocoapods.
-    final String frameworkDir =
-        flutterMacOSFrameworkDir(buildInfo.mode, globals.fs, globals.artifacts);
-    xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
-  }
-
-
   final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
 
