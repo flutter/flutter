@@ -7,6 +7,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/material/button.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -88,6 +89,7 @@ class OutlinedButton extends ButtonStyleButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
+    IconAlignment? iconAlignment,
   }) = _OutlinedButtonWithIcon;
 
   /// A static convenience method that constructs an outlined button
@@ -315,6 +317,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     Clip? clipBehavior,
     required Widget icon,
     required Widget label,
+    IconAlignment? iconAlignment,
   }) : assert(icon != null),
        assert(label != null),
        super(
@@ -325,7 +328,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
          focusNode: focusNode,
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _OutlinedButtonWithIconChild(icon: icon, label: label),
+         child: _OutlinedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? IconAlignment.left),
       );
 }
 
@@ -334,18 +337,30 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
     Key? key,
     required this.label,
     required this.icon,
+    required this.iconAlignment,
   }) : super(key: key);
 
   final Widget label;
   final Widget icon;
+  final IconAlignment iconAlignment;
 
   @override
   Widget build(BuildContext context) {
     final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
+
+    List<Widget> _renderButtonChildren() {
+      switch (iconAlignment) {
+        case IconAlignment.left:
+          return <Widget>[icon, SizedBox(width: gap), label];
+        case IconAlignment.right:
+          return <Widget>[label, SizedBox(width: gap), icon];
+      }
+    }
+
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), label],
+      children: _renderButtonChildren(),
     );
   }
 }
