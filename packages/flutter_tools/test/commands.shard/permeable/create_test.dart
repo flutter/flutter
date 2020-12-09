@@ -2316,6 +2316,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
     expect(logger.errorText, contains('If you want to add new platforms to this plugin, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
+    expect(logger.errorText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
