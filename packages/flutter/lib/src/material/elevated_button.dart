@@ -396,7 +396,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
          focusNode: focusNode,
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _ElevatedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? ButtonIconAlignment.left),
+         child: _ElevatedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? ButtonIconAlignment.start),
       );
 
   @override
@@ -432,9 +432,9 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 
     List<Widget> _renderButtonChildren() {
       switch (iconAlignment) {
-        case ButtonIconAlignment.left:
+        case ButtonIconAlignment.start:
           return <Widget>[icon, SizedBox(width: gap), label];
-        case ButtonIconAlignment.right:
+        case ButtonIconAlignment.end:
           return <Widget>[label, SizedBox(width: gap), icon];
       }
     }

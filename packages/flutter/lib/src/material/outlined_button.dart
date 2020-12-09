@@ -328,7 +328,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
          focusNode: focusNode,
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
-         child: _OutlinedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? ButtonIconAlignment.left),
+         child: _OutlinedButtonWithIconChild(icon: icon, label: label, iconAlignment: iconAlignment ?? ButtonIconAlignment.start),
       );
 }
 
@@ -351,9 +351,9 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
 
     List<Widget> _renderButtonChildren() {
       switch (iconAlignment) {
-        case ButtonIconAlignment.left:
+        case ButtonIconAlignment.start:
           return <Widget>[icon, SizedBox(width: gap), label];
-        case ButtonIconAlignment.right:
+        case ButtonIconAlignment.end:
           return <Widget>[label, SizedBox(width: gap), icon];
       }
     }
