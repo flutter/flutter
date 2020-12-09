@@ -111,13 +111,13 @@ EmbedFrameworks() {
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand rsync -av --delete "${ephemeral_dir}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete --links "${ephemeral_dir}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual FlutterMacOS.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
 
   # Copy Xcode behavior and don't copy over headers or modules.
-  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${ephemeral_dir}/FlutterMacOS.framework" "${xcode_frameworks_dir}/"
+  RunCommand rsync -av --delete --links --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${ephemeral_dir}/FlutterMacOS.framework" "${xcode_frameworks_dir}/"
 
   # Sign the binaries we moved.
   if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
