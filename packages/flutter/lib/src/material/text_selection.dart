@@ -257,8 +257,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
       anchorBelow: anchorBelow,
       children: itemDatas.asMap().entries.map((MapEntry<int, _TextSelectionToolbarItemData> entry) {
         return TextSelectionToolbarTextButton(
-          index: entry.key,
-          total: itemDatas.length,
+          padding: TextSelectionToolbarTextButton.getPadding(entry.key, itemDatas.length),
           onPressed: entry.value.onPressed,
           child: Text(entry.value.label),
         );

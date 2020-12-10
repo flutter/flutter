@@ -42,8 +42,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
       anchorBelow: anchorBelow,
       children: <Widget>[
         TextSelectionToolbarTextButton(
-          index: 0,
-          total: 1,
+          padding: TextSelectionToolbarTextButton.getPadding(0, 1),
           onPressed: () {},
           child: const Text('Custom button'),
         ),

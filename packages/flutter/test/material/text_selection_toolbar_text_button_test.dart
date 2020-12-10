@@ -24,8 +24,7 @@ void main() {
                 setState = setter;
                 return TextSelectionToolbarTextButton(
                   child: const Text('button'),
-                  index: index,
-                  total: total,
+                  padding: TextSelectionToolbarTextButton.getPadding(index, total),
                 );
               },
             ),

@@ -29,12 +29,14 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   const TextSelectionToolbarTextButton({
     Key? key,
     required this.child,
-    required this.index,
+    required this.padding,
     this.onPressed,
-    required this.total,
-  }) : assert(total > 0),
-       assert(index >= 0 && index < total),
-       super(key: key);
+  }) : super(key: key);
+
+  // These values were eyeballed to match the native text selection menu on a
+  // Pixel 2 running Android 10.
+  static const double _kMiddlePadding = 9.5;
+  static const double _kEndPadding = 14.5;
 
   /// The child of this button.
   ///
@@ -44,28 +46,31 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   /// Called when this button is pressed.
   final VoidCallback? onPressed;
 
-  /// At what index this button is in the toolbar children.
+  /// The padding between the button's edge and its child.
   ///
-  /// This is needed becase a button may appear differently depending on where
-  /// it is in the list.
-  ///
-  /// See also:
-  ///   [total], which is the total number of children in the toolbar.
-  final int index;
-
-  /// The total number of children in the toolbar, including this one.
-  ///
-  /// This is needed becase a button may appear differently depending on where
-  /// it is in the list.
+  /// In a standard Material [TextSelectionToolbar], the padding depends on the
+  /// button's position within the toolbar.
   ///
   /// See also:
-  ///   [index], which is the index among total where this button appears.
-  final int total;
+  ///
+  ///  * [getPadding], which calculates the standard padding based on the
+  ///    button's position.
+  ///  * [TextButton.padding], which is where this padding is applied.
+  final EdgeInsets padding;
 
-  // These values were eyeballed to match the native text selection menu on a
-  // Pixel 2 running Android 10.
-  static const double _kMiddlePadding = 9.5;
-  static const double _kEndPadding = 14.5;
+  /// Returns the standard padding for a button at index out of a total number
+  /// of buttons.
+  ///
+  /// Standard Material [TextSelectionToolbar]s have buttons with different
+  /// padding depending on their position in the toolbar.
+  static EdgeInsets getPadding(int index, int total) {
+    assert(total > 0 && index >= 0 && index < total);
+    final _TextSelectionToolbarItemPosition position = _getPosition(index, total);
+    return EdgeInsets.only(
+      left: _getLeftPadding(position),
+      right: _getRightPadding(position),
+    );
+  }
 
   static double _getLeftPadding(_TextSelectionToolbarItemPosition position) {
     if (position == _TextSelectionToolbarItemPosition.first
@@ -83,7 +88,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     return _kMiddlePadding;
   }
 
-  _TextSelectionToolbarItemPosition get _position {
+  static _TextSelectionToolbarItemPosition _getPosition(int index, int total) {
     if (index == 0) {
       return total == 1
           ? _TextSelectionToolbarItemPosition.only
@@ -107,10 +112,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
         primary: primary,
         shape: const RoundedRectangleBorder(),
         minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
-        padding: EdgeInsets.only(
-          left: _getLeftPadding(_position),
-          right: _getRightPadding(_position),
-        ),
+        padding: padding,
       ),
       onPressed: onPressed,
       child: child,

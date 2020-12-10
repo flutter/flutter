@@ -675,13 +675,18 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   // Visit only the children that should be painted.
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    int visible = 0;
+    int total = 0;
     visitChildren((RenderObject renderObjectChild) {
+      total++;
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
+        visible++;
         visitor(renderObjectChild);
       }
     });
+    print('justin visiting children for semantics, $visible of $total were visible');
   }
 }
 
