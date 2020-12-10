@@ -539,7 +539,7 @@ void main() {
           textDirection: TextDirection.rtl,
           child: TextFormField(
             decoration: const InputDecoration(
-              border: const OutlineInputBorder(),
+              border: OutlineInputBorder(),
               labelText: 'Some Label',
               hintText: 'Some Hint',
               hintTextDirection: TextDirection.ltr,
@@ -560,7 +560,7 @@ void main() {
           textDirection: TextDirection.rtl,
           child: TextFormField(
             decoration: const InputDecoration(
-              border: const OutlineInputBorder(),
+              border: OutlineInputBorder(),
               labelText: 'Some Label',
               hintText: 'Some Hint',
             ),
