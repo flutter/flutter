@@ -13,7 +13,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/41859
   - title: 'Removed brightness'
-    date: 2020-09-24
+    date: 2020-12-10
     element:
       uris: [ 'cupertino.dart' ]
       constructor: ''
@@ -24,7 +24,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/41859
   - title: 'Removed brightness'
-    date: 2020-09-24
+    date: 2020-12-10
     element:
       uris: [ 'cupertino.dart' ]
       method: 'copyWith'
