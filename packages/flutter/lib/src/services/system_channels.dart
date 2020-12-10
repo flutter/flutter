@@ -318,7 +318,7 @@ class SystemChannels {
     'flutter/restoration',
     StandardMethodCodec(),
   );
- 
+
   /// A [MethodChannel] for installing and managing dynamic features.
   ///
   /// The following outgoing methods are defined for this channel (invoked using
