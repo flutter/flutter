@@ -24,6 +24,23 @@ void main() {
     expect(header, tester.widget(find.byType(Text)));
   });
 
+  testWidgets('Shows footer', (WidgetTester tester) async {
+    const Widget footer = Text('Footer');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoFormSection(
+            header: footer,
+            children: <Widget>[CupertinoTextFormFieldRow()],
+          ),
+        ),
+      ),
+    );
+
+    expect(footer, tester.widget(find.byType(Text)));
+  });
+
   testWidgets('Shows long dividers in edge-to-edge section part 1',
       (WidgetTester tester) async {
     await tester.pumpWidget(
