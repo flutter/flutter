@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
+// Examples are not null safe.
+
 /// Builds a [Widget] when given a concrete value of a [ValueListenable<T>].
 ///
 /// If the `child` parameter provided to the [ValueListenableBuilder] is not

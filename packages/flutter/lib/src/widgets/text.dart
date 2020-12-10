@@ -12,6 +12,7 @@ import 'framework.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // String _name;
 

@@ -11,6 +11,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'object.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // int rows, columns;
 // String _name;

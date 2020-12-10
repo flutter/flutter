@@ -19,6 +19,7 @@ import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
+// Examples are not null safe.
 // Examples can assume:
 // dynamic context;
 

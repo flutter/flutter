@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // BuildContext context;
 
@@ -84,7 +85,7 @@ import 'constants.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material --no-null-safety}
 ///
 /// This example shows how to listen to page updates in [TabBar] and [TabBarView]
 /// when using [DefaultTabController].

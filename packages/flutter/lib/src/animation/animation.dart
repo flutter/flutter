@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import 'tween.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // AnimationController _controller;
 

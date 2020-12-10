@@ -16,6 +16,8 @@ import 'navigation_rail_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples are not null safe.
+
 /// A material widget that is meant to be displayed at the left or right of an
 /// app to navigate between a small number of views, typically between three and
 /// five.
@@ -38,7 +40,7 @@ import 'theme_data.dart';
 /// [https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart]
 /// for an example.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material --no-null-safety}
 ///
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider

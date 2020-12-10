@@ -10,6 +10,7 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // BuildContext context;
 

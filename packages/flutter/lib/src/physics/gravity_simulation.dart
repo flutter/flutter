@@ -4,6 +4,7 @@
 
 import 'simulation.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // AnimationController _controller;
 

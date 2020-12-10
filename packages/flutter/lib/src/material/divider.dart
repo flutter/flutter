@@ -8,6 +8,7 @@ import 'package:flutter/painting.dart';
 import 'divider_theme.dart';
 import 'theme.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // BuildContext context;
 
@@ -24,7 +25,7 @@ import 'theme.dart';
 /// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the height.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold --no-null-safety}
 ///
 /// This sample shows how to display a Divider between an orange and blue box
 /// inside a column. The Divider is 20 logical pixels in height and contains a

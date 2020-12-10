@@ -7,6 +7,8 @@ import 'package:flutter/painting.dart';
 
 import 'typography.dart';
 
+// Examples are not null safe.
+
 /// Material design text theme.
 ///
 /// Definitions for the various typographical styles found in Material Design

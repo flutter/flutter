@@ -10,6 +10,7 @@ import 'diagnostics.dart';
 import 'print.dart';
 import 'stack_frame.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // String runtimeType;
 // bool draconisAlive;

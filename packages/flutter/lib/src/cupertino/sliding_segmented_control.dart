@@ -12,6 +12,8 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
+// Examples are not null safe.
+
 // Extracted from https://developer.apple.com/design/resources/.
 
 // Minimum padding from edges of the segmented control to edges of

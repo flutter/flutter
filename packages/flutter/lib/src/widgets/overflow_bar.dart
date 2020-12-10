@@ -44,7 +44,7 @@ enum OverflowBarAlignment {
 /// If the layout overflows, then children's order within their
 /// column is specified by [overflowDirection] instead.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center --no-null-safety}
 ///
 /// This example defines a simple approximation of a dialog
 /// layout, where the layout of the dialog's action buttons are

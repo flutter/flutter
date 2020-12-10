@@ -13,6 +13,7 @@ import 'image.dart';
 import 'implicit_animations.dart';
 import 'transitions.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // Uint8List bytes;
 

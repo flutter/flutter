@@ -10,6 +10,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'image.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // BuildContext context;
 

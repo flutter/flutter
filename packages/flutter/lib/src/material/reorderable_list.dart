@@ -11,6 +11,7 @@ import 'debug.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // class MyDataObject { }
 
@@ -59,7 +60,7 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// The [onReorder] parameter is required and will be called when a child
 /// widget is dragged to a new position.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold --no-null-safety}
 ///
 /// ```dart
 /// List<String> _list = List.generate(5, (i) => "${i}");

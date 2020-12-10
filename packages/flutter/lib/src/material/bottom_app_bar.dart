@@ -12,6 +12,7 @@ import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // Widget bottomAppBarContents;
 

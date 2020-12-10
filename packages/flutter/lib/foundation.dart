@@ -19,6 +19,7 @@ export 'package:meta/meta.dart' show
   required,
   visibleForTesting;
 
+// Examples are not null safe.
 // Examples can assume:
 // String _name;
 // bool _first;

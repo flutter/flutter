@@ -27,6 +27,8 @@ import 'sliver.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
+// Examples are not null safe.
+
 /// A controller for [PageView].
 ///
 /// A page controller lets you manipulate which page is visible in a [PageView].

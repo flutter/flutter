@@ -6,6 +6,7 @@
 import 'animation.dart';
 import 'tween.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // AnimationController myAnimationController;
 

@@ -274,6 +274,7 @@ class ScrollController extends ChangeNotifier {
   }
 }
 
+// Examples are not null safe.
 // Examples can assume:
 // TrackingScrollController _trackingScrollController;
 

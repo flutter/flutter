@@ -22,6 +22,7 @@ import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // int itemCount;
 
@@ -467,7 +468,7 @@ abstract class ScrollView extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material --no-null-safety}
 ///
 /// By default, if items are inserted at the "top" of a scrolling container like
 /// [ListView] or [CustomScrollView], the top item and all of the items below it

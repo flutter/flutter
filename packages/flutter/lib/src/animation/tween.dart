@@ -11,6 +11,7 @@ import 'animation.dart';
 import 'animations.dart';
 import 'curves.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // Animation<Offset> _animation;
 // AnimationController _controller;

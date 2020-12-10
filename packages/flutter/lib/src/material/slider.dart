@@ -20,6 +20,7 @@ import 'material_state.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // int _dollars = 0;
 // int _duelCommandment = 1;
@@ -39,7 +40,7 @@ enum _SliderType { material, adaptive }
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold --no-null-safety}
 ///
 /// ![A slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)

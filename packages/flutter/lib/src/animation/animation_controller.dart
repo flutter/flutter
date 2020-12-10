@@ -16,6 +16,7 @@ import 'listener_helpers.dart';
 
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
+// Examples are not null safe.
 // Examples can assume:
 // AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // bool dismissed;

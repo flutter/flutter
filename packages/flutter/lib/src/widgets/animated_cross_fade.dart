@@ -10,6 +10,7 @@ import 'framework.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // bool _first;
 

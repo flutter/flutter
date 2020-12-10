@@ -22,6 +22,7 @@ import 'theme.dart';
 // and it is what most apps would have used).
 
 
+// Examples are not null safe.
 // Examples can assume:
 // BuildContext context;
 

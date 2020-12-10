@@ -17,6 +17,7 @@ import 'material_localizations.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // enum Department { treasury, state }
 // BuildContext context;

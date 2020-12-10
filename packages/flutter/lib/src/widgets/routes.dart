@@ -23,6 +23,7 @@ import 'restoration.dart';
 import 'scroll_controller.dart';
 import 'transitions.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // dynamic routeObserver;
 // NavigatorState navigator;

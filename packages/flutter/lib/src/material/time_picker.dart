@@ -33,6 +33,7 @@ import 'theme_data.dart';
 import 'time.dart';
 import 'time_picker_theme.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // BuildContext context;
 

@@ -24,6 +24,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 // defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
 const double _kDefaultFontSize = 14.0;
 
+// Examples are not null safe.
 // Examples can assume:
 // BuildContext context;
 

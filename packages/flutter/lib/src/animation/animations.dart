@@ -11,6 +11,7 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
+// Examples are not null safe.
 // Examples can assume:
 // AnimationController controller;
 

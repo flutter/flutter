@@ -198,8 +198,8 @@ class SampleChecker {
   /// Computes the headers needed for each sample file.
   List<Line> get headers {
     return _headers ??= <String>[
-      '// @dart = 2.9',
       '// generated code',
+      '// ignore_for_file: unused_import',
       "import 'dart:async';",
       "import 'dart:convert';",
       "import 'dart:math' as math;",
@@ -335,6 +335,7 @@ class SampleChecker {
       bool inSnippet = false;
       // Whether or not we're in a '```dart' segment.
       bool inDart = false;
+      bool samplesAreNullSafe = true;
       int lineNumber = 0;
       final List<String> block = <String>[];
       List<String> snippetArgs = <String>[];
@@ -383,11 +384,8 @@ class SampleChecker {
             if (_codeBlockEndRegex.hasMatch(trimmedLine)) {
               inDart = false;
               final Section processed = _processBlock(startLine, block);
-              if (preambleSections.isEmpty) {
-                sections.add(processed);
-              } else {
-                sections.add(Section.combine(preambleSections..add(processed)));
-              }
+              final Section combinedSection = preambleSections.isEmpty ? processed : Section.combine(preambleSections..add(processed));
+              sections.add(combinedSection.copyWith(isNullSafe: samplesAreNullSafe));
               block.clear();
             } else if (trimmedLine == _dartDocPrefix) {
               block.add('');
@@ -415,7 +413,9 @@ class SampleChecker {
         }
         if (!inSampleSection) {
           final Match sampleMatch = _dartDocSampleBeginRegex.firstMatch(trimmedLine);
-          if (line == '// Examples can assume:') {
+          if (line == '// Examples are not null safe.') {
+            samplesAreNullSafe = false;
+          } else if (line == '// Examples can assume:') {
             assert(block.isEmpty);
             startLine = Line('', filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
@@ -509,7 +509,7 @@ class SampleChecker {
     pubSpec.writeAsStringSync('''
 name: analyze_sample_code
 environment:
-  sdk: '>=2.10.0 <3.0.0'
+  sdk: ">=2.12.0-0 <3.0.0"
 dependencies:
   flutter:
     sdk: flutter
@@ -529,6 +529,7 @@ linter:
     final String sectionId = _createNameFromSource('snippet', section.start.filename, section.start.line);
     final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
     final List<Line> mainContents = <Line>[
+      if (!section.isNullSafe) const Line('// @dart = 2.9'),
       ...headers,
       const Line(''),
       Line('// From: ${section.start.filename}:${section.start.line}'),
@@ -820,7 +821,7 @@ class Line {
 
 /// A class to represent a section of sample code, marked by "{@tool snippet}...{@end-tool}".
 class Section {
-  const Section(this.code);
+  const Section(this.code, {this.isNullSafe});
   factory Section.combine(List<Section> sections) {
     final List<Line> code = sections
       .expand((Section section) => section.code)
@@ -863,6 +864,11 @@ class Section {
   }
   Line get start => code.firstWhere((Line line) => line.filename != null);
   final List<Line> code;
+  final bool isNullSafe;
+
+  Section copyWith({bool isNullSafe}) {
+    return Section(code, isNullSafe: isNullSafe);
+  }
 }
 
 /// A class to represent a sample in the dartdoc comments, marked by
@@ -944,6 +950,7 @@ Future<void> _runInteractive(Directory tempDir, Directory flutterPackage, String
       tempDir.deleteSync(recursive: true);
       exit(0);
     });
+    print('Using temp dir ${tempDir.path}');
   }
 
   final SampleChecker checker = SampleChecker(flutterPackage, tempDirectory: tempDir)

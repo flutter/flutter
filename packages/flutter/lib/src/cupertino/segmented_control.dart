@@ -11,6 +11,8 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples are not null safe.
+
 // Minimum padding from edges of the segmented control to edges of
 // encompassing widget.
 const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(horizontal: 16.0);

@@ -18,6 +18,7 @@ const String _kLibraryOption = 'library';
 const String _kOutputOption = 'output';
 const String _kPackageOption = 'package';
 const String _kTemplateOption = 'template';
+const String _kNullSafetyOption = 'null-safety';
 const String _kTypeOption = 'type';
 const String _kShowDartPad = 'dartpad';
 
@@ -104,6 +105,12 @@ void main(List<String> argList) {
         'final HTML output. This flag only applies when the type parameter is '
         '"sample".',
   );
+  parser.addFlag(
+    _kNullSafetyOption,
+    defaultsTo: true,
+    negatable: true,
+    help: 'Indicates whether the null-safety language features should be enabled.',
+  );
 
   final ArgResults args = parser.parse(argList);
 
@@ -176,6 +183,7 @@ void main(List<String> argList) {
     input,
     snippetType,
     showDartPad: args[_kShowDartPad] as bool,
+    enableNullSafety: args[_kNullSafetyOption] as bool,
     template: template,
     output: args[_kOutputOption] != null ? File(args[_kOutputOption] as String) : null,
     metadata: <String, Object>{

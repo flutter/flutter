@@ -9,6 +9,7 @@ part of material_animated_icons;
 // See: https://github.com/flutter/flutter/issues/1831 for details regarding
 // generic vector graphics support in Flutter.
 
+// Examples are not null safe.
 // Examples can assume:
 // AnimationController controller;
 

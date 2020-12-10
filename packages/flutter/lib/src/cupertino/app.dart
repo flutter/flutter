@@ -13,6 +13,8 @@ import 'localizations.dart';
 import 'route.dart';
 import 'theme.dart';
 
+// Examples are not null safe.
+
 /// An application that uses Cupertino design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly

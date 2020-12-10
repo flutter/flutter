@@ -16,6 +16,7 @@ export 'package:flutter/rendering.dart' show
   SliverGridDelegateWithFixedCrossAxisCount,
   SliverGridDelegateWithMaxCrossAxisExtent;
 
+// Examples are not null safe.
 // Examples can assume:
 // SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
 

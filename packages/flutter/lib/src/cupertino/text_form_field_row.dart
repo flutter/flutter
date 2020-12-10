@@ -11,6 +11,8 @@ import 'form_row.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
+// Examples are not null safe.
+
 /// Creates a [CupertinoFormRow] containing a [FormField] that wraps
 /// a [CupertinoTextField].
 ///
@@ -72,7 +74,7 @@ import 'theme.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material --no-null-safety}
 /// This example shows how to move the focus to the next field when the user
 /// presses the SPACE key.
 ///

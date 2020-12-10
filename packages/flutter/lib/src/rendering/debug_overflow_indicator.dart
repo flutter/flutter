@@ -11,6 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'object.dart';
 import 'stack.dart';
 
+// Examples are not null safe.
+
 // Describes which side the region data overflows on.
 enum _OverflowSide {
   left,

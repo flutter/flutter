@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -13,6 +12,8 @@ import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
 import 'text_style.dart';
+
+// Examples are not null safe.
 
 /// An immutable span of text.
 ///

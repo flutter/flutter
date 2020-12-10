@@ -6,6 +6,8 @@ import 'dart:ui' show Color;
 
 import 'package:flutter/painting.dart';
 
+// Examples are not null safe.
+
 /// Defines a single color as well a color swatch with ten shades of the color.
 ///
 /// The color's shades are referred to by index. The greater the index, the

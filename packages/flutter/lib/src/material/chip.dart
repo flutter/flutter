@@ -23,6 +23,8 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
 
+// Examples are not null safe.
+
 // Some design constants
 const double _kChipHeight = 32.0;
 const double _kDeleteIconSize = 18.0;
@@ -221,7 +223,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center --no-null-safety}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.

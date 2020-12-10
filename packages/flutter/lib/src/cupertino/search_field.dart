@@ -12,6 +12,8 @@ import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
 
+// Examples are not null safe.
+
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
 ///
