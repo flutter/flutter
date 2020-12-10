@@ -346,8 +346,9 @@ class PersistedPicture extends PersistedLeafSurface {
     }
 
     final bool didRequireBitmap =
-        existingSurface.picture.recordingCanvas!.hasArbitraryPaint;
-    final bool requiresBitmap = picture.recordingCanvas!.hasArbitraryPaint;
+        existingSurface.picture.recordingCanvas!.renderStrategy.hasArbitraryPaint;
+    final bool requiresBitmap =
+        picture.recordingCanvas!.renderStrategy.hasArbitraryPaint;
     if (didRequireBitmap != requiresBitmap) {
       // Switching canvas types is always expensive.
       return 1.0;
@@ -388,7 +389,7 @@ class PersistedPicture extends PersistedLeafSurface {
   Matrix4? get localTransformInverse => null;
 
   void applyPaint(EngineCanvas? oldCanvas) {
-    if (picture.recordingCanvas!.hasArbitraryPaint) {
+    if (picture.recordingCanvas!.renderStrategy.hasArbitraryPaint) {
       _applyBitmapPaint(oldCanvas);
     } else {
       _applyDomPaint(oldCanvas);
@@ -515,7 +516,8 @@ class PersistedPicture extends PersistedLeafSurface {
     if (_debugShowCanvasReuseStats) {
       DebugCanvasReuseOverlay.instance.createdCount++;
     }
-    final BitmapCanvas canvas = BitmapCanvas(bounds, density: _density);
+    final BitmapCanvas canvas = BitmapCanvas(bounds,
+      picture.recordingCanvas!.renderStrategy, density: _density);
     canvas.setElementCache(_elementCache);
     if (_debugExplainSurfaceStats) {
       _surfaceStatsFor(this)

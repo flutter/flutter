@@ -20,7 +20,8 @@ double _measureBorderRadius(double x, double y) {
 }
 
 class RawRecordingCanvas extends BitmapCanvas implements ui.PictureRecorder {
-  RawRecordingCanvas(ui.Size size) : super(ui.Offset.zero & size);
+  RawRecordingCanvas(ui.Size size) : super(ui.Offset.zero & size,
+      RenderStrategy());
 
   @override
   void dispose() {
@@ -77,17 +78,14 @@ class RecordingCanvas {
   RecordingCanvas(ui.Rect? bounds)
       : _paintBounds = _PaintBounds(bounds ?? ui.Rect.largest);
 
-  /// Whether this canvas is doing arbitrary paint operations not expressible
-  /// via DOM elements.
-  bool get hasArbitraryPaint => _hasArbitraryPaint;
-  bool _hasArbitraryPaint = false;
+  final RenderStrategy renderStrategy = RenderStrategy();
 
   /// Forces arbitrary paint even for simple pictures.
   ///
   /// This is useful for testing bitmap canvas when otherwise the compositor
   /// would prefer a DOM canvas.
   void debugEnforceArbitraryPaint() {
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
   }
 
   /// Whether this canvas contain drawing operations.
@@ -210,7 +208,7 @@ class RecordingCanvas {
 
   void saveLayerWithoutBounds(SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     // TODO(het): Implement this correctly using another canvas.
     _commands.add(const PaintSave());
     _paintBounds.saveTransformsAndClip();
@@ -219,7 +217,7 @@ class RecordingCanvas {
 
   void saveLayer(ui.Rect bounds, SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     // TODO(het): Implement this correctly using another canvas.
     _commands.add(const PaintSave());
     _paintBounds.saveTransformsAndClip();
@@ -268,7 +266,7 @@ class RecordingCanvas {
 
   void skew(double sx, double sy) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _paintBounds.skew(sx, sy);
     _commands.add(PaintSkew(sx, sy));
   }
@@ -284,7 +282,7 @@ class RecordingCanvas {
         // Since this refers to inverse, can't shrink paintBounds.
         break;
     }
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _commands.add(command);
   }
 
@@ -292,7 +290,7 @@ class RecordingCanvas {
     assert(!_recordingEnded);
     final PaintClipRRect command = PaintClipRRect(rrect);
     _paintBounds.clipRect(rrect.outerRect, command);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _commands.add(command);
   }
 
@@ -300,7 +298,7 @@ class RecordingCanvas {
     assert(!_recordingEnded);
     final PaintClipPath command = PaintClipPath(path as SurfacePath);
     _paintBounds.clipRect(path.getBounds(), command);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _commands.add(command);
   }
 
@@ -329,14 +327,14 @@ class RecordingCanvas {
       math.max(p1.dy, p2.dy) + paintSpread,
       command,
     );
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     _commands.add(command);
   }
 
   void drawPaint(SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final PaintDrawPaint command = PaintDrawPaint(paint.paintData);
     _paintBounds.grow(_paintBounds.maxPaintBounds, command);
@@ -346,7 +344,7 @@ class RecordingCanvas {
   void drawRect(ui.Rect rect, SurfacePaint paint) {
     assert(!_recordingEnded);
     if (paint.shader != null) {
-      _hasArbitraryPaint = true;
+      renderStrategy.hasArbitraryPaint = true;
     }
     _didDraw = true;
     final double paintSpread = _getPaintSpread(paint);
@@ -362,7 +360,7 @@ class RecordingCanvas {
   void drawRRect(ui.RRect rrect, SurfacePaint paint) {
     assert(!_recordingEnded);
     if (paint.shader != null || !rrect.webOnlyUniformRadii) {
-      _hasArbitraryPaint = true;
+      renderStrategy.hasArbitraryPaint = true;
     }
     _didDraw = true;
     final double paintSpread = _getPaintSpread(paint);
@@ -414,7 +412,7 @@ class RecordingCanvas {
       return; // Some inner radius is overlapping some outer radius
     }
 
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final double paintSpread = _getPaintSpread(paint);
     final PaintDrawDRRect command =
@@ -431,7 +429,7 @@ class RecordingCanvas {
 
   void drawOval(ui.Rect rect, SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final double paintSpread = _getPaintSpread(paint);
     final PaintDrawOval command = PaintDrawOval(rect, paint.paintData);
@@ -445,7 +443,7 @@ class RecordingCanvas {
 
   void drawCircle(ui.Offset c, double radius, SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final double paintSpread = _getPaintSpread(paint);
     final PaintDrawCircle command = PaintDrawCircle(c, radius, paint.paintData);
@@ -479,7 +477,7 @@ class RecordingCanvas {
     }
     SurfacePath sPath = path as SurfacePath;
     if (!sPath.pathRef.isEmpty) {
-      _hasArbitraryPaint = true;
+      renderStrategy.hasArbitraryPaint = true;
       _didDraw = true;
       ui.Rect pathBounds = sPath.getBounds();
       final double paintSpread = _getPaintSpread(paint);
@@ -498,7 +496,8 @@ class RecordingCanvas {
 
   void drawImage(ui.Image image, ui.Offset offset, SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
+    renderStrategy.hasImageElements = true;
     _didDraw = true;
     final double left = offset.dx;
     final double top = offset.dy;
@@ -511,7 +510,8 @@ class RecordingCanvas {
   void drawImageRect(
       ui.Image image, ui.Rect src, ui.Rect dst, SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
+    renderStrategy.hasImageElements = true;
     _didDraw = true;
     final PaintDrawImageRect command =
         PaintDrawImageRect(image, src, dst, paint.paintData);
@@ -529,8 +529,9 @@ class RecordingCanvas {
 
     _didDraw = true;
     if (engineParagraph.hasArbitraryPaint) {
-      _hasArbitraryPaint = true;
+      renderStrategy.hasArbitraryPaint = true;
     }
+    renderStrategy.hasParagraphs = true;
     final double left = offset.dx;
     final double top = offset.dy;
     final PaintDrawParagraph command =
@@ -548,7 +549,7 @@ class RecordingCanvas {
   void drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final ui.Rect shadowRect =
         computePenumbraBounds(path.getBounds(), elevation);
@@ -561,7 +562,7 @@ class RecordingCanvas {
   void drawVertices(
       SurfaceVertices vertices, ui.BlendMode blendMode, SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final PaintDrawVertices command =
         PaintDrawVertices(vertices, blendMode, paint.paintData);
@@ -572,7 +573,7 @@ class RecordingCanvas {
   void drawRawPoints(
       ui.PointMode pointMode, Float32List points, SurfacePaint paint) {
     assert(!_recordingEnded);
-    _hasArbitraryPaint = true;
+    renderStrategy.hasArbitraryPaint = true;
     _didDraw = true;
     final PaintDrawPoints command =
         PaintDrawPoints(pointMode, points, paint.paintData);
@@ -1909,4 +1910,22 @@ double _getPaintSpread(SurfacePaint paint) {
     spread += paint.strokeWidth * sqrtOfTwoDivByTwo;
   }
   return spread;
+}
+
+/// Contains metrics collected by recording canvas to provide data for
+/// rendering heuristics (canvas use vs DOM).
+class RenderStrategy {
+  /// Whether paint commands contain image elements.
+  bool hasImageElements = false;
+
+  /// Whether paint commands contain paragraphs.
+  bool hasParagraphs = false;
+
+  /// Whether paint commands are doing arbitrary operations
+  /// not expressible via pure DOM elements.
+  ///
+  /// This is used to decide whether to use simplified DomCanvas.
+  bool hasArbitraryPaint = false;
+
+  RenderStrategy();
 }

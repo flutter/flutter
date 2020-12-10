@@ -108,15 +108,19 @@ class BitmapCanvas extends EngineCanvas {
   /// uses global transform of canvas to compute ratio.
   final double _density;
 
+  final RenderStrategy _renderStrategy;
+
   /// Allocates a canvas with enough memory to paint a picture within the given
   /// [bounds].
   ///
   /// This canvas can be reused by pictures with different paint bounds as long
   /// as the [Rect.size] of the bounds fully fit within the size used to
   /// initialize this canvas.
-  BitmapCanvas(this._bounds, {double density = 1.0})
+  BitmapCanvas(this._bounds, RenderStrategy renderStrategy,
+      {double density = 1.0})
       : assert(_bounds != null), // ignore: unnecessary_null_comparison
         _density = density,
+        _renderStrategy = renderStrategy,
         _widthInBitmapPixels = _widthToPhysical(_bounds.width),
         _heightInBitmapPixels = _heightToPhysical(_bounds.height),
         _canvasPool = _CanvasPool(_widthToPhysical(_bounds.width),
@@ -134,7 +138,7 @@ class BitmapCanvas extends EngineCanvas {
 
   /// Constructs bitmap canvas to capture image data.
   factory BitmapCanvas.imageData(ui.Rect bounds) {
-    BitmapCanvas bitmapCanvas = BitmapCanvas(bounds);
+    BitmapCanvas bitmapCanvas = BitmapCanvas(bounds, RenderStrategy());
     bitmapCanvas._preserveImageData = true;
     return bitmapCanvas;
   }
@@ -331,19 +335,30 @@ class BitmapCanvas extends EngineCanvas {
   /// - Pictures typically have large rect/rounded rectangles as background
   ///   prefer DOM if canvas has not been allocated yet.
   ///
-  bool _useDomForRendering(SurfacePaintData paint) =>
+  bool _useDomForRenderingFill(SurfacePaintData paint) =>
       (_preserveImageData == false && _contains3dTransform) ||
       (_childOverdraw && _canvasPool._canvas == null &&
           paint.maskFilter == null &&
           paint.shader == null &&
           paint.style != ui.PaintingStyle.stroke);
 
+  /// Same as [_useDomForRenderingFill] but allows stroke as well.
+  ///
+  /// DOM canvas is generated for simple strokes using borders.
+  bool _useDomForRenderingFillAndStroke(SurfacePaintData paint) =>
+      (_preserveImageData == false && _contains3dTransform) ||
+          ((_childOverdraw || _renderStrategy.hasImageElements ||
+              _renderStrategy.hasParagraphs) &&
+              _canvasPool._canvas == null &&
+              paint.maskFilter == null &&
+              paint.shader == null);
+
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
     final SurfacePaintData paintData = SurfacePaintData()
       ..color = color
       ..blendMode = blendMode;
-    if (_useDomForRendering(paintData)) {
+    if (_useDomForRenderingFill(paintData)) {
       drawRect(_computeScreenBounds(_canvasPool._currentTransform), paintData);
     } else {
       _canvasPool.drawColor(color, blendMode);
@@ -352,7 +367,7 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawLine(ui.Offset p1, ui.Offset p2, SurfacePaintData paint) {
-    if (_useDomForRendering(paint)) {
+    if (_useDomForRenderingFill(paint)) {
       final SurfacePath path = SurfacePath()
         ..moveTo(p1.dx, p1.dy)
         ..lineTo(p2.dx, p2.dy);
@@ -368,7 +383,7 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawPaint(SurfacePaintData paint) {
-    if (_useDomForRendering(paint)) {
+    if (_useDomForRenderingFill(paint)) {
       drawRect(_computeScreenBounds(_canvasPool._currentTransform), paint);
     } else {
       ui.Rect? shaderBounds = (paint.shader != null) ?
@@ -381,7 +396,7 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
-    if (_useDomForRendering(paint)) {
+    if (_useDomForRenderingFillAndStroke(paint)) {
       html.HtmlElement element = _buildDrawRectElement(
           rect, paint, 'draw-rect', _canvasPool._currentTransform);
       _drawElement(
@@ -418,12 +433,14 @@ class BitmapCanvas extends EngineCanvas {
     if (blendMode != null) {
       element.style.mixBlendMode = _stringForBlendMode(blendMode) ?? '';
     }
+    // Switch to preferring DOM from now on.
+    _childOverdraw = true;
   }
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
     final ui.Rect rect = rrect.outerRect;
-    if (_useDomForRendering(paint)) {
+    if (_useDomForRenderingFillAndStroke(paint)) {
       html.HtmlElement element = _buildDrawRectElement(
           rect, paint, 'draw-rrect', _canvasPool._currentTransform);
       _applyRRectBorderRadius(element.style, rrect);
@@ -448,7 +465,7 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawOval(ui.Rect rect, SurfacePaintData paint) {
-    if (_useDomForRendering(paint)) {
+    if (_useDomForRenderingFill(paint)) {
       html.HtmlElement element = _buildDrawRectElement(
           rect, paint, 'draw-oval', _canvasPool._currentTransform);
       _drawElement(
@@ -468,7 +485,7 @@ class BitmapCanvas extends EngineCanvas {
   @override
   void drawCircle(ui.Offset c, double radius, SurfacePaintData paint) {
     ui.Rect rect = ui.Rect.fromCircle(center: c, radius: radius);
-    if (_useDomForRendering(paint)) {
+    if (_useDomForRenderingFillAndStroke(paint)) {
       html.HtmlElement element = _buildDrawRectElement(
           rect, paint, 'draw-circle', _canvasPool._currentTransform);
       _drawElement(
@@ -487,7 +504,7 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawPath(ui.Path path, SurfacePaintData paint) {
-    if (_useDomForRendering(paint)) {
+    if (_useDomForRenderingFill(paint)) {
       final Matrix4 transform = _canvasPool._currentTransform;
       final SurfacePath surfacePath = path as SurfacePath;
       final ui.Rect? pathAsLine = surfacePath.toStraightLine();
@@ -508,6 +525,11 @@ class BitmapCanvas extends EngineCanvas {
       final ui.Rect? pathAsRect = surfacePath.toRect();
       if (pathAsRect != null) {
         drawRect(pathAsRect, paint);
+        return;
+      }
+      final ui.RRect ? pathAsRRect = surfacePath.toRoundedRect();
+      if (pathAsRRect != null) {
+        drawRRect(pathAsRRect, paint);
         return;
       }
       final ui.Rect pathBounds = surfacePath.getBounds();

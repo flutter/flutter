@@ -186,7 +186,7 @@ html.HtmlElement _buildDrawRectElement(ui.Rect rect, SurfacePaintData paint, Str
     style
       ..width = '${right - left - strokeWidth}px'
       ..height = '${bottom - top - strokeWidth}px'
-      ..border = '${strokeWidth}px solid $cssColor';
+      ..border = '${_borderStrokeToCssUnit(strokeWidth)} solid $cssColor';
   } else {
     style
       ..width = '${right - left}px'
@@ -204,18 +204,26 @@ void _applyRRectBorderRadius(html.CssStyleDeclaration style, ui.RRect rrect) {
       rrect.trRadiusX == rrect.trRadiusY &&
       rrect.blRadiusX == rrect.blRadiusY &&
       rrect.brRadiusX == rrect.brRadiusY) {
-    style.borderRadius = '${rrect.blRadiusX.toStringAsFixed(3)}px';
+    style.borderRadius = '${_borderStrokeToCssUnit(rrect.blRadiusX)}';
     return;
   }
   // Non-uniform. Apply each corner radius.
-  style.borderTopLeftRadius = '${rrect.tlRadiusX.toStringAsFixed(3)}px '
-      '${rrect.tlRadiusY.toStringAsFixed(3)}px';
-  style.borderTopRightRadius = '${rrect.trRadiusX.toStringAsFixed(3)}px '
-      '${rrect.trRadiusY.toStringAsFixed(3)}px';
-  style.borderBottomLeftRadius = '${rrect.blRadiusX.toStringAsFixed(3)}px '
-      '${rrect.blRadiusY.toStringAsFixed(3)}px';
-  style.borderBottomRightRadius = '${rrect.brRadiusX.toStringAsFixed(3)}px '
-      '${rrect.brRadiusY.toStringAsFixed(3)}px';
+  style.borderTopLeftRadius = '${_borderStrokeToCssUnit(rrect.tlRadiusX)} '
+      '${_borderStrokeToCssUnit(rrect.tlRadiusY)}';
+  style.borderTopRightRadius = '${_borderStrokeToCssUnit(rrect.trRadiusX)} '
+      '${_borderStrokeToCssUnit(rrect.trRadiusY)}';
+  style.borderBottomLeftRadius = '${_borderStrokeToCssUnit(rrect.blRadiusX)} '
+      '${_borderStrokeToCssUnit(rrect.blRadiusY)}';
+  style.borderBottomRightRadius = '${_borderStrokeToCssUnit(rrect.brRadiusX)} '
+      '${_borderStrokeToCssUnit(rrect.brRadiusY)}';
+}
+
+String _borderStrokeToCssUnit(double value) {
+  if (value == 0) {
+    // TODO: hairline nees to take into account both dpi and density.
+    value = 1.0;
+  }
+  return '${value.toStringAsFixed(3)}px';
 }
 
 html.Element _pathToSvgElement(SurfacePath path, SurfacePaintData paint,

@@ -25,7 +25,8 @@ void testMain() async {
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
         double maxDiffRatePercent = 0.0}) async {
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
+    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
+        RenderStrategy());
 
     rc.endRecording();
     rc.apply(engineCanvas, screenRect);

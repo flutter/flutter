@@ -30,7 +30,8 @@ void testMain() async {
       {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
       double maxDiffRatePercent = 0.0, bool setupPerspective = false,
         bool write = false}) async {
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
+    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
+        RenderStrategy());
 
     rc.endRecording();
     rc.apply(engineCanvas, screenRect);

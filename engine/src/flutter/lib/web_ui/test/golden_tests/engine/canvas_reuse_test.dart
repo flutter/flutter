@@ -34,7 +34,8 @@ void testMain() async {
 
   // Regression test for https://github.com/flutter/flutter/issues/51514
   test('Canvas is reused and z-index doesn\'t leak across paints', () async {
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
+    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
+        RenderStrategy());
     const Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
     // Draw first frame into engine canvas.

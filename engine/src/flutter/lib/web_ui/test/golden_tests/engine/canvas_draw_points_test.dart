@@ -23,7 +23,7 @@ void testMain() async {
   BitmapCanvas canvas;
 
   setUp(() {
-    canvas = BitmapCanvas(region);
+    canvas = BitmapCanvas(region, RenderStrategy());
   });
 
   tearDown(() {

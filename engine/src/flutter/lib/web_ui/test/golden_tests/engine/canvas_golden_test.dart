@@ -77,7 +77,8 @@ void testMain() async {
   }
 
   test('renders pixels that are not aligned inside the canvas', () async {
-    canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 60, 60));
+    canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 60, 60),
+        RenderStrategy());
 
     drawMisalignedLines(canvas);
 
@@ -92,7 +93,8 @@ void testMain() async {
     // shift its position back to 0.0 and at the same time it will it will
     // compensate by shifting the contents of the canvas in the opposite
     // direction.
-    canvas = BitmapCanvas(const Rect.fromLTWH(0.5, 0.5, 60, 60));
+    canvas = BitmapCanvas(const Rect.fromLTWH(0.5, 0.5, 60, 60),
+        RenderStrategy());
     canvas.clipRect(const Rect.fromLTWH(0, 0, 50, 50), ClipOp.intersect);
     drawMisalignedLines(canvas);
 
@@ -103,7 +105,8 @@ void testMain() async {
   });
 
   test('fill the whole canvas with color even when transformed', () async {
-    canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 50, 50));
+    canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 50, 50),
+        RenderStrategy());
     canvas.clipRect(const Rect.fromLTWH(0, 0, 50, 50), ClipOp.intersect);
     canvas.translate(25, 25);
     canvas.drawColor(const Color.fromRGBO(0, 255, 0, 1.0), BlendMode.src);
@@ -116,7 +119,8 @@ void testMain() async {
   });
 
   test('fill the whole canvas with paint even when transformed', () async {
-    canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 50, 50));
+    canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 50, 50),
+        RenderStrategy());
     canvas.clipRect(const Rect.fromLTWH(0, 0, 50, 50), ClipOp.intersect);
     canvas.translate(25, 25);
     canvas.drawPaint(SurfacePaintData()
@@ -160,7 +164,7 @@ void testMain() async {
     final Rect innerClip = Rect.fromLTRB(0.5, canvasSize.bottom / 2 + 0.5,
         canvasSize.right, canvasSize.bottom);
 
-    canvas = BitmapCanvas(canvasSize);
+    canvas = BitmapCanvas(canvasSize, RenderStrategy());
     canvas.debugChildOverdraw = true;
     canvas.clipRect(outerClip, ClipOp.intersect);
     canvas.drawParagraph(paragraph, const Offset(8.5, 8.5));
@@ -201,7 +205,7 @@ void testMain() async {
 
     final Rect canvasSize = Offset.zero & Size(500, 500);
 
-    canvas = BitmapCanvas(canvasSize);
+    canvas = BitmapCanvas(canvasSize, RenderStrategy());
     canvas.debugChildOverdraw = true;
 
     final SurfacePaintData pathPaint = SurfacePaintData()
