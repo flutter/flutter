@@ -35,8 +35,7 @@ class VulkanSurfaceProducer final : public SurfaceProducer,
   std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
       const SkISize& size) override;
 
-  std::unique_ptr<SurfaceProducerSurface> ProduceOffscreenSurface(
-      const SkISize& size);
+  sk_sp<SkSurface> ProduceOffscreenSurface(const SkISize& size);
 
   // |SurfaceProducer|
   void SubmitSurface(std::unique_ptr<SurfaceProducerSurface> surface) override;
