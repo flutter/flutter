@@ -1412,6 +1412,60 @@ void main() {
     expect(getIndex(), null);
   });
 
+  testWidgets('DropdownButton selected item color test', (WidgetTester tester) async {
+    Widget build({ ValueChanged<String?>? onChanged, String? value, Widget? hint, Widget? disabledHint }) {
+      return MaterialApp(
+        theme: ThemeData(
+          disabledColor: Colors.pink,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: Column(children: <Widget>[
+              DropdownButtonFormField<String>(
+                style: const TextStyle(
+                  color: Colors.yellow
+                ),
+                disabledHint: disabledHint,
+                hint: hint,
+                items: const <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(
+                    child: Text('one'),
+                    value: 'one',
+                  ),
+                  DropdownMenuItem<String>(
+                    child: Text('two'),
+                    value: 'two',
+                  ),
+                ],
+              value: value,
+              onChanged: onChanged,
+              )
+            ]),
+          ),
+        ),
+      );
+    }
+
+    Color textColor(String text) {
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color!;
+    }
+
+    // The selected value should be displayed when the button is enabled.
+    await tester.pumpWidget(build(onChanged: onChanged, value: 'two'));
+    // The dropdown icon and the selected menu item are vertically aligned.
+    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+    // Selected item has a normal color from [DropdownButtonFormField.style]
+    // when the button is enabled.
+    expect(textColor('two'), Colors.yellow);
+
+    // The selected value should be displayed when the button is disabled.
+    await tester.pumpWidget(build(onChanged: null, value: 'two'));
+    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+    // Selected item has a disabled color from [theme.disabledColor]
+    // when the button is disable.
+    expect(textColor('two'), Colors.pink);
+  });
+
   testWidgets(
     'DropdowwnButton hint displays when the items list is empty, '
     'items is null, and disabledHint is null',

@@ -121,6 +121,12 @@
          "flaky": true
       },
       {
+         "name": "Linux web_benchmarks_canvaskit",
+         "repo": "flutter",
+         "task_name": "linux_web_benchmarks_canvaskit",
+         "flaky": true
+      },
+      {
          "name": "Linux web_benchmarks_html",
          "repo": "flutter",
          "task_name": "linux_web_benchmarks_html",

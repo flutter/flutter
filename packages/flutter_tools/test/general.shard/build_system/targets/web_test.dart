@@ -83,7 +83,7 @@ void main() {
 
     // Plugins
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistry);'));
+    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -185,7 +185,7 @@ void main() {
 
     // Plugins
     expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
-    expect(generated, contains('registerPlugins(webPluginRegistry);'));
+    expect(generated, contains('registerPlugins(webPluginRegistrar);'));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -208,7 +208,7 @@ void main() {
 
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
+    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
     // Main
     expect(generated, contains('entrypoint.main();'));
   }));
@@ -253,7 +253,7 @@ void main() {
 
     // Plugins
     expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
-    expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
+    expect(generated, isNot(contains('registerPlugins(webPluginRegistrar);')));
 
     // Main
     expect(generated, contains('entrypoint.main();'));
@@ -378,6 +378,40 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        '--no-source-maps',
+        '-O4',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
+
+    await const Dart2JSTarget().build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
+  test('Dart2JSTarget calls dart2js with expected args in release mode with native null assertions', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kNativeNullAssertions] = 'true';
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '--native-null-assertions',
+        '-Ddart.vm.product=true',
+        '--no-source-maps',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.packages',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '--native-null-assertions',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-O4',

@@ -128,11 +128,13 @@ class ColdRunner extends ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool allowExistingDdsInstance = false,
   }) async {
     _didAttach = true;
     try {
       await connectToServiceProtocol(
         getSkSLMethod: writeSkSL,
+        allowExistingDdsInstance: allowExistingDdsInstance,
       );
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
