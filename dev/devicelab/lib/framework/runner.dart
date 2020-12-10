@@ -80,9 +80,8 @@ Future<TaskResult> runTask(
   });
 
   try {
-    final _ClientAndIsolate client = await _connectToRunnerIsolate(await uri.future);
-    final vms.Response taskResultResponse = await client.callServiceExtension('ext.cocoonRunTask');
-    final TaskResult taskResult = TaskResult.fromJson(taskResultResponse.json);
+    final RunnerClient client = await RunnerClient.connect(await uri.future);
+    final TaskResult taskResult = await client.getTaskResult();
     await runner.exitCode;
     client.dispose();
     return taskResult;
@@ -94,55 +93,62 @@ Future<TaskResult> runTask(
   }
 }
 
-class _ClientAndIsolate {
-  const _ClientAndIsolate(this.client, this.isolate);
+class RunnerClient {
+  const RunnerClient(this.client, this.isolate);
 
-  static Future<_ClientAndIsolate> fromUri(String uri) async {
-    final vms.VmService client = await vmServiceConnectUri(uri);
-    final vms.VM vm = await client.getVM();
-    final vms.IsolateRef isolate = vm.isolates.single;
-    return _ClientAndIsolate(client, isolate);
+  static Future<RunnerClient> connect(Uri vmServiceUri) async {
+    final List<String> pathSegments = <String>[
+      // Add authentication code.
+      if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
+      'ws',
+    ];
+    final String uri = vmServiceUri.replace(
+      scheme: 'ws',
+      pathSegments: pathSegments,
+    ).toString();
+    final Stopwatch stopwatch = Stopwatch()..start();
+
+    while (true) {
+      try {
+        // Make sure VM server is up by successfully opening and closing a socket.
+        await (await WebSocket.connect(uri)).close();
+
+        final vms.VmService client = await vmServiceConnectUri(uri);
+        final vms.VM vm = await client.getVM();
+        final vms.IsolateRef isolate = vm.isolates.single;
+        final RunnerClient runnerClient = RunnerClient(client, isolate);
+
+        if (!await runnerClient.ready()) {
+          throw 'not ready yet';
+        }
+        return runnerClient;
+      } catch (error) {
+        if (stopwatch.elapsed > const Duration(seconds: 10)) {
+          print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
   }
 
   final vms.VmService client;
   final vms.IsolateRef isolate;
 
-  Future<vms.Response> callServiceExtension(String name) {
+  Future<bool> ready() async {
+    final vms.Response response = await _callServiceExtension('ext.cocoonRunnerReady');
+    return response.json['result'] == 'ready';
+  }
+
+  Future<TaskResult> getTaskResult() async {
+    final vms.Response taskResultResponse = await _callServiceExtension('ext.cocoonRunTask');
+    return TaskResult.fromJson(taskResultResponse.json);
+  }
+
+  Future<vms.Response> _callServiceExtension(String name) {
     return client.callServiceExtension(name, isolateId: isolate.id);
   }
 
   void dispose() {
     client.dispose();
-  }
-}
-
-Future<_ClientAndIsolate> _connectToRunnerIsolate(Uri vmServiceUri) async {
-  final List<String> pathSegments = <String>[
-    // Add authentication code.
-    if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
-    'ws',
-  ];
-  final String uri = vmServiceUri.replace(
-    scheme: 'ws',
-    pathSegments: pathSegments,
-  ).toString();
-  final Stopwatch stopwatch = Stopwatch()..start();
-
-  while (true) {
-    try {
-      // Make sure VM server is up by successfully opening and closing a socket.
-      await (await WebSocket.connect(uri)).close();
-
-      final _ClientAndIsolate client = await _ClientAndIsolate.fromUri(uri);
-      final vms.Response response = await client.callServiceExtension('ext.cocoonRunnerReady');
-      if (response.json['result'] != 'ready')
-        throw 'not ready yet';
-      return client;
-    } catch (error) {
-      if (stopwatch.elapsed > const Duration(seconds: 10)) {
-        print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-    }
   }
 }
