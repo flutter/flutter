@@ -40,9 +40,9 @@ class BitmapCanvas extends EngineCanvas {
   /// The size of the paint [bounds].
   ui.Size get size => _bounds.size;
 
-  /// The last paragraph style is cached to optimize the case where the style
-  /// hasn't changed.
-  ParagraphGeometricStyle? _cachedLastStyle;
+  /// The last CSS font string is cached to optimize the case where the font
+  /// styles hasn't changed.
+  String? _cachedLastCssFont = null;
 
   /// List of extra sibling elements created for paragraphs and clipping.
   final List<html.Element> _children = <html.Element>[];
@@ -210,7 +210,7 @@ class BitmapCanvas extends EngineCanvas {
       }
     }
     _children.clear();
-    _cachedLastStyle = null;
+    _cachedLastCssFont = null;
     _setupInitialTransform();
   }
 
@@ -255,7 +255,7 @@ class BitmapCanvas extends EngineCanvas {
   void restore() {
     _canvasPool.restore();
     _saveCount--;
-    _cachedLastStyle = null;
+    _cachedLastCssFont = null;
   }
 
   // TODO(yjbanov): not sure what this is attempting to do, but it is probably
@@ -545,7 +545,7 @@ class BitmapCanvas extends EngineCanvas {
     }
     _childOverdraw = true;
     _canvasPool.closeCurrentCanvas();
-    _cachedLastStyle = null;
+    _cachedLastCssFont = null;
   }
 
   html.ImageElement _reuseOrCreateImage(HtmlImage htmlImage) {
@@ -790,11 +790,11 @@ class BitmapCanvas extends EngineCanvas {
     _childOverdraw = true;
   }
 
-  void setFontFromParagraphStyle(ParagraphGeometricStyle style) {
-    if (style != _cachedLastStyle) {
+  void setCssFont(String cssFont) {
+    if (cssFont != _cachedLastCssFont) {
       html.CanvasRenderingContext2D ctx = _canvasPool.context;
-      ctx.font = style.cssFontString;
-      _cachedLastStyle = style;
+      ctx.font = cssFont;
+      _cachedLastCssFont = cssFont;
     }
   }
 
@@ -802,7 +802,7 @@ class BitmapCanvas extends EngineCanvas {
   /// contains information about the measurement.
   ///
   /// The text is measured using the font set by the most recent call to
-  /// [setFontFromParagraphStyle].
+  /// [setCssFont].
   html.TextMetrics measureText(String text) {
     return _canvasPool.context.measureText(text);
   }
@@ -810,7 +810,7 @@ class BitmapCanvas extends EngineCanvas {
   /// Draws text to the canvas starting at coordinate ([x], [y]).
   ///
   /// The text is drawn starting at coordinates ([x], [y]). It uses the current
-  /// font set by the most recent call to [setFontFromParagraphStyle].
+  /// font set by the most recent call to [setCssFont].
   void fillText(String text, double x, double y) {
     _canvasPool.context.fillText(text, x, y);
   }
