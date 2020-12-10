@@ -40,8 +40,9 @@ void testMain() {
 
   List<CkImageFilter> createImageFilters() {
     return <CkImageFilter>[
-      CkImageFilter.blur(sigmaX: 5, sigmaY: 6),
-      CkImageFilter.blur(sigmaX: 6, sigmaY: 5),
+      CkImageFilter.blur(sigmaX: 5, sigmaY: 6, tileMode: ui.TileMode.clamp),
+      CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.clamp),
+      CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
       for (final CkColorFilter colorFilter in createColorFilters()) CkImageFilter.color(colorFilter: colorFilter),
     ];
   }
@@ -50,7 +51,7 @@ void testMain() {
     setUpCanvasKitTest();
 
     test('can be constructed', () {
-      final CkImageFilter imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10);
+      final CkImageFilter imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
       expect(imageFilter, isA<CkImageFilter>());
       expect(imageFilter.createDefault(), isNotNull);
       expect(imageFilter.resurrect(), isNotNull);
@@ -80,12 +81,12 @@ void testMain() {
 
     test('reuses the Skia filter', () {
       final CkPaint paint = CkPaint();
-      paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10);
+      paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
 
       final ManagedSkiaObject managedFilter = paint.imageFilter as ManagedSkiaObject;
       final Object skiaFilter = managedFilter?.skiaObject;
 
-      paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10);
+      paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
       expect((paint.imageFilter as ManagedSkiaObject).skiaObject, same(skiaFilter));
     });
 

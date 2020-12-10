@@ -24,7 +24,7 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
 
   void initImage(CanvasImage* image);
   void initPicture(Picture*);
-  void initBlur(double sigma_x, double sigma_y);
+  void initBlur(double sigma_x, double sigma_y, SkTileMode tile_mode);
   void initMatrix(const tonic::Float64List& matrix4, int filter_quality);
   void initColorFilter(ColorFilter* colorFilter);
   void initComposeFilter(ImageFilter* outer, ImageFilter* inner);

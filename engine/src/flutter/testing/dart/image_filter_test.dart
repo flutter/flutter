@@ -72,8 +72,8 @@ void main() {
     return bytes.buffer.asUint32List();
   }
 
-  ImageFilter makeBlur(double sigmaX, double sigmaY) =>
-    ImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY);
+  ImageFilter makeBlur(double sigmaX, double sigmaY, [TileMode tileMode = TileMode.clamp]) =>
+    ImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   ImageFilter makeScale(double scX, double scY,
                         [double trX = 0.0, double trY = 0.0,
@@ -105,6 +105,7 @@ void main() {
   List<ImageFilter> makeList() {
     return <ImageFilter>[
       makeBlur(10.0, 10.0),
+      makeBlur(10.0, 10.0, TileMode.decal),
       makeBlur(10.0, 20.0),
       makeBlur(20.0, 20.0),
       makeScale(10.0, 10.0),
@@ -272,14 +273,14 @@ void main() {
 
   test('Composite ImageFilter toString', () {
     expect(
-      ImageFilter.compose(outer: makeBlur(20.0, 20.0), inner: makeBlur(10.0, 10.0)).toString(),
-      contains('blur(10.0, 10.0) -> blur(20.0, 20.0)'),
+      ImageFilter.compose(outer: makeBlur(20.0, 20.0, TileMode.decal), inner: makeBlur(10.0, 10.0)).toString(),
+      contains('blur(10.0, 10.0, clamp) -> blur(20.0, 20.0, decal)'),
     );
 
     // Produces a flat list of filters
     expect(
       ImageFilter.compose(
-        outer: ImageFilter.compose(outer: makeBlur(30.0, 30.0), inner: makeBlur(20.0, 20.0)),
+        outer: ImageFilter.compose(outer: makeBlur(30.0, 30.0, TileMode.mirror), inner: makeBlur(20.0, 20.0, TileMode.repeated)),
         inner: ImageFilter.compose(
           outer: const ColorFilter.mode(null, null),
           inner: makeScale(10.0, 10.0),
@@ -288,8 +289,8 @@ void main() {
       contains(
         'matrix([10.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, -0.0, 0.0, 1.0], FilterQuality.low) -> '
         'ColorFilter.mode(null, null) -> '
-        'blur(20.0, 20.0) -> '
-        'blur(30.0, 30.0)'
+        'blur(20.0, 20.0, repeated) -> '
+        'blur(30.0, 30.0, mirror)'
       ),
     );
   });
