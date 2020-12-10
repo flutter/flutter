@@ -24,18 +24,15 @@ class PhysicalKeyData {
   PhysicalKeyData(
     String chromiumHidCodes,
     String androidKeyboardLayout,
-    String androidKeyCodeHeader,
     String androidNameMap,
     String glfwKeyCodeHeader,
     String glfwNameMap,
   )   : assert(chromiumHidCodes != null),
         assert(androidKeyboardLayout != null),
-        assert(androidKeyCodeHeader != null),
         assert(androidNameMap != null),
         assert(glfwKeyCodeHeader != null),
         assert(glfwNameMap != null) {
     _nameToAndroidScanCodes = _readAndroidScanCodes(androidKeyboardLayout);
-    _nameToAndroidKeyCode = _readAndroidKeyCodes(androidKeyCodeHeader);
     _nameToGlfwKeyCode = _readGlfwKeyCodes(glfwKeyCodeHeader);
     // Cast Android dom map
     final Map<String, List<dynamic>> dynamicAndroidNames = (json.decode(androidNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
@@ -65,10 +62,6 @@ class PhysicalKeyData {
       entry.androidKeyNames = _nameToAndroidName[entry.constantName]?.cast<String>();
       if (entry.androidKeyNames != null && entry.androidKeyNames.isNotEmpty) {
         for (final String androidKeyName in entry.androidKeyNames) {
-          if (_nameToAndroidKeyCode[androidKeyName] != null) {
-            entry.androidKeyCodes ??= <int>[];
-            entry.androidKeyCodes.add(_nameToAndroidKeyCode[androidKeyName]);
-          }
           if (_nameToAndroidScanCodes[androidKeyName] != null && _nameToAndroidScanCodes[androidKeyName].isNotEmpty) {
             entry.androidScanCodes ??= <int>[];
             entry.androidScanCodes.addAll(_nameToAndroidScanCodes[androidKeyName]);
@@ -128,13 +121,6 @@ class PhysicalKeyData {
   /// JSON.
   Map<String, List<int>> _nameToAndroidScanCodes;
 
-  /// The mapping from Android name (e.g. "MEDIA_EJECT") to the integer key code
-  /// (logical meaning) of the key.
-  ///
-  /// Only populated if data is parsed from the source files, not if parsed from
-  /// JSON.
-  Map<String, int> _nameToAndroidKeyCode;
-
   /// The mapping from GLFW name (e.g. "GLFW_KEY_COMMA") to the integer key code
   /// (logical meaning) of the key.
   ///
@@ -173,23 +159,6 @@ class PhysicalKeyData {
       return null;
     });
 
-    return result;
-  }
-
-  /// Parses entries from Android's keycodes.h key code data file.
-  ///
-  /// Lines in this file look like this (without the ///):
-  ///  /** Left Control modifier key. */
-  ///  AKEYCODE_CTRL_LEFT       = 113,
-  Map<String, int> _readAndroidKeyCodes(String headerFile) {
-    final RegExp enumBlock = RegExp(r'enum\s*\{(.*)\};', multiLine: true);
-    // Eliminate everything outside of the enum block.
-    headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1));
-    final RegExp enumEntry = RegExp(r'AKEYCODE_([A-Z0-9_]+)\s*=\s*([0-9]+),?');
-    final Map<String, int> result = <String, int>{};
-    for (final Match match in enumEntry.allMatches(headerFile)) {
-      result[match.group(1)] = int.parse(match.group(2));
-    }
     return result;
   }
 
@@ -286,7 +255,6 @@ class PhysicalKeyEntry {
     @required this.chromiumName,
     this.androidKeyNames,
     this.androidScanCodes,
-    this.androidKeyCodes,
     this.glfwKeyNames,
     this.glfwKeyCodes,
   })  : assert(usbHidCode != null),
@@ -302,7 +270,6 @@ class PhysicalKeyEntry {
       usbHidCode: map['scanCodes']['usb'] as int,
       androidKeyNames: (map['names']['android'] as List<dynamic>)?.cast<String>(),
       androidScanCodes: (map['scanCodes']['android'] as List<dynamic>)?.cast<int>(),
-      androidKeyCodes: (map['keyCodes']['android'] as List<dynamic>)?.cast<int>(),
       linuxScanCode: map['scanCodes']['linux'] as int,
       xKbScanCode: map['scanCodes']['xkb'] as int,
       windowsScanCode: map['scanCodes']['windows'] as int,
@@ -335,10 +302,6 @@ class PhysicalKeyEntry {
   /// The list of names that Android gives to this key (symbol names minus the
   /// prefix).
   List<String> androidKeyNames;
-  /// The list of Android key codes matching this key, created by looking up the
-  /// Android name in the Chromium data, and substituting the Android key code
-  /// value.
-  List<int> androidKeyCodes;
   /// The list of Android scan codes matching this key, created by looking up
   /// the Android name in the Chromium data, and substituting the Android scan
   /// code value.
@@ -373,7 +336,6 @@ class PhysicalKeyEntry {
         'ios': iosScanCode,
       }),
       'keyCodes': removeEmptyValues(<String, List<int>>{
-        'android': androidKeyCodes,
         'glfw': glfwKeyCodes,
       }),
     });

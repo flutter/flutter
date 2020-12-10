@@ -28,6 +28,21 @@ Map<String, List<String>> parseMapOfListOfString(String jsonString) {
   });
 }
 
+/// Reverse the map of { fromValue -> list of toValue } to { toValue -> fromValue } and return.
+Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, void Function(String fromValue, String newToValue) onDuplicate) {
+  final Map<String, String> result = <String, String>{};
+  inMap.forEach((String fromValue, List<String> toValues) {
+    for (final String toValue in toValues) {
+      if (result.containsKey(toValue)) {
+        onDuplicate(fromValue, toValue);
+        continue;
+      }
+      result[toValue] = fromValue;
+    }
+  });
+  return result;
+}
+
 /// The data structure used to manage keyboard key entries.
 ///
 /// The main constructor parses the given input data into the data structure.
@@ -45,14 +60,16 @@ class LogicalKeyData {
     String gtkNameMap,
     String windowsKeyCodeHeader,
     String windowsNameMap,
+    String androidKeyCodeHeader,
+    String androidNameMap,
   )   : assert(chromiumKeys != null),
         assert(gtkKeyCodeHeader != null),
         assert(gtkNameMap != null) {
     _readPrintables(data);
     _readHidEntries(data, chromiumKeys);
     _readWindowsKeyCodes(data, windowsKeyCodeHeader, parseMapOfListOfString(windowsNameMap));
-    // Cast GTK dom map
     _readGtkKeyCodes(data, gtkKeyCodeHeader, parseMapOfListOfString(gtkNameMap));
+    _readAndroidKeyCodes(data, androidKeyCodeHeader, parseMapOfListOfString(androidNameMap));
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) => a.value.value.compareTo(b.value.value)
@@ -164,16 +181,8 @@ class LogicalKeyData {
   ///  #define GDK_KEY_space 0x020
   void _readGtkKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameToGtkName) {
     final RegExp definedCodes = RegExp(r'#define GDK_KEY_([a-zA-Z0-9_]+)\s*0x([0-9a-f]+),?');
-    final Map<String, String> gtkNameToFlutterName = <String, String>{};
-    nameToGtkName.forEach((String flutterName, List<String> gtkNames) {
-      for (final String gtkName in gtkNames) {
-        if (gtkNameToFlutterName.containsKey(gtkName)) {
-          print('Duplicate GTK logical name $gtkName');
-          continue;
-        }
-        gtkNameToFlutterName[gtkName] = flutterName;
-      }
-    });
+    final Map<String, String> gtkNameToFlutterName = reverseMapOfListOfString(nameToGtkName,
+        (String flutterName, String gtkName) { print('Duplicate GTK logical name $gtkName'); });
 
     for (final Match match in definedCodes.allMatches(headerFile)) {
       final String gtkName = match.group(1);
@@ -198,16 +207,8 @@ class LogicalKeyData {
   void _readWindowsKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
     // The mapping from the Flutter name (e.g. "enter") to the Windows name (e.g.
     // "RETURN").
-    final Map<String, String> nameToFlutterName = <String, String>{};
-    nameMap.forEach((String flutterName, List<String> windowsNames) {
-      for (final String windowsName in windowsNames) {
-        if (nameToFlutterName.containsKey(windowsName)) {
-          print('Duplicate Windows logical name $windowsName');
-          continue;
-        }
-        nameToFlutterName[windowsName] = flutterName;
-      }
-    });
+    final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
+        (String flutterName, String windowsName) { print('Duplicate Windows logical name $windowsName'); });
 
     final RegExp definedCodes = RegExp(r'define VK_([A-Z0-9_]+)\s*([A-Z0-9_x]+),?');
     for (final Match match in definedCodes.allMatches(headerFile)) {
@@ -227,14 +228,39 @@ class LogicalKeyData {
         ..windowsNames.add(windowsName)
         ..windowsValues.add(value);
     }
-    // // The header doesn't explicitly define the [0-9] and [A-Z], but they mention that the range
-    // // is equivalent to the ASCII value.
-    // for (int i = 0x30; i <= 0x39; i++) {
-    //   replaced[String.fromCharCode(i)] = i;
-    // }
-    // for (int i = 0x41; i <= 0x5A; i++) {
-    //   replaced[String.fromCharCode(i)] = i;
-    // }
+  }
+
+  /// Parses entries from Android's keycodes.h key code data file.
+  ///
+  /// Lines in this file look like this (without the ///):
+  ///  /** Left Control modifier key. */
+  ///  AKEYCODE_CTRL_LEFT       = 113,
+  void _readAndroidKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
+    final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
+        (String flutterName, String androidName) { print('Duplicate Android logical name $androidName'); });
+
+    final RegExp enumBlock = RegExp(r'enum\s*\{(.*)\};', multiLine: true);
+    // Eliminate everything outside of the enum block.
+    headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1));
+    final RegExp enumEntry = RegExp(r'AKEYCODE_([A-Z0-9_]+)\s*=\s*([0-9]+),?');
+    final Map<String, int> result = <String, int>{};
+    for (final Match match in enumEntry.allMatches(headerFile)) {
+      final String androidName = match.group(1);
+      final String name = nameToFlutterName[androidName];
+      final int value = int.tryParse(match.group(2));
+      if (name == null) {
+        print('Unmapped Android logical entry $androidName');
+        continue;
+      }
+      final LogicalKeyEntry entry = data[name];
+      if (entry == null) {
+        print('Invalid logical entry by name $name (from Android $androidName)');
+        continue;
+      }
+      entry
+        ..androidNames.add(androidName)
+        ..androidValues.add(value);
+    }
   }
 
   /// Returns the static map of printable representations.
@@ -290,7 +316,9 @@ class LogicalKeyEntry {
         gtkNames = <String>[],
         gtkValues = <int>[],
         windowsNames = <String>[],
-        windowsValues = <int>[];
+        windowsValues = <int>[],
+        androidNames = <String>[],
+        androidValues = <int>[];
 
   LogicalKeyEntry.fromName({
     @required int value,
@@ -311,7 +339,9 @@ class LogicalKeyEntry {
       gtkNames = (map['names']['gtk'] as List<dynamic>)?.cast<String>(),
       gtkValues = (map['values']['gtk'] as List<dynamic>)?.cast<int>(),
       windowsNames = (map['names']['windows'] as List<dynamic>)?.cast<String>(),
-      windowsValues = (map['values']['windows'] as List<dynamic>)?.cast<int>();
+      windowsValues = (map['values']['windows'] as List<dynamic>)?.cast<int>(),
+      androidNames = (map['names']['android'] as List<dynamic>)?.cast<String>(),
+      androidValues = (map['values']['android'] as List<dynamic>)?.cast<int>();
 
   final int value;
 
@@ -346,6 +376,15 @@ class LogicalKeyEntry {
   /// value.
   final List<int> windowsValues;
 
+  /// The list of names that Android gives to this key (symbol names minus the
+  /// prefix).
+  final List<String> androidNames;
+
+  /// The list of Android key codes matching this key, created by looking up the
+  /// Android name in the Chromium data, and substituting the Android key code
+  /// value.
+  final List<int> androidValues;
+
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
     return removeEmptyValues(<String, dynamic>{
@@ -356,11 +395,13 @@ class LogicalKeyEntry {
         'web': webNames,
         'gtk': gtkNames,
         'windows': windowsNames,
+        'android': androidNames,
       }),
       'values': removeEmptyValues(<String, List<int>>{
         'web': webValues,
         'gtk': gtkValues,
         'windows': windowsValues,
+        'android': androidValues,
       }),
     });
   }

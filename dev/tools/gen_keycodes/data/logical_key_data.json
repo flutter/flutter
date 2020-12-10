@@ -27,6 +27,9 @@
       ],
       "windows": [
         "BACK"
+      ],
+      "android": [
+        "DEL"
       ]
     },
     "values": {
@@ -38,6 +41,9 @@
       ],
       "windows": [
         8
+      ],
+      "android": [
+        67
       ]
     }
   },
@@ -56,6 +62,9 @@
       ],
       "windows": [
         "TAB"
+      ],
+      "android": [
+        "TAB"
       ]
     },
     "values": {
@@ -69,6 +78,9 @@
       ],
       "windows": [
         9
+      ],
+      "android": [
+        61
       ]
     }
   },
@@ -87,6 +99,9 @@
       ],
       "windows": [
         "RETURN"
+      ],
+      "android": [
+        "ENTER"
       ]
     },
     "values": {
@@ -100,6 +115,9 @@
       ],
       "windows": [
         13
+      ],
+      "android": [
+        66
       ]
     }
   },
@@ -116,6 +134,9 @@
       ],
       "windows": [
         "ESCAPE"
+      ],
+      "android": [
+        "ESCAPE"
       ]
     },
     "values": {
@@ -127,6 +148,9 @@
       ],
       "windows": [
         27
+      ],
+      "android": [
+        111
       ]
     }
   },
@@ -140,6 +164,9 @@
       ],
       "windows": [
         "SPACE"
+      ],
+      "android": [
+        "SPACE"
       ]
     },
     "values": {
@@ -148,6 +175,9 @@
       ],
       "windows": [
         32
+      ],
+      "android": [
+        62
       ]
     }
   },
@@ -235,11 +265,17 @@
     "names": {
       "windows": [
         "OEM_COMMA"
+      ],
+      "android": [
+        "COMMA"
       ]
     },
     "values": {
       "windows": [
         188
+      ],
+      "android": [
+        55
       ]
     }
   },
@@ -250,11 +286,17 @@
     "names": {
       "windows": [
         "OEM_MINUS"
+      ],
+      "android": [
+        "MINUS"
       ]
     },
     "values": {
       "windows": [
         189
+      ],
+      "android": [
+        69
       ]
     }
   },
@@ -268,6 +310,9 @@
       ],
       "windows": [
         "OEM_PERIOD"
+      ],
+      "android": [
+        "PERIOD"
       ]
     },
     "values": {
@@ -276,6 +321,9 @@
       ],
       "windows": [
         190
+      ],
+      "android": [
+        56
       ]
     }
   },
@@ -286,11 +334,17 @@
     "names": {
       "windows": [
         "OEM_2"
+      ],
+      "android": [
+        "SLASH"
       ]
     },
     "values": {
       "windows": [
         191
+      ],
+      "android": [
+        76
       ]
     }
   },
@@ -298,71 +352,151 @@
     "constant": "digit0",
     "english": "Digit 0",
     "value": 48,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "0"
+      ]
+    },
+    "values": {
+      "android": [
+        7
+      ]
+    }
   },
   "digit1": {
     "constant": "digit1",
     "english": "Digit 1",
     "value": 49,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "1"
+      ]
+    },
+    "values": {
+      "android": [
+        8
+      ]
+    }
   },
   "digit2": {
     "constant": "digit2",
     "english": "Digit 2",
     "value": 50,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "2"
+      ]
+    },
+    "values": {
+      "android": [
+        9
+      ]
+    }
   },
   "digit3": {
     "constant": "digit3",
     "english": "Digit 3",
     "value": 51,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "3"
+      ]
+    },
+    "values": {
+      "android": [
+        10
+      ]
+    }
   },
   "digit4": {
     "constant": "digit4",
     "english": "Digit 4",
     "value": 52,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "4"
+      ]
+    },
+    "values": {
+      "android": [
+        11
+      ]
+    }
   },
   "digit5": {
     "constant": "digit5",
     "english": "Digit 5",
     "value": 53,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "5"
+      ]
+    },
+    "values": {
+      "android": [
+        12
+      ]
+    }
   },
   "digit6": {
     "constant": "digit6",
     "english": "Digit 6",
     "value": 54,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "6"
+      ]
+    },
+    "values": {
+      "android": [
+        13
+      ]
+    }
   },
   "digit7": {
     "constant": "digit7",
     "english": "Digit 7",
     "value": 55,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "7"
+      ]
+    },
+    "values": {
+      "android": [
+        14
+      ]
+    }
   },
   "digit8": {
     "constant": "digit8",
     "english": "Digit 8",
     "value": 56,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "8"
+      ]
+    },
+    "values": {
+      "android": [
+        15
+      ]
+    }
   },
   "digit9": {
     "constant": "digit9",
     "english": "Digit 9",
     "value": 57,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "9"
+      ]
+    },
+    "values": {
+      "android": [
+        16
+      ]
+    }
   },
   "colon": {
     "constant": "colon",
@@ -378,11 +512,17 @@
     "names": {
       "windows": [
         "OEM_1"
+      ],
+      "android": [
+        "SEMICOLON"
       ]
     },
     "values": {
       "windows": [
         186
+      ],
+      "android": [
+        74
       ]
     }
   },
@@ -400,11 +540,17 @@
     "names": {
       "windows": [
         "OEM_PLUS"
+      ],
+      "android": [
+        "EQUALS"
       ]
     },
     "values": {
       "windows": [
         187
+      ],
+      "android": [
+        70
       ]
     }
   },
@@ -436,11 +582,17 @@
     "names": {
       "windows": [
         "OEM_4"
+      ],
+      "android": [
+        "LEFT_BRACKET"
       ]
     },
     "values": {
       "windows": [
         219
+      ],
+      "android": [
+        71
       ]
     }
   },
@@ -451,11 +603,17 @@
     "names": {
       "windows": [
         "OEM_5"
+      ],
+      "android": [
+        "BACKSLASH"
       ]
     },
     "values": {
       "windows": [
         220
+      ],
+      "android": [
+        73
       ]
     }
   },
@@ -466,11 +624,17 @@
     "names": {
       "windows": [
         "OEM_6"
+      ],
+      "android": [
+        "RIGHT_BRACKET"
       ]
     },
     "values": {
       "windows": [
         221
+      ],
+      "android": [
+        72
       ]
     }
   },
@@ -495,11 +659,17 @@
     "names": {
       "windows": [
         "OEM_3"
+      ],
+      "android": [
+        "GRAVE"
       ]
     },
     "values": {
       "windows": [
         192
+      ],
+      "android": [
+        68
       ]
     }
   },
@@ -507,183 +677,391 @@
     "constant": "keyA",
     "english": "Key A",
     "value": 97,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "A"
+      ]
+    },
+    "values": {
+      "android": [
+        29
+      ]
+    }
   },
   "keyB": {
     "constant": "keyB",
     "english": "Key B",
     "value": 98,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "B"
+      ]
+    },
+    "values": {
+      "android": [
+        30
+      ]
+    }
   },
   "keyC": {
     "constant": "keyC",
     "english": "Key C",
     "value": 99,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "C"
+      ]
+    },
+    "values": {
+      "android": [
+        31
+      ]
+    }
   },
   "keyD": {
     "constant": "keyD",
     "english": "Key D",
     "value": 100,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "D"
+      ]
+    },
+    "values": {
+      "android": [
+        32
+      ]
+    }
   },
   "keyE": {
     "constant": "keyE",
     "english": "Key E",
     "value": 101,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "E"
+      ]
+    },
+    "values": {
+      "android": [
+        33
+      ]
+    }
   },
   "keyF": {
     "constant": "keyF",
     "english": "Key F",
     "value": 102,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "F"
+      ]
+    },
+    "values": {
+      "android": [
+        34
+      ]
+    }
   },
   "keyG": {
     "constant": "keyG",
     "english": "Key G",
     "value": 103,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "G"
+      ]
+    },
+    "values": {
+      "android": [
+        35
+      ]
+    }
   },
   "keyH": {
     "constant": "keyH",
     "english": "Key H",
     "value": 104,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "H"
+      ]
+    },
+    "values": {
+      "android": [
+        36
+      ]
+    }
   },
   "keyI": {
     "constant": "keyI",
     "english": "Key I",
     "value": 105,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "I"
+      ]
+    },
+    "values": {
+      "android": [
+        37
+      ]
+    }
   },
   "keyJ": {
     "constant": "keyJ",
     "english": "Key J",
     "value": 106,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "J"
+      ]
+    },
+    "values": {
+      "android": [
+        38
+      ]
+    }
   },
   "keyK": {
     "constant": "keyK",
     "english": "Key K",
     "value": 107,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "K"
+      ]
+    },
+    "values": {
+      "android": [
+        39
+      ]
+    }
   },
   "keyL": {
     "constant": "keyL",
     "english": "Key L",
     "value": 108,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "L"
+      ]
+    },
+    "values": {
+      "android": [
+        40
+      ]
+    }
   },
   "keyM": {
     "constant": "keyM",
     "english": "Key M",
     "value": 109,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "M"
+      ]
+    },
+    "values": {
+      "android": [
+        41
+      ]
+    }
   },
   "keyN": {
     "constant": "keyN",
     "english": "Key N",
     "value": 110,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "N"
+      ]
+    },
+    "values": {
+      "android": [
+        42
+      ]
+    }
   },
   "keyO": {
     "constant": "keyO",
     "english": "Key O",
     "value": 111,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "O"
+      ]
+    },
+    "values": {
+      "android": [
+        43
+      ]
+    }
   },
   "keyP": {
     "constant": "keyP",
     "english": "Key P",
     "value": 112,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "P"
+      ]
+    },
+    "values": {
+      "android": [
+        44
+      ]
+    }
   },
   "keyQ": {
     "constant": "keyQ",
     "english": "Key Q",
     "value": 113,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "Q"
+      ]
+    },
+    "values": {
+      "android": [
+        45
+      ]
+    }
   },
   "keyR": {
     "constant": "keyR",
     "english": "Key R",
     "value": 114,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "R"
+      ]
+    },
+    "values": {
+      "android": [
+        46
+      ]
+    }
   },
   "keyS": {
     "constant": "keyS",
     "english": "Key S",
     "value": 115,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "S"
+      ]
+    },
+    "values": {
+      "android": [
+        47
+      ]
+    }
   },
   "keyT": {
     "constant": "keyT",
     "english": "Key T",
     "value": 116,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "T"
+      ]
+    },
+    "values": {
+      "android": [
+        48
+      ]
+    }
   },
   "keyU": {
     "constant": "keyU",
     "english": "Key U",
     "value": 117,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "U"
+      ]
+    },
+    "values": {
+      "android": [
+        49
+      ]
+    }
   },
   "keyV": {
     "constant": "keyV",
     "english": "Key V",
     "value": 118,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "V"
+      ]
+    },
+    "values": {
+      "android": [
+        50
+      ]
+    }
   },
   "keyW": {
     "constant": "keyW",
     "english": "Key W",
     "value": 119,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "W"
+      ]
+    },
+    "values": {
+      "android": [
+        51
+      ]
+    }
   },
   "keyX": {
     "constant": "keyX",
     "english": "Key X",
     "value": 120,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "X"
+      ]
+    },
+    "values": {
+      "android": [
+        52
+      ]
+    }
   },
   "keyY": {
     "constant": "keyY",
     "english": "Key Y",
     "value": 121,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "Y"
+      ]
+    },
+    "values": {
+      "android": [
+        53
+      ]
+    }
   },
   "keyZ": {
     "constant": "keyZ",
     "english": "Key Z",
     "value": 122,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "Z"
+      ]
+    },
+    "values": {
+      "android": [
+        54
+      ]
+    }
   },
   "braceLeft": {
     "constant": "braceLeft",
@@ -726,6 +1104,9 @@
       ],
       "windows": [
         "DELETE"
+      ],
+      "android": [
+        "FORWARD_DEL"
       ]
     },
     "values": {
@@ -737,6 +1118,9 @@
       ],
       "windows": [
         46
+      ],
+      "android": [
+        112
       ]
     }
   },
@@ -783,6 +1167,9 @@
       ],
       "windows": [
         "CAPITAL"
+      ],
+      "android": [
+        "CAPS_LOCK"
       ]
     },
     "values": {
@@ -794,6 +1181,9 @@
       ],
       "windows": [
         20
+      ],
+      "android": [
+        115
       ]
     }
   },
@@ -804,11 +1194,17 @@
     "names": {
       "web": [
         "Fn"
+      ],
+      "android": [
+        "FUNCTION"
       ]
     },
     "values": {
       "web": [
         262
+      ],
+      "android": [
+        119
       ]
     }
   },
@@ -863,6 +1259,9 @@
       ],
       "windows": [
         "NUMLOCK"
+      ],
+      "android": [
+        "NUM_LOCK"
       ]
     },
     "values": {
@@ -874,6 +1273,9 @@
       ],
       "windows": [
         144
+      ],
+      "android": [
+        143
       ]
     }
   },
@@ -890,6 +1292,9 @@
       ],
       "windows": [
         "SCROLL"
+      ],
+      "android": [
+        "SCROLL_LOCK"
       ]
     },
     "values": {
@@ -901,6 +1306,9 @@
       ],
       "windows": [
         145
+      ],
+      "android": [
+        116
       ]
     }
   },
@@ -934,11 +1342,17 @@
     "names": {
       "web": [
         "Symbol"
+      ],
+      "android": [
+        "SYM"
       ]
     },
     "values": {
       "web": [
         271
+      ],
+      "android": [
+        63
       ]
     }
   },
@@ -1000,6 +1414,9 @@
       ],
       "windows": [
         "DOWN"
+      ],
+      "android": [
+        "DPAD_DOWN"
       ]
     },
     "values": {
@@ -1011,6 +1428,9 @@
       ],
       "windows": [
         40
+      ],
+      "android": [
+        20
       ]
     }
   },
@@ -1027,6 +1447,9 @@
       ],
       "windows": [
         "LEFT"
+      ],
+      "android": [
+        "DPAD_LEFT"
       ]
     },
     "values": {
@@ -1038,6 +1461,9 @@
       ],
       "windows": [
         37
+      ],
+      "android": [
+        21
       ]
     }
   },
@@ -1054,6 +1480,9 @@
       ],
       "windows": [
         "RIGHT"
+      ],
+      "android": [
+        "DPAD_RIGHT"
       ]
     },
     "values": {
@@ -1065,6 +1494,9 @@
       ],
       "windows": [
         39
+      ],
+      "android": [
+        22
       ]
     }
   },
@@ -1081,6 +1513,9 @@
       ],
       "windows": [
         "UP"
+      ],
+      "android": [
+        "DPAD_UP"
       ]
     },
     "values": {
@@ -1092,6 +1527,9 @@
       ],
       "windows": [
         38
+      ],
+      "android": [
+        19
       ]
     }
   },
@@ -1108,6 +1546,9 @@
       ],
       "windows": [
         "END"
+      ],
+      "android": [
+        "MOVE_END"
       ]
     },
     "values": {
@@ -1119,6 +1560,9 @@
       ],
       "windows": [
         35
+      ],
+      "android": [
+        123
       ]
     }
   },
@@ -1135,6 +1579,9 @@
       ],
       "windows": [
         "HOME"
+      ],
+      "android": [
+        "MOVE_HOME"
       ]
     },
     "values": {
@@ -1146,6 +1593,9 @@
       ],
       "windows": [
         36
+      ],
+      "android": [
+        122
       ]
     }
   },
@@ -1162,6 +1612,9 @@
       ],
       "windows": [
         "NEXT"
+      ],
+      "android": [
+        "PAGE_DOWN"
       ]
     },
     "values": {
@@ -1173,6 +1626,9 @@
       ],
       "windows": [
         34
+      ],
+      "android": [
+        93
       ]
     }
   },
@@ -1189,6 +1645,9 @@
       ],
       "windows": [
         "PRIOR"
+      ],
+      "android": [
+        "PAGE_UP"
       ]
     },
     "values": {
@@ -1200,6 +1659,9 @@
       ],
       "windows": [
         33
+      ],
+      "android": [
+        92
       ]
     }
   },
@@ -1216,6 +1678,9 @@
       ],
       "windows": [
         "CLEAR"
+      ],
+      "android": [
+        "CLEAR"
       ]
     },
     "values": {
@@ -1227,6 +1692,9 @@
       ],
       "windows": [
         12
+      ],
+      "android": [
+        28
       ]
     }
   },
@@ -1241,6 +1709,9 @@
       "gtk": [
         "3270_Copy",
         "Copy"
+      ],
+      "android": [
+        "COPY"
       ]
     },
     "values": {
@@ -1250,6 +1721,9 @@
       "gtk": [
         64789,
         269025111
+      ],
+      "android": [
+        278
       ]
     }
   },
@@ -1278,6 +1752,9 @@
       ],
       "gtk": [
         "Cut"
+      ],
+      "android": [
+        "CUT"
       ]
     },
     "values": {
@@ -1286,6 +1763,9 @@
       ],
       "gtk": [
         269025112
+      ],
+      "android": [
+        277
       ]
     }
   },
@@ -1344,6 +1824,9 @@
       ],
       "windows": [
         "INSERT"
+      ],
+      "android": [
+        "INSERT"
       ]
     },
     "values": {
@@ -1355,6 +1838,9 @@
       ],
       "windows": [
         45
+      ],
+      "android": [
+        124
       ]
     }
   },
@@ -1368,6 +1854,9 @@
       ],
       "gtk": [
         "Paste"
+      ],
+      "android": [
+        "PASTE"
       ]
     },
     "values": {
@@ -1376,6 +1865,9 @@
       ],
       "gtk": [
         269025133
+      ],
+      "android": [
+        279
       ]
     }
   },
@@ -1524,6 +2016,9 @@
       ],
       "windows": [
         "APPS"
+      ],
+      "android": [
+        "MENU"
       ]
     },
     "values": {
@@ -1535,6 +2030,9 @@
       ],
       "windows": [
         93
+      ],
+      "android": [
+        82
       ]
     }
   },
@@ -1599,6 +2097,9 @@
       ],
       "windows": [
         "HELP"
+      ],
+      "android": [
+        "HELP"
       ]
     },
     "values": {
@@ -1610,6 +2111,9 @@
       ],
       "windows": [
         47
+      ],
+      "android": [
+        259
       ]
     }
   },
@@ -1626,6 +2130,9 @@
       ],
       "windows": [
         "PAUSE"
+      ],
+      "android": [
+        "BREAK"
       ]
     },
     "values": {
@@ -1637,6 +2144,9 @@
       ],
       "windows": [
         19
+      ],
+      "android": [
+        121
       ]
     }
   },
@@ -1689,6 +2199,9 @@
       ],
       "windows": [
         "SELECT"
+      ],
+      "android": [
+        "DPAD_CENTER"
       ]
     },
     "values": {
@@ -1700,6 +2213,9 @@
       ],
       "windows": [
         41
+      ],
+      "android": [
+        23
       ]
     }
   },
@@ -1713,6 +2229,9 @@
       ],
       "gtk": [
         "ZoomIn"
+      ],
+      "android": [
+        "ZOOM_IN"
       ]
     },
     "values": {
@@ -1721,6 +2240,9 @@
       ],
       "gtk": [
         269025163
+      ],
+      "android": [
+        168
       ]
     }
   },
@@ -1734,6 +2256,9 @@
       ],
       "gtk": [
         "ZoomOut"
+      ],
+      "android": [
+        "ZOOM_OUT"
       ]
     },
     "values": {
@@ -1742,6 +2267,9 @@
       ],
       "gtk": [
         269025164
+      ],
+      "android": [
+        169
       ]
     }
   },
@@ -1755,6 +2283,9 @@
       ],
       "gtk": [
         "MonBrightnessDown"
+      ],
+      "android": [
+        "BRIGHTNESS_DOWN"
       ]
     },
     "values": {
@@ -1763,6 +2294,9 @@
       ],
       "gtk": [
         269025027
+      ],
+      "android": [
+        220
       ]
     }
   },
@@ -1776,6 +2310,9 @@
       ],
       "gtk": [
         "MonBrightnessUp"
+      ],
+      "android": [
+        "BRIGHTNESS_UP"
       ]
     },
     "values": {
@@ -1784,6 +2321,9 @@
       ],
       "gtk": [
         269025026
+      ],
+      "android": [
+        221
       ]
     }
   },
@@ -1794,11 +2334,17 @@
     "names": {
       "web": [
         "Camera"
+      ],
+      "android": [
+        "CAMERA"
       ]
     },
     "values": {
       "web": [
         1539
+      ],
+      "android": [
+        27
       ]
     }
   },
@@ -1812,6 +2358,9 @@
       ],
       "gtk": [
         "Eject"
+      ],
+      "android": [
+        "MEDIA_EJECT"
       ]
     },
     "values": {
@@ -1820,6 +2369,9 @@
       ],
       "gtk": [
         269025068
+      ],
+      "android": [
+        129
       ]
     }
   },
@@ -1851,11 +2403,17 @@
     "names": {
       "web": [
         "Power"
+      ],
+      "android": [
+        "POWER"
       ]
     },
     "values": {
       "web": [
         1542
+      ],
+      "android": [
+        26
       ]
     }
   },
@@ -1890,6 +2448,9 @@
       ],
       "gtk": [
         "3270_PrintScreen"
+      ],
+      "android": [
+        "SYSRQ"
       ]
     },
     "values": {
@@ -1898,6 +2459,9 @@
       ],
       "gtk": [
         64797
+      ],
+      "android": [
+        120
       ]
     }
   },
@@ -1947,6 +2511,9 @@
       ],
       "gtk": [
         "WakeUp"
+      ],
+      "android": [
+        "WAKEUP"
       ]
     },
     "values": {
@@ -1955,6 +2522,9 @@
       ],
       "gtk": [
         269025067
+      ],
+      "android": [
+        224
       ]
     }
   },
@@ -2034,6 +2604,9 @@
       ],
       "windows": [
         "CONVERT"
+      ],
+      "android": [
+        "HENKAN"
       ]
     },
     "values": {
@@ -2042,6 +2615,9 @@
       ],
       "windows": [
         28
+      ],
+      "android": [
+        214
       ]
     }
   },
@@ -2112,6 +2688,9 @@
       ],
       "gtk": [
         "ISO_Next_Group"
+      ],
+      "android": [
+        "LANGUAGE_SWITCH"
       ]
     },
     "values": {
@@ -2120,6 +2699,9 @@
       ],
       "gtk": [
         65032
+      ],
+      "android": [
+        204
       ]
     }
   },
@@ -2157,6 +2739,9 @@
       ],
       "windows": [
         "MODECHANGE"
+      ],
+      "android": [
+        "SWITCH_CHARSET"
       ]
     },
     "values": {
@@ -2168,6 +2753,9 @@
       ],
       "windows": [
         31
+      ],
+      "android": [
+        95
       ]
     }
   },
@@ -2193,11 +2781,17 @@
     "names": {
       "web": [
         "NonConvert"
+      ],
+      "android": [
+        "MUHENKAN"
       ]
     },
     "values": {
       "web": [
         1805
+      ],
+      "android": [
+        213
       ]
     }
   },
@@ -2325,6 +2919,9 @@
       ],
       "gtk": [
         "Eisu_Shift"
+      ],
+      "android": [
+        "EISU"
       ]
     },
     "values": {
@@ -2333,6 +2930,9 @@
       ],
       "gtk": [
         65327
+      ],
+      "android": [
+        212
       ]
     }
   },
@@ -2388,6 +2988,9 @@
       ],
       "gtk": [
         "Hiragana_Katakana"
+      ],
+      "android": [
+        "KATAKANA_HIRAGANA"
       ]
     },
     "values": {
@@ -2396,6 +2999,9 @@
       ],
       "gtk": [
         65319
+      ],
+      "android": [
+        215
       ]
     }
   },
@@ -2430,6 +3036,9 @@
       ],
       "gtk": [
         "Kanji"
+      ],
+      "android": [
+        "KANA"
       ]
     },
     "values": {
@@ -2438,6 +3047,9 @@
       ],
       "gtk": [
         65313
+      ],
+      "android": [
+        218
       ]
     }
   },
@@ -2514,6 +3126,9 @@
       ],
       "gtk": [
         "Zenkaku_Hankaku"
+      ],
+      "android": [
+        "ZENKAKU_HANKAKU"
       ]
     },
     "values": {
@@ -2522,6 +3137,9 @@
       ],
       "gtk": [
         65322
+      ],
+      "android": [
+        211
       ]
     }
   },
@@ -2539,6 +3157,9 @@
       ],
       "windows": [
         "F1"
+      ],
+      "android": [
+        "F1"
       ]
     },
     "values": {
@@ -2551,6 +3172,9 @@
       ],
       "windows": [
         112
+      ],
+      "android": [
+        131
       ]
     }
   },
@@ -2568,6 +3192,9 @@
       ],
       "windows": [
         "F2"
+      ],
+      "android": [
+        "F2"
       ]
     },
     "values": {
@@ -2580,6 +3207,9 @@
       ],
       "windows": [
         113
+      ],
+      "android": [
+        132
       ]
     }
   },
@@ -2597,6 +3227,9 @@
       ],
       "windows": [
         "F3"
+      ],
+      "android": [
+        "F3"
       ]
     },
     "values": {
@@ -2609,6 +3242,9 @@
       ],
       "windows": [
         114
+      ],
+      "android": [
+        133
       ]
     }
   },
@@ -2626,6 +3262,9 @@
       ],
       "windows": [
         "F4"
+      ],
+      "android": [
+        "F4"
       ]
     },
     "values": {
@@ -2638,6 +3277,9 @@
       ],
       "windows": [
         115
+      ],
+      "android": [
+        134
       ]
     }
   },
@@ -2654,6 +3296,9 @@
       ],
       "windows": [
         "F5"
+      ],
+      "android": [
+        "F5"
       ]
     },
     "values": {
@@ -2665,6 +3310,9 @@
       ],
       "windows": [
         116
+      ],
+      "android": [
+        135
       ]
     }
   },
@@ -2681,6 +3329,9 @@
       ],
       "windows": [
         "F6"
+      ],
+      "android": [
+        "F6"
       ]
     },
     "values": {
@@ -2692,6 +3343,9 @@
       ],
       "windows": [
         117
+      ],
+      "android": [
+        136
       ]
     }
   },
@@ -2708,6 +3362,9 @@
       ],
       "windows": [
         "F7"
+      ],
+      "android": [
+        "F7"
       ]
     },
     "values": {
@@ -2719,6 +3376,9 @@
       ],
       "windows": [
         118
+      ],
+      "android": [
+        137
       ]
     }
   },
@@ -2735,6 +3395,9 @@
       ],
       "windows": [
         "F8"
+      ],
+      "android": [
+        "F8"
       ]
     },
     "values": {
@@ -2746,6 +3409,9 @@
       ],
       "windows": [
         119
+      ],
+      "android": [
+        138
       ]
     }
   },
@@ -2762,6 +3428,9 @@
       ],
       "windows": [
         "F9"
+      ],
+      "android": [
+        "F9"
       ]
     },
     "values": {
@@ -2773,6 +3442,9 @@
       ],
       "windows": [
         120
+      ],
+      "android": [
+        139
       ]
     }
   },
@@ -2789,6 +3461,9 @@
       ],
       "windows": [
         "F10"
+      ],
+      "android": [
+        "F10"
       ]
     },
     "values": {
@@ -2800,6 +3475,9 @@
       ],
       "windows": [
         121
+      ],
+      "android": [
+        140
       ]
     }
   },
@@ -2816,6 +3494,9 @@
       ],
       "windows": [
         "F11"
+      ],
+      "android": [
+        "F11"
       ]
     },
     "values": {
@@ -2827,6 +3508,9 @@
       ],
       "windows": [
         122
+      ],
+      "android": [
+        141
       ]
     }
   },
@@ -2843,6 +3527,9 @@
       ],
       "windows": [
         "F12"
+      ],
+      "android": [
+        "F12"
       ]
     },
     "values": {
@@ -2854,6 +3541,9 @@
       ],
       "windows": [
         123
+      ],
+      "android": [
+        142
       ]
     }
   },
@@ -3311,6 +4001,9 @@
       ],
       "gtk": [
         "Close"
+      ],
+      "android": [
+        "MEDIA_CLOSE"
       ]
     },
     "values": {
@@ -3319,6 +4012,9 @@
       ],
       "gtk": [
         269025110
+      ],
+      "android": [
+        128
       ]
     }
   },
@@ -3395,6 +4091,9 @@
       ],
       "windows": [
         "MEDIA_PLAY_PAUSE"
+      ],
+      "android": [
+        "MEDIA_PLAY_PAUSE"
       ]
     },
     "values": {
@@ -3403,6 +4102,9 @@
       ],
       "windows": [
         179
+      ],
+      "android": [
+        85
       ]
     }
   },
@@ -3419,6 +4121,9 @@
       ],
       "windows": [
         "MEDIA_STOP"
+      ],
+      "android": [
+        "MEDIA_STOP"
       ]
     },
     "values": {
@@ -3430,6 +4135,9 @@
       ],
       "windows": [
         178
+      ],
+      "android": [
+        86
       ]
     }
   },
@@ -3443,6 +4151,9 @@
       ],
       "gtk": [
         "AudioNext"
+      ],
+      "android": [
+        "MEDIA_NEXT"
       ]
     },
     "values": {
@@ -3451,6 +4162,9 @@
       ],
       "gtk": [
         269025047
+      ],
+      "android": [
+        87
       ]
     }
   },
@@ -3464,6 +4178,9 @@
       ],
       "gtk": [
         "AudioPrev"
+      ],
+      "android": [
+        "MEDIA_PREVIOUS"
       ]
     },
     "values": {
@@ -3472,6 +4189,9 @@
       ],
       "gtk": [
         269025046
+      ],
+      "android": [
+        88
       ]
     }
   },
@@ -3599,6 +4319,9 @@
       ],
       "windows": [
         "VOLUME_DOWN"
+      ],
+      "android": [
+        "VOLUME_DOWN"
       ]
     },
     "values": {
@@ -3610,6 +4333,9 @@
       ],
       "windows": [
         174
+      ],
+      "android": [
+        25
       ]
     }
   },
@@ -3626,6 +4352,9 @@
       ],
       "windows": [
         "VOLUME_UP"
+      ],
+      "android": [
+        "VOLUME_UP"
       ]
     },
     "values": {
@@ -3637,6 +4366,9 @@
       ],
       "windows": [
         175
+      ],
+      "android": [
+        24
       ]
     }
   },
@@ -3653,6 +4385,9 @@
       ],
       "windows": [
         "VOLUME_MUTE"
+      ],
+      "android": [
+        "VOLUME_MUTE"
       ]
     },
     "values": {
@@ -3664,6 +4399,9 @@
       ],
       "windows": [
         173
+      ],
+      "android": [
+        164
       ]
     }
   },
@@ -3692,6 +4430,9 @@
       ],
       "gtk": [
         "Calendar"
+      ],
+      "android": [
+        "CALENDAR"
       ]
     },
     "values": {
@@ -3700,6 +4441,9 @@
       ],
       "gtk": [
         269025056
+      ],
+      "android": [
+        208
       ]
     }
   },
@@ -3716,6 +4460,9 @@
       ],
       "windows": [
         "LAUNCH_MAIL"
+      ],
+      "android": [
+        "ENVELOPE"
       ]
     },
     "values": {
@@ -3727,6 +4474,9 @@
       ],
       "windows": [
         180
+      ],
+      "android": [
+        65
       ]
     }
   },
@@ -3752,11 +4502,17 @@
     "names": {
       "web": [
         "LaunchMusicPlayer"
+      ],
+      "android": [
+        "MUSIC"
       ]
     },
     "values": {
       "web": [
         2821
+      ],
+      "android": [
+        209
       ]
     }
   },
@@ -3818,11 +4574,17 @@
     "names": {
       "web": [
         "LaunchWebBrowser"
+      ],
+      "android": [
+        "EXPLORER"
       ]
     },
     "values": {
       "web": [
         2825
+      ],
+      "android": [
+        64
       ]
     }
   },
@@ -3863,11 +4625,17 @@
     "names": {
       "web": [
         "LaunchContacts"
+      ],
+      "android": [
+        "CONTACTS"
       ]
     },
     "values": {
       "web": [
         2828
+      ],
+      "android": [
+        207
       ]
     }
   },
@@ -3899,11 +4667,17 @@
     "names": {
       "web": [
         "LaunchAssistant"
+      ],
+      "android": [
+        "ASSIST"
       ]
     },
     "values": {
       "web": [
         2830
+      ],
+      "android": [
+        219
       ]
     }
   },
@@ -3962,6 +4736,9 @@
       ],
       "windows": [
         "BROWSER_FAVORITES"
+      ],
+      "android": [
+        "BOOKMARK"
       ]
     },
     "values": {
@@ -3973,6 +4750,9 @@
       ],
       "windows": [
         171
+      ],
+      "android": [
+        174
       ]
     }
   },
@@ -3989,6 +4769,9 @@
       ],
       "windows": [
         "BROWSER_FORWARD"
+      ],
+      "android": [
+        "FORWARD"
       ]
     },
     "values": {
@@ -4000,6 +4783,9 @@
       ],
       "windows": [
         167
+      ],
+      "android": [
+        125
       ]
     }
   },
@@ -4070,6 +4856,9 @@
       ],
       "windows": [
         "BROWSER_SEARCH"
+      ],
+      "android": [
+        "SEARCH"
       ]
     },
     "values": {
@@ -4081,6 +4870,9 @@
       ],
       "windows": [
         170
+      ],
+      "android": [
+        84
       ]
     }
   },
@@ -4223,11 +5015,17 @@
     "names": {
       "web": [
         "AVRInput"
+      ],
+      "android": [
+        "AVR_INPUT"
       ]
     },
     "values": {
       "web": [
         3336
+      ],
+      "android": [
+        182
       ]
     }
   },
@@ -4238,11 +5036,17 @@
     "names": {
       "web": [
         "AVRPower"
+      ],
+      "android": [
+        "AVR_POWER"
       ]
     },
     "values": {
       "web": [
         3337
+      ],
+      "android": [
+        181
       ]
     }
   },
@@ -4253,11 +5057,17 @@
     "names": {
       "web": [
         "ChannelDown"
+      ],
+      "android": [
+        "CHANNEL_DOWN"
       ]
     },
     "values": {
       "web": [
         3338
+      ],
+      "android": [
+        167
       ]
     }
   },
@@ -4268,11 +5078,17 @@
     "names": {
       "web": [
         "ChannelUp"
+      ],
+      "android": [
+        "CHANNEL_UP"
       ]
     },
     "values": {
       "web": [
         3339
+      ],
+      "android": [
+        166
       ]
     }
   },
@@ -4283,11 +5099,17 @@
     "names": {
       "web": [
         "ColorF0Red"
+      ],
+      "android": [
+        "PROG_RED"
       ]
     },
     "values": {
       "web": [
         3340
+      ],
+      "android": [
+        183
       ]
     }
   },
@@ -4298,11 +5120,17 @@
     "names": {
       "web": [
         "ColorF1Green"
+      ],
+      "android": [
+        "PROG_GREEN"
       ]
     },
     "values": {
       "web": [
         3341
+      ],
+      "android": [
+        184
       ]
     }
   },
@@ -4313,11 +5141,17 @@
     "names": {
       "web": [
         "ColorF2Yellow"
+      ],
+      "android": [
+        "PROG_YELLOW"
       ]
     },
     "values": {
       "web": [
         3342
+      ],
+      "android": [
+        185
       ]
     }
   },
@@ -4328,11 +5162,17 @@
     "names": {
       "web": [
         "ColorF3Blue"
+      ],
+      "android": [
+        "PROG_BLUE"
       ]
     },
     "values": {
       "web": [
         3343
+      ],
+      "android": [
+        186
       ]
     }
   },
@@ -4373,11 +5213,17 @@
     "names": {
       "web": [
         "ClosedCaptionToggle"
+      ],
+      "android": [
+        "CAPTIONS"
       ]
     },
     "values": {
       "web": [
         3346
+      ],
+      "android": [
+        175
       ]
     }
   },
@@ -4613,11 +5459,17 @@
     "names": {
       "web": [
         "Guide"
+      ],
+      "android": [
+        "GUIDE"
       ]
     },
     "values": {
       "web": [
         3362
+      ],
+      "android": [
+        172
       ]
     }
   },
@@ -4658,11 +5510,17 @@
     "names": {
       "web": [
         "Info"
+      ],
+      "android": [
+        "INFO"
       ]
     },
     "values": {
       "web": [
         3365
+      ],
+      "android": [
+        165
       ]
     }
   },
@@ -4766,6 +5624,9 @@
       ],
       "gtk": [
         "AudioForward"
+      ],
+      "android": [
+        "MEDIA_FAST_FORWARD"
       ]
     },
     "values": {
@@ -4774,6 +5635,9 @@
       ],
       "gtk": [
         269025175
+      ],
+      "android": [
+        90
       ]
     }
   },
@@ -4784,11 +5648,17 @@
     "names": {
       "web": [
         "MediaLast"
+      ],
+      "android": [
+        "LAST_CHANNEL"
       ]
     },
     "values": {
       "web": [
         3373
+      ],
+      "android": [
+        229
       ]
     }
   },
@@ -4802,6 +5672,9 @@
       ],
       "gtk": [
         "AudioPause"
+      ],
+      "android": [
+        "MEDIA_PAUSE"
       ]
     },
     "values": {
@@ -4810,6 +5683,9 @@
       ],
       "gtk": [
         269025073
+      ],
+      "android": [
+        127
       ]
     }
   },
@@ -4824,6 +5700,9 @@
       "gtk": [
         "3270_Play",
         "AudioPlay"
+      ],
+      "android": [
+        "MEDIA_PLAY"
       ]
     },
     "values": {
@@ -4833,6 +5712,9 @@
       "gtk": [
         64790,
         269025044
+      ],
+      "android": [
+        126
       ]
     }
   },
@@ -4846,6 +5728,9 @@
       ],
       "gtk": [
         "AudioRecord"
+      ],
+      "android": [
+        "MEDIA_RECORD"
       ]
     },
     "values": {
@@ -4854,6 +5739,9 @@
       ],
       "gtk": [
         269025052
+      ],
+      "android": [
+        130
       ]
     }
   },
@@ -4867,6 +5755,9 @@
       ],
       "gtk": [
         "AudioRewind"
+      ],
+      "android": [
+        "MEDIA_REWIND"
       ]
     },
     "values": {
@@ -4875,6 +5766,9 @@
       ],
       "gtk": [
         269025086
+      ],
+      "android": [
+        89
       ]
     }
   },
@@ -5140,11 +6034,17 @@
     "names": {
       "web": [
         "Settings"
+      ],
+      "android": [
+        "SETTINGS"
       ]
     },
     "values": {
       "web": [
         3395
+      ],
+      "android": [
+        176
       ]
     }
   },
@@ -5170,11 +6070,17 @@
     "names": {
       "web": [
         "STBInput"
+      ],
+      "android": [
+        "STB_INPUT"
       ]
     },
     "values": {
       "web": [
         3397
+      ],
+      "android": [
+        180
       ]
     }
   },
@@ -5185,11 +6091,17 @@
     "names": {
       "web": [
         "STBPower"
+      ],
+      "android": [
+        "STB_POWER"
       ]
     },
     "values": {
       "web": [
         3398
+      ],
+      "android": [
+        179
       ]
     }
   },
@@ -5215,11 +6127,17 @@
     "names": {
       "web": [
         "Teletext"
+      ],
+      "android": [
+        "TV_TELETEXT"
       ]
     },
     "values": {
       "web": [
         3400
+      ],
+      "android": [
+        233
       ]
     }
   },
@@ -5230,11 +6148,17 @@
     "names": {
       "web": [
         "TV"
+      ],
+      "android": [
+        "TV"
       ]
     },
     "values": {
       "web": [
         3401
+      ],
+      "android": [
+        170
       ]
     }
   },
@@ -5245,11 +6169,17 @@
     "names": {
       "web": [
         "TVInput"
+      ],
+      "android": [
+        "TV_INPUT"
       ]
     },
     "values": {
       "web": [
         3402
+      ],
+      "android": [
+        178
       ]
     }
   },
@@ -5260,11 +6190,17 @@
     "names": {
       "web": [
         "TVPower"
+      ],
+      "android": [
+        "TV_POWER"
       ]
     },
     "values": {
       "web": [
         3403
+      ],
+      "android": [
+        177
       ]
     }
   },
@@ -5305,11 +6241,17 @@
     "names": {
       "web": [
         "ZoomToggle"
+      ],
+      "android": [
+        "TV_ZOOM_MODE"
       ]
     },
     "values": {
       "web": [
         3406
+      ],
+      "android": [
+        255
       ]
     }
   },
@@ -5320,11 +6262,17 @@
     "names": {
       "web": [
         "DVR"
+      ],
+      "android": [
+        "DVR"
       ]
     },
     "values": {
       "web": [
         3407
+      ],
+      "android": [
+        173
       ]
     }
   },
@@ -5335,11 +6283,17 @@
     "names": {
       "web": [
         "MediaAudioTrack"
+      ],
+      "android": [
+        "MEDIA_AUDIO_TRACK"
       ]
     },
     "values": {
       "web": [
         3408
+      ],
+      "android": [
+        222
       ]
     }
   },
@@ -5350,11 +6304,17 @@
     "names": {
       "web": [
         "MediaSkipBackward"
+      ],
+      "android": [
+        "MEDIA_SKIP_BACKWARD"
       ]
     },
     "values": {
       "web": [
         3409
+      ],
+      "android": [
+        273
       ]
     }
   },
@@ -5365,11 +6325,17 @@
     "names": {
       "web": [
         "MediaSkipForward"
+      ],
+      "android": [
+        "MEDIA_SKIP_FORWARD"
       ]
     },
     "values": {
       "web": [
         3410
+      ],
+      "android": [
+        272
       ]
     }
   },
@@ -5380,11 +6346,17 @@
     "names": {
       "web": [
         "MediaStepBackward"
+      ],
+      "android": [
+        "MEDIA_STEP_BACKWARD"
       ]
     },
     "values": {
       "web": [
         3411
+      ],
+      "android": [
+        275
       ]
     }
   },
@@ -5395,11 +6367,17 @@
     "names": {
       "web": [
         "MediaStepForward"
+      ],
+      "android": [
+        "MEDIA_STEP_FORWARD"
       ]
     },
     "values": {
       "web": [
         3412
+      ],
+      "android": [
+        274
       ]
     }
   },
@@ -5410,11 +6388,17 @@
     "names": {
       "web": [
         "MediaTopMenu"
+      ],
+      "android": [
+        "MEDIA_TOP_MENU"
       ]
     },
     "values": {
       "web": [
         3413
+      ],
+      "android": [
+        226
       ]
     }
   },
@@ -5425,11 +6409,17 @@
     "names": {
       "web": [
         "NavigateIn"
+      ],
+      "android": [
+        "NAVIGATE_IN"
       ]
     },
     "values": {
       "web": [
         3414
+      ],
+      "android": [
+        262
       ]
     }
   },
@@ -5440,11 +6430,17 @@
     "names": {
       "web": [
         "NavigateNext"
+      ],
+      "android": [
+        "NAVIGATE_NEXT"
       ]
     },
     "values": {
       "web": [
         3415
+      ],
+      "android": [
+        261
       ]
     }
   },
@@ -5455,11 +6451,17 @@
     "names": {
       "web": [
         "NavigateOut"
+      ],
+      "android": [
+        "NAVIGATE_OUT"
       ]
     },
     "values": {
       "web": [
         3416
+      ],
+      "android": [
+        263
       ]
     }
   },
@@ -5470,11 +6472,17 @@
     "names": {
       "web": [
         "NavigatePrevious"
+      ],
+      "android": [
+        "NAVIGATE_PREVIOUS"
       ]
     },
     "values": {
       "web": [
         3417
+      ],
+      "android": [
+        260
       ]
     }
   },
@@ -5485,11 +6493,17 @@
     "names": {
       "web": [
         "Pairing"
+      ],
+      "android": [
+        "PAIRING"
       ]
     },
     "values": {
       "web": [
         3418
+      ],
+      "android": [
+        225
       ]
     }
   },
@@ -5605,11 +6619,17 @@
     "names": {
       "web": [
         "MicrophoneVolumeMute"
+      ],
+      "android": [
+        "MUTE"
       ]
     },
     "values": {
       "web": [
         3593
+      ],
+      "android": [
+        91
       ]
     }
   },
@@ -5650,11 +6670,17 @@
     "names": {
       "web": [
         "AppSwitch"
+      ],
+      "android": [
+        "APP_SWITCH"
       ]
     },
     "values": {
       "web": [
         4097
+      ],
+      "android": [
+        187
       ]
     }
   },
@@ -5665,11 +6691,17 @@
     "names": {
       "web": [
         "Call"
+      ],
+      "android": [
+        "CALL"
       ]
     },
     "values": {
       "web": [
         4098
+      ],
+      "android": [
+        5
       ]
     }
   },
@@ -5680,11 +6712,17 @@
     "names": {
       "web": [
         "CameraFocus"
+      ],
+      "android": [
+        "FOCUS"
       ]
     },
     "values": {
       "web": [
         4099
+      ],
+      "android": [
+        80
       ]
     }
   },
@@ -5695,11 +6733,17 @@
     "names": {
       "web": [
         "EndCall"
+      ],
+      "android": [
+        "ENDCALL"
       ]
     },
     "values": {
       "web": [
         4100
+      ],
+      "android": [
+        6
       ]
     }
   },
@@ -5710,11 +6754,17 @@
     "names": {
       "web": [
         "GoBack"
+      ],
+      "android": [
+        "BACK"
       ]
     },
     "values": {
       "web": [
         4101
+      ],
+      "android": [
+        4
       ]
     }
   },
@@ -5725,11 +6775,17 @@
     "names": {
       "web": [
         "GoHome"
+      ],
+      "android": [
+        "HOME"
       ]
     },
     "values": {
       "web": [
         4102
+      ],
+      "android": [
+        3
       ]
     }
   },
@@ -5740,11 +6796,17 @@
     "names": {
       "web": [
         "HeadsetHook"
+      ],
+      "android": [
+        "HEADSETHOOK"
       ]
     },
     "values": {
       "web": [
         4103
+      ],
+      "android": [
+        79
       ]
     }
   },
@@ -5770,11 +6832,17 @@
     "names": {
       "web": [
         "Notification"
+      ],
+      "android": [
+        "NOTIFICATION"
       ]
     },
     "values": {
       "web": [
         4105
+      ],
+      "android": [
+        83
       ]
     }
   },
@@ -5785,11 +6853,17 @@
     "names": {
       "web": [
         "MannerMode"
+      ],
+      "android": [
+        "MANNER_MODE"
       ]
     },
     "values": {
       "web": [
         4106
+      ],
+      "android": [
+        205
       ]
     }
   },
@@ -5830,11 +6904,17 @@
     "names": {
       "web": [
         "TVAntennaCable"
+      ],
+      "android": [
+        "TV_ANTENNA_CABLE"
       ]
     },
     "values": {
       "web": [
         4354
+      ],
+      "android": [
+        242
       ]
     }
   },
@@ -5845,11 +6925,17 @@
     "names": {
       "web": [
         "TVAudioDescription"
+      ],
+      "android": [
+        "TV_AUDIO_DESCRIPTION"
       ]
     },
     "values": {
       "web": [
         4355
+      ],
+      "android": [
+        252
       ]
     }
   },
@@ -5860,11 +6946,17 @@
     "names": {
       "web": [
         "TVAudioDescriptionMixDown"
+      ],
+      "android": [
+        "TV_AUDIO_DESCRIPTION_MIX_DOWN"
       ]
     },
     "values": {
       "web": [
         4356
+      ],
+      "android": [
+        254
       ]
     }
   },
@@ -5875,11 +6967,17 @@
     "names": {
       "web": [
         "TVAudioDescriptionMixUp"
+      ],
+      "android": [
+        "TV_AUDIO_DESCRIPTION_MIX_UP"
       ]
     },
     "values": {
       "web": [
         4357
+      ],
+      "android": [
+        253
       ]
     }
   },
@@ -5890,11 +6988,17 @@
     "names": {
       "web": [
         "TVContentsMenu"
+      ],
+      "android": [
+        "TV_CONTENTS_MENU"
       ]
     },
     "values": {
       "web": [
         4358
+      ],
+      "android": [
+        256
       ]
     }
   },
@@ -5905,11 +7009,17 @@
     "names": {
       "web": [
         "TVDataService"
+      ],
+      "android": [
+        "TV_DATA_SERVICE"
       ]
     },
     "values": {
       "web": [
         4359
+      ],
+      "android": [
+        230
       ]
     }
   },
@@ -5920,11 +7030,17 @@
     "names": {
       "web": [
         "TVInputComponent1"
+      ],
+      "android": [
+        "TV_INPUT_COMPONENT_1"
       ]
     },
     "values": {
       "web": [
         4360
+      ],
+      "android": [
+        249
       ]
     }
   },
@@ -5935,11 +7051,17 @@
     "names": {
       "web": [
         "TVInputComponent2"
+      ],
+      "android": [
+        "TV_INPUT_COMPONENT_2"
       ]
     },
     "values": {
       "web": [
         4361
+      ],
+      "android": [
+        250
       ]
     }
   },
@@ -5950,11 +7072,17 @@
     "names": {
       "web": [
         "TVInputComposite1"
+      ],
+      "android": [
+        "TV_INPUT_COMPOSITE_1"
       ]
     },
     "values": {
       "web": [
         4362
+      ],
+      "android": [
+        247
       ]
     }
   },
@@ -5965,11 +7093,17 @@
     "names": {
       "web": [
         "TVInputComposite2"
+      ],
+      "android": [
+        "TV_INPUT_COMPOSITE_2"
       ]
     },
     "values": {
       "web": [
         4363
+      ],
+      "android": [
+        248
       ]
     }
   },
@@ -6070,11 +7204,17 @@
     "names": {
       "web": [
         "TVNetwork"
+      ],
+      "android": [
+        "TV_NETWORK"
       ]
     },
     "values": {
       "web": [
         4370
+      ],
+      "android": [
+        241
       ]
     }
   },
@@ -6085,11 +7225,17 @@
     "names": {
       "web": [
         "TVNumberEntry"
+      ],
+      "android": [
+        "TV_NUMBER_ENTRY"
       ]
     },
     "values": {
       "web": [
         4371
+      ],
+      "android": [
+        234
       ]
     }
   },
@@ -6100,11 +7246,17 @@
     "names": {
       "web": [
         "TVRadioService"
+      ],
+      "android": [
+        "TV_RADIO_SERVICE"
       ]
     },
     "values": {
       "web": [
         4372
+      ],
+      "android": [
+        232
       ]
     }
   },
@@ -6115,11 +7267,17 @@
     "names": {
       "web": [
         "TVSatellite"
+      ],
+      "android": [
+        "TV_SATELLITE"
       ]
     },
     "values": {
       "web": [
         4373
+      ],
+      "android": [
+        237
       ]
     }
   },
@@ -6160,11 +7318,17 @@
     "names": {
       "web": [
         "TVSatelliteToggle"
+      ],
+      "android": [
+        "TV_SATELLITE_SERVICE"
       ]
     },
     "values": {
       "web": [
         4376
+      ],
+      "android": [
+        240
       ]
     }
   },
@@ -6175,11 +7339,17 @@
     "names": {
       "web": [
         "TVTerrestrialAnalog"
+      ],
+      "android": [
+        "TV_TERRESTRIAL_ANALOG"
       ]
     },
     "values": {
       "web": [
         4377
+      ],
+      "android": [
+        235
       ]
     }
   },
@@ -6190,11 +7360,17 @@
     "names": {
       "web": [
         "TVTerrestrialDigital"
+      ],
+      "android": [
+        "TV_TERRESTRIAL_DIGITAL"
       ]
     },
     "values": {
       "web": [
         4378
+      ],
+      "android": [
+        236
       ]
     }
   },
@@ -6205,11 +7381,17 @@
     "names": {
       "web": [
         "TVTimer"
+      ],
+      "android": [
+        "TV_TIMER_PROGRAMMING"
       ]
     },
     "values": {
       "web": [
         4379
+      ],
+      "android": [
+        258
       ]
     }
   },
@@ -6250,11 +7432,17 @@
     "names": {
       "gtk": [
         "KP_Enter"
+      ],
+      "android": [
+        "NUMPAD_ENTER"
       ]
     },
     "values": {
       "gtk": [
         65421
+      ],
+      "android": [
+        160
       ]
     }
   },
@@ -6262,15 +7450,31 @@
     "constant": "numpadParenLeft",
     "english": "Numpad Paren Left",
     "value": 8589934632,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "NUMPAD_LEFT_PAREN"
+      ]
+    },
+    "values": {
+      "android": [
+        162
+      ]
+    }
   },
   "numpadParenRight": {
     "constant": "numpadParenRight",
     "english": "Numpad Paren Right",
     "value": 8589934633,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "NUMPAD_RIGHT_PAREN"
+      ]
+    },
+    "values": {
+      "android": [
+        163
+      ]
+    }
   },
   "numpadMultiply": {
     "constant": "numpadMultiply",
@@ -6282,6 +7486,9 @@
       ],
       "windows": [
         "MULTIPLY"
+      ],
+      "android": [
+        "NUMPAD_MULTIPLY"
       ]
     },
     "values": {
@@ -6290,6 +7497,9 @@
       ],
       "windows": [
         106
+      ],
+      "android": [
+        155
       ]
     }
   },
@@ -6303,6 +7513,9 @@
       ],
       "windows": [
         "ADD"
+      ],
+      "android": [
+        "NUMPAD_ADD"
       ]
     },
     "values": {
@@ -6311,6 +7524,9 @@
       ],
       "windows": [
         107
+      ],
+      "android": [
+        157
       ]
     }
   },
@@ -6318,8 +7534,16 @@
     "constant": "numpadComma",
     "english": "Numpad Comma",
     "value": 8589934636,
-    "names": {},
-    "values": {}
+    "names": {
+      "android": [
+        "NUMPAD_COMMA"
+      ]
+    },
+    "values": {
+      "android": [
+        159
+      ]
+    }
   },
   "numpadSubtract": {
     "constant": "numpadSubtract",
@@ -6331,6 +7555,9 @@
       ],
       "windows": [
         "SUBTRACT"
+      ],
+      "android": [
+        "NUMPAD_SUBTRACT"
       ]
     },
     "values": {
@@ -6339,6 +7566,9 @@
       ],
       "windows": [
         109
+      ],
+      "android": [
+        156
       ]
     }
   },
@@ -6352,6 +7582,9 @@
       ],
       "windows": [
         "DECIMAL"
+      ],
+      "android": [
+        "NUMPAD_DOT"
       ]
     },
     "values": {
@@ -6360,6 +7593,9 @@
       ],
       "windows": [
         110
+      ],
+      "android": [
+        158
       ]
     }
   },
@@ -6373,6 +7609,9 @@
       ],
       "windows": [
         "DIVIDE"
+      ],
+      "android": [
+        "NUMPAD_DIVIDE"
       ]
     },
     "values": {
@@ -6381,6 +7620,9 @@
       ],
       "windows": [
         111
+      ],
+      "android": [
+        154
       ]
     }
   },
@@ -6395,6 +7637,9 @@
       ],
       "windows": [
         "NUMPAD0"
+      ],
+      "android": [
+        "NUMPAD_0"
       ]
     },
     "values": {
@@ -6404,6 +7649,9 @@
       ],
       "windows": [
         96
+      ],
+      "android": [
+        144
       ]
     }
   },
@@ -6418,6 +7666,9 @@
       ],
       "windows": [
         "NUMPAD1"
+      ],
+      "android": [
+        "NUMPAD_1"
       ]
     },
     "values": {
@@ -6427,6 +7678,9 @@
       ],
       "windows": [
         97
+      ],
+      "android": [
+        145
       ]
     }
   },
@@ -6441,6 +7695,9 @@
       ],
       "windows": [
         "NUMPAD2"
+      ],
+      "android": [
+        "NUMPAD_2"
       ]
     },
     "values": {
@@ -6450,6 +7707,9 @@
       ],
       "windows": [
         98
+      ],
+      "android": [
+        146
       ]
     }
   },
@@ -6464,6 +7724,9 @@
       ],
       "windows": [
         "NUMPAD3"
+      ],
+      "android": [
+        "NUMPAD_3"
       ]
     },
     "values": {
@@ -6473,6 +7736,9 @@
       ],
       "windows": [
         99
+      ],
+      "android": [
+        147
       ]
     }
   },
@@ -6487,6 +7753,9 @@
       ],
       "windows": [
         "NUMPAD4"
+      ],
+      "android": [
+        "NUMPAD_4"
       ]
     },
     "values": {
@@ -6496,6 +7765,9 @@
       ],
       "windows": [
         100
+      ],
+      "android": [
+        148
       ]
     }
   },
@@ -6509,6 +7781,9 @@
       ],
       "windows": [
         "NUMPAD5"
+      ],
+      "android": [
+        "NUMPAD_5"
       ]
     },
     "values": {
@@ -6517,6 +7792,9 @@
       ],
       "windows": [
         101
+      ],
+      "android": [
+        149
       ]
     }
   },
@@ -6531,6 +7809,9 @@
       ],
       "windows": [
         "NUMPAD6"
+      ],
+      "android": [
+        "NUMPAD_6"
       ]
     },
     "values": {
@@ -6540,6 +7821,9 @@
       ],
       "windows": [
         102
+      ],
+      "android": [
+        150
       ]
     }
   },
@@ -6554,6 +7838,9 @@
       ],
       "windows": [
         "NUMPAD7"
+      ],
+      "android": [
+        "NUMPAD_7"
       ]
     },
     "values": {
@@ -6563,6 +7850,9 @@
       ],
       "windows": [
         103
+      ],
+      "android": [
+        151
       ]
     }
   },
@@ -6577,6 +7867,9 @@
       ],
       "windows": [
         "NUMPAD8"
+      ],
+      "android": [
+        "NUMPAD_8"
       ]
     },
     "values": {
@@ -6586,6 +7879,9 @@
       ],
       "windows": [
         104
+      ],
+      "android": [
+        152
       ]
     }
   },
@@ -6600,6 +7896,9 @@
       ],
       "windows": [
         "NUMPAD9"
+      ],
+      "android": [
+        "NUMPAD_9"
       ]
     },
     "values": {
@@ -6609,6 +7908,9 @@
       ],
       "windows": [
         105
+      ],
+      "android": [
+        153
       ]
     }
   },
@@ -6622,6 +7924,9 @@
       ],
       "windows": [
         "OEM_NEC_EQUAL"
+      ],
+      "android": [
+        "NUMPAD_EQUALS"
       ]
     },
     "values": {
@@ -6630,6 +7935,9 @@
       ],
       "windows": [
         146
+      ],
+      "android": [
+        161
       ]
     }
   },
@@ -6643,6 +7951,9 @@
       ],
       "windows": [
         "LMENU"
+      ],
+      "android": [
+        "ALT_LEFT"
       ]
     },
     "values": {
@@ -6651,6 +7962,9 @@
       ],
       "windows": [
         164
+      ],
+      "android": [
+        57
       ]
     }
   },
@@ -6665,6 +7979,9 @@
       "windows": [
         "CONTROL",
         "LCONTROL"
+      ],
+      "android": [
+        "CTRL_LEFT"
       ]
     },
     "values": {
@@ -6674,6 +7991,9 @@
       "windows": [
         17,
         162
+      ],
+      "android": [
+        113
       ]
     }
   },
@@ -6687,6 +8007,9 @@
       ],
       "windows": [
         "LWIN"
+      ],
+      "android": [
+        "META_LEFT"
       ]
     },
     "values": {
@@ -6695,6 +8018,9 @@
       ],
       "windows": [
         91
+      ],
+      "android": [
+        117
       ]
     }
   },
@@ -6709,6 +8035,9 @@
       "windows": [
         "SHIFT",
         "LSHIFT"
+      ],
+      "android": [
+        "SHIFT_LEFT"
       ]
     },
     "values": {
@@ -6718,6 +8047,9 @@
       "windows": [
         16,
         160
+      ],
+      "android": [
+        59
       ]
     }
   },
@@ -6731,6 +8063,9 @@
       ],
       "windows": [
         "RMENU"
+      ],
+      "android": [
+        "ALT_RIGHT"
       ]
     },
     "values": {
@@ -6739,6 +8074,9 @@
       ],
       "windows": [
         165
+      ],
+      "android": [
+        58
       ]
     }
   },
@@ -6752,6 +8090,9 @@
       ],
       "windows": [
         "RCONTROL"
+      ],
+      "android": [
+        "CTRL_RIGHT"
       ]
     },
     "values": {
@@ -6760,6 +8101,9 @@
       ],
       "windows": [
         163
+      ],
+      "android": [
+        114
       ]
     }
   },
@@ -6773,6 +8117,9 @@
       ],
       "windows": [
         "RWIN"
+      ],
+      "android": [
+        "META_RIGHT"
       ]
     },
     "values": {
@@ -6781,6 +8128,9 @@
       ],
       "windows": [
         92
+      ],
+      "android": [
+        118
       ]
     }
   },
@@ -6794,6 +8144,9 @@
       ],
       "windows": [
         "RSHIFT"
+      ],
+      "android": [
+        "SHIFT_RIGHT"
       ]
     },
     "values": {
@@ -6802,6 +8155,9 @@
       ],
       "windows": [
         161
+      ],
+      "android": [
+        60
       ]
     }
   }

@@ -93,26 +93,19 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of Android key codes to logical keys.
   String get androidKeyCodeMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in keyData.data) {
-      if (entry.androidKeyCodes != null) {
-        for (final int code in entry.androidKeyCodes.cast<int>()) {
-          androidKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
-      }
-    }
     return androidKeyCodeMap.toString().trimRight();
   }
 
   /// This generates the map of Android number pad key codes to logical keys.
   String get androidNumpadMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in numpadKeyData) {
-      if (entry.androidKeyCodes != null) {
-        for (final int code in entry.androidKeyCodes.cast<int>()) {
-          androidKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
-      }
-    }
+    // for (final PhysicalKeyEntry entry in numpadKeyData) {
+    //   if (entry.androidKeyCodes != null) {
+    //     for (final int code in entry.androidKeyCodes.cast<int>()) {
+    //       androidKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
+    //     }
+    //   }
+    // }
     return androidKeyCodeMap.toString().trimRight();
   }
 

@@ -224,10 +224,6 @@ Future<void> main(List<String> rawArguments) async {
       await getAndroidScanCodes() :
       File(parsedArguments['android-scancodes'] as String).readAsStringSync();
 
-    final String androidKeyCodes = parsedArguments['android-keycodes'] == null ?
-      await getAndroidKeyCodes() :
-      File(parsedArguments['android-keycodes'] as String).readAsStringSync();
-
     final String androidToDomKey = File(parsedArguments['android-domkey'] as String).readAsStringSync();
 
     final String glfwKeyCodes = parsedArguments['glfw-keycodes'] == null ?
@@ -236,7 +232,7 @@ Future<void> main(List<String> rawArguments) async {
 
     final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
 
-    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
+    physicalData = PhysicalKeyData(hidCodes, androidScanCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
 
     // Logical
     final String gtkKeyCodes = parsedArguments['gtk-keycodes'] == null ?
@@ -255,7 +251,11 @@ Future<void> main(List<String> rawArguments) async {
 
     final String windowsToDomKey = File(parsedArguments['windows-domkey'] as String).readAsStringSync();
 
-    logicalData = LogicalKeyData(webLogicalKeys, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey);
+    final String androidKeyCodes = parsedArguments['android-keycodes'] == null ?
+      await getAndroidKeyCodes() :
+      File(parsedArguments['android-keycodes'] as String).readAsStringSync();
+
+    logicalData = LogicalKeyData(webLogicalKeys, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey, androidKeyCodes, androidToDomKey);
 
     // Write data files
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
@@ -292,7 +292,7 @@ Future<void> main(List<String> rawArguments) async {
         codeGenerator = FuchsiaCodeGenerator(physicalData);
         break;
       case 'android':
-        codeGenerator = AndroidCodeGenerator(physicalData);
+        codeGenerator = AndroidCodeGenerator(physicalData, logicalData);
         break;
       case 'macos':
         codeGenerator = MacOsCodeGenerator(physicalData, maskConstants);
