@@ -143,7 +143,7 @@ class GradientLinear extends EngineGradient {
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
-    if (tileMode == ui.TileMode.clamp) {
+    if (tileMode == ui.TileMode.clamp || tileMode == ui.TileMode.decal) {
       return _createCanvasGradient(ctx, shaderBounds, density);
     } else {
       initWebGl();
@@ -172,7 +172,7 @@ class GradientLinear extends EngineGradient {
           from.dx - offsetX, from.dy - offsetY, to.dx - offsetX,
           to.dy - offsetY);
     }
-    _addColorStopsToCanvasGradient(gradient, colors, colorStops);
+    _addColorStopsToCanvasGradient(gradient, colors, colorStops, tileMode == ui.TileMode.decal);
     return gradient;
   }
 
@@ -281,15 +281,27 @@ class GradientLinear extends EngineGradient {
 }
 
 void _addColorStopsToCanvasGradient(html.CanvasGradient gradient,
-    List<ui.Color> colors, List<double>? colorStops) {
+    List<ui.Color> colors, List<double>? colorStops, bool isDecal) {
+  double scale, offset;
+  if (isDecal) {
+    scale = 0.999;
+    offset = (1.0 - scale) / 2.0;
+    gradient.addColorStop(0, '#00000000');
+  } else {
+    scale = 1.0;
+    offset = 0.0;
+  }
   if (colorStops == null) {
     assert(colors.length == 2);
-    gradient.addColorStop(0, colorToCssString(colors[0])!);
-    gradient.addColorStop(1, colorToCssString(colors[1])!);
+    gradient.addColorStop(offset, colorToCssString(colors[0])!);
+    gradient.addColorStop(1 - offset, colorToCssString(colors[1])!);
   } else {
     for (int i = 0; i < colors.length; i++) {
-      gradient.addColorStop(colorStops[i], colorToCssString(colors[i])!);
+      gradient.addColorStop(colorStops[i] * scale + offset, colorToCssString(colors[i])!);
     }
+  }
+  if (isDecal) {
+    gradient.addColorStop(1, '#00000000');
   }
 }
 
@@ -311,11 +323,12 @@ String _writeSharedGradientShader(ShaderBuilder builder,
     builder.addUniform(ShaderType.kVec4, name: 'scale_$i');
   }
 
-  // Use st variable name if clamped, otherwise write code to comnpute
+  // Use st variable name if clamped or decaled, otherwise write code to compute
   // tiled_st.
   String probeName = 'st';
   switch (tileMode) {
     case ui.TileMode.clamp:
+    case ui.TileMode.decal:
       break;
     case ui.TileMode.repeated:
       method.addStatement('float tiled_st = fract(st);');
@@ -349,7 +362,7 @@ class GradientRadial extends EngineGradient {
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
-    if (tileMode == ui.TileMode.clamp) {
+    if (tileMode == ui.TileMode.clamp || tileMode == ui.TileMode.decal) {
       return _createCanvasGradient(ctx, shaderBounds, density);
     } else {
       initWebGl();
@@ -364,7 +377,7 @@ class GradientRadial extends EngineGradient {
     final html.CanvasGradient gradient = ctx!.createRadialGradient(
         center.dx - offsetX, center.dy - offsetY, 0,
         center.dx - offsetX, center.dy - offsetY, radius);
-    _addColorStopsToCanvasGradient(gradient, colors, colorStops);
+    _addColorStopsToCanvasGradient(gradient, colors, colorStops, tileMode == ui.TileMode.decal);
     return gradient;
   }
 

@@ -20,7 +20,7 @@ abstract class _CkManagedSkImageFilterConvertible<T extends Object> implements u
 ///
 /// Currently only supports `blur`.
 abstract class CkImageFilter extends ManagedSkiaObject<SkImageFilter> implements _CkManagedSkImageFilterConvertible<SkImageFilter> {
-  factory CkImageFilter.blur({ required double sigmaX, required double sigmaY }) = _CkBlurImageFilter;
+  factory CkImageFilter.blur({ required double sigmaX, required double sigmaY, required ui.TileMode tileMode }) = _CkBlurImageFilter;
   factory CkImageFilter.color({ required CkColorFilter colorFilter }) = _CkColorFilterImageFilter;
 
   CkImageFilter._();
@@ -66,17 +66,27 @@ class _CkColorFilterImageFilter extends CkImageFilter {
 }
 
 class _CkBlurImageFilter extends CkImageFilter {
-  _CkBlurImageFilter({ required this.sigmaX, required this.sigmaY }) : super._();
+  _CkBlurImageFilter({ required this.sigmaX, required this.sigmaY, required this.tileMode }) : super._();
 
   final double sigmaX;
   final double sigmaY;
+  final ui.TileMode tileMode;
+
+  String get _modeString {
+    switch (tileMode) {
+      case ui.TileMode.clamp: return 'clamp';
+      case ui.TileMode.mirror: return 'mirror';
+      case ui.TileMode.repeated: return 'repeated';
+      case ui.TileMode.decal: return 'decal';
+    }
+  }
 
   @override
   SkImageFilter _initSkiaObject() {
     return canvasKit.ImageFilter.MakeBlur(
       sigmaX,
       sigmaY,
-      canvasKit.TileMode.Clamp,
+      toSkTileMode(tileMode),
       null,
     );
   }
@@ -87,15 +97,16 @@ class _CkBlurImageFilter extends CkImageFilter {
       return false;
     return other is _CkBlurImageFilter
         && other.sigmaX == sigmaX
-        && other.sigmaY == sigmaY;
+        && other.sigmaY == sigmaY
+        && other.tileMode == tileMode;
   }
 
   @override
-  int get hashCode => ui.hashValues(sigmaX, sigmaY);
+  int get hashCode => ui.hashValues(sigmaX, sigmaY, tileMode);
 
   @override
   String toString() {
-    return 'ImageFilter.blur($sigmaX, $sigmaY)';
+    return 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString)';
   }
 }
 
