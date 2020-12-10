@@ -1227,6 +1227,57 @@ void testMain() {
   _testEach<_ButtonedEventMixin>(
     [
       _PointerEventContext(),
+    ],
+    'correctly handles missing right mouse button up when followed by move',
+        (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // This can happen with the following gesture sequence:
+      //
+      //  - Pops up the context menu by right clicking;
+      //  - Clicks LMB to close context menu.
+      //  - Moves mouse.
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      // Press RMB popping up the context menu, then release by LMB down and up.
+      // Browser won't send up event in that case.
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 2,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[0].synthesized, equals(true));
+
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(2));
+      packets.clear();
+
+      // User now hovers.
+      glassPane.dispatchEvent(context.mouseMove(
+        button: _kNoButtonChange,
+        buttons: 0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].buttons, equals(0));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(0));
+      packets.clear();
+    },
+  );
+
+  _testEach<_ButtonedEventMixin>(
+    [
+      _PointerEventContext(),
       _MouseEventContext(),
     ],
     'handles RMB click when the browser sends it as a move',
@@ -1303,10 +1354,16 @@ void testMain() {
         clientY: 20.0,
       ));
       expect(packets, hasLength(1));
-      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data, hasLength(3));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
-      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].synthesized, equals(true));
       expect(packets[0].data[0].buttons, equals(2));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(0));
+      expect(packets[0].data[2].change, equals(ui.PointerChange.hover));
+      expect(packets[0].data[2].synthesized, equals(false));
+      expect(packets[0].data[2].buttons, equals(0));
       packets.clear();
     },
   );
@@ -1416,7 +1473,7 @@ void testMain() {
 
       // Press RMB again. In Chrome, when RMB is clicked again while the
       // context menu is still active, it sends a pointerdown/mousedown event
-      // with "buttons:0".
+      // with "buttons:0". We convert this to pointer up, pointer down.
       glassPane.dispatchEvent(context.mouseDown(
         button: 2,
         buttons: 0,
@@ -1424,10 +1481,16 @@ void testMain() {
         clientY: 20.0,
       ));
       expect(packets, hasLength(1));
-      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data, hasLength(3));
       expect(packets[0].data[0].change, equals(ui.PointerChange.move));
-      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].synthesized, equals(true));
       expect(packets[0].data[0].buttons, equals(2));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(0));
+      expect(packets[0].data[2].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[2].synthesized, equals(false));
+      expect(packets[0].data[2].buttons, equals(2));
       packets.clear();
 
       // Release RMB.
