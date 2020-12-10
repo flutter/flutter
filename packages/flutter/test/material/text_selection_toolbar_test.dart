@@ -81,7 +81,6 @@ void main() {
       Container(width: itemWidth, height: height),
       Container(width: itemWidth, height: height),
       Container(width: itemWidth, height: height),
-      Container(width: itemWidth, height: height),
     ];
 
     await tester.pumpWidget(
@@ -111,20 +110,20 @@ void main() {
         Container(width: itemWidth, height: height),
       );
     });
-    await tester.pump();
-    expect(find.byType(Container), findsNWidgets(children.length - 2));
+    await tester.pumpAndSettle();
+    expect(find.byType(Container), findsNWidgets(children.length - 1));
     expect(_findOverflowButton(), findsOneWidget);
 
     // Tap the overflow button to show the overflow menu.
     await tester.tap(_findOverflowButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(2));
+    expect(find.byType(Container), findsNWidgets(1));
     expect(_findOverflowButton(), findsOneWidget);
 
     // Tap the overflow button again to hide the overflow menu.
     await tester.tap(_findOverflowButton());
     await tester.pumpAndSettle();
-    expect(find.byType(Container), findsNWidgets(children.length - 2));
+    expect(find.byType(Container), findsNWidgets(children.length - 1));
     expect(_findOverflowButton(), findsOneWidget);
   });
 

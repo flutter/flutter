@@ -686,7 +686,6 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
         visitor(renderObjectChild);
       }
     });
-    print('justin visiting children for semantics, $visible of $total were visible');
   }
 }
 
