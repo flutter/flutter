@@ -6,7 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
 import 'material_state.dart';
+import 'theme.dart';
 
 const double _kScrollbarThickness = 8.0;
 const double _kScrollbarThicknessWithTrack = 12.0;
@@ -90,6 +92,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   late AnimationController _hoverAnimationController;
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
+  late ColorScheme _colorScheme;
 
   Set<MaterialState> get _states => <MaterialState>{
     if (_dragIsActive) MaterialState.dragged,
@@ -97,35 +100,63 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   };
 
   MaterialStateProperty<Color> get _thumbColor {
+    final Color onSurface = _colorScheme.onSurface;
+    final Brightness brightness = _colorScheme.brightness;
+    late Color dragColor;
+    late Color hoverColor;
+    late Color idleColor;
+    switch (brightness) {
+      case Brightness.light:
+        dragColor = onSurface.withOpacity(0.6);
+        hoverColor = onSurface.withOpacity(0.5);
+        idleColor = onSurface.withOpacity(0.1);
+        break;
+      case Brightness.dark:
+        dragColor = onSurface.withOpacity(0.75);
+        hoverColor = onSurface.withOpacity(0.65);
+        idleColor = onSurface.withOpacity(0.3);
+        break;
+    }
+
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.dragged))
-        return const Color(0xFF616161);
+        return dragColor;
 
       // If the track is visible, the thumb color hover animation is ignored and
       // changes immediately.
       if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
-        return const Color(0xFF757575);
+        return hoverColor;
 
       return Color.lerp(
-        const Color(0xFFE0E0E0),
-        const Color(0xFF757575),
+        idleColor,
+        hoverColor,
         _hoverAnimationController.value,
       )!;
     });
   }
 
   MaterialStateProperty<Color> get _trackColor {
+    final Color onSurface = _colorScheme.onSurface;
+    final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
-        return const Color(0xFF424242).withOpacity(0.04);
+      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover) {
+        return brightness == Brightness.light
+          ? onSurface.withOpacity(0.03)
+          : onSurface.withOpacity(0.05);
+      }
       return const Color(0x00000000);
     });
   }
 
   MaterialStateProperty<Color> get _trackBorderColor {
+    final Color onSurface = _colorScheme.onSurface;
+    final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
-        return const Color(0xFFE0E0E0);
+      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover) {
+        return brightness == Brightness.light
+          ? onSurface.withOpacity(0.1)
+          : onSurface.withOpacity(0.25);
+      }
       return const Color(0x00000000);
     });
   }
@@ -152,6 +183,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void updateScrollbarPainter() {
+    _colorScheme = Theme.of(context).colorScheme;
     scrollbarPainter
       ..color = _thumbColor.resolve(_states)
       ..trackColor = _trackColor.resolve(_states)

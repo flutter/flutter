@@ -559,7 +559,7 @@ void main() {
           const Rect.fromLTRB(790.0, 3.0, 798.0, 93.0),
           const Radius.circular(8.0),
         ),
-        color: const Color(0xFFE0E0E0),
+        color: const Color(0x1a000000),
       ),
     );
 
@@ -573,7 +573,7 @@ void main() {
           const Rect.fromLTRB(790.0, 3.0, 798.0, 93.0),
           const Radius.circular(8.0),
         ),
-        color: const Color(0xFFE0E0E0),
+        color: const Color(0x1a000000),
       ),
     );
 
@@ -589,7 +589,7 @@ void main() {
           const Rect.fromLTRB(790.0, 3.0, 798.0, 93.0),
           const Radius.circular(8.0),
         ),
-        color: const Color(0xc6e0e0e0),
+        color: const Color(0x14000000),
       ),
     );
   });
@@ -619,7 +619,7 @@ void main() {
           const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
           const Radius.circular(8.0),
         ),
-        color: const Color(0xFFE0E0E0),
+        color: const Color(0x1a000000),
       ),
     );
 
@@ -636,7 +636,7 @@ void main() {
           const Radius.circular(8.0),
         ),
         // Drag color
-        color: const Color(0xFF616161),
+        color: const Color(0x99000000),
       ),
     );
 
@@ -655,7 +655,7 @@ void main() {
           const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
           const Radius.circular(8.0),
         ),
-        color: const Color(0xFFE0E0E0),
+        color: const Color(0x1a000000),
       ),
     );
   });
@@ -684,7 +684,7 @@ void main() {
           const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
           const Radius.circular(8.0),
         ),
-        color: const Color(0xFFE0E0E0),
+        color: const Color(0x1a000000),
       ),
     );
 
@@ -702,7 +702,7 @@ void main() {
           const Radius.circular(8.0),
         ),
         // Hover color
-        color: const Color(0xFF757575),
+        color: const Color(0x80000000),
       ),
     );
   });
@@ -732,7 +732,7 @@ void main() {
           const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
           const Radius.circular(8.0),
         ),
-        color: const Color(0xFFE0E0E0),
+        color: const Color(0x1a000000),
       ),
     );
 
@@ -747,13 +747,13 @@ void main() {
       paints
         ..rect(
           rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-          color: const Color(0xFF424242).withOpacity(0.04),
+          color: const Color(0x08000000),
         )
         ..line(
           p1: const Offset(784.0, 0.0),
           p2: const Offset(784.0, 600.0),
           strokeWidth: 1.0,
-          color: const Color(0xFFE0E0E0),
+          color: const Color(0x1a000000),
         )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
@@ -762,7 +762,7 @@ void main() {
             const Radius.circular(8.0),
           ),
           // Hover color
-          color: const Color(0xFF757575),
+          color: const Color(0x80000000),
       ),
     );
   });
