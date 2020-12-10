@@ -574,8 +574,8 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// Here is an example of [PageView]. It creates three centered [Text] widgets as children for PageView.
-/// Which is scrollable horizontally.
+/// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
+/// which scroll horizontally.
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
