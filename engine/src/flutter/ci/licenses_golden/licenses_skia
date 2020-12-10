@@ -1,4 +1,4 @@
-Signature: d4c3d1e7cec742eb2a6496bff6d4297b
+Signature: 9b9f8957449805a5224212f9de623ac9
 
 UNUSED LICENSES:
 
@@ -4196,6 +4196,9 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMiddleOutPolygonTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMidpointContourParser.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrResolveLevelCounter.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIndirectOp.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIndirectOp.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeIterator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/gpu/text/GrSDFTOptions.cpp
