@@ -811,8 +811,6 @@ class _LargeTitleNavigationBarSliverDelegate
       brightness: brightness,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          if (math.min(1.15, 1 + (constraints.maxHeight - maxExtent)/maxExtent*0.12) == 1.15)
-            print(constraints.maxHeight);
           return DefaultTextStyle(
             style: CupertinoTheme.of(context).textTheme.textStyle,
             child: Stack(
