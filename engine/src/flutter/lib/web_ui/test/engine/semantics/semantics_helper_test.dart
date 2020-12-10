@@ -9,6 +9,8 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
+const PointerSupportDetector _defaultSupportDetector = PointerSupportDetector();
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -151,15 +153,22 @@ void testMain() {
         skip: browserEngine == BrowserEngine.webkit);
 
     test('Not relevant events should be forwarded to the framework', () async {
-      final html.Event event = html.TouchEvent('touchcancel');
+      html.Event event;
+      if (_defaultSupportDetector.hasPointerEvents) {
+        event = html.PointerEvent('pointermove');
+      } else if (_defaultSupportDetector.hasTouchEvents) {
+        event = html.TouchEvent('touchcancel');
+      } else {
+        event = html.MouseEvent('mousemove');
+      }
+
       bool shouldForwardToFramework =
           mobileSemanticsEnabler.tryEnableSemantics(event);
 
       expect(shouldForwardToFramework, true);
-    },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-        skip: browserEngine != BrowserEngine.blink);
-  });
+    });
+  },  // Run the `MobileSemanticsEnabler` only on mobile browsers.
+      skip: operatingSystem == OperatingSystem.linux ||
+          operatingSystem == OperatingSystem.macOs ||
+          operatingSystem == OperatingSystem.windows);
 }
