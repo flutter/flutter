@@ -338,8 +338,8 @@ class SystemChannels {
   ///    the implementation, this string may vary, but the default Google Play
   ///    Store implementation beings in the "Requested" state before transitioning
   ///    into the "Downloading" and finally the "Installed" state.
-  static const MethodChannel dynamicfeatures = OptionalMethodChannel(
-    'flutter/dynamicfeatures',
+  static const MethodChannel dynamicfeature = OptionalMethodChannel(
+    'flutter/dynamicfeature',
     StandardMethodCodec(),
   );
 }
