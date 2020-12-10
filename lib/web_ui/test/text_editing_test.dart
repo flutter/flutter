@@ -706,7 +706,10 @@ void testMain() {
       expect(spy.messages, isEmpty);
     });
 
-    test('do not close connection on blur', () async {
+    test('focus and connection with blur', () async {
+      // In all the desktop browsers we are keeping the connection
+      // open, keep the text editing element focused if it receives a blur
+      // event.
       final MethodCall setClient = MethodCall(
           'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -731,19 +734,26 @@ void testMain() {
       // DOM element is blurred.
       textEditing.editingElement.domElement.blur();
 
-      expect(spy.messages, hasLength(0));
-
-      // DOM element still has focus.
-      // Even though this passes on manual tests it does not work on
-      // Firefox automated unit tests.
-      if (browserEngine != BrowserEngine.firefox) {
+      // For ios-safari the connection is closed.
+      if (browserEngine == BrowserEngine.webkit &&
+          operatingSystem == OperatingSystem.iOs) {
+        expect(spy.messages, hasLength(1));
+        expect(spy.messages[0].channel, 'flutter/textinput');
+        expect(spy.messages[0].methodName,
+            'TextInputClient.onConnectionClosed');
+        await Future<void>.delayed(Duration.zero);
+        // DOM element loses the focus.
+        expect(document.activeElement, document.body);
+      } else {
+        // No connection close message sent.
+        expect(spy.messages, hasLength(0));
+        await Future<void>.delayed(Duration.zero);
+        // DOM element still keeps the focus.
         expect(document.activeElement, textEditing.editingElement.domElement);
       }
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge));
+        skip: (browserEngine == BrowserEngine.edge));
 
     test('finishAutofillContext closes connection no autofill element',
         () async {
