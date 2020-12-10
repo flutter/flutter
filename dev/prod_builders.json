@@ -259,6 +259,12 @@
          "flaky": false
       },
       {
+         "name": "Mac macos_content_validation_test",
+         "repo": "flutter",
+         "task_name": "macos_content_validation_test",
+         "flaky": true
+      },
+      {
          "name": "Mac tool_tests",
          "repo": "flutter",
          "task_name": "mac_tool_tests",

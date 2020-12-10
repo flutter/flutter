@@ -291,6 +291,13 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
+         "name":"Mac macos_content_validation_test",
+         "repo":"flutter",
+         "task_name":"macos_content_validation_test",
+         "enabled":true,
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
+      },
+      {
          "name":"Mac tool_tests",
          "repo":"flutter",
          "task_name":"mac_tool_tests",
