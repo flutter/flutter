@@ -392,7 +392,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           enableDrag: widget.enableDrag,
           onDragStart: handleDragStart,
           onDragEnd: handleDragEnd,
-        )
+        ),
       ),
       builder: (BuildContext context, Widget? child) {
         // Disable the initial animation when accessible navigation is on so
