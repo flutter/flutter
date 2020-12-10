@@ -36,7 +36,7 @@ void testMain() async {
         Offset(shaderRect.right, shaderRect.bottom),
         [Color(0xFFcfdfd2), Color(0xFF042a85)]);
     rc.drawRect(shaderRect, paint);
-    expect(rc.hasArbitraryPaint, isTrue);
+    expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_rect',
         region: screenRect,
         maxDiffRatePercent: 0.01);
@@ -64,7 +64,7 @@ void testMain() async {
       rc.drawOval(shaderRect, paint);
       yOffset += 120;
     }
-    expect(rc.hasArbitraryPaint, isTrue);
+    expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_oval_matrix',
         region: screenRect,
         maxDiffRatePercent: 0.2);
@@ -80,7 +80,7 @@ void testMain() async {
         Offset(shaderRect.right, shaderRect.bottom),
         [Color(0xFFcfdfd2), Color(0xFF042a85)]);
     rc.drawRRect(RRect.fromRectAndRadius(shaderRect, Radius.circular(16)), paint);
-    expect(rc.hasArbitraryPaint, isTrue);
+    expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_rounded_rect',
         region: screenRect,
         maxDiffRatePercent: 0.1);
@@ -108,7 +108,7 @@ void testMain() async {
       rc.drawOval(shaderRect, paint);
       yOffset += 120;
     }
-    expect(rc.hasArbitraryPaint, isTrue);
+    expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_tiled_repeated_rect',
         region: screenRect);
   });
@@ -135,7 +135,7 @@ void testMain() async {
       rc.drawOval(shaderRect, paint);
       yOffset += 120;
     }
-    expect(rc.hasArbitraryPaint, isTrue);
+    expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_tiled_mirrored_rect',
         region: screenRect);
   });

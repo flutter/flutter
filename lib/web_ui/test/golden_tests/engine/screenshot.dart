@@ -13,7 +13,8 @@ import 'package:test/test.dart';
 Future<void> canvasScreenshot(RecordingCanvas rc, String fileName,
     {ui.Rect region = const ui.Rect.fromLTWH(0, 0, 600, 800),
       double maxDiffRatePercent = 0.0, bool write: false}) async {
-  final EngineCanvas engineCanvas = BitmapCanvas(region);
+  final EngineCanvas engineCanvas = BitmapCanvas(region,
+      RenderStrategy());
 
   rc.endRecording();
   rc.apply(engineCanvas, region);
