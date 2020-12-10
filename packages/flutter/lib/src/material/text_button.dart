@@ -68,15 +68,15 @@ class TextButton extends ButtonStyleButton {
     Clip clipBehavior = Clip.none,
     required Widget child,
   }) : super(
-          key: key,
-          onPressed: onPressed,
-          onLongPress: onLongPress,
-          style: style,
-          focusNode: focusNode,
-          autofocus: autofocus,
-          clipBehavior: clipBehavior,
-          child: child,
-        );
+    key: key,
+    onPressed: onPressed,
+    onLongPress: onLongPress,
+    style: style,
+    focusNode: focusNode,
+    autofocus: autofocus,
+    clipBehavior: clipBehavior,
+    child: child,
+  );
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
