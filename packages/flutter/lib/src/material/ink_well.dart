@@ -1217,9 +1217,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// during animation. You should avoid using InkWells within [Material] widgets
 /// that are changing size.
 ///
-/// Animations triggered by an [InkWell] will survive their widget moving
-/// due to [GlobalKey] reparenting, assuming that the nearest [Material]
-/// ancestor is the same before and after the move.
+/// Animations triggered by an [InkWell] will survive their widget moving due
+/// to [GlobalKey] reparenting, assuming that the nearest [Material] ancestor
+/// is the same before and after the move.
 ///
 /// See also:
 ///
