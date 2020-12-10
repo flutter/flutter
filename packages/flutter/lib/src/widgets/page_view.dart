@@ -581,7 +581,7 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///  Widget build(BuildContext context) {
 ///    final controller = PageController(initialPage: 0);
 ///    return PageView(
-///      // scrollDirection property defaults to Axis.horizontal if not given explicitly
+///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
 ///      // use Axis.vertical for scrolling vertically
 ///      scrollDirection: Axis.horizontal,
 ///      controller: controller,
