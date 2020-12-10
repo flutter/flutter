@@ -46,7 +46,7 @@ class TestAssetBundle extends AssetBundle {
   }
 
   @override
-  Future<String> loadString(String key, { bool cache = true }) async {
+  Future<String> loadString(String key, { bool cache = true, bool unzip = false }) async {
     if (key == 'lib/gallery/example_code.dart')
       return testCodeFile;
     return '';
