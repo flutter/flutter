@@ -214,7 +214,8 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
     // from animating the size change.
     _containerKey = UniqueKey();
     // If the menu items change, make sure the overflow menu is closed. This
-    // prevents an empty overflow menu.
+    // prevents getting into a broken state where _overflowOpen is true when
+    // there are not enough children to cause overflow.
     _overflowOpen = false;
   }
 
@@ -675,14 +676,10 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   // Visit only the children that should be painted.
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    int visible = 0;
-    int total = 0;
     visitChildren((RenderObject renderObjectChild) {
-      total++;
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
-        visible++;
         visitor(renderObjectChild);
       }
     });
