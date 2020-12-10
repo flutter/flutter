@@ -295,12 +295,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     radius = nextRadius;
   }
 
-  Paint get _thumbPaint {
+  Paint get _paintThumb {
     return Paint()
       ..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
-  Paint _trackPaint({ bool isBorder = false }) {
+  Paint _paintTrack({ bool isBorder = false }) {
     if (isBorder) {
       return Paint()
         ..color = trackBorderColor.withOpacity(trackBorderColor.opacity * fadeoutOpacityAnimation.value)
@@ -357,18 +357,18 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     _trackRect = trackOffset & trackSize;
-    canvas.drawRect(_trackRect!, _trackPaint());
+    canvas.drawRect(_trackRect!, _paintTrack());
     canvas.drawLine(
       trackOffset,
       Offset(trackOffset.dx, trackOffset.dy + _trackExtent),
-      _trackPaint(isBorder: true),
+      _paintTrack(isBorder: true),
     );
 
     _thumbRect = Offset(x, y) & thumbSize;
     if (radius == null)
-      canvas.drawRect(_thumbRect!, _thumbPaint);
+      canvas.drawRect(_thumbRect!, _paintThumb);
     else
-      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _thumbPaint);
+      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect!, radius!), _paintThumb);
   }
 
   double _thumbExtent() {
