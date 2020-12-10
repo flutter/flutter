@@ -765,8 +765,9 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset, 8);
+    // TODO(justinmc): This originally had base/extent reversed.
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 5);
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
