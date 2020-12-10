@@ -529,7 +529,7 @@ linter:
     final String sectionId = _createNameFromSource('snippet', section.start.filename, section.start.line);
     final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
     final List<Line> mainContents = <Line>[
-      if (!section.isNullSafe) const Line('// @dart = 2.9'),
+      if (!section.isNullSafe) const Line('// @dart = 2.9') else const Line(''),
       ...headers,
       const Line(''),
       Line('// From: ${section.start.filename}:${section.start.line}'),
@@ -600,7 +600,7 @@ linter:
       caseSensitive: false,
     );
     bool unknownAnalyzerErrors = false;
-    final int headerLength = headers.length + 2;
+    final int headerLength = headers.length + 3;
     for (final String error in errors) {
       final Match parts = errorPattern.matchAsPrefix(error);
       if (parts != null) {
