@@ -101,7 +101,7 @@ void testEachCanvas(String description, CanvasTest body,
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
       WebExperiments.instance.useCanvasText = false;
-      return body(BitmapCanvas(bounds));
+      return body(BitmapCanvas(bounds, RenderStrategy()));
     } finally {
       WebExperiments.instance.useCanvasText = null;
       TextMeasurementService.clearCache();
@@ -111,7 +111,7 @@ void testEachCanvas(String description, CanvasTest body,
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
       WebExperiments.instance.useCanvasText = true;
-      await body(BitmapCanvas(bounds));
+      await body(BitmapCanvas(bounds, RenderStrategy()));
     } finally {
       WebExperiments.instance.useCanvasText = null;
       TextMeasurementService.clearCache();

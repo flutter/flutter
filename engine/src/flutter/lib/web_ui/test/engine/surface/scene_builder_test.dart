@@ -682,7 +682,7 @@ class MockPersistedPicture extends PersistedPicture {
   int updateCount = 0;
   int applyPaintCount = 0;
 
-  final BitmapCanvas _fakeCanvas = BitmapCanvas(const Rect.fromLTRB(0, 0, 10, 10));
+  final BitmapCanvas _fakeCanvas = BitmapCanvas(const Rect.fromLTRB(0, 0, 10, 10), RenderStrategy());
 
   @override
   EngineCanvas get debugCanvas {

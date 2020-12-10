@@ -30,7 +30,8 @@ void testMain() async {
       { Rect region = const Rect.fromLTWH(0, 0, 500, 500),
         bool write = false }) async {
 
-    final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
+    final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
+        RenderStrategy());
 
     // Draws the estimated bounds so we can spot the bug in Scuba.
     engineCanvas

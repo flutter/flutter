@@ -31,7 +31,8 @@ void testMain() async {
   const Radius someFixedRadius = Radius.circular(10);
 
   setUp(() {
-    canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 500, 100));
+    canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 500, 100),
+        RenderStrategy());
     canvas.translate(10, 10); // Center
   });
 

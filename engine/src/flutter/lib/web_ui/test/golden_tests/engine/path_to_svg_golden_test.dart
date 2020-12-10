@@ -21,7 +21,8 @@ void testMain() async {
 
   Future<void> testPath(Path path, String scubaFileName, {Paint paint, double maxDiffRatePercent = null}) async {
     const Rect canvasBounds = Rect.fromLTWH(0, 0, 600, 800);
-    final BitmapCanvas bitmapCanvas = BitmapCanvas(canvasBounds);
+    final BitmapCanvas bitmapCanvas = BitmapCanvas(canvasBounds,
+        RenderStrategy());
     final RecordingCanvas canvas = RecordingCanvas(canvasBounds);
 
     paint ??= Paint()
