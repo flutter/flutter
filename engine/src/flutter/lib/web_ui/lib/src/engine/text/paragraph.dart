@@ -380,7 +380,7 @@ class DomParagraph implements EngineParagraph {
     }
 
     final List<EngineLineMetrics> lines = _measurementResult!.lines!;
-    canvas.setFontFromParagraphStyle(_geometricStyle);
+    canvas.setCssFont(_geometricStyle.cssFontString);
 
     // Then paint the text.
     canvas._setUpPaint(_paint!.paintData, null);
