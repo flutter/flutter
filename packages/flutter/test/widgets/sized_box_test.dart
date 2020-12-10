@@ -209,4 +209,27 @@ void main() {
 
     expect(tester.getSize(find.text('This is a multi-line text.')).height, greaterThan(16));
   });
+
+  testWidgets('SizedBox constrains intrinsics correctly when one dimension is infinity', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 100,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: IntrinsicHeight(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Text('This is a multi-line text.', style: TextStyle(height: 1.0, fontSize: 16)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('This is a multi-line text.')).height, greaterThan(16));
+  });
 }
