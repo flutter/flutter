@@ -5,6 +5,8 @@
 // @dart = 2.12
 part of engine;
 
+const bool _debugLogPointerConverter = false;
+
 class _PointerState {
   _PointerState(this.x, this.y);
 
@@ -237,6 +239,9 @@ class PointerDataConverter {
     double scrollDeltaX = 0.0,
     double scrollDeltaY = 0.0,
   }) {
+    if (_debugLogPointerConverter) {
+      print('>> device=$device change = $change buttons = $buttons');
+    }
     assert(change != null); // ignore: unnecessary_null_comparison
     if (signalKind == null ||
       signalKind == ui.PointerSignalKind.none) {
