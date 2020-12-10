@@ -247,10 +247,15 @@ class CupertinoFormSection extends StatelessWidget {
       childrenWithDividers.add(longDivider);
     }
 
-    final BorderRadius childrenGroupBorderRadius =
-        _type == _CupertinoFormSectionType.insetGrouped
-            ? _kDefaultInsetGroupedBorderRadius
-            : BorderRadius.zero;
+    final BorderRadius childrenGroupBorderRadius;
+    switch (_type) {
+      case _CupertinoFormSectionType.base:
+        childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
+        break;
+      case _CupertinoFormSectionType.insetGrouped:
+        childrenGroupBorderRadius = BorderRadius.zero;
+        break;
+    }
 
     // Refactored the decorate children group in one place to avoid repeating it
     // twice down bellow in the returned widget.
@@ -274,22 +279,20 @@ class CupertinoFormSection extends StatelessWidget {
       ),
       child: Column(
         children: <Widget>[
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: header == null
-                ? null
-                : DefaultTextStyle(
-                    style: TextStyle(
-                      fontSize: 13.0,
-                      color:
-                          CupertinoColors.secondaryLabel.resolveFrom(context),
-                    ),
-                    child: Padding(
-                      padding: _kDefaultHeaderMargin,
-                      child: header!,
-                    ),
-                  ),
-          ),
+          if (header != null)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: DefaultTextStyle(
+                style: TextStyle(
+                  fontSize: 13.0,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                child: Padding(
+                  padding: _kDefaultHeaderMargin,
+                  child: header!,
+                ),
+              ),
+            ),
           Padding(
             padding: margin,
             child: clipBehavior == Clip.none
@@ -299,22 +302,20 @@ class CupertinoFormSection extends StatelessWidget {
                     clipBehavior: clipBehavior,
                     child: decoratedChildrenGroup),
           ),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: footer == null
-                ? null
-                : DefaultTextStyle(
-                    style: TextStyle(
-                      fontSize: 13.0,
-                      color:
-                          CupertinoColors.secondaryLabel.resolveFrom(context),
-                    ),
-                    child: Padding(
-                      padding: _kDefaultFooterMargin,
-                      child: footer!,
-                    ),
-                  ),
-          ),
+          if (footer != null)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: DefaultTextStyle(
+                style: TextStyle(
+                  fontSize: 13.0,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                child: Padding(
+                  padding: _kDefaultFooterMargin,
+                  child: footer!,
+                ),
+              ),
+            ),
         ],
       ),
     );
