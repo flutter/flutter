@@ -809,6 +809,8 @@ class _LargeTitleNavigationBarSliverDelegate
       border: border,
       backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
       brightness: brightness,
+      // `LayoutBuilder` provides the height of the nav bar for the large
+      // title magnification.
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return DefaultTextStyle(
@@ -848,8 +850,11 @@ class _LargeTitleNavigationBarSliverDelegate
                                 overflow: TextOverflow.ellipsis,
                                 child: Transform.scale(
                                   // This scale is estimated from the settings app in iOS 14.
-                                  // It has a maximum magnification of about 15%.
-                                  scale: math.min(1.15, 1 + (constraints.maxHeight - maxExtent)/maxExtent*0.12),
+                                  // The large title scales linearly from 1.0 up to 1.15 magnification.
+                                  // The `constraints.maxHeight` value is the height of the nav bar, 
+                                  // and `maxExtent` is the default large title height the nav bar snaps back to. 
+                                  // The difference between the two heights is used to scale the title.
+                                  scale: math.max(1.0, math.min(1.15, 1 + (constraints.maxHeight - maxExtent)/maxExtent*0.12)),
                                   alignment: AlignmentDirectional.bottomStart,
                                   child: components.largeTitle!,
                                 ),
