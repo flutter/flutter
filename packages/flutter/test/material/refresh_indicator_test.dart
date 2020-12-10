@@ -501,6 +501,54 @@ void main() {
     );
   });
 
+  testWidgets('RefreshIndicator responds to edgeDistance', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: () async {},
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                return SizedBox(
+                  height: 200.0,
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        )
+    );
+
+    //By default the value of edgeDistance is 0.0
+    expect(
+        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).edgeDistance,
+        0.0,
+    );
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: () async {},
+            strokeWidth: kToolbarHeight,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                return SizedBox(
+                  height: 200.0,
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        )
+    );
+
+    expect(
+        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).edgeDistance,
+        kToolbarHeight,
+    );
+  });
+
   testWidgets('Top RefreshIndicator showed when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
