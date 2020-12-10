@@ -394,9 +394,9 @@ enum FilterQuality {
 }
 
 class ImageFilter {
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0}) {
+  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode tileMode = TileMode.clamp}) {
     if (engine.useCanvasKit) {
-      return engine.CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY);
+      return engine.CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
     }
     return engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY);
   }

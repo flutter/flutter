@@ -3137,10 +3137,11 @@ class _ColorFilter extends NativeFieldWrapperClass2 {
 ///    this class as a child layer filter.
 abstract class ImageFilter {
   /// Creates an image filter that applies a Gaussian blur.
-  factory ImageFilter.blur({ double sigmaX = 0.0, double sigmaY = 0.0 }) {
+  factory ImageFilter.blur({ double sigmaX = 0.0, double sigmaY = 0.0, TileMode tileMode = TileMode.clamp }) {
     assert(sigmaX != null); // ignore: unnecessary_null_comparison
     assert(sigmaY != null); // ignore: unnecessary_null_comparison
-    return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY);
+    assert(tileMode != null); // ignore: unnecessary_null_comparison
+    return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
 
   /// Creates an image filter that applies a matrix transformation.
@@ -3206,21 +3207,31 @@ class _MatrixImageFilter implements ImageFilter {
 }
 
 class _GaussianBlurImageFilter implements ImageFilter {
-  _GaussianBlurImageFilter({ required this.sigmaX, required this.sigmaY });
+  _GaussianBlurImageFilter({ required this.sigmaX, required this.sigmaY, required this.tileMode });
 
   final double sigmaX;
   final double sigmaY;
+  final TileMode tileMode;
 
   // MakeBlurFilter
   late final _ImageFilter nativeFilter = _ImageFilter.blur(this);
   @override
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
-  @override
-  String get _shortDescription => 'blur($sigmaX, $sigmaY)';
+  String get _modeString {
+    switch(tileMode) {
+      case TileMode.clamp: return 'clamp';
+      case TileMode.mirror: return 'mirror';
+      case TileMode.repeated: return 'repeated';
+      case TileMode.decal: return 'decal';
+    }
+  }
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY)';
+  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString)';
+
+  @override
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString)';
 
   @override
   bool operator ==(Object other) {
@@ -3228,7 +3239,8 @@ class _GaussianBlurImageFilter implements ImageFilter {
       return false;
     return other is _GaussianBlurImageFilter
         && other.sigmaX == sigmaX
-        && other.sigmaY == sigmaY;
+        && other.sigmaY == sigmaY
+        && other.tileMode == tileMode;
   }
 
   @override
@@ -3278,9 +3290,9 @@ class _ImageFilter extends NativeFieldWrapperClass2 {
     : assert(filter != null), // ignore: unnecessary_null_comparison
       creator = filter {    // ignore: prefer_initializing_formals
     _constructor();
-    _initBlur(filter.sigmaX, filter.sigmaY);
+    _initBlur(filter.sigmaX, filter.sigmaY, filter.tileMode.index);
   }
-  void _initBlur(double sigmaX, double sigmaY) native 'ImageFilter_initBlur';
+  void _initBlur(double sigmaX, double sigmaY, int tileMode) native 'ImageFilter_initBlur';
 
   /// Creates an image filter that applies a matrix transformation.
   ///
@@ -3330,14 +3342,22 @@ class Shader extends NativeFieldWrapperClass2 {
   Shader._();
 }
 
-/// Defines what happens at the edge of the gradient.
+/// Defines what happens at the edge of a gradient or the sampling of a source image
+/// in an [ImageFilter].
 ///
 /// A gradient is defined along a finite inner area. In the case of a linear
 /// gradient, it's between the parallel lines that are orthogonal to the line
 /// drawn between two points. In the case of radial gradients, it's the disc
 /// that covers the circle centered on a particular point up to a given radius.
 ///
-/// This enum is used to define how the gradient should paint the regions
+/// An image filter reads source samples from a source image and performs operations
+/// on those samples to produce a result image. An image defines color samples only
+/// for pixels within the bounds of the image but some filter operations, such as a blur
+/// filter, read samples over a wide area to compute the output for a given pixel. Such
+/// a filter would need to combine samples from inside the image with hypothetical
+/// color values from outside the image.
+///
+/// This enum is used to define how the gradient or image filter should treat the regions
 /// outside that defined inner area.
 ///
 /// See also:
@@ -3349,36 +3369,60 @@ class Shader extends NativeFieldWrapperClass2 {
 ///  * [dart:ui.Gradient], the low-level class used when dealing with the
 ///    [Paint.shader] property directly, with its [Gradient.linear] and
 ///    [Gradient.radial] constructors.
-// These enum values must be kept in sync with SkShader::TileMode.
+///  * [dart:ui.ImageFilter.blur], an ImageFilter that may sometimes need to
+///    read samples from outside an image to combine with the pixels near the
+///    edge of the image.
+// These enum values must be kept in sync with SkTileMode.
 enum TileMode {
-  /// Edge is clamped to the final color.
+  /// Samples beyond the edge are clamped to the nearest color in the defined inner area.
   ///
-  /// The gradient will paint the all the regions outside the inner area with
-  /// the color of the point closest to that region.
+  /// A gradient will paint all the regions outside the inner area with the
+  /// color at the end of the color stop list closest to that region.
   ///
+  /// An image filter will substitute the nearest edge pixel for any samples taken from
+  /// outside its source image.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_linear.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_radial.png)
   clamp,
 
-  /// Edge is repeated from first color to last.
+  /// Samples beyond the edge are repeated from the far end of the defined area.
   ///
-  /// This is as if the stop points from 0.0 to 1.0 were then repeated from 1.0
-  /// to 2.0, 2.0 to 3.0, and so forth (and for linear gradients, similarly from
-  /// -1.0 to 0.0, -2.0 to -1.0, etc).
+  /// For a gradient, this technique is as if the stop points from 0.0 to 1.0 were then
+  /// repeated from 1.0 to 2.0, 2.0 to 3.0, and so forth (and for linear gradients, similarly
+  /// from -1.0 to 0.0, -2.0 to -1.0, etc).
+  ///
+  /// An image filter will treat its source image as if it were tiled across the enlarged
+  /// sample space from which it reads, each tile in the same orientation as the base image.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_linear.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radial.png)
   repeated,
 
-  /// Edge is mirrored from last color to first.
+  /// Samples beyond the edge are mirrored back and forth across the defined area.
   ///
-  /// This is as if the stop points from 0.0 to 1.0 were then repeated backwards
-  /// from 2.0 to 1.0, then forwards from 2.0 to 3.0, then backwards again from
-  /// 4.0 to 3.0, and so forth (and for linear gradients, similarly from in the
+  /// For a gradient, this technique is as if the stop points from 0.0 to 1.0 were then
+  /// repeated backwards from 2.0 to 1.0, then forwards from 2.0 to 3.0, then backwards
+  /// again from 4.0 to 3.0, and so forth (and for linear gradients, similarly in the
   /// negative direction).
+  ///
+  /// An image filter will treat its source image as tiled in an alternating forwards and
+  /// backwards or upwards and downwards direction across the sample space from which
+  /// it is reading.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_linear.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_radial.png)
   mirror,
+
+  /// Samples beyond the edge are treated as transparent black.
+  ///
+  /// A gradient will render transparency over any region that is outside the circle of a
+  /// radial gradient or outside the parallel lines that define the inner area of a linear
+  /// gradient.
+  ///
+  /// An image filter will substitute transparent black for any sample it must read from
+  /// outside its source image.
+  decal,
 }
 
 Int32List _encodeColorList(List<Color> colors) {
