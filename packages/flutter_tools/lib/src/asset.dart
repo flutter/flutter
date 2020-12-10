@@ -73,6 +73,7 @@ abstract class AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
+    TargetPlatform targetPlatform,
   });
 }
 
@@ -122,7 +123,8 @@ class ManifestAssetBundle implements AssetBundle {
   DateTime _lastBuildTimestamp;
 
   static const String _kAssetManifestJson = 'AssetManifest.json';
-  static const String _kNoticeFile = 'NOTICES.gz';
+  static const String _kNoticeFile = 'NOTICES';
+  static const String _kNoticeZippedFile = 'NOTICES.gz';
 
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
@@ -161,6 +163,7 @@ class ManifestAssetBundle implements AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
+    TargetPlatform targetPlatform,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
@@ -321,7 +324,6 @@ class ManifestAssetBundle implements AssetBundle {
     final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig);
-    final List<int> licenseBytes = utf8.encode(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
     if (wildcardDirectories.isNotEmpty) {
@@ -339,16 +341,23 @@ class ManifestAssetBundle implements AssetBundle {
 
     _setIfChanged(_kAssetManifestJson, assetManifest);
     _setIfChanged(kFontManifestJson, fontManifest);
-    if (entries[_kNoticeFile] == null ||
-        gzip.decode((entries[_kNoticeFile] as DevFSByteContent).bytes)
-            != licenseBytes) {
-      entries[_kNoticeFile] = DevFSByteContent(
-        ZLibEncoder(
-          dictionary: utf8.encode('copyrightsoftwaretothisinandorofthe'),
-          gzip: true,
-          level: 9,
-        ).convert(licenseBytes)
-      );
+    if (targetPlatform == TargetPlatform.web_javascript) {
+      // Don't compress the NOTICES file on web since the client doesn't have
+      // dart:io to decompress it.
+      _setIfChanged(_kNoticeFile, DevFSStringContent(licenseResult.combinedLicenses));
+    } else {
+      final List<int> licenseBytes = utf8.encode(licenseResult.combinedLicenses);
+      if (entries[_kNoticeZippedFile] == null ||
+          gzip.decode((entries[_kNoticeZippedFile] as DevFSByteContent).bytes)
+              != licenseBytes) {
+        entries[_kNoticeZippedFile] = DevFSByteContent(
+          ZLibEncoder(
+            dictionary: utf8.encode('copyrightsoftwaretothisinandorofthe'),
+            gzip: true,
+            level: 9,
+          ).convert(licenseBytes)
+        );
+      }
     }
     return 0;
   }

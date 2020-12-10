@@ -192,6 +192,7 @@ Future<AssetBundle> buildAssets({
   String manifestPath,
   String assetDirPath,
   @required String packagesPath,
+  TargetPlatform targetPlatform,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= globals.fs.path.absolute(packagesPath);
@@ -202,6 +203,7 @@ Future<AssetBundle> buildAssets({
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
+    targetPlatform: targetPlatform,
   );
   if (result != 0) {
     return null;

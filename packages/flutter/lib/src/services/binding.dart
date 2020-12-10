@@ -105,7 +105,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
       rawLicenses.complete(
-        await rootBundle.loadString('NOTICES.gz', cache: false, unzip: true)
+        await rootBundle.loadString(
+          // NOTICES for web isn't compressed since we don't have access to
+          // dart:io on the client side and it's already compressed between
+          // the server and client.
+          kIsWeb ? 'NOTICES' : 'NOTICES.gz',
+          cache: false,
+          unzip: !kIsWeb,
+        )
       );
     }, Priority.animation);
     await rawLicenses.future;
