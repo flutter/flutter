@@ -1000,7 +1000,7 @@ class TextSelectionGestureDetectorBuilder {
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapStart].
   ///
   /// By default, it selects text position specified in [details] if selection
-  /// is enabled.
+  /// is enabled. If widget is not focused, it selects the word that is tapped on.
   ///
   /// See also:
   ///
@@ -1009,17 +1009,26 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.longPress,
-      );
+      if (!renderEditable.hasFocus) {
+        renderEditable.selectWordsInRange(
+          from: details.globalPosition,
+          to: details.globalPosition,
+          cause: SelectionChangedCause.longPress,
+        );
+      } else {
+        renderEditable.selectPositionAt(
+          from: details.globalPosition,
+          cause: SelectionChangedCause.longPress,
+        );
+      }
     }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapMoveUpdate].
   ///
   /// By default, it updates the selection location specified in [details] if
-  /// selection is enabled.
+  /// selection is enabled. If there are characters already selected, it extends
+  /// the selection.
   ///
   /// See also:
   ///
@@ -1028,10 +1037,22 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.longPress,
-      );
+      final int selectionCharacterCount = ((renderEditable.selection?.start ?? 0) - (renderEditable.selection?.end ?? 0)).abs();
+      
+      // This checks to make sure it only selects words if there's already some
+      // characters selected.
+      if (selectionCharacterCount > 0) {
+        renderEditable.selectWordsInRange(
+          from: details.globalPosition - details.offsetFromOrigin,
+          to: details.globalPosition,
+          cause: SelectionChangedCause.longPress,
+        );
+      } else {
+        renderEditable.selectPositionAt(
+          from: details.globalPosition,
+          cause: SelectionChangedCause.longPress,
+        );
+      }
     }
   }
 
