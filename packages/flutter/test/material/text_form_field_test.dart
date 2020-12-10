@@ -533,44 +533,44 @@ void main() {
   });
 
   testWidgets('TextFormField respects hintTextDirection', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: TextFormField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Some Label',
-                hintText: 'Some Hint',
-                hintTextDirection: TextDirection.ltr,
-              ),
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: TextFormField(
+            decoration: const InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: 'Some Label',
+              hintText: 'Some Hint',
+              hintTextDirection: TextDirection.ltr,
             ),
           ),
         ),
-      ));
+      ),
+    ));
 
-      final hintTextFinder = find.text('Some Hint');
+    final Finder hintTextFinder = find.text('Some Hint');
 
-      Text hintText = tester.firstWidget(hintTextFinder);
-      expect(hintText.textDirection, TextDirection.ltr);
+    final Text hintText = tester.firstWidget(hintTextFinder);
+    expect(hintText.textDirection, TextDirection.ltr);
 
-      await tester.pumpWidget(MaterialApp(
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: TextFormField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Some Label',
-                hintText: 'Some Hint',
-              ),
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: TextFormField(
+            decoration: const InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: 'Some Label',
+              hintText: 'Some Hint',
             ),
           ),
         ),
-      ));
+      ),
+    ));
 
-      final BuildContext context = tester.element(hintTextFinder);
-      final textDirection = Directionality.of(context);
-      expect(textDirection, TextDirection.rtl);
+    final BuildContext context = tester.element(hintTextFinder);
+    final TextDirection textDirection = Directionality.of(context);
+    expect(textDirection, TextDirection.rtl);
   });
 }
