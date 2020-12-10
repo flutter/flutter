@@ -6,7 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service/vm_service.dart' as vms;
+import 'package:vm_service/vm_service_io.dart';
 
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
@@ -79,10 +80,10 @@ Future<TaskResult> runTask(
   });
 
   try {
-    final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
-    final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
+    final RunnerClient client = await RunnerClient.connect(await uri.future);
+    final TaskResult taskResult = await client.getTaskResult();
     await runner.exitCode;
+    client.dispose();
     return taskResult;
   } finally {
     if (!runnerFinished)
@@ -92,33 +93,62 @@ Future<TaskResult> runTask(
   }
 }
 
-Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
-  final List<String> pathSegments = <String>[
-    // Add authentication code.
-    if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
-    'ws',
-  ];
-  final String url = vmServiceUri.replace(scheme: 'ws', pathSegments:
-      pathSegments).toString();
-  final Stopwatch stopwatch = Stopwatch()..start();
+class RunnerClient {
+  const RunnerClient(this.client, this.isolate);
 
-  while (true) {
-    try {
-      // Make sure VM server is up by successfully opening and closing a socket.
-      await (await WebSocket.connect(url)).close();
+  static Future<RunnerClient> connect(Uri vmServiceUri) async {
+    final List<String> pathSegments = <String>[
+      // Add authentication code.
+      if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
+      'ws',
+    ];
+    final String uri = vmServiceUri.replace(
+      scheme: 'ws',
+      pathSegments: pathSegments,
+    ).toString();
+    final Stopwatch stopwatch = Stopwatch()..start();
 
-      // Look up the isolate.
-      final VMServiceClient client = VMServiceClient.connect(url);
-      final VM vm = await client.getVM();
-      final VMIsolateRef isolate = vm.isolates.single;
-      final String response = await isolate.invokeExtension('ext.cocoonRunnerReady') as String;
-      if (response != 'ready')
-        throw 'not ready yet';
-      return isolate;
-    } catch (error) {
-      if (stopwatch.elapsed > const Duration(seconds: 10))
-        print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+    while (true) {
+      try {
+        // Make sure VM server is up by successfully opening and closing a socket.
+        await (await WebSocket.connect(uri)).close();
+
+        final vms.VmService client = await vmServiceConnectUri(uri);
+        final vms.VM vm = await client.getVM();
+        final vms.IsolateRef isolate = vm.isolates.single;
+        final RunnerClient runnerClient = RunnerClient(client, isolate);
+
+        if (!await runnerClient.ready()) {
+          throw 'not ready yet';
+        }
+        return runnerClient;
+      } catch (error) {
+        if (stopwatch.elapsed > const Duration(seconds: 10)) {
+          print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
     }
+  }
+
+  final vms.VmService client;
+  final vms.IsolateRef isolate;
+
+  Future<bool> ready() async {
+    final vms.Response response = await _callServiceExtension('ext.cocoonRunnerReady');
+    return response.json['result'] == 'ready';
+  }
+
+  Future<TaskResult> getTaskResult() async {
+    final vms.Response taskResultResponse = await _callServiceExtension('ext.cocoonRunTask');
+    return TaskResult.fromJson(taskResultResponse.json);
+  }
+
+  Future<vms.Response> _callServiceExtension(String name) {
+    return client.callServiceExtension(name, isolateId: isolate.id);
+  }
+
+  void dispose() {
+    client.dispose();
   }
 }
