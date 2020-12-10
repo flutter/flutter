@@ -25,7 +25,7 @@ enum BorderStyle {
 /// A side of a border of a box.
 ///
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
-/// [Border.start], [Border.end], and [Border.bottom].
+/// [Border.left], [Border.right], and [Border.bottom].
 ///
 /// Note that setting [BorderSide.width] to 0.0 will result in hairline
 /// rendering. A more involved explanation is present in [BorderSide.width].
