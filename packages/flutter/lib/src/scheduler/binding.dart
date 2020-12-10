@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback, PlatformDispatcher, VoidCallback;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -856,11 +856,11 @@ mixin SchedulerBinding on BindingBase {
     Timeline.startSync('Warm-up frame');
     final bool hadScheduledFrame = _hasScheduledFrame;
     // We use timers here to ensure that microtasks flush in between.
-    Timer.run(() {
+    _captureAndFlushMicrotasks(() {
       assert(_warmUpFrame);
       handleBeginFrame(null);
     });
-    Timer.run(() {
+    _captureAndFlushMicrotasks(() {
       assert(_warmUpFrame);
       handleDrawFrame();
       // We call resetEpoch after this frame so that, in the hot reload case,
@@ -883,6 +883,42 @@ mixin SchedulerBinding on BindingBase {
       await endOfFrame;
       Timeline.finishSync();
     });
+  }
+
+  void _captureAndFlushMicrotasks(void Function() callback) {
+    final Queue<VoidCallback> microtasks = Queue<VoidCallback>();
+    // Whether microtask interceptor is enabled. Once this even is finished,
+    // microtasks in all future events should run normally.
+    bool enabled = true;
+    final Zone microtaskInterceptor = Zone.current.fork(
+      specification: ZoneSpecification(
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, VoidCallback microtask) {
+          if (enabled) {
+            microtasks.add(microtask);
+          } else {
+            // We're no longer manually flushing microtasks, so delegate to
+            // the parent, which in the normal case scheduled the microtask
+            // normally.
+            parent.scheduleMicrotask(zone, microtask);
+          }
+        },
+      ),
+    );
+    microtaskInterceptor.run(() {
+      try {
+        callback();
+      } catch (error, stack) {
+        microtaskInterceptor.handleUncaughtError(error, stack);
+      }
+      while (microtasks.isNotEmpty) {
+        try {
+          microtasks.removeFirst().call();
+        } catch (error, stack) {
+          microtaskInterceptor.handleUncaughtError(error, stack);
+        }
+      }
+    });
+    enabled = false;
   }
 
   Duration? _firstRawTimeStampInEpoch;
