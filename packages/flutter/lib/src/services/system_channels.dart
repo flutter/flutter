@@ -331,7 +331,9 @@ class SystemChannels {
   ///    is provided, then the dynamic feature with the moduleName will be installed.
   ///    This method returns a future that will not be completed until the
   ///    feature is fully installed and ready to use. When an error occurs, the
-  ///    future will complete an error.
+  ///    future will complete an error. Calling `loadLibrary()` on a deferred
+  ///    imported library is equivalent to calling this method with only a
+  ///    loadingUnitId and a null moduleName.
   ///  * `getDynamicFeatureInstallState`: Gets the current installation state of
   ///    the dynamic feature identified by the loadingUnitId or moduleName.
   ///    This method returns a string that represents the state. Depending on
