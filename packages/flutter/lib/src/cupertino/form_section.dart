@@ -249,10 +249,10 @@ class CupertinoFormSection extends StatelessWidget {
 
     final BorderRadius childrenGroupBorderRadius;
     switch (_type) {
-      case _CupertinoFormSectionType.base:
+      case _CupertinoFormSectionType.insetGrouped:
         childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
         break;
-      case _CupertinoFormSectionType.insetGrouped:
+      case _CupertinoFormSectionType.base:
         childrenGroupBorderRadius = BorderRadius.zero;
         break;
     }
