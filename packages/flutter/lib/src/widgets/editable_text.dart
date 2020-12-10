@@ -1248,7 +1248,7 @@ class EditableText extends StatefulWidget {
   ///
   /// * iOS password autofill: Go to Settings -> Password, turn on "Autofill
   ///   Passwords", and add new passwords for testing by pressing the top right
-  ///   "+" button. Use an arbitary "website" if you don't have associated
+  ///   "+" button. Use an arbitrary "website" if you don't have associated
   ///   domains set up for your app. As long as there's at least one password
   ///   stored, you should be able to see a key-shaped icon in the quick type
   ///   bar on the software keyboard, when a password related field is focused.
