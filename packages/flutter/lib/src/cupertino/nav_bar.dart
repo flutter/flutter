@@ -854,7 +854,7 @@ class _LargeTitleNavigationBarSliverDelegate
                                   // The `constraints.maxHeight` value is the height of the nav bar, 
                                   // and `maxExtent` is the default large title height the nav bar snaps back to. 
                                   // The difference between the two heights is used to scale the title.
-                                  scale: math.max(1.0, math.min(1.15, 1 + (constraints.maxHeight - maxExtent)/maxExtent*0.12)),
+                                  scale: math.max(1.0, math.min(1.15, 1 + (constraints.maxHeight - maxExtent) / maxExtent * 0.12)),
                                   alignment: AlignmentDirectional.bottomStart,
                                   child: components.largeTitle!,
                                 ),
