@@ -563,6 +563,26 @@ void main() {
     // The follower is still hit testable because there is a leader layer.
     expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
   });
+
+  test('RenderProxyBox consults computeSizeForNoChild() for intrinsics when it has no child', () {
+    final _ProxyBoxWithDefaultSize inner = _ProxyBoxWithDefaultSize(const Size(20, 30));
+    final RenderPositionedBox outer = RenderPositionedBox(alignment: Alignment.center, child: inner);
+    expect(outer.getMinIntrinsicWidth(double.infinity), 20);
+    expect(outer.getMaxIntrinsicWidth(double.infinity), 20);
+    expect(outer.getMinIntrinsicHeight(double.infinity), 30);
+    expect(outer.getMaxIntrinsicHeight(double.infinity), 30);
+  });
+}
+
+class _ProxyBoxWithDefaultSize extends RenderProxyBox {
+  _ProxyBoxWithDefaultSize(this.defaultSize);
+
+  final Size defaultSize;
+
+  @override
+  Size computeSizeForNoChild(BoxConstraints constraints) {
+    return constraints.constrain(defaultSize);
+  }
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {

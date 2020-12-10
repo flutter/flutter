@@ -73,28 +73,28 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
       return child!.getMinIntrinsicWidth(height);
-    return 0.0;
+    return computeSizeForNoChild(const BoxConstraints()).width;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null)
       return child!.getMaxIntrinsicWidth(height);
-    return 0.0;
+    return computeSizeForNoChild(const BoxConstraints()).width;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null)
       return child!.getMinIntrinsicHeight(width);
-    return 0.0;
+    return computeSizeForNoChild(const BoxConstraints()).height;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null)
       return child!.getMaxIntrinsicHeight(width);
-    return 0.0;
+    return computeSizeForNoChild(const BoxConstraints()).height;
   }
 
   @override
