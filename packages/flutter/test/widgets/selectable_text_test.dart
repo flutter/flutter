@@ -765,7 +765,6 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // TODO(justinmc): This originally had base/extent reversed.
     expect(controller.selection.baseOffset, 8);
     expect(controller.selection.extentOffset, 5);
   });
