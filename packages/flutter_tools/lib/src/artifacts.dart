@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
@@ -305,12 +306,14 @@ class CachedArtifacts implements Artifacts {
       BuildMode mode, EnvironmentType environmentType) {
     switch (artifact) {
       case Artifact.genSnapshot:
-      case Artifact.flutterFramework:
       case Artifact.flutterXcframework:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         final String artifactFileName = _artifactToFileName(artifact);
         final String engineDir = _getEngineArtifactsPath(platform, mode);
         return _fileSystem.path.join(engineDir, artifactFileName);
+      case Artifact.flutterFramework:
+        final String engineDir = _getEngineArtifactsPath(platform, mode);
+        return _getIosEngineArtifactPath(engineDir, environmentType, _fileSystem);
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         final String artifactFileName = _artifactToFileName(artifact);
@@ -527,6 +530,38 @@ HostPlatform _currentHostPlatformAsHost(Platform platform) {
   throw UnimplementedError('Host OS not supported.');
 }
 
+String _getIosEngineArtifactPath(String engineDirectory,
+    EnvironmentType environmentType, FileSystem fileSystem) {
+  final Directory xcframeworkDirectory = fileSystem
+      .directory(engineDirectory)
+      .childDirectory(_artifactToFileName(Artifact.flutterXcframework));
+
+  if (!xcframeworkDirectory.existsSync()) {
+    throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter build ios".');
+  }
+  Directory flutterFrameworkSource;
+  for (final Directory platformDirectory
+      in xcframeworkDirectory.listSync().whereType<Directory>()) {
+    if (!platformDirectory.basename.startsWith('ios-')) {
+      continue;
+    }
+    // ios-x86_64-simulator, ios-armv7_arm64 (Xcode 11), or ios-arm64_armv7 (Xcode 12).
+    final bool simulatorDirectory =
+        platformDirectory.basename.endsWith('-simulator');
+    if ((environmentType == EnvironmentType.simulator && simulatorDirectory) ||
+        (environmentType == EnvironmentType.physical && !simulatorDirectory)) {
+      flutterFrameworkSource = platformDirectory;
+    }
+  }
+  if (flutterFrameworkSource == null) {
+    throwToolExit('No iOS frameworks found in ${xcframeworkDirectory.path}');
+  }
+
+  return flutterFrameworkSource
+      .childDirectory(_artifactToFileName(Artifact.flutterFramework))
+      .path;
+}
+
 /// Manages the artifacts of a locally built engine.
 class LocalEngineArtifacts implements Artifacts {
   LocalEngineArtifacts(
@@ -578,7 +613,8 @@ class LocalEngineArtifacts implements Artifacts {
       case Artifact.platformLibrariesJson:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
       case Artifact.flutterFramework:
-        return _fileSystem.path.join(engineOutPath, artifactFileName);
+        return _getIosEngineArtifactPath(
+            engineOutPath, environmentType, _fileSystem);
       case Artifact.flutterPatchedSdkPath:
         // When using local engine always use [BuildMode.debug] regardless of
         // what was specified in [mode] argument because local engine will

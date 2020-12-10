@@ -74,7 +74,7 @@
          "repo":"flutter",
          "task_name":"linux_gradle_non_android_plugin_test",
          "enabled":true,
-         "run_if": ["dev/**", "bin/**"]
+         "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
          "name":"Linux gradle_plugin_bundle_test",
@@ -123,7 +123,7 @@
          "repo":"flutter",
          "task_name":"linux_plugin_test",
          "enabled":true,
-         "run_if": ["dev/**", "bin/**"]
+         "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
          "name":"Linux tool_tests",
@@ -225,7 +225,7 @@
          "repo":"flutter",
          "task_name":"mac_gradle_non_android_plugin_test",
          "enabled":true,
-         "run_if":["dev/**", "bin/**"]
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
          "name":"Mac gradle_plugin_bundle_test",
@@ -288,7 +288,7 @@
          "repo":"flutter",
          "task_name":"mac_plugin_lint_mac",
          "enabled":true,
-         "run_if":["dev/**", "bin/**"]
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
          "name":"Mac tool_tests",
@@ -335,7 +335,7 @@
          "repo": "flutter",
          "task_name": "win_gradle_non_android_plugin_test",
          "enabled":true,
-         "run_if":["dev/**", "bin/**"]
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
          "name": "Windows gradle_plugin_bundle_test",
@@ -377,7 +377,7 @@
          "repo": "flutter",
          "task_name": "win_plugin_test",
          "enabled":true,
-         "run_if":["dev/**", "bin/**"]
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
         "name": "Windows tool_tests",
