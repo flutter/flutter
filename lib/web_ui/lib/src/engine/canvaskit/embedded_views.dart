@@ -239,7 +239,7 @@ class HtmlViewEmbedder {
     for (final Mutator mutator in mutators) {
       switch (mutator.type) {
         case MutatorType.transform:
-          headTransform.multiply(mutator.matrix!);
+          headTransform = mutator.matrix!.multiplied(headTransform);
           head.style.transform =
               float64ListToCssTransform(headTransform.storage);
           break;
