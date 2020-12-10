@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,9 @@ part of material_animated_icons;
 ///
 /// The available icons are specified in [AnimatedIcons].
 ///
-/// {@tool sample}
+/// {@youtube 560 315 https://www.youtube.com/watch?v=pJcbh8pbvJs}
+///
+/// {@tool snippet}
 ///
 /// ```dart
 /// AnimatedIcon(
@@ -34,9 +36,9 @@ class AnimatedIcon extends StatelessWidget {
   /// The [progress] and [icon] arguments must not be null.
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const AnimatedIcon({
-    Key key,
-    @required this.icon,
-    @required this.progress,
+    Key? key,
+    required this.icon,
+    required this.progress,
     this.color,
     this.size,
     this.semanticLabel,
@@ -67,14 +69,14 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
-  final Color color;
+  final Color? color;
 
   /// The size of the icon in logical pixels.
   ///
   /// Icons occupy a square with width and height equal to size.
   ///
   /// Defaults to the current [IconTheme] size.
-  final double size;
+  final double? size;
 
   /// The icon to display. Available icons are listed in [AnimatedIcons].
   final AnimatedIconData icon;
@@ -86,9 +88,9 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [Semantics.label], which is set to [semanticLabel] in the underlying
-  ///    [Semantics] widget.
-  final String semanticLabel;
+  ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the
+  ///    underlying [Semantics] widget.
+  final String? semanticLabel;
 
   /// The text direction to use for rendering the icon.
   ///
@@ -96,18 +98,20 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// If the text direction is [TextDirection.rtl], the icon will be mirrored
   /// horizontally (e.g back arrow will point right).
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   static final _UiPathFactory _pathFactory = () => ui.Path();
 
   @override
   Widget build(BuildContext context) {
-    final _AnimatedIconData iconData = icon;
+    assert(debugCheckHasDirectionality(context));
+    final _AnimatedIconData iconData = icon as _AnimatedIconData;
     final IconThemeData iconTheme = IconTheme.of(context);
-    final double iconSize = size ?? iconTheme.size;
+    assert(iconTheme.isConcrete);
+    final double iconSize = size ?? iconTheme.size!;
     final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
-    final double iconOpacity = iconTheme.opacity;
-    Color iconColor = color ?? iconTheme.color;
+    final double iconOpacity = iconTheme.opacity!;
+    Color iconColor = color ?? iconTheme.color!;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     return Semantics(
@@ -131,12 +135,12 @@ typedef _UiPathFactory = ui.Path Function();
 
 class _AnimatedIconPainter extends CustomPainter {
   _AnimatedIconPainter({
-    @required this.paths,
-    @required this.progress,
-    @required this.color,
-    @required this.scale,
-    @required this.shouldMirror,
-    @required this.uiPathFactory,
+    required this.paths,
+    required this.progress,
+    required this.color,
+    required this.scale,
+    required this.shouldMirror,
+    required this.uiPathFactory,
   }) : super(repaint: progress);
 
   // This list is assumed to be immutable, changes to the contents of the list
@@ -160,7 +164,7 @@ class _AnimatedIconPainter extends CustomPainter {
     }
 
     final double clampedProgress = progress.value.clamp(0.0, 1.0);
-    for (_PathFrames path in paths)
+    for (final _PathFrames path in paths)
       path.paint(canvas, color, uiPathFactory, clampedProgress);
   }
 
@@ -177,31 +181,31 @@ class _AnimatedIconPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Offset position) => null;
+  bool? hitTest(Offset position) => null;
 
   @override
   bool shouldRebuildSemantics(CustomPainter oldDelegate) => false;
 
   @override
-  SemanticsBuilderCallback get semanticsBuilder => null;
+  SemanticsBuilderCallback? get semanticsBuilder => null;
 }
 
 class _PathFrames {
   const _PathFrames({
-    @required this.commands,
-    @required this.opacities,
+    required this.commands,
+    required this.opacities,
   });
 
   final List<_PathCommand> commands;
   final List<double> opacities;
 
   void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
-    final double opacity = _interpolate<double>(opacities, progress, lerpDouble);
+    final double opacity = _interpolate<double?>(opacities, progress, lerpDouble)!;
     final ui.Paint paint = ui.Paint()
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
-    for (_PathCommand command in commands)
+    for (final _PathCommand command in commands)
       command.apply(path, progress);
     canvas.drawPath(path, paint);
   }
@@ -228,7 +232,7 @@ class _PathMoveTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset offset = _interpolate<Offset>(points, progress, Offset.lerp);
+    final Offset offset = _interpolate<Offset?>(points, progress, Offset.lerp)!;
     path.moveTo(offset.dx, offset.dy);
   }
 }
@@ -242,9 +246,9 @@ class _PathCubicTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset controlPoint1 = _interpolate<Offset>(controlPoints1, progress, Offset.lerp);
-    final Offset controlPoint2 = _interpolate<Offset>(controlPoints2, progress, Offset.lerp);
-    final Offset targetPoint = _interpolate<Offset>(targetPoints, progress, Offset.lerp);
+    final Offset controlPoint1 = _interpolate<Offset?>(controlPoints1, progress, Offset.lerp)!;
+    final Offset controlPoint2 = _interpolate<Offset?>(controlPoints2, progress, Offset.lerp)!;
+    final Offset targetPoint = _interpolate<Offset?>(targetPoints, progress, Offset.lerp)!;
     path.cubicTo(
       controlPoint1.dx, controlPoint1.dy,
       controlPoint2.dx, controlPoint2.dy,
@@ -261,7 +265,7 @@ class _PathLineTo extends _PathCommand {
 
   @override
   void apply(Path path, double progress) {
-    final Offset point = _interpolate<Offset>(points, progress, Offset.lerp);
+    final Offset point = _interpolate<Offset?>(points, progress, Offset.lerp)!;
     path.lineTo(point.dx, point.dy);
   }
 }
@@ -275,23 +279,23 @@ class _PathClose extends _PathCommand {
   }
 }
 
-// Interpolates a value given a set of values equally spaced in time.
-//
-// [interpolator] is the interpolation function used to interpolate between 2
-// points of type T.
-//
-// This is currently done with linear interpolation between every 2 consecutive
-// points. Linear interpolation was smooth enough with the limited set of
-// animations we have tested, so we use it for simplicity. If we find this to
-// not be smooth enough we can try applying spline instead.
-//
-// [progress] is expected to be between 0.0 and 1.0.
+/// Interpolates a value given a set of values equally spaced in time.
+///
+/// [interpolator] is the interpolation function used to interpolate between 2
+/// points of type T.
+///
+/// This is currently done with linear interpolation between every 2 consecutive
+/// points. Linear interpolation was smooth enough with the limited set of
+/// animations we have tested, so we use it for simplicity. If we find this to
+/// not be smooth enough we can try applying spline instead.
+///
+/// [progress] is expected to be between 0.0 and 1.0.
 T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);
   if (values.length == 1)
     return values[0];
-  final double targetIdx = lerpDouble(0, values.length -1, progress);
+  final double targetIdx = lerpDouble(0, values.length -1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;

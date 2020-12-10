@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,14 +43,14 @@ void main() {
     final Rect spacer3Rect = tester.getRect(find.byType(Spacer).at(2));
     final Rect spacer4Rect = tester.getRect(find.byType(Spacer).at(3));
     expect(spacer1Rect.size.height, 0.0);
-    expect(spacer1Rect.size.width, closeTo(93.8, 0.1));
-    expect(spacer1Rect.left, closeTo(696.3, 0.1));
-    expect(spacer2Rect.size.width, closeTo(93.8, 0.1));
-    expect(spacer2Rect.left, closeTo(592.5, 0.1));
+    expect(spacer1Rect.size.width, moreOrLessEquals(93.8, epsilon: 0.1));
+    expect(spacer1Rect.left, moreOrLessEquals(696.3, epsilon: 0.1));
+    expect(spacer2Rect.size.width, moreOrLessEquals(93.8, epsilon: 0.1));
+    expect(spacer2Rect.left, moreOrLessEquals(592.5, epsilon: 0.1));
     expect(spacer3Rect.size.width, spacer2Rect.size.width * 2.0);
-    expect(spacer3Rect.left, closeTo(395.0, 0.1));
+    expect(spacer3Rect.left, moreOrLessEquals(395.0, epsilon: 0.1));
     expect(spacer4Rect.size.width, spacer3Rect.size.width * 2.0);
-    expect(spacer4Rect.left, closeTo(10.0, 0.1));
+    expect(spacer4Rect.left, moreOrLessEquals(10.0, epsilon: 0.1));
   });
 
   testWidgets('Spacer takes up space.', (WidgetTester tester) async {
@@ -68,6 +68,6 @@ void main() {
     final Rect flexRect = tester.getRect(find.byType(Column));
     expect(spacerRect.size, const Size(0.0, 580.0));
     expect(spacerRect.topLeft, const Offset(400.0, 10.0));
-    expect(flexRect, Rect.fromLTWH(390.0, 0.0, 20.0, 600.0));
+    expect(flexRect, const Rect.fromLTWH(390.0, 0.0, 20.0, 600.0));
   });
 }

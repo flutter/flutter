@@ -1,8 +1,7 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:core';
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
@@ -16,8 +15,8 @@ import 'package:fuchsia_remote_debug_protocol/logging.dart';
 ///
 /// Example usage:
 ///
-/// $ dart examples/list_vms_and_flutter_views.dart \
-///     fe80::8eae:4cff:fef4:9247 eno1
+///     $ dart examples/list_vms_and_flutter_views.dart \
+///         fe80::8eae:4cff:fef4:9247 eno1
 Future<void> main(List<String> args) async {
   // Log only at info level within the library. If issues arise, this can be
   // changed to [LoggingLevel.all] or [LoggingLevel.fine] to see more
@@ -36,13 +35,13 @@ Future<void> main(List<String> args) async {
   final FuchsiaRemoteConnection connection =
       await FuchsiaRemoteConnection.connect(address, interface, sshConfigPath);
   print('On $address, the following Dart VM ports are running:');
-  for (int port in await connection.getDeviceServicePorts()) {
+  for (final int port in await connection.getDeviceServicePorts()) {
     print('\t$port');
   }
   print('');
 
   print('The following Flutter views are running:');
-  for (FlutterView view in await connection.getFlutterViews()) {
+  for (final FlutterView view in await connection.getFlutterViews()) {
     print('\t${view.name ?? view.id}');
   }
   await connection.stop();

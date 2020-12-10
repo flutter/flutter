@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'test_widgets.dart';
 
 class TestCustomPainter extends CustomPainter {
-  TestCustomPainter({ this.log, this.name });
+  TestCustomPainter({ required this.log, required this.name });
 
   final List<String> log;
   final String name;

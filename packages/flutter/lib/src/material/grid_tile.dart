@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,26 +21,26 @@ class GridTile extends StatelessWidget {
   ///
   /// Must have a child. Does not typically have both a header and a footer.
   const GridTile({
-    Key key,
+    Key? key,
     this.header,
     this.footer,
-    @required this.child,
+    required this.child,
   }) : assert(child != null),
        super(key: key);
 
   /// The widget to show over the top of this grid tile.
   ///
   /// Typically a [GridTileBar].
-  final Widget header;
+  final Widget? header;
 
   /// The widget to show over the bottom of this grid tile.
   ///
   /// Typically a [GridTileBar].
-  final Widget footer;
+  final Widget? footer;
 
   /// The widget that fills the tile.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -48,27 +48,26 @@ class GridTile extends StatelessWidget {
     if (header == null && footer == null)
       return child;
 
-    final List<Widget> children = <Widget>[
-      Positioned.fill(
-        child: child,
-      ),
-    ];
-    if (header != null) {
-      children.add(Positioned(
-        top: 0.0,
-        left: 0.0,
-        right: 0.0,
-        child: header,
-      ));
-    }
-    if (footer != null) {
-      children.add(Positioned(
-        left: 0.0,
-        bottom: 0.0,
-        right: 0.0,
-        child: footer,
-      ));
-    }
-    return Stack(children: children);
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          child: child,
+        ),
+        if (header != null)
+          Positioned(
+            top: 0.0,
+            left: 0.0,
+            right: 0.0,
+            child: header!,
+          ),
+        if (footer != null)
+          Positioned(
+            left: 0.0,
+            bottom: 0.0,
+            right: 0.0,
+            child: footer!,
+          ),
+      ],
+    );
   }
 }

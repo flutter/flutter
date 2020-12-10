@@ -1,0 +1,45 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 30
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+    defaultConfig {
+        applicationId "io.flutter.addtoapp"
+        minSdkVersion 16
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+    }
+    // Test build types.
+    buildTypes {
+        staging {
+            initWith debug
+            // This is required because the `:flutter` project doesn't define this custom build type.
+            // Without the fallback, the Android plugin will make Gradle exit with the following error:
+            // `Unable to find a matching variant of project :flutter`
+            matchingFallbacks = ['debug']
+        }
+        prod {
+            initWith release
+            matchingFallbacks = ['release']
+        }
+    }
+    // Test flavors.
+    flavorDimensions "version"
+    productFlavors {
+        demo {
+            dimension "version"
+        }
+    }
+}
+
+dependencies {
+    implementation project(':flutter')
+}

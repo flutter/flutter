@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,7 +29,7 @@ void beginFrame(Duration timeStamp) {
   final double t = timeStamp.inMicroseconds / Duration.microsecondsPerMillisecond / 1800.0;
   canvas.rotate(math.pi * (t % 1.0));
 
-  canvas.drawRect(ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
+  canvas.drawRect(const ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
   final ui.Picture picture = recorder.endRecording();
 

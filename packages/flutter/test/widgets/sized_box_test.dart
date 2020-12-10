@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,9 +44,9 @@ void main() {
         child: SizedBox(
           key: patient,
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -54,9 +54,9 @@ void main() {
           key: patient,
           height: 0.0,
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -65,9 +65,9 @@ void main() {
           width: 0.0,
           height: 0.0,
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -76,9 +76,9 @@ void main() {
           width: 100.0,
           height: 100.0,
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
+    expect(patient.currentContext!.size, equals(const Size(100.0, 100.0)));
 
     await tester.pumpWidget(
       Center(
@@ -87,27 +87,27 @@ void main() {
           width: 1000.0,
           height: 1000.0,
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
         child: SizedBox.expand(
           key: patient,
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
         child: SizedBox.shrink(
           key: patient,
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
@@ -119,9 +119,9 @@ void main() {
           key: patient,
           child: Container(),
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -130,9 +130,9 @@ void main() {
           height: 0.0,
           child: Container(),
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -142,9 +142,9 @@ void main() {
           height: 0.0,
           child: Container(),
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
 
     await tester.pumpWidget(
       Center(
@@ -154,9 +154,9 @@ void main() {
           height: 100.0,
           child: Container(),
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
+    expect(patient.currentContext!.size, equals(const Size(100.0, 100.0)));
 
     await tester.pumpWidget(
       Center(
@@ -166,9 +166,9 @@ void main() {
           height: 1000.0,
           child: Container(),
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -176,9 +176,9 @@ void main() {
           key: patient,
           child: Container(),
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+    expect(patient.currentContext!.size, equals(const Size(800.0, 600.0)));
 
     await tester.pumpWidget(
       Center(
@@ -186,8 +186,27 @@ void main() {
           key: patient,
           child: Container(),
         ),
-      )
+      ),
     );
-    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+  });
+
+  testWidgets('SizedBox constrains intrinsics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27293.
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: IntrinsicHeight(
+            child: SizedBox(
+              width: 100,
+              child: Text('This is a multi-line text.', style: TextStyle(height: 1.0, fontSize: 16)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('This is a multi-line text.')).height, greaterThan(16));
   });
 }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,11 +20,11 @@ void main() {
     expect(semantics, hasSemantics(
       TestSemantics(
         id: 0,
-        rect: Rect.fromLTRB(0.0, 0.0, 2400.0, 1800.0),
+        rect: const Rect.fromLTRB(0.0, 0.0, 2400.0, 1800.0),
         children: <TestSemantics>[
           TestSemantics(
             id: 1,
-            rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             flags: <SemanticsFlag>[SemanticsFlag.isSelected],
           ),
         ],
@@ -37,7 +37,7 @@ void main() {
     expect(semantics, hasSemantics(
       TestSemantics(
         id: 0,
-        rect: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        rect: const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0),
       ), ignoreTransform: true,
     ));
 

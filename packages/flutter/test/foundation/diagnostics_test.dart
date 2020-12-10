@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 class TestTree extends Object with DiagnosticableTreeMixin {
   TestTree({
-    this.name,
+    this.name = '',
     this.style,
     this.children = const <TestTree>[],
     this.properties = const <DiagnosticsNode>[],
@@ -19,25 +19,22 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   final String name;
   final List<TestTree> children;
   final List<DiagnosticsNode> properties;
-  final DiagnosticsTreeStyle style;
+  final DiagnosticsTreeStyle? style;
 
   @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (TestTree child in this.children) {
-      children.add(child.toDiagnosticsNode(
+  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
+    for (final TestTree child in children)
+      child.toDiagnosticsNode(
         name: 'child ${child.name}',
         style: child.style,
-      ));
-    }
-    return children;
-  }
+      ),
+  ];
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     if (style != null)
-      properties.defaultDiagnosticsTreeStyle = style;
-
+      properties.defaultDiagnosticsTreeStyle = style!;
     this.properties.forEach(properties.add);
   }
 }
@@ -50,40 +47,38 @@ enum ExampleEnum {
 
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
-Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap()));
+Map<String, Object?> simulateJsonSerialization(DiagnosticsNode node) {
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object?>;
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
   validateNodeJsonSerializationHelper(simulateJsonSerialization(node), node);
 }
 
-void validateNodeJsonSerializationHelper(Map<String, Object> json, DiagnosticsNode node) {
+void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsNode node) {
   expect(json['name'], equals(node.name));
-  expect(json['showSeparator'], equals(node.showSeparator));
+  expect(json['showSeparator'] ?? true, equals(node.showSeparator));
   expect(json['description'], equals(node.toDescription()));
-  expect(json['level'], equals(describeEnum(node.level)));
-  expect(json['showName'], equals(node.showName));
+  expect(json['level'] ?? describeEnum(DiagnosticLevel.info), equals(describeEnum(node.level)));
+  expect(json['showName'] ?? true, equals(node.showName));
   expect(json['emptyBodyDescription'], equals(node.emptyBodyDescription));
-  expect(json['style'], equals(describeEnum(node.style)));
-  final String valueToString = node is DiagnosticsProperty ? node.valueToString() : node.value.toString();
-  expect(json['valueToString'], equals(valueToString));
+  expect(json['style'] ?? describeEnum(DiagnosticsTreeStyle.sparse), equals(describeEnum(node.style!)));
   expect(json['type'], equals(node.runtimeType.toString()));
-  expect(json['hasChildren'], equals(node.getChildren().isNotEmpty));
+  expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
 }
 
-void validatePropertyJsonSerialization(DiagnosticsProperty<Object> property) {
+void validatePropertyJsonSerialization(DiagnosticsProperty<Object?> property) {
   validatePropertyJsonSerializationHelper(simulateJsonSerialization(property), property);
 }
 
 void validateStringPropertyJsonSerialization(StringProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   expect(json['quoted'], equals(property.quoted));
   validatePropertyJsonSerializationHelper(json, property);
 }
 
 void validateFlagPropertyJsonSerialization(FlagProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   expect(json['ifTrue'], equals(property.ifTrue));
 
   if (property.ifTrue != null) {
@@ -101,7 +96,7 @@ void validateFlagPropertyJsonSerialization(FlagProperty property) {
 }
 
 void validateDoublePropertyJsonSerialization(DoubleProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.unit != null) {
     expect(json['unit'], equals(property.unit));
   } else {
@@ -114,7 +109,7 @@ void validateDoublePropertyJsonSerialization(DoubleProperty property) {
 }
 
 void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.ifPresent != null) {
     expect(json['ifPresent'], equals(property.ifPresent));
   } else {
@@ -124,11 +119,26 @@ void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> prop
   validatePropertyJsonSerializationHelper(json, property);
 }
 
+void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> property) {
+  final Map<String, Object?> json = simulateJsonSerialization(property);
+  if (property.value.isNotEmpty) {
+    expect(json['values'], equals(
+      property.value.entries
+        .where((MapEntry<String, Object?> entry) => entry.value != null)
+        .map((MapEntry<String, Object?> entry) => entry.key).toList(),
+    ));
+  } else {
+    expect(json.containsKey('values'), isFalse);
+  }
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
 void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value != null) {
-    final List<Object> valuesJson = json['values'];
-    final List<String> expectedValues = property.value.map<String>((Object value) => value.toString()).toList();
+    final List<Object?> valuesJson = json['values']! as List<Object?>;
+    final List<String> expectedValues = property.value!.map<String>((Object value) => value.toString()).toList();
     expect(listEquals(valuesJson, expectedValues), isTrue);
   } else {
     expect(json.containsKey('values'), isFalse);
@@ -137,7 +147,7 @@ void validateIterablePropertyJsonSerialization(IterableProperty<Object> property
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validatePropertyJsonSerializationHelper(final Map<String, Object> json, DiagnosticsProperty<Object> property) {
+void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, DiagnosticsProperty<Object?> property) {
   if (property.defaultValue != kNoDefaultValue) {
     expect(json['defaultValue'], equals(property.defaultValue.toString()));
   } else {
@@ -168,7 +178,6 @@ void validatePropertyJsonSerializationHelper(final Map<String, Object> json, Dia
     expect(json.containsKey('exception'), isFalse);
   }
   expect(json['propertyType'], equals(property.propertyType.toString()));
-  expect(json['valueToString'], equals(property.valueToString()));
   expect(json.containsKey('defaultLevel'), isTrue);
   if (property.value is Diagnosticable) {
     expect(json['isDiagnosticableValue'], isTrue);
@@ -182,8 +191,8 @@ void main() {
   test('TreeDiagnosticsMixin control test', () async {
     void goldenStyleTest(
       String description, {
-      DiagnosticsTreeStyle style,
-      DiagnosticsTreeStyle lastChildStyle,
+      DiagnosticsTreeStyle? style,
+      DiagnosticsTreeStyle? lastChildStyle,
       String golden = '',
     }) {
       final TestTree tree = TestTree(children: <TestTree>[
@@ -266,12 +275,28 @@ void main() {
       '   ╚═══════════\n',
     );
 
-    // You would never really want to make everything a leaf child like this
-    // but you can and still get a readable tree.
+    goldenStyleTest(
+      'error children',
+      style: DiagnosticsTreeStyle.sparse,
+      lastChildStyle: DiagnosticsTreeStyle.error,
+      golden:
+      'TestTree#00000\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      ' │   ╚══════════════════════════════════════════════════════════════════\n'
+      ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '   ╚══════════════════════════════════════════════════════════════════\n',
+    );
+
+    // You would never really want to make everything a transition child like
+    // this but you can and still get a readable tree.
     // The joint between single and double lines here is a bit clunky
     // but we could correct that if there is any real use for this style.
     goldenStyleTest(
-      'leaf',
+      'transition',
       style: DiagnosticsTreeStyle.transition,
       golden:
       'TestTree#00000:\n'
@@ -293,6 +318,26 @@ void main() {
       '  ╘═╦══ child node C ═══\n'
       '    ║ TestTree#00000\n'
       '    ╚═══════════\n',
+    );
+
+    goldenStyleTest(
+      'error',
+      style: DiagnosticsTreeStyle.error,
+      golden:
+      '══╡ TESTTREE#00000 ╞═════════════════════════════════════════════\n'
+      '╞═╦══╡ CHILD NODE A: TESTTREE#00000 ╞════════════════════════════════\n'
+      '│ ╚══════════════════════════════════════════════════════════════════\n'
+      '╞═╦══╡ CHILD NODE B: TESTTREE#00000 ╞════════════════════════════════\n'
+      '│ ║ ╞═╦══╡ CHILD NODE B1: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ║ ╞═╦══╡ CHILD NODE B2: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║ │ ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ║ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      '│ ║   ╚══════════════════════════════════════════════════════════════════\n'
+      '│ ╚══════════════════════════════════════════════════════════════════\n'
+      '╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '  ╚══════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
 
     goldenStyleTest(
@@ -319,40 +364,42 @@ void main() {
   test('TreeDiagnosticsMixin tree with properties test', () async {
     void goldenStyleTest(
       String description, {
-      DiagnosticsTreeStyle style,
-      DiagnosticsTreeStyle lastChildStyle,
-      @required String golden,
+      String? name,
+      DiagnosticsTreeStyle? style,
+      DiagnosticsTreeStyle? lastChildStyle,
+      DiagnosticsTreeStyle propertyStyle = DiagnosticsTreeStyle.singleLine,
+      required String golden,
     }) {
       final TestTree tree = TestTree(
         properties: <DiagnosticsNode>[
-          StringProperty('stringProperty1', 'value1', quoted: false),
-          DoubleProperty('doubleProperty1', 42.5),
-          DoubleProperty('roundedProperty', 1.0 / 3.0),
-          StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW', level: DiagnosticLevel.hidden, quoted: false),
-          DiagnosticsProperty<Object>('DO_NOT_SHOW_NULL', null, defaultValue: null),
-          DiagnosticsProperty<Object>('nullProperty', null),
-          StringProperty('node_type', '<root node>', showName: false, quoted: false),
+          StringProperty('stringProperty1', 'value1', quoted: false, style: propertyStyle),
+          DoubleProperty('doubleProperty1', 42.5, style: propertyStyle),
+          DoubleProperty('roundedProperty', 1.0 / 3.0, style: propertyStyle),
+          StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW', level: DiagnosticLevel.hidden, quoted: false, style: propertyStyle),
+          DiagnosticsProperty<Object>('DO_NOT_SHOW_NULL', null, defaultValue: null, style: propertyStyle),
+          DiagnosticsProperty<Object>('nullProperty', null, style: propertyStyle),
+          StringProperty('node_type', '<root node>', showName: false, quoted: false, style: propertyStyle),
         ],
         children: <TestTree>[
           TestTree(name: 'node A', style: style),
           TestTree(
             name: 'node B',
             properties: <DiagnosticsNode>[
-              StringProperty('p1', 'v1', quoted: false),
-              StringProperty('p2', 'v2', quoted: false),
+              StringProperty('p1', 'v1', quoted: false, style: propertyStyle),
+              StringProperty('p2', 'v2', quoted: false, style: propertyStyle),
             ],
             children: <TestTree>[
               TestTree(name: 'node B1', style: style),
               TestTree(
                 name: 'node B2',
-                properties: <DiagnosticsNode>[StringProperty('property1', 'value1', quoted: false)],
+                properties: <DiagnosticsNode>[StringProperty('property1', 'value1', quoted: false, style: propertyStyle)],
                 style: style,
               ),
               TestTree(
                 name: 'node B3',
                 properties: <DiagnosticsNode>[
-                  StringProperty('node_type', '<leaf node>', showName: false, quoted: false),
-                  IntProperty('foo', 42),
+                  StringProperty('node_type', '<leaf node>', showName: false, quoted: false, style: propertyStyle),
+                  IntProperty('foo', 42, style: propertyStyle),
                 ],
                 style: lastChildStyle ?? style,
               ),
@@ -362,7 +409,7 @@ void main() {
           TestTree(
             name: 'node C',
             properties: <DiagnosticsNode>[
-              StringProperty('foo', 'multi\nline\nvalue!', quoted: false),
+              StringProperty('foo', 'multi\nline\nvalue!', quoted: false, style: propertyStyle),
             ],
             style: lastChildStyle ?? style,
           ),
@@ -370,11 +417,13 @@ void main() {
         style: lastChildStyle,
       );
 
-      if (tree.style != DiagnosticsTreeStyle.singleLine)
+      if (tree.style != DiagnosticsTreeStyle.singleLine &&
+          tree.style != DiagnosticsTreeStyle.errorProperty) {
         expect(tree, hasAGoodToStringDeep);
+      }
 
       expect(
-        tree.toDiagnosticsNode(style: style).toStringDeep(),
+        tree.toDiagnosticsNode(name: name, style: style).toStringDeep(),
         equalsIgnoringHashCodes(golden),
         reason: description,
       );
@@ -400,6 +449,45 @@ void main() {
       ' │ ├─child node B1: TestTree#00000\n'
       ' │ ├─child node B2: TestTree#00000\n'
       ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ └─child node B3: TestTree#00000\n'
+      ' │     <leaf node>\n'
+      ' │     foo: 42\n'
+      ' │\n'
+      ' └─child node C: TestTree#00000\n'
+      '     foo:\n'
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
+    );
+
+    goldenStyleTest(
+      'sparse with indented single line properties',
+      style: DiagnosticsTreeStyle.sparse,
+      propertyStyle: DiagnosticsTreeStyle.errorProperty,
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1:\n'
+      ' │   value1\n'
+      ' │ doubleProperty1:\n'
+      ' │   42.5\n'
+      ' │ roundedProperty:\n'
+      ' │   0.3\n'
+      ' │ nullProperty:\n'
+      ' │   null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1:\n'
+      ' │ │   v1\n'
+      ' │ │ p2:\n'
+      ' │ │   v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1:\n'
+      ' │ │     value1\n'
       ' │ │\n'
       ' │ └─child node B3: TestTree#00000\n'
       ' │     <leaf node>\n'
@@ -457,7 +545,7 @@ void main() {
     );
 
     goldenStyleTest(
-      'leaf children',
+      'transition children',
       style: DiagnosticsTreeStyle.sparse,
       lastChildStyle: DiagnosticsTreeStyle.transition,
       golden:
@@ -490,6 +578,40 @@ void main() {
       '   ║     value!\n'
       '   ╚═══════════\n',
     );
+
+    goldenStyleTest(
+      'error children',
+      style: DiagnosticsTreeStyle.sparse,
+      lastChildStyle: DiagnosticsTreeStyle.error,
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ ╘═╦══╡ CHILD NODE B3: TESTTREE#00000 ╞═══════════════════════════════\n'
+      ' │   ║ <leaf node>\n'
+      ' │   ║ foo: 42\n'
+      ' │   ╚══════════════════════════════════════════════════════════════════\n'
+      ' ╘═╦══╡ CHILD NODE C: TESTTREE#00000 ╞════════════════════════════════\n'
+      '   ║ foo:\n'
+      '   ║   multi\n'
+      '   ║   line\n'
+      '   ║   value!\n'
+      '   ╚══════════════════════════════════════════════════════════════════\n',
+    );
+
 
     // You would never really want to make everything a transition child like
     // this but you can and still get a readable tree.
@@ -559,6 +681,32 @@ void main() {
         '      value!\n',
     );
 
+    goldenStyleTest(
+      'flat',
+      style: DiagnosticsTreeStyle.flat,
+      golden:
+      'TestTree#00000:\n'
+      'stringProperty1: value1\n'
+      'doubleProperty1: 42.5\n'
+      'roundedProperty: 0.3\n'
+      'nullProperty: null\n'
+      '<root node>\n'
+      'child node A: TestTree#00000\n'
+      'child node B: TestTree#00000:\n'
+      'p1: v1\n'
+      'p2: v2\n'
+      'child node B1: TestTree#00000\n'
+      'child node B2: TestTree#00000:\n'
+      'property1: value1\n'
+      'child node B3: TestTree#00000:\n'
+      '<leaf node>\n'
+      'foo: 42\n'
+      'child node C: TestTree#00000:\n'
+      'foo:\n'
+      '  multi\n'
+      '  line\n'
+      '  value!\n',
+    );
     // Single line mode does not display children.
     goldenStyleTest(
       'single line',
@@ -566,10 +714,33 @@ void main() {
       golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
+    goldenStyleTest(
+      'single line',
+      name: 'some name',
+      style: DiagnosticsTreeStyle.singleLine,
+      golden: 'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
+    );
+
+    // No name so we don't indent.
+    goldenStyleTest(
+      'indented single line',
+      style: DiagnosticsTreeStyle.errorProperty,
+      golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
+    );
+
+    goldenStyleTest(
+      'indented single line',
+      name: 'some name',
+      style: DiagnosticsTreeStyle.errorProperty,
+      golden:
+      'some name:\n'
+      '  TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
+    );
+
     // TODO(jacobr): this is an ugly test case.
     // There isn't anything interesting for this case as the children look the
-    // same with and without children. Only difference is odd not clearly
-    // desirable density of B3 being right next to node C.
+    // same with and without children. Only difference is the odd and
+    // undesirable density of B3 being right next to node C.
     goldenStyleTest(
       'single line last child',
       style: DiagnosticsTreeStyle.sparse,
@@ -593,6 +764,64 @@ void main() {
       ' │ │\n'
       ' │ └─child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
       ' └─child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
+    );
+
+    // TODO(jacobr): this is an ugly test case.
+    // There isn't anything interesting for this case as the children look the
+    // same with and without children. Only difference is the odd and
+    // undesirable density of B3 being right next to node C.
+    // Typically header lines should not be places as leaves in the tree and
+    // should instead be places in front of other nodes that they
+    // function as a header for.
+    goldenStyleTest(
+      'indented single line last child',
+      style: DiagnosticsTreeStyle.sparse,
+      lastChildStyle: DiagnosticsTreeStyle.errorProperty,
+      golden:
+      'TestTree#00000\n'
+      ' │ stringProperty1: value1\n'
+      ' │ doubleProperty1: 42.5\n'
+      ' │ roundedProperty: 0.3\n'
+      ' │ nullProperty: null\n'
+      ' │ <root node>\n'
+      ' │\n'
+      ' ├─child node A: TestTree#00000\n'
+      ' ├─child node B: TestTree#00000\n'
+      ' │ │ p1: v1\n'
+      ' │ │ p2: v2\n'
+      ' │ │\n'
+      ' │ ├─child node B1: TestTree#00000\n'
+      ' │ ├─child node B2: TestTree#00000\n'
+      ' │ │   property1: value1\n'
+      ' │ │\n'
+      ' │ └─child node B3:\n'
+      ' │     TestTree#00000(<leaf node>, foo: 42)\n'
+      ' └─child node C:\n'
+      '     TestTree#00000(foo: multi\\nline\\nvalue!)\n',
+    );
+  });
+
+  test('toString test', () {
+    final TestTree tree = TestTree(
+      properties: <DiagnosticsNode>[
+        StringProperty('stringProperty1', 'value1', quoted: false),
+        DoubleProperty('doubleProperty1', 42.5),
+        DoubleProperty('roundedProperty', 1.0 / 3.0),
+        StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW', level: DiagnosticLevel.hidden, quoted: false),
+        StringProperty('DEBUG_ONLY', 'DEBUG_ONLY', level: DiagnosticLevel.debug, quoted: false),
+      ],
+      // child to verify that children are not included in the toString.
+      children: <TestTree>[TestTree(name: 'node A')],
+    );
+
+    expect(
+      tree.toString(),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3)'),
+    );
+
+    expect(
+      tree.toString(minLevel: DiagnosticLevel.debug),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, DEBUG_ONLY: DEBUG_ONLY)'),
     );
   });
 
@@ -671,6 +900,14 @@ void main() {
     expect(describeEnum(ExampleEnum.hello), equals('hello'));
     expect(describeEnum(ExampleEnum.world), equals('world'));
     expect(describeEnum(ExampleEnum.deferToChild), equals('deferToChild'));
+    expect(
+      () => describeEnum('Hello World'),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        'The provided object "Hello World" is not an enum.'),
+      ),
+    );
   });
 
   test('string property test', () {
@@ -841,6 +1078,15 @@ void main() {
     validateDoublePropertyJsonSerialization(doubleWithUnit);
   });
 
+  test('double.infinity serialization test', () {
+    final DoubleProperty infProperty1 = DoubleProperty('double1', double.infinity);
+    validateDoublePropertyJsonSerialization(infProperty1);
+    expect(infProperty1.toString(), equals('double1: Infinity'));
+
+    final DoubleProperty infProperty2 = DoubleProperty('double2', double.negativeInfinity);
+    validateDoublePropertyJsonSerialization(infProperty2);
+    expect(infProperty2.toString(), equals('double2: -Infinity'));
+  });
 
   test('unsafe double property test', () {
     final DoubleProperty safe = DoubleProperty.lazy(
@@ -867,7 +1113,7 @@ void main() {
 
     final DoubleProperty throwingProperty = DoubleProperty.lazy(
       'name',
-      () => throw FlutterError('Invalid constraints'),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Invalid constraints')]),
     );
     // TODO(jacobr): it would be better if throwingProperty.object threw an
     // exception.
@@ -993,7 +1239,7 @@ void main() {
     expect(missing.isFiltered(DiagnosticLevel.info), isFalse);
     validateObjectFlagPropertyJsonSerialization(present);
     validateObjectFlagPropertyJsonSerialization(missing);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54221
 
   test('describe bool property', () {
     final FlagProperty yes = FlagProperty(
@@ -1191,8 +1437,8 @@ void main() {
   });
 
   test('object property test', () {
-    final Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
-    final DiagnosticsNode simple = DiagnosticsProperty<Rect>(
+    const Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
+    final DiagnosticsProperty<Rect> simple = DiagnosticsProperty<Rect>(
       'name',
       rect,
     );
@@ -1201,7 +1447,7 @@ void main() {
     expect(simple.toString(), equals('name: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
     validatePropertyJsonSerialization(simple);
 
-    final DiagnosticsNode withDescription = DiagnosticsProperty<Rect>(
+    final DiagnosticsProperty<Rect> withDescription = DiagnosticsProperty<Rect>(
       'name',
       rect,
       description: 'small rect',
@@ -1230,7 +1476,7 @@ void main() {
     expect(hideNullProperty.toString(), equals('name: null'));
     validatePropertyJsonSerialization(hideNullProperty);
 
-    final DiagnosticsNode nullDescription = DiagnosticsProperty<Object>(
+    final DiagnosticsProperty<Object> nullDescription = DiagnosticsProperty<Object>(
       'name',
       null,
       ifNull: 'missing',
@@ -1266,8 +1512,8 @@ void main() {
   });
 
   test('lazy object property test', () {
-    final Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
-    final DiagnosticsNode simple = DiagnosticsProperty<Rect>.lazy(
+    const Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
+    final DiagnosticsProperty<Rect> simple = DiagnosticsProperty<Rect>.lazy(
       'name',
       () => rect,
       description: 'small rect',
@@ -1287,7 +1533,7 @@ void main() {
     expect(nullProperty.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(nullProperty);
 
-    final DiagnosticsNode hideNullProperty = DiagnosticsProperty<Object>.lazy(
+    final DiagnosticsProperty<Object> hideNullProperty = DiagnosticsProperty<Object>.lazy(
       'name',
       () => null,
       description: 'missing',
@@ -1298,7 +1544,7 @@ void main() {
     expect(hideNullProperty.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(hideNullProperty);
 
-    final DiagnosticsNode hideName = DiagnosticsProperty<Rect>.lazy(
+    final DiagnosticsProperty<Rect> hideName = DiagnosticsProperty<Rect>.lazy(
       'name',
       () => rect,
       description: 'small rect',
@@ -1311,7 +1557,7 @@ void main() {
 
     final DiagnosticsProperty<Object> throwingWithDescription = DiagnosticsProperty<Object>.lazy(
       'name',
-      () => throw FlutterError('Property not available'),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Property not available')]),
       description: 'missing',
       defaultValue: null,
     );
@@ -1323,7 +1569,7 @@ void main() {
 
     final DiagnosticsProperty<Object> throwingProperty = DiagnosticsProperty<Object>.lazy(
       'name',
-      () => throw FlutterError('Property not available'),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Property not available')]),
       defaultValue: null,
     );
     expect(throwingProperty.value, isNull);
@@ -1407,6 +1653,88 @@ void main() {
     validateObjectFlagPropertyJsonSerialization(missing);
   });
 
+  test('iterable flags property test', () {
+    // Normal property
+    {
+      final Function onClick = () { };
+      final Function onMove = () { };
+      final Map<String, Function> value = <String, Function>{
+        'click': onClick,
+        'move': onMove,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.name, equals('listeners'));
+      expect(flags.value, equals(value));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      expect(flags.toString(), equals('listeners: click, move'));
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Reversed-order property
+    {
+      final Function onClick = () { };
+      final Function onMove = () { };
+      final Map<String, Function> value = <String, Function>{
+        'move': onMove,
+        'click': onClick,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.toString(), equals('listeners: move, click'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Partially empty property
+    {
+      final Function onClick = () { };
+      final Map<String, Function?> value = <String, Function?>{
+        'move': null,
+        'click': onClick,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.toString(), equals('listeners: click'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Empty property (without ifEmpty)
+    {
+      final Map<String, Function?> value = <String, Function?>{
+        'enter': null,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.isFiltered(DiagnosticLevel.info), isTrue);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Empty property (without ifEmpty)
+    {
+      final Map<String, Function?> value = <String, Function?>{
+        'enter': null,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+        ifEmpty: '<none>',
+      );
+      expect(flags.toString(), equals('listeners: <none>'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+  });
+
   test('iterable property test', () {
     final List<int> ints = <int>[1,2,3];
     final IterableProperty<int> intsProperty = IterableProperty<int>(
@@ -1416,6 +1744,15 @@ void main() {
     expect(intsProperty.value, equals(ints));
     expect(intsProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(intsProperty.toString(), equals('ints: 1, 2, 3'));
+
+    final List<double> doubles = <double>[1,2,3];
+    final IterableProperty<double> doublesProperty = IterableProperty<double>(
+      'doubles',
+      doubles,
+    );
+    expect(doublesProperty.value, equals(doubles));
+    expect(doublesProperty.isFiltered(DiagnosticLevel.info), isFalse);
+    expect(doublesProperty.toString(), equals('doubles: 1.0, 2.0, 3.0'));
 
     final IterableProperty<Object> emptyProperty = IterableProperty<Object>(
       'name',
@@ -1447,7 +1784,7 @@ void main() {
     validateIterablePropertyJsonSerialization(hideNullProperty);
 
     final List<Object> objects = <Object>[
-      Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
+      const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
       const Color.fromARGB(255, 255, 255, 255),
     ];
     final IterableProperty<Object> objectsProperty = IterableProperty<Object>(
@@ -1541,6 +1878,34 @@ void main() {
     );
   });
 
+  test('Stack trace test', () {
+    final StackTrace stack = StackTrace.fromString(
+      '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+      '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+      '#2      someMethod3  (file:///foo.dart:4:1)\n'
+    );
+
+    expect(
+      DiagnosticsStackTrace('Stack trace', stack).toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Stack trace:\n'
+        '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+        '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n'
+      ),
+    );
+
+    expect(
+      DiagnosticsStackTrace('-- callback 2 --', stack, showSeparator: false).toStringDeep(),
+      equalsIgnoringHashCodes(
+        '-- callback 2 --\n'
+        '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+        '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n'
+      ),
+    );
+  });
+
   test('message test', () {
     final DiagnosticsNode message = DiagnosticsNode.message('hello world');
     expect(message.toString(), equals('hello world'));
@@ -1554,6 +1919,365 @@ void main() {
     expect(messageProperty.name, equals('diagnostics'));
     expect(messageProperty.value, isNull);
     expect(messageProperty.showName, isTrue);
-    validatePropertyJsonSerialization(messageProperty);
+    validatePropertyJsonSerialization(messageProperty as DiagnosticsProperty<Object?>);
+  });
+
+  test('error message style wrap test', () {
+    // This tests wrapping of properties with styles typical for error messages.
+    DiagnosticsNode createTreeWithWrappingNodes({
+      DiagnosticsTreeStyle? rootStyle,
+      required DiagnosticsTreeStyle propertyStyle,
+    }) {
+      return TestTree(
+        name: 'Test tree',
+        properties: <DiagnosticsNode>[
+          DiagnosticsNode.message(
+          '--- example property at max length --',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            'This is a very long message that must wrap as it cannot fit on one line. '
+            'This is a very long message that must wrap as it cannot fit on one line. '
+            'This is a very long message that must wrap as it cannot fit on one line.',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            '--- example property at max length --',
+            style: propertyStyle,
+          ),
+          DiagnosticsProperty<String>(
+            null,
+            'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.',
+            allowWrap: false,
+          ),
+          DiagnosticsNode.message(
+            '--- example property at max length --',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            'This property has a very long property name that will be allowed to wrap unlike most property names. This property has a very long property name that will be allowed to wrap unlike most property names:\n'
+            '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            'This property has a very long property name that will be allowed to wrap unlike most property names. This property has a very long property name that will be allowed to wrap unlike most property names:\n'
+            '  https://goo.gl/',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            'Click on the following url:\n'
+            '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            'Click on the following url\n'
+            '  https://goo.gl/',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            '--- example property at max length --',
+            style: propertyStyle,
+          ),
+          DiagnosticsProperty<String>(
+            'multi-line value',
+            '[1.0, 0.0, 0.0, 0.0]\n'
+            '[1.0, 1.0, 0.0, 0.0]\n'
+            '[1.0, 0.0, 1.0, 0.0]\n'
+            '[1.0, 0.0, 0.0, 1.0]\n',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            '--- example property at max length --',
+            style: propertyStyle,
+          ),
+          DiagnosticsProperty<String>(
+            'This property has a very long property name that will be allowed to wrap unlike most property names. This property has a very long property name that will be allowed to wrap unlike most property names',
+            'This is a very long message that must wrap as it cannot fit on one line. '
+            'This is a very long message that must wrap as it cannot fit on one line. '
+            'This is a very long message that must wrap as it cannot fit on one line.',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            '--- example property at max length --',
+            style: propertyStyle,
+          ),
+          DiagnosticsProperty<String>(
+            'This property has a very long property name that will be allowed to wrap unlike most property names. This property has a very long property name that will be allowed to wrap unlike most property names',
+            '[1.0, 0.0, 0.0, 0.0]\n'
+            '[1.0, 1.0, 0.0, 0.0]\n'
+            '[1.0, 0.0, 1.0, 0.0]\n'
+            '[1.0, 0.0, 0.0, 1.0]\n',
+            style: propertyStyle,
+          ),
+          DiagnosticsNode.message(
+            '--- example property at max length --',
+            style: propertyStyle,
+          ),
+          MessageProperty(
+            'diagnosis',
+            'insufficient data to draw conclusion (less than five repaints)',
+            style: propertyStyle,
+          ),
+        ],
+      ).toDiagnosticsNode(style: rootStyle);
+    }
+
+    final TextTreeRenderer renderer = TextTreeRenderer(wrapWidth: 40, wrapWidthProperties: 40);
+    expect(
+      renderer.render(createTreeWithWrappingNodes(
+        rootStyle: DiagnosticsTreeStyle.error,
+        propertyStyle: DiagnosticsTreeStyle.singleLine,
+      )),
+      equalsIgnoringHashCodes(
+        '══╡ TESTTREE#00000 ╞════════════════════\n'
+        '--- example property at max length --\n'
+        'This is a very long message that must\n'
+        'wrap as it cannot fit on one line. This\n'
+        'is a very long message that must wrap as\n'
+        'it cannot fit on one line. This is a\n'
+        'very long message that must wrap as it\n'
+        'cannot fit on one line.\n'
+        '--- example property at max length --\n'
+        'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  https://goo.gl/\n'
+        'Click on the following url:\n'
+        '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+        'Click on the following url\n'
+        '  https://goo.gl/\n'
+        '--- example property at max length --\n'
+        'multi-line value:\n'
+        '  [1.0, 0.0, 0.0, 0.0]\n'
+        '  [1.0, 1.0, 0.0, 0.0]\n'
+        '  [1.0, 0.0, 1.0, 0.0]\n'
+        '  [1.0, 0.0, 0.0, 1.0]\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  [1.0, 0.0, 0.0, 0.0]\n'
+        '  [1.0, 1.0, 0.0, 0.0]\n'
+        '  [1.0, 0.0, 1.0, 0.0]\n'
+        '  [1.0, 0.0, 0.0, 1.0]\n'
+        '--- example property at max length --\n'
+        'diagnosis: insufficient data to draw\n'
+        '  conclusion (less than five repaints)\n'
+        '════════════════════════════════════════\n',
+      ),
+    );
+
+    // This output looks ugly but verifies that no indentation on word wrap
+    // leaks in if the style is flat.
+    expect(
+      renderer.render(createTreeWithWrappingNodes(
+        rootStyle: DiagnosticsTreeStyle.sparse,
+        propertyStyle: DiagnosticsTreeStyle.flat,
+      )),
+      equalsIgnoringHashCodes(
+        'TestTree#00000\n'
+        '   --- example property at max length --\n'
+        '   This is a very long message that must\n'
+        '   wrap as it cannot fit on one line. This\n'
+        '   is a very long message that must wrap as\n'
+        '   it cannot fit on one line. This is a\n'
+        '   very long message that must wrap as it\n'
+        '   cannot fit on one line.\n'
+        '   --- example property at max length --\n'
+        '   Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.\n'
+        '   --- example property at max length --\n'
+        '   This property has a very long property\n'
+        '   name that will be allowed to wrap unlike\n'
+        '   most property names. This property has a\n'
+        '   very long property name that will be\n'
+        '   allowed to wrap unlike most property\n'
+        '   names:\n'
+        '     http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+        '   This property has a very long property\n'
+        '   name that will be allowed to wrap unlike\n'
+        '   most property names. This property has a\n'
+        '   very long property name that will be\n'
+        '   allowed to wrap unlike most property\n'
+        '   names:\n'
+        '     https://goo.gl/\n'
+        '   Click on the following url:\n'
+        '     http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+        '   Click on the following url\n'
+        '     https://goo.gl/\n'
+        '   --- example property at max length --\n'
+        '   multi-line value:\n'
+        '   [1.0, 0.0, 0.0, 0.0]\n'
+        '   [1.0, 1.0, 0.0, 0.0]\n'
+        '   [1.0, 0.0, 1.0, 0.0]\n'
+        '   [1.0, 0.0, 0.0, 1.0]\n'
+        '   --- example property at max length --\n'
+        '   This property has a very long property\n'
+        '   name that will be allowed to wrap unlike\n'
+        '   most property names. This property has a\n'
+        '   very long property name that will be\n'
+        '   allowed to wrap unlike most property\n'
+        '   names:\n'
+        '   This is a very long message that must\n'
+        '   wrap as it cannot fit on one line. This\n'
+        '   is a very long message that must wrap as\n'
+        '   it cannot fit on one line. This is a\n'
+        '   very long message that must wrap as it\n'
+        '   cannot fit on one line.\n'
+        '   --- example property at max length --\n'
+        '   This property has a very long property\n'
+        '   name that will be allowed to wrap unlike\n'
+        '   most property names. This property has a\n'
+        '   very long property name that will be\n'
+        '   allowed to wrap unlike most property\n'
+        '   names:\n'
+        '   [1.0, 0.0, 0.0, 0.0]\n'
+        '   [1.0, 1.0, 0.0, 0.0]\n'
+        '   [1.0, 0.0, 1.0, 0.0]\n'
+        '   [1.0, 0.0, 0.0, 1.0]\n'
+        '   --- example property at max length --\n'
+        '   diagnosis: insufficient data to draw\n'
+        '   conclusion (less than five repaints)\n'
+      ),
+    );
+
+    // This case matches the styles that should generally be used for error
+    // messages
+    expect(
+        renderer.render(createTreeWithWrappingNodes(
+          rootStyle: DiagnosticsTreeStyle.error,
+          propertyStyle: DiagnosticsTreeStyle.errorProperty,
+        )),
+        equalsIgnoringHashCodes(
+          '══╡ TESTTREE#00000 ╞════════════════════\n'
+          '--- example property at max length --\n'
+          'This is a very long message that must\n'
+          'wrap as it cannot fit on one line. This\n'
+          'is a very long message that must wrap as\n'
+          'it cannot fit on one line. This is a\n'
+          'very long message that must wrap as it\n'
+          'cannot fit on one line.\n'
+          '--- example property at max length --\n'
+          'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.\n'
+          '--- example property at max length --\n'
+          'This property has a very long property\n'
+          'name that will be allowed to wrap unlike\n'
+          'most property names. This property has a\n'
+          'very long property name that will be\n'
+          'allowed to wrap unlike most property\n'
+          'names:\n'
+          '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+          'This property has a very long property\n'
+          'name that will be allowed to wrap unlike\n'
+          'most property names. This property has a\n'
+          'very long property name that will be\n'
+          'allowed to wrap unlike most property\n'
+          'names:\n'
+          '  https://goo.gl/\n'
+          'Click on the following url:\n'
+          '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+          'Click on the following url\n'
+          '  https://goo.gl/\n'
+          '--- example property at max length --\n'
+          'multi-line value:\n'
+          '  [1.0, 0.0, 0.0, 0.0]\n'
+          '  [1.0, 1.0, 0.0, 0.0]\n'
+          '  [1.0, 0.0, 1.0, 0.0]\n'
+          '  [1.0, 0.0, 0.0, 1.0]\n'
+          '--- example property at max length --\n'
+          'This property has a very long property\n'
+          'name that will be allowed to wrap unlike\n'
+          'most property names. This property has a\n'
+          'very long property name that will be\n'
+          'allowed to wrap unlike most property\n'
+          'names:\n'
+          '  This is a very long message that must\n'
+          '  wrap as it cannot fit on one line.\n'
+          '  This is a very long message that must\n'
+          '  wrap as it cannot fit on one line.\n'
+          '  This is a very long message that must\n'
+          '  wrap as it cannot fit on one line.\n'
+          '--- example property at max length --\n'
+          'This property has a very long property\n'
+          'name that will be allowed to wrap unlike\n'
+          'most property names. This property has a\n'
+          'very long property name that will be\n'
+          'allowed to wrap unlike most property\n'
+          'names:\n'
+          '  [1.0, 0.0, 0.0, 0.0]\n'
+          '  [1.0, 1.0, 0.0, 0.0]\n'
+          '  [1.0, 0.0, 1.0, 0.0]\n'
+          '  [1.0, 0.0, 0.0, 1.0]\n'
+          '--- example property at max length --\n'
+          'diagnosis:\n'
+          '  insufficient data to draw conclusion\n'
+          '  (less than five repaints)\n'
+          '════════════════════════════════════════\n'
+        ),
+    );
+  });
+
+  test('DiagnosticsProperty for basic types has value in json', () {
+    DiagnosticsProperty<int> intProperty = DiagnosticsProperty<int>('int1', 10);
+    Map<String, Object?> json = simulateJsonSerialization(intProperty);
+    expect(json['name'], 'int1');
+    expect(json['value'], 10);
+
+    intProperty = IntProperty('int2', 20);
+    json = simulateJsonSerialization(intProperty);
+    expect(json['name'], 'int2');
+    expect(json['value'], 20);
+
+    DiagnosticsProperty<double> doubleProperty = DiagnosticsProperty<double>('double', 33.3);
+    json = simulateJsonSerialization(doubleProperty);
+    expect(json['name'], 'double');
+    expect(json['value'], 33.3);
+
+    doubleProperty = DoubleProperty('double2', 33.3);
+    json = simulateJsonSerialization(doubleProperty);
+    expect(json['name'], 'double2');
+    expect(json['value'], 33.3);
+
+    final DiagnosticsProperty<bool> boolProperty = DiagnosticsProperty<bool>('bool', true);
+    json = simulateJsonSerialization(boolProperty);
+    expect(json['name'], 'bool');
+    expect(json['value'], true);
+
+    DiagnosticsProperty<String> stringProperty = DiagnosticsProperty<String>('string1', 'hello');
+    json = simulateJsonSerialization(stringProperty);
+    expect(json['name'], 'string1');
+    expect(json['value'], 'hello');
+
+    stringProperty = StringProperty('string2', 'world');
+    json = simulateJsonSerialization(stringProperty);
+    expect(json['name'], 'string2');
+    expect(json['value'], 'world');
   });
 }

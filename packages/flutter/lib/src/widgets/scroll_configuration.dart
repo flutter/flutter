@@ -1,8 +1,9 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -35,6 +36,9 @@ class ScrollBehavior {
     // _MaterialScrollBehavior as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -44,22 +48,56 @@ class ScrollBehavior {
           color: _kDefaultGlowColor,
         );
     }
-    return null;
   }
+
+  /// Specifies the type of velocity tracker to use in the descendant
+  /// [Scrollable]s' drag gesture recognizers, for estimating the velocity of a
+  /// drag gesture.
+  ///
+  /// This can be used to, for example, apply different fling velocity
+  /// estimation methods on different platforms, in order to match the
+  /// platform's native behavior.
+  ///
+  /// Typically, the provided [GestureVelocityTrackerBuilder] should return a
+  /// fresh velocity tracker. If null is returned, [Scrollable] creates a new
+  /// [VelocityTracker] to track the newly added pointer that may develop into
+  /// a drag gesture.
+  ///
+  /// The default implementation provides a new
+  /// [IOSScrollViewFlingVelocityTracker] on iOS and macOS for each new pointer,
+  /// and a new [VelocityTracker] on other platforms for each new pointer.
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return (PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind);
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return (PointerEvent event) => VelocityTracker.withKind(event.kind);
+    }
+  }
+
+  static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 
   /// The scroll physics to use for the platform given by [getPlatform].
   ///
-  /// Defaults to [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
+  /// Defaults to [RangeMaintainingScrollPhysics] mixed with
+  /// [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
   /// Android.
   ScrollPhysics getScrollPhysics(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-        return const BouncingScrollPhysics();
+      case TargetPlatform.macOS:
+        return _bouncingPhysics;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return const ClampingScrollPhysics();
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return _clampingPhysics;
     }
-    return null;
   }
 
   /// Called whenever a [ScrollConfiguration] is rebuilt with a new
@@ -75,7 +113,7 @@ class ScrollBehavior {
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => objectRuntimeType(this, 'ScrollBehavior');
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.
@@ -87,9 +125,9 @@ class ScrollConfiguration extends InheritedWidget {
   ///
   /// The [behavior] and [child] arguments must not be null.
   const ScrollConfiguration({
-    Key key,
-    @required this.behavior,
-    @required Widget child,
+    Key? key,
+    required this.behavior,
+    required Widget child,
   }) : super(key: key, child: child);
 
   /// How [Scrollable] widgets that are descendants of [child] should behave.
@@ -100,7 +138,7 @@ class ScrollConfiguration extends InheritedWidget {
   /// If no [ScrollConfiguration] widget is in scope of the given `context`,
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
-    final ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
+    final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
     return configuration?.behavior ?? const ScrollBehavior();
   }
 

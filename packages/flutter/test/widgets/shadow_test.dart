@@ -1,13 +1,15 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:io' show Platform;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  tearDown(() {
+    debugDisableShadows = true;
+  });
+
   testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
@@ -30,18 +32,14 @@ void main() {
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
-    if (Platform.isLinux) {
-      // TODO(ianh): use the skip argument instead once that doesn't hang, https://github.com/dart-lang/test/issues/830
-      await expectLater(
-        find.byType(Container),
-        matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
-      ); // shadows render differently on different platforms
-    }
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
+    );
     debugDisableShadows = true;
   });
 
-  testWidgets('Shadows on ShapeDecoration', (WidgetTester tester) async {
-    debugDisableShadows = false;
+  group('Shadows on ShapeDecoration', () {
     Widget build(int elevation) {
       return Center(
         child: RepaintBoundary(
@@ -57,15 +55,18 @@ void main() {
         ),
       );
     }
-    for (int elevation in kElevationToShadow.keys) {
-      await tester.pumpWidget(build(elevation));
-      await expectLater(
-        find.byType(Container),
-        matchesGoldenFile('shadow.ShapeDecoration.$elevation.png'),
-      );
+    for (final int elevation in kElevationToShadow.keys) {
+      testWidgets('elevation $elevation', (WidgetTester tester) async {
+        debugDisableShadows = false;
+        await tester.pumpWidget(build(elevation));
+        await expectLater(
+          find.byType(Container),
+          matchesGoldenFile('shadow.ShapeDecoration.$elevation.png'),
+        );
+        debugDisableShadows = true;
+      });
     }
-    debugDisableShadows = true;
-  }, skip: !Platform.isLinux); // shadows render differently on different platforms
+  });
 
   testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -76,7 +77,7 @@ void main() {
             color: Colors.yellow[200],
             child: PhysicalModel(
               elevation: 9.0,
-              color: Colors.blue[900],
+              color: Colors.blue[900]!,
               child: const SizedBox(
                 height: 100.0,
                 width: 100.0,
@@ -93,18 +94,14 @@ void main() {
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
-    if (Platform.isLinux) {
-      // TODO(ianh): use the skip argument instead once that doesn't hang, https://github.com/dart-lang/test/issues/830
-      await expectLater(
-        find.byType(Container),
-        matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
-      ); // shadows render differently on different platforms
-    }
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
+    );
     debugDisableShadows = true;
   });
 
-  testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
-    debugDisableShadows = false;
+  group('Shadows with PhysicalShape', () {
     Widget build(double elevation) {
       return Center(
         child: RepaintBoundary(
@@ -112,8 +109,9 @@ void main() {
             padding: const EdgeInsets.all(150.0),
             color: Colors.yellow[200],
             child: PhysicalShape(
-              color: Colors.green[900],
-              clipper: ShapeBorderClipper(shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0))),
+              color: Colors.green[900]!,
+              clipper: ShapeBorderClipper(shape: BeveledRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0))),
               elevation: elevation,
               child: const SizedBox(
                 height: 100.0,
@@ -124,13 +122,17 @@ void main() {
         ),
       );
     }
-    for (int elevation in kElevationToShadow.keys) {
-      await tester.pumpWidget(build(elevation.toDouble()));
-      await expectLater(
-        find.byType(Container),
-        matchesGoldenFile('shadow.PhysicalShape.$elevation.1.png'),
-      );
+
+    for (final int elevation in kElevationToShadow.keys) {
+      testWidgets('elevation $elevation', (WidgetTester tester) async {
+        debugDisableShadows = false;
+        await tester.pumpWidget(build(elevation.toDouble()));
+        await expectLater(
+          find.byType(Container),
+          matchesGoldenFile('shadow.PhysicalShape.$elevation.png'),
+        );
+        debugDisableShadows = true;
+      });
     }
-    debugDisableShadows = true;
-  }, skip: !Platform.isLinux); // shadows render differently on different platforms
+  });
 }

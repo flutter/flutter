@@ -1,0 +1,17 @@
+<<skip until matching line>>
+══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
+<<skip until matching line>>
+^$
+The relevant error-causing widget was:
+  CustomScrollView
+  file:\/\/\/.+print_user_created_ancestor_test\.dart:[0-9]+:7
+
+When the exception was thrown, this was the stack:
+<<skip until matching line>>
+\(elided [0-9]+ frames from .+\)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+.*..:.. \+0 -1: Rendering Error *
+  Test failed\. See exception logs above\.
+  The test description was: Rendering Error
+ *
+.*..:.. \+0 -1: Some tests failed\. *

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 // This is a regression test for https://github.com/flutter/flutter/issues/5840.
 
 class Bar extends StatefulWidget {
+  const Bar({ Key? key }) : super(key: key);
   @override
   BarState createState() => BarState();
 }
@@ -46,7 +47,7 @@ class BarState extends State<Bar> {
 }
 
 class StatefulCreationCounter extends StatefulWidget {
-  const StatefulCreationCounter({ Key key }) : super(key: key);
+  const StatefulCreationCounter({ Key? key }) : super(key: key);
 
   @override
   StatefulCreationCounterState createState() => StatefulCreationCounterState();
@@ -68,7 +69,7 @@ class StatefulCreationCounterState extends State<StatefulCreationCounter> {
 void main() {
   testWidgets('reparent state with layout builder', (WidgetTester tester) async {
     expect(StatefulCreationCounterState.creationCount, 0);
-    await tester.pumpWidget(Bar());
+    await tester.pumpWidget(const Bar());
     expect(StatefulCreationCounterState.creationCount, 1);
     final BarState s = tester.state<BarState>(find.byType(Bar));
     s.trigger();
@@ -79,9 +80,9 @@ void main() {
   testWidgets('Clean then reparent with dependencies', (WidgetTester tester) async {
     int layoutBuilderBuildCount = 0;
 
-    StateSetter keyedSetState;
-    StateSetter layoutBuilderSetState;
-    StateSetter childSetState;
+    late StateSetter keyedSetState;
+    late StateSetter layoutBuilderSetState;
+    late StateSetter childSetState;
 
     final GlobalKey key = GlobalKey();
     final Widget keyedWidget = StatefulBuilder(

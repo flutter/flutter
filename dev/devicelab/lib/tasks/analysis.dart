@@ -1,13 +1,12 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../framework/framework.dart';
+import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 /// Run each benchmark this many times and compute average, min, max.
@@ -28,11 +27,12 @@ Future<TaskResult> analyzerBenchmarkTask() async {
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
 
-  final Map<String, dynamic> data = <String, dynamic>{};
-  data.addAll((await _run(_FlutterRepoBenchmark())).asMap('flutter_repo', 'batch'));
-  data.addAll((await _run(_FlutterRepoBenchmark(watch: true))).asMap('flutter_repo', 'watch'));
-  data.addAll((await _run(_MegaGalleryBenchmark())).asMap('mega_gallery', 'batch'));
-  data.addAll((await _run(_MegaGalleryBenchmark(watch: true))).asMap('mega_gallery', 'watch'));
+  final Map<String, dynamic> data = <String, dynamic>{
+    ...(await _run(_FlutterRepoBenchmark())).asMap('flutter_repo', 'batch'),
+    ...(await _run(_FlutterRepoBenchmark(watch: true))).asMap('flutter_repo', 'watch'),
+    ...(await _run(_MegaGalleryBenchmark())).asMap('mega_gallery', 'batch'),
+    ...(await _run(_MegaGalleryBenchmark(watch: true))).asMap('mega_gallery', 'watch'),
+  };
 
   return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
 }
@@ -64,12 +64,10 @@ abstract class _Benchmark {
 
   Directory get directory;
 
-  List<String> get options {
-    final List<String> result = <String>[ '--benchmark' ];
-    if (watch)
-      result.add('--watch');
-    return result;
-  }
+  List<String> get options => <String>[
+    '--benchmark',
+    if (watch) '--watch',
+  ];
 
   Future<double> execute(int iteration, int targetIterations) async {
     section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');

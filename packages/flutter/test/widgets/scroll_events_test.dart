@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,9 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
-Widget _buildScroller({ List<String> log }) {
+Widget _buildScroller({ required List<String> log }) {
   return NotificationListener<ScrollNotification>(
     onNotification: (ScrollNotification notification) {
       if (notification is ScrollStartNotification) {
@@ -20,14 +19,14 @@ Widget _buildScroller({ List<String> log }) {
       }
       return false;
     },
-    child: SingleChildScrollView(
-      child: Container(width: 1000.0, height: 1000.0),
+    child: const SingleChildScrollView(
+      child: SizedBox(width: 1000.0, height: 1000.0),
     ),
   );
 }
 
 void main() {
-  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { @required Duration duration }) {
+  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { required Duration duration }) {
     final Completer<void> completer = Completer<void>();
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.animateTo(newScrollOffset, duration: duration, curve: Curves.linear).whenComplete(completer.complete);
@@ -139,7 +138,7 @@ void main() {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
-    // The ideal behaviour here would be a single start/end pair, but for
+    // The ideal behavior here would be a single start/end pair, but for
     // simplicity of implementation we compromise here and accept two. Should
     // you find a way to make this work with just one without complicating the
     // API, feel free to change the expectation here.

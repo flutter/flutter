@@ -1,0 +1,16 @@
+<<skip until matching line>>
+══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
+<<skip until matching line>>
+^$
+Widget creation tracking is currently disabled. Enabling it enables improved error messages\. It can
+be enabled by passing `--track-widget-creation` to `flutter run` or `flutter test`\.
+
+When the exception was thrown, this was the stack:
+<<skip until matching line>>
+\(elided [0-9]+ frames from .+\)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+.*..:.. \+0 -1: Rendering Error *
+  Test failed\. See exception logs above\.
+  The test description was: Rendering Error
+ *
+.*..:.. \+0 -1: Some tests failed\. *

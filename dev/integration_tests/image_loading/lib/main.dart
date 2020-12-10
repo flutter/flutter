@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,7 @@ void main() {
     handleUncaughtError:(Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: error,
-      context: 'In the Zone handleUncaughtError handler',
+      context: ErrorDescription('In the Zone handleUncaughtError handler'),
       silent: false,
     ));
   });
@@ -42,11 +42,19 @@ class _ImageLoaderState extends State<ImageLoader> {
   void initState() {
     // This is not an image, but we don't care since we're using a faked
     // http client.
-    final NetworkImage image = NetworkImage('https://github.com/flutter/flutter');
+    const NetworkImage image = NetworkImage('https://github.com/flutter/flutter');
     final ImageStream stream = image.resolve(ImageConfiguration.empty);
-    stream.addListener((ImageInfo info, bool syncCall) {}, onError: (dynamic error, StackTrace stackTrace) {
-      print('ERROR caught by framework');
-    });
+    ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo info, bool syncCall) {
+        stream.removeListener(listener);
+      },
+      onError: (dynamic error, StackTrace stackTrace) {
+        print('ERROR caught by framework');
+        stream.removeListener(listener);
+      },
+    );
+    stream.addListener(listener);
     super.initState();
   }
 

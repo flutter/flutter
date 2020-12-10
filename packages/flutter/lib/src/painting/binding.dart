@@ -1,6 +1,7 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
@@ -9,8 +10,6 @@ import 'package:flutter/services.dart' show ServicesBinding;
 
 import 'image_cache.dart';
 import 'shader_warm_up.dart';
-
-const double _kDefaultDecodedCacheRatioCap = 0.0;
 
 /// Binding for the painting library.
 ///
@@ -23,14 +22,12 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     super.initInstances();
     _instance = this;
     _imageCache = createImageCache();
-    if (shaderWarmUp != null) {
-      shaderWarmUp.execute();
-    }
+    shaderWarmUp?.execute();
   }
 
   /// The current [PaintingBinding], if one has been created.
-  static PaintingBinding get instance => _instance;
-  static PaintingBinding _instance;
+  static PaintingBinding? get instance => _instance;
+  static PaintingBinding? _instance;
 
   /// [ShaderWarmUp] to be executed during [initInstances].
   ///
@@ -46,27 +43,14 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// installation or a data wipe. The warm up does not block the main thread
   /// so there should be no "Application Not Responding" warning.
   ///
-  /// Currently the warm-up happens synchronously on the GPU thread which means
-  /// the rendering of the first frame on the GPU thread will be postponed until
-  /// the warm-up is finished.
+  /// Currently the warm-up happens synchronously on the raster thread which
+  /// means the rendering of the first frame on the raster thread will be
+  /// postponed until the warm-up is finished.
   ///
   /// See also:
   ///
   ///  * [ShaderWarmUp], the interface of how this warm up works.
-  static ShaderWarmUp get shaderWarmUp => _shaderWarmUp;
-  static set shaderWarmUp(ShaderWarmUp value) {
-    assert(_instance == null,
-        'PaintingBinding.shaderWarmUp should only be set before the '
-        'PaintingBinding singleton instance is initialized.\n\n'
-        'Setting it after init would not affect how shaders are warmed up.\n\n'
-        'To fix this, try to change PaintingBinding.shaderWarmUp before:\n'
-        ' 1. runApp\n'
-        ' 2. WidgetsFlutterBinding.ensureInitialized\n'
-        ' 3. enableFlutterDriverExtension\n'
-    );
-    _shaderWarmUp = value;
-  }
-  static ShaderWarmUp _shaderWarmUp = const DefaultShaderWarmUp();
+  static ShaderWarmUp? shaderWarmUp = const DefaultShaderWarmUp();
 
   /// The singleton that implements the Flutter framework's image cache.
   ///
@@ -75,8 +59,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   ///
   /// The image cache is created during startup by the [createImageCache]
   /// method.
-  ImageCache get imageCache => _imageCache;
-  ImageCache _imageCache;
+  ImageCache? get imageCache => _imageCache;
+  ImageCache? _imageCache;
 
   /// Creates the [ImageCache] singleton (accessible via [imageCache]).
   ///
@@ -84,56 +68,95 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @protected
   ImageCache createImageCache() => ImageCache();
 
-  /// The maximum multiple of the compressed image size used when caching an
-  /// animated image.
+  /// Calls through to [dart:ui] from [ImageCache].
   ///
-  /// Individual frames of animated images can be cached into memory to avoid
-  /// using CPU to re-decode them for every loop in the animation. This behavior
-  /// will result in out-of-memory crashes when decoding large (or large numbers
-  /// of) animated images so is disabled by default. Set this value to control
-  /// how much memory each animated image is allowed to use for caching decoded
-  /// frames compared to its compressed size. For example, setting this to `2.0`
-  /// means that a 400KB GIF would be allowed at most to use 800KB of memory
-  /// caching unessential decoded frames. A setting of `1.0` or less disables
-  /// all caching of unessential decoded frames. See
-  /// [_kDefaultDecodedCacheRatioCap] for the default value.
+  /// The `cacheWidth` and `cacheHeight` parameters, when specified, indicate
+  /// the size to decode the image to.
   ///
-  /// @deprecated The in-memory cache of decoded frames causes issues with
-  /// memory consumption. Soon this API and the in-memory cache will be removed.
-  /// See
-  /// [flutter/flutter#26081](https://github.com/flutter/flutter/issues/26081)
-  /// for more context.
-  @deprecated
-  double get decodedCacheRatioCap => _kDecodedCacheRatioCap;
-  double _kDecodedCacheRatioCap = _kDefaultDecodedCacheRatioCap;
-  /// Changes the maximum multiple of compressed image size used when caching an
-  /// animated image.
+  /// Both `cacheWidth` and `cacheHeight` must be positive values greater than
+  /// or equal to 1, or null. It is valid to specify only one of `cacheWidth`
+  /// and `cacheHeight` with the other remaining null, in which case the omitted
+  /// dimension will be scaled to maintain the aspect ratio of the original
+  /// dimensions. When both are null or omitted, the image will be decoded at
+  /// its native resolution.
   ///
-  /// Changing this value only affects new images, not images that have already
-  /// been decoded.
-  ///
-  /// @deprecated The in-memory cache of decoded frames causes issues with
-  /// memory consumption. Soon this API and the in-memory cache will be removed.
-  /// See
-  /// [flutter/flutter#26081](https://github.com/flutter/flutter/issues/26081)
-  /// for more context.
-  @deprecated
-  set decodedCacheRatioCap(double value) {
-    assert (value != null);
-    assert (value >= 0.0);
-    _kDecodedCacheRatioCap = value;
-  }
-
-  // ignore: deprecated_member_use_from_same_package
-  /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
-  Future<ui.Codec> instantiateImageCodec(Uint8List list) {
-    return ui.instantiateImageCodec(list, decodedCacheRatioCap: decodedCacheRatioCap); // ignore: deprecated_member_use_from_same_package
+  /// The `allowUpscaling` parameter determines whether the `cacheWidth` or
+  /// `cacheHeight` parameters are clamped to the intrinsic width and height of
+  /// the original image. By default, the dimensions are clamped to avoid
+  /// unnecessary memory usage for images. Callers that wish to display an image
+  /// above its native resolution should prefer scaling the canvas the image is
+  /// drawn into.
+  Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
+    int? cacheWidth,
+    int? cacheHeight,
+    bool allowUpscaling = false,
+  }) {
+    assert(cacheWidth == null || cacheWidth > 0);
+    assert(cacheHeight == null || cacheHeight > 0);
+    assert(allowUpscaling != null);
+    return ui.instantiateImageCodec(
+      bytes,
+      targetWidth: cacheWidth,
+      targetHeight: cacheHeight,
+      allowUpscaling: allowUpscaling,
+    );
   }
 
   @override
   void evict(String asset) {
     super.evict(asset);
-    imageCache.clear();
+    imageCache!.clear();
+    imageCache!.clearLiveImages();
+  }
+
+  @override
+  void handleMemoryPressure() {
+    super.handleMemoryPressure();
+    imageCache?.clear();
+  }
+
+  /// Listenable that notifies when the available fonts on the system have
+  /// changed.
+  ///
+  /// System fonts can change when the system installs or removes new font. To
+  /// correctly reflect the change, it is important to relayout text related
+  /// widgets when this happens.
+  ///
+  /// Objects that show text and/or measure text (e.g. via [TextPainter] or
+  /// [Paragraph]) should listen to this and redraw/remeasure.
+  Listenable get systemFonts => _systemFonts;
+  final _SystemFontsNotifier _systemFonts = _SystemFontsNotifier();
+
+  @override
+  Future<void> handleSystemMessage(Object systemMessage) async {
+    await super.handleSystemMessage(systemMessage);
+    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
+    final String type = message['type'] as String;
+    switch (type) {
+      case 'fontsChange':
+        _systemFonts.notifyListeners();
+        break;
+    }
+    return;
+  }
+}
+
+class _SystemFontsNotifier extends Listenable {
+  final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
+
+  void notifyListeners () {
+    for (final VoidCallback callback in _systemFontsCallbacks) {
+      callback();
+    }
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    _systemFontsCallbacks.add(listener);
+  }
+  @override
+  void removeListener(VoidCallback listener) {
+    _systemFontsCallbacks.remove(listener);
   }
 }
 
@@ -144,4 +167,4 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 ///
 /// The image cache is created during startup by the [PaintingBinding]'s
 /// [PaintingBinding.createImageCache] method.
-ImageCache get imageCache => PaintingBinding.instance.imageCache;
+ImageCache? get imageCache => PaintingBinding.instance!.imageCache;

@@ -1,6 +1,7 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 
 import 'dart:typed_data';
 
@@ -59,11 +60,10 @@ void main() {
   });
 
   test('setApplicationSwitcherDescription missing plugin', () async {
-    final List<ByteData> log = <ByteData>[];
+    final List<ByteData?> log = <ByteData>[];
 
-    BinaryMessages.setMockMessageHandler('flutter/platform', (ByteData message) {
+    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
       log.add(message);
-      return null;
     });
 
     await SystemChrome.setApplicationSwitcherDescription(

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,23 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  test('BeveledRectangleBorder defaults', () {
+    const BeveledRectangleBorder border = BeveledRectangleBorder();
+    expect(border.side, BorderSide.none);
+    expect(border.borderRadius, BorderRadius.zero);
+  });
+
+  test('BeveledRectangleBorder copyWith, ==, hashCode', () {
+    expect(const BeveledRectangleBorder(), const BeveledRectangleBorder().copyWith());
+    expect(const BeveledRectangleBorder().hashCode, const BeveledRectangleBorder().copyWith().hashCode);
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const BorderRadius radius = BorderRadius.all(Radius.circular(16.0));
+    expect(
+      const BeveledRectangleBorder().copyWith(side: side, borderRadius: radius),
+      const BeveledRectangleBorder(side: side, borderRadius: radius),
+    );
+  });
+
   test('BeveledRectangleBorder scale and lerp', () {
     final BeveledRectangleBorder c10 = BeveledRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
     final BeveledRectangleBorder c15 = BeveledRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));
@@ -21,7 +38,7 @@ void main() {
   });
 
   test('BeveledRectangleBorder BorderRadius.zero', () {
-    final Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect1 = isPathThat(
       includes: const <Offset>[ Offset(10.0, 20.0), Offset(20.0, 30.0) ],
       excludes: const <Offset>[ Offset(9.0, 19.0), Offset(31.0, 41.0) ],
@@ -45,7 +62,7 @@ void main() {
   });
 
   test('BeveledRectangleBorder non-zero BorderRadius', () {
-    final Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect = isPathThat(
       includes: const <Offset>[ Offset(15.0, 25.0), Offset(20.0, 30.0) ],
       excludes: const <Offset>[ Offset(10.0, 20.0), Offset(30.0, 40.0) ],

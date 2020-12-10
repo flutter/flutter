@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,18 +6,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('builder doesn\'t get called if app doesn\'t change', (WidgetTester tester) async {
+  testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Widget app = MaterialApp(
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
       home: const Placeholder(),
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         log.add('build');
         expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
-        expect(child, isInstanceOf<Navigator>());
+        expect(child, isA<Navigator>());
         return const Placeholder();
       },
     );
@@ -37,7 +37,7 @@ void main() {
     expect(log, <String>['build']);
   });
 
-  testWidgets('builder doesn\'t get called if app doesn\'t change', (WidgetTester tester) async {
+  testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -52,10 +52,10 @@ void main() {
             return const Placeholder();
           },
         ),
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Directionality(
             textDirection: TextDirection.rtl,
-            child: child,
+            child: child!,
           );
         },
       ),

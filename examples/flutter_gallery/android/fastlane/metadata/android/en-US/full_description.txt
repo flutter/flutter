@@ -1,9 +1,0 @@
-(Flutter is beta technology)
-
-A gallery of widgets and behaviors, plus demos and vignettes, all built with Flutter.
-
-Flutter is Google’s multi-platform mobile app SDK for crafting beautiful native experiences on iOS and Android in record time.
-
-This app is open source. Check out the code to see how this app is built: https://github.com/flutter/flutter/tree/master/examples/flutter_gallery
-
-Visit https://flutter.io to learn more.

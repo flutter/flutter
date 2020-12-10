@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,11 +6,23 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Border constructor', () {
-    expect(() => Border(left: nonconst(null)), throwsAssertionError);
-    expect(() => Border(top: nonconst(null)), throwsAssertionError);
-    expect(() => Border(right: nonconst(null)), throwsAssertionError);
-    expect(() => Border(bottom: nonconst(null)), throwsAssertionError);
+  test('Border.uniform constructor', () {
+    const BorderSide side = BorderSide();
+    const Border border = Border.fromBorderSide(side);
+    expect(border.left, same(side));
+    expect(border.top, same(side));
+    expect(border.right, same(side));
+    expect(border.bottom, same(side));
+  });
+
+  test('Border.symmetric constructor', () {
+    const BorderSide side1 = BorderSide(color: Color(0xFFFFFFFF));
+    const BorderSide side2 = BorderSide(color: Color(0xFF000000));
+    const Border border = Border.symmetric(vertical: side1, horizontal: side2);
+    expect(border.left, same(side1));
+    expect(border.top, same(side2));
+    expect(border.right, same(side1));
+    expect(border.bottom, same(side2));
   });
 
   test('Border.merge', () {
@@ -75,7 +87,7 @@ void main() {
     );
     expect(
       const Border(left: magenta3) + const Border(left: yellow2),
-      isNot(isInstanceOf<Border>()), // see shape_border_test.dart for better tests of this case
+      isNot(isA<Border>()), // see shape_border_test.dart for better tests of this case
     );
     const Border b3 = Border(top: magenta3);
     const Border b6 = Border(top: magenta6);

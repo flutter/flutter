@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,11 +23,11 @@ void main() {
     expect(insets.along(Axis.horizontal), equals(16.0));
     expect(insets.along(Axis.vertical), equals(20.0));
 
-    expect(insets.inflateRect(Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
-           Rect.fromLTRB(18.0, 25.0, 135.0, 156.0));
+    expect(insets.inflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
+           const Rect.fromLTRB(18.0, 25.0, 135.0, 156.0));
 
-    expect(insets.deflateRect(Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
-           Rect.fromLTRB(28.0, 39.0, 113.0, 130.0));
+    expect(insets.deflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
+           const Rect.fromLTRB(28.0, 39.0, 113.0, 130.0));
 
     expect(insets.inflateSize(const Size(100.0, 125.0)), const Size(116.0, 145.0));
     expect(insets.deflateSize(const Size(100.0, 125.0)), const Size(84.0, 105.0));
@@ -175,7 +175,7 @@ void main() {
 
   test('EdgeInsetsGeometry operators', () {
     final EdgeInsetsGeometry a = const EdgeInsetsDirectional.fromSTEB(1.0, 2.0, 3.0, 5.0).add(EdgeInsets.zero);
-    expect(a, isNot(isInstanceOf<EdgeInsetsDirectional>()));
+    expect(a, isNot(isA<EdgeInsetsDirectional>()));
     expect(a * 2.0, const EdgeInsetsDirectional.fromSTEB(2.0, 4.0, 6.0, 10.0));
     expect(a / 2.0, const EdgeInsetsDirectional.fromSTEB(0.5, 1.0, 1.5, 2.5));
     expect(a % 2.0, const EdgeInsetsDirectional.fromSTEB(1.0, 0.0, 1.0, 1.0));

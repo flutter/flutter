@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 // This is a regression test for https://github.com/flutter/flutter/issues/5588.
 
 class OrderSwitcher extends StatefulWidget {
-  const OrderSwitcher({ Key key, this.a, this.b }) : super(key: key);
+  const OrderSwitcher({
+    Key? key,
+    required this.a,
+    required this.b,
+  }) : super(key: key);
 
   final Widget a;
   final Widget b;
@@ -29,23 +33,23 @@ class OrderSwitcherState extends State<OrderSwitcher> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-    if (_aFirst) {
-      children.add(KeyedSubtree(child: widget.a));
-      children.add(widget.b);
-    } else {
-      children.add(KeyedSubtree(child: widget.b));
-      children.add(widget.a);
-    }
     return Stack(
       textDirection: TextDirection.ltr,
-      children: children,
+      children: _aFirst
+        ? <Widget>[
+            KeyedSubtree(child: widget.a),
+            widget.b,
+          ]
+        : <Widget>[
+            KeyedSubtree(child: widget.b),
+            widget.a,
+          ],
     );
   }
 }
 
 class DummyStatefulWidget extends StatefulWidget {
-  const DummyStatefulWidget(Key key) : super(key: key);
+  const DummyStatefulWidget(Key? key) : super(key: key);
 
   @override
   DummyStatefulWidgetState createState() => DummyStatefulWidgetState();
@@ -57,15 +61,19 @@ class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
 }
 
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
-  const RekeyableDummyStatefulWidgetWrapper({ this.child, this.initialKey });
-  final Widget child;
+  const RekeyableDummyStatefulWidgetWrapper({
+    Key? key,
+    this.child,
+    required this.initialKey,
+  }) : super(key: key);
+  final Widget? child;
   final GlobalKey initialKey;
   @override
   RekeyableDummyStatefulWidgetWrapperState createState() => RekeyableDummyStatefulWidgetWrapperState();
 }
 
 class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyStatefulWidgetWrapper> {
-  GlobalKey _key;
+  GlobalKey? _key;
 
   @override
   void initState() {
@@ -73,7 +81,7 @@ class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyState
     _key = widget.initialKey;
   }
 
-  void _setChild(GlobalKey value) {
+  void _setChild(GlobalKey? value) {
     setState(() {
       _key = value;
     });
@@ -154,11 +162,11 @@ void main() {
     expect(find.byType(RekeyableDummyStatefulWidgetWrapper), findsNWidgets(2));
     expect(find.byType(DummyStatefulWidget), findsNWidgets(2));
 
-    keyRoot.currentState.switchChildren();
+    keyRoot.currentState!.switchChildren();
     final List<State> states = tester.stateList(find.byType(RekeyableDummyStatefulWidgetWrapper)).toList();
-    final RekeyableDummyStatefulWidgetWrapperState a = states[0];
+    final RekeyableDummyStatefulWidgetWrapperState a = states[0] as RekeyableDummyStatefulWidgetWrapperState;
     a._setChild(null);
-    final RekeyableDummyStatefulWidgetWrapperState b = states[1];
+    final RekeyableDummyStatefulWidgetWrapperState b = states[1] as RekeyableDummyStatefulWidgetWrapperState;
     b._setChild(keyC);
     await tester.pump();
 

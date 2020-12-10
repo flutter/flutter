@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,11 +9,14 @@ void main() {
   testWidgets('Dialog interaction', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
+    final FocusNode focusNode = FocusNode(debugLabel: 'Editable Text Node');
+
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(
+              focusNode: focusNode,
               autofocus: true,
             ),
           ),
@@ -22,6 +25,7 @@ void main() {
     );
 
     expect(tester.testTextInput.isVisible, isTrue);
+    expect(focusNode.hasPrimaryFocus, isTrue);
 
     final BuildContext context = tester.element(find.byType(TextField));
 
@@ -37,11 +41,7 @@ void main() {
     Navigator.of(tester.element(find.text('Dialog'))).pop();
     await tester.pump();
 
-    expect(tester.testTextInput.isVisible, isFalse);
-
-    await tester.tap(find.byType(TextField));
-    await tester.idle();
-
+    expect(focusNode.hasPrimaryFocus, isTrue);
     expect(tester.testTextInput.isVisible, isTrue);
 
     await tester.pumpWidget(Container());
@@ -130,7 +130,7 @@ void main() {
     await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
-  }, skip: true); // https://github.com/flutter/flutter/issues/29384.
+  });
 
   testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -175,7 +175,7 @@ void main() {
   testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    Widget makeTest(String prefix) {
+    Widget makeTest(String? prefix) {
       return MaterialApp(
         home: Material(
           child: ListView(

@@ -1,8 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.integration.androidviews;
+package io.flutter.integration.platformviews;
 
 import android.annotation.TargetApi;
 import android.os.Build;
@@ -17,6 +17,8 @@ import static android.view.MotionEvent.PointerProperties;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MotionEventCodec {
+    private static long MOTION_EVENT_ID = 1;
+
     public static HashMap<String, Object> encode(MotionEvent event) {
         ArrayList<HashMap<String,Object>> pointerProperties = new ArrayList<>();
         ArrayList<HashMap<String,Object>> pointerCoords = new ArrayList<>();
@@ -46,6 +48,7 @@ public class MotionEventCodec {
         eventMap.put("edgeFlags", event.getEdgeFlags());
         eventMap.put("source", event.getSource());
         eventMap.put("flags", event.getFlags());
+        eventMap.put("motionEventId", MOTION_EVENT_ID++);
 
         return eventMap;
     }

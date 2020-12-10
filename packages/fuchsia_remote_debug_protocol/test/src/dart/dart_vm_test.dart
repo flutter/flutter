@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -217,7 +217,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(isInstanceOf<RpcFormatError>()));
+      expect(failingFunction, throwsA(isA<RpcFormatError>()));
     });
 
     test('get isolates by pattern', () async {
@@ -241,7 +241,7 @@ void main() {
             'type': '@Isolate',
             'fixedId': 'true',
             'id': 'isolates/3',
-            'name': 'file://flutterBinary2:main()',
+            'name': 'flutterBinary.cmx',
             'number': '3',
           },
           <String, dynamic>{
@@ -268,13 +268,9 @@ void main() {
           await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
       final List<IsolateRef> matchingFlutterIsolates =
-          await vm.getMainIsolatesByPattern('flutterBinary');
+          await vm.getMainIsolatesByPattern('flutterBinary.cmx');
       expect(matchingFlutterIsolates.length, 1);
-      final List<IsolateRef> allFlutterIsolates =
-          await vm.getMainIsolatesByPattern('');
-      expect(allFlutterIsolates.length, 2);
-      final List<IsolateRef> allIsolates = await vm.getMainIsolatesByPattern('',
-          includeNonFlutterIsolates: true);
+      final List<IsolateRef> allIsolates = await vm.getMainIsolatesByPattern('');
       expect(allIsolates.length, 4);
     });
 
@@ -315,7 +311,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(isInstanceOf<RpcFormatError>()));
+      expect(failingFunction, throwsA(isA<RpcFormatError>()));
     });
   });
 
@@ -350,7 +346,7 @@ void main() {
         await vm.invokeRpc('somesillyfunction', timeout: timeoutTime);
       }
 
-      expect(failingFunction, throwsA(isInstanceOf<TimeoutException>()));
+      expect(failingFunction, throwsA(isA<TimeoutException>()));
     });
   });
 }

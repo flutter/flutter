@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,7 +52,63 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
-  testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
+  testWidgets('Dialog not barrier dismissible by default', (WidgetTester tester) async {
+    await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
+
+    final BuildContext context = tester.element(find.text('Go'));
+
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+    // Tap on the barrier, which shouldn't do anything this time.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+  });
+
+ testWidgets('Dialog configurable to be barrier dismissible', (WidgetTester tester) async {
+    await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
+
+    final BuildContext context = tester.element(find.text('Go'));
+
+    showCupertinoDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+    // Tap off the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsNothing);
+  });
+
+  testWidgets('Dialog destructive action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDestructiveAction: true,
       child: Text('Ok'),
@@ -60,8 +116,39 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.red, greaterThan(widget.style.color.blue));
-    expect(widget.style.color.alpha, lessThan(255));
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
+  });
+
+  testWidgets('Dialog dark theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('Content'),
+            actions: <Widget>[
+              CupertinoDialogAction(child: const Text('Cancel'), isDefaultAction: true, onPressed: () {}),
+              const CupertinoDialogAction(child: Text('OK')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RichText cancelText =  tester.widget<RichText>(
+      find.descendant(of: find.text('Cancel'), matching: find.byType(RichText)),
+    );
+
+    expect(
+      cancelText.text.style!.color!.value,
+      0xFF0A84FF, // dark elevated color of systemBlue.
+    );
+
+    expect(
+      find.byType(CupertinoAlertDialog),
+      paints..rect(color: const Color(0xBF1E1E1E)),
+    );
   });
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
@@ -80,59 +167,63 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            children: <TestSemantics>[
-              TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
-                    label: 'Alert',
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(label: 'The Title'),
-                          TestSemantics(label: 'Content'),
-                        ],
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasImplicitScrolling,
-                        ],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                            label: 'Cancel',
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                            label: 'OK',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+                          label: 'Alert',
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasImplicitScrolling,
+                              ],
+                              children: <TestSemantics>[
+                                TestSemantics(label: 'The Title'),
+                                TestSemantics(label: 'Content'),
+                              ],
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasImplicitScrolling,
+                              ],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                                  label: 'Cancel',
+                                ),
+                                TestSemantics(
+                                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                                  label: 'OK',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ]
+                )
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
       ),
-      ignoreId: true,
-      ignoreRect: true,
-      ignoreTransform: true,
-    ),
-  );
+    );
 
     semantics.dispose();
   });
 
-  testWidgets('Dialog default action styles', (WidgetTester tester) async {
+  testWidgets('Dialog default action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       child: Text('Ok'),
@@ -140,10 +231,10 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.fontWeight, equals(FontWeight.w400));
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
-  testWidgets('Default and destructive style', (WidgetTester tester) async {
+  testWidgets('Dialog default and destructive action styles', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       isDestructiveAction: true,
@@ -152,8 +243,30 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.fontWeight, equals(FontWeight.w400));
-    expect(widget.style.color.red, greaterThan(widget.style.color.blue));
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
+  });
+
+  testWidgets('Dialog disabled action style', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
+      child: Text('Ok'),
+    )));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.color!.opacity, greaterThanOrEqualTo(127 / 255));
+    expect(widget.style.color!.opacity, lessThanOrEqualTo(128 / 255));
+  });
+
+  testWidgets('Dialog enabled action style', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(CupertinoDialogAction(
+      child: const Text('Ok'),
+      onPressed: () {},
+    )));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.color!.opacity, equals(1.0));
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
@@ -198,15 +311,15 @@ void main() {
       tester.getSize(
         find.byType(ClipRRect)
       ),
-      equals(const Size(310.0, 560.0)),
+      equals(const Size(310.0, 560.0 - 24.0 * 2)),
     );
 
     // Check sizes/locations of the text. The text is large so these 2 buttons are stacked.
     // Visually the "Cancel" button and "OK" button are the same height when using the
     // regular font. However, when using the test font, "Cancel" becomes 2 lines which
     // is why the height we're verifying for "Cancel" is larger than "OK".
-    expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 162.0)));
-    expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0)));
+    expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 132.0)));
+    expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0 + 24.0)));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')), equals(const Size(310.0, 148.0)));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'OK')), equals(const Size(310.0, 98.0)));
   });
@@ -247,10 +360,12 @@ void main() {
     await tester.pump();
 
     const double topAndBottomMargin = 40.0;
+    const double topAndBottomPadding = 24.0 * 2;
+    const double leftAndRightPadding = 40.0 * 2;
     final Finder modalFinder = find.byType(ClipRRect);
     expect(
       tester.getSize(modalFinder),
-      equals(const Size(200.0, 100.0 - topAndBottomMargin)),
+      equals(const Size(200.0 - leftAndRightPadding, 100.0 - topAndBottomMargin - topAndBottomPadding)),
     );
   });
 
@@ -437,7 +552,7 @@ void main() {
 
   testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -482,7 +597,7 @@ void main() {
 
   testWidgets('Actions section height for 2 stacked buttons with enough room is height of both buttons.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -587,12 +702,12 @@ void main() {
 
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
-    // The two multi-line buttons with large text are taller than 50% of the
+    // The two multiline buttons with large text are taller than 50% of the
     // dialog height, but with the accessibility layout policy, the 2 buttons
     // should be in a scrollable area equal to half the dialog height.
     expect(
       actionsSectionBox.size.height,
-      280.0,
+      280.0 - 24.0,
     );
   });
 
@@ -633,13 +748,10 @@ void main() {
     expect(option1ButtonBox.size.width, actionsSectionBox.size.width);
 
     // Expected Height = button 1 + divider + 1/2 button 2 = 67.83333333333334
-    // Technically the following number is off by 0.00000000000003 but I think it's a
-    // Dart precision issue. I ran the subtraction directly in dartpad and still
-    // got 67.83333333333337.
-    const double expectedHeight = 67.83333333333337;
+    const double expectedHeight = 67.83333333333334;
     expect(
       actionsSectionBox.size.height,
-      expectedHeight,
+      moreOrLessEquals(expectedHeight),
     );
   });
 
@@ -693,7 +805,7 @@ void main() {
 
   testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+    late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
@@ -721,8 +833,8 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    const Color normalButtonBackgroundColor = Color(0xc0ffffff);
-    const Color pressedButtonBackgroundColor = Color(0x90ffffff);
+    const Color normalButtonBackgroundColor = Color(0xCCF2F2F2);
+    const Color pressedButtonBackgroundColor = Color(0xFFE1E1E1);
     final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
@@ -800,9 +912,9 @@ void main() {
     );
 
     // We must explicitly cause an "up" gesture to avoid a crash.
-    // todo(mattcarroll) remove this call when #19540 is fixed
+    // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
     await gesture.up();
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52960
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -847,31 +959,31 @@ void main() {
     // Enter animation.
     await tester.pump();
     Transform transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.3, 0.01));
+    expect(transform.transform[0], moreOrLessEquals(1.3, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.145, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.145, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.044, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.044, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.013, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.013, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.003, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.003, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.000, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.000, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.000, 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.000, epsilon: 0.001));
 
     await tester.tap(find.text('Delete'));
 
@@ -928,57 +1040,147 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.10, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.40, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.156, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.437, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.324, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.55, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(0.606, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.737, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, closeTo(1.0, 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
 
     await tester.tap(find.text('Delete'));
 
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.500, 0.001));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    expect(transition.opacity.value, moreOrLessEquals(0.500, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.332, 0.001));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    expect(transition.opacity.value, moreOrLessEquals(0.332, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.188, 0.001));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    expect(transition.opacity.value, moreOrLessEquals(0.188, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.081, 0.001));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    expect(transition.opacity.value, moreOrLessEquals(0.081, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.019, 0.001));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    expect(transition.opacity.value, moreOrLessEquals(0.019, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.0, 0.001));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    expect(transition.opacity.value, moreOrLessEquals(0.0, epsilon: 0.001));
+  });
+
+  testWidgets('Actions are accessible by key', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return const CupertinoAlertDialog(
+            title: Text('The Title'),
+            content: Text('The message'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                key: Key('option_1'),
+                child: Text('Option 1'),
+              ),
+              CupertinoDialogAction(
+                key: Key('option_2'),
+                child: Text('Option 2'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(find.byKey(const Key('option_1')), findsOneWidget);
+    expect(find.byKey(const Key('option_2')), findsOneWidget);
+    expect(find.byKey(const Key('option_3')), findsNothing);
+  });
+
+  testWidgets('Dialog widget insets by MediaQuery viewInsets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.zero),
+          child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
+        ),
+      ),
+    );
+
+    final Rect placeholderRectWithoutInsets = tester.getRect(find.byType(Placeholder));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(viewInsets: EdgeInsets.fromLTRB(40.0, 30.0, 20.0, 10.0)),
+          child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
+        ),
+      ),
+    );
+
+    // no change yet because padding is animated
+    expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    // once animation settles the dialog is padded by the new viewInsets
+    expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
+  });
+
+  testWidgets('Default cupertino dialog golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: const RepaintBoundary(
+              child: CupertinoAlertDialog(
+                title: Text('Title'),
+                content: Text('text'),
+                actions: <Widget>[
+                  CupertinoDialogAction(child: Text('No')),
+                  CupertinoDialogAction(child: Text('OK')),
+                ],
+              ),
+            ),
+          );
+        }
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('dialog_test.cupertino.default.png'),
+    );
   });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
   final RenderObject buttonBox = tester.renderObject(find.widgetWithText(CupertinoDialogAction, title));
   assert(buttonBox is RenderBox);
-  return buttonBox;
+  return buttonBox as RenderBox;
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
@@ -988,15 +1190,17 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
     }),
   );
   assert(actionsSection is RenderBox);
-  return actionsSection;
+  return actionsSection as RenderBox;
 }
 
-Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {
+Widget createAppWithButtonThatLaunchesDialog({
+  required WidgetBuilder dialogBuilder
+}) {
   return MaterialApp(
     home: Material(
       child: Center(
         child: Builder(builder: (BuildContext context) {
-          return RaisedButton(
+          return ElevatedButton(
             onPressed: () {
               showDialog<void>(
                 context: context,
@@ -1015,5 +1219,18 @@ Widget boilerplate(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: child,
+  );
+}
+
+Widget createAppWithCenteredButton(Widget child) {
+  return MaterialApp(
+    home: Material(
+      child: Center(
+        child: ElevatedButton(
+          onPressed: null,
+          child: child
+        ),
+      )
+    )
   );
 }

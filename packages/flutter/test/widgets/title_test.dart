@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,21 +26,9 @@ void main() {
     expect(widget.color, equals(const Color(0xFF00FF00)));
   });
 
-  testWidgets('should not allow null title or color', (WidgetTester tester) async {
-    expect(() => Title(
-      title: null,
-      color: const Color(0xFF00FF00),
-      child: Container(),
-    ), throwsAssertionError);
-    expect(() => Title(
-      color: null,
-      child: Container(),
-    ), throwsAssertionError);
-  });
-
   testWidgets('should not allow non-opaque color', (WidgetTester tester) async {
     expect(() => Title(
-      color: const Color(0),
+      color: const Color(0x00000000),
       child: Container(),
     ), throwsAssertionError);
   });

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,10 +16,10 @@ class Title extends StatelessWidget {
   /// [color] must be an opaque color (i.e. color.alpha must be 255 (0xFF)).
   /// [color] and [child] are required arguments.
   Title({
-    Key key,
+    Key? key,
     this.title = '',
-    @required this.color,
-    @required this.child,
+    required this.color,
+    required this.child,
   }) : assert(title != null),
        assert(color != null && color.alpha == 0xFF),
        super(key: key);
@@ -35,7 +35,7 @@ class Title extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -44,7 +44,7 @@ class Title extends StatelessWidget {
       ApplicationSwitcherDescription(
         label: title,
         primaryColor: color.value,
-      )
+      ),
     );
     return child;
   }
@@ -53,6 +53,6 @@ class Title extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title, defaultValue: ''));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
   }
 }

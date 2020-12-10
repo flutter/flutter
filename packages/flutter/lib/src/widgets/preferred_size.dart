@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,7 @@ abstract class PreferredSizeWidget implements Widget {
   /// In many cases it's only necessary to define one preferred dimension.
   /// For example the [Scaffold] only depends on its app bar's preferred
   /// height. In that case implementations of this method can just return
-  /// `new Size.fromHeight(myAppBarHeight)`;
+  /// `new Size.fromHeight(myAppBarHeight)`.
   Size get preferredSize;
 }
 
@@ -43,14 +43,14 @@ abstract class PreferredSizeWidget implements Widget {
 class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a widget that has a preferred size.
   const PreferredSize({
-    Key key,
-    @required this.child,
-    @required this.preferredSize,
+    Key? key,
+    required this.child,
+    required this.preferredSize,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

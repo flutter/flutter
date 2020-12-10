@@ -2,18 +2,24 @@
 <<skip until matching line>>
 ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
 The following assertion was thrown running a test:
-Guarded function conflict\. You must use "await" with all Future-returning test APIs\.
-The guarded method "pump" from class WidgetTester was called from .*dev/automated_tests/flutter_test/test_async_utils_unguarded_test.dart on line [0-9]+\.
-Then, it was called again from .*dev/automated_tests/flutter_test/test_async_utils_unguarded_test.dart on line [0-9]+\.
-The first method had not yet finished executing at the time that the second method was called\. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called\. Typically, this is achieved by putting an "await" statement in front of the call to the first\.
+Guarded function conflict\.
+You must use "await" with all Future-returning test APIs\.
+The guarded method "pump" from class WidgetTester was called from
+.*dev/automated_tests/flutter_test/test_async_utils_unguarded_test.dart[ \n]on[ \n]line[ \n][0-9]+\.
+Then, it was called again from
+.*dev/automated_tests/flutter_test/test_async_utils_unguarded_test.dart[ \n]on[ \n]line[ \n][0-9]+\.
+The first method had not yet finished executing at the time that the second method was called\. Since
+both are guarded, and the second was not a nested call inside the first, the first must complete its
+execution before the second can be called\. Typically, this is achieved by putting an "await"
+statement in front of the call to the first\.
 
 When the first method was called, this was the stack:
 <<skip until matching line>>
-(elided [0-9]+ frames from .+)
+(elided ([0-9]+|one) frames? from .+)
 
 When the exception was thrown, this was the stack:
 <<skip until matching line>>
-(elided [0-9]+ frames from .+)
+(elided ([0-9]+|one) frames? from .+)
 
 The test description was:
 TestAsyncUtils - handling unguarded async helper functions

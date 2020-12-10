@@ -1,31 +1,31 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/animation.dart';
+
 import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   TestRenderSliverBoxChildManager({
-    this.children,
+    required this.children,
   });
 
-  RenderSliverList _renderObject;
+  late RenderSliverList _renderObject;
   List<RenderBox> children;
 
   RenderSliverList createRenderObject() {
-    assert(_renderObject == null);
     _renderObject = RenderSliverList(childManager: this);
     return _renderObject;
   }
 
-  int _currentlyUpdatingChildIndex;
+  int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, { @required RenderBox after }) {
+  void createChild(int index, { required RenderBox? after }) {
     if (index < 0 || index >= children.length)
       return;
     try {
@@ -44,13 +44,13 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   double estimateMaxScrollOffset(
     SliverConstraints constraints, {
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
   }) {
-    assert(lastIndex >= firstIndex);
-    return children.length * (trailingScrollOffset - leadingScrollOffset) / (lastIndex - firstIndex + 1);
+    assert(lastIndex! >= firstIndex!);
+    return children.length * (trailingScrollOffset! - leadingScrollOffset!) / (lastIndex! - firstIndex! + 1);
   }
 
   @override
@@ -59,12 +59,58 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
   @override
   void setDidUnderflow(bool value) { }
+}
+
+class ViewportOffsetSpy extends ViewportOffset {
+  ViewportOffsetSpy(this._pixels);
+
+  double _pixels;
+
+  @override
+  double get pixels => _pixels;
+
+  @override
+  bool get hasPixels => true;
+
+  bool corrected = false;
+
+  @override
+  bool applyViewportDimension(double viewportDimension) => true;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
+
+  @override
+  void correctBy(double correction) {
+    _pixels += correction;
+    corrected = true;
+  }
+
+  @override
+  void jumpTo(double pixels) {
+    // Do nothing, not required in test.
+  }
+
+  @override
+  Future<void> animateTo(
+    double to, {
+    required Duration duration,
+    required Curve curve,
+  }) async {
+    // Do nothing, not required in test.
+  }
+
+  @override
+  ScrollDirection get userScrollDirection => ScrollDirection.idle;
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
 
 void main() {
@@ -242,7 +288,7 @@ void main() {
     );
     layout(root);
 
-    final SliverMultiBoxAdaptorParentData parentData = a.parentData;
+    final SliverMultiBoxAdaptorParentData parentData = a.parentData! as SliverMultiBoxAdaptorParentData;
     parentData.layoutOffset = 0.001;
 
     root.offset = ViewportOffset.fixed(900.0);
@@ -251,25 +297,62 @@ void main() {
     root.offset = ViewportOffset.fixed(0.0);
     pumpFrame();
 
-    expect(inner.geometry.scrollOffsetCorrection, isNull);
+    expect(inner.geometry?.scrollOffsetCorrection, isNull);
+  });
+
+  test('SliverList - no correction when tiny double precision error', () {
+    RenderSliverList inner;
+    RenderBox a;
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
+      children: <RenderBox>[
+        a = RenderSizedBox(const Size(100.0, 400.0)),
+        RenderSizedBox(const Size(100.0, 400.0)),
+        RenderSizedBox(const Size(100.0, 400.0)),
+        RenderSizedBox(const Size(100.0, 400.0)),
+        RenderSizedBox(const Size(100.0, 400.0)),
+      ],
+    );
+    inner = childManager.createRenderObject();
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        inner,
+      ],
+    );
+    layout(root);
+
+    final SliverMultiBoxAdaptorParentData parentData = a.parentData! as SliverMultiBoxAdaptorParentData;
+    // Simulate double precision error.
+    parentData.layoutOffset = -0.0000000000001;
+
+    root.offset = ViewportOffset.fixed(900.0);
+    pumpFrame();
+
+    final ViewportOffsetSpy spy = ViewportOffsetSpy(0.0);
+    root.offset = spy;
+    pumpFrame();
+
+    expect(spy.corrected, false);
   });
 
   test('SliverMultiBoxAdaptorParentData.toString', () {
     final SliverMultiBoxAdaptorParentData candidate = SliverMultiBoxAdaptorParentData();
     expect(candidate.keepAlive, isFalse);
     expect(candidate.index, isNull);
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
-    candidate.keepAlive = null;
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.keepAlive = true;
-    expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=None');
     candidate.keepAlive = false;
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.index = 0;
-    expect(candidate.toString(), 'index=0; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=0; layoutOffset=None');
     candidate.index = 1;
-    expect(candidate.toString(), 'index=1; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=1; layoutOffset=None');
     candidate.index = -1;
-    expect(candidate.toString(), 'index=-1; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=-1; layoutOffset=None');
+    candidate.layoutOffset = 100.0;
+    expect(candidate.toString(), 'index=-1; layoutOffset=100.0');
   });
 }

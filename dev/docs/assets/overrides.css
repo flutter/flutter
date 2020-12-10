@@ -97,6 +97,10 @@ code {
   padding-right: 0;
 }
 
+.markdown.desc {
+  max-width: inherit;
+}
+
 #search-box {
   color: #555;
   background-color: #fff;
@@ -117,8 +121,7 @@ dl.dl-horizontal dt {
 }
 
 /* Line the material icons up with their labels */
-i.material-icons.md-36,
-i.material-icons.md-48 {
+i.md-36 {
   vertical-align: bottom;
 }
 
@@ -142,4 +145,9 @@ footer {
   color: #128c00;
   font-style: italic;
   font-weight: bold;
+}
+
+/* Constrain image width to container */
+img {
+  max-width: 100%
 }

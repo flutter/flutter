@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/foundation.dart';
 
 import 'object.dart';
 import 'stack.dart';
@@ -22,11 +23,11 @@ enum _OverflowSide {
 // the indicators.
 class _OverflowRegionData {
   const _OverflowRegionData({
-    this.rect,
+    required this.rect,
     this.label = '',
     this.labelOffset = Offset.zero,
     this.rotation = 0.0,
-    this.side,
+    required this.side,
   });
 
   final Rect rect;
@@ -48,7 +49,7 @@ class _OverflowRegionData {
 /// overflows. It will print on the first occurrence, and once after each time that
 /// [reassemble] is called.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
@@ -119,7 +120,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
 
   String _formatPixels(double value) {
     assert(value > 0.0);
-    String pixels;
+    final String pixels;
     if (value > 10.0) {
       pixels = value.toStringAsFixed(0);
     } else if (value > 1.0) {
@@ -198,26 +199,30 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  void _reportOverflow(RelativeRect overflow, String overflowHints) {
-    overflowHints ??= 'The edge of the $runtimeType that is '
-      'overflowing has been marked in the rendering with a yellow and black '
-      'striped pattern. This is usually caused by the contents being too big '
-      'for the $runtimeType.\n'
-      'This is considered an error condition because it indicates that there '
-      'is content that cannot be seen. If the content is legitimately bigger '
-      'than the available space, consider clipping it with a ClipRect widget '
-      'before putting it in the $runtimeType, or using a scrollable '
-      'container, like a ListView.';
+  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
+    overflowHints ??= <DiagnosticsNode>[];
+    if (overflowHints.isEmpty) {
+      overflowHints.add(ErrorDescription(
+        'The edge of the $runtimeType that is '
+        'overflowing has been marked in the rendering with a yellow and black '
+        'striped pattern. This is usually caused by the contents being too big '
+        'for the $runtimeType.'
+      ));
+      overflowHints.add(ErrorHint(
+        'This is considered an error condition because it indicates that there '
+        'is content that cannot be seen. If the content is legitimately bigger '
+        'than the available space, consider clipping it with a ClipRect widget '
+        'before putting it in the $runtimeType, or using a scrollable '
+        'container, like a ListView.'
+      ));
+    }
 
-    final List<String> overflows = <String>[];
-    if (overflow.left > 0.0)
-      overflows.add('${_formatPixels(overflow.left)} pixels on the left');
-    if (overflow.top > 0.0)
-      overflows.add('${_formatPixels(overflow.top)} pixels on the top');
-    if (overflow.bottom > 0.0)
-      overflows.add('${_formatPixels(overflow.bottom)} pixels on the bottom');
-    if (overflow.right > 0.0)
-      overflows.add('${_formatPixels(overflow.right)} pixels on the right');
+    final List<String> overflows = <String>[
+      if (overflow.left > 0.0) '${_formatPixels(overflow.left)} pixels on the left',
+      if (overflow.top > 0.0) '${_formatPixels(overflow.top)} pixels on the top',
+      if (overflow.bottom > 0.0) '${_formatPixels(overflow.bottom)} pixels on the bottom',
+      if (overflow.right > 0.0) '${_formatPixels(overflow.right)} pixels on the right',
+    ];
     String overflowText = '';
     assert(overflows.isNotEmpty,
         "Somehow $runtimeType didn't actually overflow like it thought it did.");
@@ -232,17 +237,22 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         overflows[overflows.length - 1] = 'and ${overflows[overflows.length - 1]}';
         overflowText = overflows.join(', ');
     }
+    // TODO(jacobr): add the overflows in pixels as structured data so they can
+    // be visualized in debugging tools.
     FlutterError.reportError(
-      FlutterErrorDetailsForRendering(
-        exception: 'A $runtimeType overflowed by $overflowText.',
+      FlutterErrorDetails(
+        exception: FlutterError('A $runtimeType overflowed by $overflowText.'),
         library: 'rendering library',
-        context: 'during layout',
-        renderObject: this,
-        informationCollector: (StringBuffer information) {
-          information.writeln(overflowHints);
-          information.writeln('The specific $runtimeType in question is:');
-          information.writeln('  ${toStringShallow(joiner: '\n  ')}');
-          information.writeln('◢◤' * (FlutterError.wrapWidth ~/ 2));
+        context: ErrorDescription('during layout'),
+        informationCollector: () sync* {
+          if (debugCreator != null)
+            yield DiagnosticsDebugCreator(debugCreator!);
+          yield* overflowHints!;
+          yield describeForError('The specific $runtimeType in question is');
+          // TODO(jacobr): this line is ascii art that it would be nice to
+          // handle a little more generically in GUI debugging clients in the
+          // future.
+          yield DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false);
         },
       ),
     );
@@ -259,7 +269,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     Offset offset,
     Rect containerRect,
     Rect childRect, {
-    String overflowHints,
+    List<DiagnosticsNode>? overflowHints,
   }) {
     final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
 
@@ -271,10 +281,10 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     }
 
     final List<_OverflowRegionData> overflowRegions = _calculateOverflowRegions(overflow, containerRect);
-    for (_OverflowRegionData region in overflowRegions) {
+    for (final _OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
-
-      if (_indicatorLabel[region.side.index].text?.text != region.label) {
+      final TextSpan? textSpan = _indicatorLabel[region.side.index].text as TextSpan?;
+      if (textSpan?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,
           style: _indicatorTextStyle,

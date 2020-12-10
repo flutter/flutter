@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../cache.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
@@ -18,6 +18,7 @@ class LogsCommand extends FlutterCommand {
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
     );
+    usesDeviceTimeoutOption();
   }
 
   @override
@@ -26,32 +27,35 @@ class LogsCommand extends FlutterCommand {
   @override
   final String description = 'Show log output for running Flutter apps.';
 
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
   Device device;
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
-    device = await findTargetDevice();
-    if (device == null)
+    device = await findTargetDevice(includeUnsupportedDevices: true);
+    if (device == null) {
       throwToolExit(null);
+    }
     return super.verifyThenRunCommand(commandPath);
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['clear'])
+    if (boolArg('clear')) {
       device.clearLogs();
+    }
 
-    final DeviceLogReader logReader = device.getLogReader();
+    final DeviceLogReader logReader = await device.getLogReader();
 
-    Cache.releaseLockEarly();
-
-    printStatus('Showing $logReader logs:');
+    globals.printStatus('Showing $logReader logs:');
 
     final Completer<int> exitCompleter = Completer<int>();
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
-      (String message) => printStatus(message, wrap: false),
+      (String message) => globals.printStatus(message, wrap: false),
       onDone: () {
         exitCompleter.complete(0);
       },
@@ -63,7 +67,7 @@ class LogsCommand extends FlutterCommand {
     // When terminating, close down the log reader.
     ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
       subscription.cancel();
-      printStatus('');
+      globals.printStatus('');
       exitCompleter.complete(0);
     });
     ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
@@ -74,9 +78,10 @@ class LogsCommand extends FlutterCommand {
     // Wait for the log reader to be finished.
     final int result = await exitCompleter.future;
     await subscription.cancel();
-    if (result != 0)
+    if (result != 0) {
       throwToolExit('Error listening to $logReader logs.');
+    }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

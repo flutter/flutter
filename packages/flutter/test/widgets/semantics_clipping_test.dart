@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -39,18 +39,21 @@ void main() {
       ),
     ));
 
-    expect(tester.takeException(), contains('overflowed'));
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
             label: '1',
-            rect: Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
           TestSemantics(
             label: '2',
-            rect: Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
+            rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
           ),
           // node with Text 3 not present.
         ],
@@ -98,18 +101,21 @@ void main() {
       ),
     ));
 
-    expect(tester.takeException(), contains('overflowed'));
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
             label: '1',
-            rect: Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
           TestSemantics(
             label: '2\n3',
-            rect: Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
+            rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
           ),
         ],
       ),

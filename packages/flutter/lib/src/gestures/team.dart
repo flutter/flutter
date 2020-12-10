@@ -1,6 +1,7 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 
 import 'arena.dart';
 import 'binding.dart';
@@ -25,8 +26,8 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   final int _pointer;
 
   bool _resolved = false;
-  GestureArenaMember _winner;
-  GestureArenaEntry _entry;
+  GestureArenaMember? _winner;
+  GestureArenaEntry? _entry;
 
   @override
   void acceptGesture(int pointer) {
@@ -34,25 +35,25 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(_winner != null || _members.isNotEmpty);
     _close();
     _winner ??= _owner.captain ?? _members[0];
-    for (GestureArenaMember member in _members) {
+    for (final GestureArenaMember member in _members) {
       if (member != _winner)
         member.rejectGesture(pointer);
     }
-    _winner.acceptGesture(pointer);
+    _winner!.acceptGesture(pointer);
   }
 
   @override
   void rejectGesture(int pointer) {
     assert(_pointer == pointer);
     _close();
-    for (GestureArenaMember member in _members)
+    for (final GestureArenaMember member in _members)
       member.rejectGesture(pointer);
   }
 
   void _close() {
     assert(!_resolved);
     _resolved = true;
-    final _CombiningGestureArenaMember combiner = _owner._combiners.remove(_pointer);
+    final _CombiningGestureArenaMember? combiner = _owner._combiners.remove(_pointer);
     assert(combiner == this);
   }
 
@@ -60,7 +61,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(!_resolved);
     assert(_pointer == pointer);
     _members.add(member);
-    _entry ??= GestureBinding.instance.gestureArena.add(pointer, this);
+    _entry ??= GestureBinding.instance!.gestureArena.add(pointer, this);
     return _CombiningGestureArenaEntry(this, member);
   }
 
@@ -71,11 +72,11 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
       _members.remove(member);
       member.rejectGesture(_pointer);
       if (_members.isEmpty)
-        _entry.resolve(disposition);
+        _entry!.resolve(disposition);
     } else {
       assert(disposition == GestureDisposition.accepted);
       _winner ??= _owner.captain ?? member;
-      _entry.resolve(disposition);
+      _entry!.resolve(disposition);
     }
   }
 }
@@ -112,7 +113,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 ///
 /// [AndroidView] uses a team with a captain to decide which gestures are
 /// forwarded to the native view. For example if we want to forward taps and
-/// vertical scrolls to a native Android view, [TapGestureRecognizers] and
+/// vertical scrolls to a native Android view, [TapGestureRecognizer]s and
 /// [VerticalDragGestureRecognizer] are added to a team with a captain(the captain is set to be a
 /// gesture recognizer that never explicitly claims the gesture).
 /// The captain allows [AndroidView] to know when any gestures in the team has been
@@ -129,7 +130,7 @@ class GestureArenaTeam {
   /// If not null, when any one of the [GestureArenaTeam] members claims victory
   /// the captain accepts the gesture.
   /// If null, the member that claims a victory accepts the gesture.
-  GestureArenaMember captain;
+  GestureArenaMember? captain;
 
   /// Adds a new member to the arena on behalf of this team.
   ///

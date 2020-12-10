@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize = 12.0 }) {
+Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Theme(
@@ -50,7 +50,7 @@ List<Color> indicatorColors(WidgetTester tester) {
     find.descendant(
       of: find.byType(TabPageSelector),
       matching: find.byType(TabPageSelectorIndicator),
-    )
+    ),
   );
   return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
 }
@@ -90,7 +90,7 @@ void main() {
     tabController.animateTo(1, duration: const Duration(milliseconds: 200));
     await tester.pump();
     // Verify that indicator 0's color is becoming increasingly transparent,
-    /// and indicator 1's color is becoming increasingly opaque during the
+    // and indicator 1's color is becoming increasingly opaque during the
     // 200ms animation. Indicator 2 remains transparent throughout.
     await tester.pump(const Duration(milliseconds: 10));
     List<Color> colors = indicatorColors(tester);
@@ -212,7 +212,7 @@ void main() {
     ).evaluate();
 
     // Indicators get an 8 pixel margin, 16 + 8 = 24.
-    for (Element indicatorElement in indicatorElements)
+    for (final Element indicatorElement in indicatorElements)
       expect(indicatorElement.size, const Size(24.0, 24.0));
 
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);

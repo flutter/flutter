@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,7 +41,7 @@ void main() {
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
     // Will need to be changed if the animation curve or duration changes.
-    expect(widget1TransientTopLeft.dx, closeTo(130, 1.0));
+    expect(widget1TransientTopLeft.dx, moreOrLessEquals(130, epsilon: 1.0));
 
     await tester.pumpAndSettle();
 
@@ -66,7 +66,7 @@ void main() {
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
     // Will need to be changed if the animation curve or duration changes.
-    expect(widget1TransientTopLeft.dx, closeTo(249, 1.0));
+    expect(widget1TransientTopLeft.dx, moreOrLessEquals(249, epsilon: 1.0));
 
     await tester.pumpAndSettle();
 
@@ -274,10 +274,10 @@ void main() {
   testWidgets('test edge swipes work with media query padding (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        builder: (BuildContext context, Widget navigator) {
+        builder: (BuildContext context, Widget? navigator) {
           return MediaQuery(
             data: const MediaQueryData(padding: EdgeInsets.only(left: 40)),
-            child: navigator,
+            child: navigator!,
           );
         },
         home: const Placeholder(),
@@ -318,12 +318,12 @@ void main() {
   testWidgets('test edge swipes work with media query padding (RLT)', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        builder: (BuildContext context, Widget navigator) {
+        builder: (BuildContext context, Widget? navigator) {
           return Directionality(
             textDirection: TextDirection.rtl,
             child: MediaQuery(
               data: const MediaQueryData(padding: EdgeInsets.only(right: 40)),
-              child: navigator,
+              child: navigator!,
             ),
           );
         },
@@ -463,37 +463,17 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
   });
 
-  testWidgets('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
-              return Center(child: Text('Page $pageNumber'));
-            },
-          );
-        },
-      ),
-    );
+  testWidgets('CupertinoPage does not lose its state when transitioning out', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(KeepsStateTestWidget(navigatorKey: navigator));
+    expect(find.text('subpage'), findsOneWidget);
+    expect(find.text('home'), findsNothing);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.text('Page 1'), findsNothing);
-    expect(find.text('Page 2'), isOnstage);
-
-    final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
-    // The width of the page.
-    await gesture.moveBy(const Offset(800, 0));
-    await gesture.up();
+    navigator.currentState!.pop();
     await tester.pump();
 
-    expect(find.text('Page 1'), isOnstage);
-    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('subpage'), findsOneWidget);
+    expect(find.text('home'), findsOneWidget);
   });
 }
 
@@ -511,4 +491,39 @@ class RtlOverrideWidgetsLocalization implements WidgetsLocalizations {
   const RtlOverrideWidgetsLocalization();
   @override
   TextDirection get textDirection => TextDirection.rtl;
+}
+
+class KeepsStateTestWidget extends StatefulWidget {
+  const KeepsStateTestWidget({this.navigatorKey});
+
+  final Key? navigatorKey;
+
+  @override
+  State<KeepsStateTestWidget> createState() => _KeepsStateTestWidgetState();
+}
+
+class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
+  String? _subpage = 'subpage';
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      home: Navigator(
+        key: widget.navigatorKey,
+        pages: <Page<void>>[
+          const CupertinoPage<void>(child: Text('home')),
+          if (_subpage != null) CupertinoPage<void>(child: Text(_subpage!)),
+        ],
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          if (!route.didPop(result)) {
+            return false;
+          }
+          setState(() {
+            _subpage = null;
+          });
+          return true;
+        },
+      ),
+    );
+  }
 }

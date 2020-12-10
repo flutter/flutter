@@ -1,6 +1,7 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -67,7 +68,7 @@ class SemanticsTag {
   final String name;
 
   @override
-  String toString() => '$runtimeType($name)';
+  String toString() => '${objectRuntimeType(this, 'SemanticsTag')}($name)';
 }
 
 /// An identifier of a custom semantics action.
@@ -97,7 +98,7 @@ class CustomSemanticsAction {
   /// Creates a new [CustomSemanticsAction].
   ///
   /// The [label] must not be null or the empty string.
-  const CustomSemanticsAction({@required this.label})
+  const CustomSemanticsAction({required String this.label})
     : assert(label != null),
       assert(label != ''),
       hint = null,
@@ -107,32 +108,32 @@ class CustomSemanticsAction {
   /// action.
   ///
   /// The [hint] must not be null or the empty string.
-  const CustomSemanticsAction.overridingAction({@required this.hint, @required this.action})
+  const CustomSemanticsAction.overridingAction({required String this.hint, required SemanticsAction this.action})
     : assert(hint != null),
       assert(hint != ''),
       assert(action != null),
       label = null;
 
   /// The user readable name of this custom semantics action.
-  final String label;
+  final String? label;
 
   /// The hint description of this custom semantics action.
-  final String hint;
+  final String? hint;
 
   /// The standard semantics action this action replaces.
-  final SemanticsAction action;
+  final SemanticsAction? action;
 
   @override
   int get hashCode => ui.hashValues(label, hint, action);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final CustomSemanticsAction typedOther = other;
-    return typedOther.label == label
-      && typedOther.hint == hint
-      && typedOther.action == action;
+    return other is CustomSemanticsAction
+        && other.label == label
+        && other.hint == hint
+        && other.action == action;
   }
 
   @override
@@ -148,7 +149,7 @@ class CustomSemanticsAction {
 
   /// Get the identifier for a given `action`.
   static int getIdentifier(CustomSemanticsAction action) {
-    int result = _ids[action];
+    int? result = _ids[action];
     if (result == null) {
       result = _nextId++;
       _ids[action] = result;
@@ -158,7 +159,7 @@ class CustomSemanticsAction {
   }
 
   /// Get the `action` for a given identifier.
-  static CustomSemanticsAction getAction(int id) {
+  static CustomSemanticsAction? getAction(int id) {
     return _actions[id];
   }
 }
@@ -172,31 +173,33 @@ class CustomSemanticsAction {
 ///
 /// Typically obtained from [SemanticsNode.getSemanticsData].
 @immutable
-class SemanticsData extends Diagnosticable {
+class SemanticsData with Diagnosticable {
   /// Creates a semantics data object.
   ///
   /// The [flags], [actions], [label], and [Rect] arguments must not be null.
   ///
   /// If [label] is not empty, then [textDirection] must also not be null.
   const SemanticsData({
-    @required this.flags,
-    @required this.actions,
-    @required this.label,
-    @required this.increasedValue,
-    @required this.value,
-    @required this.decreasedValue,
-    @required this.hint,
-    @required this.textDirection,
-    @required this.rect,
-    @required this.elevation,
-    @required this.thickness,
-    @required this.textSelection,
-    @required this.scrollIndex,
-    @required this.scrollChildCount,
-    @required this.scrollPosition,
-    @required this.scrollExtentMax,
-    @required this.scrollExtentMin,
-    @required this.platformViewId,
+    required this.flags,
+    required this.actions,
+    required this.label,
+    required this.increasedValue,
+    required this.value,
+    required this.decreasedValue,
+    required this.hint,
+    required this.textDirection,
+    required this.rect,
+    required this.elevation,
+    required this.thickness,
+    required this.textSelection,
+    required this.scrollIndex,
+    required this.scrollChildCount,
+    required this.scrollPosition,
+    required this.scrollExtentMax,
+    required this.scrollExtentMin,
+    required this.platformViewId,
+    required this.maxValueLength,
+    required this.currentValueLength,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -249,20 +252,20 @@ class SemanticsData extends Diagnosticable {
 
   /// The reading direction for the text in [label], [value], [hint],
   /// [increasedValue], and [decreasedValue].
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
-  final TextSelection textSelection;
+  final TextSelection? textSelection;
 
   /// The total number of scrollable children that contribute to semantics.
   ///
   /// If the number of children are unknown or unbounded, this value will be
   /// null.
-  final int scrollChildCount;
+  final int? scrollChildCount;
 
   /// The index of the first visible semantic child of a scroll node.
-  final int scrollIndex;
+  final int? scrollIndex;
 
   /// Indicates the current scrolling position in logical pixels if the node is
   /// scrollable.
@@ -274,7 +277,7 @@ class SemanticsData extends Diagnosticable {
   /// See also:
   ///
   ///  * [ScrollPosition.pixels], from where this value is usually taken.
-  final double scrollPosition;
+  final double? scrollPosition;
 
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
   /// scrollable.
@@ -284,7 +287,7 @@ class SemanticsData extends Diagnosticable {
   /// See also:
   ///
   ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
-  final double scrollExtentMax;
+  final double? scrollExtentMax;
 
   /// Indicates the minimum in-range value for [scrollPosition] if the node is
   /// scrollable.
@@ -294,7 +297,7 @@ class SemanticsData extends Diagnosticable {
   /// See also:
   ///
   ///  * [ScrollPosition.minScrollExtent], from where this value is usually taken.
-  final double scrollExtentMin;
+  final double? scrollExtentMin;
 
   /// The id of the platform view, whose semantics nodes will be added as
   /// children to this node.
@@ -307,20 +310,40 @@ class SemanticsData extends Diagnosticable {
   ///
   ///  * [AndroidView], which is the platform view for Android.
   ///  * [UiKitView], which is the platform view for iOS.
-  final int platformViewId;
+  final int? platformViewId;
+
+  /// The maximum number of characters that can be entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [SemanticsFlag.isTextField] is set. Defaults
+  /// to null, which means no limit is imposed on the text field.
+  final int? maxValueLength;
+
+  /// The current number of characters that have been entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [SemanticsFlag.isTextField] is set. This must
+  /// be set when [maxValueLength] is set.
+  final int? currentValueLength;
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
 
   /// The set of [SemanticsTag]s associated with this node.
-  final Set<SemanticsTag> tags;
+  final Set<SemanticsTag>? tags;
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
   /// By default, the transform is null, which represents the identity
   /// transformation (i.e., that this node has the same coordinate system as its
   /// parent).
-  final Matrix4 transform;
+  final Matrix4? transform;
 
   /// The elevation of this node relative to the parent semantics node.
   ///
@@ -345,7 +368,7 @@ class SemanticsData extends Diagnosticable {
   /// See also:
   ///
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
-  final List<int> customSemanticsActionIds;
+  final List<int>? customSemanticsActionIds;
 
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
@@ -354,7 +377,7 @@ class SemanticsData extends Diagnosticable {
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => objectRuntimeType(this, 'SemanticsData');
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -363,22 +386,22 @@ class SemanticsData extends Diagnosticable {
     properties.add(TransformProperty('transform', transform, showName: false, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
-    final List<String> actionSummary = <String>[];
-    for (SemanticsAction action in SemanticsAction.values.values) {
-      if ((actions & action.index) != 0)
-        actionSummary.add(describeEnum(action));
-    }
-    final List<String> customSemanticsActionSummary = customSemanticsActionIds
-      .map<String>((int actionId) => CustomSemanticsAction.getAction(actionId).label)
+    final List<String> actionSummary = <String>[
+      for (final SemanticsAction action in SemanticsAction.values.values)
+        if ((actions & action.index) != 0)
+          describeEnum(action),
+    ];
+    final List<String?> customSemanticsActionSummary = customSemanticsActionIds!
+      .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
       .toList();
     properties.add(IterableProperty<String>('actions', actionSummary, ifEmpty: null));
-    properties.add(IterableProperty<String>('customActions', customSemanticsActionSummary, ifEmpty: null));
+    properties.add(IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
-    final List<String> flagSummary = <String>[];
-    for (SemanticsFlag flag in SemanticsFlag.values.values) {
-      if ((flags & flag.index) != 0)
-        flagSummary.add(describeEnum(flag));
-    }
+    final List<String> flagSummary = <String>[
+      for (final SemanticsFlag flag in SemanticsFlag.values.values)
+        if ((flags & flag.index) != 0)
+          describeEnum(flag),
+    ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(StringProperty('label', label, defaultValue: ''));
     properties.add(StringProperty('value', value, defaultValue: ''));
@@ -387,8 +410,10 @@ class SemanticsData extends Diagnosticable {
     properties.add(StringProperty('hint', hint, defaultValue: ''));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     if (textSelection?.isValid == true)
-      properties.add(MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
+      properties.add(MessageProperty('textSelection', '[${textSelection!.start}, ${textSelection!.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
+    properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
+    properties.add(IntProperty('currentValueLength', currentValueLength, defaultValue: null));
     properties.add(IntProperty('scrollChildren', scrollChildCount, defaultValue: null));
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
@@ -397,31 +422,31 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! SemanticsData)
-      return false;
-    final SemanticsData typedOther = other;
-    return typedOther.flags == flags
-        && typedOther.actions == actions
-        && typedOther.label == label
-        && typedOther.value == value
-        && typedOther.increasedValue == increasedValue
-        && typedOther.decreasedValue == decreasedValue
-        && typedOther.hint == hint
-        && typedOther.textDirection == textDirection
-        && typedOther.rect == rect
-        && setEquals(typedOther.tags, tags)
-        && typedOther.scrollChildCount == scrollChildCount
-        && typedOther.scrollIndex == scrollIndex
-        && typedOther.textSelection == textSelection
-        && typedOther.scrollPosition == scrollPosition
-        && typedOther.scrollExtentMax == scrollExtentMax
-        && typedOther.scrollExtentMin == scrollExtentMin
-        && typedOther.platformViewId == platformViewId
-        && typedOther.transform == transform
-        && typedOther.elevation == elevation
-        && typedOther.thickness == thickness
-        && _sortedListsEqual(typedOther.customSemanticsActionIds, customSemanticsActionIds);
+  bool operator ==(Object other) {
+    return other is SemanticsData
+        && other.flags == flags
+        && other.actions == actions
+        && other.label == label
+        && other.value == value
+        && other.increasedValue == increasedValue
+        && other.decreasedValue == decreasedValue
+        && other.hint == hint
+        && other.textDirection == textDirection
+        && other.rect == rect
+        && setEquals(other.tags, tags)
+        && other.scrollChildCount == scrollChildCount
+        && other.scrollIndex == scrollIndex
+        && other.textSelection == textSelection
+        && other.scrollPosition == scrollPosition
+        && other.scrollExtentMax == scrollExtentMax
+        && other.scrollExtentMin == scrollExtentMin
+        && other.platformViewId == platformViewId
+        && other.maxValueLength == maxValueLength
+        && other.currentValueLength == currentValueLength
+        && other.transform == transform
+        && other.elevation == elevation
+        && other.thickness == thickness
+        && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
   @override
@@ -445,15 +470,17 @@ class SemanticsData extends Diagnosticable {
         scrollExtentMax,
         scrollExtentMin,
         platformViewId,
+        maxValueLength,
+        currentValueLength,
         transform,
-        elevation,
-        thickness,
       ),
+      elevation,
+      thickness,
       ui.hashList(customSemanticsActionIds),
     );
   }
 
-  static bool _sortedListsEqual(List<int> left, List<int> right) {
+  static bool _sortedListsEqual(List<int>? left, List<int>? right) {
     if (left == null && right == null)
       return true;
     if (left != null && right != null) {
@@ -470,10 +497,10 @@ class SemanticsData extends Diagnosticable {
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   _SemanticsDiagnosticableNode({
-    String name,
-    @required SemanticsNode value,
-    @required DiagnosticsTreeStyle style,
-    @required this.childOrder,
+    String? name,
+    required SemanticsNode value,
+    required DiagnosticsTreeStyle? style,
+    required this.childOrder,
   }) : super(
     name: name,
     value: value,
@@ -483,12 +510,7 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   final DebugSemanticsDumpOrder childOrder;
 
   @override
-  List<DiagnosticsNode> getChildren() {
-    if (value != null)
-      return value.debugDescribeChildren(childOrder: childOrder);
-
-    return const <DiagnosticsNode>[];
-  }
+  List<DiagnosticsNode> getChildren() => value.debugDescribeChildren(childOrder: childOrder);
 }
 
 /// Provides hint values which override the default hints on supported
@@ -513,7 +535,7 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   ///
   /// Bad: 'Double tap to show movies'.
   /// Good: 'show movies'.
-  final String onTapHint;
+  final String? onTapHint;
 
   /// The hint text for a long press action.
   ///
@@ -524,7 +546,7 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   ///
   /// Bad: 'Double tap and hold to show tooltip'.
   /// Good: 'show tooltip'.
-  final String onLongPressHint;
+  final String? onLongPressHint;
 
   /// Whether there are any non-null hint values.
   bool get isNotEmpty => onTapHint != null || onLongPressHint != null;
@@ -533,12 +555,12 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   int get hashCode => ui.hashValues(onTapHint, onLongPressHint);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final SemanticsHintOverrides typedOther = other;
-    return typedOther.onTapHint == onTapHint
-      && typedOther.onLongPressHint == onLongPressHint;
+    return other is SemanticsHintOverrides
+        && other.onTapHint == onTapHint
+        && other.onLongPressHint == onLongPressHint;
   }
 
   @override
@@ -563,16 +585,23 @@ class SemanticsProperties extends DiagnosticableTree {
     this.selected,
     this.toggled,
     this.button,
+    this.link,
     this.header,
     this.textField,
+    this.slider,
+    this.readOnly,
+    this.focusable,
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
+    this.multiline,
     this.scopesRoute,
     this.namesRoute,
     this.image,
     this.liveRegion,
+    this.maxValueLength,
+    this.currentValueLength,
     this.label,
     this.value,
     this.increasedValue,
@@ -581,6 +610,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.hintOverrides,
     this.textDirection,
     this.sortKey,
+    this.tagForChildren,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -609,63 +639,94 @@ class SemanticsProperties extends DiagnosticableTree {
   /// For example, a button that a user can currently interact with would set
   /// this field to true. A button that currently does not respond to user
   /// interactions would set this field to false.
-  final bool enabled;
+  final bool? enabled;
 
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
   /// state is.
   ///
   /// This is mutually exclusive with [toggled].
-  final bool checked;
+  final bool? checked;
 
   /// If non-null, indicates that this subtree represents a toggle switch
   /// or similar widget with an "on" state, and what its current
   /// state is.
   ///
   /// This is mutually exclusive with [checked].
-  final bool toggled;
+  final bool? toggled;
 
   /// If non-null indicates that this subtree represents something that can be
   /// in a selected or unselected state, and what its current state is.
   ///
   /// The active tab in a tab bar for example is considered "selected", whereas
   /// all other tabs are unselected.
-  final bool selected;
+  final bool? selected;
 
   /// If non-null, indicates that this subtree represents a button.
   ///
   /// TalkBack/VoiceOver provides users with the hint "button" when a button
   /// is focused.
-  final bool button;
+  final bool? button;
+
+  /// If non-null, indicates that this subtree represents a link.
+  ///
+  /// iOS's VoiceOver provides users with a unique hint when a link is focused.
+  /// Android's Talkback will announce a link hint the same way it does a
+  /// button.
+  final bool? link;
 
   /// If non-null, indicates that this subtree represents a header.
   ///
   /// A header divides into sections. For example, an address book application
   /// might define headers A, B, C, etc. to divide the list of alphabetically
   /// sorted contacts into sections.
-  final bool header;
+  final bool? header;
 
   /// If non-null, indicates that this subtree represents a text field.
   ///
   /// TalkBack/VoiceOver provide special affordances to enter text into a
   /// text field.
-  final bool textField;
+  final bool? textField;
+
+  /// If non-null, indicates that this subtree represents a slider.
+  ///
+  /// Talkback/\VoiceOver provides users with the hint "slider" when a
+  /// slider is focused.
+  final bool? slider;
+
+  /// If non-null, indicates that this subtree is read only.
+  ///
+  /// Only applicable when [textField] is true.
+  ///
+  /// TalkBack/VoiceOver will treat it as non-editable text field.
+  final bool? readOnly;
+
+  /// If non-null, whether the node is able to hold input focus.
+  ///
+  /// If [focusable] is set to false, then [focused] must not be true.
+  ///
+  /// Input focus indicates that the node will receive keyboard events. It is not
+  /// to be confused with accessibility focus. Accessibility focus is the
+  /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
+  /// element it is reading, and is separate from input focus.
+  final bool? focusable;
 
   /// If non-null, whether the node currently holds input focus.
   ///
-  /// At most one node in the tree should hold input focus at any point in time.
+  /// At most one node in the tree should hold input focus at any point in time,
+  /// and it should not be set to true if [focusable] is false.
   ///
-  /// Input focus (indicates that the node will receive keyboard events) is not
+  /// Input focus indicates that the node will receive keyboard events. It is not
   /// to be confused with accessibility focus. Accessibility focus is the
-  /// green/black rectangular that TalkBack/VoiceOver on the screen and is
-  /// separate from input focus.
-  final bool focused;
+  /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
+  /// element it is reading, and is separate from input focus.
+  final bool? focused;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
   /// For example, a radio button is in a mutually exclusive group because only
   /// one radio button in that group can be marked as [checked].
-  final bool inMutuallyExclusiveGroup;
+  final bool? inMutuallyExclusiveGroup;
 
   /// If non-null, whether the node is considered hidden.
   ///
@@ -683,64 +744,91 @@ class SemanticsProperties extends DiagnosticableTree {
   /// the semantics tree altogether. Hidden elements are only included in the
   /// semantics tree to work around platform limitations and they are mainly
   /// used to implement accessibility scrolling on iOS.
-  final bool hidden;
+  final bool? hidden;
 
   /// If non-null, whether [value] should be obscured.
   ///
   /// This option is usually set in combination with [textField] to indicate
   /// that the text field contains a password (or other sensitive information).
   /// Doing so instructs screen readers to not read out the [value].
-  final bool obscured;
+  final bool? obscured;
+
+  /// Whether the [value] is coming from a field that supports multiline text
+  /// editing.
+  ///
+  /// This option is only meaningful when [textField] is true to indicate
+  /// whether it's a single-line or multiline text field.
+  ///
+  /// This option is null when [textField] is false.
+  final bool? multiline;
 
   /// If non-null, whether the node corresponds to the root of a subtree for
   /// which a route name should be announced.
   ///
-  /// Generally, this is set in combination with [explicitChildNodes], since
-  /// nodes with this flag are not considered focusable by Android or iOS.
+  /// Generally, this is set in combination with
+  /// [SemanticsConfiguration.explicitChildNodes], since nodes with this flag
+  /// are not considered focusable by Android or iOS.
   ///
   /// See also:
   ///
   ///  * [SemanticsFlag.scopesRoute] for a description of how the announced
   ///    value is selected.
-  final bool scopesRoute;
+  final bool? scopesRoute;
 
   /// If non-null, whether the node contains the semantic label for a route.
   ///
   /// See also:
   ///
   ///  * [SemanticsFlag.namesRoute] for a description of how the name is used.
-  final bool namesRoute;
+  final bool? namesRoute;
 
   /// If non-null, whether the node represents an image.
   ///
   /// See also:
   ///
-  ///  * [SemanticsFlag.image], for the flag this setting controls.
-  final bool image;
+  ///  * [SemanticsFlag.isImage], for the flag this setting controls.
+  final bool? image;
 
   /// If non-null, whether the node should be considered a live region.
   ///
-  /// On Android, when a live region semantics node is first created TalkBack
-  /// will make a polite announcement of the current label. This announcement
-  /// occurs even if the node is not focused. Subsequent polite announcements
-  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
-  /// announcement will only be made if the node's label has changed since the
-  /// last update.
+  /// On Android, when the label changes on a live region semantics node,
+  /// TalkBack will make a polite announcement of the current label. This
+  /// announcement occurs even if the node is not focused, but only if the label
+  /// has changed since the last update.
   ///
   /// On iOS, no announcements are made but the node is marked as
   /// `UIAccessibilityTraitUpdatesFrequently`.
   ///
-  /// An example of a live region is the [Snackbar] widget. When it appears
+  /// An example of a live region is the [SnackBar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live
   /// region causes an initial polite announcement to be generated
   /// automatically.
   ///
   /// See also:
   ///
-  ///  * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
+  ///  * [SemanticsFlag.isLiveRegion], the semantics flag this setting controls.
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
-  ///  * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
-  final bool liveRegion;
+  final bool? liveRegion;
+
+  /// The maximum number of characters that can be entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [textField] is true. Defaults to null,
+  /// which means no limit is imposed on the text field.
+  final int? maxValueLength;
+
+  /// The current number of characters that have been entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [textField] is true. Must be set when
+  /// [maxValueLength] is set.
+  final int? currentValueLength;
 
   /// Provides a textual description of the widget.
   ///
@@ -751,7 +839,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsConfiguration.label] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
-  final String label;
+  final String? label;
 
   /// Provides a textual description of the value of the widget.
   ///
@@ -762,7 +850,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsConfiguration.value] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
-  final String value;
+  final String? value;
 
   /// The value that [value] will become after a [SemanticsAction.increase]
   /// action has been performed on this widget.
@@ -775,7 +863,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsConfiguration.increasedValue] for a description of how this
   ///    is exposed in TalkBack and VoiceOver.
-  final String increasedValue;
+  final String? increasedValue;
 
   /// The value that [value] will become after a [SemanticsAction.decrease]
   /// action has been performed on this widget.
@@ -788,7 +876,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsConfiguration.decreasedValue] for a description of how this
   ///    is exposed in TalkBack and VoiceOver.
-  final String decreasedValue;
+  final String? decreasedValue;
 
   /// Provides a brief textual description of the result of an action performed
   /// on the widget.
@@ -800,7 +888,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
-  final String hint;
+  final String? hint;
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
@@ -810,13 +898,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// as there as at least one non-null hint override.
   ///
   /// On iOS, these are always ignored and the default [hint] is used instead.
-  final SemanticsHintOverrides hintOverrides;
+  final SemanticsHintOverrides? hintOverrides;
 
   /// The reading direction of the [label], [value], [hint], [increasedValue],
   /// and [decreasedValue].
   ///
   /// Defaults to the ambient [Directionality].
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   /// Determines the position of this node among its siblings in the traversal
   /// sort order.
@@ -824,7 +912,23 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This is used to describe the order in which the semantic node should be
   /// traversed by the accessibility services on the platform (e.g. VoiceOver
   /// on iOS and TalkBack on Android).
-  final SemanticsSortKey sortKey;
+  final SemanticsSortKey? sortKey;
+
+  /// A tag to be applied to the child [SemanticsNode]s of this widget.
+  ///
+  /// The tag is added to all child [SemanticsNode]s that pass through the
+  /// [RenderObject] corresponding to this widget while looking to be attached
+  /// to a parent SemanticsNode.
+  ///
+  /// Tags are used to communicate to a parent SemanticsNode that a child
+  /// SemanticsNode was passed through a particular RenderObject. The parent can
+  /// use this information to determine the shape of the semantics tree.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.addTagForChildren], to which the tags provided
+  ///    here will be passed.
+  final SemanticsTag? tagForChildren;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -834,7 +938,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen while an element is focused.
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   /// The handler for [SemanticsAction.longPress].
   ///
@@ -844,7 +948,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen without lifting the finger after the
   /// second tap.
-  final VoidCallback onLongPress;
+  final VoidCallback? onLongPress;
 
   /// The handler for [SemanticsAction.scrollLeft].
   ///
@@ -857,7 +961,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  final VoidCallback onScrollLeft;
+  final VoidCallback? onScrollLeft;
 
   /// The handler for [SemanticsAction.scrollRight].
   ///
@@ -870,7 +974,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  final VoidCallback onScrollRight;
+  final VoidCallback? onScrollRight;
 
   /// The handler for [SemanticsAction.scrollUp].
   ///
@@ -883,7 +987,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  final VoidCallback onScrollUp;
+  final VoidCallback? onScrollUp;
 
   /// The handler for [SemanticsAction.scrollDown].
   ///
@@ -896,7 +1000,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  final VoidCallback onScrollDown;
+  final VoidCallback? onScrollDown;
 
   /// The handler for [SemanticsAction.increase].
   ///
@@ -909,7 +1013,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume up button.
-  final VoidCallback onIncrease;
+  final VoidCallback? onIncrease;
 
   /// The handler for [SemanticsAction.decrease].
   ///
@@ -922,7 +1026,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume down button.
-  final VoidCallback onDecrease;
+  final VoidCallback? onDecrease;
 
   /// The handler for [SemanticsAction.copy].
   ///
@@ -930,7 +1034,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  final VoidCallback onCopy;
+  final VoidCallback? onCopy;
 
   /// The handler for [SemanticsAction.cut].
   ///
@@ -939,7 +1043,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  final VoidCallback onCut;
+  final VoidCallback? onCut;
 
   /// The handler for [SemanticsAction.paste].
   ///
@@ -947,43 +1051,43 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  final VoidCallback onPaste;
+  final VoidCallback? onPaste;
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorForwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field forward by one character.
   ///
   /// TalkBack users can trigger this by pressing the volume up key while the
   /// input focus is in a text field.
-  final MoveCursorHandler onMoveCursorForwardByCharacter;
+  final MoveCursorHandler? onMoveCursorForwardByCharacter;
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorBackwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one character.
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  final MoveCursorHandler onMoveCursorBackwardByCharacter;
+  final MoveCursorHandler? onMoveCursorBackwardByCharacter;
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  /// The handler for [SemanticsAction.moveCursorForwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one word.
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  final MoveCursorHandler onMoveCursorForwardByWord;
+  final MoveCursorHandler? onMoveCursorForwardByWord;
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  /// The handler for [SemanticsAction.moveCursorBackwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one word.
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  final MoveCursorHandler onMoveCursorBackwardByWord;
+  final MoveCursorHandler? onMoveCursorBackwardByWord;
 
   /// The handler for [SemanticsAction.setSelection].
   ///
@@ -992,7 +1096,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// TalkBack users can trigger this handler by selecting "Move cursor to
   /// beginning/end" or "Select all" from the local context menu.
-  final SetSelectionHandler onSetSelection;
+  final SetSelectionHandler? onSetSelection;
 
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
@@ -1011,7 +1115,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  final VoidCallback onDidGainAccessibilityFocus;
+  final VoidCallback? onDidGainAccessibilityFocus;
 
   /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
   ///
@@ -1030,7 +1134,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
   ///    accessibility focus.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  final VoidCallback onDidLoseAccessibilityFocus;
+  final VoidCallback? onDidLoseAccessibilityFocus;
 
   /// The handler for [SemanticsAction.dismiss].
   ///
@@ -1039,19 +1143,19 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users on Android can trigger this action in the local context
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
-  final VoidCallback onDismiss;
+  final VoidCallback? onDismiss;
 
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
   ///
   /// The handler associated with each custom action is called whenever a
-  /// semantics event of type [SemanticsEvent.customEvent] is received. The
+  /// semantics action of type [SemanticsAction.customAction] is received. The
   /// provided argument will be an identifier used to retrieve an instance of
   /// a custom action which can then retrieve the correct handler from this map.
   ///
   /// See also:
   ///
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
-  final Map<CustomSemanticsAction, VoidCallback> customSemanticsActions;
+  final Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1067,7 +1171,7 @@ class SemanticsProperties extends DiagnosticableTree {
   }
 
   @override
-  String toStringShort() => '$runtimeType'; // the hashCode isn't important since we're immutable
+  String toStringShort() => objectRuntimeType(this, 'SemanticsProperties'); // the hashCode isn't important since we're immutable
 }
 
 /// In tests use this function to reset the counter used to generate
@@ -1089,7 +1193,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// is created.
   SemanticsNode({
     this.key,
-    VoidCallback showOnScreen,
+    VoidCallback? showOnScreen,
   }) : id = _generateNewId(),
        _showOnScreen = showOnScreen;
 
@@ -1098,8 +1202,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
     this.key,
-    VoidCallback showOnScreen,
-    SemanticsOwner owner,
+    VoidCallback? showOnScreen,
+    required SemanticsOwner owner,
   }) : id = 0,
        _showOnScreen = showOnScreen {
     attach(owner);
@@ -1123,7 +1227,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Keys are used during the construction of the semantics tree. They are not
   /// transferred to the engine.
-  final Key key;
+  final Key? key;
 
   /// The unique identifier for this node.
   ///
@@ -1131,7 +1235,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// they are created.
   final int id;
 
-  final VoidCallback _showOnScreen;
+  final VoidCallback? _showOnScreen;
 
   // GEOMETRY
 
@@ -1140,11 +1244,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// By default, the transform is null, which represents the identity
   /// transformation (i.e., that this node has the same coordinate system as its
   /// parent).
-  Matrix4 get transform => _transform;
-  Matrix4 _transform;
-  set transform(Matrix4 value) {
+  Matrix4? get transform => _transform;
+  Matrix4? _transform;
+  set transform(Matrix4? value) {
     if (!MatrixUtils.matrixEquals(_transform, value)) {
-      _transform = MatrixUtils.isIdentity(value) ? null : value;
+      _transform = value == null || MatrixUtils.isIdentity(value) ? null : value;
       _markDirty();
     }
   }
@@ -1154,6 +1258,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   Rect _rect = Rect.zero;
   set rect(Rect value) {
     assert(value != null);
+    assert(value.isFinite, '$this (with $owner) tried to set a non-finite rect.');
     if (_rect != value) {
       _rect = value;
       _markDirty();
@@ -1177,7 +1282,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// If this rect is non-null it has to completely enclose
   /// [parentPaintClipRect]. If [parentPaintClipRect] is null this property is
   /// also null.
-  Rect parentSemanticsClipRect;
+  Rect? parentSemanticsClipRect;
 
   /// The paint clip from an ancestor that was applied to this node.
   ///
@@ -1192,13 +1297,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// This rect is completely enclosed by [parentSemanticsClipRect].
   ///
   /// If this rect is null [parentSemanticsClipRect] also has to be null.
-  Rect parentPaintClipRect;
+  Rect? parentPaintClipRect;
 
   /// The elevation adjustment that the parent imposes on this node.
   ///
   /// The [elevation] property is relative to the elevation of the parent
   /// [SemanticsNode]. However, as [SemanticsConfiguration]s from various
-  /// ascending [RenderObjects] are merged into each other to form that
+  /// ascending [RenderObject]s are merged into each other to form that
   /// [SemanticsNode] the parent’s elevation may change. This requires an
   /// adjustment of the child’s relative elevation which is represented by this
   /// value.
@@ -1209,7 +1314,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [elevation], the actual elevation of this [SemanticsNode].
-  double elevationAdjustment;
+  double? elevationAdjustment;
 
   /// The index of this node within the parent's list of semantic children.
   ///
@@ -1217,7 +1322,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// child list. For example, if a scrollable has five children but the first
   /// two are not visible (and thus not included in the list of children), then
   /// the index of the last node will still be 4.
-  int indexInParent;
+  int? indexInParent;
 
   /// Whether the node is invisible.
   ///
@@ -1263,41 +1368,42 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // CHILDREN
 
   /// Contains the children in inverse hit test order (i.e. paint order).
-  List<SemanticsNode> _children;
+  List<SemanticsNode>? _children;
 
   /// A snapshot of `newChildren` passed to [_replaceChildren] that we keep in
   /// debug mode. It supports the assertion that user does not mutate the list
   /// of children.
-  List<SemanticsNode> _debugPreviousSnapshot;
+  late List<SemanticsNode> _debugPreviousSnapshot;
 
   void _replaceChildren(List<SemanticsNode> newChildren) {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
       if (identical(newChildren, _children)) {
-        final StringBuffer mutationErrors = StringBuffer();
+        final List<DiagnosticsNode> mutationErrors = <DiagnosticsNode>[];
         if (newChildren.length != _debugPreviousSnapshot.length) {
-          mutationErrors.writeln(
-            'The list\'s length has changed from ${_debugPreviousSnapshot.length} '
+          mutationErrors.add(ErrorDescription(
+            "The list's length has changed from ${_debugPreviousSnapshot.length} "
             'to ${newChildren.length}.'
-          );
+          ));
         } else {
           for (int i = 0; i < newChildren.length; i++) {
             if (!identical(newChildren[i], _debugPreviousSnapshot[i])) {
-              mutationErrors.writeln(
-                'Child node at position $i was replaced:\n'
-                'Previous child: ${newChildren[i]}\n'
-                'New child: ${_debugPreviousSnapshot[i]}\n'
-              );
+              if (mutationErrors.isNotEmpty) {
+                mutationErrors.add(ErrorSpacer());
+              }
+              mutationErrors.add(ErrorDescription('Child node at position $i was replaced:'));
+              mutationErrors.add(newChildren[i].toDiagnosticsNode(name: 'Previous child', style: DiagnosticsTreeStyle.singleLine));
+              mutationErrors.add(_debugPreviousSnapshot[i].toDiagnosticsNode(name: 'New child', style: DiagnosticsTreeStyle.singleLine));
             }
           }
         }
         if (mutationErrors.isNotEmpty) {
-          throw FlutterError(
-            'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
-            'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
-            'Error details:\n'
-            '$mutationErrors'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.'),
+            ErrorHint('Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'),
+            ErrorDescription('Error details:'),
+            ...mutationErrors,
+          ]);
         }
       }
       assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);
@@ -1306,31 +1412,29 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
       SemanticsNode ancestor = this;
       while (ancestor.parent is SemanticsNode)
-        ancestor = ancestor.parent;
+        ancestor = ancestor.parent!;
       assert(!newChildren.any((SemanticsNode child) => child == ancestor));
       return true;
     }());
     assert(() {
       final Set<SemanticsNode> seenChildren = <SemanticsNode>{};
-      for (SemanticsNode child in newChildren)
+      for (final SemanticsNode child in newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
     }());
 
     // The goal of this function is updating sawChange.
     if (_children != null) {
-      for (SemanticsNode child in _children)
+      for (final SemanticsNode child in _children!)
         child._dead = true;
     }
-    if (newChildren != null) {
-      for (SemanticsNode child in newChildren) {
-        assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
-        child._dead = false;
-      }
+    for (final SemanticsNode child in newChildren) {
+      assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
+      child._dead = false;
     }
     bool sawChange = false;
     if (_children != null) {
-      for (SemanticsNode child in _children) {
+      for (final SemanticsNode child in _children!) {
         if (child._dead) {
           if (child.parent == this) {
             // we might have already had our child stolen from us by
@@ -1341,29 +1445,27 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         }
       }
     }
-    if (newChildren != null) {
-      for (SemanticsNode child in newChildren) {
-        if (child.parent != this) {
-          if (child.parent != null) {
-            // we're rebuilding the tree from the bottom up, so it's possible
-            // that our child was, in the last pass, a child of one of our
-            // ancestors. In that case, we drop the child eagerly here.
-            // TODO(ianh): Find a way to assert that the same node didn't
-            // actually appear in the tree in two places.
-            child.parent?.dropChild(child);
-          }
-          assert(!child.attached);
-          adoptChild(child);
-          sawChange = true;
+    for (final SemanticsNode child in newChildren) {
+      if (child.parent != this) {
+        if (child.parent != null) {
+          // we're rebuilding the tree from the bottom up, so it's possible
+          // that our child was, in the last pass, a child of one of our
+          // ancestors. In that case, we drop the child eagerly here.
+          // TODO(ianh): Find a way to assert that the same node didn't
+          // actually appear in the tree in two places.
+          child.parent?.dropChild(child);
         }
+        assert(!child.attached);
+        adoptChild(child);
+        sawChange = true;
       }
     }
     if (!sawChange && _children != null) {
       assert(newChildren != null);
-      assert(newChildren.length == _children.length);
+      assert(newChildren.length == _children!.length);
       // Did the order change?
-      for (int i = 0; i < _children.length; i++) {
-        if (_children[i].id != newChildren[i].id) {
+      for (int i = 0; i < _children!.length; i++) {
+        if (_children![i].id != newChildren[i].id) {
           sawChange = true;
           break;
         }
@@ -1379,7 +1481,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   bool _dead = false;
 
   /// The number of children this node has.
-  int get childrenCount => hasChildren ? _children.length : 0;
+  int get childrenCount => hasChildren ? _children!.length : 0;
 
   /// Visits the immediate children of this node.
   ///
@@ -1388,7 +1490,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// returns false.
   void visitChildren(SemanticsNodeVisitor visitor) {
     if (_children != null) {
-      for (SemanticsNode child in _children) {
+      for (final SemanticsNode child in _children!) {
         if (!visitor(child))
           return;
       }
@@ -1402,7 +1504,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// returned true, otherwise returns false.
   bool _visitDescendants(SemanticsNodeVisitor visitor) {
     if (_children != null) {
-      for (SemanticsNode child in _children) {
+      for (final SemanticsNode child in _children!) {
         if (!visitor(child) || !child._visitDescendants(visitor))
           return false;
       }
@@ -1413,10 +1515,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // AbstractNode OVERRIDES
 
   @override
-  SemanticsOwner get owner => super.owner;
+  SemanticsOwner? get owner => super.owner as SemanticsOwner?;
 
   @override
-  SemanticsNode get parent => super.parent;
+  SemanticsNode? get parent => super.parent as SemanticsNode?;
 
   @override
   void redepthChildren() {
@@ -1434,21 +1536,21 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _markDirty();
     }
     if (_children != null) {
-      for (SemanticsNode child in _children)
+      for (final SemanticsNode child in _children!)
         child.attach(owner);
     }
   }
 
   @override
   void detach() {
-    assert(owner._nodes.containsKey(id));
-    assert(!owner._detachedNodes.contains(this));
-    owner._nodes.remove(id);
-    owner._detachedNodes.add(this);
+    assert(owner!._nodes.containsKey(id));
+    assert(!owner!._detachedNodes.contains(this));
+    owner!._nodes.remove(id);
+    owner!._detachedNodes.add(this);
     super.detach();
     assert(owner == null);
     if (_children != null) {
-      for (SemanticsNode child in _children) {
+      for (final SemanticsNode child in _children!) {
         // The list of children may be stale and may contain nodes that have
         // been assigned to a different parent.
         if (child.parent == this)
@@ -1469,8 +1571,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       return;
     _dirty = true;
     if (attached) {
-      assert(!owner._detachedNodes.contains(this));
-      owner._dirtyNodes.add(this);
+      assert(!owner!._detachedNodes.contains(this));
+      owner!._dirtyNodes.add(this);
     }
   }
 
@@ -1492,6 +1594,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _actionsAsBits != config._actionsAsBits ||
         indexInParent != config.indexInParent ||
         platformViewId != config.platformViewId ||
+        _maxValueLength != config._maxValueLength ||
+        _currentValueLength != config._currentValueLength ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
 
@@ -1506,10 +1610,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Tags are used during the construction of the semantics tree. They are not
   /// transferred to the engine.
-  Set<SemanticsTag> tags;
+  Set<SemanticsTag>? tags;
 
   /// Whether this node is tagged with `tag`.
-  bool isTagged(SemanticsTag tag) => tags != null && tags.contains(tag);
+  bool isTagged(SemanticsTag tag) => tags != null && tags!.contains(tag);
 
   int _flags = _kEmptyConfig._flags;
 
@@ -1578,7 +1682,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// describes how high the box is that this [SemanticsNode] occupies in three
   /// dimensional space. The two other dimensions are defined by [rect].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// The following code stacks three [PhysicalModel]s on top of each other
   /// separated by non-zero elevations.
   ///
@@ -1622,13 +1726,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
-  SemanticsHintOverrides get hintOverrides => _hintOverrides;
-  SemanticsHintOverrides _hintOverrides;
+  SemanticsHintOverrides? get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides? _hintOverrides;
 
   /// The reading direction for [label], [value], [hint], [increasedValue], and
   /// [decreasedValue].
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection = _kEmptyConfig.textDirection;
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection = _kEmptyConfig.textDirection;
 
   /// Determines the position of this node among its siblings in the traversal
   /// sort order.
@@ -1636,24 +1740,29 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// This is used to describe the order in which the semantic node should be
   /// traversed by the accessibility services on the platform (e.g. VoiceOver
   /// on iOS and TalkBack on Android).
-  SemanticsSortKey get sortKey => _sortKey;
-  SemanticsSortKey _sortKey;
+  SemanticsSortKey? get sortKey => _sortKey;
+  SemanticsSortKey? _sortKey;
 
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
-  TextSelection get textSelection => _textSelection;
-  TextSelection _textSelection;
+  TextSelection? get textSelection => _textSelection;
+  TextSelection? _textSelection;
+
+  /// If this node represents a text field, this indicates whether or not it's
+  /// a multiline text field.
+  bool? get isMultiline => _isMultiline;
+  bool? _isMultiline;
 
   /// The total number of scrollable children that contribute to semantics.
   ///
   /// If the number of children are unknown or unbounded, this value will be
   /// null.
-  int get scrollChildCount => _scrollChildCount;
-  int _scrollChildCount;
+  int? get scrollChildCount => _scrollChildCount;
+  int? _scrollChildCount;
 
   /// The index of the first visible semantic child of a scroll node.
-  int get scrollIndex => _scrollIndex;
-  int _scrollIndex;
+  int? get scrollIndex => _scrollIndex;
+  int? _scrollIndex;
 
   /// Indicates the current scrolling position in logical pixels if the node is
   /// scrollable.
@@ -1665,9 +1774,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [ScrollPosition.pixels], from where this value is usually taken.
-  double get scrollPosition => _scrollPosition;
-  double _scrollPosition;
-
+  double? get scrollPosition => _scrollPosition;
+  double? _scrollPosition;
 
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
   /// scrollable.
@@ -1677,8 +1785,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
-  double get scrollExtentMax => _scrollExtentMax;
-  double _scrollExtentMax;
+  double? get scrollExtentMax => _scrollExtentMax;
+  double? _scrollExtentMax;
 
   /// Indicates the minimum in-range value for [scrollPosition] if the node is
   /// scrollable.
@@ -1688,8 +1796,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [ScrollPosition.minScrollExtent] from where this value is usually taken.
-  double get scrollExtentMin => _scrollExtentMin;
-  double _scrollExtentMin;
+  double? get scrollExtentMin => _scrollExtentMin;
+  double? _scrollExtentMin;
 
   /// The id of the platform view, whose semantics nodes will be added as
   /// children to this node.
@@ -1702,8 +1810,30 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   ///  * [AndroidView], which is the platform view for Android.
   ///  * [UiKitView], which is the platform view for iOS.
-  int get platformViewId => _platformViewId;
-  int _platformViewId;
+  int? get platformViewId => _platformViewId;
+  int? _platformViewId;
+
+  /// The maximum number of characters that can be entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [SemanticsFlag.isTextField] is set. Defaults
+  /// to null, which means no limit is imposed on the text field.
+  int? get maxValueLength => _maxValueLength;
+  int? _maxValueLength;
+
+  /// The current number of characters that have been entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [SemanticsFlag.isTextField] is set. Must be
+  /// set when [maxValueLength] is set.
+  int? get currentValueLength => _currentValueLength;
+  int? _currentValueLength;
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
@@ -1719,15 +1849,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// No reference is kept to the [SemanticsConfiguration] object, but the child
   /// list is used as-is and should therefore not be changed after this call.
   void updateWith({
-    @required SemanticsConfiguration config,
-    List<SemanticsNode> childrenInInversePaintOrder,
+    required SemanticsConfiguration? config,
+    List<SemanticsNode>? childrenInInversePaintOrder,
   }) {
     config ??= _kEmptyConfig;
     if (_isDifferentFromCurrentSemanticAnnotation(config))
       _markDirty();
 
     assert(
-      config.platformViewId == null || childrenInInversePaintOrder.isEmpty,
+      config.platformViewId == null || childrenInInversePaintOrder == null || childrenInInversePaintOrder.isEmpty,
       'SemanticsNodes with children must not specify a platformViewId.'
     );
 
@@ -1746,6 +1876,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
+    _isMultiline = config.isMultiline;
     _scrollPosition = config._scrollPosition;
     _scrollExtentMax = config._scrollExtentMax;
     _scrollExtentMin = config._scrollExtentMin;
@@ -1754,6 +1885,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollIndex = config.scrollIndex;
     indexInParent = config.indexInParent;
     _platformViewId = config._platformViewId;
+    _maxValueLength = config._maxValueLength;
+    _currentValueLength = config._currentValueLength;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -1780,31 +1913,33 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String value = _value;
     String increasedValue = _increasedValue;
     String decreasedValue = _decreasedValue;
-    TextDirection textDirection = _textDirection;
-    Set<SemanticsTag> mergedTags = tags == null ? null : Set<SemanticsTag>.from(tags);
-    TextSelection textSelection = _textSelection;
-    int scrollChildCount = _scrollChildCount;
-    int scrollIndex = _scrollIndex;
-    double scrollPosition = _scrollPosition;
-    double scrollExtentMax = _scrollExtentMax;
-    double scrollExtentMin = _scrollExtentMin;
-    int platformViewId = _platformViewId;
+    TextDirection? textDirection = _textDirection;
+    Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.from(tags!);
+    TextSelection? textSelection = _textSelection;
+    int? scrollChildCount = _scrollChildCount;
+    int? scrollIndex = _scrollIndex;
+    double? scrollPosition = _scrollPosition;
+    double? scrollExtentMax = _scrollExtentMax;
+    double? scrollExtentMin = _scrollExtentMin;
+    int? platformViewId = _platformViewId;
+    int? maxValueLength = _maxValueLength;
+    int? currentValueLength = _currentValueLength;
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
-    for (CustomSemanticsAction action in _customSemanticsActions.keys)
+    for (final CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     if (hintOverrides != null) {
-      if (hintOverrides.onTapHint != null) {
+      if (hintOverrides!.onTapHint != null) {
         final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
-          hint: hintOverrides.onTapHint,
+          hint: hintOverrides!.onTapHint!,
           action: SemanticsAction.tap,
         );
         customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
       }
-      if (hintOverrides.onLongPressHint != null) {
+      if (hintOverrides!.onLongPressHint != null) {
         final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
-          hint: hintOverrides.onLongPressHint,
+          hint: hintOverrides!.onLongPressHint!,
           action: SemanticsAction.longPress,
         );
         customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -1824,6 +1959,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         scrollExtentMax ??= node._scrollExtentMax;
         scrollExtentMin ??= node._scrollExtentMin;
         platformViewId ??= node._platformViewId;
+        maxValueLength ??= node._maxValueLength;
+        currentValueLength ??= node._currentValueLength;
         if (value == '' || value == null)
           value = node._value;
         if (increasedValue == '' || increasedValue == null)
@@ -1832,23 +1969,21 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           decreasedValue = node._decreasedValue;
         if (node.tags != null) {
           mergedTags ??= <SemanticsTag>{};
-          mergedTags.addAll(node.tags);
+          mergedTags!.addAll(node.tags!);
         }
-        if (node._customSemanticsActions != null) {
-          for (CustomSemanticsAction action in _customSemanticsActions.keys)
-            customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
-        }
+        for (final CustomSemanticsAction action in _customSemanticsActions.keys)
+          customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         if (node.hintOverrides != null) {
-          if (node.hintOverrides.onTapHint != null) {
+          if (node.hintOverrides!.onTapHint != null) {
             final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
-              hint: node.hintOverrides.onTapHint,
+              hint: node.hintOverrides!.onTapHint!,
               action: SemanticsAction.tap,
             );
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
           }
-          if (node.hintOverrides.onLongPressHint != null) {
+          if (node.hintOverrides!.onLongPressHint != null) {
             final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
-              hint: node.hintOverrides.onLongPressHint,
+              hint: node.hintOverrides!.onLongPressHint!,
               action: SemanticsAction.longPress,
             );
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -1894,6 +2029,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
       platformViewId: platformViewId,
+      maxValueLength: maxValueLength,
+      currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
     );
   }
@@ -1909,13 +2046,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   void _addToUpdate(ui.SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
-    Int32List childrenInTraversalOrder;
-    Int32List childrenInHitTestOrder;
+    final Int32List childrenInTraversalOrder;
+    final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
       childrenInTraversalOrder = _kEmptyChildList;
       childrenInHitTestOrder = _kEmptyChildList;
     } else {
-      final int childCount = _children.length;
+      final int childCount = _children!.length;
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
       childrenInTraversalOrder = Int32List(childCount);
       for (int i = 0; i < childCount; i += 1) {
@@ -1925,15 +2062,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       // order.
       childrenInHitTestOrder = Int32List(childCount);
       for (int i = childCount - 1; i >= 0; i -= 1) {
-        childrenInHitTestOrder[i] = _children[childCount - i - 1].id;
+        childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
       }
     }
-    Int32List customSemanticsActionIds;
+    Int32List? customSemanticsActionIds;
     if (data.customSemanticsActionIds?.isNotEmpty == true) {
-      customSemanticsActionIds = Int32List(data.customSemanticsActionIds.length);
-      for (int i = 0; i < data.customSemanticsActionIds.length; i++) {
-        customSemanticsActionIds[i] = data.customSemanticsActionIds[i];
-        customSemanticsActionIdsUpdate.add(data.customSemanticsActionIds[i]);
+      customSemanticsActionIds = Int32List(data.customSemanticsActionIds!.length);
+      for (int i = 0; i < data.customSemanticsActionIds!.length; i++) {
+        customSemanticsActionIds[i] = data.customSemanticsActionIds![i];
+        customSemanticsActionIdsUpdate.add(data.customSemanticsActionIds![i]);
       }
     }
     builder.updateNode(
@@ -1947,14 +2084,16 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
-      textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
-      textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
-      platformViewId: data.platformViewId != null ? data.platformViewId : -1,
-      scrollChildren: data.scrollChildCount != null ? data.scrollChildCount : 0,
-      scrollIndex: data.scrollIndex != null ? data.scrollIndex : 0 ,
-      scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
-      scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
-      scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
+      textSelectionBase: data.textSelection != null ? data.textSelection!.baseOffset : -1,
+      textSelectionExtent: data.textSelection != null ? data.textSelection!.extentOffset : -1,
+      platformViewId: data.platformViewId ?? -1,
+      maxValueLength: data.maxValueLength ?? -1,
+      currentValueLength: data.currentValueLength ?? -1,
+      scrollChildren: data.scrollChildCount ?? 0,
+      scrollIndex: data.scrollIndex ?? 0 ,
+      scrollPosition: data.scrollPosition ?? double.nan,
+      scrollExtentMax: data.scrollExtentMax ?? double.nan,
+      scrollExtentMin: data.scrollExtentMin ?? double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
       elevation: data.elevation,
       thickness: data.thickness,
@@ -1967,16 +2106,16 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
-    TextDirection inheritedTextDirection = textDirection;
-    SemanticsNode ancestor = parent;
+    TextDirection? inheritedTextDirection = textDirection;
+    SemanticsNode? ancestor = parent;
     while (inheritedTextDirection == null && ancestor != null) {
       inheritedTextDirection = ancestor.textDirection;
       ancestor = ancestor.parent;
     }
 
-    List<SemanticsNode> childrenInDefaultOrder;
+    List<SemanticsNode>? childrenInDefaultOrder;
     if (inheritedTextDirection != null) {
-      childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
+      childrenInDefaultOrder = _childrenInDefaultOrder(_children!, inheritedTextDirection);
     } else {
       // In the absence of text direction default to paint order.
       childrenInDefaultOrder = _children;
@@ -1988,16 +2127,16 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     // the same place. Only children within the same group are sorted.
     final List<_TraversalSortNode> everythingSorted = <_TraversalSortNode>[];
     final List<_TraversalSortNode> sortNodes = <_TraversalSortNode>[];
-    SemanticsSortKey lastSortKey;
-    for (int position = 0; position < childrenInDefaultOrder.length; position += 1) {
+    SemanticsSortKey? lastSortKey;
+    for (int position = 0; position < childrenInDefaultOrder!.length; position += 1) {
       final SemanticsNode child = childrenInDefaultOrder[position];
-      final SemanticsSortKey sortKey = child.sortKey;
+      final SemanticsSortKey? sortKey = child.sortKey;
       lastSortKey = position > 0
           ? childrenInDefaultOrder[position - 1].sortKey
           : null;
       final bool isCompatibleWithPreviousSortKey = position == 0 ||
           sortKey.runtimeType == lastSortKey.runtimeType &&
-          (sortKey == null || sortKey.name == lastSortKey.name);
+          (sortKey == null || sortKey.name == lastSortKey!.name);
       if (!isCompatibleWithPreviousSortKey && sortNodes.isNotEmpty) {
         // Do not sort groups with null sort keys. List.sort does not guarantee
         // a stable sort order.
@@ -2031,12 +2170,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Semantics events should be sent to inform interested parties (like
   /// the accessibility system of the operating system) about changes to the UI.
-  ///
-  /// For example, if this semantics node represents a scrollable list, a
-  /// [ScrollCompletedSemanticsEvent] should be sent after a scroll action is completed.
-  /// That way, the operating system can give additional feedback to the user
-  /// about the state of the UI (e.g. on Android a ping sound is played to
-  /// indicate a successful scroll in accessibility mode).
   void sendEvent(SemanticsEvent event) {
     if (!attached)
       return;
@@ -2044,39 +2177,41 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   @override
-  String toStringShort() => '$runtimeType#$id';
+  String toStringShort() => '${objectRuntimeType(this, 'SemanticsNode')}#$id';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     bool hideOwner = true;
     if (_dirty) {
-      final bool inDirtyNodes = owner != null && owner._dirtyNodes.contains(this);
+      final bool inDirtyNodes = owner != null && owner!._dirtyNodes.contains(this);
       properties.add(FlagProperty('inDirtyNodes', value: inDirtyNodes, ifTrue: 'dirty', ifFalse: 'STALE'));
       hideOwner = inDirtyNodes;
     }
     properties.add(DiagnosticsProperty<SemanticsOwner>('owner', owner, level: hideOwner ? DiagnosticLevel.hidden : DiagnosticLevel.info));
     properties.add(FlagProperty('isMergedIntoParent', value: isMergedIntoParent, ifTrue: 'merged up ⬆️'));
     properties.add(FlagProperty('mergeAllDescendantsIntoThisNode', value: mergeAllDescendantsIntoThisNode, ifTrue: 'merge boundary ⛔️'));
-    final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
+    final Offset? offset = transform != null ? MatrixUtils.getAsTranslation(transform!) : null;
     if (offset != null) {
       properties.add(DiagnosticsProperty<Rect>('rect', rect.shift(offset), showName: false));
     } else {
-      final double scale = transform != null ? MatrixUtils.getAsScale(transform) : null;
-      String description;
+      final double? scale = transform != null ? MatrixUtils.getAsScale(transform!) : null;
+      String? description;
       if (scale != null) {
         description = '$rect scaled by ${scale.toStringAsFixed(1)}x';
-      } else if (transform != null && !MatrixUtils.isIdentity(transform)) {
+      } else if (transform != null && !MatrixUtils.isIdentity(transform!)) {
         final String matrix = transform.toString().split('\n').take(4).map<String>((String line) => line.substring(4)).join('; ');
         description = '$rect with transform [$matrix]';
       }
       properties.add(DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
+    properties.add(IterableProperty<String>('tags', tags?.map((SemanticsTag tag) => tag.name), defaultValue: null));
     final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => describeEnum(action)).toList()..sort();
-    final List<String> customSemanticsActions = _customSemanticsActions.keys
-      .map<String>((CustomSemanticsAction action) => action.label)
+    final List<String?> customSemanticsActions = _customSemanticsActions.keys
+      .map<String?>((CustomSemanticsAction action) => action.label)
       .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
-    properties.add(IterableProperty<String>('customActions', customSemanticsActions, ifEmpty: null));
+    properties.add(IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null));
     final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
@@ -2089,15 +2224,17 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     if (_textSelection?.isValid == true)
-      properties.add(MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
+      properties.add(MessageProperty('text selection', '[${_textSelection!.start}, ${_textSelection!.end}]'));
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
+    properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
+    properties.add(IntProperty('currentValueLength', currentValueLength, defaultValue: null));
     properties.add(IntProperty('scrollChildren', scrollChildCount, defaultValue: null));
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
-    properties.add(DoubleProperty('thicknes', thickness, defaultValue: 0.0));
+    properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -2107,7 +2244,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   @override
   String toStringDeep({
     String prefixLineOne = '',
-    String prefixOtherLines,
+    String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
   }) {
@@ -2117,8 +2254,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   DiagnosticsNode toDiagnosticsNode({
-    String name,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.sparse,
+    String? name,
+    DiagnosticsTreeStyle? style = DiagnosticsTreeStyle.sparse,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
   }) {
     return _SemanticsDiagnosticableNode(
@@ -2144,12 +2281,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
     switch (childOrder) {
       case DebugSemanticsDumpOrder.inverseHitTest:
-        return _children;
+        return _children!;
       case DebugSemanticsDumpOrder.traversalOrder:
         return _childrenInTraversalOrder();
     }
-    assert(false);
-    return null;
   }
 }
 
@@ -2163,11 +2298,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 /// for each [SemanticsNode], one for the top and one for the bottom edge.
 class _BoxEdge implements Comparable<_BoxEdge> {
   _BoxEdge({
-    @required this.isLeadingEdge,
-    @required this.offset,
-    @required this.node,
+    required this.isLeadingEdge,
+    required this.offset,
+    required this.node,
   }) : assert(isLeadingEdge != null),
        assert(offset != null),
+       assert(offset.isFinite),
        assert(node != null);
 
   /// True if the edge comes before the seconds edge along the traversal
@@ -2200,8 +2336,8 @@ class _BoxEdge implements Comparable<_BoxEdge> {
 /// The [nodes] are sorted among each other separately from other nodes.
 class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   _SemanticsSortGroup({
-    @required this.startOffset,
-    @required this.textDirection,
+    required this.startOffset,
+    required this.textDirection,
   }) : assert(startOffset != null);
 
   /// The offset from the start edge of the parent [SemanticsNode] in the
@@ -2227,7 +2363,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   /// then sorts them using [sortedWithinKnot].
   List<SemanticsNode> sortedWithinVerticalGroup() {
     final List<_BoxEdge> edges = <_BoxEdge>[];
-    for (SemanticsNode child in nodes) {
+    for (final SemanticsNode child in nodes) {
       // Using a small delta to shrink child rects removes overlapping cases.
       final Rect childRect = child.rect.deflate(0.1);
       edges.add(_BoxEdge(
@@ -2244,9 +2380,9 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     edges.sort();
 
     List<_SemanticsSortGroup> horizontalGroups = <_SemanticsSortGroup>[];
-    _SemanticsSortGroup group;
+    _SemanticsSortGroup? group;
     int depth = 0;
-    for (_BoxEdge edge in edges) {
+    for (final _BoxEdge edge in edges) {
       if (edge.isLeadingEdge) {
         depth += 1;
         group ??= _SemanticsSortGroup(
@@ -2258,7 +2394,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
         depth -= 1;
       }
       if (depth == 0) {
-        horizontalGroups.add(group);
+        horizontalGroups.add(group!);
         group = null;
       }
     }
@@ -2268,12 +2404,9 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
       horizontalGroups = horizontalGroups.reversed.toList();
     }
 
-    final List<SemanticsNode> result = <SemanticsNode>[];
-    for (_SemanticsSortGroup group in horizontalGroups) {
-      final List<SemanticsNode> sortedKnotNodes = group.sortedWithinKnot();
-      result.addAll(sortedKnotNodes);
-    }
-    return result;
+    return horizontalGroups
+      .expand((_SemanticsSortGroup group) => group.sortedWithinKnot())
+      .toList();
   }
 
   /// Sorts [nodes] where nodes intersect both vertically and horizontally.
@@ -2298,10 +2431,10 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     }
     final Map<int, SemanticsNode> nodeMap = <int, SemanticsNode>{};
     final Map<int, int> edges = <int, int>{};
-    for (SemanticsNode node in nodes) {
+    for (final SemanticsNode node in nodes) {
       nodeMap[node.id] = node;
       final Offset center = _pointInParentCoordinates(node, node.rect.center);
-      for (SemanticsNode nextNode in nodes) {
+      for (final SemanticsNode nextNode in nodes) {
         if (identical(node, nextNode) || edges[nextNode.id] == node.id) {
           // Skip self or when we've already established that the next node
           // points to current node.
@@ -2340,13 +2473,13 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
       }
       visitedIds.add(id);
       if (edges.containsKey(id)) {
-        search(edges[id]);
+        search(edges[id]!);
       }
       sortedIds.add(id);
     }
 
     startNodes.map<int>((SemanticsNode node) => node.id).forEach(search);
-    return sortedIds.map<SemanticsNode>((int id) => nodeMap[id]).toList().reversed.toList();
+    return sortedIds.map<SemanticsNode>((int id) => nodeMap[id]!).toList().reversed.toList();
   }
 }
 
@@ -2356,7 +2489,7 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
     return point;
   }
   final Vector3 vector = Vector3(point.dx, point.dy, 0.0);
-  node.transform.transform3(vector);
+  node.transform!.transform3(vector);
   return Offset(vector.x, vector.y);
 }
 
@@ -2373,7 +2506,8 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 /// For an illustration of the algorithm see http://bit.ly/flutter-default-traversal.
 List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
-  for (SemanticsNode child in children) {
+  for (final SemanticsNode child in children) {
+    assert(child.rect.isFinite);
     // Using a small delta to shrink child rects removes overlapping cases.
     final Rect childRect = child.rect.deflate(0.1);
     edges.add(_BoxEdge(
@@ -2390,9 +2524,9 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
   edges.sort();
 
   final List<_SemanticsSortGroup> verticalGroups = <_SemanticsSortGroup>[];
-  _SemanticsSortGroup group;
+  _SemanticsSortGroup? group;
   int depth = 0;
-  for (_BoxEdge edge in edges) {
+  for (final _BoxEdge edge in edges) {
     if (edge.isLeadingEdge) {
       depth += 1;
       group ??= _SemanticsSortGroup(
@@ -2404,18 +2538,15 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
       depth -= 1;
     }
     if (depth == 0) {
-      verticalGroups.add(group);
+      verticalGroups.add(group!);
       group = null;
     }
   }
   verticalGroups.sort();
 
-  final List<SemanticsNode> result = <SemanticsNode>[];
-  for (_SemanticsSortGroup group in verticalGroups) {
-    final List<SemanticsNode> sortedGroupNodes = group.sortedWithinVerticalGroup();
-    result.addAll(sortedGroupNodes);
-  }
-  return result;
+  return verticalGroups
+    .expand((_SemanticsSortGroup group) => group.sortedWithinVerticalGroup())
+    .toList();
 }
 
 /// The implementation of [Comparable] that implements the ordering of
@@ -2427,9 +2558,9 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
 /// the list of its siblings. [sortKey] takes precedence over position.
 class _TraversalSortNode implements Comparable<_TraversalSortNode> {
   _TraversalSortNode({
-    @required this.node,
+    required this.node,
     this.sortKey,
-    @required this.position,
+    required this.position,
   })
     : assert(node != null),
       assert(position != null);
@@ -2441,7 +2572,7 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
   ///
   /// Sort keys take precedence over other attributes, such as
   /// [position].
-  final SemanticsSortKey sortKey;
+  final SemanticsSortKey? sortKey;
 
   /// Position within the list of siblings as determined by the default sort
   /// order.
@@ -2449,10 +2580,10 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 
   @override
   int compareTo(_TraversalSortNode other) {
-    if (sortKey == null || other?.sortKey == null) {
+    if (sortKey == null || other.sortKey == null) {
       return position - other.position;
     }
-    return sortKey.compareTo(other.sortKey);
+    return sortKey!.compareTo(other.sortKey!);
   }
 }
 
@@ -2466,12 +2597,11 @@ class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
-  final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
 
   /// The root node of the semantics tree, if any.
   ///
   /// If the semantics tree is empty, returns null.
-  SemanticsNode get rootSemanticsNode => _nodes[0];
+  SemanticsNode? get rootSemanticsNode => _nodes[0];
 
   @override
   void dispose() {
@@ -2481,7 +2611,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [Window.updateSemantics].
+  /// Update the semantics using [dart:ui.PlatformDispatcher.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
@@ -2493,20 +2623,22 @@ class SemanticsOwner extends ChangeNotifier {
       _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
       visitedNodes.addAll(localDirtyNodes);
-      for (SemanticsNode node in localDirtyNodes) {
+      for (final SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
-        assert(node.parent == null || !node.parent.isPartOfNodeMerging || node.isMergedIntoParent);
+        assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent);
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
           // if we're merged into our parent, make sure our parent is added to the dirty list
-          if (node.parent != null && node.parent.isPartOfNodeMerging)
-            node.parent._markDirty(); // this can add the node to the dirty list
+          if (node.parent != null && node.parent!.isPartOfNodeMerging) {
+            node.parent!._markDirty(); // this can add the node to the dirty list
+            node._dirty = false; // We don't want to send update for this node.
+          }
         }
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    for (SemanticsNode node in visitedNodes) {
+    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance!.createSemanticsUpdateBuilder();
+    for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
@@ -2522,16 +2654,16 @@ class SemanticsOwner extends ChangeNotifier {
         node._addToUpdate(builder, customSemanticsActionIds);
     }
     _dirtyNodes.clear();
-    for (int actionId in customSemanticsActionIds) {
-      final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
+    for (final int actionId in customSemanticsActionIds) {
+      final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance.window.updateSemantics(builder.build());
+    SemanticsBinding.instance!.window.updateSemantics(builder.build());
     notifyListeners();
   }
 
-  _SemanticsActionHandler _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
-    SemanticsNode result = _nodes[id];
+  _SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+    SemanticsNode? result = _nodes[id];
     if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
       result._visitDescendants((SemanticsNode node) {
         if (node._canPerformAction(action)) {
@@ -2541,9 +2673,9 @@ class SemanticsOwner extends ChangeNotifier {
         return true; // continue walk
       });
     }
-    if (result == null || !result._canPerformAction(action))
+    if (result == null || !result!._canPerformAction(action))
       return null;
-    return result._actions[action];
+    return result!._actions[action];
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.
@@ -2555,28 +2687,28 @@ class SemanticsOwner extends ChangeNotifier {
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [ dynamic args ]) {
     assert(action != null);
-    final _SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
+    final _SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
       handler(args);
       return;
     }
 
     // Default actions if no [handler] was provided.
-    if (action == SemanticsAction.showOnScreen && _nodes[id]._showOnScreen != null)
-      _nodes[id]._showOnScreen();
+    if (action == SemanticsAction.showOnScreen && _nodes[id]!._showOnScreen != null)
+      _nodes[id]!._showOnScreen!();
   }
 
-  _SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
+  _SemanticsActionHandler? _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
     if (node.transform != null) {
       final Matrix4 inverse = Matrix4.identity();
-      if (inverse.copyInverse(node.transform) == 0.0)
+      if (inverse.copyInverse(node.transform!) == 0.0)
         return null;
       position = MatrixUtils.transformPoint(inverse, position);
     }
     if (!node.rect.contains(position))
       return null;
     if (node.mergeAllDescendantsIntoThisNode) {
-      SemanticsNode result;
+      SemanticsNode? result;
       node._visitDescendants((SemanticsNode child) {
         if (child._canPerformAction(action)) {
           result = child;
@@ -2587,8 +2719,8 @@ class SemanticsOwner extends ChangeNotifier {
       return result?._actions[action];
     }
     if (node.hasChildren) {
-      for (SemanticsNode child in node._children.reversed) {
-        final _SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
+      for (final SemanticsNode child in node._children!.reversed) {
+        final _SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(child, position, action);
         if (handler != null)
           return handler;
       }
@@ -2605,10 +2737,10 @@ class SemanticsOwner extends ChangeNotifier {
   /// the `args` parameter.
   void performActionAt(Offset position, SemanticsAction action, [ dynamic args ]) {
     assert(action != null);
-    final SemanticsNode node = rootSemanticsNode;
+    final SemanticsNode? node = rootSemanticsNode;
     if (node == null)
       return;
-    final _SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
+    final _SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(node, position, action);
     if (handler != null)
       handler(args);
   }
@@ -2638,7 +2770,7 @@ class SemanticsConfiguration {
   /// information to the [SemanticsNode] introduced by this configuration
   /// is controlled by [explicitChildNodes].
   ///
-  /// This has to be true if [isMergingDescendantsIntoOneNode] is also true.
+  /// This has to be true if [isMergingSemanticsOfDescendants] is also true.
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
@@ -2651,11 +2783,11 @@ class SemanticsConfiguration {
   /// so in the form of explicit [SemanticsNode]s.
   ///
   /// When set to false children of the owning [RenderObject] are allowed to
-  /// annotate [SemanticNode]s of their parent with the semantic information
+  /// annotate [SemanticsNode]s of their parent with the semantic information
   /// they want to contribute to the semantic tree.
   /// When set to true the only way for children of the owning [RenderObject]
   /// to contribute semantic information to the semantic tree is to introduce
-  /// new explicit [SemanticNode]s to the tree.
+  /// new explicit [SemanticsNode]s to the tree.
   ///
   /// This setting is often used in combination with [isSemanticBoundary] to
   /// create semantic boundaries that are either writable or not for children.
@@ -2679,7 +2811,7 @@ class SemanticsConfiguration {
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
 
   // SEMANTIC ANNOTATIONS
-  // These will end up on [SemanticNode]s generated from
+  // These will end up on [SemanticsNode]s generated from
   // [SemanticsConfiguration]s.
 
   /// Whether this configuration is empty.
@@ -2743,10 +2875,10 @@ class SemanticsConfiguration {
   /// onTap handler should always be wrapping an element that defines a
   /// semantic [onTap] handler. By default a [GestureDetector] will register its
   /// own semantic [onTap] handler that follows this principle.
-  VoidCallback get onTap => _onTap;
-  VoidCallback _onTap;
-  set onTap(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.tap, value);
+  VoidCallback? get onTap => _onTap;
+  VoidCallback? _onTap;
+  set onTap(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.tap, value!);
     _onTap = value;
   }
 
@@ -2758,10 +2890,10 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen without lifting the finger after the
   /// second tap.
-  VoidCallback get onLongPress => _onLongPress;
-  VoidCallback _onLongPress;
-  set onLongPress(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.longPress, value);
+  VoidCallback? get onLongPress => _onLongPress;
+  VoidCallback? _onLongPress;
+  set onLongPress(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.longPress, value!);
     _onLongPress = value;
   }
 
@@ -2776,10 +2908,10 @@ class SemanticsConfiguration {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollLeft => _onScrollLeft;
-  VoidCallback _onScrollLeft;
-  set onScrollLeft(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.scrollLeft, value);
+  VoidCallback? get onScrollLeft => _onScrollLeft;
+  VoidCallback? _onScrollLeft;
+  set onScrollLeft(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.scrollLeft, value!);
     _onScrollLeft = value;
   }
 
@@ -2790,10 +2922,10 @@ class SemanticsConfiguration {
   /// TalkBack users on Android can trigger this action in the local context
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
-  VoidCallback get onDismiss => _onDismiss;
-  VoidCallback _onDismiss;
-  set onDismiss(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.dismiss, value);
+  VoidCallback? get onDismiss => _onDismiss;
+  VoidCallback? _onDismiss;
+  set onDismiss(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.dismiss, value!);
     _onDismiss = value;
   }
 
@@ -2808,10 +2940,10 @@ class SemanticsConfiguration {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollRight => _onScrollRight;
-  VoidCallback _onScrollRight;
-  set onScrollRight(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.scrollRight, value);
+  VoidCallback? get onScrollRight => _onScrollRight;
+  VoidCallback? _onScrollRight;
+  set onScrollRight(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.scrollRight, value!);
     _onScrollRight = value;
   }
 
@@ -2826,10 +2958,10 @@ class SemanticsConfiguration {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollUp => _onScrollUp;
-  VoidCallback _onScrollUp;
-  set onScrollUp(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.scrollUp, value);
+  VoidCallback? get onScrollUp => _onScrollUp;
+  VoidCallback? _onScrollUp;
+  set onScrollUp(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.scrollUp, value!);
     _onScrollUp = value;
   }
 
@@ -2844,10 +2976,10 @@ class SemanticsConfiguration {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollDown => _onScrollDown;
-  VoidCallback _onScrollDown;
-  set onScrollDown(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.scrollDown, value);
+  VoidCallback? get onScrollDown => _onScrollDown;
+  VoidCallback? _onScrollDown;
+  set onScrollDown(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.scrollDown, value!);
     _onScrollDown = value;
   }
 
@@ -2862,10 +2994,10 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume up button.
-  VoidCallback get onIncrease => _onIncrease;
-  VoidCallback _onIncrease;
-  set onIncrease(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.increase, value);
+  VoidCallback? get onIncrease => _onIncrease;
+  VoidCallback? _onIncrease;
+  set onIncrease(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.increase, value!);
     _onIncrease = value;
   }
 
@@ -2880,10 +3012,10 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume down button.
-  VoidCallback get onDecrease => _onDecrease;
-  VoidCallback _onDecrease;
-  set onDecrease(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.decrease, value);
+  VoidCallback? get onDecrease => _onDecrease;
+  VoidCallback? _onDecrease;
+  set onDecrease(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.decrease, value!);
     _onDecrease = value;
   }
 
@@ -2893,10 +3025,10 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onCopy => _onCopy;
-  VoidCallback _onCopy;
-  set onCopy(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.copy, value);
+  VoidCallback? get onCopy => _onCopy;
+  VoidCallback? _onCopy;
+  set onCopy(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.copy, value!);
     _onCopy = value;
   }
 
@@ -2907,10 +3039,10 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onCut => _onCut;
-  VoidCallback _onCut;
-  set onCut(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.cut, value);
+  VoidCallback? get onCut => _onCut;
+  VoidCallback? _onCut;
+  set onCut(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.cut, value!);
     _onCut = value;
   }
 
@@ -2920,10 +3052,10 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onPaste => _onPaste;
-  VoidCallback _onPaste;
-  set onPaste(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.paste, value);
+  VoidCallback? get onPaste => _onPaste;
+  VoidCallback? _onPaste;
+  set onPaste(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.paste, value!);
     _onPaste = value;
   }
 
@@ -2936,85 +3068,85 @@ class SemanticsConfiguration {
   /// For elements in a scrollable list the framework provides a default
   /// implementation for this action and it is not advised to provide a
   /// custom one via this setter.
-  VoidCallback get onShowOnScreen => _onShowOnScreen;
-  VoidCallback _onShowOnScreen;
-  set onShowOnScreen(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.showOnScreen, value);
+  VoidCallback? get onShowOnScreen => _onShowOnScreen;
+  VoidCallback? _onShowOnScreen;
+  set onShowOnScreen(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.showOnScreen, value!);
     _onShowOnScreen = value;
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorForwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field forward by one character.
   ///
   /// TalkBack users can trigger this by pressing the volume up key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
-  MoveCursorHandler _onMoveCursorForwardByCharacter;
-  set onMoveCursorForwardByCharacter(MoveCursorHandler value) {
+  MoveCursorHandler? get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
+  MoveCursorHandler? _onMoveCursorForwardByCharacter;
+  set onMoveCursorForwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
-      value(extentSelection);
+      value!(extentSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  /// The handler for [SemanticsAction.moveCursorBackwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one character.
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
-  MoveCursorHandler _onMoveCursorBackwardByCharacter;
-  set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
+  MoveCursorHandler? get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
+  MoveCursorHandler? _onMoveCursorBackwardByCharacter;
+  set onMoveCursorBackwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
-      value(extentSelection);
+      value!(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  /// The handler for [SemanticsAction.moveCursorForwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one word.
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
-  MoveCursorHandler _onMoveCursorForwardByWord;
-  set onMoveCursorForwardByWord(MoveCursorHandler value) {
+  MoveCursorHandler? get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
+  MoveCursorHandler? _onMoveCursorForwardByWord;
+  set onMoveCursorForwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
-      value(extentSelection);
+      value!(extentSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
 
-  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  /// The handler for [SemanticsAction.moveCursorBackwardByWord].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
   /// text field backward by one word.
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
-  MoveCursorHandler _onMoveCursorBackwardByWord;
-  set onMoveCursorBackwardByWord(MoveCursorHandler value) {
+  MoveCursorHandler? get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
+  MoveCursorHandler? _onMoveCursorBackwardByWord;
+  set onMoveCursorBackwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
-      value(extentSelection);
+      value!(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
@@ -3026,16 +3158,17 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users can trigger this handler by selecting "Move cursor to
   /// beginning/end" or "Select all" from the local context menu.
-  SetSelectionHandler get onSetSelection => _onSetSelection;
-  SetSelectionHandler _onSetSelection;
-  set onSetSelection(SetSelectionHandler value) {
+  SetSelectionHandler? get onSetSelection => _onSetSelection;
+  SetSelectionHandler? _onSetSelection;
+  set onSetSelection(SetSelectionHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.setSelection, (dynamic args) {
-      final Map<String, int> selection = args;
+      assert(args != null && args is Map);
+      final Map<String, int> selection = (args as Map<dynamic, dynamic>).cast<String, int>();
       assert(selection != null && selection['base'] != null && selection['extent'] != null);
-      value(TextSelection(
-        baseOffset: selection['base'],
-        extentOffset: selection['extent'],
+      value!(TextSelection(
+        baseOffset: selection['base']!,
+        extentOffset: selection['extent']!,
       ));
     });
     _onSetSelection = value;
@@ -3058,10 +3191,10 @@ class SemanticsConfiguration {
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
-  VoidCallback _onDidGainAccessibilityFocus;
-  set onDidGainAccessibilityFocus(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.didGainAccessibilityFocus, value);
+  VoidCallback? get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
+  VoidCallback? _onDidGainAccessibilityFocus;
+  set onDidGainAccessibilityFocus(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.didGainAccessibilityFocus, value!);
     _onDidGainAccessibilityFocus = value;
   }
 
@@ -3082,20 +3215,16 @@ class SemanticsConfiguration {
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
   ///    accessibility focus.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
-  VoidCallback _onDidLoseAccessibilityFocus;
-  set onDidLoseAccessibilityFocus(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value);
+  VoidCallback? get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
+  VoidCallback? _onDidLoseAccessibilityFocus;
+  set onDidLoseAccessibilityFocus(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value!);
     _onDidLoseAccessibilityFocus = value;
   }
 
   /// Returns the action handler registered for [action] or null if none was
   /// registered.
-  ///
-  /// See also:
-  ///
-  ///  * [addAction] to add an action.
-  _SemanticsActionHandler getActionHandler(SemanticsAction action) => _actions[action];
+  _SemanticsActionHandler? getActionHandler(SemanticsAction action) => _actions[action];
 
   /// Determines the position of this node among its siblings in the traversal
   /// sort order.
@@ -3108,9 +3237,9 @@ class SemanticsConfiguration {
   /// subject to how this configuration is used. For example, the [absorb]
   /// method may decide to not use this key when it combines multiple
   /// [SemanticsConfiguration] objects.
-  SemanticsSortKey get sortKey => _sortKey;
-  SemanticsSortKey _sortKey;
-  set sortKey(SemanticsSortKey value) {
+  SemanticsSortKey? get sortKey => _sortKey;
+  SemanticsSortKey? _sortKey;
+  set sortKey(SemanticsSortKey? value) {
     assert(value != null);
     _sortKey = value;
     _hasBeenAnnotated = true;
@@ -3122,9 +3251,9 @@ class SemanticsConfiguration {
   /// child list. For example, if a scrollable has five children but the first
   /// two are not visible (and thus not included in the list of children), then
   /// the index of the last node will still be 4.
-  int get indexInParent => _indexInParent;
-  int _indexInParent;
-  set indexInParent(int value) {
+  int? get indexInParent => _indexInParent;
+  int? _indexInParent;
+  set indexInParent(int? value) {
     _indexInParent = value;
     _hasBeenAnnotated = true;
   }
@@ -3133,9 +3262,9 @@ class SemanticsConfiguration {
   ///
   /// If the number of children are unknown or unbounded, this value will be
   /// null.
-  int get scrollChildCount => _scrollChildCount;
-  int _scrollChildCount;
-  set scrollChildCount(int value) {
+  int? get scrollChildCount => _scrollChildCount;
+  int? _scrollChildCount;
+  set scrollChildCount(int? value) {
     if (value == scrollChildCount)
       return;
     _scrollChildCount = value;
@@ -3144,9 +3273,9 @@ class SemanticsConfiguration {
 
   /// The index of the first visible scrollable child that contributes to
   /// semantics.
-  int get scrollIndex => _scrollIndex;
-  int _scrollIndex;
-  set scrollIndex(int value) {
+  int? get scrollIndex => _scrollIndex;
+  int? _scrollIndex;
+  set scrollIndex(int? value) {
     if (value == scrollIndex)
       return;
     _scrollIndex = value;
@@ -3155,12 +3284,46 @@ class SemanticsConfiguration {
 
   /// The id of the platform view, whose semantics nodes will be added as
   /// children to this node.
-  int get platformViewId => _platformViewId;
-  int _platformViewId;
-  set platformViewId(int value) {
+  int? get platformViewId => _platformViewId;
+  int? _platformViewId;
+  set platformViewId(int? value) {
     if (value == platformViewId)
       return;
     _platformViewId = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The maximum number of characters that can be entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [isTextField] is true. Defaults to null,
+  /// which means no limit is imposed on the text field.
+  int? get maxValueLength => _maxValueLength;
+  int? _maxValueLength;
+  set maxValueLength(int? value) {
+    if (value == maxValueLength)
+      return;
+    _maxValueLength = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The current number of characters that have been entered into an editable
+  /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
+  /// This should only be set when [isTextField] is true. Must be set when
+  /// [maxValueLength] is set.
+  int? get currentValueLength => _currentValueLength;
+  int? _currentValueLength;
+  set currentValueLength(int? value) {
+    if (value == currentValueLength)
+      return;
+    _currentValueLength = value;
     _hasBeenAnnotated = true;
   }
 
@@ -3183,7 +3346,7 @@ class SemanticsConfiguration {
   /// The handlers for each supported [CustomSemanticsAction].
   ///
   /// Whenever a custom accessibility action is added to a node, the action
-  /// [SemanticAction.customAction] is automatically added. A handler is
+  /// [SemanticsAction.customAction] is automatically added. A handler is
   /// created which uses the passed argument to lookup the custom action
   /// handler from this map and invoke it, if present.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
@@ -3196,10 +3359,10 @@ class SemanticsConfiguration {
   }
 
   void _onCustomSemanticsAction(dynamic args) {
-    final CustomSemanticsAction action = CustomSemanticsAction.getAction(args);
+    final CustomSemanticsAction? action = CustomSemanticsAction.getAction(args as int);
     if (action == null)
       return;
-    final VoidCallback callback = _customSemanticsActions[action];
+    final VoidCallback? callback = _customSemanticsActions[action];
     if (callback != null)
       callback();
   }
@@ -3291,9 +3454,9 @@ class SemanticsConfiguration {
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
-  SemanticsHintOverrides get hintOverrides => _hintOverrides;
-  SemanticsHintOverrides _hintOverrides;
-  set hintOverrides(SemanticsHintOverrides value) {
+  SemanticsHintOverrides? get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides? _hintOverrides;
+  set hintOverrides(SemanticsHintOverrides? value) {
     if (value == null)
       return;
     _hintOverrides = value;
@@ -3359,14 +3522,12 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   ///
-  /// On Android, when a live region semantics node is first created TalkBack
-  /// will make a polite announcement of the current label. This announcement
-  /// occurs even if the node is not focused. Subsequent polite announcements
-  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
-  /// announcement will only be made if the node's label has changed since the
-  /// last update.
+  /// On Android, when the label changes on a live region semantics node,
+  /// TalkBack will make a polite announcement of the current label. This
+  /// announcement occurs even if the node is not focused, but only if the label
+  /// has changed since the last update.
   ///
-  /// An example of a live region is the [Snackbar] widget. When it appears
+  /// An example of a live region is the [SnackBar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live
   /// region causes an initial polite announcement to be generated
   /// automatically.
@@ -3381,9 +3542,9 @@ class SemanticsConfiguration {
 
   /// The reading direction for the text in [label], [value], [hint],
   /// [increasedValue], and [decreasedValue].
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection textDirection) {
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? textDirection) {
     _textDirection = textDirection;
     _hasBeenAnnotated = true;
   }
@@ -3414,10 +3575,10 @@ class SemanticsConfiguration {
   /// This property does not control whether semantics are enabled. If you wish to
   /// disable semantics for a particular widget, you should use an [ExcludeSemantics]
   /// widget.
-  bool get isEnabled => _hasFlag(SemanticsFlag.hasEnabledState) ? _hasFlag(SemanticsFlag.isEnabled) : null;
-  set isEnabled(bool value) {
+  bool? get isEnabled => _hasFlag(SemanticsFlag.hasEnabledState) ? _hasFlag(SemanticsFlag.isEnabled) : null;
+  set isEnabled(bool? value) {
     _setFlag(SemanticsFlag.hasEnabledState, true);
-    _setFlag(SemanticsFlag.isEnabled, value);
+    _setFlag(SemanticsFlag.isEnabled, value!);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
@@ -3429,10 +3590,10 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// checked/unchecked state.
-  bool get isChecked => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
-  set isChecked(bool value) {
+  bool? get isChecked => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
+  set isChecked(bool? value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
-    _setFlag(SemanticsFlag.isChecked, value);
+    _setFlag(SemanticsFlag.isChecked, value!);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
@@ -3443,10 +3604,10 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// on/off state.
-  bool get isToggled => _hasFlag(SemanticsFlag.hasToggledState) ? _hasFlag(SemanticsFlag.isToggled) : null;
-  set isToggled(bool value) {
+  bool? get isToggled => _hasFlag(SemanticsFlag.hasToggledState) ? _hasFlag(SemanticsFlag.isToggled) : null;
+  set isToggled(bool? value) {
     _setFlag(SemanticsFlag.hasToggledState, true);
-    _setFlag(SemanticsFlag.isToggled, value);
+    _setFlag(SemanticsFlag.isToggled, value!);
   }
 
   /// Whether the owning RenderObject corresponds to UI that allows the user to
@@ -3459,7 +3620,13 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isInMutuallyExclusiveGroup, value);
   }
 
-  /// Whether the owning [RenderObject] currently holds the user's focus.
+  /// Whether the owning [RenderObject] can hold the input focus.
+  bool get isFocusable => _hasFlag(SemanticsFlag.isFocusable);
+  set isFocusable(bool value) {
+    _setFlag(SemanticsFlag.isFocusable, value);
+  }
+
+  /// Whether the owning [RenderObject] currently holds the input focus.
   bool get isFocused => _hasFlag(SemanticsFlag.isFocused);
   set isFocused(bool value) {
     _setFlag(SemanticsFlag.isFocused, value);
@@ -3471,10 +3638,22 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isButton, value);
   }
 
+  /// Whether the owning [RenderObject] is a link (true) or not (false).
+  bool get isLink => _hasFlag(SemanticsFlag.isLink);
+  set isLink(bool value) {
+    _setFlag(SemanticsFlag.isLink, value);
+  }
+
   /// Whether the owning [RenderObject] is a header (true) or not (false).
   bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
   set isHeader(bool value) {
     _setFlag(SemanticsFlag.isHeader, value);
+  }
+
+  /// Whether the owning [RenderObject] is a slider (true) or not (false).
+  bool get isSlider => _hasFlag(SemanticsFlag.isSlider);
+  set isSlider(bool value) {
+    _setFlag(SemanticsFlag.isSlider, value);
   }
 
   /// Whether the owning [RenderObject] is considered hidden.
@@ -3504,14 +3683,31 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isTextField, value);
   }
 
+  /// Whether the owning [RenderObject] is read only.
+  ///
+  /// Only applicable when [isTextField] is true.
+  bool get isReadOnly => _hasFlag(SemanticsFlag.isReadOnly);
+  set isReadOnly(bool value) {
+    _setFlag(SemanticsFlag.isReadOnly, value);
+  }
+
   /// Whether the [value] should be obscured.
   ///
-  /// This option is usually set in combination with [textField] to indicate
+  /// This option is usually set in combination with [isTextField] to indicate
   /// that the text field contains a password (or other sensitive information).
   /// Doing so instructs screen readers to not read out the [value].
   bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
   set isObscured(bool value) {
     _setFlag(SemanticsFlag.isObscured, value);
+  }
+
+  /// Whether the text field is multiline.
+  ///
+  /// This option is usually set in combination with [isTextField] to indicate
+  /// that the text field is configured to be multiline.
+  bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
+  set isMultiline(bool value) {
+    _setFlag(SemanticsFlag.isMultiline, value);
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts
@@ -3528,9 +3724,9 @@ class SemanticsConfiguration {
 
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
-  TextSelection get textSelection => _textSelection;
-  TextSelection _textSelection;
-  set textSelection(TextSelection value) {
+  TextSelection? get textSelection => _textSelection;
+  TextSelection? _textSelection;
+  set textSelection(TextSelection? value) {
     assert(value != null);
     _textSelection = value;
     _hasBeenAnnotated = true;
@@ -3546,9 +3742,9 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [ScrollPosition.pixels], from where this value is usually taken.
-  double get scrollPosition => _scrollPosition;
-  double _scrollPosition;
-  set scrollPosition(double value) {
+  double? get scrollPosition => _scrollPosition;
+  double? _scrollPosition;
+  set scrollPosition(double? value) {
     assert(value != null);
     _scrollPosition = value;
     _hasBeenAnnotated = true;
@@ -3562,9 +3758,9 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
-  double get scrollExtentMax => _scrollExtentMax;
-  double _scrollExtentMax;
-  set scrollExtentMax(double value) {
+  double? get scrollExtentMax => _scrollExtentMax;
+  double? _scrollExtentMax;
+  set scrollExtentMax(double? value) {
     assert(value != null);
     _scrollExtentMax = value;
     _hasBeenAnnotated = true;
@@ -3578,9 +3774,9 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [ScrollPosition.minScrollExtent], from where this value is usually taken.
-  double get scrollExtentMin => _scrollExtentMin;
-  double _scrollExtentMin;
-  set scrollExtentMin(double value) {
+  double? get scrollExtentMin => _scrollExtentMin;
+  double? _scrollExtentMin;
+  set scrollExtentMin(double? value) {
     assert(value != null);
     _scrollExtentMin = value;
     _hasBeenAnnotated = true;
@@ -3595,8 +3791,8 @@ class SemanticsConfiguration {
   ///
   ///  * [addTagForChildren] to add a tag and for more information about their
   ///    usage.
-  Iterable<SemanticsTag> get tagsForChildren => _tagsForChildren;
-  Set<SemanticsTag> _tagsForChildren;
+  Iterable<SemanticsTag>? get tagsForChildren => _tagsForChildren;
+  Set<SemanticsTag>? _tagsForChildren;
 
   /// Specifies a [SemanticsTag] that this configuration wants to apply to all
   /// child [SemanticsNode]s.
@@ -3611,11 +3807,11 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
+  ///  * [RenderViewport.excludeFromScrolling] for an example of
   ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
     _tagsForChildren ??= <SemanticsTag>{};
-    _tagsForChildren.add(tag);
+    _tagsForChildren!.add(tag);
   }
 
   // INTERNAL FLAG MANAGEMENT
@@ -3639,7 +3835,7 @@ class SemanticsConfiguration {
   ///
   /// Two configurations are said to be compatible if they can be added to the
   /// same [SemanticsNode] without losing any semantics information.
-  bool isCompatibleWith(SemanticsConfiguration other) {
+  bool isCompatibleWith(SemanticsConfiguration? other) {
     if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated)
       return true;
     if (_actionsAsBits & other._actionsAsBits != 0)
@@ -3647,6 +3843,12 @@ class SemanticsConfiguration {
     if ((_flags & other._flags) != 0)
       return false;
     if (_platformViewId != null && other._platformViewId != null) {
+      return false;
+    }
+    if (_maxValueLength != null && other._maxValueLength != null) {
+      return false;
+    }
+    if (_currentValueLength != null && other._currentValueLength != null) {
       return false;
     }
     if (_value != null && _value.isNotEmpty && other._value != null && other._value.isNotEmpty)
@@ -3684,6 +3886,8 @@ class SemanticsConfiguration {
     _scrollIndex ??= child._scrollIndex;
     _scrollChildCount ??= child._scrollChildCount;
     _platformViewId ??= child._platformViewId;
+    _maxValueLength ??= child._maxValueLength;
+    _currentValueLength ??= child._currentValueLength;
 
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
@@ -3740,6 +3944,8 @@ class SemanticsConfiguration {
       .._scrollIndex = _scrollIndex
       .._scrollChildCount = _scrollChildCount
       .._platformViewId = _platformViewId
+      .._maxValueLength = _maxValueLength
+      .._currentValueLength = _currentValueLength
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions);
   }
@@ -3763,10 +3969,10 @@ enum DebugSemanticsDumpOrder {
 }
 
 String _concatStrings({
-  @required String thisString,
-  @required String otherString,
-  @required TextDirection thisTextDirection,
-  @required TextDirection otherTextDirection,
+  required String thisString,
+  required String otherString,
+  required TextDirection? thisTextDirection,
+  required TextDirection? otherTextDirection,
 }) {
   if (otherString.isEmpty)
     return thisString;
@@ -3786,50 +3992,56 @@ String _concatStrings({
   return '$thisString\n$nestedLabel';
 }
 
-/// Base class for all sort keys for [Semantics] accessibility traversal order
-/// sorting.
+/// Base class for all sort keys for [SemanticsProperties.sortKey] accessibility
+/// traversal order sorting.
 ///
-/// Only keys of the same type and having matching [name]s are compared. If a
-/// list of sibling [SemanticsNode]s contains keys that are not comparable with
-/// each other the list is first sorted using the default sorting algorithm.
-/// Then the nodes are broken down into groups by moving comparable nodes
-/// towards the _earliest_ node in the group. Finally each group is sorted by
-/// sort key and the resulting list is made by concatenating the sorted groups
-/// back.
+/// Sort keys are sorted by [name], then by the comparison that the subclass
+/// implements. If [SemanticsProperties.sortKey] is specified, sort keys within
+/// the same semantic group must all be of the same type.
 ///
-/// For example, let's take nodes (C, D, B, E, A, F). Let's assign node A key 1,
-/// node B key 2, node C key 3. Let's also assume that the default sort order
-/// leaves the original list intact. Because nodes A, B, and C, have comparable
-/// sort key, they will form a group by pulling all nodes towards the earliest
-/// node, which is C. The result is group (C, B, A). The remaining nodes D, E,
-/// F, form a second group with sort key being `null`. The first group is sorted
-/// using their sort keys becoming (A, B, C). The second group is left as is
-/// because it does not specify sort keys. Then we concatenate the two groups -
-/// (A, B, C) and (D, E, F) - into the final (A, B, C, D, E, F).
+/// Keys with no [name] are compared to other keys with no [name], and will
+/// be traversed before those with a [name].
 ///
-/// Because of the complexity introduced by incomparable sort keys among sibling
-/// nodes, it is recommended to either use comparable keys for all nodes, or
-/// use null for all of them, leaving the sort order to the default algorithm.
+/// If no sort key is applied to a semantics node, then it will be ordered using
+/// a platform dependent default algorithm.
 ///
-/// See Also:
+/// See also:
 ///
 ///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
-abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {
+abstract class SemanticsSortKey with Diagnosticable implements Comparable<SemanticsSortKey> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const SemanticsSortKey({this.name});
 
-  /// An optional name that will make this sort key only order itself
-  /// with respect to other sort keys of the same [name], as long as
-  /// they are of the same [runtimeType].
-  final String name;
+  /// An optional name that will group this sort key with other sort keys of the
+  /// same [name].
+  ///
+  /// Sort keys must have the same `runtimeType` when compared.
+  ///
+  /// Keys with no [name] are compared to other keys with no [name], and will
+  /// be traversed before those with a [name].
+  final String? name;
 
   @override
   int compareTo(SemanticsSortKey other) {
-    // The sorting algorithm must not compare incomparable keys.
-    assert(runtimeType == other.runtimeType);
-    assert(name == other.name);
-    return doCompare(other);
+    // Sort by name first and then subclass ordering.
+    assert(runtimeType == other.runtimeType, 'Semantics sort keys can only be compared to other sort keys of the same type.');
+
+    // Defer to the subclass implementation for ordering only if the names are
+    // identical (or both null).
+    if (name == other.name) {
+      return doCompare(other);
+    }
+
+    // Keys that don't have a name are sorted together and come before those with
+    // a name.
+    if (name == null && other.name != null) {
+      return -1;
+    } else if (name != null && other.name == null) {
+      return 1;
+    }
+
+    return name!.compareTo(other.name!);
   }
 
   /// The implementation of [compareTo].
@@ -3857,17 +4069,25 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 /// The [OrdinalSortKey] compares itself with other [OrdinalSortKey]s
 /// to sort based on the order it is given.
 ///
-/// The ordinal value `order` is typically a whole number, though it can be
+/// [OrdinalSortKey]s are sorted by the optional [name], then by their [order].
+/// If [SemanticsProperties.sortKey] is a [OrdinalSortKey], then all the other
+/// specified sort keys in the same semantics group must also be
+/// [OrdinalSortKey]s.
+///
+/// Keys with no [name] are compared to other keys with no [name], and will
+/// be traversed before those with a [name].
+///
+/// The ordinal value [order] is typically a whole number, though it can be
 /// fractional, e.g. in order to fit between two other consecutive whole
 /// numbers. The value must be finite (it cannot be [double.nan],
 /// [double.infinity], or [double.negativeInfinity]).
 class OrdinalSortKey extends SemanticsSortKey {
-  /// Creates a semantics sort key that uses a [double] as its key value.
+  /// Creates a const semantics sort key that uses a [double] as its key value.
   ///
-  /// The [order] must be a finite number.
+  /// The [order] must be a finite number, and must not be null.
   const OrdinalSortKey(
     this.order, {
-    String name,
+    String? name,
   }) : assert(order != null),
        assert(order != double.nan),
        assert(order > double.negativeInfinity),
@@ -3878,7 +4098,8 @@ class OrdinalSortKey extends SemanticsSortKey {
   /// the order in which this node is traversed by the platform's accessibility
   /// services.
   ///
-  /// Lower values will be traversed first.
+  /// Lower values will be traversed first. Keys with the same [name] will be
+  /// grouped together and sorted by name first, and then sorted by [order].
   final double order;
 
   @override

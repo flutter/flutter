@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<String> runFlutterAndQuit(List<String> args, Device device) async {
@@ -17,7 +18,7 @@ Future<String> runFlutterAndQuit(List<String> args, Device device) async {
   print('run: starting...');
   final Process run = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['run', '--suppress-analytics']..addAll(args),
+    <String>['run', '--suppress-analytics', ...args],
     isBot: false, // we just want to test the output, not have any debugging info
   );
   final List<String> stdout = <String>[];
@@ -61,8 +62,13 @@ void main() {
     Future<void> checkMode(String mode, {bool releaseExpected = false, bool dynamic = false}) async {
       await inDirectory(appDir, () async {
         print('run: starting $mode test...');
-        final List<String> args = <String>['--$mode']..addAll(dynamic ? <String>['--dynamic'] : const <String>[]);
-        args.addAll(<String>['-d', device.deviceId, 'lib/build_mode.dart']);
+        final List<String> args = <String>[
+          '--$mode',
+          if (dynamic) '--dynamic',
+          '-d',
+          device.deviceId,
+          'lib/build_mode.dart',
+        ];
         final String stdout = await runFlutterAndQuit(args, device);
         if (!stdout.contains('>>> Release: $releaseExpected <<<')) {
           throw "flutter run --$mode ${dynamic ? '--dynamic ' : ''}didn't set kReleaseMode properly";

@@ -1,16 +1,17 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/rendering/layer.dart';
 
 /// An [Invocation] and the [stack] trace that led to it.
 ///
 /// Used by [TestRecordingCanvas] to trace canvas calls.
 class RecordedInvocation {
   /// Create a record for an invocation list.
-  const RecordedInvocation(this.invocation, { this.stack });
+  const RecordedInvocation(this.invocation, { required this.stack });
 
   /// The method that was called and its arguments.
   ///
@@ -71,7 +72,7 @@ class TestRecordingCanvas implements Canvas {
   }
 
   @override
-  void saveLayer(Rect bounds, Paint paint) {
+  void saveLayer(Rect? bounds, Paint paint) {
     _saveCount += 1;
     invocations.add(RecordedInvocation(_MethodCall(#saveLayer, <dynamic>[bounds, paint]), stack: StackTrace.current));
   }
@@ -103,38 +104,82 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge }) {
+  ClipRectLayer? pushClipRect(
+    bool needsCompositing,
+    Offset offset,
+    Rect clipRect,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.hardEdge,
+    ClipRectLayer? oldLayer,
+  }) {
     clipRectAndPaint(clipRect.shift(offset), clipBehavior, clipRect.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
+  ClipRRectLayer? pushClipRRect(
+    bool needsCompositing,
+    Offset offset,
+    Rect bounds,
+    RRect clipRRect,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipRRectLayer? oldLayer,
+  }) {
     assert(clipBehavior != null);
     clipRRectAndPaint(clipRRect.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
+  ClipPathLayer? pushClipPath(
+    bool needsCompositing,
+    Offset offset,
+    Rect bounds,
+    Path clipPath,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipPathLayer? oldLayer,
+  }) {
     clipPathAndPaint(clipPath.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+  TransformLayer? pushTransform(
+    bool needsCompositing,
+    Offset offset,
+    Matrix4 transform,
+    PaintingContextCallback painter, {
+    TransformLayer? oldLayer,
+  }) {
     canvas.save();
     canvas.transform(transform.storage);
     painter(this, offset);
     canvas.restore();
+    return null;
   }
 
   @override
-  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
-    canvas.saveLayer(null, null); // TODO(ianh): Expose the alpha somewhere.
+  OpacityLayer pushOpacity(
+    Offset offset,
+    int alpha,
+    PaintingContextCallback painter, {
+    OpacityLayer? oldLayer,
+  }) {
+    canvas.saveLayer(null, Paint()); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
+    return OpacityLayer();
   }
 
   @override
-  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+  void pushLayer(
+    Layer childLayer,
+    PaintingContextCallback painter,
+    Offset offset, {
+    Rect? childPaintBounds,
+  }) {
     painter(this, offset);
   }
 
@@ -165,7 +210,7 @@ class _MethodCall implements Invocation {
   List<Type> get typeArguments => _typeArguments;
 }
 
-String _valueName(Object value) {
+String _valueName(Object? value) {
   if (value is double)
     return value.toStringAsFixed(1);
   return value.toString();
@@ -189,7 +234,7 @@ String _describeInvocation(Invocation call) {
     buffer.write('(');
     buffer.writeAll(call.positionalArguments.map<String>(_valueName), ', ');
     String separator = call.positionalArguments.isEmpty ? '' : ', ';
-    call.namedArguments.forEach((Symbol name, Object value) {
+    call.namedArguments.forEach((Symbol name, Object? value) {
       buffer.write(separator);
       buffer.write(_symbolName(name));
       buffer.write(': ');

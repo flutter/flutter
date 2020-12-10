@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,14 +13,83 @@ import 'package:flutter/scheduler.dart';
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
+///
+/// The receiver of an [ImageInfo] object must call [dispose]. To safely share
+/// the object with other clients, use the [clone] method before calling
+/// dispose.
 @immutable
 class ImageInfo {
-  /// Creates an [ImageInfo] object for the given image and scale.
+  /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
-  /// Both the image and the scale must not be null.
-  const ImageInfo({ @required this.image, this.scale = 1.0 })
+  /// Both the [image] and the [scale] must not be null.
+  ///
+  /// The [debugLabel] may be used to identify the source of this image.
+  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel })
     : assert(image != null),
       assert(scale != null);
+
+  /// Creates an [ImageInfo] with a cloned [image].
+  ///
+  /// Once all outstanding references to the [image] are disposed, it is no
+  /// longer safe to access properties of it or attempt to draw it. Clones serve
+  /// to create new references to the underlying image data that can safely be
+  /// disposed without knowledge of whether some other reference holder will
+  /// still need access to the underlying image. Once a client disposes of its
+  /// own image reference, it can no longer access the image, but other clients
+  /// will be able to access their own references.
+  ///
+  /// This method must be used in cases where a client holding an [ImageInfo]
+  /// needs to share the image info object with another client and will still
+  /// need to access the underlying image data at some later point, e.g. to
+  /// share it again with another client.
+  ///
+  /// See also:
+  ///
+  ///  * [Image.clone], which describes how and why to clone images.
+  ImageInfo clone() {
+    return ImageInfo(
+      image: image.clone(),
+      scale: scale,
+      debugLabel: debugLabel,
+    );
+  }
+
+  /// Whether this [ImageInfo] is a [clone] of the `other`.
+  ///
+  /// This method is a convenience wrapper for [Image.isCloneOf], and is useful
+  /// for clients that are trying to determine whether new layout or painting
+  /// logic is required when receiving a new image reference.
+  ///
+  /// {@tool snippet}
+  ///
+  /// The following sample shows how to appropriately check whether the
+  /// [ImageInfo] reference refers to new image data or not.
+  ///
+  /// ```dart
+  /// ImageInfo _imageInfo;
+  /// set imageInfo (ImageInfo value) {
+  ///   // If the image reference is exactly the same, do nothing.
+  ///   if (value == _imageInfo) {
+  ///     return;
+  ///   }
+  ///   // If it is a clone of the current reference, we must dispose of it and
+  ///   // can do so immediately. Since the underlying image has not changed,
+  ///   // We don't have any additional work to do here.
+  ///   if (value != null && _imageInfo != null && value.isCloneOf(_imageInfo)) {
+  ///     value.dispose();
+  ///     return;
+  ///   }
+  ///   _imageInfo?.dispose();
+  ///   _imageInfo = value;
+  ///   // Perform work to determine size, or paint the image.
+  /// }
+  /// ```
+  /// {@end-tool}
+  bool isCloneOf(ImageInfo other) {
+    return other.image.isCloneOf(image)
+        && scale == scale
+        && other.debugLabel == debugLabel;
+  }
 
   /// The raw image pixels.
   ///
@@ -35,30 +104,117 @@ class ImageInfo {
   ///
   /// For example, if this is 2.0 it means that there are four image pixels for
   /// every one logical pixel, and the image's actual width and height (as given
-  /// by the [dart:ui.Image.width] and [dart:ui.Image.height] properties) are double the
-  /// height and width that should be used when painting the image (e.g. in the
-  /// arguments given to [Canvas.drawImage]).
+  /// by the [dart:ui.Image.width] and [dart:ui.Image.height] properties) are
+  /// double the height and width that should be used when painting the image
+  /// (e.g. in the arguments given to [Canvas.drawImage]).
   final double scale;
 
-  @override
-  String toString() => '$image @ ${scale}x';
+  /// A string used for debugging purposes to identify the source of this image.
+  final String? debugLabel;
+
+  /// Disposes of this object.
+  ///
+  /// Once this method has been called, the object should not be used anymore,
+  /// and no clones of it or the image it contains can be made.
+  void dispose() {
+    assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
+    image.dispose();
+  }
 
   @override
-  int get hashCode => hashValues(image, scale);
+  String toString() => '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x';
+
+  @override
+  int get hashCode => hashValues(image, scale, debugLabel);
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageInfo typedOther = other;
-    return typedOther.image == image
-        && typedOther.scale == scale;
+    return other is ImageInfo
+        && other.image == image
+        && other.scale == scale
+        && other.debugLabel == debugLabel;
+  }
+}
+
+/// Interface for receiving notifications about the loading of an image.
+///
+/// This class overrides [operator ==] and [hashCode] to compare the individual
+/// callbacks in the listener, meaning that if you add an instance of this class
+/// as a listener (e.g. via [ImageStream.addListener]), you can instantiate a
+/// _different_ instance of this class when you remove the listener, and the
+/// listener will be properly removed as long as all associated callbacks are
+/// equal.
+///
+/// Used by [ImageStream] and [ImageStreamCompleter].
+@immutable
+class ImageStreamListener {
+  /// Creates a new [ImageStreamListener].
+  ///
+  /// The [onImage] parameter must not be null.
+  const ImageStreamListener(
+    this.onImage, {
+    this.onChunk,
+    this.onError,
+  }) : assert(onImage != null);
+
+  /// Callback for getting notified that an image is available.
+  ///
+  /// This callback may fire multiple times (e.g. if the [ImageStreamCompleter]
+  /// that drives the notifications fires multiple times). An example of such a
+  /// case would be an image with multiple frames within it (such as an animated
+  /// GIF).
+  ///
+  /// For more information on how to interpret the parameters to the callback,
+  /// see the documentation on [ImageListener].
+  ///
+  /// See also:
+  ///
+  ///  * [onError], which will be called instead of [onImage] if an error occurs
+  ///    during loading.
+  final ImageListener onImage;
+
+  /// Callback for getting notified when a chunk of bytes has been received
+  /// during the loading of the image.
+  ///
+  /// This callback may fire many times (e.g. when used with a [NetworkImage],
+  /// where the image bytes are loaded incrementally over the wire) or not at
+  /// all (e.g. when used with a [MemoryImage], where the image bytes are
+  /// already available in memory).
+  ///
+  /// This callback may also continue to fire after the [onImage] callback has
+  /// fired (e.g. for multi-frame images that continue to load after the first
+  /// frame is available).
+  final ImageChunkListener? onChunk;
+
+  /// Callback for getting notified when an error occurs while loading an image.
+  ///
+  /// If an error occurs during loading, [onError] will be called instead of
+  /// [onImage].
+  final ImageErrorListener? onError;
+
+  @override
+  int get hashCode => hashValues(onImage, onChunk, onError);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ImageStreamListener
+        && other.onImage == onImage
+        && other.onChunk == onChunk
+        && other.onError == onError;
   }
 }
 
 /// Signature for callbacks reporting that an image is available.
 ///
-/// Used by [ImageStream].
+/// Used in [ImageStreamListener].
+///
+/// The `image` argument contains information about the image to be rendered.
+/// The implementer of [ImageStreamListener.onImage] is expected to call dispose
+/// on the [ui.Image] it receives.
 ///
 /// The `synchronousCall` argument is true if the listener is being invoked
 /// during the call to `addListener`. This can be useful if, for example,
@@ -68,15 +224,57 @@ class ImageInfo {
 /// same stack frame as the call to [ImageStream.addListener]).
 typedef ImageListener = void Function(ImageInfo image, bool synchronousCall);
 
+/// Signature for listening to [ImageChunkEvent] events.
+///
+/// Used in [ImageStreamListener].
+typedef ImageChunkListener = void Function(ImageChunkEvent event);
+
 /// Signature for reporting errors when resolving images.
 ///
-/// Used by [ImageStream] and [precacheImage] to report errors.
-typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTrace);
+/// Used in [ImageStreamListener], as well as by [ImageCache.putIfAbsent] and
+/// [precacheImage], to report errors.
+typedef ImageErrorListener = void Function(Object exception, StackTrace? stackTrace);
 
-class _ImageListenerPair {
-  _ImageListenerPair(this.listener, this.errorListener);
-  final ImageListener listener;
-  final ImageErrorListener errorListener;
+/// An immutable notification of image bytes that have been incrementally loaded.
+///
+/// Chunk events represent progress notifications while an image is being
+/// loaded (e.g. from disk or over the network).
+///
+/// See also:
+///
+///  * [ImageChunkListener], the means by which callers get notified of
+///    these events.
+@immutable
+class ImageChunkEvent with Diagnosticable {
+  /// Creates a new chunk event.
+  const ImageChunkEvent({
+    required this.cumulativeBytesLoaded,
+    required this.expectedTotalBytes,
+  }) : assert(cumulativeBytesLoaded >= 0),
+       assert(expectedTotalBytes == null || expectedTotalBytes >= 0);
+
+  /// The number of bytes that have been received across the wire thus far.
+  final int cumulativeBytesLoaded;
+
+  /// The expected number of bytes that need to be received to finish loading
+  /// the image.
+  ///
+  /// This value is not necessarily equal to the expected _size_ of the image
+  /// in bytes, as the bytes required to load the image may be compressed.
+  ///
+  /// This value will be null if the number is not known in advance.
+  ///
+  /// When this value is null, the chunk event may still be useful as an
+  /// indication that data is loading (and how much), but it cannot represent a
+  /// loading completion percentage.
+  final int? expectedTotalBytes;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('cumulativeBytesLoaded', cumulativeBytesLoaded));
+    properties.add(IntProperty('expectedTotalBytes', expectedTotalBytes));
+  }
 }
 
 /// A handle to an image resource.
@@ -91,11 +289,16 @@ class _ImageListenerPair {
 ///
 /// ImageStream objects are backed by [ImageStreamCompleter] objects.
 ///
+/// The [ImageCache] will consider an image to be live until the listener count
+/// drops to zero after adding at least one listener. The
+/// [ImageStreamCompleter.addOnLastListenerRemovedCallback] method is used for
+/// tracking this information.
+///
 /// See also:
 ///
 ///  * [ImageProvider], which has an example that includes the use of an
 ///    [ImageStream] in a [Widget].
-class ImageStream extends Diagnosticable {
+class ImageStream with Diagnosticable {
   /// Create an initially unbound image stream.
   ///
   /// Once an [ImageStreamCompleter] is available, call [setCompleter].
@@ -104,10 +307,10 @@ class ImageStream extends Diagnosticable {
   /// The completer that has been assigned to this image stream.
   ///
   /// Generally there is no need to deal with the completer directly.
-  ImageStreamCompleter get completer => _completer;
-  ImageStreamCompleter _completer;
+  ImageStreamCompleter? get completer => _completer;
+  ImageStreamCompleter? _completer;
 
-  List<_ImageListenerPair> _listeners;
+  List<ImageStreamListener>? _listeners;
 
   /// Assigns a particular [ImageStreamCompleter] to this [ImageStream].
   ///
@@ -121,14 +324,9 @@ class ImageStream extends Diagnosticable {
     assert(_completer == null);
     _completer = value;
     if (_listeners != null) {
-      final List<_ImageListenerPair> initialListeners = _listeners;
+      final List<ImageStreamListener> initialListeners = _listeners!;
       _listeners = null;
-      for (_ImageListenerPair listenerPair in initialListeners) {
-        _completer.addListener(
-          listenerPair.listener,
-          onError: listenerPair.errorListener,
-        );
-      }
+      initialListeners.forEach(_completer!.addListener);
     }
   }
 
@@ -139,53 +337,38 @@ class ImageStream extends Diagnosticable {
   /// If the assigned [completer] completes multiple images over its lifetime,
   /// this listener will fire multiple times.
   ///
+  /// {@template flutter.painting.imageStream.addListener}
   /// The listener will be passed a flag indicating whether a synchronous call
   /// occurred. If the listener is added within a render object paint function,
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
   ///
-  /// An [ImageErrorListener] can also optionally be added along with the
-  /// `listener`. If an error occurred, `onError` will be called instead of
-  /// `listener`.
+  /// If a duplicate `listener` is registered N times, then it will be called N
+  /// times when the image stream completes (whether because a new image is
+  /// available or because an error occurs). Likewise, to remove all instances
+  /// of the listener, [removeListener] would need to called N times as well.
   ///
-  /// If a `listener` or `onError` handler is registered multiple times, then it
-  /// will be called multiple times when the image stream completes (whether
-  /// because a new image is available or because an error occurs,
-  /// respectively). In general, registering a listener multiple times is
-  /// discouraged because [removeListener] will remove the first instance that
-  /// was added, even if it was added with a different `onError` than the
-  /// intended paired `addListener` call.
-  void addListener(ImageListener listener, { ImageErrorListener onError }) {
+  /// When a `listener` receives an [ImageInfo] object, the `listener` is
+  /// responsible for disposing of the [ImageInfo.image].
+  /// {@endtemplate}
+  void addListener(ImageStreamListener listener) {
     if (_completer != null)
-      return _completer.addListener(listener, onError: onError);
-    _listeners ??= <_ImageListenerPair>[];
-    _listeners.add(_ImageListenerPair(listener, onError));
+      return _completer!.addListener(listener);
+    _listeners ??= <ImageStreamListener>[];
+    _listeners!.add(listener);
   }
 
-  /// Stop listening for new concrete [ImageInfo] objects and errors from
-  /// the `listener`'s associated [ImageErrorListener].
+  /// Stops listening for events from this stream's [ImageStreamCompleter].
   ///
-  /// If `listener` has been added multiple times, this removes the first
-  /// instance of the listener, along with the `onError` listener that was
-  /// registered with that first instance. This might not be the instance that
-  /// the `addListener` corresponding to this `removeListener` had added.
-  ///
-  /// For example, if one widget calls [addListener] with a global static
-  /// function and a private error handler, and another widget calls
-  /// [addListener] with the same global static function but a different private
-  /// error handler, then the second widget is disposed and removes the image
-  /// listener (the aforementioned global static function), it will remove the
-  /// error handler from the first widget, not the second. If an error later
-  /// occurs, the first widget, which is still supposedly listening, will not
-  /// receive any messages, while the second, which is supposedly disposed, will
-  /// have its callback invoked.
-  void removeListener(ImageListener listener) {
+  /// If [listener] has been added multiple times, this removes the _first_
+  /// instance of the listener.
+  void removeListener(ImageStreamListener listener) {
     if (_completer != null)
-      return _completer.removeListener(listener);
+      return _completer!.removeListener(listener);
     assert(_listeners != null);
-    for (int i = 0; i < _listeners.length; i += 1) {
-      if (_listeners[i].listener == listener) {
-        _listeners.removeAt(i);
+    for (int i = 0; i < _listeners!.length; i += 1) {
+      if (_listeners![i] == listener) {
+        _listeners!.removeAt(i);
         break;
       }
     }
@@ -202,7 +385,7 @@ class ImageStream extends Diagnosticable {
   /// will go from being different than other [ImageStream]'s keys to
   /// potentially being the same as others'. No notification is sent when this
   /// happens.
-  Object get key => _completer != null ? _completer : this;
+  Object get key => _completer ?? this;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -213,7 +396,7 @@ class ImageStream extends Diagnosticable {
       ifPresent: _completer?.toStringShort(),
       ifNull: 'unresolved',
     ));
-    properties.add(ObjectFlagProperty<List<_ImageListenerPair>>(
+    properties.add(ObjectFlagProperty<List<ImageStreamListener>>(
       'listeners',
       _listeners,
       ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
@@ -224,16 +407,50 @@ class ImageStream extends Diagnosticable {
   }
 }
 
+/// An opaque handle that keeps an [ImageStreamCompleter] alive even if it has
+/// lost its last listener.
+///
+/// To create a handle, use [ImageStreamCompleter.keepAlive].
+///
+/// Such handles are useful when an image cache needs to keep a completer alive
+/// but does not actually have a listener subscribed, or when a widget that
+/// displays an image needs to temporarily unsubscribe from the completer but
+/// may re-subscribe in the future, for example when the [TickerMode] changes.
+class ImageStreamCompleterHandle {
+  ImageStreamCompleterHandle._(ImageStreamCompleter this._completer) {
+    _completer!._keepAliveHandles += 1;
+  }
+
+  ImageStreamCompleter? _completer;
+
+  /// Call this method to signal the [ImageStreamCompleter] that it can now be
+  /// disposed when its last listener drops.
+  ///
+  /// This method must only be called once per object.
+  void dispose() {
+    assert(_completer != null);
+    assert(_completer!._keepAliveHandles > 0);
+    assert(!_completer!._disposed);
+
+    _completer!._keepAliveHandles -= 1;
+    _completer!._maybeDispose();
+    _completer = null;
+  }
+}
+
 /// Base class for those that manage the loading of [dart:ui.Image] objects for
 /// [ImageStream]s.
 ///
 /// [ImageStreamListener] objects are rarely constructed directly. Generally, an
 /// [ImageProvider] subclass will return an [ImageStream] and automatically
 /// configure it with the right [ImageStreamCompleter] when possible.
-abstract class ImageStreamCompleter extends Diagnosticable {
-  final List<_ImageListenerPair> _listeners = <_ImageListenerPair>[];
-  ImageInfo _currentImage;
-  FlutterErrorDetails _currentError;
+abstract class ImageStreamCompleter with Diagnosticable {
+  final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
+  ImageInfo? _currentImage;
+  FlutterErrorDetails? _currentError;
+
+  /// A string identifying the source of the underlying image.
+  String? debugLabel;
 
   /// Whether any listeners are currently registered.
   ///
@@ -246,59 +463,51 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   ///
   /// Typically this is used by overriding [addListener], checking if
   /// [hasListeners] is false before calling `super.addListener()`, and if so,
-  /// starting whatever work is needed to determine when to call
-  /// [notifyListeners]; and similarly, by overriding [removeListener], checking
-  /// if [hasListeners] is false after calling `super.removeListener()`, and if
-  /// so, stopping that same work.
+  /// starting whatever work is needed to determine when to notify listeners;
+  /// and similarly, by overriding [removeListener], checking if [hasListeners]
+  /// is false after calling `super.removeListener()`, and if so, stopping that
+  /// same work.
   @protected
+  @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
+
+  /// We must avoid disposing a completer if it has never had a listener, even
+  /// if all [keepAlive] handles get disposed.
+  bool _hadAtLeastOneListener = false;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
   /// already available, or if an error has been already reported, this object
-  /// will call the listener or error listener synchronously.
+  /// will notify the listener synchronously.
   ///
   /// If the [ImageStreamCompleter] completes multiple images over its lifetime,
-  /// this listener will fire multiple times.
+  /// this listener's [ImageStreamListener.onImage] will fire multiple times.
   ///
-  /// The listener will be passed a flag indicating whether a synchronous call
-  /// occurred. If the listener is added within a render object paint function,
-  /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
-  /// a paint.
-  ///
-  /// An [ImageErrorListener] can also optionally be added along with the
-  /// `listener`. If an error occurred, `onError` will be called instead of
-  /// `listener`.
-  ///
-  /// If a `listener` or `onError` handler is registered multiple times, then it
-  /// will be called multiple times when the image stream completes (whether
-  /// because a new image is available or because an error occurs,
-  /// respectively). In general, registering a listener multiple times is
-  /// discouraged because [removeListener] will remove the first instance that
-  /// was added, even if it was added with a different `onError` than the
-  /// intended paired `addListener` call.
-  void addListener(ImageListener listener, { ImageErrorListener onError }) {
-    _listeners.add(_ImageListenerPair(listener, onError));
+  /// {@macro flutter.painting.imageStream.addListener}
+  void addListener(ImageStreamListener listener) {
+    _checkDisposed();
+    _hadAtLeastOneListener = true;
+    _listeners.add(listener);
     if (_currentImage != null) {
       try {
-        listener(_currentImage, true);
+        listener.onImage(_currentImage!.clone(), true);
       } catch (exception, stack) {
         reportError(
-          context: 'by a synchronously-called image listener',
+          context: ErrorDescription('by a synchronously-called image listener'),
           exception: exception,
           stack: stack,
         );
       }
     }
-    if (_currentError != null && onError != null) {
+    if (_currentError != null && listener.onError != null) {
       try {
-        onError(_currentError.exception, _currentError.stack);
+        listener.onError!(_currentError!.exception, _currentError!.stack);
       } catch (exception, stack) {
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: exception,
             library: 'image resource service',
-            context: 'by a synchronously-called image error listener',
+            context: ErrorDescription('by a synchronously-called image error listener'),
             stack: stack,
           ),
         );
@@ -306,37 +515,108 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     }
   }
 
-  /// Stop listening for new concrete [ImageInfo] objects and errors from
-  /// its associated [ImageErrorListener].
+  int _keepAliveHandles = 0;
+  /// Creates an [ImageStreamCompleterHandle] that will prevent this stream from
+  /// being disposed at least until the handle is disposed.
   ///
-  /// If `listener` has been added multiple times, this removes the first
-  /// instance of the listener, along with the `onError` listener that was
-  /// registered with that first instance. This might not be the instance that
-  /// the `addListener` corresponding to this `removeListener` had added.
-  void removeListener(ImageListener listener) {
+  /// Such handles are useful when an image cache needs to keep a completer
+  /// alive but does not itself have a listener subscribed, or when a widget
+  /// that displays an image needs to temporarily unsubscribe from the completer
+  /// but may re-subscribe in the future, for example when the [TickerMode]
+  /// changes.
+  ImageStreamCompleterHandle keepAlive() {
+    _checkDisposed();
+    return ImageStreamCompleterHandle._(this);
+  }
+
+  /// Stops the specified [listener] from receiving image stream events.
+  ///
+  /// If [listener] has been added multiple times, this removes the _first_
+  /// instance of the listener.
+  ///
+  /// Once all listeners have been removed and all [keepAlive] handles have been
+  /// disposed, this image stream is no longer usable.
+  void removeListener(ImageStreamListener listener) {
+    _checkDisposed();
     for (int i = 0; i < _listeners.length; i += 1) {
-      if (_listeners[i].listener == listener) {
+      if (_listeners[i] == listener) {
         _listeners.removeAt(i);
         break;
       }
     }
+    if (_listeners.isEmpty) {
+      final List<VoidCallback> callbacks = _onLastListenerRemovedCallbacks.toList();
+      for (final VoidCallback callback in callbacks) {
+        callback();
+      }
+      _onLastListenerRemovedCallbacks.clear();
+      _maybeDispose();
+    }
+  }
+
+  bool _disposed = false;
+  void _maybeDispose() {
+    if (!_hadAtLeastOneListener || _disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
+      return;
+    }
+
+    _currentImage?.dispose();
+    _currentImage = null;
+    _disposed = true;
+  }
+
+  void _checkDisposed() {
+    if (_disposed) {
+      throw StateError(
+        'Stream has been disposed.\n'
+        'An ImageStream is considered disposed once at least one listener has '
+        'been added and subsequently all listeners have been removed and no '
+        'handles are outstanding from the keepAlive method.\n'
+        'To resolve this error, maintain at least one listener on the stream, '
+        'or create an ImageStreamCompleterHandle from the keepAlive '
+        'method, or create a new stream for the image.',
+      );
+    }
+  }
+
+  final List<VoidCallback> _onLastListenerRemovedCallbacks = <VoidCallback>[];
+
+  /// Adds a callback to call when [removeListener] results in an empty
+  /// list of listeners and there are no [keepAlive] handles outstanding.
+  ///
+  /// This callback will never fire if [removeListener] is never called.
+  void addOnLastListenerRemovedCallback(VoidCallback callback) {
+    assert(callback != null);
+    _checkDisposed();
+    _onLastListenerRemovedCallbacks.add(callback);
+  }
+
+  /// Removes a callback previously supplied to
+  /// [addOnLastListenerRemovedCallback].
+  void removeOnLastListenerRemovedCallback(VoidCallback callback) {
+    assert(callback != null);
+    _checkDisposed();
+    _onLastListenerRemovedCallbacks.remove(callback);
   }
 
   /// Calls all the registered listeners to notify them of a new image.
   @protected
   void setImage(ImageInfo image) {
+    _checkDisposed();
+    _currentImage?.dispose();
     _currentImage = image;
+
     if (_listeners.isEmpty)
       return;
-    final List<ImageListener> localListeners = _listeners.map<ImageListener>(
-      (_ImageListenerPair listenerPair) => listenerPair.listener
-    ).toList();
-    for (ImageListener listener in localListeners) {
+    // Make a copy to allow for concurrent modification.
+    final List<ImageStreamListener> localListeners =
+        List<ImageStreamListener>.from(_listeners);
+    for (final ImageStreamListener listener in localListeners) {
       try {
-        listener(image, false);
+        listener.onImage(image.clone(), false);
       } catch (exception, stack) {
         reportError(
-          context: 'by an image listener',
+          context: ErrorDescription('by an image listener'),
           exception: exception,
           stack: stack,
         );
@@ -347,8 +627,8 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// Calls all the registered error listeners to notify them of an error that
   /// occurred while resolving the image.
   ///
-  /// If no error listeners are attached, a [FlutterError] will be reported
-  /// instead.
+  /// If no error listeners (listeners with an [ImageStreamListener.onError]
+  /// specified) are attached, a [FlutterError] will be reported instead.
   ///
   /// The `context` should be a string describing where the error was caught, in
   /// a form that will make sense in English when following the word "thrown",
@@ -374,10 +654,10 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// See [FlutterErrorDetails] for further details on these values.
   @protected
   void reportError({
-    String context,
-    dynamic exception,
-    StackTrace stack,
-    InformationCollector informationCollector,
+    DiagnosticsNode? context,
+    required Object exception,
+    StackTrace? stack,
+    InformationCollector? informationCollector,
     bool silent = false,
   }) {
     _currentError = FlutterErrorDetails(
@@ -389,23 +669,22 @@ abstract class ImageStreamCompleter extends Diagnosticable {
       silent: silent,
     );
 
-    final List<ImageErrorListener> localErrorListeners =
-      _listeners.map<ImageErrorListener>(
-        (_ImageListenerPair listenerPair) => listenerPair.errorListener
-      ).where(
-        (ImageErrorListener errorListener) => errorListener != null
-      ).toList();
+    // Make a copy to allow for concurrent modification.
+    final List<ImageErrorListener> localErrorListeners = _listeners
+        .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
+        .whereType<ImageErrorListener>()
+        .toList();
 
     if (localErrorListeners.isEmpty) {
-      FlutterError.reportError(_currentError);
+      FlutterError.reportError(_currentError!);
     } else {
-      for (ImageErrorListener errorListener in localErrorListeners) {
+      for (final ImageErrorListener errorListener in localErrorListeners) {
         try {
           errorListener(exception, stack);
         } catch (exception, stack) {
           FlutterError.reportError(
             FlutterErrorDetails(
-              context: 'when reporting an error to an image listener',
+              context: ErrorDescription('when reporting an error to an image listener'),
               library: 'image resource service',
               exception: exception,
               stack: stack,
@@ -416,17 +695,36 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     }
   }
 
+  /// Calls all the registered [ImageChunkListener]s (listeners with an
+  /// [ImageStreamListener.onChunk] specified) to notify them of a new
+  /// [ImageChunkEvent].
+  @protected
+  void reportImageChunkEvent(ImageChunkEvent event){
+    _checkDisposed();
+    if (hasListeners) {
+      // Make a copy to allow for concurrent modification.
+      final List<ImageChunkListener> localListeners = _listeners
+          .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
+          .whereType<ImageChunkListener>()
+          .toList();
+      for (final ImageChunkListener listener in localListeners) {
+        listener(event);
+      }
+    }
+  }
+
   /// Accumulates a list of strings describing the object's state. Subclasses
   /// should override this to have their information included in [toString].
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ImageInfo>('current', _currentImage, ifNull: 'unresolved', showName: false));
-    description.add(ObjectFlagProperty<List<_ImageListenerPair>>(
+    description.add(ObjectFlagProperty<List<ImageStreamListener>>(
       'listeners',
       _listeners,
-      ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
+      ifPresent: '${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }',
     ));
+    description.add(FlagProperty('disposed', value: _disposed, ifTrue: '<disposed>'));
   }
 }
 
@@ -447,11 +745,11 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
   /// message is only dumped to the console in debug mode (see [new
   /// FlutterErrorDetails]).
-  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
+  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector })
       : assert(image != null) {
-    image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
+    image.then<void>(setImage, onError: (Object error, StackTrace stack) {
       reportError(
-        context: 'resolving a single-frame image stream',
+        context: ErrorDescription('resolving a single-frame image stream'),
         exception: error,
         stack: stack,
         informationCollector: informationCollector,
@@ -498,66 +796,101 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   ///
   /// Immediately starts decoding the first image frame when the codec is ready.
   ///
-  /// [codec] is a future for an initialized [ui.Codec] that will be used to
-  /// decode the image.
-  /// [scale] is the linear scale factor for drawing this frames of this image
-  /// at their intended size.
+  /// The `codec` parameter is a future for an initialized [ui.Codec] that will
+  /// be used to decode the image.
+  ///
+  /// The `scale` parameter is the linear scale factor for drawing this frames
+  /// of this image at their intended size.
+  ///
+  /// The `tag` parameter is passed on to created [ImageInfo] objects to
+  /// help identify the source of the image.
+  ///
+  /// The `chunkEvents` parameter is an optional stream of notifications about
+  /// the loading progress of the image. If this stream is provided, the events
+  /// produced by the stream will be delivered to registered [ImageChunkListener]s
+  /// (see [addListener]).
   MultiFrameImageStreamCompleter({
-    @required Future<ui.Codec> codec,
-    @required double scale,
-    InformationCollector informationCollector,
+    required Future<ui.Codec> codec,
+    required double scale,
+    String? debugLabel,
+    Stream<ImageChunkEvent>? chunkEvents,
+    InformationCollector? informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
-       _scale = scale,
-       _framesEmitted = 0,
-       _timer = null {
-    codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
+       _scale = scale {
+    this.debugLabel = debugLabel;
+    codec.then<void>(_handleCodecReady, onError: (Object error, StackTrace stack) {
       reportError(
-        context: 'resolving an image codec',
+        context: ErrorDescription('resolving an image codec'),
         exception: error,
         stack: stack,
         informationCollector: informationCollector,
         silent: true,
       );
     });
+    if (chunkEvents != null) {
+      chunkEvents.listen(reportImageChunkEvent,
+        onError: (Object error, StackTrace stack) {
+          reportError(
+            context: ErrorDescription('loading an image'),
+            exception: error,
+            stack: stack,
+            informationCollector: informationCollector,
+            silent: true,
+          );
+        },
+      );
+    }
   }
 
-  ui.Codec _codec;
+  ui.Codec? _codec;
   final double _scale;
-  final InformationCollector _informationCollector;
-  ui.FrameInfo _nextFrame;
+  final InformationCollector? _informationCollector;
+  ui.FrameInfo? _nextFrame;
   // When the current was first shown.
-  Duration _shownTimestamp;
+  late Duration _shownTimestamp;
   // The requested duration for the current frame;
-  Duration _frameDuration;
+  Duration? _frameDuration;
   // How many frames have been emitted so far.
-  int _framesEmitted;
-  Timer _timer;
+  int _framesEmitted = 0;
+  Timer? _timer;
+
+  // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
+  bool _frameCallbackScheduled = false;
 
   void _handleCodecReady(ui.Codec codec) {
     _codec = codec;
     assert(_codec != null);
 
-    _decodeNextFrameAndSchedule();
+    if (hasListeners) {
+      _decodeNextFrameAndSchedule();
+    }
   }
 
   void _handleAppFrame(Duration timestamp) {
+    _frameCallbackScheduled = false;
     if (!hasListeners)
       return;
+    assert(_nextFrame != null);
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
+      _emitFrame(ImageInfo(
+        image: _nextFrame!.image.clone(),
+        scale: _scale,
+        debugLabel: debugLabel,
+      ));
       _shownTimestamp = timestamp;
-      _frameDuration = _nextFrame.duration;
+      _frameDuration = _nextFrame!.duration;
+      _nextFrame!.image.dispose();
       _nextFrame = null;
-      final int completedCycles = _framesEmitted ~/ _codec.frameCount;
-      if (_codec.repetitionCount == -1 || completedCycles <= _codec.repetitionCount) {
+      final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
+      if (_codec!.repetitionCount == -1 || completedCycles <= _codec!.repetitionCount) {
         _decodeNextFrameAndSchedule();
       }
       return;
     }
-    final Duration delay = _frameDuration - (timestamp - _shownTimestamp);
+    final Duration delay = _frameDuration! - (timestamp - _shownTimestamp);
     _timer = Timer(delay * timeDilation, () {
-      SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+      _scheduleAppFrame();
     });
   }
 
@@ -566,16 +899,19 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   bool _hasFrameDurationPassed(Duration timestamp) {
-    assert(_shownTimestamp != null);
-    return timestamp - _shownTimestamp >= _frameDuration;
+    return timestamp - _shownTimestamp >= _frameDuration!;
   }
 
   Future<void> _decodeNextFrameAndSchedule() async {
+    // This will be null if we gave it away. If not, it's still ours and it
+    // must be disposed of.
+    _nextFrame?.image.dispose();
+    _nextFrame = null;
     try {
-      _nextFrame = await _codec.getNextFrame();
+      _nextFrame = await _codec!.getNextFrame();
     } catch (exception, stack) {
       reportError(
-        context: 'resolving an image frame',
+        context: ErrorDescription('resolving an image frame'),
         exception: exception,
         stack: stack,
         informationCollector: _informationCollector,
@@ -583,13 +919,33 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
       return;
     }
-    if (_codec.frameCount == 1) {
+    if (_codec!.frameCount == 1) {
+      // ImageStreamCompleter listeners removed while waiting for next frame to
+      // be decoded.
+      // There's no reason to emit the frame without active listeners.
+      if (!hasListeners) {
+        return;
+      }
       // This is not an animated image, just return it and don't schedule more
       // frames.
-      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
+      _emitFrame(ImageInfo(
+        image: _nextFrame!.image.clone(),
+        scale: _scale,
+        debugLabel: debugLabel,
+      ));
+      _nextFrame!.image.dispose();
+      _nextFrame = null;
       return;
     }
-    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+    _scheduleAppFrame();
+  }
+
+  void _scheduleAppFrame() {
+    if (_frameCallbackScheduled) {
+      return;
+    }
+    _frameCallbackScheduled = true;
+    SchedulerBinding.instance!.scheduleFrameCallback(_handleAppFrame);
   }
 
   void _emitFrame(ImageInfo imageInfo) {
@@ -598,14 +954,14 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   @override
-  void addListener(ImageListener listener, { ImageErrorListener onError }) {
+  void addListener(ImageStreamListener listener) {
     if (!hasListeners && _codec != null)
       _decodeNextFrameAndSchedule();
-    super.addListener(listener, onError: onError);
+    super.addListener(listener);
   }
 
   @override
-  void removeListener(ImageListener listener) {
+  void removeListener(ImageStreamListener listener) {
     super.removeListener(listener);
     if (!hasListeners) {
       _timer?.cancel();

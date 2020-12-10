@@ -1,0 +1,6 @@
+# This Gemfile is for the setup step of the Cirrus Mac tasks
+source 'https://rubygems.org'
+
+# Don't pin cocoapods so we can catch breakages from upstream changes, e.g.
+# https://github.com/flutter/flutter/issues/41144
+gem 'cocoapods'

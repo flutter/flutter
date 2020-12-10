@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
-Widget buildFrame({ bool reverse = false, @required TextDirection textDirection }) {
+Widget buildFrame({ bool reverse = false, required TextDirection textDirection }) {
   return Directionality(
     textDirection: textDirection,
     child: Center(

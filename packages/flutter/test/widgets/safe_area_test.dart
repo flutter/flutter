@@ -1,10 +1,11 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   group('SafeArea', () {
@@ -85,6 +86,108 @@ void main() {
       expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(100.0, 30.0));
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
+
+    testWidgets('SafeArea - properties', (WidgetTester tester) async {
+      final SafeArea child = SafeArea(
+        left: true,
+        right: false,
+        bottom: false,
+        child: Container()
+      );
+      final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+      child.debugFillProperties(properties);
+
+      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
+      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
+      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
+      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
+    });
+
+    group('SafeArea maintains bottom viewPadding when specified for consumed bottom padding', () {
+      Widget boilerplate(Widget child) {
+        return Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(textDirection: TextDirection.ltr, child: child),
+        );
+      }
+
+      testWidgets('SafeArea alone.', (WidgetTester tester) async {
+        final Widget child = boilerplate(SafeArea(
+          maintainBottomViewPadding: true,
+          child: Column(
+            children: const <Widget>[
+              Expanded(child: Placeholder()),
+            ],
+          ),
+        ));
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.symmetric(vertical: 20.0),
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+        // Consume bottom padding - as if by the keyboard opening
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(top: 20.0),
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+              viewInsets: EdgeInsets.only(bottom: 300.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+        expect(initialPoint, finalPoint);
+      });
+
+      testWidgets('SafeArea with nested Scaffold', (WidgetTester tester) async {
+        final Widget child = boilerplate(SafeArea(
+          maintainBottomViewPadding: true,
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Column(
+              children: const <Widget>[
+                Expanded(child: Placeholder()),
+              ],
+            ),
+          ),
+        ));
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.symmetric(vertical: 20.0),
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+        // Consume bottom padding - as if by the keyboard opening
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(top: 20.0),
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+              viewInsets: EdgeInsets.only(bottom: 300.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+        expect(initialPoint, finalPoint);
+      });
+    });
   });
 
   group('SliverSafeArea', () {
@@ -128,9 +231,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(0.0, 120.0, 780.0, 100.0),
-        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 120.0, 780.0, 100.0),
+        const Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -146,9 +249,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(20.0, 110.0, 760.0, 100.0),
-        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(20.0, 110.0, 760.0, 100.0),
+        const Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -166,9 +269,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
-        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
+        const Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -188,9 +291,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
-        Rect.fromLTWH(0.0, 220.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
+        const Rect.fromLTWH(0.0, 220.0, 800.0, 100.0),
       ]);
 
       await tester.pumpWidget(
@@ -205,10 +308,26 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(100.0, 130.0, 700.0, 100.0),
-        Rect.fromLTWH(0.0, 230.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(100.0, 130.0, 700.0, 100.0),
+        const Rect.fromLTWH(0.0, 230.0, 800.0, 100.0),
       ]);
     });
+  });
+
+  testWidgets('SliverSafeArea - properties', (WidgetTester tester) async {
+    const SliverSafeArea child = SliverSafeArea(
+      left: true,
+      right: false,
+      bottom: false,
+      sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+    );
+    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+    child.debugFillProperties(properties);
+
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
+    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
   });
 }

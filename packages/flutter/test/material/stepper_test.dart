@@ -1,7 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -380,26 +381,21 @@ void main() {
     }
 
     final ControlsWidgetBuilder builder =
-      (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
+      (BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
         return Container(
           margin: const EdgeInsets.only(top: 16.0),
           child: ConstrainedBox(
             constraints: const BoxConstraints.tightFor(height: 48.0),
             child: Row(
               children: <Widget>[
-                FlatButton(
+                TextButton(
                   onPressed: onStepContinue,
-                  color: Colors.blue,
-                  textColor: Colors.white,
-                  textTheme: ButtonTextTheme.normal,
                   child: const Text('Let us continue!'),
                 ),
                 Container(
                   margin: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: FlatButton(
+                  child: TextButton(
                     onPressed: onStepCancel,
-                    textColor: Colors.red,
-                    textTheme: ButtonTextTheme.normal,
                     child: const Text('Cancel This!'),
                   ),
                 ),
@@ -478,6 +474,73 @@ void main() {
     expect(find.text('!'), findsOneWidget);
   });
 
+  testWidgets('Nested stepper error test', (WidgetTester tester) async {
+    late FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails = details;
+    };
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Stepper(
+              type: StepperType.horizontal,
+              steps: <Step>[
+                Step(
+                  title: const Text('Step 2'),
+                  content:  Stepper(
+                    type: StepperType.vertical,
+                    steps: const <Step>[
+                      Step(
+                        title: Text('Nested step 1'),
+                        content: Text('A'),
+                      ),
+                      Step(
+                        title: Text('Nested step 2'),
+                        content: Text('A'),
+                      ),
+                    ],
+                  ),
+                ),
+                const Step(
+                  title: Text('Step 1'),
+                  content: Text('A'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
+
+    expect(errorDetails.stack, isNotNull);
+    // Check the ErrorDetails without the stack trace
+    final String fullErrorMessage = errorDetails.toString();
+    final List<String> lines = fullErrorMessage.split('\n');
+    // The lines in the middle of the error message contain the stack trace
+    // which will change depending on where the test is run.
+    final String errorMessage = lines.takeWhile(
+      (String line) => line != '',
+    ).join('\n');
+    expect(errorMessage.length, lessThan(fullErrorMessage.length));
+    expect(errorMessage, startsWith(
+      '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
+      'The following assertion was thrown building Stepper('
+    ));
+    // The description string of the stepper looks slightly different depending
+    // on the platform and is omitted here.
+    expect(errorMessage, endsWith(
+      '):\n'
+      'Steppers must not be nested.\n'
+      'The material specification advises that one should avoid\n'
+      'embedding steppers within steppers.\n'
+      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
+    ));
+  });
+
   ///https://github.com/flutter/flutter/issues/16920
   testWidgets('Stepper icons size test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -539,5 +602,245 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Text After Stepper'), findsNothing);
+  });
+
+  testWidgets("Vertical Stepper can't be focused when disabled.", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            currentStep: 0,
+            type: StepperType.vertical,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 0'),
+                state: StepState.disabled,
+                content: Text('Text 0'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), scopeOk: true);
+    disabledNode.requestFocus();
+    await tester.pump();
+    expect(disabledNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets("Horizontal Stepper can't be focused when disabled.", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            currentStep: 0,
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('Step 0'),
+                state: StepState.disabled,
+                content: Text('Text 0'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final FocusNode disabledNode = Focus.of(tester.element(find.text('Step 0')), scopeOk: true);
+    disabledNode.requestFocus();
+    await tester.pump();
+    expect(disabledNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('Stepper header title should not overflow', (WidgetTester tester) async {
+    const String longText =
+        'A long long long long long long long long long long long long text';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              Stepper(
+                steps: const <Step>[
+                  Step(
+                    title: Text(longText),
+                    content: Text('Text content')
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
+    const String longText =
+        'A long long long long long long long long long long long long text';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              Stepper(
+                steps: const <Step>[
+                  Step(
+                    title: Text('Regular title'),
+                    subtitle: Text(longText),
+                    content: Text('Text content')
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Stepper enabled button styles', (WidgetTester tester) async {
+    Widget buildFrame(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            onStepCancel: () { },
+            onStepContinue: () { },
+            steps: const <Step>[
+              Step(
+                title: Text('step1'),
+                content: SizedBox(width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Material buttonMaterial(String label) {
+      return tester.widget<Material>(
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
+      );
+    }
+
+    // The checks that follow verify that the layout and appearance of
+    // the default enabled Stepper buttons have not changed even
+    // though the FlatButtons have been replaced by TextButtons.
+
+    const OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2)));
+    const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
+    const Rect cancelButtonRect = Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
+
+    await tester.pumpWidget(buildFrame(ThemeData.light()));
+
+    expect(buttonMaterial('CONTINUE').color!.value, 0xff2196f3);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0xffffffff);
+    expect(buttonMaterial('CONTINUE').shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
+
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x8a000000);
+    expect(buttonMaterial('CANCEL').shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
+
+    await tester.pumpWidget(buildFrame(ThemeData.dark()));
+    await tester.pumpAndSettle(); // Complete the theme animation.
+
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value,  0xffffffff);
+    expect(buttonMaterial('CONTINUE').shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CONTINUE')), continueButtonRect);
+
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0xb3ffffff);
+    expect(buttonMaterial('CANCEL').shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
+  });
+
+  testWidgets('Stepper disabled button styles', (WidgetTester tester) async {
+    Widget buildFrame(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('step1'),
+                content: SizedBox(width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Material buttonMaterial(String label) {
+      return tester.widget<Material>(
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material))
+      );
+    }
+
+    // The checks that follow verify that the appearance of the
+    // default disabled Stepper buttons have not changed even though
+    // the FlatButtons have been replaced by TextButtons.
+
+    await tester.pumpWidget(buildFrame(ThemeData.light()));
+
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0x61000000);
+
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x61000000);
+
+    await tester.pumpWidget(buildFrame(ThemeData.dark()));
+    await tester.pumpAndSettle(); // Complete the theme animation.
+
+    expect(buttonMaterial('CONTINUE').color!.value, 0);
+    expect(buttonMaterial('CONTINUE').textStyle!.color!.value, 0x61ffffff);
+
+    expect(buttonMaterial('CANCEL').color!.value, 0);
+    expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x61ffffff);
+  });
+
+  testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
+    const ScrollPhysics physics = NeverScrollableScrollPhysics();
+
+    for(final StepperType type in StepperType.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Stepper(
+              physics: physics,
+              type: type,
+              steps: const <Step>[
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final ListView listView = tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
+      expect(listView.physics, physics);
+    }
   });
 }

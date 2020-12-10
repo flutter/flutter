@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -39,13 +39,13 @@ class TestTree {
       ),
     );
   }
-  RenderObject root;
-  RenderConstrainedBox child;
+  late RenderBox root;
+  late RenderConstrainedBox child;
   bool painted = false;
 }
 
 class MutableCompositor extends RenderProxyBox {
-  MutableCompositor({ RenderBox child }) : super(child);
+  MutableCompositor({ required RenderBox child }) : super(child);
   bool _alwaysComposite = false;
   @override
   bool get alwaysNeedsCompositing => _alwaysComposite;
@@ -75,9 +75,9 @@ class TestCompositingBitsTree {
       ),
     );
   }
-  RenderObject root;
-  MutableCompositor compositor;
-  RenderConstrainedBox child;
+  late RenderBox root;
+  late MutableCompositor compositor;
+  late RenderConstrainedBox child;
   bool painted = false;
 }
 

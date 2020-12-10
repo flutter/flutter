@@ -1,8 +1,10 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
 import 'tolerance.dart';
@@ -16,9 +18,9 @@ class SpringDescription {
   ///
   /// See [mass], [stiffness], and [damping] for the units of the arguments.
   const SpringDescription({
-    this.mass,
-    this.stiffness,
-    this.damping,
+    required this.mass,
+    required this.stiffness,
+    required this.damping,
   });
 
   /// Creates a spring given the mass (m), stiffness (k), and damping ratio (ζ).
@@ -29,8 +31,8 @@ class SpringDescription {
   /// See [mass] and [stiffness] for the units for those arguments. The damping
   /// ratio is unitless.
   SpringDescription.withDampingRatio({
-    this.mass,
-    this.stiffness,
+    required this.mass,
+    required this.stiffness,
     double ratio = 1.0,
   }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 
@@ -55,7 +57,7 @@ class SpringDescription {
   final double damping;
 
   @override
-  String toString() => '$runtimeType(mass: ${mass.toStringAsFixed(1)}, stiffness: ${stiffness.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})';
+  String toString() => '${objectRuntimeType(this, 'SpringDescription')}(mass: ${mass.toStringAsFixed(1)}, stiffness: ${stiffness.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})';
 }
 
 /// The kind of spring solution that the [SpringSimulation] is using to simulate the spring.
@@ -119,11 +121,11 @@ class SpringSimulation extends Simulation {
   }
 
   @override
-  String toString() => '$runtimeType(end: $_endPosition, $type)';
+  String toString() => '${objectRuntimeType(this, 'SpringSimulation')}(end: $_endPosition, $type)';
 }
 
-/// A SpringSimulation where the value of [x] is guaranteed to have exactly the
-/// end value when the simulation isDone().
+/// A [SpringSimulation] where the value of [x] is guaranteed to have exactly the
+/// end value when the simulation [isDone].
 class ScrollSpringSimulation extends SpringSimulation {
   /// Creates a spring simulation from the provided spring description, start
   /// distance, end distance, and initial velocity.
@@ -196,7 +198,7 @@ class _CriticalSolution implements _SpringSolution {
 
   @override
   double dx(double time) {
-    final double power = math.pow(math.e, _r * time);
+    final double power = math.pow(math.e, _r * time) as double;
     return _r * (_c1 + _c2 * time) * power + _c2 * power;
   }
 
@@ -266,16 +268,16 @@ class _UnderdampedSolution implements _SpringSolution {
 
   @override
   double x(double time) {
-    return math.pow(math.e, _r * time) *
+    return (math.pow(math.e, _r * time) as double) *
            (_c1 * math.cos(_w * time) + _c2 * math.sin(_w * time));
   }
 
   @override
   double dx(double time) {
-    final double power = math.pow(math.e, _r * time);
+    final double power = math.pow(math.e, _r * time) as double;
     final double cosine = math.cos(_w * time);
     final double sine = math.sin(_w * time);
-    return      power * (_c2 * _w * cosine - _c1 * _w * sine) +
+    return power * (_c2 * _w * cosine - _c1 * _w * sine) +
            _r * power * (_c2 *      sine   + _c1 *      cosine);
   }
 

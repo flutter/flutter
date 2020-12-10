@@ -1,8 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -14,10 +12,10 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
   int framesBegun = 0;
   int framesDrawn = 0;
 
-  bool handleBeginFrameMicrotaskRun;
+  late bool handleBeginFrameMicrotaskRun;
 
   @override
-  void handleBeginFrame(Duration rawTimeStamp) {
+  void handleBeginFrame(Duration? rawTimeStamp) {
     handleBeginFrameMicrotaskRun = false;
     framesBegun += 1;
     Future<void>.microtask(() { handleBeginFrameMicrotaskRun = true; });
@@ -34,8 +32,12 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
   }
 }
 
-Future<void> main() async {
-  final TestBinding binding = TestBinding();
+void main() {
+  late TestBinding binding;
+
+  setUp(() {
+    binding = TestBinding();
+  });
 
   test('test pumpBenchmark() only runs one frame', () async {
     await benchmarkWidgets((WidgetTester tester) async {
@@ -63,6 +65,9 @@ Future<void> main() async {
 
       expect(endFramesBegun, equals(startFramesBegun + 1));
       expect(endFramesDrawn, equals(startFramesDrawn + 1));
-    });
-  });
+    },
+    // We are not interested in the performance of the "benchmark", we are just
+    // testing the behavior. So it's OK that asserts are enabled.
+    mayRunWithAsserts: true);
+  }, skip: isBrowser);
 }

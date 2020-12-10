@@ -1,8 +1,7 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/foundation.dart';
 
@@ -11,18 +10,18 @@ import 'tween.dart';
 // Examples can assume:
 // AnimationController _controller;
 
-/// The status of an animation
+/// The status of an animation.
 enum AnimationStatus {
-  /// The animation is stopped at the beginning
+  /// The animation is stopped at the beginning.
   dismissed,
 
-  /// The animation is running from beginning to end
+  /// The animation is running from beginning to end.
   forward,
 
-  /// The animation is running backwards, from end to beginning
+  /// The animation is running backwards, from end to beginning.
   reverse,
 
-  /// The animation is stopped at the end
+  /// The animation is stopped at the end.
   completed,
 }
 
@@ -63,6 +62,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
   /// Stop calling the listener every time the value of the animation changes.
   ///
+  /// If `listener` is not currently registered as a listener, this method does
+  /// nothing.
+  ///
   /// Listeners can be added with [addListener].
   @override
   void removeListener(VoidCallback listener);
@@ -73,6 +75,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   void addStatusListener(AnimationStatusListener listener);
 
   /// Stops calling the listener every time the status of the animation changes.
+  ///
+  /// If `listener` is not currently registered as a status listener, this
+  /// method does nothing.
   ///
   /// Listeners can be added with [addStatusListener].
   void removeStatusListener(AnimationStatusListener listener);
@@ -101,7 +106,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// argument to the method (`child`), whose value is derived by applying the
   /// given [Tween] to the value of this [Animation].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Given an [AnimationController] `_controller`, the following code creates
   /// an `Animation<Alignment>` that swings from top left to top right as the
@@ -116,7 +121,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// );
   /// ```
   /// {@end-tool}
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The `_alignment.value` could then be used in a widget's build method, for
   /// instance, to position a child using an [Align] widget such that the
@@ -136,7 +141,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Animation<Alignment> _alignment2 = _controller.drive(_tween);
   /// ```
   /// {@end-tool}
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following code is exactly equivalent, and is typically clearer when
   /// the tweens are created inline, as might be preferred when the tweens have
@@ -162,7 +167,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   @optionalTypeArgs
   Animation<U> drive<U>(Animatable<U> child) {
     assert(this is Animation<double>);
-    return child.animate(this as dynamic); // TODO(ianh): Clean this once https://github.com/dart-lang/sdk/issues/32120 is fixed.
+    return child.animate(this as Animation<double>);
   }
 
   @override
@@ -186,22 +191,15 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// * "&#x23EE;": [AnimationStatus.dismissed] ([value] == 0.0)
   String toStringDetails() {
     assert(status != null);
-    String icon;
     switch (status) {
       case AnimationStatus.forward:
-        icon = '\u25B6'; // >
-        break;
+        return '\u25B6'; // >
       case AnimationStatus.reverse:
-        icon = '\u25C0'; // <
-        break;
+        return '\u25C0'; // <
       case AnimationStatus.completed:
-        icon = '\u23ED'; // >>|
-        break;
+        return '\u23ED'; // >>|
       case AnimationStatus.dismissed:
-        icon = '\u23EE'; // |<<
-        break;
+        return '\u23EE'; // |<<
     }
-    assert(icon != null);
-    return '$icon';
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ class SpinningSquare extends StatefulWidget {
 }
 
 class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProviderStateMixin {
-  AnimationController _animation;
+  late AnimationController _animation;
 
   @override
   void initState() {

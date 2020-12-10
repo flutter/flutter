@@ -1,7 +1,10 @@
-#!/bin/bash
-# Copyright 2016 The Chromium Authors. All rights reserved.
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
+# Exit on error
+set -e
 
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
@@ -35,6 +38,32 @@ AssertExists() {
   return 0
 }
 
+ParseFlutterBuildMode() {
+  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
+  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
+  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
+
+  case "$build_mode" in
+    *release*) build_mode="release";;
+    *profile*) build_mode="profile";;
+    *debug*) build_mode="debug";;
+    *)
+      EchoError "========================================================================"
+      EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
+      EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
+      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment variable."
+      EchoError "If that is not set, the CONFIGURATION environment variable is used."
+      EchoError ""
+      EchoError "You can fix this by either adding an appropriately named build"
+      EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
+      EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
+      EchoError "========================================================================"
+      exit -1;;
+  esac
+  echo "${build_mode}"
+}
+
 BuildApp() {
   local project_path="${SOURCE_ROOT}/.."
   if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
@@ -46,60 +75,47 @@ BuildApp() {
     target_path="${FLUTTER_TARGET}"
   fi
 
-  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
-  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
-  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
-  local artifact_variant="unknown"
-  case "$build_mode" in
-    *release*) build_mode="release"; artifact_variant="ios-release";;
-    *profile*) build_mode="profile"; artifact_variant="ios-profile";;
-    *debug*) build_mode="debug"; artifact_variant="ios";;
-    *)
-      EchoError "========================================================================"
-      EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
-      EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
-      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment varaible."
-      EchoError "If that is not set, the CONFIGURATION environment variable is used."
-      EchoError ""
-      EchoError "You can fix this by either adding an appropriately named build"
-      EchoError "configuration, or adding an appriate value for FLUTTER_BUILD_MODE to the"
-      EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
-      EchoError "========================================================================"
-      exit -1;;
-  esac
-
-  # Archive builds (ACTION=install) should always run in release mode.
-  if [[ "$ACTION" == "install" && "$build_mode" != "release" ]]; then
-    EchoError "========================================================================"
-    EchoError "ERROR: Flutter archive builds must be run in Release mode."
-    EchoError ""
-    EchoError "To correct, ensure FLUTTER_BUILD_MODE is set to release or run:"
-    EchoError "flutter build ios --release"
-    EchoError ""
-    EchoError "then re-run Archive from Xcode."
-    EchoError "========================================================================"
-    exit -1
-  fi
-
-  local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
-
-  AssertExists "${framework_path}"
-  AssertExists "${project_path}"
-
   local derived_dir="${SOURCE_ROOT}/Flutter"
   if [[ -e "${project_path}/.ios" ]]; then
     derived_dir="${project_path}/.ios/Flutter"
   fi
-  RunCommand mkdir -p -- "$derived_dir"
-  AssertExists "$derived_dir"
 
-  RunCommand rm -rf -- "${derived_dir}/App.framework"
+  local bundle_sksl_path=""
+  if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
+    bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+  fi
 
+  # Default value of assets_path is flutter_assets
+  local assets_path="flutter_assets"
+  # The value of assets_path can set by add FLTAssetsPath to
+  # AppFrameworkInfo.plist.
+  if FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null); then
+    if [[ -n "$FLTAssetsPath" ]]; then
+      assets_path="${FLTAssetsPath}"
+    fi
+  fi
+
+  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
+  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
+  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+  local build_mode="$(ParseFlutterBuildMode)"
+  local artifact_variant="unknown"
+  case "$build_mode" in
+    release ) artifact_variant="ios-release";;
+    profile ) artifact_variant="ios-profile";;
+    debug ) artifact_variant="ios";;
+  esac
+
+  # Warn the user if not archiving (ACTION=install) in release mode.
+  if [[ "$ACTION" == "install" && "$build_mode" != "release" ]]; then
+    echo "warning: Flutter archive not built in Release mode. Ensure FLUTTER_BUILD_MODE \
+is set to release or run \"flutter build ios --release\", then re-run Archive from Xcode."
+  fi
+
+  local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
   local flutter_engine_flag=""
   local local_engine_flag=""
-  local flutter_framework="${framework_path}/Flutter.framework"
-  local flutter_podspec="${framework_path}/Flutter.podspec"
+  local flutter_framework="${framework_path}/Flutter.xcframework"
 
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -119,140 +135,60 @@ BuildApp() {
       exit -1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
-    flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
+    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.xcframework"
   fi
 
+  local bitcode_flag=""
+  if [[ "$ENABLE_BITCODE" == "YES" ]]; then
+    bitcode_flag="true"
+  fi
+
+  # TODO(jmagman): use assemble copied engine in add-to-app.
   if [[ -e "${project_path}/.ios" ]]; then
-    RunCommand rm -rf -- "${derived_dir}/engine"
-    mkdir "${derived_dir}/engine"
-    RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
+    RunCommand rm -rf -- "${derived_dir}/engine/Flutter.framework"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
-    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
-  else
-    RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
-    RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
-    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
   fi
 
   RunCommand pushd "${project_path}" > /dev/null
-
-  AssertExists "${target_path}"
 
   local verbose_flag=""
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
     verbose_flag="--verbose"
   fi
 
-  local build_dir="${FLUTTER_BUILD_DIR:-build}"
-
-  local track_widget_creation_flag=""
-  if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
-    track_widget_creation_flag="--track-widget-creation"
+  local performance_measurement_option=""
+  if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
+    performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
   fi
 
-  if [[ "${build_mode}" != "debug" ]]; then
-    StreamOutput " ├─Building Dart code..."
-    # Transform ARCHS to comma-separated list of target architectures.
-    local archs="${ARCHS// /,}"
-    if [[ $archs =~ .*i386.* || $archs =~ .*x86_64.* ]]; then
-      EchoError "========================================================================"
-      EchoError "ERROR: Flutter does not support running in profile or release mode on"
-      EchoError "the Simulator (this build was: '$build_mode')."
-      EchoError "You can ensure Flutter runs in Debug mode with your host app in release"
-      EchoError "mode by setting FLUTTER_BUILD_MODE=debug in the .xcconfig associated"
-      EchoError "with the ${CONFIGURATION} build configuration."
-      EchoError "========================================================================"
-      exit -1
-    fi
-    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
-      ${verbose_flag}                                                       \
-      build aot                                                             \
-      --output-dir="${build_dir}/aot"                                       \
-      --target-platform=ios                                                 \
-      --target="${target_path}"                                             \
-      --${build_mode}                                                       \
-      --ios-arch="${archs}"                                                 \
-      ${flutter_engine_flag}                                                \
-      ${local_engine_flag}                                                  \
-      ${track_widget_creation_flag}
-
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to build ${project_path}."
-      exit -1
-    fi
-    StreamOutput "done"
-
-    local app_framework="${build_dir}/aot/App.framework"
-
-    RunCommand cp -r -- "${app_framework}" "${derived_dir}"
-
-    StreamOutput " ├─Generating dSYM file..."
-    # Xcode calls `symbols` during app store upload, which uses Spotlight to
-    # find dSYM files for embedded frameworks. When it finds the dSYM file for
-    # `App.framework` it throws an error, which aborts the app store upload.
-    # To avoid this, we place the dSYM files in a folder ending with ".noindex",
-    # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
-    RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
-    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
-      exit -1
-    fi
-    StreamOutput "done"
-
-    StreamOutput " ├─Stripping debug symbols..."
-    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to strip ${derived_dir}/App.framework/App."
-      exit -1
-    fi
-    StreamOutput "done"
-
-  else
-    RunCommand mkdir -p -- "${derived_dir}/App.framework"
-
-    # Build stub for all requested architectures.
-    local arch_flags=""
-    read -r -a archs <<< "$ARCHS"
-    for arch in "${archs[@]}"; do
-      arch_flags="${arch_flags}-arch $arch "
-    done
-
-    RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
-        ${arch_flags} \
-        -dynamiclib \
-        -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
-        -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
-        -install_name '@rpath/App.framework/App' \
-        -o "${derived_dir}/App.framework/App" -)"
+  local code_size_directory=""
+  if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
+    code_size_directory="-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}"
   fi
 
-  local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
-  if [[ -e "${project_path}/.ios" ]]; then
-    plistPath="${project_path}/.ios/Flutter/AppFrameworkInfo.plist"
-  fi
-
-  RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
-
-  local precompilation_flag=""
-  if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
-    precompilation_flag="--precompiled"
-  fi
-
-  StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
-    ${verbose_flag}                                                         \
-    build bundle                                                            \
-    --target-platform=ios                                                   \
-    --target="${target_path}"                                               \
-    --${build_mode}                                                         \
-    --depfile="${build_dir}/snapshot_blob.bin.d"                            \
-    --asset-dir="${derived_dir}/App.framework/flutter_assets"               \
-    ${precompilation_flag}                                                  \
-    ${flutter_engine_flag}                                                  \
-    ${local_engine_flag}                                                    \
-    ${track_widget_creation_flag}
+  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
+    ${verbose_flag}                                                       \
+    ${flutter_engine_flag}                                                \
+    ${local_engine_flag}                                                  \
+    assemble                                                              \
+    --output="${BUILT_PRODUCTS_DIR}/"                                     \
+    ${performance_measurement_option}                                     \
+    -dTargetPlatform=ios                                                  \
+    -dTargetFile="${target_path}"                                         \
+    -dBuildMode=${build_mode}                                             \
+    -dIosArchs="${ARCHS}"                                                 \
+    -dSdkRoot="${SDKROOT}"                                                \
+    -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
+    -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                \
+    -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
+    -dDartObfuscation="${DART_OBFUSCATION}"                               \
+    -dEnableBitcode="${bitcode_flag}"                                     \
+    ${bundle_sksl_path}                                                   \
+    ${code_size_directory}                                                \
+    --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
+    --DartDefines="${DART_DEFINES}"                                       \
+    --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
+    "${build_mode}_ios_bundle_flutter_assets"
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
@@ -296,12 +232,11 @@ LipoExecutable() {
         exit 1
       fi
     else
-      lipo -output "${output}" -extract "${arch}" "${executable}"
-      if [[ $? == 0 ]]; then
+      if lipo -output "${output}" -extract "${arch}" "${executable}"; then
         all_executables+=("${output}")
       else
         echo "Failed to extract ${arch} for ${executable}. Running lipo -info:"
-        lipo -info "${executable}"
+        RunCommand lipo -info "${executable}"
         exit 1
       fi
     fi
@@ -311,10 +246,10 @@ LipoExecutable() {
   # Skip this step for non-fat executables.
   if [[ ${#all_executables[@]} > 0 ]]; then
     local merged="${executable}_merged"
-    lipo -output "${merged}" -create "${all_executables[@]}"
+    RunCommand lipo -output "${merged}" -create "${all_executables[@]}"
 
-    cp -f -- "${merged}" "${executable}" > /dev/null
-    rm -f -- "${merged}" "${all_executables[@]}"
+    RunCommand cp -f -- "${merged}" "${executable}" > /dev/null
+    RunCommand rm -f -- "${merged}" "${all_executables[@]}"
   fi
 }
 
@@ -324,17 +259,15 @@ ThinFramework() {
   local framework_dir="$1"
   shift
 
-  local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
   LipoExecutable "${executable}" "$@"
 }
 
 ThinAppFrameworks() {
-  local app_path="${TARGET_BUILD_DIR}/${WRAPPER_NAME}"
-  local frameworks_dir="${app_path}/Frameworks"
+  local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
 
-  [[ -d "$frameworks_dir" ]] || return 0
-  find "${app_path}" -type d -name "*.framework" | while read framework_dir; do
+  [[ -d "${xcode_frameworks_dir}" ]] || return 0
+  find "${xcode_frameworks_dir}" -type d -name "*.framework" | while read framework_dir; do
     ThinFramework "$framework_dir" "$ARCHS"
   done
 }
@@ -342,47 +275,69 @@ ThinAppFrameworks() {
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
-  AssertExists "${FLUTTER_APPLICATION_PATH}"
-
-  # Prefer the hidden .ios folder, but fallback to a visible ios folder if .ios
-  # doesn't exist.
-  local flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter"
-  local flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter/engine"
-  if [[ ! -d ${flutter_ios_out_folder} ]]; then
-    flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
-    flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
-  fi
-
-  AssertExists "${flutter_ios_out_folder}"
-
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
-  local xcode_frameworks_dir=${BUILT_PRODUCTS_DIR}"/"${PRODUCT_NAME}".app/Frameworks"
+  local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand cp -Rv -- "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete --filter "- .DS_Store/" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual Flutter.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
-  # Remove it first since Xcode might be trying to hold some of these files - this way we're
-  # sure to get a clean copy.
-  RunCommand rm -rf -- "${xcode_frameworks_dir}/Flutter.framework"
-  RunCommand cp -Rv -- "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
+
+  # Copy Xcode behavior and don't copy over headers or modules.
+  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${BUILT_PRODUCTS_DIR}/Flutter.framework" "${xcode_frameworks_dir}/"
+  if [[ "$ACTION" != "install" || "$ENABLE_BITCODE" == "NO" ]]; then
+    # Strip bitcode from the destination unless archiving, or if bitcode is disabled entirely.
+    RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${BUILT_PRODUCTS_DIR}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"
+  fi
 
   # Sign the binaries we moved.
-  local identity="${EXPANDED_CODE_SIGN_IDENTITY_NAME:-$CODE_SIGN_IDENTITY}"
-  if [[ -n "$identity" && "$identity" != "\"\"" ]]; then
-    RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/App.framework/App"
-    RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
+  if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
+    RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/App.framework/App"
+    RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
+  fi
+
+  AddObservatoryBonjourService
+}
+
+# Add the observatory publisher Bonjour service to the produced app bundle Info.plist.
+AddObservatoryBonjourService() {
+  local build_mode="$(ParseFlutterBuildMode)"
+  # Debug and profile only.
+  if [[ "${build_mode}" == "release" ]]; then
+    return
+  fi
+  local built_products_plist="${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
+
+  if [[ ! -f "${built_products_plist}" ]]; then
+    EchoError "error: ${INFOPLIST_PATH} does not exist. The Flutter \"Thin Binary\" build phase must run after \"Copy Bundle Resources\"."
+    exit -1
+  fi
+  # If there are already NSBonjourServices specified by the app (uncommon), insert the observatory service name to the existing list.
+  if plutil -extract NSBonjourServices xml1 -o - "${built_products_plist}"; then
+    RunCommand plutil -insert NSBonjourServices.0 -string "_dartobservatory._tcp" "${built_products_plist}"
+  else
+    # Otherwise, add the NSBonjourServices key and observatory service name.
+    RunCommand plutil -insert NSBonjourServices -json "[\"_dartobservatory._tcp\"]" "${built_products_plist}"
+  fi
+
+  # Don't override the local network description the Flutter app developer specified (uncommon).
+  # This text will appear below the "Your app would like to find and connect to devices on your local network" permissions popup.
+  if ! plutil -extract NSLocalNetworkUsageDescription xml1 -o - "${built_products_plist}"; then
+    RunCommand plutil -insert NSLocalNetworkUsageDescription -string "Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds." "${built_products_plist}"
   fi
 }
 
+EmbedAndThinFrameworks() {
+  EmbedFlutterFrameworks
+  ThinAppFrameworks
+}
+
 # Main entry point.
-
-# TODO(cbracken): improve error handling, then enable set -e
-
 if [[ $# == 0 ]]; then
-  # Backwards-compatibility: if no args are provided, build.
-  BuildApp
+  # Named entry points were introduced in Flutter v0.0.7.
+  EchoError "error: Your Xcode project is incompatible with this version of Flutter. Run \"rm -rf ios/Runner.xcodeproj\" and \"flutter create .\" to regenerate."
+  exit -1
 else
   case $1 in
     "build")
@@ -391,5 +346,10 @@ else
       ThinAppFrameworks ;;
     "embed")
       EmbedFlutterFrameworks ;;
+    "embed_and_thin")
+      EmbedAndThinFrameworks ;;
+    "test_observatory_bonjour_service")
+      # Exposed for integration testing only.
+      AddObservatoryBonjourService ;;
   esac
 fi

@@ -1,8 +1,11 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
@@ -12,7 +15,7 @@ import 'edge_insets.dart';
 /// A rectangular border with smooth continuous transitions between the straight
 /// sides and the rounded corners.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
@@ -26,17 +29,18 @@ import 'edge_insets.dart';
 ///
 /// See also:
 ///
-/// * [RoundedRectangleBorder] Which creates rectangles with rounded corners,
-///   however its straight sides change into a rounded corner with a circular
-///   radius in a step function instead of gradually like the
-///   [ContinuousRectangleBorder].
-class ContinuousRectangleBorder extends ShapeBorder {
+///  * [RoundedRectangleBorder] Which creates rectangles with rounded corners,
+///    however its straight sides change into a rounded corner with a circular
+///    radius in a step function instead of gradually like the
+///    [ContinuousRectangleBorder].
+class ContinuousRectangleBorder extends OutlinedBorder {
   /// The arguments must not be null.
   const ContinuousRectangleBorder({
-    this.side = BorderSide.none,
+    BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
-       assert(borderRadius != null);
+       assert(borderRadius != null),
+       super(side: side);
 
   /// The radius for each corner.
   ///
@@ -44,10 +48,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
 
-  /// The style of this border.
-  final BorderSide side;
-
-  @override
+   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
 
   @override
@@ -59,24 +60,24 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     assert(t != null);
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
       );
     }
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     assert(t != null);
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -115,30 +116,38 @@ class ContinuousRectangleBorder extends ShapeBorder {
       ..cubicTo(left, top, left, top, left + tlRadiusY, top)
       ..lineTo(right - trRadiusX, top)
       ..cubicTo(right, top, right, top, right, top + trRadiusY)
-      ..lineTo(right, bottom - blRadiusX)
-      ..cubicTo(right, bottom, right, bottom, right - blRadiusY, bottom)
-      ..lineTo(left + brRadiusX, bottom)
-      ..cubicTo(left, bottom, left, bottom, left, bottom - brRadiusY)
+      ..lineTo(right, bottom - brRadiusX)
+      ..cubicTo(right, bottom, right, bottom, right - brRadiusY, bottom)
+      ..lineTo(left + blRadiusX, bottom)
+      ..cubicTo(left, bottom, left, bottom, left, bottom - blRadiusY)
       ..close();
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius }) {
+    return ContinuousRectangleBorder(
+      side: side ?? this.side,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     if (rect.isEmpty)
       return;
     switch (side.style) {
       case BorderStyle.none:
-      break;
+        break;
       case BorderStyle.solid:
         final Path path = getOuterPath(rect, textDirection: textDirection);
         final Paint paint = side.toPaint();
@@ -148,12 +157,12 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final ContinuousRectangleBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius;
+    return other is ContinuousRectangleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius;
   }
 
   @override
@@ -161,6 +170,6 @@ class ContinuousRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '${objectRuntimeType(this, 'ContinuousRectangleBorder')}($side, $borderRadius)';
   }
 }

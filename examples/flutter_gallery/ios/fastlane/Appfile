@@ -1,8 +1,0 @@
-app_identifier "io.flutter.demo.gallery" # The bundle identifier of your app
-apple_id "stores@flutter.io" # Your Apple email address
-
-itc_team_id "118089806" # iTunes Connect Team ID
-team_id "S8QB4VV633" # Developer Portal Team ID
-
-# For more information about the Appfile, see:
-#     https://docs.fastlane.tools/advanced/#appfile

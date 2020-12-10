@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,7 +41,7 @@ abstract class InputBorder extends ShapeBorder {
   /// No input border.
   ///
   /// Use this value with [InputDecoration.border] to specify that no border
-  /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
+  /// should be drawn. The [InputDecoration.collapsed] constructor sets
   /// its border to this value.
   static const InputBorder none = _NoInputBorder();
 
@@ -52,7 +52,7 @@ abstract class InputBorder extends ShapeBorder {
   final BorderSide borderSide;
 
   /// Creates a copy of this input border with the specified `borderSide`.
-  InputBorder copyWith({ BorderSide borderSide });
+  InputBorder copyWith({ BorderSide? borderSide });
 
   /// True if this border will enclose the [InputDecorator]'s container.
   ///
@@ -74,10 +74,10 @@ abstract class InputBorder extends ShapeBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    double gapStart,
+    double? gapStart,
     double gapExtent = 0.0,
     double gapPercentage = 0.0,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   });
 }
 
@@ -86,7 +86,7 @@ class _NoInputBorder extends InputBorder {
   const _NoInputBorder() : super(borderSide: BorderSide.none);
 
   @override
-  _NoInputBorder copyWith({ BorderSide borderSide }) => const _NoInputBorder();
+  _NoInputBorder copyWith({ BorderSide? borderSide }) => const _NoInputBorder();
 
   @override
   bool get isOutline => false;
@@ -98,12 +98,12 @@ class _NoInputBorder extends InputBorder {
   _NoInputBorder scale(double t) => const _NoInputBorder();
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()..addRect(rect);
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()..addRect(rect);
   }
 
@@ -111,10 +111,10 @@ class _NoInputBorder extends InputBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    double gapStart,
+    double? gapStart,
     double gapExtent = 0.0,
     double gapPercentage = 0.0,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   }) {
     // Do not paint.
   }
@@ -166,7 +166,7 @@ class UnderlineInputBorder extends InputBorder {
   bool get isOutline => false;
 
   @override
-  UnderlineInputBorder copyWith({ BorderSide borderSide, BorderRadius borderRadius }) {
+  UnderlineInputBorder copyWith({ BorderSide? borderSide, BorderRadius? borderRadius }) {
     return UnderlineInputBorder(
       borderSide: borderSide ?? this.borderSide,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -184,33 +184,33 @@ class UnderlineInputBorder extends InputBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRect(Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t)!,
       );
     }
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -224,10 +224,10 @@ class UnderlineInputBorder extends InputBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    double gapStart,
+    double? gapStart,
     double gapExtent = 0.0,
     double gapPercentage = 0.0,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero)
       canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
@@ -235,13 +235,13 @@ class UnderlineInputBorder extends InputBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final InputBorder typedOther = other;
-    return typedOther.borderSide == borderSide;
+    return other is InputBorder
+        && other.borderSide == borderSide;
   }
 
   @override
@@ -321,9 +321,9 @@ class OutlineInputBorder extends InputBorder {
 
   @override
   OutlineInputBorder copyWith({
-    BorderSide borderSide,
-    BorderRadius borderRadius,
-    double gapPadding,
+    BorderSide? borderSide,
+    BorderRadius? borderRadius,
+    double? gapPadding,
   }) {
     return OutlineInputBorder(
       borderSide: borderSide ?? this.borderSide,
@@ -347,11 +347,11 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a is OutlineInputBorder) {
       final OutlineInputBorder outline = a;
       return OutlineInputBorder(
-        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t),
+        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t)!,
         borderSide: BorderSide.lerp(outline.borderSide, borderSide, t),
         gapPadding: outline.gapPadding,
       );
@@ -360,11 +360,11 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b is OutlineInputBorder) {
       final OutlineInputBorder outline = b;
       return OutlineInputBorder(
-        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t),
+        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t)!,
         borderSide: BorderSide.lerp(borderSide, outline.borderSide, t),
         gapPadding: outline.gapPadding,
       );
@@ -373,75 +373,80 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
+    // When the corner radii on any side add up to be greater than the
+    // given height, each radius has to be scaled to not exceed the
+    // size of the width/height of the RRect.
+    final RRect scaledRRect = center.scaleRadii();
+
     final Rect tlCorner = Rect.fromLTWH(
-      center.left,
-      center.top,
-      center.tlRadiusX * 2.0,
-      center.tlRadiusY * 2.0,
+      scaledRRect.left,
+      scaledRRect.top,
+      scaledRRect.tlRadiusX * 2.0,
+      scaledRRect.tlRadiusY * 2.0,
     );
     final Rect trCorner = Rect.fromLTWH(
-      center.right - center.trRadiusX * 2.0,
-      center.top,
-      center.trRadiusX * 2.0,
-      center.trRadiusY * 2.0,
+      scaledRRect.right - scaledRRect.trRadiusX * 2.0,
+      scaledRRect.top,
+      scaledRRect.trRadiusX * 2.0,
+      scaledRRect.trRadiusY * 2.0,
     );
     final Rect brCorner = Rect.fromLTWH(
-      center.right - center.brRadiusX * 2.0,
-      center.bottom - center.brRadiusY * 2.0,
-      center.brRadiusX * 2.0,
-      center.brRadiusY * 2.0,
+      scaledRRect.right - scaledRRect.brRadiusX * 2.0,
+      scaledRRect.bottom - scaledRRect.brRadiusY * 2.0,
+      scaledRRect.brRadiusX * 2.0,
+      scaledRRect.brRadiusY * 2.0,
     );
     final Rect blCorner = Rect.fromLTWH(
-      center.left,
-      center.bottom - center.brRadiusY * 2.0,
-      center.blRadiusX * 2.0,
-      center.blRadiusY * 2.0,
+      scaledRRect.left,
+      scaledRRect.bottom - scaledRRect.blRadiusY * 2.0,
+      scaledRRect.blRadiusX * 2.0,
+      scaledRRect.blRadiusX * 2.0,
     );
 
     const double cornerArcSweep = math.pi / 2.0;
-    final double tlCornerArcSweep = start < center.tlRadiusX
-      ? math.asin(start / center.tlRadiusX)
+    final double tlCornerArcSweep = start < scaledRRect.tlRadiusX
+      ? math.asin((start / scaledRRect.tlRadiusX).clamp(-1.0, 1.0))
       : math.pi / 2.0;
 
     final Path path = Path()
       ..addArc(tlCorner, math.pi, tlCornerArcSweep)
-      ..moveTo(center.left + center.tlRadiusX, center.top);
+      ..moveTo(scaledRRect.left + scaledRRect.tlRadiusX, scaledRRect.top);
 
-    if (start > center.tlRadiusX)
-      path.lineTo(center.left + start, center.top);
+    if (start > scaledRRect.tlRadiusX)
+      path.lineTo(scaledRRect.left + start, scaledRRect.top);
 
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
-    if (start + extent < center.width - center.trRadiusX) {
+    if (start + extent < scaledRRect.width - scaledRRect.trRadiusX) {
       path
         ..relativeMoveTo(extent, 0.0)
-        ..lineTo(center.right - center.trRadiusX, center.top)
+        ..lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top)
         ..addArc(trCorner, trCornerArcStart, trCornerArcSweep);
-    } else if (start + extent < center.width) {
-      final double dx = center.width - (start + extent);
-      final double sweep = math.acos(dx / center.trRadiusX);
+    } else if (start + extent < scaledRRect.width) {
+      final double dx = scaledRRect.width - (start + extent);
+      final double sweep = math.acos(dx / scaledRRect.trRadiusX);
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
     return path
-      ..moveTo(center.right, center.top + center.trRadiusY)
-      ..lineTo(center.right, center.bottom - center.brRadiusY)
+      ..moveTo(scaledRRect.right, scaledRRect.top + scaledRRect.trRadiusY)
+      ..lineTo(scaledRRect.right, scaledRRect.bottom - scaledRRect.brRadiusY)
       ..addArc(brCorner, 0.0, cornerArcSweep)
-      ..lineTo(center.left + center.blRadiusX, center.bottom)
+      ..lineTo(scaledRRect.left + scaledRRect.blRadiusX, scaledRRect.bottom)
       ..addArc(blCorner, math.pi / 2.0, cornerArcSweep)
-      ..lineTo(center.left, center.top + center.trRadiusY);
+      ..lineTo(scaledRRect.left, scaledRRect.top + scaledRRect.tlRadiusY);
   }
 
   /// Draw a rounded rectangle around [rect] using [borderRadius].
@@ -456,10 +461,10 @@ class OutlineInputBorder extends InputBorder {
   void paint(
     Canvas canvas,
     Rect rect, {
-    double gapStart,
+    double? gapStart,
     double gapExtent = 0.0,
     double gapPercentage = 0.0,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   }) {
     assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
@@ -471,32 +476,31 @@ class OutlineInputBorder extends InputBorder {
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
       canvas.drawRRect(center, paint);
     } else {
-      final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage);
-      switch (textDirection) {
-        case TextDirection.rtl: {
-          final Path path = _gapBorderPath(canvas, center, gapStart + gapPadding - extent, extent);
+      final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage)!;
+      switch (textDirection!) {
+        case TextDirection.rtl:
+          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
           canvas.drawPath(path, paint);
           break;
-        }
-        case TextDirection.ltr: {
-          final Path path = _gapBorderPath(canvas, center, gapStart - gapPadding, extent);
+
+        case TextDirection.ltr:
+          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
           canvas.drawPath(path, paint);
           break;
-        }
       }
     }
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final OutlineInputBorder typedOther = other;
-    return typedOther.borderSide == borderSide
-        && typedOther.borderRadius == borderRadius
-        && typedOther.gapPadding == gapPadding;
+    return other is OutlineInputBorder
+        && other.borderSide == borderSide
+        && other.borderRadius == borderRadius
+        && other.gapPadding == gapPadding;
   }
 
   @override

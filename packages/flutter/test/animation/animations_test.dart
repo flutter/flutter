@@ -1,10 +1,15 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
+
+import '../scheduler/scheduler_tester.dart';
 
 class BogusCurve extends Curve {
   @override
@@ -14,7 +19,9 @@ class BogusCurve extends Curve {
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance.resetEpoch();
+    WidgetsBinding.instance!.resetEpoch();
+    ui.window.onBeginFrame = null;
+    ui.window.onDrawFrame = null;
   });
 
   test('toString control test', () {
@@ -231,8 +238,122 @@ void main() {
       vsync: const TestVSync(),
     );
     final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: BogusCurve());
+    FlutterError? error;
+    try {
+      curved.value;
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error!.toStringDeep(), matches(
+      // RegExp matcher is required here due to flutter web and flutter mobile generating
+      // slightly different floating point numbers
+      // in Flutter web 0.0 sometimes just appears as 0. or 0
+      RegExp(r'''
+FlutterError
+   Invalid curve endpoint at \d+(\.\d*)?\.
+   Curves must map 0\.0 to near zero and 1\.0 to near one but
+   BogusCurve mapped \d+(\.\d*)? to \d+(\.\d*)?, which is near \d+(\.\d*)?\.
+''',
+        multiLine: true
+      ),
+    ));
+  });
 
-    expect(() { curved.value; }, throwsFlutterError);
+  test('CurvedAnimation running with different forward and reverse durations.', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 50),
+      vsync: const TestVSync(),
+    );
+    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear);
+
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 10));
+    expect(curved.value, moreOrLessEquals(0.1));
+    tick(const Duration(milliseconds: 20));
+    expect(curved.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 30));
+    expect(curved.value, moreOrLessEquals(0.3));
+    tick(const Duration(milliseconds: 40));
+    expect(curved.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 50));
+    expect(curved.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 60));
+    expect(curved.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 70));
+    expect(curved.value, moreOrLessEquals(0.7));
+    tick(const Duration(milliseconds: 80));
+    expect(curved.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 90));
+    expect(curved.value, moreOrLessEquals(0.9));
+    tick(const Duration(milliseconds: 100));
+    expect(curved.value, moreOrLessEquals(1.0));
+    controller.reverse();
+    tick(const Duration(milliseconds: 110));
+    expect(curved.value, moreOrLessEquals(1.0));
+    tick(const Duration(milliseconds: 120));
+    expect(curved.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 130));
+    expect(curved.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 140));
+    expect(curved.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 150));
+    expect(curved.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 160));
+    expect(curved.value, moreOrLessEquals(0.0));
+  });
+
+  test('ReverseAnimation running with different forward and reverse durations.', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 50),
+      vsync: const TestVSync(),
+    );
+    final ReverseAnimation reversed = ReverseAnimation(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.linear,
+        reverseCurve: Curves.linear,
+      ),
+    );
+
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 10));
+    expect(reversed.value, moreOrLessEquals(0.9));
+    tick(const Duration(milliseconds: 20));
+    expect(reversed.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 30));
+    expect(reversed.value, moreOrLessEquals(0.7));
+    tick(const Duration(milliseconds: 40));
+    expect(reversed.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 50));
+    expect(reversed.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 60));
+    expect(reversed.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 70));
+    expect(reversed.value, moreOrLessEquals(0.3));
+    tick(const Duration(milliseconds: 80));
+    expect(reversed.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 90));
+    expect(reversed.value, moreOrLessEquals(0.1));
+    tick(const Duration(milliseconds: 100));
+    expect(reversed.value, moreOrLessEquals(0.0));
+    controller.reverse();
+    tick(const Duration(milliseconds: 110));
+    expect(reversed.value, moreOrLessEquals(0.0));
+    tick(const Duration(milliseconds: 120));
+    expect(reversed.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 130));
+    expect(reversed.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 140));
+    expect(reversed.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 150));
+    expect(reversed.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 160));
+    expect(reversed.value, moreOrLessEquals(1.0));
   });
 
   test('TweenSequence', () {

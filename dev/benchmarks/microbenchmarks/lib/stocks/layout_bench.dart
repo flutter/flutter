@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,11 +15,12 @@ import '../common.dart';
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
 Future<void> main() async {
+  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
   final Stopwatch watch = Stopwatch();
   int iterations = 0;
@@ -45,7 +46,7 @@ Future<void> main() async {
 
     watch.start();
     while (watch.elapsed < kBenchmarkTime) {
-      renderView.configuration = (iterations % 2 == 0) ? big : small;
+      renderView.configuration = iterations.isEven ? big : small;
       await tester.pumpBenchmark(Duration(milliseconds: iterations * 16));
       iterations += 1;
     }

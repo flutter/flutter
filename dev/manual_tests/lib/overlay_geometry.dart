@@ -1,7 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -156,7 +157,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       setState(() {
         final double dy = markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;
-        for (MarkerType type in markers.keys) {
+        for (final MarkerType type in markers.keys) {
           final Offset oldPosition = markers[type];
           markers[type] = oldPosition.translate(0.0, dy);
         }
@@ -168,7 +169,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   void handleTapUp(GlobalKey target, Offset globalPosition) {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
-      final RenderBox box = target.currentContext.findRenderObject();
+      final RenderBox box = target.currentContext.findRenderObject() as RenderBox;
       markers[MarkerType.topLeft] = box.localToGlobal(const Offset(0.0, 0.0));
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));
@@ -179,26 +180,27 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> layers = <Widget>[
-      Scaffold(
-        appBar: AppBar(title: const Text('Tap a Card')),
-        body: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: handleScrollNotification,
-            child: ListView.custom(
-              childrenDelegate: CardBuilder(
-                cardModels: cardModels,
-                onTapUp: handleTapUp,
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+          appBar: AppBar(title: const Text('Tap a Card')),
+          body: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: handleScrollNotification,
+              child: ListView.custom(
+                childrenDelegate: CardBuilder(
+                  cardModels: cardModels,
+                  onTapUp: handleTapUp,
+                ),
               ),
             ),
           ),
         ),
-      ),
-    ];
-    for (MarkerType type in markers.keys)
-      layers.add(Marker(type: type, position: markers[type]));
-    return Stack(children: layers);
+        for (final MarkerType type in markers.keys)
+          Marker(type: type, position: markers[type]),
+      ],
+    );
   }
 }
 

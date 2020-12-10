@@ -1,11 +1,8 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/common.dart';
-import '../cache.dart';
-import '../codegen.dart';
-import '../project.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class GenerateCommand extends FlutterCommand {
@@ -23,18 +20,12 @@ class GenerateCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-    final FlutterProject flutterProject = await FlutterProject.current();
-    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
-    codegenDaemon.startBuild();
-    await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
-      if (codegenStatus == CodegenStatus.Failed) {
-        throwToolExit('Code generation failed');
-      }
-      if (codegenStatus ==CodegenStatus.Succeeded) {
-        break;
-      }
-    }
-    return null;
+    globals.printError(
+      '"flutter generate" is deprecated, use "dart pub run build_runner" instead. '
+      'The following dependencies must be added to dev_dependencies in pubspec.yaml:\n'
+      'build_runner: ^1.10.0\n'
+      'including all dependencies under the "builders" key'
+    );
+    return FlutterCommandResult.fail();
   }
 }

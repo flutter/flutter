@@ -1,11 +1,11 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
 
 class AdaptedListItem extends StatelessWidget {
-  const AdaptedListItem({ Key key, this.name }) : super(key: key);
+  const AdaptedListItem({ Key? key, required this.name }) : super(key: key);
 
   final String name;
 
@@ -26,7 +26,7 @@ class AdaptedListItem extends StatelessWidget {
 }
 
 class AdaptedGridItem extends StatelessWidget {
-  const AdaptedGridItem({ Key key, this.name }) : super(key: key);
+  const AdaptedGridItem({ Key? key, required this.name }) : super(key: key);
 
   final String name;
 
@@ -65,7 +65,7 @@ const double _kMaxTileWidth = 150.0;
 const double _kGridViewBreakpoint = 450.0;
 
 class AdaptiveContainer extends StatelessWidget {
-  const AdaptiveContainer({ Key key, this.names }) : super(key: key);
+  const AdaptiveContainer({ Key? key, required this.names }) : super(key: key);
 
   final List<String> names;
 
@@ -85,12 +85,7 @@ class AdaptiveContainer extends StatelessWidget {
   }
 }
 
-List<String> _initNames() {
-  final List<String> names = <String>[];
-  for (int i = 0; i < 30; i++)
-    names.add('Item $i');
-  return names;
-}
+List<String> _initNames() => List<String>.generate(30, (int i) => 'Item $i');
 
 final List<String> _kNames = _initNames();
 

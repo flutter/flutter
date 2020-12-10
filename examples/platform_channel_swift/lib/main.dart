@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,7 +65,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
               Text(_batteryLevel, key: const Key('Battery level label')),
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: RaisedButton(
+                child: ElevatedButton(
                   child: const Text('Refresh'),
                   onPressed: _getBatteryLevel,
                 ),

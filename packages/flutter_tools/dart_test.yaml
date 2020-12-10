@@ -1,0 +1,9 @@
+# package:test configuration
+# https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md
+
+# Some of our tests take an absurdly long time to run, and on some
+# hosts they can take even longer due to the host suddenly being
+# overloaded. For this reason, we set the test timeout to
+# significantly more than it would be by default, and we never set the
+# timeouts in the tests themselves.
+timeout: 15m

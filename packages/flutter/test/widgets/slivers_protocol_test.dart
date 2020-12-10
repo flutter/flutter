@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,9 +9,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
-  final RenderObject target = key.currentContext.findRenderObject();
-  expect(target.parent, isInstanceOf<RenderViewport>());
-  final SliverPhysicalParentData parentData = target.parentData;
+  final RenderObject target = key.currentContext!.findRenderObject()!;
+  expect(target.parent, isA<RenderViewport>());
+  final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
 }
@@ -68,7 +68,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  const BigSliver({ Key key }) : super(key: key);
+  const BigSliver({ Key? key }) : super(key: key);
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
     return RenderBigSliver();
@@ -105,7 +105,7 @@ class RenderOverlappingSliver extends RenderSliver {
 }
 
 class OverlappingSliver extends LeafRenderObjectWidget {
-  const OverlappingSliver({ Key key }) : super(key: key);
+  const OverlappingSliver({ Key? key }) : super(key: key);
   @override
   RenderOverlappingSliver createRenderObject(BuildContext context) {
     return RenderOverlappingSliver();

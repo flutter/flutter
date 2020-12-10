@@ -1,8 +1,9 @@
 name: {{projectName}}
 description: {{description}}
-{{#withPluginHook}}
-publish_to: 'none'
-{{/withPluginHook}}
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 {{^withPluginHook}}
 
 # The following defines the version and build number for your application.
@@ -19,32 +20,34 @@ version: 1.0.0+1
 {{/withPluginHook}}
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
+{{#withPluginHook}}
+  {{pluginProjectName}}:
+    # When depending on this package from a real application you should use:
+    #   {{pluginProjectName}}: ^x.y.z
+    # See https://dart.dev/tools/pub/dependencies#version-constraints
+    # The example app is bundled with the plugin so we use a path dependency on
+    # the parent directory to use the current plugin's version.
+    path: ../
+{{/withPluginHook}}
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
+  cupertino_icons: ^1.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-{{#withDriverTest}}
-  flutter_driver:
+  integration_test:
     sdk: flutter
-  test: 1.6.1
-{{/withDriverTest}}
-
-{{#withPluginHook}}
-  {{pluginProjectName}}:
-    path: ../
-{{/withPluginHook}}
 
 # For information on the generic Dart part of this file, see the
-# following page: https://www.dartlang.org/tools/pub/pubspec
+# following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
@@ -56,14 +59,14 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   # assets:
-  #  - images/a_dot_burr.jpeg
-  #  - images/a_dot_ham.jpeg
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.io/assets-and-images/#resolution-aware.
+  # https://flutter.dev/assets-and-images/#resolution-aware.
 
   # For details regarding adding assets from package dependencies, see
-  # https://flutter.io/assets-and-images/#from-packages
+  # https://flutter.dev/assets-and-images/#from-packages
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
@@ -83,4 +86,4 @@ flutter:
   #         weight: 700
   #
   # For details regarding fonts from package dependencies,
-  # see https://flutter.io/custom-fonts/#from-packages
+  # see https://flutter.dev/custom-fonts/#from-packages
