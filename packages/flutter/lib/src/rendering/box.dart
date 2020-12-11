@@ -1824,9 +1824,10 @@ abstract class RenderBox extends RenderObject {
   /// Computes the value returned by [getDryLayout]. Do not call this
   /// function directly, instead, call [getDryLayout].
   ///
-  /// Override in subclasses that implement [performLayout] or [performResize].
-  /// This method should return the [Size] that this [RenderBox] would like to
-  /// be given the provided [BoxConstraints].
+  /// Override in subclasses that implement [performLayout] or [performResize]
+  /// or when setting [sizedByParent] to true without overriding
+  /// [performResize]. This method should return the [Size] that this
+  /// [RenderBox] would like to be given the provided [BoxConstraints].
   ///
   /// The size returned by this method must match the [size] that the
   /// [RenderBox] will compute for itself in [performLayout] (or
