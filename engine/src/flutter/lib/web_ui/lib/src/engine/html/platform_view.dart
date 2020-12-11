@@ -44,6 +44,7 @@ class PersistedPlatformView extends PersistedLeafSurface {
     _styleReset.innerHtml = '''
       :host {
         all: initial;
+        cursor: inherit;
       }''';
     _shadowRoot.append(_styleReset);
     final html.Element? platformView =

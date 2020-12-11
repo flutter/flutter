@@ -165,3 +165,17 @@ Some useful links:
 2. Browser and driver CIPD [packages](https://chrome-infra-packages.appspot.com/p/flutter_internal) (Note: Access rights are restricted for these packages.)
 3. LUCI web [recipe](https://flutter.googlesource.com/recipes/+/refs/heads/master/recipes/web_engine.py)
 4. More general reading on CIPD packages [link](https://chromium.googlesource.com/chromium/src.git/+/master/docs/cipd.md#What-is-CIPD)
+
+## Troubleshooting
+
+### Can't load Kernel binary: Invalid kernel binary format version.
+
+Some times `.dart_tool` cache invalidation fails, and you'll end up with a cached version of `felt` that is not compatible with the Dart SDK that you're using.
+
+In that case, any invocation to `felt` will fail with:
+
+`Can't load Kernel binary: Invalid kernel binary format version.`
+
+The solution is to delete the cached `felt.snapshot` files within `engine/src/flutter/lib/web_ui`:
+
+**`rm .dart_tool/felt.snapshot*`**
