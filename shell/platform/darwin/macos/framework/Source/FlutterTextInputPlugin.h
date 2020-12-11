@@ -6,6 +6,7 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterIntermediateKeyResponder.h"
 
 /**
  * A plugin to handle text input.
@@ -16,7 +17,7 @@
  * This is not an FlutterPlugin since it needs access to FlutterViewController internals, so needs
  * to be managed differently.
  */
-@interface FlutterTextInputPlugin : NSResponder
+@interface FlutterTextInputPlugin : FlutterIntermediateKeyResponder
 
 /**
  * Initializes a text input plugin that coordinates key event handling with |viewController|.

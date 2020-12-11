@@ -399,7 +399,7 @@ def RunDartTests(build_dir, filter, verbose_dart_snapshot):
   # This one is a bit messy. The pubspec.yaml at flutter/testing/dart/pubspec.yaml
   # has dependencies that are hardcoded to point to the sky packages at host_debug_unopt/
   # Before running Dart tests, make sure to run just that target (NOT the whole engine)
-  EnsureDebugUnoptSkyPackagesAreBuilt();
+  EnsureDebugUnoptSkyPackagesAreBuilt()
 
   # Now that we have the Sky packages at the hardcoded location, run `pub get`.
   RunEngineExecutable(build_dir, os.path.join('dart-sdk', 'bin', 'pub'), None, flags=['get'], cwd=dart_tests_dir)
@@ -443,7 +443,7 @@ def main():
   parser = argparse.ArgumentParser()
 
   parser.add_argument('--variant', dest='variant', action='store',
-      default='host_debug_unopt', help='The engine build variant to run the tests for.');
+      default='host_debug_unopt', help='The engine build variant to run the tests for.')
   parser.add_argument('--type', type=str, default='all')
   parser.add_argument('--engine-filter', type=str, default='',
       help='A list of engine test executables to run.')

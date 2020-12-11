@@ -60,6 +60,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterGLCompositor.mm",
     "framework/Source/FlutterIOSurfaceHolder.h",
     "framework/Source/FlutterIOSurfaceHolder.mm",
+    "framework/Source/FlutterIntermediateKeyResponder.h",
+    "framework/Source/FlutterIntermediateKeyResponder.mm",
     "framework/Source/FlutterMouseCursorPlugin.h",
     "framework/Source/FlutterMouseCursorPlugin.mm",
     "framework/Source/FlutterResizeSynchronizer.h",
