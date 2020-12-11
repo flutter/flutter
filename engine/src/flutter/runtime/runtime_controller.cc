@@ -37,8 +37,7 @@ RuntimeController::RuntimeController(
     const PlatformData& p_platform_data,
     const fml::closure& p_isolate_create_callback,
     const fml::closure& p_isolate_shutdown_callback,
-    std::shared_ptr<const fml::Mapping> p_persistent_isolate_data,
-    std::shared_ptr<VolatilePathTracker> p_volatile_path_tracker)
+    std::shared_ptr<const fml::Mapping> p_persistent_isolate_data)
     : client_(p_client),
       vm_(p_vm),
       isolate_snapshot_(std::move(p_isolate_snapshot)),
@@ -54,8 +53,7 @@ RuntimeController::RuntimeController(
       platform_data_(std::move(p_platform_data)),
       isolate_create_callback_(p_isolate_create_callback),
       isolate_shutdown_callback_(p_isolate_shutdown_callback),
-      persistent_isolate_data_(std::move(p_persistent_isolate_data)),
-      volatile_path_tracker_(std::move(p_volatile_path_tracker)) {}
+      persistent_isolate_data_(std::move(p_persistent_isolate_data)) {}
 
 RuntimeController::~RuntimeController() {
   FML_DCHECK(Dart_CurrentIsolate() == nullptr);
@@ -95,8 +93,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
       platform_data_,               //
       isolate_create_callback_,     //
       isolate_shutdown_callback_,   //
-      persistent_isolate_data_,     //
-      volatile_path_tracker_        //
+      persistent_isolate_data_      //
       ));
 }
 
@@ -372,8 +369,7 @@ bool RuntimeController::LaunchRootIsolate(
           isolate_shutdown_callback_,                     //
           dart_entrypoint,                                //
           dart_entrypoint_library,                        //
-          std::move(isolate_configuration),               //
-          volatile_path_tracker_                          //
+          std::move(isolate_configuration)                //
           )
           .lock();
 
