@@ -70,13 +70,13 @@ void main() {
 
   testWidgets('Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000001);
-    const Color captionColor = Color(0xFF000002);
+    const Color unselectedWidgetColor = Color(0xFF000002);
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+          unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
@@ -106,7 +106,7 @@ void main() {
     expect(selectedFontStyle.fontSize, selectedFontSize);
     expect(selectedFontStyle.fontWeight, equals(FontWeight.w400));
     expect(selectedFontStyle.height, isNull);
-    expect(unselectedFontStyle.color, equals(captionColor));
+    expect(unselectedFontStyle.color, equals(unselectedWidgetColor));
     expect(unselectedFontStyle.fontWeight, equals(FontWeight.w400));
     expect(unselectedFontStyle.height, isNull);
     // Unselected label has a font size of 14 but is scaled down to be font size 12.
@@ -116,7 +116,7 @@ void main() {
     );
     expect(selectedIcon.color, equals(primaryColor));
     expect(selectedIcon.fontSize, equals(24.0));
-    expect(unselectedIcon.color, equals(captionColor));
+    expect(unselectedIcon.color, equals(unselectedWidgetColor));
     expect(unselectedIcon.fontSize, equals(24.0));
     // There should not be any [Opacity] or [FadeTransition] widgets
     // since showUnselectedLabels and showSelectedLabels are true.
@@ -439,7 +439,7 @@ void main() {
 
   testWidgets('Fixed BottomNavigationBar custom font size, color', (WidgetTester tester) async {
     const Color primaryColor = Colors.black;
-    const Color captionColor = Colors.purple;
+    const Color unselectedWidgetColor = Colors.purple;
     const Color selectedColor = Colors.blue;
     const Color unselectedColor = Colors.yellow;
     const double selectedFontSize = 18.0;
@@ -449,7 +449,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+          unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
@@ -499,7 +499,7 @@ void main() {
 
   testWidgets('Shifting BottomNavigationBar custom font size, color', (WidgetTester tester) async {
     const Color primaryColor = Colors.black;
-    const Color captionColor = Colors.purple;
+    const Color unselectedWidgetColor = Colors.purple;
     const Color selectedColor = Colors.blue;
     const Color unselectedColor = Colors.yellow;
     const double selectedFontSize = 18.0;
@@ -509,7 +509,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+          unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(

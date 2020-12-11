@@ -56,6 +56,8 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 /// configuration) -- prefilled with the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
 
+final Map<String, String> localEngineEnv = <String, String>{};
+
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
 
@@ -83,36 +85,12 @@ int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
 /// WARNING: this number must match the shard count in LUCI configs.
 const int kWebLongRunningTestShardCount = 3;
 
-/// Tests that we don't run on Web for various reasons.
+/// Tests that we don't run on Web for compilation reasons.
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileKnownFailures = <String>[
-  // This test doesn't compile because it depends on code outside the flutter package.
-  'test/examples/sector_layout_test.dart',
-  // This test relies on widget tracking capability in the VM.
-  'test/widgets/widget_inspector_test.dart',
-  'test/painting/decoration_test.dart',
-  'test/material/time_picker_test.dart',
-  'test/material/text_field_test.dart',
-  'test/material/floating_action_button_test.dart',
-  'test/widgets/selectable_text_test.dart',
-  'test/widgets/color_filter_test.dart',
-  'test/widgets/editable_text_cursor_test.dart',
-  'test/material/data_table_test.dart',
-  'test/cupertino/nav_bar_transition_test.dart',
-  'test/cupertino/refresh_test.dart',
-  'test/cupertino/text_field_test.dart',
-  'test/cupertino/route_test.dart',
-  'test/foundation/error_reporting_test.dart',
-  'test/foundation/consolidate_response_test.dart',
-  'test/foundation/stack_trace_test.dart',
   'test/services/message_codecs_vm_test.dart',
-  'test/services/platform_messages_test.dart',
-  'test/widgets/image_resolution_test.dart ',
-  'test/widgets/platform_view_test.dart',
-  'test/widgets/route_notification_messages_test.dart',
-  'test/widgets/semantics_tester_generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart',
-  'test/widgets/text_golden_test.dart',
+  'test/examples/sector_layout_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -129,6 +107,13 @@ Future<void> main(List<String> args) async {
   print('$clock STARTING ANALYSIS');
   try {
     flutterTestArgs.addAll(args);
+    for (final String arg in args) {
+      if (arg.startsWith('--local-engine='))
+        localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
+      if (arg.startsWith('--local-engine-src-path='))
+        localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
+    }
+
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
@@ -389,6 +374,7 @@ Future<void> _runWebToolTests() async {
 /// target app.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
@@ -486,18 +472,6 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
 }) async {
   assert(Platform.isMacOS);
   print('${green}Testing IPA build$reset for $cyan$relativePathToApplication$reset...');
-  // Install Cocoapods.  We don't have these checked in for the examples,
-  // and build ios doesn't take care of it automatically.
-  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
-  if (podfile.existsSync()) {
-    await runCommand('pod',
-      <String>['install'],
-      workingDirectory: podfile.parent.path,
-      environment: <String, String>{
-        'LANG': 'en_US.UTF-8',
-      },
-    );
-  }
   await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
     release: release,
     verifyCaching: verifyCaching,
@@ -652,6 +626,13 @@ Future<void> _runFrameworkTests() async {
         tableData: bigqueryApi?.tabledata,
       );
     }
+    // Run release mode tests (see packages/flutter/test_release/README.md)
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
+      tableData: bigqueryApi?.tabledata,
+      tests: <String>[ 'test_release' + path.separator ],
+    );
   }
 
   Future<void> runLibraries() async {
@@ -1259,6 +1240,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
+    ...localEngineEnv
   };
   if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;

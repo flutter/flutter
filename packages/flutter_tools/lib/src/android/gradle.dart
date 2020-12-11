@@ -324,9 +324,6 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.splitPerAbi) {
     command.add('-Psplit-per-abi=true');
   }
-  if (androidBuildInfo.shrink) {
-    command.add('-Pshrink=true');
-  }
   if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
     command.add('-Pdart-defines=${encodeDartDefines(androidBuildInfo.buildInfo.dartDefines)}');
   }
@@ -535,7 +532,9 @@ Future<void> _performCodeSizeAnalysis(
     kind: kind,
   );
   final File outputFile = globals.fsUtils.getUniqueFile(
-    globals.fs.directory(getBuildDirectory()),'$kind-code-size-analysis', 'json',
+    globals.fs
+      .directory(globals.fsUtils.homeDirPath)
+      .childDirectory('.flutter-devtools'), '$kind-code-size-analysis', 'json',
   )..writeAsStringSync(jsonEncode(output));
   // This message is used as a sentinel in analyze_apk_size_test.dart
   globals.printStatus(
@@ -1090,6 +1089,21 @@ Directory _getLocalEngineRepo({
         '${abi}_$buildMode',
         artifactVersion,
         '${abi}_$buildMode-$artifactVersion.$artifact',
+      ),
+    );
+  }
+  for (final String artifact in <String>['flutter_embedding_$buildMode', '${abi}_$buildMode']) {
+    _createSymlink(
+      globals.fs.path.join(
+        engineOutPath,
+        '$artifact.maven-metadata.xml',
+      ),
+      globals.fs.path.join(
+        localEngineRepo.path,
+        'io',
+        'flutter',
+        artifact,
+        'maven-metadata.xml',
       ),
     );
   }

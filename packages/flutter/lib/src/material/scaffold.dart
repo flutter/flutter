@@ -1443,7 +1443,9 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButtonAnimator,
     this.persistentFooterButtons,
     this.drawer,
+    this.onDrawerChanged,
     this.endDrawer,
+    this.onEndDrawerChanged,
     this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
@@ -1607,6 +1609,9 @@ class Scaffold extends StatefulWidget {
   /// {@end-tool}
   final Widget? drawer;
 
+  /// Optional callback that is called when the [Scaffold.drawer] is opened or closed.
+  final DrawerCallback? onDrawerChanged;
+
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
   /// left-to-right ([TextDirection.rtl])
@@ -1666,6 +1671,9 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final Widget? endDrawer;
+
+  /// Optional callback that is called when the [Scaffold.endDrawer] is opened or closed.
+  final DrawerCallback? onEndDrawerChanged;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
@@ -2091,12 +2099,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     setState(() {
       _drawerOpened = isOpened;
     });
+    widget.onDrawerChanged?.call(isOpened);
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
     setState(() {
       _endDrawerOpened = isOpened;
     });
+    widget.onEndDrawerChanged?.call(isOpened);
   }
 
   /// Opens the [Drawer] (if any).
