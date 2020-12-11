@@ -18,6 +18,7 @@ import 'slider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // RangeValues _rangeValues = RangeValues(0.3, 0.7);
 // RangeValues _dollarsRange = RangeValues(50, 100);
 // void setState(VoidCallback fn) { }
@@ -33,7 +34,7 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// ![A range slider widget, consisting of 5 divisions and showing the default
 /// value indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/range_slider.png)

@@ -16,6 +16,9 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
+// Examples can assume:
+// // @dart = 2.9
+
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
   fontWeight: FontWeight.w400,
   color: CupertinoColors.placeholderText,

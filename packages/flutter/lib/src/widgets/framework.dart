@@ -30,10 +30,9 @@ export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 // void setState(VoidCallback fn) { }
-
-// Examples can assume:
 // abstract class RenderFrogJar extends RenderObject { }
 // abstract class FrogJar extends RenderObjectWidget { }
 // abstract class FrogJarParentData extends ParentData { Size size; }
@@ -4437,7 +4436,7 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///
 /// It is possible to override this widget.
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=freeform_no_null_safety}
 /// ```dart
 /// import 'package:flutter/material.dart';
 ///

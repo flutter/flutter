@@ -27,6 +27,9 @@ import 'sliver.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A controller for [PageView].
 ///
 /// A page controller lets you manipulate which page is visible in a [PageView].
