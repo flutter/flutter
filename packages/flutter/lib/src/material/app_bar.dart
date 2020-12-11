@@ -1262,6 +1262,118 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=freeform}
+///
+/// This sample shows a [SliverAppBar] and it's behaviors when using the [pinned], [snap] and [floating] parameters.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// void main() => runApp(MyApp());
+///
+/// class MyApp extends StatefulWidget {
+///   const MyApp({Key key}) : super(key: key);
+///
+///   @override
+///   State<StatefulWidget> createState() => _MyAppState();
+/// }
+///
+/// class _MyAppState extends State<MyApp> {
+///   bool _pinned = true;
+///   bool _snap = false;
+///   bool _floating = false;
+///
+///   // SliverAppBar is declared in Scaffold.body, in slivers of a
+///   // CustomScrollView.
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: CustomScrollView(
+///           slivers: <Widget>[
+///             SliverAppBar(
+///               pinned: this._pinned,
+///               snap: this._snap,
+///               floating: this._floating,
+///               expandedHeight: 160.0,
+///               flexibleSpace: FlexibleSpaceBar(
+///                 title: const Text("SliverAppBar"),
+///                 background: FlutterLogo(),
+///               ),
+///             ),
+///             SliverToBoxAdapter(
+///               child: Center(
+///                 child: Container(
+///                   height: 2000,
+///                   child: const Text("Scroll to see SliverAppBar in effect ."),
+///                 ),
+///               ),
+///             ),
+///           ],
+///         ),
+///         bottomNavigationBar: BottomAppBar(
+///           child: ButtonBar(
+///             alignment: MainAxisAlignment.spaceEvenly,
+///             children: <Widget>[
+///               Row(
+///                 children: <Widget>[
+///                   const Text('pinned'),
+///                   Switch(
+///                     onChanged: (bool val) {
+///                       setState(() {
+///                         this._pinned = val;
+///                       });
+///                     },
+///                     value: this._pinned,
+///                   ),
+///                 ],
+///               ),
+///               Row(
+///                 children: <Widget>[
+///                   const Text('snap'),
+///                   Switch(
+///                     onChanged: (bool val) {
+///                       setState(() {
+///                         this._snap = val;
+///                         //Snapping only applies when the app bar is floating.
+///                         this._floating = this._floating || val;
+///                       });
+///                     },
+///                     value: this._snap,
+///                   ),
+///                 ],
+///               ),
+///               Row(
+///                 children: <Widget>[
+///                   const Text('floating'),
+///                   Switch(
+///                     onChanged: (bool val) {
+///                       setState(() {
+///                         this._floating = val;
+///                         if (this._snap == true) {
+///                           if (this._floating != true) {
+///                             this._snap = false;
+///                           }
+///                         }
+///                       });
+///                     },
+///                     value: this._floating,
+///                   ),
+///                 ],
+///               ),
+///             ],
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// ```
+/// {@end-tool}
+///
 /// ## Animated Examples
 ///
 /// The following animations show how app bars with different configurations
