@@ -248,7 +248,6 @@ class SnippetGenerator {
               'The template $template was not found in the templates directory ${templatesDir.path}');
           exit(1);
         }
-
         final String templateContents = _loadFileAsUtf8(templateFile);
         String app = interpolateTemplate(snippetData, templateContents, metadata);
 
