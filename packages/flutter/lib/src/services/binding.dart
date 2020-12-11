@@ -109,7 +109,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
           // NOTICES for web isn't compressed since we don't have access to
           // dart:io on the client side and it's already compressed between
           // the server and client.
-          kIsWeb ? 'NOTICES' : 'NOTICES.gz',
+          //
+          // The compressed version doesn't have a common .gz extension because
+          // gradle for Android non-transparently manipulates .gz files.
+          kIsWeb ? 'NOTICES' : 'NOTICES.Z',
           cache: false,
           unzip: !kIsWeb,
         )

@@ -124,7 +124,13 @@ class ManifestAssetBundle implements AssetBundle {
 
   static const String _kAssetManifestJson = 'AssetManifest.json';
   static const String _kNoticeFile = 'NOTICES';
-  static const String _kNoticeZippedFile = 'NOTICES.gz';
+  // Comically, this can't be name with the more common .gz file extension
+  // because when it's part of an AAR and brought into another APK via gradle,
+  // gradle individually traverses all the files of the AAR and unzips .gz
+  // files (b/37117906). A less common .Z extension still describes how the
+  // file is formatted if users want to manually inspect the application
+  // bundle and is recognized by default file handlers on OS such as macOS.˚
+  static const String _kNoticeZippedFile = 'NOTICES.Z';
 
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
