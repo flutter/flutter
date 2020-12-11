@@ -98,7 +98,7 @@ class BottomNavigationBarItem {
   final Color? backgroundColor;
 
   /// The text to display in the tooltip for this [BottomNavigationBarItem].
-  /// 
+  ///
   /// The tooltip will only appear on an item in the [BottomNavigationBar].
   final String? toolTip;
 }
