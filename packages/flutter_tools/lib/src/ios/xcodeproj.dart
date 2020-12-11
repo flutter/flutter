@@ -342,8 +342,8 @@ class XcodeProjectInterpreter {
   ///
   /// If [scheme] is null, xcodebuild will return build settings for the first discovered
   /// target (by default this is Runner).
-  Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+  Future<Map<String, String>> getBuildSettings(String workspacePath, {
+    String configuration,
     String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -354,10 +354,12 @@ class XcodeProjectInterpreter {
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
-      '-project',
-      _fileSystem.path.absolute(projectPath),
+      '-workspace',
+      _fileSystem.path.absolute(workspacePath),
       if (scheme != null)
         ...<String>['-scheme', scheme],
+      if (configuration != null)
+        ...<String>['-configuration', configuration],
       '-showBuildSettings',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ];
@@ -368,7 +370,7 @@ class XcodeProjectInterpreter {
       final RunResult result = await _processUtils.run(
         showBuildSettingsCommand,
         throwOnError: true,
-        workingDirectory: projectPath,
+        workingDirectory: workspacePath,
         timeout: timeout,
         timeoutRetries: 1,
       );

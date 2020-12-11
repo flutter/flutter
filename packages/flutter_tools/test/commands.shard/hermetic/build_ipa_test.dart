@@ -19,7 +19,8 @@ import '../../src/testbed.dart';
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
-      String projectPath, {
+      String workspacePath, {
+        String configuration,
         String scheme,
         Duration timeout = const Duration(minutes: 1),
       }) async {

@@ -74,7 +74,7 @@ void main() {
           .thenReturn(ProcessResult(0, 1, '', ''));
 
       expect(await xcodeProjectInterpreter.getBuildSettings(
-        '', scheme: 'Runner', timeout: delay),
+        '', configuration: 'Profile', scheme: 'Runner', timeout: delay),
         const <String, String>{});
       // build settings times out and is killed once, then succeeds.
       verify(processManager.killPid(any)).called(1);
@@ -321,17 +321,26 @@ void main() {
         command: <String>[
           'xcrun',
           'xcodebuild',
-          '-project',
+          '-workspace',
           '/',
           '-scheme',
           'Free',
-          '-showBuildSettings'
+          '-configuration',
+          'Release (Free)',
+          '-showBuildSettings',
         ],
         exitCode: 1,
       ),
     ]);
 
-    expect(await xcodeProjectInterpreter.getBuildSettings('', scheme: 'Free'), const <String, String>{});
+    expect(
+      await xcodeProjectInterpreter.getBuildSettings(
+        '',
+        configuration: 'Release (Free)',
+        scheme: 'Free',
+      ),
+      const <String, String>{},
+    );
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -345,15 +354,23 @@ void main() {
         command: <String>[
           'xcrun',
           'xcodebuild',
-          '-project',
+          '-workspace',
           '/',
-          '-showBuildSettings'
+          '-configuration',
+          'Profile',
+          '-showBuildSettings',
         ],
         exitCode: 1,
       ),
     ]);
 
-    expect(await xcodeProjectInterpreter.getBuildSettings(''), const <String, String>{});
+    expect(
+      await xcodeProjectInterpreter.getBuildSettings(
+        '',
+        configuration: 'Profile',
+      ),
+      const <String, String>{},
+    );
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -369,17 +386,26 @@ void main() {
         command: <String>[
           'xcrun',
           'xcodebuild',
-          '-project',
+          '-workspace',
           fileSystem.path.separator,
           '-scheme',
           'Free',
+          '-configuration',
+          'Release (Free)',
           '-showBuildSettings',
           'CODE_SIGN_STYLE=Manual',
-          'ARCHS=arm64'
+          'ARCHS=arm64',
         ],
       ),
     ]);
-    expect(await xcodeProjectInterpreter.getBuildSettings('', scheme: 'Free'), const <String, String>{});
+    expect(
+      await xcodeProjectInterpreter.getBuildSettings(
+        '',
+        configuration: 'Release (Free)',
+        scheme: 'Free',
+      ),
+      const <String, String>{},
+    );
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
