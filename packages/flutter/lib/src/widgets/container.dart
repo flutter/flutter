@@ -11,6 +11,7 @@ import 'framework.dart';
 import 'image.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 /// A widget that paints a [Decoration] either before or after its child paints.

@@ -30,7 +30,7 @@ const double _kInnerRadius = 4.5;
 /// will respond to [onChanged] by calling [State.setState] to update the
 /// radio button's [groupValue].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
 ///
 /// Here is an example of Radio widgets wrapped in ListTiles, which is similar
 /// to what you could get with the RadioListTile widget.
@@ -202,7 +202,7 @@ class Radio<T> extends StatefulWidget {
   ///
   /// The default is false.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
   /// This example shows how to enable deselecting a radio button by setting the
   /// [toggleable] attribute.
   ///

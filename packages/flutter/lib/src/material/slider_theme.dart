@@ -13,6 +13,9 @@ import 'colors.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// Applies a slider theme to descendant [Slider] widgets.
 ///
 /// A slider theme describes the colors and shape choices of the slider
