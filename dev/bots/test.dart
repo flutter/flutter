@@ -56,8 +56,6 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 /// configuration) -- prefilled with the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
 
-final Map<String, String> localEngineEnv = <String, String>{};
-
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
 
@@ -107,13 +105,6 @@ Future<void> main(List<String> args) async {
   print('$clock STARTING ANALYSIS');
   try {
     flutterTestArgs.addAll(args);
-    for (final String arg in args) {
-      if (arg.startsWith('--local-engine='))
-        localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
-      if (arg.startsWith('--local-engine-src-path='))
-        localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
-    }
-
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
@@ -374,6 +365,7 @@ Future<void> _runWebToolTests() async {
 /// target app.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
@@ -471,18 +463,6 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
 }) async {
   assert(Platform.isMacOS);
   print('${green}Testing IPA build$reset for $cyan$relativePathToApplication$reset...');
-  // Install Cocoapods.  We don't have these checked in for the examples,
-  // and build ios doesn't take care of it automatically.
-  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
-  if (podfile.existsSync()) {
-    await runCommand('pod',
-      <String>['install'],
-      workingDirectory: podfile.parent.path,
-      environment: <String, String>{
-        'LANG': 'en_US.UTF-8',
-      },
-    );
-  }
   await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
     release: release,
     verifyCaching: verifyCaching,
@@ -1251,7 +1231,6 @@ Future<void> _pubRunTest(String workingDirectory, {
   ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
-    ...localEngineEnv
   };
   if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;

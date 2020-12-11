@@ -1212,16 +1212,16 @@ class EditableText extends StatefulWidget {
   /// A list of strings that helps the autofill service identify the type of this
   /// text input.
   ///
-  /// When set to null or empty, the text input will not send any autofill related
-  /// information to the platform. As a result, it will not participate in
+  /// When set to null or empty, this text input will not send its autofill
+  /// information to the platform, preventing it from participating in
   /// autofills triggered by a different [AutofillClient], even if they're in the
-  /// same [AutofillScope]. Additionally, on Android and web, setting this to null
-  /// or empty will disable autofill for this text field.
+  /// same [AutofillScope]. Additionally, on Android and web, setting this to
+  /// null or empty will disable autofill for this text field.
   ///
   /// The minimum platform SDK version that supports Autofill is API level 26
   /// for Android, and iOS 10.0 for iOS.
   ///
-  /// ### iOS-specific Concerns:
+  /// ### Setting up iOS autofill:
   ///
   /// To provide the best user experience and ensure your app fully supports
   /// password autofill on iOS, follow these steps:
@@ -1233,6 +1233,47 @@ class EditableText extends StatefulWidget {
   ///   works only with [TextInputType.emailAddress]. Make sure the input field has a
   ///   compatible [keyboardType]. Empirically, [TextInputType.name] works well
   ///   with many autofill hints that are predefined on iOS.
+  ///
+  /// ### Troubleshooting Autofill
+  ///
+  /// Autofill service providers rely heavily on [autofillHints]. Make sure the
+  /// entries in [autofillHints] are supported by the autofill service currently
+  /// in use (the name of the service can typically be found in your mobile
+  /// device's system settings).
+  ///
+  /// #### Autofill UI refuses to show up when I tap on the text field
+  ///
+  /// Check the device's system settings and make sure autofill is turned on,
+  /// and there're available credentials stored in the autofill service.
+  ///
+  /// * iOS password autofill: Go to Settings -> Password, turn on "Autofill
+  ///   Passwords", and add new passwords for testing by pressing the top right
+  ///   "+" button. Use an arbitrary "website" if you don't have associated
+  ///   domains set up for your app. As long as there's at least one password
+  ///   stored, you should be able to see a key-shaped icon in the quick type
+  ///   bar on the software keyboard, when a password related field is focused.
+  ///
+  /// * iOS contact information autofill: iOS seems to pull contact info from
+  ///   the Apple ID currently associated with the device. Go to Settings ->
+  ///   Apple ID (usually the first entry, or "Sign in to your iPhone" if you
+  ///   haven't set up one on the device), and fill out the relevant fields. If
+  ///   you wish to test more contact info types, try adding them in Contacts ->
+  ///   My Card.
+  ///
+  /// * Android autofill: Go to Settings -> System -> Languages & input ->
+  ///   Autofill service. Enable the autofill service of your choice, and make
+  ///   sure there're available credentials associated with your app.
+  ///
+  /// #### I called `TextInput.finishAutofillContext` but the autofill save
+  /// prompt isn't showing
+  ///
+  /// * iOS: iOS may not show a prompt or any other visual indication when it
+  ///   saves user password. Go to Settings -> Password and check if your new
+  ///   password is saved. Neither saving password nor auto-generating strong
+  ///   password works without properly setting up associated domains in your
+  ///   app. To set up associated domains, follow the instructions in
+  ///   <https://developer.apple.com/documentation/safariservices/supporting_associated_domains_in_your_app>.
+  ///
   /// {@endtemplate}
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
