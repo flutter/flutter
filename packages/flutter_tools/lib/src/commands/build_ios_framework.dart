@@ -449,7 +449,6 @@ end
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
-        'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];
