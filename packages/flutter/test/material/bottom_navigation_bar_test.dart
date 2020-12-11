@@ -1151,36 +1151,7 @@ void main() {
     expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
   });
 
-  testWidgets('BottomNavigationBar shows custom tool tips if toolTip is provided in BottomNavigationBarItem', (WidgetTester tester) async {
-    const String label = 'Foo';
-    const String toolTip = 'Foo Tool Tip';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                label: label,
-                toolTip: toolTip,
-                icon: Icon(Icons.ac_unit),
-              ),
-              BottomNavigationBarItem(
-                label: 'B',
-                icon: Icon(Icons.battery_alert),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(find.text(label), findsOneWidget);
-    await tester.longPress(find.text(label));
-    expect(find.byTooltip(toolTip), findsOneWidget);
-  });
-
-  testWidgets('BottomNavigationBar doesn\'t show tool tips if toolTip is null in BottomNavigationBarItem', (WidgetTester tester) async {
+  testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1188,11 +1159,17 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 label: 'A',
+                toolTip: 'A tooltip',
                 icon: Icon(Icons.ac_unit),
               ),
               BottomNavigationBarItem(
                 label: 'B',
                 icon: Icon(Icons.battery_alert),
+              ),
+              BottomNavigationBarItem(
+                label: 'C',
+                icon: Icon(Icons.cake),
+                toolTip: '',
               ),
             ],
           ),
@@ -1202,7 +1179,15 @@ void main() {
 
     expect(find.text('A'), findsOneWidget);
     await tester.longPress(find.text('A'));
-    expect(find.byType(Tooltip), findsNothing);
+    expect(find.byTooltip('A tooltip'), findsOneWidget);
+
+    expect(find.text('B'), findsOneWidget);
+    await tester.longPress(find.text('B'));
+    expect(find.byTooltip('B'), findsOneWidget);
+
+    expect(find.text('C'), findsOneWidget);
+    await tester.longPress(find.text('C'));
+    expect(find.byTooltip('C'), findsNothing);
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
