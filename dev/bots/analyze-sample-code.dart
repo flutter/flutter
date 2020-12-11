@@ -153,7 +153,7 @@ class SampleChecker {
   /// A RegExp that matches a Dart constructor.
   static final RegExp _constructorRegExp = RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
 
-  /// A RegExp that matches a dart version specification in a example preamble.
+  /// A RegExp that matches a dart version specification in an example preamble.
   static final RegExp _dartVersionRegExp = RegExp(r'\/\/ \/\/ @dart = ([0-9]+\.[0-9]+)');
 
   /// Whether or not to print verbose output.
