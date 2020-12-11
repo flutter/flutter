@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:meta/meta.dart' show required, visibleForTesting;
+import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
@@ -152,12 +152,10 @@ final Expando<Uri> _httpAddressExpando = Expando<Uri>();
 
 final Expando<Uri> _wsAddressExpando = Expando<Uri>();
 
-@visibleForTesting
 void setHttpAddress(Uri uri, vm_service.VmService vmService) {
   _httpAddressExpando[vmService] = uri;
 }
 
-@visibleForTesting
 void setWsAddress(Uri uri, vm_service.VmService vmService) {
   _wsAddressExpando[vmService] = uri;
 }
