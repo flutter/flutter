@@ -45,10 +45,10 @@ import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
-import 'src/isolated/devtools_launcher.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/resident_runner.dart';

@@ -8,10 +8,10 @@ import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../base/io.dart' as io;
-import '../base/logger.dart';
-import '../convert.dart';
-import '../resident_runner.dart';
+import 'base/io.dart' as io;
+import 'base/logger.dart';
+import 'convert.dart';
+import 'resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses the server package.
 ///

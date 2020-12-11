@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/isolated/devtools_launcher.dart';
+import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 
 import '../src/common.dart';
