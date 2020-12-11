@@ -11,11 +11,10 @@ import 'print.dart';
 import 'stack_frame.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// String runtimeType;
-// bool draconisAlive;
-// bool draconisAmulet;
-// Diagnosticable draconis;
+// late String runtimeType;
+// late bool draconisAlive;
+// late bool draconisAmulet;
+// late Diagnosticable draconis;
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);

@@ -203,6 +203,8 @@ class SampleChecker {
     return _headers ??= <String>[
       '// generated code',
       '// ignore_for_file: unused_import',
+      '// ignore_for_file: unused_element',
+      '// ignore_for_file: unused_local_variable',
       "import 'dart:async';",
       "import 'dart:convert';",
       "import 'dart:math' as math;",
