@@ -1,4 +1,4 @@
-Signature: e7b3327cb7442bf0ad7340b74855704e
+Signature: d237b797ca103285ccb27d13df7b961c
 
 UNUSED LICENSES:
 
@@ -3929,6 +3929,7 @@ FILE: ../../../third_party/skia/src/gpu/GrClipStack.h
 FILE: ../../../third_party/skia/src/gpu/GrDDLTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDDLTask.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
+FILE: ../../../third_party/skia/src/gpu/GrRenderTargetContext.h
 FILE: ../../../third_party/skia/src/gpu/GrRingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrStagingBufferManager.cpp
