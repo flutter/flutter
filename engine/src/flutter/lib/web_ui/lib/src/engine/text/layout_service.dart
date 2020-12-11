@@ -188,6 +188,7 @@ class TextLayoutService {
       if (span is PlaceholderSpan) {
         // TODO(mdebbar): Do placeholders affect min/max intrinsic width?
       } else if (span is FlatTextSpan) {
+        spanometer.currentSpan = span;
         final LineBreakResult nextBreak = currentLine.findNextBreak(span.end);
 
         // For the purpose of max intrinsic width, we don't care if the line
@@ -251,6 +252,9 @@ class LineSegment {
 
   /// The width of the trailing white space in the segment.
   double get widthOfTrailingSpace => widthIncludingSpace - width;
+
+  /// Whether this segment is made of only white space.
+  bool get isSpaceOnly => start.index == end.indexWithoutTrailingSpaces;
 }
 
 /// Builds instances of [EngineLineMetrics] for the given [paragraph].
@@ -358,8 +362,12 @@ class LineBuilder {
   void _addSegment(LineSegment segment) {
     _segments.add(segment);
 
-    // Add the width of previous trailing space.
-    width += widthOfTrailingSpace + segment.width;
+    // Adding a space-only segment has no effect on `width` because it doesn't
+    // include trailing white space.
+    if (!segment.isSpaceOnly) {
+      // Add the width of previous trailing space.
+      width += widthOfTrailingSpace + segment.width;
+    }
     widthIncludingSpace += segment.widthIncludingSpace;
     end = segment.end;
   }
@@ -370,17 +378,39 @@ class LineBuilder {
   LineSegment _popSegment() {
     final LineSegment poppedSegment = _segments.removeLast();
 
-    double widthOfPrevTrailingSpace;
     if (_segments.isEmpty) {
-      widthOfPrevTrailingSpace = 0.0;
+      width = 0.0;
+      widthIncludingSpace = 0.0;
       end = start;
     } else {
-      widthOfPrevTrailingSpace = lastSegment.widthOfTrailingSpace;
+      widthIncludingSpace -= poppedSegment.widthIncludingSpace;
       end = lastSegment.end;
-    }
 
-    width = width - poppedSegment.width - widthOfPrevTrailingSpace;
-    widthIncludingSpace -= poppedSegment.widthIncludingSpace;
+      // Now, let's figure out what to do with `width`.
+
+      // Popping a space-only segment has no effect on `width`.
+      if (!poppedSegment.isSpaceOnly) {
+        // First, we subtract the width of the popped segment.
+        width -= poppedSegment.width;
+
+        // Second, we subtract all trailing spaces from `width`. There could be
+        // multiple trailing segments that are space-only.
+        double widthOfTrailingSpace = 0.0;
+        int i = _segments.length - 1;
+        while (i >= 0 && _segments[i].isSpaceOnly) {
+          // Since the segment is space-only, `widthIncludingSpace` contains
+          // the width of the space and nothing else.
+          widthOfTrailingSpace += _segments[i].widthIncludingSpace;
+          i--;
+        }
+        if (i >= 0) {
+          // Having `i >= 0` means in the above loop we stopped at a
+          // non-space-only segment. We should also subtract its trailing spaces.
+          widthOfTrailingSpace += _segments[i].widthOfTrailingSpace;
+        }
+        width -= widthOfTrailingSpace;
+      }
+    }
 
     return poppedSegment;
   }
