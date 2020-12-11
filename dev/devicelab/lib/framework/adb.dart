@@ -131,6 +131,9 @@ abstract class Device {
   /// Assumes the device doesn't have a secure unlock pattern.
   Future<void> unlock();
 
+  /// Attempt to reboot the phone, if possible.
+  Future<void> reboot();
+
   /// Emulate a tap on the touch screen.
   Future<void> tap(int x, int y);
 
@@ -575,6 +578,11 @@ class AndroidDevice extends Device {
   String toString() {
     return '$deviceId $deviceInfo';
   }
+
+  @override
+  Future<void> reboot() {
+    return adb(<String>['reboot']);
+  }
 }
 
 class IosDeviceDiscovery implements DeviceDiscovery {
@@ -740,6 +748,11 @@ class IosDevice extends Device {
 
   @override
   Future<void> stop(String packageName) async {}
+
+  @override
+  Future<void> reboot() {
+    return Process.run('idevicesyslog', <String>['reboot', '-u', deviceId]);
+  }
 }
 
 /// Fuchsia device.
@@ -782,6 +795,11 @@ class FuchsiaDevice extends Device {
   @override
   Stream<String> get logcat {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> reboot() async {
+    // Unsupported.
   }
 }
 
@@ -846,6 +864,11 @@ class FakeDevice extends Device {
 
   @override
   Future<void> stop(String packageName) async {}
+
+  @override
+  Future<void> reboot() async {
+    // Unsupported.
+  }
 }
 
 class FakeDeviceDiscovery implements DeviceDiscovery {

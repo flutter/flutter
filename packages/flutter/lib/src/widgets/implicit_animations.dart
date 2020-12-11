@@ -297,7 +297,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -813,6 +813,47 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// The following code implements the [AnimatedPadding] widget, using a [curve] of
+/// [Curves.easeInOut].
+///
+/// ```dart
+/// double padValue = 0.0;
+/// _updatePadding(double value) {
+///   setState(() {
+///     padValue = value;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: [
+///       AnimatedPadding(
+///         padding: EdgeInsets.all(padValue),
+///         duration: const Duration(seconds: 2),
+///         curve: Curves.easeInOut,
+///         child: Container(
+///           width: MediaQuery.of(context).size.width,
+///           height: MediaQuery.of(context).size.height / 5,
+///           color: Colors.blue,
+///         ),
+///       ),
+///       Text('Padding: $padValue'),
+///       ElevatedButton(
+///         child: Text('Change padding'),
+///         onPressed: () {
+///           _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
+///         }
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
@@ -1058,7 +1099,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// The following example transitions an AnimatedPositioned
 /// between two states. It adjusts the `height`, `width`, and
@@ -1069,28 +1110,31 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Stack(
-///     children: [
-///       AnimatedPositioned(
-///         width: selected ? 200.0 : 50.0,
-///         height: selected ? 50.0 : 200.0,
-///         top: selected ? 50.0 : 150.0,
-///         right: 150.0,
-///         duration: Duration(seconds: 2),
-///         curve: Curves.fastOutSlowIn,
-///         child: GestureDetector(
-///           onTap: () {
-///             setState(() {
-///               selected = !selected;
-///             });
-///           },
-///           child: Container(
-///             color: Colors.blue,
-///             child: Text('Tap me to start the animated transition'),
+///   return Container(
+///     width: 200,
+///     height: 350,
+///     child: Stack(
+///       children: [
+///         AnimatedPositioned(
+///           width: selected ? 200.0 : 50.0,
+///           height: selected ? 50.0 : 200.0,
+///           top: selected ? 50.0 : 150.0,
+///           duration: Duration(seconds: 2),
+///           curve: Curves.fastOutSlowIn,
+///           child: GestureDetector(
+///             onTap: () {
+///               setState(() {
+///                 selected = !selected;
+///               });
+///             },
+///             child: Container(
+///               color: Colors.blue,
+///               child: Center(child: Text('Tap me')),
+///             ),
 ///           ),
 ///         ),
-///       ),
-///     ],
+///       ],
+///     ),
 ///   );
 /// }
 ///```

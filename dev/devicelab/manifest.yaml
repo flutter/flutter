@@ -228,6 +228,7 @@ tasks:
       with SkSL shader warm-up with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -310,6 +311,12 @@ tasks:
   android_semantics_integration_test:
     description: >
       Tests that the Android accessibility bridge produces correct semantics.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  android_plugin_example_app_build_test:
+    description: >
+      Tests that the plugin example app can be built using the Flutter Gradle plugin.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -550,7 +557,6 @@ tasks:
       Measures the runtime performance of animations after a backdrop filter is removed on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -651,6 +657,7 @@ tasks:
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab_ios
     required_agent_capabilities: ["mac-catalina/ios"]
+    flaky: true # https://github.com/flutter/flutter/issues/71178
 
   smoke_catalina_start_up:
     description: >
@@ -755,6 +762,7 @@ tasks:
       Android with e2e.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   flutter_gallery__transition_perf_e2e_ios:
     description: >

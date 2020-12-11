@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -24,14 +25,15 @@ import '../reporting/reporting.dart';
 final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
-String flutterFrameworkDir(BuildMode mode) {
-  return globals.fs.path.normalize(globals.fs.path.dirname(globals.artifacts.getArtifactPath(
-      Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode)));
-}
-
-String flutterMacOSFrameworkDir(BuildMode mode) {
-  return globals.fs.path.normalize(globals.fs.path.dirname(globals.artifacts.getArtifactPath(
-      Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin_x64, mode: mode)));
+String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
+    Artifacts artifacts) {
+  final String flutterMacOSFramework = artifacts.getArtifactPath(
+    Artifact.flutterMacOSFramework,
+    platform: TargetPlatform.darwin_x64,
+    mode: mode,
+  );
+  return fileSystem.path
+      .normalize(fileSystem.path.dirname(flutterMacOSFramework));
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
@@ -179,19 +181,13 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
   }
 
-  // iOS does not link on Flutter in any build phase. Add the linker flag.
-  if (!useMacOSConfig) {
-    xcodeBuildSettings.add(r'OTHER_LDFLAGS=$(inherited) -framework Flutter');
-  }
-
-  if (!project.isModule) {
+  if (!project.isModule && useMacOSConfig) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
-    // However, this is necessary for regular projects using Cocoapods.
-    final String frameworkDir = useMacOSConfig
-      ? flutterMacOSFrameworkDir(buildInfo.mode)
-      : flutterFrameworkDir(buildInfo.mode);
+    // However, this is necessary for regular macOS projects using Cocoapods.
+    final String frameworkDir =
+        flutterMacOSFrameworkDir(buildInfo.mode, globals.fs, globals.artifacts);
     xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
@@ -242,26 +238,32 @@ class XcodeProjectInterpreter {
       _terminal = terminal,
       _logger = logger,
       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+      _operatingSystemUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
       _usage = usage;
 
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
+  final OperatingSystemUtils _operatingSystemUtils;
   final Terminal _terminal;
   final Logger _logger;
   final Usage _usage;
 
-  static const String _executable = '/usr/bin/xcodebuild';
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
-    if (!_platform.isMacOS || !_fileSystem.file(_executable).existsSync()) {
+    if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
       return;
     }
     try {
       if (_versionText == null) {
         final RunResult result = _processUtils.runSync(
-          <String>[_executable, '-version'],
+          <String>[...xcrunCommand(), 'xcodebuild', '-version'],
         );
         if (result.exitCode != 0) {
           return;
@@ -316,6 +318,25 @@ class XcodeProjectInterpreter {
     return _patchVersion;
   }
 
+  /// The `xcrun` Xcode command to run or locate development
+  /// tools and properties.
+  ///
+  /// Returns `xcrun` on x86 macOS.
+  /// Returns `/usr/bin/arch -arm64e xcrun` on ARM macOS to force Xcode commands
+  /// to run outside the x86 Rosetta translation, which may cause crashes.
+  List<String> xcrunCommand() {
+    final List<String> xcrunCommand = <String>[];
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+      // Force Xcode commands to run outside Rosetta.
+      xcrunCommand.addAll(<String>[
+        '/usr/bin/arch',
+        '-arm64e',
+      ]);
+    }
+    xcrunCommand.add('xcrun');
+    return xcrunCommand;
+  }
+
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
   ///
@@ -331,7 +352,8 @@ class XcodeProjectInterpreter {
       terminal: _terminal,
     );
     final List<String> showBuildSettingsCommand = <String>[
-      _executable,
+      ...xcrunCommand(),
+      'xcodebuild',
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null)
@@ -368,7 +390,8 @@ class XcodeProjectInterpreter {
 
   Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
     await _processUtils.run(<String>[
-      _executable,
+      ...xcrunCommand(),
+      'xcodebuild',
       '-workspace',
       workspacePath,
       '-scheme',
@@ -387,7 +410,8 @@ class XcodeProjectInterpreter {
     const int missingProjectExitCode = 66;
     final RunResult result = await _processUtils.run(
       <String>[
-        _executable,
+        ...xcrunCommand(),
+        'xcodebuild',
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],

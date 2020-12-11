@@ -14,7 +14,7 @@ class {{pluginDartClass}}Web {
     final MethodChannel channel = MethodChannel(
       '{{projectName}}',
       const StandardMethodCodec(),
-      registrar.messenger,
+      registrar,
     );
 
     final pluginInstance = {{pluginDartClass}}Web();

@@ -397,6 +397,11 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _getSize(constraints);
+  }
+
+  @override
   void performLayout() {
     size = _getSize(constraints);
     delegate._callPerformLayout(size, firstChild);

@@ -82,6 +82,11 @@ void main() {
     return _testFile('package_assets', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
   });
 
+  testWithoutContext('flutter test should support dart defines', () async {
+    return _testFile('dart_defines', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero,
+      extraArguments: <String>['--dart-define=flutter.test.foo=bar']);
+  });
+
   testWithoutContext('flutter test should run a test when its name matches a regexp', () async {
     final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--name', 'inc.*de']);

@@ -22,6 +22,9 @@ List<String> _taskNames = <String>[];
 /// The device-id to run test on.
 String deviceId;
 
+/// The git branch being tested on.
+String gitBranch;
+
 /// The build of the local engine to use.
 ///
 /// Required for A/B test mode.
@@ -29,6 +32,12 @@ String localEngine;
 
 /// The path to the engine "src/" directory.
 String localEngineSrcPath;
+
+/// Name of the LUCI builder this test is currently running on.
+///
+/// This is only passed on CI runs for Cocoon to be able to uniquely identify
+/// this test run.
+String luciBuilder;
 
 /// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
@@ -81,9 +90,11 @@ Future<void> main(List<String> rawArgs) async {
   }
 
   deviceId = args['device-id'] as String;
+  exitOnFirstTestFailure = args['exit'] as bool;
+  gitBranch = args['git-branch'] as String;
   localEngine = args['local-engine'] as String;
   localEngineSrcPath = args['local-engine-src-path'] as String;
-  exitOnFirstTestFailure = args['exit'] as bool;
+  luciBuilder = args['luci-builder'] as String;
   serviceAccountTokenFile = args['service-account-token-file'] as String;
   silent = args['silent'] as bool;
 
@@ -111,7 +122,8 @@ Future<void> _runTasks() async {
 
     if (serviceAccountTokenFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-      await cocoon.sendTaskResult(taskName: taskName, result: result);
+      /// Cocoon references LUCI tasks by the [luciBuilder] instead of [taskName].
+      await cocoon.sendTaskResult(builderName: luciBuilder, result: result, gitBranch: gitBranch);
     }
 
     if (!result.succeeded) {
@@ -319,6 +331,11 @@ final ArgParser _argParser = ArgParser()
     help: 'Exit on the first test failure.',
   )
   ..addOption(
+    'git-branch',
+    help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
+          'checkouts run in detached HEAD state, so the branch must be passed.',
+  )
+  ..addOption(
     'local-engine',
     help: 'Name of a build output within the engine out directory, if you\n'
           'are building Flutter locally. Use this to select a specific\n'
@@ -337,6 +354,10 @@ final ArgParser _argParser = ArgParser()
     help: 'Path to your engine src directory, if you are building Flutter\n'
           'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
           'the location based on the value of the --flutter-root option.',
+  )
+  ..addOption(
+    'luci-builder',
+    help: '[Flutter infrastructure] Name of the LUCI builder being run on.'
   )
   ..addFlag(
     'match-host-platform',

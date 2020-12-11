@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image, ColorFilter;
@@ -357,7 +356,7 @@ void main() {
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );
-  });
+  }, skip: kIsWeb);
 
   test('DecorationImage - error listener', () async {
     late String exception;
@@ -702,5 +701,5 @@ void main() {
     expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount);
 
     info.dispose();
-  });
+  }, skip: kIsWeb);
 }

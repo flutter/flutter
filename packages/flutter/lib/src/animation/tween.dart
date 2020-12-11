@@ -436,7 +436,7 @@ class ConstantTween<T> extends Tween<T> {
   T lerp(double t) => begin as T;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ReverseTween')}(value: $begin)';
+  String toString() => '${objectRuntimeType(this, 'ConstantTween')}(value: $begin)';
 }
 
 /// Transforms the value of the given animation by the given curve.
