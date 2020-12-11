@@ -569,9 +569,8 @@ class _TabBarScrollController extends ScrollController {
 /// Uses values from [TabBarTheme] if it is set in the current context.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
-///
-/// This sample shows the implementation of [TabBar] with a [DefaultTabController]
-/// and a [TabBar] consisting of three [Tab] widgets with an [Icon] as a child.
+/// This sample shows the implementation of [TabBar] and [TabBarView] using a [DefaultTabController].
+/// Each [Tab] corresponds to a child of the [TabBarView] in the order they are written.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -580,43 +579,31 @@ class _TabBarScrollController extends ScrollController {
 ///      length: 3,
 ///      child: Scaffold(
 ///        appBar: AppBar(
-///          title: Text("TabBar Widget"),
+///          title: Text('TabBar Widget'),
 ///          bottom: TabBar(
-///            tabs: [
+///            tabs: <Widget>[
 ///              Tab(
-///                icon: Icon(
-///                  Icons.cloud_outlined,
-///                ),
+///                icon: Icon(Icons.cloud_outlined),
 ///              ),
 ///              Tab(
-///                icon: Icon(
-///                  Icons.beach_access_sharp,
-///                ),
+///                icon: Icon(Icons.beach_access_sharp),
 ///              ),
 ///              Tab(
-///                icon: Icon(
-///                  Icons.brightness_5_sharp,
-///                ),
+///                icon: Icon(Icons.brightness_5_sharp),
 ///              ),
 ///            ],
 ///          ),
 ///        ),
 ///        body: TabBarView(
-///          children: [
+///          children: <Widget>[
 ///            Center(
-///              child: Text(
-///                "It's cloudy here",
-///              ),
+///              child: Text('It\'s cloudy here'),
 ///            ),
 ///            Center(
-///              child: Text(
-///                "It's rainy here",
-///              ),
+///              child: Text('It\'s rainy here'),
 ///            ),
 ///            Center(
-///              child: Text(
-///                "It's sunny here",
-///              ),
+///              child: Text('It\'s sunny here'),
 ///            ),
 ///          ],
 ///        ),
@@ -627,12 +614,11 @@ class _TabBarScrollController extends ScrollController {
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_material}
-///
 /// [TabBar] can also be implmented by using a [TabController] which provides more options
-/// to control the behaviour of the [TabBar] and [TabBarView], this can be used instead of
-/// a [DefaultTabController], below is a sample for this.
+/// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
+/// a [DefaultTabController], demonstrated below.
 ///
-/// ```dart preamble
+/// ```dart
 ///
 /// TabController _tabController;
 ///
@@ -645,45 +631,33 @@ class _TabBarScrollController extends ScrollController {
 ///  Widget build(BuildContext context) {
 ///    return Scaffold(
 ///      appBar: AppBar(
-///        title: Text("TabBar Widget"),
+///        title: Text('TabBar Widget'),
 ///        bottom: TabBar(
 ///          controller: _tabController,
-///          tabs: [
+///          tabs: <Widget>[
 ///            Tab(
-///              icon: Icon(
-///                Icons.cloud_outlined,
-///              ),
+///              icon: Icon(Icons.cloud_outlined),
 ///            ),
 ///            Tab(
-///             icon: Icon(
-///                Icons.beach_access_sharp,
-///              ),
+///             icon: Icon(Icons.beach_access_sharp),
 ///            ),
 ///            Tab(
-///              icon: Icon(
-///                Icons.brightness_5_sharp,
-///              ),
+///              icon: Icon(Icons.brightness_5_sharp),
 ///            ),
 ///          ],
 ///        ),
 ///      ),
 ///      body: TabBarView(
 ///        controller: _tabController,
-///        children: [
+///        children: <Widget>[
 ///          Center(
-///            child: Text(
-///              "It's cloudy here",
-///            ),
+///            child: Text('It\'s cloudy here'),
 ///          ),
 ///          Center(
-///            child: Text(
-///              "It's rainy here",
-///            ),
+///            child: Text('It\'s rainy here'),
 ///          ),
 ///          Center(
-//             child: Text(
-///              "It's sunny here",
-///            ),
+//             child: Text('It\'s sunny here'),
 ///          ),
 ///        ],
 ///      ),
@@ -695,7 +669,7 @@ class _TabBarScrollController extends ScrollController {
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
-///  * [TabBar], which is used to display the [Tab] corresponding to each page of the [TabBarView]
+///  * [TabBar], which is used to display the [Tab] that corresponds to each page of the [TabBarView].
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design tab bar.
   ///
