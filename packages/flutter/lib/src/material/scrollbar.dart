@@ -62,16 +62,16 @@ class Scrollbar extends RawScrollbar {
     double? thickness,
     Radius? radius,
   }) : super(
-    key: key,
-    child: child,
-    controller: controller,
-    isAlwaysShown: isAlwaysShown,
-    thickness: thickness ?? _kScrollbarThickness,
-    radius: radius,
-    fadeDuration: _kScrollbarFadeDuration,
-    timeToFade: _kScrollbarTimeToFade,
-    pressDuration: Duration.zero,
-  );
+         key: key,
+         child: child,
+         controller: controller,
+         isAlwaysShown: isAlwaysShown,
+         thickness: thickness ?? _kScrollbarThickness,
+         radius: radius,
+         fadeDuration: _kScrollbarFadeDuration,
+         timeToFade: _kScrollbarTimeToFade,
+         pressDuration: Duration.zero,
+       );
 
   /// Controls if the track will show on hover and remain, including during drag.
   ///

@@ -880,16 +880,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
-  /// Returns the [Axis] of the child scroll view, or null if one is not
-  /// determined.
+  /// Returns the [Axis] of the child scroll view, or null if the current scroll
+  /// controller does not have any attached positions.
   @protected
   Axis? getScrollbarDirection() {
-    try {
+    assert(_currentController != null);
+    if (_currentController!.hasClients)
       return _currentController!.position.axis;
-    } catch (_) {
-      // Ignore the gesture if we cannot determine the direction.
-      return null;
-    }
+    return null;
   }
 
   /// Handler called when a press on the scrollbar thumb has been recognized.
@@ -1008,6 +1006,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       curve: Curves.easeInOut,
     );
   }
+
   bool _handleScrollNotification(ScrollNotification notification) {
 
     final ScrollMetrics metrics = notification.metrics;
@@ -1170,13 +1169,13 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
     required Object debugOwner,
     required GlobalKey customPaintKey,
     required Duration pressDuration,
-  }) :  _customPaintKey = customPaintKey,
-      super(
-      postAcceptSlopTolerance: postAcceptSlopTolerance,
-      kind: kind,
-      debugOwner: debugOwner,
-      duration: pressDuration,
-    );
+  }) : _customPaintKey = customPaintKey,
+       super(
+         postAcceptSlopTolerance: postAcceptSlopTolerance,
+         kind: kind,
+         debugOwner: debugOwner,
+         duration: pressDuration,
+       );
 
   final GlobalKey _customPaintKey;
 
@@ -1205,8 +1204,8 @@ class _TrackTapGestureRecognizer extends TapGestureRecognizer {
   _TrackTapGestureRecognizer({
     required Object debugOwner,
     required GlobalKey customPaintKey,
-  }) :  _customPaintKey = customPaintKey,
-      super(debugOwner: debugOwner);
+  }) : _customPaintKey = customPaintKey,
+       super(debugOwner: debugOwner);
 
   final GlobalKey _customPaintKey;
 
