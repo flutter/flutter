@@ -163,6 +163,12 @@
         "flaky":false
       },
       {
+         "name":"Linux flutter_plugins",
+         "repo":"flutter",
+         "task_name":"flutter_plugins",
+         "flaky":false
+      },
+      {
          "name": "Mac build_aar_module_test",
          "repo": "flutter",
          "task_name": "mac_build_aar_module_test",
