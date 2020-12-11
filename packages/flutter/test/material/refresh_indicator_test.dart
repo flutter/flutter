@@ -501,7 +501,7 @@ void main() {
     );
   });
 
-  testWidgets('Top RefreshIndicator shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Top RefreshIndicator be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -535,7 +535,7 @@ void main() {
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
-  testWidgets('Bottom RefreshIndicator shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Bottom RefreshIndicator be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
