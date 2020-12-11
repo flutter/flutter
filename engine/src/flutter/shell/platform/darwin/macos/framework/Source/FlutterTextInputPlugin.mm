@@ -129,17 +129,20 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 }
 
 #pragma mark -
-#pragma mark NSResponder
+#pragma mark FlutterIntermediateKeyResponder
 
 /**
+ * Handles key down events received from the view controller, responding TRUE if
+ * the event was handled.
+ *
  * Note, the Apple docs suggest that clients should override essentially all the
  * mouse and keyboard event-handling methods of NSResponder. However, experimentation
  * indicates that only key events are processed by the native layer; Flutter processes
  * mouse events. Additionally, processing both keyUp and keyDown results in duplicate
- * processing of the same keys. So for now, limit processing to just keyDown.
+ * processing of the same keys. So for now, limit processing to just handleKeyDown.
  */
-- (void)keyDown:(NSEvent*)event {
-  [_textInputContext handleEvent:event];
+- (BOOL)handleKeyDown:(NSEvent*)event {
+  return [_textInputContext handleEvent:event];
 }
 
 #pragma mark -
