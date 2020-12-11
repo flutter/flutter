@@ -35,7 +35,7 @@
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material --no-null-safety}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
 /// blabla it when it is blabla:
 ///

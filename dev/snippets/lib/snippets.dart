@@ -226,7 +226,6 @@ class SnippetGenerator {
     File input,
     SnippetType type, {
     bool showDartPad = false,
-    bool enableNullSafety = true,
     String template,
     File output,
     @required Map<String, Object> metadata,
@@ -248,9 +247,6 @@ class SnippetGenerator {
           stderr.writeln(
               'The template $template was not found in the templates directory ${templatesDir.path}');
           exit(1);
-        }
-        if (!enableNullSafety) {
-          snippetData.add(_ComponentTuple('dart-version-header', <String>['// @dart = 2.9']));
         }
 
         final String templateContents = _loadFileAsUtf8(templateFile);
