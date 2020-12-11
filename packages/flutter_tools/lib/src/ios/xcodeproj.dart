@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -232,6 +233,7 @@ class XcodeProjectInterpreter {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Terminal terminal,
+    @required Config config,
     @required Usage usage,
   }) : _platform = platform,
       _fileSystem = fileSystem,
@@ -244,6 +246,7 @@ class XcodeProjectInterpreter {
         platform: platform,
         processManager: processManager,
       ),
+      _config = config,
       _usage = usage;
 
   final Platform _platform;
@@ -253,6 +256,7 @@ class XcodeProjectInterpreter {
   final Terminal _terminal;
   final Logger _logger;
   final Usage _usage;
+  final Config _config;
 
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
 
@@ -342,8 +346,8 @@ class XcodeProjectInterpreter {
   ///
   /// If [scheme] is null, xcodebuild will return build settings for the first discovered
   /// target (by default this is Runner).
-  Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+  Future<Map<String, String>> getBuildSettings(String projectPath, {
+    String configuration,
     String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -354,11 +358,14 @@ class XcodeProjectInterpreter {
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
-      '-project',
+      '-workspace',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null)
         ...<String>['-scheme', scheme],
+      if (configuration != null)
+        ...<String>['-configuration', configuration],
       '-showBuildSettings',
+      'BUILD_DIR=${_fileSystem.path.absolute(getIosBuildDirectory(_config, _fileSystem))}',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ];
     try {

@@ -701,8 +701,9 @@ String getAssetBuildDirectory() {
 }
 
 /// Returns the iOS build output directory.
-String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'ios');
+String getIosBuildDirectory([Config config, FileSystem fileSystem]) {
+  fileSystem ??= globals.fs;
+  return fileSystem.path.join(getBuildDirectory(config, fileSystem), 'ios');
 }
 
 /// Returns the macOS build output directory.

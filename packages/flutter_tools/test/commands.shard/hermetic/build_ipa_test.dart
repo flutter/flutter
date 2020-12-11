@@ -20,6 +20,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
       String projectPath, {
+        String configuration,
         String scheme,
         Duration timeout = const Duration(minutes: 1),
       }) async {
@@ -80,7 +81,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpMockXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
+  FakeCommand setUpMockXcodeBuildHandler({ bool verbose = false, void Function() onRun }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -98,8 +99,6 @@ void main() {
         'COMPILER_INDEX_STORE_ENABLE=NO',
         '-archivePath', '/build/ios/archive/Runner',
         'archive',
-        if (showBuildSettings)
-          '-showBuildSettings',
       ],
       stdout: 'STDOUT STUFF',
       onRun: onRun,
@@ -209,7 +208,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpMockXcodeBuildHandler(),
-      setUpMockXcodeBuildHandler(showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -227,7 +225,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpMockXcodeBuildHandler(verbose: true),
-      setUpMockXcodeBuildHandler(verbose: true, showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -270,7 +267,6 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      setUpMockXcodeBuildHandler(showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
@@ -302,7 +298,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           xattrCommand,
           setUpMockXcodeBuildHandler(),
-          setUpMockXcodeBuildHandler(showBuildSettings: true),
           exportArchiveCommand,
         ]),
     Platform: () => macosPlatform,

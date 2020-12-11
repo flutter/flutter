@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/build.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -208,6 +209,11 @@ void main() {
             fileSystem: fileSystem,
             terminal: Terminal.test(),
             usage: Usage.test(),
+            config: Config.test(
+              'test',
+              logger: logger,
+              directory: fileSystem.directory('/'),
+            ),
           ),
         ),
         artifacts: artifacts,
