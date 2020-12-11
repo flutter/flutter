@@ -47,7 +47,7 @@ import 'theme.dart';
 /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
-/// uses an [AboutListTile], and the second uses the [showAboutDialogE] function.
+/// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
