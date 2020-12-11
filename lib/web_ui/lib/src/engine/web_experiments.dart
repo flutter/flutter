@@ -36,9 +36,24 @@ class WebExperiments {
 
   bool _useCanvasText = _defaultUseCanvasText;
 
+  // TODO(mdebbar): Clean up https://github.com/flutter/flutter/issues/71952
+  /// Experiment flag for using canvas-based measurement for rich text.
+  bool get useCanvasRichText => _useCanvasRichText;
+  set useCanvasRichText(bool? enabled) {
+    _useCanvasRichText = enabled ?? _defaultUseCanvasRichText;
+  }
+
+  static const bool _defaultUseCanvasRichText = const bool.fromEnvironment(
+    'FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_RICH_TEXT',
+    defaultValue: false,
+  );
+
+  bool _useCanvasRichText = _defaultUseCanvasRichText;
+
   /// Reset all experimental flags to their default values.
   void reset() {
     _useCanvasText = _defaultUseCanvasText;
+    _useCanvasRichText = _defaultUseCanvasRichText;
   }
 
   /// Used to enable/disable experimental flags in the web engine.
@@ -46,6 +61,9 @@ class WebExperiments {
     switch (name) {
       case 'useCanvasText':
         useCanvasText = enabled;
+        break;
+      case 'useCanvasRichText':
+        useCanvasRichText = enabled;
         break;
     }
   }
