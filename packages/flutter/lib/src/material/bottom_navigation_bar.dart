@@ -396,7 +396,8 @@ class _BottomNavigationTile extends StatelessWidget {
     // The amount that the unselected icons are bigger than the selected icon,
     // (or zero if the unselected icons are not any bigger than the selected icon).
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
-    
+
+    // The effective tool tip message to be shown on the BottomNavigationBarItem.
     final String? effectiveTooltip = item.toolTip == '' ? null : item.toolTip ?? item.label;
 
     // Defines the padding for the animating icons + labels.
