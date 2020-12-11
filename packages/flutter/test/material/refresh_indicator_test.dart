@@ -501,7 +501,7 @@ void main() {
     );
   });
 
-  testWidgets('Top RefreshIndicator showed when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Top RefreshIndicator shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -535,7 +535,7 @@ void main() {
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
-  testWidgets('Bottom RefreshIndicator showed when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Bottom RefreshIndicator shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -568,5 +568,41 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, greaterThan(300.0));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/71936
+  testWidgets('RefreshIndicator should not be shown when overscroll occurs due to inertia', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 2000.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(100.0);
+
+    // Release finger before reach the edge.
+    await tester.fling(find.text('X'), const Offset(0.0, 99.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
   });
 }

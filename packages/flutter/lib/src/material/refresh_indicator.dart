@@ -215,12 +215,21 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     super.dispose();
   }
 
+  bool _shouldStart(ScrollNotification notification) {
+    // The indicator will be pulled out in two cases,
+    // 1, Begin drag when the scrollable widget at the edge with zero scroll position.
+    // 2, Keep drag before overscroll occurs when the scrollable widget have
+    //    a non-zero scroll position(do not release finger before overscroll).
+    return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null))
+      && notification.metrics.extentBefore == 0.0
+      && _mode == null
+      && _start(notification.metrics.axisDirection);
+  }
+
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification))
       return false;
-    if ((notification is ScrollStartNotification || notification is ScrollUpdateNotification) &&
-        notification.metrics.extentBefore == 0.0 &&
-        _mode == null && _start(notification.metrics.axisDirection)) {
+    if (_shouldStart(notification)) {
       setState(() {
         _mode = _RefreshIndicatorMode.drag;
       });
