@@ -657,7 +657,7 @@ class _TabBarScrollController extends ScrollController {
 ///            child: Text('It\'s rainy here'),
 ///          ),
 ///          Center(
-//             child: Text('It\'s sunny here'),
+///             child: Text('It\'s sunny here'),
 ///          ),
 ///        ],
 ///      ),
