@@ -5,6 +5,8 @@
 # This header file defines the "sysroot" variable which is the absolute path
 # of the sysroot. If no sysroot applies, the variable will be an empty string.
 
+import("//build/toolchain/goma.gni")
+
 declare_args() {
   # The absolute path of the sysroot that is applied when compiling using
   # the target toolchain.
@@ -50,8 +52,15 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
 }
 
 if ((is_mac || is_ios) && xcode_toolchain == "") {
+  xcode_toolchain_args = []
+  if (use_goma) {
+    xcode_toolchain_args += [
+      "--symlink",
+      rebase_path(root_gen_dir),
+    ]
+  }
   xcode_toolchain = exec_script("//build/config/mac/xcode_toolchain.py",
-                                [],
+                                xcode_toolchain_args,
                                 "trim string",
                                 [])
 }

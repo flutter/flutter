@@ -15,8 +15,10 @@ import re
 import subprocess
 import sys
 
-
 from optparse import OptionParser
+
+sys.path.insert(1, '../../build')
+from pyutil.file_util import symlink
 
 
 def parse_version(version_str):
@@ -35,6 +37,9 @@ def main():
   parser.add_option("--print_sdk_path",
                     action="store_true", dest="print_sdk_path", default=False,
                     help="Additionaly print the path the SDK (appears first).")
+  parser.add_option("--symlink",
+                    action="store", type="string", dest="symlink", default="",
+                    help="Whether to create a symlink in the buildroot to the SDK.")
   (options, args) = parser.parse_args()
   min_sdk_version = args[0]
 
@@ -43,8 +48,7 @@ def main():
                          stderr=subprocess.STDOUT)
   out, err = job.communicate()
   if job.returncode != 0:
-    print >> sys.stderr, out
-    print >> sys.stderr, err
+    sys.stderr.writelines([out, err])
     raise Exception(('Error %d running xcode-select, you might have to run '
       '|sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer| '
       'if you are using Xcode 4.') % job.returncode)
@@ -64,22 +68,28 @@ def main():
   best_sdk = sorted(sdks, key=parse_version)[0]
 
   if options.verify and best_sdk != min_sdk_version and not options.sdk_path:
-    print >> sys.stderr, ''
-    print >> sys.stderr, '                                           vvvvvvv'
-    print >> sys.stderr, ''
-    print >> sys.stderr, \
-        'This build requires the %s SDK, but it was not found on your system.' \
-        % min_sdk_version
-    print >> sys.stderr, \
-        'Either install it, or explicitly set mac_sdk in your GYP_DEFINES.'
-    print >> sys.stderr, ''
-    print >> sys.stderr, '                                           ^^^^^^^'
-    print >> sys.stderr, ''
+    sys.stderr.writelines([
+      '',
+      '                                           vvvvvvv',
+      '',
+      'This build requires the %s SDK, but it was not found on your system.' \
+        % min_sdk_version,
+      'Either install it, or explicitly set mac_sdk in your gn args.',
+      '',
+      '                                           ^^^^^^^',
+      ''])
     return min_sdk_version
 
-  if options.print_sdk_path:
-    print subprocess.check_output(['xcodebuild', '-version', '-sdk',
-                                   'macosx' + best_sdk, 'Path']).strip()
+  if options.symlink or options.print_sdk_path:
+    sdk_output = subprocess.check_output(['xcodebuild', '-version', '-sdk',
+                                          'macosx' + best_sdk, 'Path']).strip()
+    if options.symlink:
+      symlink_target = os.path.join(options.symlink, os.path.basename(sdk_output))
+      symlink(sdk_output, symlink_target)
+      sdk_output = symlink_target
+
+    if options.print_sdk_path:
+      print(sdk_output)
 
   return best_sdk
 
@@ -87,4 +97,4 @@ def main():
 if __name__ == '__main__':
   if sys.platform != 'darwin':
     raise Exception("This script only runs on Mac")
-  print main()
+  print(main())

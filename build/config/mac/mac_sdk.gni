@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/goma.gni")
+
 declare_args() {
   # Minimum supported version of the Mac SDK.
   mac_sdk_min = "10.12"
@@ -16,24 +18,24 @@ declare_args() {
   mac_sdk_path = ""
 }
 
-find_sdk_args = [
-  "--print_sdk_path",
-  mac_sdk_min,
-]
-
-# The tool will print the SDK path on the first line, and the version on the
-# second line.
-find_sdk_lines =
-    exec_script("//build/mac/find_sdk.py", find_sdk_args, "list lines")
-
-mac_sdk_version = find_sdk_lines[1]
-
 if (mac_sdk_path == "") {
-  # TODO(brettw) http://crbug.com/335325  when everybody moves to XCode 5 we
-  # can remove the --print_sdk_path argument to find_sdk and instead just use
-  # the following two lines to get the path. Although it looks longer here, it
-  # saves forking a process in find_sdk.py so will be faster.
-  #mac_sdk_root = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX"
-  #mac_sdk_path = mac_sdk_root + mac_sdk_version + ".sdk"
+  find_sdk_args = []
+  if (use_goma) {
+    # RBE has a restriction that paths cannot come from outside the build root.
+    find_sdk_args += [
+      "--symlink",
+      rebase_path(root_gen_dir),
+    ]
+  }
+  find_sdk_args += [
+    "--print_sdk_path",
+    mac_sdk_min,
+  ]
+
+  # The tool will print the SDK path on the first line, and the version on the
+  # second line.
+  find_sdk_lines =
+      exec_script("//build/mac/find_sdk.py", find_sdk_args, "list lines")
+
   mac_sdk_path = find_sdk_lines[0]
 }

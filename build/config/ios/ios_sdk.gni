@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/goma.gni")
+
 declare_args() {
   # SDK path to use. When empty this will use the default SDK based on the
   # value of use_ios_simulator.
@@ -27,15 +29,29 @@ declare_args() {
 }
 
 if (ios_sdk_path == "") {
+  ios_sdk_args = []
+  if (use_goma) {
+    ios_sdk_args += [
+      "--symlink",
+      rebase_path(root_gen_dir),
+    ]
+  }
   if (!use_ios_simulator && ios_device_sdk_path == "") {
+    ios_sdk_args += [
+      "--sdk",
+      "iphoneos",
+    ]
     _ios_device_sdk_result =
-        exec_script("ios_sdk.py", [ "iphoneos" ], "list lines")
+        exec_script("ios_sdk.py", ios_sdk_args, "list lines")
     ios_device_sdk_path = _ios_device_sdk_result[0]
   }
 
   if (use_ios_simulator && ios_simulator_sdk_path == "") {
-    _ios_sim_sdk_result =
-        exec_script("ios_sdk.py", [ "iphonesimulator" ], "list lines")
+    ios_sdk_args += [
+      "--sdk",
+      "iphonesimulator",
+    ]
+    _ios_sim_sdk_result = exec_script("ios_sdk.py", ios_sdk_args, "list lines")
     ios_simulator_sdk_path = _ios_sim_sdk_result[0]
   }
 
