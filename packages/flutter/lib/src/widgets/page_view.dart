@@ -575,6 +575,35 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
+/// which scroll horizontally.
+///
+/// ```dart
+///  Widget build(BuildContext context) {
+///    final controller = PageController(initialPage: 0);
+///    return PageView(
+///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
+///      /// Use [Axis.vertical] to scroll vertically.
+///      scrollDirection: Axis.horizontal,
+///      controller: controller,
+///      children: [
+///        Center(
+///          child: Text("First Page"),
+///        ),
+///        Center(
+///          child: Text("Second Page"),
+///        ),
+///        Center(
+///          child: Text("Third Page"),
+///        )
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PageController], which controls which page is visible in the view.
