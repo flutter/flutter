@@ -623,10 +623,6 @@ linter:
         final String errorCode = parts[6];
         final int lineNumber = int.parse(line, radix: 10) - (isSnippet ? headerLength : 0);
         final int columnNumber = int.parse(column, radix: 10);
-        if (lineNumber < 0 && errorCode == 'unused_import') {
-          // We don't care about unused imports.
-          continue;
-        }
 
         // For when errors occur outside of the things we're trying to analyze.
         if (!isSnippet && !isSample) {
@@ -651,10 +647,6 @@ linter:
           );
         }
 
-        if (errorCode == 'unused_element' || errorCode == 'unused_local_variable') {
-          // We don't really care if sample code isn't used!
-          continue;
-        }
         if (isSample) {
           addAnalysisError(
             file,
