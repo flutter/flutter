@@ -96,19 +96,31 @@ class Surface {
       throw CanvasKitError('Cannot create surfaces of empty size.');
     }
 
-    if (size == _currentSize) {
+    // Check if the window is shrinking in size, and if so, don't allocate a
+    // new canvas as the previous canvas is big enough to fit everything.
+    final ui.Size? previousSize = _currentSize;
+    if (previousSize != null &&
+        size.width <= previousSize.width &&
+        size.height <= previousSize.height) {
       // The existing surface is still reusable.
       return;
     }
 
-    _currentSize = size;
+    _currentSize = _currentSize == null
+      // First frame. Allocate a canvas of the exact size as the window. The
+      // window is frequently never resized, particularly on mobile, so using
+      // the exact size is most optimal.
+      ? size
+      // The window is growing. Overallocate to prevent frequent reallocations.
+      : size * 1.4;
+
     _surface?.dispose();
     _surface = null;
     htmlElement?.remove();
     htmlElement = null;
     _addedToScene = false;
 
-    _surface = _wrapHtmlCanvas(size);
+    _surface = _wrapHtmlCanvas(_currentSize!);
   }
 
   CkSurface _wrapHtmlCanvas(ui.Size physicalSize) {
