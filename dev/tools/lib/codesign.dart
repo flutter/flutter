@@ -163,8 +163,14 @@ class CodesignCommand extends Command<void> {
       wrongEntitlementBinaries.forEach(print);
     }
 
-    if (unsignedBinaries.isNotEmpty || wrongEntitlementBinaries.isNotEmpty) {
+    if (unsignedBinaries.isNotEmpty) {
       throw Exception('Test failed because unsigned binaries detected.');
+    }
+
+    if (wrongEntitlementBinaries.isNotEmpty) {
+      throw Exception(
+        'Test failed because files found with the wrong entitlements:\n${wrongEntitlementBinaries.join('\n')}'
+      );
     }
 
     stdio.printStatus(
