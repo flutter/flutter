@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterIntermediateKeyResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 
 @interface FlutterViewController ()
@@ -17,14 +18,26 @@
 @property(nonatomic, readonly, nonnull) NSPasteboard* pasteboard;
 
 /**
- * Adds a responder for keyboard events. Key up and key down events are forwarded to all added
- * responders.
+ * Adds an intermediate responder for keyboard events. Key up and key down events are forwarded to
+ * all added responders, and they either handle the keys or not.
  */
-- (void)addKeyResponder:(nonnull NSResponder*)responder;
+- (void)addKeyResponder:(nonnull FlutterIntermediateKeyResponder*)responder;
 
 /**
- * Removes a responder for keyboard events.
+ * Removes an intermediate responder for keyboard events.
  */
-- (void)removeKeyResponder:(nonnull NSResponder*)responder;
+- (void)removeKeyResponder:(nonnull FlutterIntermediateKeyResponder*)responder;
 
+/**
+ * Initializes this FlutterViewController with the specified `FlutterEngine`.
+ *
+ * The initialized viewcontroller will attach itself to the engine as part of this process.
+ *
+ * @param engine The `FlutterEngine` instance to attach to. Cannot be nil.
+ * @param nibName The NIB name to initialize this controller with.
+ * @param nibBundle The NIB bundle.
+ */
+- (nonnull instancetype)initWithEngine:(nonnull FlutterEngine*)engine
+                               nibName:(nullable NSString*)nibName
+                                bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 @end
