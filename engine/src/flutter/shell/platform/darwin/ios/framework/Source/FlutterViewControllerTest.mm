@@ -101,15 +101,22 @@ typedef enum UIAccessibilityContrast : NSInteger {
 }
 
 - (void)testBinaryMessenger {
-  id engine = OCMClassMock([FlutterEngine class]);
-  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
-                                                                    nibName:nil
-                                                                     bundle:nil];
-  XCTAssertNotNil(vc);
-  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
-  OCMStub([engine binaryMessenger]).andReturn(messenger);
-  XCTAssertEqual(vc.binaryMessenger, messenger);
-  OCMVerify([engine binaryMessenger]);
+  __weak FlutterViewController* weakVC;
+  @autoreleasepool {
+    id engine = OCMClassMock([FlutterEngine class]);
+    FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
+                                                                      nibName:nil
+                                                                       bundle:nil];
+    XCTAssertNotNil(vc);
+    weakVC = vc;
+    id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+    OCMStub([engine binaryMessenger]).andReturn(messenger);
+    XCTAssertEqual(vc.binaryMessenger, messenger);
+    OCMVerify([engine binaryMessenger]);
+    // This had to be added to make sure the view controller is deleted.
+    [engine stopMocking];
+  }
+  XCTAssertNil(weakVC);
 }
 
 #pragma mark - Platform Brightness
