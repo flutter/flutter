@@ -40,7 +40,7 @@ import 'theme_data.dart';
 /// [https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart]
 /// for an example.
 ///
-/// {@tool dartpad --template=stateful_widget_material --no-null-safety}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 ///
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider

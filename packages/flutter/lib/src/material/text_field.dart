@@ -200,7 +200,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// callback. This callback is applied to the text field's current value when
 /// the user finishes editing.
 ///
-/// {@tool dartpad --template=stateful_widget_material --no-null-safety}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 ///
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
 /// callback.

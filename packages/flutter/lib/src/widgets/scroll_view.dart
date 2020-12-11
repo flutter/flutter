@@ -468,7 +468,7 @@ abstract class ScrollView extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material --no-null-safety}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 ///
 /// By default, if items are inserted at the "top" of a scrolling container like
 /// [ListView] or [CustomScrollView], the top item and all of the items below it

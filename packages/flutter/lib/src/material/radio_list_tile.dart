@@ -41,7 +41,7 @@ import 'theme_data.dart';
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold --no-null-safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// ![RadioListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile.png)
 ///
@@ -93,7 +93,7 @@ import 'theme_data.dart';
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold --no-null-safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// ![Radio list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_semantics.png)
 ///
@@ -197,7 +197,7 @@ import 'theme_data.dart';
 /// combining [Radio] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold --no-null-safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// ![Custom radio list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_custom.png)
 ///
@@ -387,7 +387,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// The default is false.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold --no-null-safety}
+  /// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
   /// This example shows how to enable deselecting a radio button by setting the
   /// [toggleable] attribute.
   ///

@@ -4436,7 +4436,7 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///
 /// It is possible to override this widget.
 ///
-/// {@tool sample --template=freeform --no-null-safety}
+/// {@tool sample --template=freeform_no_null_safety}
 /// ```dart
 /// import 'package:flutter/material.dart';
 ///

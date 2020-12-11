@@ -69,7 +69,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material --no-null-safety}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This example shows how to move the focus to the next field when the user
 /// presses the SPACE key.
 ///
