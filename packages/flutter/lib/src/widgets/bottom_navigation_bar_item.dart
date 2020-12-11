@@ -79,8 +79,7 @@ class BottomNavigationBarItem {
   /// The text label for this [BottomNavigationBarItem].
   ///
   /// This will be used to create a [Text] widget to put in the bottom navigation bar,
-  /// and in Material Design [BottomNavigationBar]s, this will be used to display
-  /// a tooltip on long press of an item in the [BottomNavigationBar].
+  /// and in Material Design [BottomNavigationBar]s.
   final String? label;
 
   /// The color of the background radial animation for material [BottomNavigationBar].
@@ -99,5 +98,7 @@ class BottomNavigationBarItem {
   final Color? backgroundColor;
 
   /// The text to display in the tooltip for this [BottomNavigationBarItem].
+  /// 
+  /// The tooltip will only appear on an item in the [BottomNavigationBar].
   final String? toolTip;
 }

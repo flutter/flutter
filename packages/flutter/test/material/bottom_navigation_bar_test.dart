@@ -1177,7 +1177,32 @@ void main() {
 
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
-    expect(find.text(toolTip), findsNWidgets(1));
+    expect(find.byTooltip(toolTip), findsOneWidget);
+  });
+
+  testWidgets('BottomNavigationBar doesn\'t show tool tips if toolTip is null in BottomNavigationBarItem', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('A'), findsOneWidget);
+    await tester.longPress(find.text('A'));
+    expect(find.byType(Tooltip), findsNothing);
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
