@@ -1328,7 +1328,7 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
   /// paragraph. Plain text is more efficient to lay out and measure than rich
   /// text.
   EngineParagraph? _tryBuildPlainText() {
-    ui.Color color = _defaultTextColor;
+    ui.Color? color;
     ui.TextDecoration? decoration;
     ui.Color? decorationColor;
     ui.TextDecorationStyle? decorationStyle;
@@ -1416,6 +1416,10 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
       i++;
     }
 
+    if (color == null && foreground == null) {
+      color = _defaultTextColor;
+    }
+
     final EngineTextStyle cumulativeStyle = EngineTextStyle(
       color: color,
       decoration: decoration,
@@ -1443,7 +1447,7 @@ class DomParagraphBuilder implements ui.ParagraphBuilder {
       paint = foreground;
     } else {
       paint = ui.Paint();
-      paint.color = color;
+      paint.color = color!;
     }
 
     if (i >= _ops.length) {

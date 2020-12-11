@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+// @dart = 2.12
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -28,10 +28,20 @@ void testMain() {
     expect(paragraph.height, isNonZero);
   });
 
-  test('PushStyle should not segfault after build()', () {
+  test('pushStyle should not segfault after build()', () {
     final ParagraphBuilder paragraphBuilder =
         ParagraphBuilder(ParagraphStyle());
     paragraphBuilder.build();
     paragraphBuilder.pushStyle(TextStyle());
+  });
+
+  test('the presence of foreground style should not throw', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+    builder.pushStyle(TextStyle(
+      foreground: Paint()..color = const Color(0xFFABCDEF),
+    ));
+    builder.addText('hi');
+
+    expect(() => builder.build(), returnsNormally);
   });
 }
