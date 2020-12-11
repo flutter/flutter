@@ -392,14 +392,13 @@ class RenderTable extends RenderBox {
        _textBaseline = textBaseline,
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
-    _children = <RenderBox?>[]..length = _columns * _rows;
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
     children?.forEach(addRow);
   }
 
   // Children are stored in row-major order.
   // _children.length must be rows * columns
-  List<RenderBox?> _children = const <RenderBox?>[];
+  List<RenderBox?> _children = <RenderBox?>[];
 
   /// The number of vertical alignment lines in this table.
   ///
@@ -704,6 +703,55 @@ class RenderTable extends RenderBox {
     _children[xy] = value;
     if (value != null)
       adoptChild(value);
+  }
+
+  /// Insert child into this render object's child list after the given child.
+  ///
+  /// If `after` is null, then this inserts the child at the start of the list.
+  void insertChild(RenderBox child, { RenderBox? after }) {
+    if (child != null)
+      adoptChild(child);
+    if (after == null) {
+      // insert at the start.
+      _children.insert(0, child);
+    } else {
+      assert(_children.contains(after));
+      _children.insert(_children.indexOf(after) + 1, child);
+    }
+  }
+
+  /// Update the number of row and column of this table.
+  void updateInfo(int rows, int columns) {
+    assert(_children.length == rows * columns);
+    _columns = columns;
+    _rows = rows;
+  }
+
+  /// Move the given `child` in the child list to be after another child.
+  ///
+  /// More efficient than removing and re-adding the child. Requires the child
+  /// to already be in the child list at some position. Pass null for `after` to
+  /// move the child to the start of the child list.
+  void moveChild(RenderBox child, { RenderBox? after }) {
+    assert(_children.contains(child));
+    _children.remove(child);
+    if (after == null) {
+      // insert at the start.
+      _children.insert(0, child);
+    } else {
+      assert(_children.contains(after));
+      _children.insert(_children.indexOf(after) + 1, child);
+    }
+    markNeedsLayout();
+  }
+
+  /// Remove this child from the child list.
+  ///
+  /// Requires the child to be present in the child list.
+  void removeChild(RenderBox child) {
+    assert(_children.contains(child));
+    dropChild(child);
+    _children.remove(child);
   }
 
   @override

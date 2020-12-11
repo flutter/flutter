@@ -293,10 +293,10 @@ class _TableElement extends RenderObjectElement {
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     int index = 0;
+    Element? previousChild;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     for (int y = 0; y < widget.children.length; y++) {
       final List<Element> elementChildren = <Element>[];
-      Element? previousChild;
       for (int x = 0; widget.children[y].children != null && x < widget.children[y].children!.length; x++) {
         assert(widget.children[y].children![x] != null);
         final Element newChild = inflateWidget(widget.children[y].children![x], IndexedSlot<Element?>(index, previousChild));
@@ -315,21 +315,17 @@ class _TableElement extends RenderObjectElement {
   @override
   void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
     renderObject.setupParentData(child);
-    final int _columns = widget.children.isNotEmpty
-      ? (widget.children[0].children != null ? widget.children[0].children!.length : 0)
-      : 0;
-    final int _index = slot.index;
-    renderObject.setChild(_index % _columns, _index ~/ _columns, child as RenderBox);
+    renderObject.insertChild(child as RenderBox, after: slot.value?.renderObject as RenderBox?);
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element?> oldSlot, IndexedSlot<Element?> newSlot) {
+    renderObject.moveChild(child as RenderBox, after: newSlot.value?.renderObject as RenderBox?);
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, dynamic slot) {
-    final TableCellParentData childParentData = child.parentData! as TableCellParentData;
-    renderObject.setChild(childParentData.x!, childParentData.y!, null);
+  void removeRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
+    renderObject.removeChild(child as RenderBox);
   }
 
   final Set<Element> _forgottenChildren = HashSet<Element>();
@@ -345,44 +341,54 @@ class _TableElement extends RenderObjectElement {
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = <List<Element>>{};
+
+    final List<Element> allOldChildren = <Element>[];
+    final List<Widget> allNewChildren = <Widget>[];
+
     for (final TableRow row in newWidget.children) {
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
         oldChildren = oldKeyedRows[row.key]!;
         taken.add(oldChildren);
-      } else if (row.key == null && oldUnkeyedRows.moveNext()) {
+      } else if (oldUnkeyedRows.moveNext()) {
         oldChildren = oldUnkeyedRows.current.children;
       } else {
         oldChildren = const <Element>[];
       }
-      newChildren.add(_TableElementRow(
-        key: row.key,
-        children: updateChildren(oldChildren, row.children!, forgottenChildren: _forgottenChildren),
-      ));
+
+      allOldChildren.addAll(oldChildren);
+      allNewChildren.addAll(row.children!);
     }
     while (oldUnkeyedRows.moveNext())
-      updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
-    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
-      updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
+      allOldChildren.addAll(oldUnkeyedRows.current.children);
+    oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)).forEach(allOldChildren.addAll);
+
+    final List<Element> updatedChildren = updateChildren(allOldChildren, allNewChildren, forgottenChildren: _forgottenChildren);
+
+    final int columns = newWidget.children.isNotEmpty
+        ? (newWidget.children[0].children != null ? newWidget.children[0].children!.length : 0)
+        : 0;
+    final int rows = newWidget.children.length;
+    assert(columns * rows == updatedChildren.length);
+
+    int rowIndex = 0;
+    for (final TableRow row in newWidget.children) {
+      newChildren.add(_TableElementRow(
+        key: row.key,
+        children: updatedChildren.getRange(rowIndex * columns, rowIndex * columns + columns).toList(),
+      ));
+      rowIndex++;
+    }
 
     _children = newChildren;
-    _updateRenderObjectChildren();
+    _updateRenderObjectInfo(rows, columns);
     _forgottenChildren.clear();
     super.update(newWidget);
     assert(widget == newWidget);
   }
 
-  void _updateRenderObjectChildren() {
-    assert(renderObject != null);
-    renderObject.setFlatChildren(
-      _children.isNotEmpty ? _children[0].children.length : 0,
-      _children.expand<RenderBox>((_TableElementRow row) {
-        return row.children.map<RenderBox>((Element child) {
-          final RenderBox box = child.renderObject! as RenderBox;
-          return box;
-        });
-      }).toList(),
-    );
+  void _updateRenderObjectInfo(int rows, int columns) {
+    renderObject.updateInfo(rows, columns);
   }
 
   @override
