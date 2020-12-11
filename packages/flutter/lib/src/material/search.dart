@@ -17,7 +17,8 @@ import 'scaffold.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// Shows a full screen search page and returns the search result selected by
 /// the user when the page is closed.

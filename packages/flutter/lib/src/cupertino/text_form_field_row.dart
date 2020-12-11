@@ -11,7 +11,8 @@ import 'form_row.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// Creates a [CupertinoFormRow] containing a [FormField] that wraps
 /// a [CupertinoTextField].

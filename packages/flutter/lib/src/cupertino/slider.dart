@@ -13,8 +13,8 @@ import 'colors.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // int _cupertinoSliderValue = 1;
 // void setState(VoidCallback fn) { }
 

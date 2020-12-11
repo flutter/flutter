@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // class Cat { }
 
 /// A category with which to annotate a class, for documentation

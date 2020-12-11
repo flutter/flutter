@@ -19,8 +19,8 @@ import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // dynamic context;
 
 /// The glue between the render tree and the Flutter engine.

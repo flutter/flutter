@@ -153,6 +153,9 @@ class SampleChecker {
   /// A RegExp that matches a Dart constructor.
   static final RegExp _constructorRegExp = RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
 
+  /// A RegExp that matches a dart version specification in a example preamble.
+  static final RegExp _dartVersionRegExp = RegExp(r'\/\/ \/\/ @dart = ([0-9]+\.[0-9]+)');
+
   /// Whether or not to print verbose output.
   final bool verbose;
 
@@ -335,7 +338,7 @@ class SampleChecker {
       bool inSnippet = false;
       // Whether or not we're in a '```dart' segment.
       bool inDart = false;
-      bool samplesAreNullSafe = true;
+      String dartVersionOverride;
       int lineNumber = 0;
       final List<String> block = <String>[];
       List<String> snippetArgs = <String>[];
@@ -366,10 +369,16 @@ class SampleChecker {
         } else if (inPreamble) {
           if (line.isEmpty) {
             inPreamble = false;
-            preambleSections.add(_processBlock(startLine, block));
+            // If there's only a dartVersionOverride in the preamble, don't add
+            // it as a section. The dartVersionOverride was processed below.
+            if (dartVersionOverride == null || block.isNotEmpty) {
+              preambleSections.add(_processBlock(startLine, block));
+            }
             block.clear();
           } else if (!line.startsWith('// ')) {
             throw SampleCheckerException('Unexpected content in sample code preamble.', file: relativeFilePath, line: lineNumber);
+          } else if (_dartVersionRegExp.hasMatch(line)) {
+            dartVersionOverride = line.substring(3);
           } else {
             block.add(line.substring(3));
           }
@@ -385,7 +394,7 @@ class SampleChecker {
               inDart = false;
               final Section processed = _processBlock(startLine, block);
               final Section combinedSection = preambleSections.isEmpty ? processed : Section.combine(preambleSections..add(processed));
-              sections.add(combinedSection.copyWith(isNullSafe: samplesAreNullSafe));
+              sections.add(combinedSection.copyWith(dartVersionOverride: dartVersionOverride));
               block.clear();
             } else if (trimmedLine == _dartDocPrefix) {
               block.add('');
@@ -413,9 +422,7 @@ class SampleChecker {
         }
         if (!inSampleSection) {
           final Match sampleMatch = _dartDocSampleBeginRegex.firstMatch(trimmedLine);
-          if (line == '// Examples are not null safe.') {
-            samplesAreNullSafe = false;
-          } else if (line == '// Examples can assume:') {
+          if (line == '// Examples can assume:') {
             assert(block.isEmpty);
             startLine = Line('', filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
@@ -529,7 +536,7 @@ linter:
     final String sectionId = _createNameFromSource('snippet', section.start.filename, section.start.line);
     final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
     final List<Line> mainContents = <Line>[
-      if (!section.isNullSafe) const Line('// @dart = 2.9') else const Line(''),
+      if (section.dartVersionOverride != null) Line(section.dartVersionOverride) else const Line(''),
       ...headers,
       const Line(''),
       Line('// From: ${section.start.filename}:${section.start.line}'),
@@ -821,7 +828,7 @@ class Line {
 
 /// A class to represent a section of sample code, marked by "{@tool snippet}...{@end-tool}".
 class Section {
-  const Section(this.code, {this.isNullSafe});
+  const Section(this.code, {this.dartVersionOverride});
   factory Section.combine(List<Section> sections) {
     final List<Line> code = sections
       .expand((Section section) => section.code)
@@ -864,10 +871,10 @@ class Section {
   }
   Line get start => code.firstWhere((Line line) => line.filename != null);
   final List<Line> code;
-  final bool isNullSafe;
+  final String dartVersionOverride;
 
-  Section copyWith({bool isNullSafe}) {
-    return Section(code, isNullSafe: isNullSafe);
+  Section copyWith({String dartVersionOverride}) {
+    return Section(code, dartVersionOverride: dartVersionOverride);
   }
 }
 

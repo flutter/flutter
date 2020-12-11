@@ -5,8 +5,8 @@
 // This file is used by ../analyze-sample-code_test.dart, which depends on the
 // precise contents (including especially the comments) of this file.
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // bool _visible = true;
 // class _Text extends Text {
 //   const _Text(String text) : super(text);

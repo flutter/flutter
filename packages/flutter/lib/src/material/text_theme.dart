@@ -7,7 +7,8 @@ import 'package:flutter/painting.dart';
 
 import 'typography.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// Material design text theme.
 ///

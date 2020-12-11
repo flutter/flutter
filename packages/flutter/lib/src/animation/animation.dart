@@ -7,8 +7,8 @@ import 'package:flutter/foundation.dart';
 
 import 'tween.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // AnimationController _controller;
 
 /// The status of an animation.

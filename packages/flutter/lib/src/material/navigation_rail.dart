@@ -16,7 +16,8 @@ import 'navigation_rail_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// A material widget that is meant to be displayed at the left or right of an
 /// app to navigate between a small number of views, typically between three and

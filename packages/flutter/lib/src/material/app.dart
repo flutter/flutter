@@ -18,7 +18,8 @@ import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'theme.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
 /// developers to be intentional about their [DefaultTextStyle].

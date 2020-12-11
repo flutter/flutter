@@ -29,8 +29,8 @@ import 'snack_bar_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // TabController tabController;
 // void setState(VoidCallback fn) { }
 // String appBarTitle;

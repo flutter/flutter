@@ -22,8 +22,8 @@ import 'theme.dart';
 // and it is what most apps would have used).
 
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);

@@ -11,7 +11,8 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// A [FormField] that contains a [TextField].
 ///

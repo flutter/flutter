@@ -12,7 +12,8 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 // Extracted from https://developer.apple.com/design/resources/.
 

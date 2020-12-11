@@ -4,8 +4,8 @@
 
 import 'simulation.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // AnimationController _controller;
 
 /// A simulation that applies a constant accelerating force.

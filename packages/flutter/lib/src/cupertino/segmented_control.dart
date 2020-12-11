@@ -11,7 +11,8 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 // Minimum padding from edges of the segmented control to edges of
 // encompassing widget.

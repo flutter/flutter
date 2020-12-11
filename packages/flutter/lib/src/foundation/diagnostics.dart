@@ -11,8 +11,8 @@ import 'constants.dart';
 import 'debug.dart';
 import 'object.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // int rows, columns;
 // String _name;
 // bool inherit;

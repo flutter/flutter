@@ -11,8 +11,8 @@ import '../widgets/media_query.dart';
 import 'interface_level.dart';
 import 'theme.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // Widget child;
 // BuildContext context;
 

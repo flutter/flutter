@@ -17,8 +17,8 @@ import 'debug.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // RangeValues _rangeValues = RangeValues(0.3, 0.7);
 // RangeValues _dollarsRange = RangeValues(50, 100);
 // void setState(VoidCallback fn) { }

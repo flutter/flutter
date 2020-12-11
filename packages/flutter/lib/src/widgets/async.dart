@@ -12,8 +12,8 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // dynamic _lot;
 // Future<String> _calculation;
 

@@ -33,8 +33,8 @@ import 'theme_data.dart';
 import 'time.dart';
 import 'time_picker_theme.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 const Duration _kDialogSizeAnimationDuration = Duration(milliseconds: 200);

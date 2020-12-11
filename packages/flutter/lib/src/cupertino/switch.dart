@@ -13,8 +13,8 @@ import 'package:flutter/services.dart';
 import 'colors.dart';
 import 'thumb_painter.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // bool _lights;
 // void setState(VoidCallback fn) { }
 

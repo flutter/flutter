@@ -20,8 +20,8 @@ import 'material_state.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // int _dollars = 0;
 // int _duelCommandment = 1;
 // void setState(VoidCallback fn) { }

@@ -11,8 +11,8 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // AnimationController controller;
 
 class _AlwaysCompleteAnimation extends Animation<double> {

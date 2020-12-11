@@ -30,7 +30,8 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// The signature of [WidgetsApp.localeListResolutionCallback].
 ///

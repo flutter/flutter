@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].

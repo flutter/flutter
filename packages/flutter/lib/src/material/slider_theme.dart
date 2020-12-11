@@ -13,7 +13,8 @@ import 'colors.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// Applies a slider theme to descendant [Slider] widgets.
 ///

@@ -13,7 +13,8 @@ import 'package:vector_math/vector_math_64.dart';
 import 'debug.dart';
 import 'object.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 // This class should only be used in debug builds.
 class _DebugSize extends Size {

@@ -19,8 +19,8 @@ export 'package:meta/meta.dart' show
   required,
   visibleForTesting;
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // String _name;
 // bool _first;
 // bool _lights;

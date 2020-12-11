@@ -9,8 +9,8 @@ part of material_animated_icons;
 // See: https://github.com/flutter/flutter/issues/1831 for details regarding
 // generic vector graphics support in Flutter.
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // AnimationController controller;
 
 /// Shows an animated icon at a given animation [progress].

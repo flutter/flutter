@@ -25,7 +25,8 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(

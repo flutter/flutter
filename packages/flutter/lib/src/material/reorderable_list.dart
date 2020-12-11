@@ -11,8 +11,8 @@ import 'debug.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // class MyDataObject { }
 
 /// The callback used by [ReorderableListView] to move an item to a new

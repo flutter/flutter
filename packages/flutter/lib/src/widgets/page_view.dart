@@ -27,7 +27,8 @@ import 'sliver.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// A controller for [PageView].
 ///

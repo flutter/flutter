@@ -13,7 +13,8 @@ import 'inline_span.dart';
 import 'text_painter.dart';
 import 'text_style.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// An immutable span of text.
 ///

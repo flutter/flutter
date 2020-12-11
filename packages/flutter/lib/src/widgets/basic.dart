@@ -65,8 +65,8 @@ export 'package:flutter/rendering.dart' show
   WrapAlignment,
   WrapCrossAlignment;
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }
 // WidgetTester tester;
 // bool _visible;

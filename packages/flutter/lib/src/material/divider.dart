@@ -8,8 +8,8 @@ import 'package:flutter/painting.dart';
 import 'divider_theme.dart';
 import 'theme.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 /// A thin horizontal line, with padding on either side.

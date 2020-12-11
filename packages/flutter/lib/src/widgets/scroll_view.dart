@@ -22,8 +22,8 @@ import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // int itemCount;
 
 /// A representation of how a [ScrollView] should dismiss the on-screen

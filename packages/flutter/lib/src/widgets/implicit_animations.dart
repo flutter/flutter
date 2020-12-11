@@ -18,8 +18,8 @@ import 'text.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // class MyWidget extends ImplicitlyAnimatedWidget {
 //   MyWidget() : super(duration: const Duration(seconds: 1));
 //   final Color targetColor = Colors.black;

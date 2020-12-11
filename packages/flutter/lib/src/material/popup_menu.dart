@@ -20,8 +20,8 @@ import 'popup_menu_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
 // dynamic _selection;

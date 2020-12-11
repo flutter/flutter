@@ -29,8 +29,8 @@ export 'package:flutter/foundation.dart' show DiagnosticsNode, DiagnosticLevel;
 export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 // void setState(VoidCallback fn) { }
 // abstract class RenderFrogJar extends RenderObject { }

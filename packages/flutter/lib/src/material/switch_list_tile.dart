@@ -9,8 +9,8 @@ import 'switch.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // void setState(VoidCallback fn) { }
 // bool _isSelected;
 

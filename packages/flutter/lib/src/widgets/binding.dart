@@ -21,7 +21,8 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// Interface for classes that register with the Widgets layer binding.
 ///

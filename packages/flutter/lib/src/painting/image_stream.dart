@@ -9,7 +9,8 @@ import 'dart:ui' show hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// A [dart:ui.Image] object with its corresponding scale.
 ///

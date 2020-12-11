@@ -16,8 +16,8 @@ export 'package:flutter/rendering.dart' show
   SliverGridDelegateWithFixedCrossAxisCount,
   SliverGridDelegateWithMaxCrossAxisExtent;
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
 
 /// A callback which produces a semantic index given a widget and the local index.

@@ -26,8 +26,8 @@ import 'sliver_fill.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // List<String> _tabs;
 
 /// Signature used by [NestedScrollView] for building its header.

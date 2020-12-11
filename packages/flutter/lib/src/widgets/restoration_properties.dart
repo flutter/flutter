@@ -10,7 +10,8 @@ import 'package:flutter/services.dart';
 import 'editable_text.dart';
 import 'restoration.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// A [RestorableProperty] that makes the wrapped value accessible to the owning
 /// [State] object via the [value] getter and setter.

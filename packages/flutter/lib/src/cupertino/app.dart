@@ -13,7 +13,8 @@ import 'localizations.dart';
 import 'route.dart';
 import 'theme.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// An application that uses Cupertino design.
 ///

@@ -28,7 +28,8 @@ export 'package:flutter/gestures.dart' show
   PointerUpEvent,
   PointerCancelEvent;
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 /// A base class for render boxes that resemble their children.
 ///

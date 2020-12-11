@@ -25,8 +25,8 @@ import 'restoration_properties.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
-// Examples are not null safe.
 // Examples can assume:
+// // @dart = 2.9
 // class MyPage extends Placeholder { MyPage({String title}); }
 // class MyHomePage extends Placeholder { }
 // NavigatorState navigator;

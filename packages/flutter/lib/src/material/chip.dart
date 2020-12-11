@@ -23,7 +23,8 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
 
-// Examples are not null safe.
+// Examples can assume:
+// // @dart = 2.9
 
 // Some design constants
 const double _kChipHeight = 32.0;
