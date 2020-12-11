@@ -572,6 +572,15 @@ void main() {
     expect(outer.getMinIntrinsicHeight(double.infinity), 30);
     expect(outer.getMaxIntrinsicHeight(double.infinity), 30);
   });
+
+  test('RenderProxyBox does not return infinity for its intrinsics', () {
+    final _ProxyBoxWithDefaultSize inner = _ProxyBoxWithDefaultSize(const Size.square(double.infinity));
+    final RenderPositionedBox outer = RenderPositionedBox(alignment: Alignment.center, child: inner);
+    expect(outer.getMinIntrinsicWidth(double.infinity), 0);
+    expect(outer.getMaxIntrinsicWidth(double.infinity), 0);
+    expect(outer.getMinIntrinsicHeight(double.infinity), 0);
+    expect(outer.getMaxIntrinsicHeight(double.infinity), 0);
+  });
 }
 
 class _ProxyBoxWithDefaultSize extends RenderProxyBox {
