@@ -19,7 +19,6 @@
 #include "flutter/lib/ui/io_manager.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/runtime/dart_snapshot.h"
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -231,8 +230,7 @@ class DartIsolate : public UIDartState {
       const fml::closure& isolate_shutdown_callback,
       std::optional<std::string> dart_entrypoint,
       std::optional<std::string> dart_entrypoint_library,
-      std::unique_ptr<IsolateConfiguration> isolate_configration,
-      std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
+      std::unique_ptr<IsolateConfiguration> isolate_configration);
 
   // |UIDartState|
   ~DartIsolate() override;
@@ -432,8 +430,7 @@ class DartIsolate : public UIDartState {
       std::string advisory_script_entrypoint,
       Flags flags,
       const fml::closure& isolate_create_callback,
-      const fml::closure& isolate_shutdown_callback,
-      std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
+      const fml::closure& isolate_shutdown_callback);
 
   DartIsolate(const Settings& settings,
               TaskRunners task_runners,
@@ -444,8 +441,7 @@ class DartIsolate : public UIDartState {
               fml::WeakPtr<ImageDecoder> image_decoder,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
-              bool is_root_isolate,
-              std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
+              bool is_root_isolate);
 
   [[nodiscard]] bool Initialize(Dart_Isolate isolate);
 
