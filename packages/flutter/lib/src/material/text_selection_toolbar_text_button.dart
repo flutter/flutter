@@ -55,7 +55,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   ///
   ///  * [getPadding], which calculates the standard padding based on the
   ///    button's position.
-  ///  * [TextButton.padding], which is where this padding is applied.
+  ///  * [ButtonStyle.padding], which is where this padding is applied.
   final EdgeInsets padding;
 
   /// Returns the standard padding for a button at index out of a total number
