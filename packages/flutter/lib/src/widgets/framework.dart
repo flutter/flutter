@@ -1331,9 +1331,6 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// If the [widget] or one of its ancestors has a [GlobalKey], it is possible
   /// for a State to be reactivated after being [deactivate]d, as part of being
   /// reparented in the tree.
-  ///
-  /// If you override this, make sure to end your method with a call to
-  /// super.reactivate().
   @protected
   @mustCallSuper
   void reactivate() { }
@@ -4911,8 +4908,8 @@ class StatefulElement extends ComponentElement {
 
   @override
   void activate() {
-    state.reactivate();
     super.activate();
+    state.reactivate();
     // Since the State could have observed the deactivate() and thus disposed of
     // resources allocated in the build method, we have to rebuild the widget
     // so that its State can reallocate its resources.
