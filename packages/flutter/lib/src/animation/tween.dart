@@ -12,6 +12,7 @@ import 'animations.dart';
 import 'curves.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // Animation<Offset> _animation;
 // AnimationController _controller;
 

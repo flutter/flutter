@@ -18,7 +18,6 @@ import 'framework.dart';
 ///
 /// Use [PreferredSize] to give a preferred size to an arbitrary widget.
 abstract class PreferredSizeWidget implements Widget {
-
   /// The size this widget would prefer if it were otherwise unconstrained.
   ///
   /// In many cases it's only necessary to define one preferred dimension.
@@ -33,6 +32,77 @@ abstract class PreferredSizeWidget implements Widget {
 /// This widget does not impose any constraints on its child, and it doesn't
 /// affect the child's layout in any way. It just advertises a preferred size
 /// which can be used by the parent.
+///
+/// Widgets like [AppBar] implement a [PreferredSizeWidget].
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This sample shows a custom widget, similar to an [AppBar], which uses a
+/// [PreferredSize] widget, with its height set to 80 logical pixels.
+/// Changing the [PreferredSize] can be used to change the height
+/// of the custom app bar.
+///
+/// ```dart preamble
+/// class AppBarContent extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Column(
+///       mainAxisAlignment: MainAxisAlignment.end,
+///       children: [
+///         Padding(
+///           padding: const EdgeInsets.symmetric(horizontal: 10),
+///           child: Row(
+///             children: [
+///               Text(
+///                 "PreferredSize Sample",
+///                 style: TextStyle(color: Colors.white),
+///               ),
+///               Spacer(),
+///               IconButton(
+///                 icon: Icon(
+///                   Icons.search,
+///                   size: 20,
+///                 ),
+///                 color: Colors.white,
+///                 onPressed: () {},
+///               ),
+///               IconButton(
+///                 icon: Icon(
+///                   Icons.more_vert,
+///                   size: 20,
+///                 ),
+///                 color: Colors.white,
+///                 onPressed: () {},
+///               ),
+///             ],
+///           ),
+///         ),
+///       ],
+///     );
+///   }
+/// }
+/// ```
+///```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: PreferredSize(
+///       preferredSize: const Size.fromHeight(80.0),
+///       child: Container(
+///         decoration: BoxDecoration(
+///           gradient: LinearGradient(
+///             colors: [Colors.blue, Colors.pink],
+///           ),
+///         ),
+///         child: AppBarContent(),
+///       ),
+///     ),
+///     body: Center(
+///       child: Text("Content"),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

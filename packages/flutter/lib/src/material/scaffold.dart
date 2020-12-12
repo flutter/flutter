@@ -30,6 +30,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // TabController tabController;
 // void setState(VoidCallback fn) { }
 // String appBarTitle;
@@ -68,7 +69,7 @@ enum _ScaffoldSlot {
 /// [BuildContext] via [ScaffoldMessenger.of] and use the
 /// [ScaffoldMessengerState.showSnackBar] function.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
 ///
 /// Here is an example of showing a [SnackBar] when the user presses a button.
 ///
@@ -111,7 +112,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  /// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
   /// Typical usage of the [ScaffoldMessenger.of] function is to call it in
   /// response to a user gesture or an application state change.
   ///
@@ -137,7 +138,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// function. The [MaterialApp.scaffoldMessengerKey] refers to the root
   /// ScaffoldMessenger that is provided by default.
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad --template=freeform_no_null_safety}
   /// Sometimes [SnackBar]s are produced by code that doesn't have ready access
   /// to a valid [BuildContext]. One such example of this is when you show a
   /// SnackBar from a method outside of the `build` function. In these
@@ -303,7 +304,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// See [ScaffoldMessenger.of] for information about how to obtain the
   /// [ScaffoldMessengerState].
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  /// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
   ///
   /// Here is an example of showing a [SnackBar] when the user presses a button.
   ///
@@ -1258,7 +1259,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showBottomSheet] function.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
 /// The [body] is a [Text] placed in a [Center] in order to center the text
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
@@ -1287,7 +1288,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
 /// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
 /// order to center the text within the [Scaffold]. The [FloatingActionButton]
@@ -1317,7 +1318,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold]. The [FloatingActionButton] is
@@ -1559,7 +1560,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// To close the drawer, use [Navigator.pop].
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   /// To disable the drawer edge swipe, set the
   /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
@@ -1622,7 +1623,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// To close the drawer, use [Navigator.pop].
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   /// To disable the drawer edge swipe, set the
   /// [Scaffold.endDrawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
@@ -1789,7 +1790,7 @@ class Scaffold extends StatefulWidget {
   /// If no instance of this class encloses the given context, will cause an
   /// assert in debug mode, and throw an exception in release mode.
   ///
-  /// {@tool dartpad --template=freeform}
+  /// {@tool dartpad --template=freeform_no_null_safety}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
@@ -1860,7 +1861,7 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
   /// [Scaffold] (since it's "above" the widget being returned in the widget
@@ -2172,7 +2173,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See [ScaffoldMessenger.of] for information about how to obtain the
   /// [ScaffoldMessengerState].
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center}
+  /// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
   ///
   /// Here is an example of showing a [SnackBar] when the user presses a button.
   ///
@@ -2546,7 +2547,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// of the app. Modal bottom sheets can be created and displayed with the
   /// [showModalBottomSheet] function.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
   ///
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to

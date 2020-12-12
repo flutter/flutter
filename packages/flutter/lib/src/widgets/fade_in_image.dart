@@ -14,6 +14,7 @@ import 'implicit_animations.dart';
 import 'transitions.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // Uint8List bytes;
 
 /// An image that shows a [placeholder] image while the target [image] is

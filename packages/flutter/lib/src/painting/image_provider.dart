@@ -17,6 +17,9 @@ import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// Signature for the callback taken by [_createErrorHandlerAndKey].
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 

@@ -11,6 +11,7 @@ import 'print.dart';
 import 'stack_frame.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // String runtimeType;
 // bool draconisAlive;
 // bool draconisAmulet;
