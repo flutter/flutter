@@ -573,9 +573,9 @@ linter:
         stderr.removeLast();
       }
     }
-    // if (stderr.isNotEmpty) {
-    //   throw 'Cannot analyze dartdocs; unexpected error output:\n$stderr';
-    // }
+    if (stderr.isNotEmpty && stderr.any((String line) => line.isNotEmpty)) {
+      throw 'Cannot analyze dartdocs; unexpected error output:\n$stderr';
+    }
     if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
       stdout.removeAt(0);
     }
