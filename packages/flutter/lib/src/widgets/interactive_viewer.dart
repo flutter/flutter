@@ -939,7 +939,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       // The mouseWheel scroll amount is hardcoded to 20 while a trackpad scroll can be any amount
       // by dividing the scroll amount by 200 it scale 0.1 units per mouseWheels scroll and feel natural for trackpads.
       // See https://github.com/flutter/flutter/pull/71266
-      final double scaleChange = 1.0 - event.scrollDelta.dy / 200;
+      final double scaleChange = math.exp(-event.scrollDelta.dy / 200);
       final Offset focalPointScene = _transformationController!.toScene(
         event.localPosition,
       );
