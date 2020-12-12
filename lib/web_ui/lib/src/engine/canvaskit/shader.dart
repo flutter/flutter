@@ -35,6 +35,7 @@ class CkGradientSweep extends CkShader implements ui.Gradient {
 
   @override
   SkShader createDefault() {
+    const double toDegrees = 180.0 / math.pi;
     return canvasKit.Shader.MakeSweepGradient(
       center.dx,
       center.dy,
@@ -43,8 +44,8 @@ class CkGradientSweep extends CkShader implements ui.Gradient {
       toSkTileMode(tileMode),
       matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
       0,
-      startAngle,
-      endAngle,
+      toDegrees * startAngle,
+      toDegrees * endAngle,
     );
   }
 
