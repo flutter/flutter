@@ -11,6 +11,7 @@ import 'borders.dart';
 import 'edge_insets.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 /// The shape to use when rendering a [Border] or [BoxDecoration].

@@ -17,6 +17,7 @@ import 'scroll_simulation.dart';
 export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
 
 // Examples can assume:
+// // @dart = 2.9
 // class FooScrollPhysics extends ScrollPhysics {
 //   const FooScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
 // }

@@ -13,6 +13,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // Widget bottomAppBarContents;
 
 /// A container that is typically used with [Scaffold.bottomNavigationBar], and

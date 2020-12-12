@@ -17,6 +17,7 @@ import 'listener_helpers.dart';
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
 // Examples can assume:
+// // @dart = 2.9
 // AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // bool dismissed;
 // void setState(VoidCallback fn) { }
