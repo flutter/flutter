@@ -25,7 +25,7 @@ void main() {
 
   setUp(() {
     tempDir = globals.fs.systemTempDirectory
-        .createTempSync('flutter_tools_create_test.');
+        .createTempSync('flutter_tools_generated_registrant_test.');
     projectDir = tempDir.childDirectory('flutter_project');
   });
 
