@@ -366,7 +366,7 @@ class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin = Alignment.centerLeft,
     this.end = Alignment.centerRight,
-    required List<Color> colors,
+    @required List<Color> colors = const [],
     List<double>? stops,
     this.tileMode = TileMode.clamp,
     GradientTransform? transform,
@@ -596,7 +596,7 @@ class RadialGradient extends Gradient {
   const RadialGradient({
     this.center = Alignment.center,
     this.radius = 0.5,
-    required List<Color> colors,
+    @required List<Color> colors = const [],
     List<double>? stops,
     this.tileMode = TileMode.clamp,
     this.focal,
