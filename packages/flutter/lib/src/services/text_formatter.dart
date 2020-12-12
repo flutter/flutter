@@ -433,9 +433,9 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///    [MaxLengthEnforcement.truncateAfterCompositionEnds]. These platforms
   ///    allow the composition to exceed by default.
   /// {@endtemplate}
-  static MaxLengthEnforcement getDefaultMaxLengthEnforcement({
+  static MaxLengthEnforcement getDefaultMaxLengthEnforcement([
     TargetPlatform? platform,
-  }) {
+  ]) {
     if (kIsWeb) {
       return MaxLengthEnforcement.truncateAfterCompositionEnds;
     } else {

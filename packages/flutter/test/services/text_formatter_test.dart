@@ -467,7 +467,7 @@ void main() {
 
       test('with TargetPlatform.windows', () async {
         final MaxLengthEnforcement enforcement = LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(
-          platform: TargetPlatform.windows,
+          TargetPlatform.windows,
         );
         if (kIsWeb) {
           expect(enforcement, MaxLengthEnforcement.truncateAfterCompositionEnds);
@@ -478,7 +478,7 @@ void main() {
 
       test('with TargetPlatform.macOS', () async {
         final MaxLengthEnforcement enforcement = LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(
-          platform: TargetPlatform.macOS,
+          TargetPlatform.macOS,
         );
         expect(enforcement, MaxLengthEnforcement.truncateAfterCompositionEnds);
       });
