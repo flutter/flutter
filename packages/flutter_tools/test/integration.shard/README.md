@@ -11,7 +11,7 @@ Use this command to run (from the `flutter_tools` directory):
 ```
 
 These tests are expensive to run and do not give meaningful coverage
-information for the flutter tool (since they are black-box tests that
+information for the Flutter tool (since they are black-box tests that
 run the tool as a subprocess, rather than being unit tests). For this
 reason, they are in a separate shard when running on continuous
 integration and are not run when calculating coverage.
