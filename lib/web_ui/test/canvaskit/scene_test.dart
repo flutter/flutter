@@ -49,6 +49,17 @@ void testMain() {
       final ui.Image sceneImage = await scene.toImage(100, 100);
       expect(sceneImage, isA<CkImage>());
     });
-  // TODO: https://github.com/flutter/flutter/issues/60040
+
+    test('pushColorFilter does not throw', () async {
+      final ui.SceneBuilder builder = ui.SceneBuilder();
+      expect(builder, isA<LayerSceneBuilder>());
+
+      builder.pushOffset(0, 0);
+      builder.pushColorFilter(ui.ColorFilter.srgbToLinearGamma());
+
+      final ui.Scene scene = builder.build();
+      expect(scene, isNotNull);
+    });
+    // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }

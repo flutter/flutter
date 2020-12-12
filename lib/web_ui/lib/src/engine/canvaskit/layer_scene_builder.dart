@@ -138,12 +138,13 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  ui.ColorFilterEngineLayer pushColorFilter(
+  ui.ColorFilterEngineLayer? pushColorFilter(
     ui.ColorFilter filter, {
     ui.ColorFilterEngineLayer? oldLayer,
   }) {
     assert(filter != null); // ignore: unnecessary_null_comparison
-    throw UnimplementedError();
+    pushLayer(ColorFilterLayer(filter));
+    return null;
   }
 
   ui.ImageFilterEngineLayer? pushImageFilter(
