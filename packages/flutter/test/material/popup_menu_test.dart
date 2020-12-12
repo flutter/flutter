@@ -453,6 +453,7 @@ void main() {
 
   testWidgets('PopupMenu positioning', (WidgetTester tester) async {
     final Widget testButton = PopupMenuButton<int>(
+      placement: PopupMenuPlacement.belowButton,
       itemBuilder: (BuildContext context) {
         return <PopupMenuItem<int>>[
           const PopupMenuItem<int>(value: 1, child: Text('AAA')),
@@ -653,6 +654,7 @@ void main() {
                   builder: (_) => Center(
                     child: PopupMenuButton<int>(
                       key: buttonKey,
+                      placement: PopupMenuPlacement.belowButton,
                       itemBuilder: (_) => <PopupMenuItem<int>>[
                         const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
                         const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
@@ -695,6 +697,7 @@ void main() {
                       child: Center(
                         child: PopupMenuButton<int>(
                           key: buttonKey,
+                          placement: PopupMenuPlacement.belowButton,
                           itemBuilder: (_) => <PopupMenuItem<int>>[
                             const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
                             const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
@@ -731,6 +734,7 @@ void main() {
         ),
         child: Material(
           child: PopupMenuButton<int>(
+            placement: PopupMenuPlacement.belowButton,
             itemBuilder: (BuildContext context) {
               popupContext = context;
               return <PopupMenuItem<int>>[
@@ -765,6 +769,7 @@ void main() {
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
     PopupMenuButton<int> buildMenuButton({Offset offset = const Offset(0.0, 0.0)}) {
       return  PopupMenuButton<int>(
+        placement: PopupMenuPlacement.belowButton,
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
@@ -1887,6 +1892,7 @@ void main() {
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
             actions: <Widget>[PopupMenuButton<int>(
+              placement: PopupMenuPlacement.belowButton,
               child: SizedBox(
                 key: buttonKey,
                 height: height,

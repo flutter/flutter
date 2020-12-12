@@ -605,7 +605,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     this.selectedItemIndex,
     this.textDirection,
     this.topPadding,
-    this.bottomPadding
+    this.bottomPadding,
+    this.placement,
   );
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -627,6 +628,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   // Bottom padding of unsafe area.
   final double bottomPadding;
+
+  // The placement of the menu.
+  final PopupMenuPlacement placement;
 
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
@@ -652,13 +656,19 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
     // Find the ideal vertical position.
     // Default vertical position is below the element that generates it.
-    double y = position.top + buttonHeight;
+    double y = placement == PopupMenuPlacement.belowButton
+      ? position.top + buttonHeight
+      : position.top;
     if (selectedItemIndex != null && itemSizes != null) {
       double selectedItemOffset = _kMenuVerticalPadding;
       for (int index = 0; index < selectedItemIndex!; index += 1)
         selectedItemOffset += itemSizes[index]!.height;
       selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
-      y = y - buttonHeight / 2.0 - selectedItemOffset;
+      if (placement == PopupMenuPlacement.belowButton) {
+        y = y - buttonHeight / 2.0 - selectedItemOffset;
+      } else {
+        y = y + buttonHeight / 2.0 - selectedItemOffset;
+      }
     }
 
     // Find the ideal horizontal position.
@@ -688,7 +698,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       x = _kMenuScreenPadding;
     else if (x + childSize.width > size.width - _kMenuScreenPadding)
       x = size.width - childSize.width - _kMenuScreenPadding;
-    if (y < _kMenuScreenPadding)
+    if (y < _kMenuScreenPadding + topPadding)
       y = _kMenuScreenPadding + topPadding;
     else if (y + childSize.height > size.height - _kMenuScreenPadding)
       y = size.height - bottomPadding - _kMenuScreenPadding - childSize.height ;
@@ -720,6 +730,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.shape,
     this.color,
     required this.capturedThemes,
+    required this.placement,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
@@ -731,6 +742,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final ShapeBorder? shape;
   final Color? color;
   final CapturedThemes capturedThemes;
+  final PopupMenuPlacement placement;
 
   @override
   Animation<double> createAnimation() {
@@ -777,6 +789,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
             Directionality.of(context),
             mediaQuery.padding.top,
             mediaQuery.padding.bottom,
+            placement,
           ),
           child: capturedThemes.wrap(menu),
         );
@@ -850,6 +863,7 @@ Future<T?> showMenu<T>({
   ShapeBorder? shape,
   Color? color,
   bool useRootNavigator = false,
+  PopupMenuPlacement placement = PopupMenuPlacement.aboveButton,
 }) {
   assert(context != null);
   assert(position != null);
@@ -879,6 +893,7 @@ Future<T?> showMenu<T>({
     shape: shape,
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+    placement: placement,
   ));
 }
 
@@ -900,6 +915,17 @@ typedef PopupMenuCanceled = void Function();
 ///
 /// Used by [PopupMenuButton.itemBuilder].
 typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext context);
+
+/// The placement of the menu popped up by press the [PopupMenuButton].
+///
+/// Used by [PopupMenuButton.placement].
+enum PopupMenuPlacement {
+  /// The popup menu is positioned above the button that generates it.
+  aboveButton,
+
+  /// The popup menu is positioned below the button that generates it.
+  belowButton,
+}
 
 /// Displays a menu when pressed and calls [onSelected] when the menu is dismissed
 /// because an item was selected. The value passed to [onSelected] is the value of
@@ -972,6 +998,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.shape,
     this.color,
     this.enableFeedback,
+    this.placement = PopupMenuPlacement.aboveButton,
   }) : assert(itemBuilder != null),
        assert(offset != null),
        assert(enabled != null),
@@ -1066,6 +1093,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// The placement of the menu popped up by press the [PopupMenuButton].
+  ///
+  /// Default to [PopupMenuPlacement.aboveButton].
+  final PopupMenuPlacement placement;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1086,8 +1118,14 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final RenderBox button = _menuButtonKey.currentContext!.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final RenderBox button;
+    if (widget.placement == PopupMenuPlacement.belowButton) {
+      button = _menuButtonKey.currentContext!.findRenderObject()! as RenderBox;
+    } else {
+      // Backward compatible.
+      button = context.findRenderObject()! as RenderBox;
+    }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(widget.offset, ancestor: overlay),
@@ -1106,6 +1144,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
+        placement: widget.placement,
       )
       .then<void>((T? newValue) {
         if (!mounted)
