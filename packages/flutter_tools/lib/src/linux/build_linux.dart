@@ -22,7 +22,8 @@ import '../project.dart';
 // - <file path>:<line>:<column>: (fatal) error: <error...>
 // - <file path>:<line>:<column>: warning: <warning...>
 // - clang: error: <link error...>
-final RegExp errorMatcher = RegExp(r'(?:.*:\d+:\d+|clang):\s?(fatal\s)?(?:error|warning):\s.*', caseSensitive: false);
+// - Error: <tool error...>
+final RegExp errorMatcher = RegExp(r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:error|warning):\s.*', caseSensitive: false);
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
@@ -152,7 +153,9 @@ Future<void> _runBuild(Directory buildDir) async {
       ],
       environment: <String, String>{
         if (globals.logger.isVerbose)
-          'VERBOSE_SCRIPT_LOGGING': 'true'
+          'VERBOSE_SCRIPT_LOGGING': 'true',
+        if (!globals.logger.isVerbose)
+          'PREFIXED_ERROR_LOGGING': 'true',
       },
       trace: true,
       stdoutErrorMatcher: errorMatcher,

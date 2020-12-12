@@ -61,6 +61,7 @@ import 'src/web/web_runner.dart';
 Future<void> main(List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
+  final bool prefixedErrors = args.contains('--prefixed-errors');
   // Support the -? Powershell help idiom.
   final int powershellHelpIndex = args.indexOf('-?');
   if (powershellHelpIndex != -1) {
@@ -166,6 +167,7 @@ Future<void> main(List<String> args) async {
           daemon: daemon,
           machine: runMachine,
           verbose: verbose && !muteCommandLogging,
+          prefixedErrors: prefixedErrors,
           windows: globals.platform.isWindows,
         );
        }
@@ -194,6 +196,7 @@ class LoggerFactory {
   /// Create the appropriate logger for the current platform and configuration.
   Logger createLogger({
     @required bool verbose,
+    @required bool prefixedErrors,
     @required bool machine,
     @required bool daemon,
     @required bool windows,
@@ -216,6 +219,9 @@ class LoggerFactory {
     }
     if (verbose) {
       logger = VerboseLogger(logger, stopwatchFactory: _stopwatchFactory);
+    }
+    if (prefixedErrors) {
+      logger = PrefixedErrorLogger(logger);
     }
     if (daemon) {
       return NotifyingLogger(verbose: verbose, parent: logger);

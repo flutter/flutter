@@ -44,6 +44,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         negatable: false,
         help: 'Noisy logging, including all shell commands executed.\n'
               'If used with --help, shows hidden options.');
+    argParser.addFlag('prefixed-errors',
+        negatable: false,
+        hide: true,
+        defaultsTo: false);
     argParser.addFlag('quiet',
         negatable: false,
         hide: !verboseHelp,
