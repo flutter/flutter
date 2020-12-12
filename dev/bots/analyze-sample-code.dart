@@ -734,8 +734,9 @@ linter:
     if (_exitCode == 1 && analysisErrors.isEmpty && !unknownAnalyzerErrors) {
       _exitCode = 0;
     }
-    if (_exitCode == 0 && !silent) {
-      print('No analysis errors in samples!');
+    if (_exitCode == 0) {
+      if (!silent)
+        print('No analysis errors in samples!');
       assert(analysisErrors.isEmpty);
     }
     return analysisErrors;
