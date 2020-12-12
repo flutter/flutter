@@ -197,7 +197,6 @@ void main() {
       expect(buildInfo.flavor, 'free');
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
-      expect(buildInfo.dartDefines.isNotEmpty, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => mockAndroidBuilder,
