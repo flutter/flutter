@@ -25,7 +25,7 @@ void main() {
 
   setUp(() {
     tempDir = globals.fs.systemTempDirectory
-        .createTempSync('flutter_tools_generated_registrant_test.');
+        .createTempSync('flutter_tools_generated_plugin_registrant_test.');
     projectDir = tempDir.childDirectory('flutter_project');
   });
 
@@ -36,7 +36,7 @@ void main() {
   testUsingContext('generated plugin registrant passes analysis', () async {
     await _createProject(projectDir, <String>[]);
     // We need to add a dependency with web support to trigger
-    // the generated_registrant generation.
+    // the generated_plugin_registrant generation.
     await _addDependency(projectDir, 'shared_preferences', '^0.5.12+4');
     await _analyzeProject(projectDir);
 
