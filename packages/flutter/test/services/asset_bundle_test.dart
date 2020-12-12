@@ -65,6 +65,11 @@ void main() {
 
     // Should have been cached and shouldn't retrieve and decode another time.
     expect(bundle.loadCallCount['NOTICES.Z'], 1);
+  }, onPlatform: <String, dynamic>{
+    'browser': const Skip(
+      'Skip the NOTICES unzipping test because NOTICES are'
+      'not zipped for the web'
+    ),
   });
 
   test('AssetImage.obtainKey succeeds with ImageConfiguration.empty', () async {

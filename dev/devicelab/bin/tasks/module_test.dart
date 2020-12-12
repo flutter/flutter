@@ -319,7 +319,11 @@ Future<void> main() async {
       section('Check the NOTICE file is correct');
 
       await inDirectory(hostApp, () async {
-        await exec('unzip', <String>[releaseHostApk, 'assets/flutter_assets/NOTICES.Z']);
+        if (Platform.isWindows) {
+          await exec('7za', <String>['x', releaseHostApk, 'assets/flutter_assets/NOTICES.Z']);
+        } else {
+          await exec('unzip', <String>[releaseHostApk, 'assets/flutter_assets/NOTICES.Z']);
+        }
         checkFileExists(path.join(hostApp.path, 'assets', 'flutter_assets', 'NOTICES.Z'));
 
         final Uint8List licenseData = File(path.join(hostApp.path, 'assets', 'flutter_assets', 'NOTICES.Z')).readAsBytesSync();
