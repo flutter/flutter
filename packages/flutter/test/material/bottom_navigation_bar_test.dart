@@ -1120,7 +1120,7 @@ void main() {
                             BottomNavigationBarItem(
                               label: label,
                               icon: Icon(Icons.ac_unit),
-                              toolTip: label,
+                              tooltip: label,
                             ),
                             BottomNavigationBarItem(
                               label: 'B',
@@ -1159,7 +1159,7 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 label: 'A',
-                toolTip: 'A tooltip',
+                tooltip: 'A tooltip',
                 icon: Icon(Icons.ac_unit),
               ),
               BottomNavigationBarItem(
@@ -1169,7 +1169,7 @@ void main() {
               BottomNavigationBarItem(
                 label: 'C',
                 icon: Icon(Icons.cake),
-                toolTip: '',
+                tooltip: '',
               ),
             ],
           ),

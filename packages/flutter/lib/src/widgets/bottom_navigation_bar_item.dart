@@ -32,7 +32,7 @@ class BottomNavigationBarItem {
     this.label,
     Widget? activeIcon,
     this.backgroundColor,
-    this.toolTip,
+    this.tooltip,
   }) : activeIcon = activeIcon ?? icon,
        assert(label == null || title == null),
        assert(icon != null);
@@ -97,8 +97,12 @@ class BottomNavigationBarItem {
   ///    the icons themselves.
   final Color? backgroundColor;
 
-  /// The text to display in the tooltip for this [BottomNavigationBarItem].
+  /// The text to display in the tooltip for this [BottomNavigationBarItem], when
+  /// the user long presses the item.
   ///
-  /// The tooltip will only appear on an item in the [BottomNavigationBar].
-  final String? toolTip;
+  /// The [Tooltip] will only appear on an item in a Material design [BottomNavigationBar], and
+  /// when the string is not empty.
+  ///
+  /// Defaults to null, in which case the [label] text will be used.
+  final String? tooltip;
 }
