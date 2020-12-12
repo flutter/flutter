@@ -41,11 +41,14 @@ void main() {
     await _createProject(projectDir, <String>[]);
     // We need to add a dependency with web support to trigger
     // the generated_plugin_registrant generation.
-    await _addDependency(projectDir, 'shared_preferences', '^0.5.12+4');
+    await _addDependency(projectDir, 'shared_preferences',
+        version: '^0.5.12+4');
     await _analyzeProject(projectDir);
 
     expect(
-        projectDir.childFile('lib/generated_plugin_registrant.dart'), exists);
+      projectDir.childFile('lib/generated_plugin_registrant.dart'),
+      exists,
+    );
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
           fileSystem: globals.fs,
@@ -75,13 +78,16 @@ void main() {
     // file does not fail analysis (this is a regression test - an ignore was
     // added to cover this case).
     await _addDependency(
-        projectDir,
-        'test_web_plugin_with_a_purposefully_extremely_long_package_name',
-        '\n        path: ../test_plugin');
+      projectDir,
+      'test_web_plugin_with_a_purposefully_extremely_long_package_name',
+      path: '../test_plugin',
+    );
     await _analyzeProject(projectDir);
 
     expect(
-        projectDir.childFile('lib/generated_plugin_registrant.dart'), exists);
+      projectDir.childFile('lib/generated_plugin_registrant.dart'),
+      exists,
+    );
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
           fileSystem: globals.fs,
@@ -99,14 +105,15 @@ Future<void> _ensureFlutterToolsSnapshot() async {
     'bin',
     'flutter_tools.dart',
   ));
-  final String flutterToolsSnapshotPath =
-      globals.fs.path.absolute(globals.fs.path.join(
-    '..',
-    '..',
-    'bin',
-    'cache',
-    'flutter_tools.snapshot',
-  ));
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
+    globals.fs.path.join(
+      '..',
+      '..',
+      'bin',
+      'cache',
+      'flutter_tools.snapshot',
+    ),
+  );
   final String dotPackages = globals.fs.path.absolute(globals.fs.path.join(
     '.packages',
   ));
@@ -145,23 +152,29 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
 
 Future<void> _addDependency(
   Directory projectDir,
-  String package,
+  String package, {
   String version,
-) async {
+  String path,
+}) async {
+  assert(version != null || path != null,
+      'Need to define a source for the package.');
+  assert(version == null || path == null,
+      'Cannot only load a package from path or from Pub, not both.');
+
   final File pubspecYaml = projectDir.childFile('pubspec.yaml');
   expect(pubspecYaml, exists);
 
   final List<String> lines = await pubspecYaml.readAsLines();
-
   for (int i = 0; i < lines.length; i++) {
     final String line = lines[i];
-
     if (line.startsWith('dependencies:')) {
-      lines.insert(i + 1, '  $package: $version');
+      lines.insert(
+          i + 1,
+          '  $package: ${version ?? '\n'
+              '    path: $path'}');
       break;
     }
   }
-
   await pubspecYaml.writeAsString(lines.join('\n'));
 }
 
@@ -177,14 +190,15 @@ ${linterRules.map((String rule) => '    - $rule').join('\n')}
 }
 
 Future<void> _analyzeProject(Directory workingDir) async {
-  final String flutterToolsSnapshotPath =
-      globals.fs.path.absolute(globals.fs.path.join(
-    '..',
-    '..',
-    'bin',
-    'cache',
-    'flutter_tools.snapshot',
-  ));
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
+    globals.fs.path.join(
+      '..',
+      '..',
+      'bin',
+      'cache',
+      'flutter_tools.snapshot',
+    ),
+  );
 
   final List<String> args = <String>[
     flutterToolsSnapshotPath,
