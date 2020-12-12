@@ -84,7 +84,7 @@ def main():
     sdk_output = subprocess.check_output(['xcodebuild', '-version', '-sdk',
                                           'macosx' + best_sdk, 'Path']).strip()
     if options.symlink:
-      symlink_target = os.path.join(options.symlink, os.path.basename(sdk_output))
+      symlink_target = os.path.join(options.symlink, 'SDKs', os.path.basename(sdk_output))
       symlink(sdk_output, symlink_target)
       sdk_output = symlink_target
 

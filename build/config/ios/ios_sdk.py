@@ -33,8 +33,12 @@ def main(argv):
 
   sdk_output = subprocess.check_output(command).strip()
   if args.symlink:
-    symlink_target = os.path.join(args.symlink, os.path.basename(sdk_output))
+    symlink_target = os.path.join(args.symlink, 'SDKs', os.path.basename(sdk_output))
     symlink(sdk_output, symlink_target)
+    frameworks_location = os.path.join(sdk_output, '..', '..', 'Library', 'Frameworks')
+    frameworks_symlink = os.path.join(args.symlink, 'Library', 'Frameworks')
+    symlink(frameworks_location, frameworks_symlink)
+
     sdk_output = symlink_target
 
   print(sdk_output)
