@@ -18,6 +18,9 @@ import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'theme.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
 /// developers to be intentional about their [DefaultTextStyle].
 ///
@@ -739,7 +742,6 @@ class _MaterialAppState extends State<MaterialApp> {
       key: widget.scaffoldMessengerKey,
       child: AnimatedTheme(
         data: theme,
-        isMaterialAppTheme: true,
         child: widget.builder != null
           ? Builder(
               builder: (BuildContext context) {

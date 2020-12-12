@@ -7,6 +7,7 @@ import 'animation.dart';
 import 'tween.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // AnimationController myAnimationController;
 
 /// Enables creating an [Animation] whose value is defined by a sequence of

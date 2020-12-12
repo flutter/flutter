@@ -69,7 +69,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// [fieldViewBuilder] parameter. The options to be displayed are determined
 /// using [optionsBuilder] and rendered with [optionsViewBuilder].
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad --template=freeform_no_null_safety}
 /// This example shows how to create a very basic autocomplete widget using the
 /// [fieldViewBuilder] and [optionsViewBuilder] parameters.
 ///
@@ -143,7 +143,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// Options will be compared using `==`, so it may be beneficial to override
 /// [Object.==] and [Object.hashCode] for custom types.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad --template=freeform_no_null_safety}
 /// This example is similar to the previous example, but it uses a custom T data
 /// type instead of directly using String.
 ///
@@ -244,7 +244,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad --template=freeform_no_null_safety}
 /// This example shows the use of RawAutocomplete in a form.
 ///
 /// ```dart imports
