@@ -141,58 +141,36 @@ enum BottomNavigationBarType {
 /// int _selectedIndex = 0;
 /// final ScrollController _homeController = ScrollController();
 /// String dropdownValue = 'One';
-/// static const TextStyle optionStyle = TextStyle(fontSize: 15, fontWeight: FontWeight.bold);
+/// FontWeight _fontWeight = FontWeight.normal;
 ///
 /// void _onItemTapped(int index) {
 ///   if (index == 0) {
 ///     _homeController.animateTo(
-///       0.0,
-///       duration: Duration(milliseconds: 500),
-///       curve: Curves.easeOut
+///         0.0,
+///         duration: Duration(milliseconds: 500),
+///         curve: Curves.easeOut
 ///     );
 ///   }
-///   setState(() {
-///     _selectedIndex = index;
-///   });
+///   else{
+///     setState(() {
+///       _fontWeight = index == 1 ? FontWeight.bold : FontWeight.normal;
+///       _selectedIndex = index;
+///     });
+///   }
 /// }
 ///
 /// Widget _listViewBody() {
 ///   return ListView.separated(
-///     controller: _homeController,
-///     itemBuilder: (context, index) {
-///       return Center(
-///         child: Text(
-///         "Item $index",
-///         style: optionStyle,
-///       ));
-///     },
-///     separatorBuilder: (context, index) => Divider(thickness: 1,),
-///     itemCount: 50
-///   );
-/// }
-///
-/// Widget _dropdownButton() {
-///   final container = Container(
-///     height: 2,
-///     color: Colors.amber[800],
-///   );
-///   return DropdownButton<String>(
-///     value: dropdownValue,
-///     icon: Icon(Icons.arrow_downward),
-///     iconSize: 24,
-///     elevation: 16,
-///     underline: container,
-///     onChanged: (String newValue) {
-///       setState(() {
-///         dropdownValue = newValue;
-///       });
-///     },
-///     items: <String>['One', 'Two', 'Three'].map<DropdownMenuItem<String>>((String value) {
-///        return DropdownMenuItem<String>(
-///         value: value,
-///         child: Text(value),
-///       );
-///     }).toList(),
+///       controller: _homeController,
+///       itemBuilder: (context, index) {
+///         return Center(
+///             child: Text(
+///               "Item $index",
+///               style: TextStyle(fontWeight: _fontWeight),
+///             ));
+///       },
+///       separatorBuilder: (context, index) => Divider(thickness: 1,),
+///       itemCount: 50
 ///   );
 /// }
 ///
@@ -210,7 +188,12 @@ enum BottomNavigationBarType {
 ///           label: 'Back top',
 ///         ),
 ///         BottomNavigationBarItem(
-///           icon: _dropdownButton(),
+///           icon: Icon(Icons.arrow_circle_up),
+///           label: 'Bold Fonts',
+///         ),
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.arrow_circle_up),
+///           label: 'Normalize Fonts',
 ///         ),
 ///       ],
 ///       currentIndex: _selectedIndex,
