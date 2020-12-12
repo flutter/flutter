@@ -1,6 +1,7 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 
 import 'dart:math' as math;
 
@@ -10,8 +11,10 @@ import 'basic_types.dart';
 
 /// How a box should be inscribed into another box.
 ///
-/// See also [applyBoxFit], which applies the sizing semantics of these values
-/// (though not the alignment semantics).
+/// See also:
+///
+///  * [applyBoxFit], which applies the sizing semantics of these values (though
+///    not the alignment semantics).
 enum BoxFit {
   /// Fill the target box by distorting the source's aspect ratio.
   ///
@@ -26,17 +29,26 @@ enum BoxFit {
 
   /// As small as possible while still covering the entire target box.
   ///
+  /// {@template flutter.painting.BoxFit.cover}
+  /// To actually clip the content, use `clipBehavior: Clip.hardEdge` alongside
+  /// this in a [FittedBox].
+  /// {@endtemplate}
+  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_fit_cover.png)
   cover,
 
   /// Make sure the full width of the source is shown, regardless of
   /// whether this means the source overflows the target box vertically.
   ///
+  /// {@macro flutter.painting.BoxFit.cover}
+  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_fit_fitWidth.png)
   fitWidth,
 
   /// Make sure the full height of the source is shown, regardless of
   /// whether this means the source overflows the target box horizontally.
+  ///
+  /// {@macro flutter.painting.BoxFit.cover}
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_fit_fitHeight.png)
   fitHeight,
@@ -45,6 +57,8 @@ enum BoxFit {
   /// any portions of the source that lie outside the box.
   ///
   /// The source image is not resized.
+  ///
+  /// {@macro flutter.painting.BoxFit.cover}
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/box_fit_none.png)
   none,
@@ -102,7 +116,7 @@ class FittedSizes {
 /// convenience function, [Alignment.inscribe], for resolving the sizes to
 /// rects, as shown in the example below.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This function paints a [dart:ui.Image] `image` onto the [Rect] `outputRect` on a
 /// [Canvas] `canvas`, using a [Paint] `paint`, applying the [BoxFit] algorithm

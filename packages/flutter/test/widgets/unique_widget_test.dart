@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class TestUniqueWidget extends UniqueWidget<TestUniqueWidgetState> {
-  const TestUniqueWidget({ GlobalKey<TestUniqueWidgetState> key }) : super(key: key);
+  const TestUniqueWidget({ required GlobalKey<TestUniqueWidgetState> key }) : super(key: key);
 
   @override
   TestUniqueWidgetState createState() => TestUniqueWidgetState();
@@ -23,7 +23,7 @@ void main() {
 
     await tester.pumpWidget(widget);
 
-    final TestUniqueWidgetState state = widget.currentState;
+    final TestUniqueWidgetState state = widget.currentState!;
 
     expect(state, isNotNull);
 

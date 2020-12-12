@@ -1,12 +1,50 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// This file is separate from viewport_caching_test.dart because we can't use
+// both testWidgets and rendering_tester in the same file - testWidgets will
+// initialize a binding, which rendering_tester will attempt to re-initialize
+// (or vice versa).
 
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
+class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _TestSliverPersistentHeaderDelegate({
+    this.key,
+    required this.minExtent,
+    required this.maxExtent,
+    this.child,
+    this.vsync = const TestVSync(),
+    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
+  });
+
+  final Key? key;
+  final Widget? child;
+
+  @override
+  final double maxExtent;
+
+  @override
+  final double minExtent;
+
+  @override
+  final TickerProvider? vsync;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child ?? SizedBox.expand(key: key);
+
+  @override
+  bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
+}
 
 void main() {
   testWidgets('Viewport getOffsetToReveal - down', (WidgetTester tester) async {
@@ -33,7 +71,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -79,7 +117,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -125,7 +163,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -172,7 +210,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -212,7 +250,7 @@ void main() {
                 );
                 children.add(sliver);
                 return SliverPadding(
-                  padding: const EdgeInsets.all(22.0),
+                  padding: const EdgeInsets.only(top: 22.0, bottom: 23.0),
                   sliver: sliver,
                 );
               }),
@@ -222,14 +260,20 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 + 2);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - (200 - 4));
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - right', (WidgetTester tester) async {
@@ -253,7 +297,7 @@ void main() {
                 );
                 children.add(sliver);
                 return SliverPadding(
-                  padding: const EdgeInsets.all(22.0),
+                  padding: const EdgeInsets.only(left: 22.0, right: 23.0),
                   sliver: sliver,
                 );
               }),
@@ -263,14 +307,20 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 + 1);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 22 - (200 - 3));
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - up', (WidgetTester tester) async {
@@ -294,7 +344,7 @@ void main() {
                 );
                 children.add(sliver);
                 return SliverPadding(
-                  padding: const EdgeInsets.all(22.0),
+                  padding: const EdgeInsets.only(top: 22.0, bottom: 23.0),
                   sliver: sliver,
                 );
               }),
@@ -304,14 +354,136 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    // Does not include the bottom padding of children[5] thus + 23 instead of + 22.
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23 + (100 - 4));
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, - 200 + 6 * (100 + 22 + 23) - 22 - 2);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - up - reverse growth', (WidgetTester tester) async {
+    const Key centerKey = ValueKey<String>('center');
+    const EdgeInsets padding = EdgeInsets.only(top: 22.0, bottom: 23.0);
+    final Widget centerSliver = SliverPadding(
+      key: centerKey,
+      padding: padding,
+      sliver: SliverToBoxAdapter(
+        child: Container(
+          height: 100.0,
+          child: const Text('Tile center'),
+        ),
+      ),
+    );
+    final Widget lowerItem = Container(
+      height: 100.0,
+      child: const Text('Tile lower'),
+    );
+    final Widget lowerSliver = SliverPadding(
+      padding: padding,
+      sliver: SliverToBoxAdapter(
+        child: lowerItem,
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              center: centerKey,
+              reverse: true,
+              slivers: <Widget>[lowerSliver, centerSliver],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+    final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, - 100 - 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, - 100 - 22 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, - 22 - 4);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, -200 - 22 - 2);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
+    const Key centerKey = ValueKey<String>('center');
+    const EdgeInsets padding = EdgeInsets.only(left: 22.0, right: 23.0);
+    final Widget centerSliver = SliverPadding(
+      key: centerKey,
+      padding: padding,
+      sliver: SliverToBoxAdapter(
+        child: Container(
+          width: 100.0,
+          child: const Text('Tile center'),
+        ),
+      ),
+    );
+    final Widget lowerItem = Container(
+      width: 100.0,
+      child: const Text('Tile lower'),
+    );
+    final Widget lowerSliver = SliverPadding(
+      padding: padding,
+      sliver: SliverToBoxAdapter(
+        child: lowerItem,
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              center: centerKey,
+              reverse: true,
+              slivers: <Widget>[lowerSliver, centerSliver],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+    final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, -100 - 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, - 100 - 22 - 200);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, - 22 - 3);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, - 300 - 22 - 1);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
@@ -336,7 +508,7 @@ void main() {
                 );
                 children.add(sliver);
                 return SliverPadding(
-                  padding: const EdgeInsets.all(22.0),
+                  padding: const EdgeInsets.only(left: 22.0, right: 23.0),
                   sliver: sliver,
                 );
               }),
@@ -346,22 +518,36 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23);
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
-    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+    expect(revealed.offset, 5 * (100 + 22 + 23) + 23 - 100);
+
+    // With rect specified.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 6 * (100 + 22 + 23) - 22 - 3);
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, -200  + 6 * (100 + 22 + 23) - 22 - 1);
   });
 
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
-    final List<List<Widget>> children = List<List<Widget>>(10);
     final List<ScrollController> controllersX = List<ScrollController>.generate(10, (int i) => ScrollController(initialScrollOffset: 400.0));
     final ScrollController controllerY  = ScrollController(initialScrollOffset: 400.0);
+    final List<List<Widget>> children = List<List<Widget>>.generate(10, (int y) {
+      return List<Widget>.generate(10, (int x) {
+        return Container(
+          height: 100.0,
+          width: 100.0,
+          child: Text('$x,$y'),
+        );
+      });
+    });
 
-    /// Builds a gird:
+    /// Builds a grid:
     ///
     ///       <- x ->
     ///   0 1 2 3 4 5 6 7 8 9
@@ -394,13 +580,7 @@ void main() {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     controller: controllersX[y],
-                    children: children[y] = List<Widget>.generate(10, (int x) {
-                      return Container(
-                        height: 100.0,
-                        width: 100.0,
-                        child: Text('$x,$y'),
-                      );
-                    }),
+                    children: children[y],
                   ),
                 );
               }),
@@ -515,9 +695,15 @@ void main() {
   });
 
   group('Nested viewports (same orientation) showOnScreen', () {
-    List<Widget> children;
+    final List<Widget> children = List<Widget>.generate(10, (int i) {
+      return Container(
+        height: 100.0,
+        width: 300.0,
+        child: Text('$i'),
+      );
+    });
 
-    Future<void> buildNestedScroller({ WidgetTester tester, ScrollController inner, ScrollController outer }) {
+    Future<void> buildNestedScroller({ required WidgetTester tester, required ScrollController inner, required ScrollController outer }) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -536,13 +722,7 @@ void main() {
                     width: 300.0,
                     child: ListView(
                       controller: inner,
-                      children: children = List<Widget>.generate(10, (int i) {
-                        return Container(
-                          height: 100.0,
-                          width: 300.0,
-                          child: Text('$i'),
-                        );
-                      }),
+                      children: children,
                     ),
                   ),
                   Container(
@@ -555,6 +735,71 @@ void main() {
         ),
       );
     }
+
+    testWidgets('Reverse List showOnScreen', (WidgetTester tester) async {
+      const double screenHeight = 400.0;
+      const double screenWidth = 400.0;
+      const double itemHeight = screenHeight / 10.0;
+      const ValueKey<String> centerKey = ValueKey<String>('center');
+
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      tester.binding.window.physicalSizeTestValue = const Size(screenWidth, screenHeight);
+
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+            center: centerKey,
+            reverse: true,
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  List<Widget>.generate(
+                    10,
+                        (int index) => SizedBox(
+                      height: itemHeight,
+                      child: Text('Item ${-index - 1}'),
+                    ),
+                  ),
+                ),
+              ),
+              SliverList(
+                key: centerKey,
+                delegate: SliverChildListDelegate(
+                  List<Widget>.generate(
+                    1,
+                        (int index) => const SizedBox(
+                      height: itemHeight,
+                      child: Text('Item 0'),
+                    ),
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  List<Widget>.generate(
+                    10,
+                    (int index) => SizedBox(
+                      height: itemHeight,
+                      child: Text('Item ${index + 1}'),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Item -1'), findsNothing);
+
+      final RenderBox itemNeg1 =
+        tester.renderObject(find.text('Item -1', skipOffstage: false));
+
+      itemNeg1.showOnScreen(duration: const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item -1'), findsOneWidget);
+    });
 
     testWidgets('in view in inner, but not in outer', (WidgetTester tester) async {
       final ScrollController inner = ScrollController();
@@ -813,4 +1058,723 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.offset, 300.0);
   });
+
+  testWidgets(
+    'Viewport showOnScreen should not scroll if the rect is already visible, even if it does not scroll linearly',
+    (WidgetTester tester) async {
+      List<Widget> children;
+      ScrollController controller;
+
+      const Key headerKey = Key('header');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              height: 600.0,
+              child: CustomScrollView(
+                controller: controller = ScrollController(initialScrollOffset: 300.0),
+                slivers: children = List<Widget>.generate(20, (int i) {
+                  return i == 10
+                  ? SliverPersistentHeader(
+                    pinned: true,
+                    floating: false,
+                    delegate: _TestSliverPersistentHeaderDelegate(
+                      minExtent: 100,
+                      maxExtent: 300,
+                      key: headerKey,
+                    ),
+                  )
+                  : SliverToBoxAdapter(
+                    child: Container(
+                      height: 300.0,
+                      child: Text('Tile $i'),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.jumpTo(300.0 * 15);
+      await tester.pumpAndSettle();
+
+      final Finder pinnedHeaderContent = find.descendant(
+        of: find.byWidget(children[10]),
+        matching: find.byKey(headerKey),
+      );
+
+      // The persistent header is pinned to the leading edge thus still visible,
+      // the viewport should not scroll.
+      tester.renderObject(pinnedHeaderContent).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 300.0 * 15);
+
+      // The 11th child will be partially obstructed by the persistent header,
+      // the viewport should scroll to reveal it.
+      controller.jumpTo(
+        11 * 300.0  // Preceding headers
+        + 200.0     // Shrinks the pinned header to minExtent
+        + 100.0     // Obstructs the leading 100 pixels of the 11th header
+      );
+      await tester.pumpAndSettle();
+
+      tester.renderObject(find.byWidget(children[11], skipOffstage: false)).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(controller.offset, lessThan(11 * 300.0 + 200.0 + 100.0));
+  });
+
+  void testFloatingHeaderShowOnScreen({ bool animated = true, Axis axis = Axis.vertical }) {
+    final TickerProvider? vsync = animated ? const TestVSync() : null;
+    const Key headerKey = Key('header');
+    late List<Widget> children;
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+
+    Widget buildList({ required SliverPersistentHeader floatingHeader, bool reversed = false }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 400.0,
+            width: 400.0,
+            child: CustomScrollView(
+              scrollDirection: axis,
+              center: reversed ? const Key('19') : null,
+              controller: controller,
+              slivers: children = List<Widget>.generate(20, (int i) {
+                  return i == 10
+                  ? floatingHeader
+                  : SliverToBoxAdapter(
+                    key: (i == 19) ? const Key('19') : null,
+                    child: Container(
+                      height: 300.0,
+                      width: 300,
+                      child: Text('Tile $i'),
+                    ),
+                  );
+              }),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double mainAxisExtent(WidgetTester tester, Finder finder) {
+      final RenderObject renderObject = tester.renderObject(finder);
+      if (renderObject is RenderSliver) {
+        return renderObject.geometry!.paintExtent;
+      }
+
+      final RenderBox renderBox = renderObject as RenderBox;
+      switch (axis) {
+        case Axis.horizontal:
+          return renderBox.size.width;
+        case Axis.vertical:
+          return renderBox.size.height;
+      }
+    }
+
+    group('animated: $animated, scrollDirection: $axis', () {
+      testWidgets(
+        'RenderViewportBase.showOnScreen',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, key: headerKey, vsync: vsync),
+              ),
+            )
+          );
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), lessThan(300));
+
+          // The persistent header is pinned to the leading edge thus still visible,
+          // the viewport should not scroll.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: Offset.zero & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          // The header expands but doesn't move.
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
+
+          // The rect specifies that the persistent header needs to be 1 pixel away
+          // from the leading edge of the viewport. Ignore the 1 pixel, the viewport
+          // should not scroll.
+          //
+          // See: https://github.com/flutter/flutter/issues/25507.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
+      });
+
+      testWidgets(
+        'RenderViewportBase.showOnScreen but no child',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                key: headerKey,
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, child: null, vsync: vsync),
+              ),
+            )
+          );
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), lessThan(300));
+
+          // The persistent header is pinned to the leading edge thus still visible,
+          // the viewport should not scroll.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            rect: Offset.zero & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          // The header expands but doesn't move.
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
+
+          // The rect specifies that the persistent header needs to be 1 pixel away
+          // from the leading edge of the viewport. Ignore the 1 pixel, the viewport
+          // should not scroll.
+          //
+          // See: https://github.com/flutter/flutter/issues/25507.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
+      });
+
+      testWidgets(
+        'RenderViewportBase.showOnScreen with maxShowOnScreenExtent ',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(
+                  minExtent: 100,
+                  maxExtent: 300,
+                  key: headerKey,
+                  vsync: vsync,
+                  showOnScreenConfiguration: const PersistentHeaderShowOnScreenConfiguration(maxShowOnScreenExtent: 200),
+                ),
+              ),
+            )
+          );
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          // childExtent was initially 100.
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 100);
+
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: Offset.zero & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          // The header doesn't move. It would have expanded to 300 but
+          // maxShowOnScreenExtent is 200, preventing it from doing so.
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 200);
+
+          // ignoreLeading still works.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 200);
+
+          // Move the viewport so that its childExtent reaches 250.
+          controller.jumpTo(300.0 * 10 + 50.0);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
+
+          // Doesn't move, doesn't expand or shrink, leading still ignored.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 10 + 50.0);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
+      });
+
+      testWidgets(
+        'RenderViewportBase.showOnScreen with minShowOnScreenExtent ',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(
+                  minExtent: 100,
+                  maxExtent: 300,
+                  key: headerKey,
+                  vsync: vsync,
+                  showOnScreenConfiguration: const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: 200),
+                ),
+              ),
+            )
+          );
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          // childExtent was initially 100.
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 100);
+
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: Offset.zero & const Size(110, 110),
+          );
+          await tester.pumpAndSettle();
+          // The header doesn't move. It would have expanded to 110 but
+          // minShowOnScreenExtent is 200, preventing it from doing so.
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 200);
+
+          // ignoreLeading still works.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(110, 110),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 200);
+
+          // Move the viewport so that its childExtent reaches 250.
+          controller.jumpTo(300.0 * 10 + 50.0);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
+
+          // Doesn't move, doesn't expand or shrink, leading still ignored.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(110, 110),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 10 + 50.0);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
+      });
+
+      testWidgets(
+        'RenderViewportBase.showOnScreen should not scroll if the rect is already visible, '
+        'even if it does not scroll linearly (reversed order version)',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, key: headerKey, vsync: vsync),
+              ),
+              reversed: true,
+            )
+          );
+
+          controller.jumpTo(-300.0 * 15);
+          await tester.pumpAndSettle();
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          // The persistent header is pinned to the leading edge thus still visible,
+          // the viewport should not scroll.
+          tester.renderObject(pinnedHeaderContent).showOnScreen();
+          await tester.pumpAndSettle();
+          expect(controller.offset, -300.0 * 15);
+
+          // children[9] will be partially obstructed by the persistent header,
+          // the viewport should scroll to reveal it.
+          controller.jumpTo(
+            - 8 * 300.0 // Preceding headers 11 - 18, children[11]'s top edge is aligned to the leading edge.
+            - 400.0     // Viewport height. children[10] (the pinned header) becomes pinned at the bottom of the screen.
+            - 200.0     // Shrinks the pinned header to minExtent (100).
+            - 100.0     // Obstructs the leading 100 pixels of the 11th header
+          );
+          await tester.pumpAndSettle();
+
+          tester.renderObject(find.byWidget(children[9], skipOffstage: false)).showOnScreen();
+          await tester.pumpAndSettle();
+          expect(controller.offset, -8 * 300.0 - 400.0 - 200.0);
+      });
+    });
+  }
+
+  group('Floating header showOnScreen', () {
+    testFloatingHeaderShowOnScreen(animated: true, axis: Axis.vertical);
+    testFloatingHeaderShowOnScreen(animated: true, axis: Axis.horizontal);
+  });
+
+  group('RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion', () {
+    const EdgeInsets padding = EdgeInsets.fromLTRB(22, 22, 34, 34);
+    const Key centerKey = Key('5');
+    Widget buildList({ required Axis axis, bool reverse = false, bool reverseGrowth = false }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 400.0,
+            width: 400.0,
+            child: CustomScrollView(
+              scrollDirection: axis,
+              reverse: reverse,
+              center: reverseGrowth ? centerKey : null,
+              slivers: List<Widget>.generate(6, (int i) {
+                return SliverPadding(
+                  key: i == 5 ? centerKey : null,
+                  padding: padding,
+                  sliver: SliverToBoxAdapter(
+                    child: Container(
+                      padding: padding,
+                      height: 300.0,
+                      width: 300.0,
+                      child: Text('Tile $i'),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('up, forward growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: false));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 34.0 * 2);
+    });
+
+    testWidgets('up, reverse growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 34.0 * 2);
+    });
+
+    testWidgets('right, forward growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: false, reverseGrowth: false));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 22.0 * 2);
+    });
+
+    testWidgets('right, reverse growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: false, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 22.0 * 2);
+    });
+
+    testWidgets('down, forward growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: false, reverseGrowth: false));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 22.0 * 2);
+    });
+
+    testWidgets('down, reverse growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: false, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 22.0 * 2);
+    });
+
+    testWidgets('left, forward growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: true, reverseGrowth: false));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 34.0 * 2);
+    });
+
+    testWidgets('left, reverse growth', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: true, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
+      expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 34.0 * 2);
+    });
+  });
+
+  testWidgets('RenderViewportBase.showOnScreen reports the correct targetRect', (WidgetTester tester) async {
+    final ScrollController innerController = ScrollController();
+    final ScrollController outerController = ScrollController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 300.0,
+            child: CustomScrollView(
+              cacheExtent: 0,
+              controller: outerController,
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 300,
+                    child: CustomScrollView(
+                      controller: innerController,
+                      slivers: List<Widget>.generate(5, (int i) {
+                        return SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 300.0,
+                            child: Text('Tile $i'),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 300.0,
+                    child: Text('hidden'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.renderObject(find.widgetWithText(SizedBox, 'Tile 1', skipOffstage: false)).showOnScreen();
+    await tester.pumpAndSettle();
+    // The inner viewport scrolls to reveal the 2nd tile.
+    expect(innerController.offset, 300.0);
+    expect(outerController.offset, 0);
+  });
+
+  group('unbounded constraints control test', () {
+    Widget buildNestedWidget([Axis a1 = Axis.vertical, Axis a2 = Axis.horizontal]) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            child: ListView(
+              scrollDirection: a1,
+              children: List<Widget>.generate(10, (int y) {
+                return Container(
+                  child: ListView(
+                    scrollDirection: a2,
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> expectFlutterError({
+      required Widget widget,
+      required WidgetTester tester,
+      required String message,
+    }) async {
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+      try {
+        await tester.pumpWidget(widget);
+      } finally {
+        FlutterError.onError = oldHandler;
+      }
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isFlutterError);
+      expect((errors.first.exception as FlutterError).toStringDeep(), message);
+    }
+
+    testWidgets('Horizontal viewport was given unbounded height', (WidgetTester tester) async {
+      await expectFlutterError(
+        widget: buildNestedWidget(),
+        tester: tester,
+        message:
+          'FlutterError\n'
+          '   Horizontal viewport was given unbounded height.\n'
+          '   Viewports expand in the cross axis to fill their container and\n'
+          '   constrain their children to match their extent in the cross axis.\n'
+          '   In this case, a horizontal viewport was given an unlimited amount\n'
+          '   of vertical space in which to expand.\n',
+      );
+    });
+
+    testWidgets('Horizontal viewport was given unbounded width', (WidgetTester tester) async {
+      await expectFlutterError(
+        widget: buildNestedWidget(Axis.horizontal, Axis.horizontal),
+        tester: tester,
+        message:
+          'FlutterError\n'
+          '   Horizontal viewport was given unbounded width.\n'
+          '   Viewports expand in the scrolling direction to fill their\n'
+          '   container. In this case, a horizontal viewport was given an\n'
+          '   unlimited amount of horizontal space in which to expand. This\n'
+          '   situation typically happens when a scrollable widget is nested\n'
+          '   inside another scrollable widget.\n'
+          '   If this widget is always nested in a scrollable widget there is\n'
+          '   no need to use a viewport because there will always be enough\n'
+          '   horizontal space for the children. In this case, consider using a\n'
+          '   Row instead. Otherwise, consider using the "shrinkWrap" property\n'
+          '   (or a ShrinkWrappingViewport) to size the width of the viewport\n'
+          '   to the sum of the widths of its children.\n'
+      );
+    });
+
+    testWidgets('Vertical viewport was given unbounded width', (WidgetTester tester) async {
+      await expectFlutterError(
+        widget: buildNestedWidget(Axis.horizontal, Axis.vertical),
+        tester: tester,
+        message:
+          'FlutterError\n'
+          '   Vertical viewport was given unbounded width.\n'
+          '   Viewports expand in the cross axis to fill their container and\n'
+          '   constrain their children to match their extent in the cross axis.\n'
+          '   In this case, a vertical viewport was given an unlimited amount\n'
+          '   of horizontal space in which to expand.\n'
+      );
+    });
+
+    testWidgets('Vertical viewport was given unbounded height', (WidgetTester tester) async {
+      await expectFlutterError(
+        widget: buildNestedWidget(Axis.vertical, Axis.vertical),
+        tester: tester,
+        message:
+          'FlutterError\n'
+          '   Vertical viewport was given unbounded height.\n'
+          '   Viewports expand in the scrolling direction to fill their\n'
+          '   container. In this case, a vertical viewport was given an\n'
+          '   unlimited amount of vertical space in which to expand. This\n'
+          '   situation typically happens when a scrollable widget is nested\n'
+          '   inside another scrollable widget.\n'
+          '   If this widget is always nested in a scrollable widget there is\n'
+          '   no need to use a viewport because there will always be enough\n'
+          '   vertical space for the children. In this case, consider using a\n'
+          '   Column instead. Otherwise, consider using the "shrinkWrap"\n'
+          '   property (or a ShrinkWrappingViewport) to size the height of the\n'
+          '   viewport to the sum of the heights of its children.\n'
+      );
+    });
+  });
+
+  test('Viewport debugThrowIfNotCheckingIntrinsics() control test', () {
+    final RenderViewport renderViewport = RenderViewport(
+      crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
+    );
+    late FlutterError error;
+    try {
+      renderViewport.computeMinIntrinsicHeight(0);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   RenderViewport does not support returning intrinsic dimensions.\n'
+      '   Calculating the intrinsic dimensions would require instantiating\n'
+      '   every child of the viewport, which defeats the point of viewports\n'
+      '   being lazy.\n'
+      '   If you are merely trying to shrink-wrap the viewport in the main\n'
+      '   axis direction, consider a RenderShrinkWrappingViewport render\n'
+      '   object (ShrinkWrappingViewport widget), which achieves that\n'
+      '   effect without implementing the intrinsic dimension API.\n',
+    );
+
+    final RenderShrinkWrappingViewport renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
+      crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
+    );
+    try {
+      renderShrinkWrappingViewport.computeMinIntrinsicHeight(0);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   RenderShrinkWrappingViewport does not support returning intrinsic\n'
+      '   dimensions.\n'
+      '   Calculating the intrinsic dimensions would require instantiating\n'
+      '   every child of the viewport, which defeats the point of viewports\n'
+      '   being lazy.\n'
+      '   If you are merely trying to shrink-wrap the viewport in the main\n'
+      '   axis direction, you should be able to achieve that effect by just\n'
+      '   giving the viewport loose constraints, without needing to measure\n'
+      '   its intrinsic dimensions.\n',
+    );
+  });
+
+  testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/45866
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            GridView(
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 3,
+                  mainAxisSpacing: 3,
+                  crossAxisSpacing: 3),
+              children: const <Widget>[
+                Text('a'),
+                Text('b'),
+                Text('c'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('b'), findsOneWidget);
+    await tester.drag(find.text('b'), const Offset(0, 200));
+    await tester.pumpAndSettle();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 }

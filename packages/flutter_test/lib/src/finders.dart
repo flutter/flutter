@@ -1,9 +1,10 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Tooltip;
+import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 import 'all_elements.dart';
@@ -35,6 +36,20 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder text(String text, { bool skipOffstage = true }) => _TextFinder(text, skipOffstage: skipOffstage);
+
+  /// Finds [Text] and [EditableText] widgets which contain the given
+  /// `pattern` argument.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.textContain('Back'), findsOneWidget);
+  /// expect(find.textContain(RegExp(r'(\w+)')), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder textContaining(Pattern pattern, { bool skipOffstage = true }) => _TextContainingFinder(pattern, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
@@ -182,7 +197,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byWidgetPredicate(WidgetPredicate predicate, { String description, bool skipOffstage = true }) {
+  Finder byWidgetPredicate(WidgetPredicate predicate, { String? description, bool skipOffstage = true }) {
     return _WidgetPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
@@ -224,7 +239,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage = true }) {
+  Finder byElementPredicate(ElementPredicate predicate, { String? description, bool skipOffstage = true }) {
     return _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
@@ -244,7 +259,12 @@ class CommonFinders {
   ///
   /// If the [skipOffstage] argument is true (the default), then nodes that are
   /// [Offstage] or that are from inactive [Route]s are skipped.
-  Finder descendant({ Finder of, Finder matching, bool matchRoot = false, bool skipOffstage = true }) {
+  Finder descendant({
+    required Finder of,
+    required Finder matching,
+    bool matchRoot = false,
+    bool skipOffstage = true,
+  }) {
     return _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
   }
 
@@ -269,7 +289,11 @@ class CommonFinders {
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the ancestors.
-  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false }) {
+  Finder ancestor({
+    required Finder of,
+    required Finder matching,
+    bool matchRoot = false,
+  }) {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
 
@@ -289,15 +313,15 @@ class CommonFinders {
   /// ## Sample code
   ///
   /// ```dart
-  /// expect(find.BySemanticsLabel('Back'), findsOneWidget);
+  /// expect(find.bySemanticsLabel('Back'), findsOneWidget);
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
-    if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null)
+    if (WidgetsBinding.instance!.pipelineOwner.semanticsOwner == null)
       throw StateError('Semantics are not enabled. '
-                       'Make sure to call tester.enableSemantics() before using '
+                       'Make sure to call tester.ensureSemantics() before using '
                        'this finder, and call dispose on its return value after.');
     return byElementPredicate(
       (Element element) {
@@ -306,7 +330,7 @@ class CommonFinders {
         if (element is! RenderObjectElement) {
           return false;
         }
-        final String semanticsLabel = element.renderObject?.debugSemantics?.label;
+        final String? semanticsLabel = element.renderObject.debugSemantics?.label;
         if (semanticsLabel == null) {
           return false;
         }
@@ -352,12 +376,12 @@ abstract class Finder {
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
-      WidgetsBinding.instance.renderViewElement,
+      WidgetsBinding.instance!.renderViewElement!,
       skipOffstage: skipOffstage,
     );
   }
 
-  Iterable<Element> _cachedResult;
+  Iterable<Element>? _cachedResult;
 
   /// Returns the current result. If [precache] was called and returned true, this will
   /// cheaply return the result that was computed then. Otherwise, it creates a new
@@ -492,11 +516,10 @@ class _HitTestableFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
-      final RenderBox box = candidate.renderObject;
-      assert(box != null);
+      final RenderBox box = candidate.renderObject! as RenderBox;
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
-      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
+      WidgetsBinding.instance!.hitTest(hitResult, absoluteOffset);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;
@@ -535,14 +558,38 @@ class _TextFinder extends MatchFinder {
 
   @override
   bool matches(Element candidate) {
-    if (candidate.widget is Text) {
-      final Text textWidget = candidate.widget;
-      if (textWidget.data != null)
-        return textWidget.data == text;
-      return textWidget.textSpan.toPlainText() == text;
-    } else if (candidate.widget is EditableText) {
-      final EditableText editable = candidate.widget;
-      return editable.controller.text == text;
+    final Widget widget = candidate.widget;
+    if (widget is Text) {
+      if (widget.data != null)
+        return widget.data == text;
+      assert(widget.textSpan != null);
+      return widget.textSpan!.toPlainText() == text;
+    } else if (widget is EditableText) {
+      return widget.controller.text == text;
+    }
+    return false;
+  }
+}
+
+class _TextContainingFinder extends MatchFinder {
+  _TextContainingFinder(this.pattern, {bool skipOffstage = true})
+      : super(skipOffstage: skipOffstage);
+
+  final Pattern pattern;
+
+  @override
+  String get description => 'text containing $pattern';
+
+  @override
+  bool matches(Element candidate) {
+    final Widget widget = candidate.widget;
+    if (widget is Text) {
+      if (widget.data != null)
+        return widget.data!.contains(pattern);
+      assert(widget.textSpan != null);
+      return widget.textSpan!.toPlainText().contains(pattern);
+    } else if (widget is EditableText) {
+      return widget.controller.text.contains(pattern);
     }
     return false;
   }
@@ -620,12 +667,12 @@ class _WidgetFinder extends MatchFinder {
 }
 
 class _WidgetPredicateFinder extends MatchFinder {
-  _WidgetPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
+  _WidgetPredicateFinder(this.predicate, { String? description, bool skipOffstage = true })
     : _description = description,
       super(skipOffstage: skipOffstage);
 
   final WidgetPredicate predicate;
-  final String _description;
+  final String? _description;
 
   @override
   String get description => _description ?? 'widget matching predicate ($predicate)';
@@ -637,12 +684,12 @@ class _WidgetPredicateFinder extends MatchFinder {
 }
 
 class _ElementPredicateFinder extends MatchFinder {
-  _ElementPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
+  _ElementPredicateFinder(this.predicate, { String? description, bool skipOffstage = true })
     : _description = description,
       super(skipOffstage: skipOffstage);
 
   final ElementPredicate predicate;
-  final String _description;
+  final String? _description;
 
   @override
   String get description => _description ?? 'element matching predicate ($predicate)';
@@ -711,7 +758,7 @@ class _AncestorFinder extends Finder {
   @override
   Iterable<Element> get allCandidates {
     final List<Element> candidates = <Element>[];
-    for (Element root in descendant.evaluate()) {
+    for (final Element root in descendant.evaluate()) {
       final List<Element> ancestors = <Element>[];
       if (matchRoot)
         ancestors.add(root);

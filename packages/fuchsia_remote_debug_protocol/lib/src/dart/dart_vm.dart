@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,8 +31,36 @@ typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(
 /// custom connection function is needed.
 RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 
+/// The JSON RPC 2 spec says that a notification from a client must not respond
+/// to the client. It's possible the client sent a notification as a "ping", but
+/// the service isn't set up yet to respond.
+///
+/// For example, if the client sends a notification message to the server for
+/// 'streamNotify', but the server has not finished loading, it will throw an
+/// exception. Since the message is a notification, the server follows the
+/// specification and does not send a response back, but is left with an
+/// unhandled exception. That exception is safe for us to ignore - the client
+/// is signaling that it will try again later if it doesn't get what it wants
+/// here by sending a notification.
+// This may be ignoring too many exceptions. It would be best to rewrite
+// the client code to not use notifications so that it gets error replies back
+// and can decide what to do from there.
+// TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+bool _ignoreRpcError(dynamic error) {
+  if (error is json_rpc.RpcException) {
+    final json_rpc.RpcException exception = error;
+    return exception.data == null || exception.data['id'] == null;
+  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
+    return true;
+  }
+  return false;
+}
+
 
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (_ignoreRpcError(error)) {
+    return;
+  }
   _log.fine('Error in internalimplementation of JSON RPC.\n$error\n$stack');
 }
 
@@ -68,7 +96,7 @@ Future<json_rpc.Peer> _waitAndConnect(
         await Future<void>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
-        _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
+        _log.warning("Connection to Fuchsia's Dart VM timed out at "
             '${uri.toString()}');
         rethrow;
       }
@@ -109,7 +137,7 @@ class DartVm {
 
   final json_rpc.Peer _peer;
 
-  /// The URI through which this DartVM instance is connected.
+  /// The URL through which this DartVM instance is connected.
   final Uri uri;
 
   /// Attempts to connect to the given [Uri].
@@ -142,8 +170,8 @@ class DartVm {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: timeout);
     final List<IsolateRef> result = <IsolateRef>[];
-    for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
-      final String name = jsonIsolate['name'];
+    for (final Map<String, dynamic> jsonIsolate in (jsonVmRef['isolates'] as List<dynamic>).cast<Map<String, dynamic>>()) {
+      final String name = jsonIsolate['name'] as String;
       if (pattern.matchAsPrefix(name) != null) {
         _log.fine('Found Isolate matching "$pattern": "$name"');
         result.add(IsolateRef._fromJson(jsonIsolate, this));
@@ -169,7 +197,7 @@ class DartVm {
           'Peer connection timed out during RPC call',
           timeout,
         );
-      });
+      }) as Map<String, dynamic>;
     return result;
   }
 
@@ -185,7 +213,7 @@ class DartVm {
     final List<FlutterView> views = <FlutterView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: timeout);
-    for (Map<String, dynamic> jsonView in rpcResponse['views']) {
+    for (final Map<String, dynamic> jsonView in (rpcResponse['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       final FlutterView flutterView = FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);
@@ -215,11 +243,11 @@ class FlutterView {
   /// All other cases return a [FlutterView] instance. The name of the
   /// view may be null, but the id will always be set.
   factory FlutterView._fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> isolate = json['isolate'];
-    final String id = json['id'];
+    final Map<String, dynamic> isolate = json['isolate'] as Map<String, dynamic>;
+    final String id = json['id'] as String;
     String name;
     if (isolate != null) {
-      name = isolate['name'];
+      name = isolate['name'] as String;
       if (name == null) {
         throw RpcFormatError('Unable to find name for isolate "$isolate"');
       }
@@ -258,9 +286,9 @@ class IsolateRef {
   IsolateRef._(this.name, this.number, this.dartVm);
 
   factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
-    final String number = json['number'];
-    final String name = json['name'];
-    final String type = json['type'];
+    final String number = json['number'] as String;
+    final String name = json['name'] as String;
+    final String type = json['type'] as String;
     if (type == null) {
       throw RpcFormatError('Unable to find type within JSON "$json"');
     }

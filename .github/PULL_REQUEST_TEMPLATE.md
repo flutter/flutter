@@ -4,22 +4,23 @@
 
 ## Related Issues
 
-*Replace this paragraph with a list of issues related to this PR from our [issue database]. Indicate, which of these issues are resolved or fixed by this PR.*
+*Replace this paragraph with a list of issues related to this PR from our [issue database]. Indicate, which of these issues are resolved or fixed by this PR. There should be at least one issue listed here.*
 
 ## Tests
 
 I added the following tests:
 
-*Replace this with a list of the tests that you added as part of this PR. A change in behaviour with no test covering it
+*Replace this with a list of the tests that you added as part of this PR. A change in behavior with no test covering it
 will likely get reverted accidentally sooner or later. PRs must include tests for all changed/updated/fixed behaviors. See [Test Coverage].*
 
 ## Checklist
 
-Before you create this PR confirm that it meets all requirements listed below by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick review process.
+Before you create this PR, confirm that it meets all requirements listed below by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick review process.
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
 - [ ] I signed the [CLA].
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
+- [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] All existing and new tests are passing.
 - [ ] The analyzer (`flutter analyze --flutter-repo`) does not report any problems on my PR.
@@ -27,10 +28,13 @@ Before you create this PR confirm that it meets all requirements listed below by
 
 ## Breaking Change
 
-Does your PR require Flutter developers to manually update their apps to accommodate your change?
+Did any tests fail when you ran them? Please read [Handling breaking changes].
 
-- [ ] Yes, this is a breaking change (Please read [Handling breaking changes]). *Replace this with a link to the e-mail where you asked for input on this proposed change.*
-- [ ] No, this is *not* a breaking change.
+- [ ] No, no existing tests failed, so this is *not* a breaking change.
+- [ ] Yes, this is a breaking change. *If not, delete the remainder of this section.*
+   - [ ] I wrote a design doc: https://flutter.dev/go/template *Replace this with a link to your design doc's short link*
+   - [ ] I got input from the developer relations team, specifically from: *Replace with the names of who gave advice*
+   - [ ] I wrote a migration guide: https://flutter.dev/go/breaking-changes-template *Replace this with a link to a pull request that adds the migration guide to https://flutter.dev/docs/release/breaking-changes*
 
 <!-- Links -->
 [issue database]: https://github.com/flutter/flutter/issues
@@ -39,4 +43,5 @@ Does your PR require Flutter developers to manually update their apps to accommo
 [Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [Features we expect every widget to implement]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#features-we-expect-every-widget-to-implement
 [CLA]: https://cla.developers.google.com/
+[Tree Hygiene]: https://github.com/flutter/flutter/wiki/Tree-hygiene
 [Handling breaking changes]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes

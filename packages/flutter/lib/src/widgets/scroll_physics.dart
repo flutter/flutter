@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
 import 'binding.dart' show WidgetsBinding;
+import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
@@ -16,6 +17,7 @@ import 'scroll_simulation.dart';
 export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
 
 // Examples can assume:
+// // @dart = 2.9
 // class FooScrollPhysics extends ScrollPhysics {
 //   const FooScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
 // }
@@ -35,6 +37,20 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 ///
 /// Instead of creating your own subclasses, [parent] can be used to combine
 /// [ScrollPhysics] objects of different types to get the desired scroll physics.
+/// For example:
+///
+/// ```dart
+/// const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+/// ```
+///
+/// You can also use `applyTo`, which is useful when you already have
+/// an instance of `ScrollPhysics`:
+///
+/// ```dart
+/// ScrollPhysics physics = const BouncingScrollPhysics();
+/// // ...
+/// physics.applyTo(const AlwaysScrollableScrollPhysics())
+/// ```
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
@@ -48,14 +64,14 @@ class ScrollPhysics {
   /// [ScrollPhysics] subclasses at runtime. For example:
   ///
   /// ```dart
-  /// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
-  ///
+  /// const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
   /// ```
+  ///
   /// will result in a [ScrollPhysics] that has the combined behavior
   /// of [BouncingScrollPhysics] and [AlwaysScrollableScrollPhysics]:
   /// behaviors that are not specified in [BouncingScrollPhysics]
   /// (e.g. [shouldAcceptUserOffset]) will defer to [AlwaysScrollableScrollPhysics].
-  final ScrollPhysics parent;
+  final ScrollPhysics? parent;
 
   /// If [parent] is null then return ancestor, otherwise recursively build a
   /// ScrollPhysics that has [ancestor] as its parent.
@@ -68,23 +84,30 @@ class ScrollPhysics {
   /// }
   /// ```
   @protected
-  ScrollPhysics buildParent(ScrollPhysics ancestor) => parent?.applyTo(ancestor) ?? ancestor;
+  ScrollPhysics? buildParent(ScrollPhysics? ancestor) => parent?.applyTo(ancestor) ?? ancestor;
 
-  /// If [parent] is null then return a [ScrollPhysics] with the same
-  /// [runtimeType] where the [parent] has been replaced with the [ancestor].
+  /// Combines this [ScrollPhysics] instance with the given physics.
   ///
-  /// If this scroll physics object already has a parent, then this method
-  /// is applied recursively and ancestor will appear at the end of the
-  /// existing chain of parents.
+  /// The returned object uses this instance's physics when it has an
+  /// opinion, and defers to the given `ancestor` object's physics
+  /// when it does not.
   ///
-  /// The returned object will combine some of the behaviors from this
-  /// [ScrollPhysics] instance and some of the behaviors from [ancestor].
+  /// If [parent] is null then this returns a [ScrollPhysics] with the
+  /// same [runtimeType], but where the [parent] has been replaced
+  /// with the [ancestor].
   ///
-  /// {@tool sample}
+  /// If this scroll physics object already has a parent, then this
+  /// method is applied recursively and ancestor will appear at the
+  /// end of the existing chain of parents.
+  ///
+  /// Calling this method with a null argument will copy the current
+  /// object. This is inefficient.
+  ///
+  /// {@tool snippet}
   ///
   /// In the following example, the [applyTo] method is used to combine the
-  /// scroll physics of two [ScrollPhysics] objects, the resulting [ScrollPhysics]
-  /// `x` has the same behavior as `y`:
+  /// scroll physics of two [ScrollPhysics] objects. The resulting [ScrollPhysics]
+  /// `x` has the same behavior as `y`.
   ///
   /// ```dart
   /// final FooScrollPhysics x = FooScrollPhysics().applyTo(BarScrollPhysics());
@@ -92,11 +115,28 @@ class ScrollPhysics {
   /// ```
   /// {@end-tool}
   ///
+  /// ## Implementing `applyTo`
+  ///
+  /// When creating a custom [ScrollPhysics] subclass, this method
+  /// must be implemented. If the physics class has no constructor
+  /// arguments, then implementing this method is merely a matter of
+  /// calling the constructor with a [parent] constructed using
+  /// [buildParent], as follows:
+  ///
+  /// ```dart
+  /// FooScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ///   return FooScrollPhysics(parent: buildParent(ancestor));
+  /// }
+  /// ```
+  ///
+  /// If the physics class has constructor arguments, they must be passed to
+  /// the constructor here as well, so as to create a clone.
+  ///
   /// See also:
   ///
   ///  * [buildParent], a utility method that's often used to define [applyTo]
-  ///    methods for ScrollPhysics subclasses.
-  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ///    methods for [ScrollPhysics] subclasses.
+  ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return ScrollPhysics(parent: buildParent(ancestor));
   }
 
@@ -117,7 +157,7 @@ class ScrollPhysics {
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     if (parent == null)
       return offset;
-    return parent.applyPhysicsToUserOffset(position, offset);
+    return parent!.applyPhysicsToUserOffset(position, offset);
   }
 
   /// Whether the scrollable should let the user adjust the scroll offset, for
@@ -132,7 +172,59 @@ class ScrollPhysics {
   bool shouldAcceptUserOffset(ScrollMetrics position) {
     if (parent == null)
       return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
-    return parent.shouldAcceptUserOffset(position);
+    return parent!.shouldAcceptUserOffset(position);
+  }
+
+  /// Provides a heuristic to determine if expensive frame-bound tasks should be
+  /// deferred.
+  ///
+  /// The velocity parameter must not be null, but may be positive, negative, or
+  /// zero.
+  ///
+  /// The metrics parameter must not be null.
+  ///
+  /// The context parameter must not be null. It normally refers to the
+  /// [BuildContext] of the widget making the call, such as an [Image] widget
+  /// in a [ListView].
+  ///
+  /// This can be used to determine whether decoding or fetching complex data
+  /// for the currently visible part of the viewport should be delayed
+  /// to avoid doing work that will not have a chance to appear before a new
+  /// frame is rendered.
+  ///
+  /// For example, a list of images could use this logic to delay decoding
+  /// images until scrolling is slow enough to actually render the decoded
+  /// image to the screen.
+  ///
+  /// The default implementation is a heuristic that compares the current
+  /// scroll velocity in local logical pixels to the longest side of the window
+  /// in physical pixels. Implementers can change this heuristic by overriding
+  /// this method and providing their custom physics to the scrollable widget.
+  /// For example, an application that changes the local coordinate system with
+  /// a large perspective transform could provide a more or less aggressive
+  /// heuristic depending on whether the transform was increasing or decreasing
+  /// the overall scale between the global screen and local scrollable
+  /// coordinate systems.
+  ///
+  /// The default implementation is stateless, and simply provides a point-in-
+  /// time decision about how fast the scrollable is scrolling. It would always
+  /// return true for a scrollable that is animating back and forth at high
+  /// velocity in a loop. It is assumed that callers will handle such
+  /// a case, or that a custom stateful implementation would be written that
+  /// tracks the sign of the velocity on successive calls.
+  ///
+  /// Returning true from this method indicates that the current scroll velocity
+  /// is great enough that expensive operations impacting the UI should be
+  /// deferred.
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
+    assert(velocity != null);
+    assert(metrics != null);
+    assert(context != null);
+    if (parent == null) {
+      final double maxPhysicalPixels = WidgetsBinding.instance!.window.physicalSize.longestSide;
+      return velocity.abs() > maxPhysicalPixels;
+    }
+    return parent!.recommendDeferredLoading(velocity, metrics, context);
   }
 
   /// Determines the overscroll by applying the boundary conditions.
@@ -172,7 +264,62 @@ class ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) {
     if (parent == null)
       return 0.0;
-    return parent.applyBoundaryConditions(position, value);
+    return parent!.applyBoundaryConditions(position, value);
+  }
+
+  /// Describes what the scroll position should be given new viewport dimensions.
+  ///
+  /// This is called by [ScrollPosition.correctForNewDimensions].
+  ///
+  /// The arguments consist of the scroll metrics as they stood in the previous
+  /// frame and the scroll metrics as they now stand after the last layout,
+  /// including the position and minimum and maximum scroll extents; a flag
+  /// indicating if the current [ScrollActivity] considers that the user is
+  /// actively scrolling (see [ScrollActivity.isScrolling]); and the current
+  /// velocity of the scroll position, if it is being driven by the scroll
+  /// activity (this is 0.0 during a user gesture) (see
+  /// [ScrollActivity.velocity]).
+  ///
+  /// The scroll metrics will be identical except for the
+  /// [ScrollMetrics.minScrollExtent] and [ScrollMetrics.maxScrollExtent]. They
+  /// are referred to as the `oldPosition` and `newPosition` (even though they
+  /// both technically have the same "position", in the form of
+  /// [ScrollMetrics.pixels]) because they are generated from the
+  /// [ScrollPosition] before and after updating the scroll extents.
+  ///
+  /// If the returned value does not exactly match the scroll offset given by
+  /// the `newPosition` argument (see [ScrollMetrics.pixels]), then the
+  /// [ScrollPosition] will call [ScrollPosition.correctPixels] to update the
+  /// new scroll position to the returned value, and layout will be re-run. This
+  /// is expensive. The new value is subject to further manipulation by
+  /// [applyBoundaryConditions].
+  ///
+  /// If the returned value _does_ match the `newPosition.pixels` scroll offset
+  /// exactly, then [ScrollPosition.applyNewDimensions] will be called next. In
+  /// that case, [applyBoundaryConditions] is not applied to the return value.
+  ///
+  /// The given [ScrollMetrics] are only valid during this method call. Do not
+  /// keep references to them to use later, as the values may update, may not
+  /// update, or may update to reflect an entirely unrelated scrollable.
+  ///
+  /// The default implementation returns the [ScrollMetrics.pixels] of the
+  /// `newPosition`, which indicates that the current scroll offset is
+  /// acceptable.
+  ///
+  /// See also:
+  ///
+  ///  * [RangeMaintainingScrollPhysics], which is enabled by default, and
+  ///    which prevents unexpected changes to the content dimensions from
+  ///    causing the scroll position to get any further out of bounds.
+  double adjustPositionForNewDimensions({
+    required ScrollMetrics oldPosition,
+    required ScrollMetrics newPosition,
+    required bool isScrolling,
+    required double velocity,
+  }) {
+    if (parent == null)
+      return newPosition.pixels;
+    return parent!.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
   }
 
   /// Returns a simulation for ballistic scrolling starting from the given
@@ -187,10 +334,10 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     if (parent == null)
       return null;
-    return parent.createBallisticSimulation(position, velocity);
+    return parent!.createBallisticSimulation(position, velocity);
   }
 
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
@@ -206,8 +353,8 @@ class ScrollPhysics {
   static final Tolerance _kDefaultTolerance = Tolerance(
     // TODO(ianh): Handle the case of the device pixel ratio changing.
     // TODO(ianh): Get this from the local MediaQuery not dart:ui's window object.
-    velocity: 1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio), // logical pixels per second
-    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
+    velocity: 1.0 / (0.050 * WidgetsBinding.instance!.window.devicePixelRatio), // logical pixels per second
+    distance: 1.0 / WidgetsBinding.instance!.window.devicePixelRatio, // logical pixels
   );
 
   /// The tolerance to use for ballistic simulations.
@@ -249,17 +396,17 @@ class ScrollPhysics {
   double carriedMomentum(double existingVelocity) {
     if (parent == null)
       return 0.0;
-    return parent.carriedMomentum(existingVelocity);
+    return parent!.carriedMomentum(existingVelocity);
   }
 
   /// The minimum amount of pixel distance drags must move by to start motion
   /// the first time or after each time the drag motion stopped.
   ///
   /// If null, no minimum threshold is enforced.
-  double get dragStartDistanceMotionThreshold => parent?.dragStartDistanceMotionThreshold;
+  double? get dragStartDistanceMotionThreshold => parent?.dragStartDistanceMotionThreshold;
 
   /// Whether a viewport is allowed to change its scroll position implicitly in
-  /// responds to a call to [RenderObject.showOnScreen].
+  /// response to a call to [RenderObject.showOnScreen].
   ///
   /// [RenderObject.showOnScreen] is for example used to bring a text field
   /// fully on screen after it has received focus. This property controls
@@ -270,8 +417,133 @@ class ScrollPhysics {
   @override
   String toString() {
     if (parent == null)
-      return runtimeType.toString();
-    return '$runtimeType -> $parent';
+      return objectRuntimeType(this, 'ScrollPhsyics');
+    return '${objectRuntimeType(this, 'ScrollPhysics')} -> $parent';
+  }
+}
+
+/// Scroll physics that attempt to keep the scroll position in range when the
+/// contents change dimensions suddenly.
+///
+/// If the scroll position is already out of range, this attempts to maintain
+/// the amount of overscroll or underscroll already present.
+///
+/// If the scroll activity is animating the scroll position, sudden changes to
+/// the scroll dimensions are allowed to happen (so as to prevent animations
+/// from jumping back and forth between in-range and out-of-range values).
+///
+/// These physics should be combined with other scroll physics, e.g.
+/// [BouncingScrollPhysics] or [ClampingScrollPhysics], to obtain a complete
+/// description of typical scroll physics. See [applyTo].
+///
+/// ## Implementation details
+///
+/// Specifically, these physics perform two adjustments.
+///
+/// The first is to maintain overscroll when the position is out of range.
+///
+/// The second is to enforce the boundary when the position is in range.
+///
+/// If the current velocity is non-zero, neither adjustment is made. The
+/// assumption is that there is an ongoing animation and therefore
+/// further changing the scroll position would disrupt the experience.
+///
+/// If the extents haven't changed, then the overscroll adjustment is
+/// not made. The assumption is that if the position is overscrolled,
+/// it is intentional, otherwise the position could not have reached
+/// that position. (Consider [ClampingScrollPhysics] vs
+/// [BouncingScrollPhysics] for example.)
+///
+/// If the position itself changed since the last animation frame,
+/// then the overscroll is not maintained. The assumption is similar
+/// to the previous case: the position would not have been placed out
+/// of range unless it was intentional.
+///
+/// In addition, if the position changed and the boundaries were and
+/// still are finite, then the boundary isn't enforced either, for
+/// the same reason. However, if any of the boundaries were or are
+/// now infinite, the boundary _is_ enforced, on the assumption that
+/// infinite boundaries indicate a lazy-loading scroll view, which
+/// cannot enforce boundaries while the full list has not loaded.
+///
+/// If the range was out of range, then the boundary is not enforced
+/// even if the range is not maintained. If the range is maintained,
+/// then the distance between the old position and the old boundary is
+/// applied to the new boundary to obtain the new position.
+///
+/// If the range was in range, and the boundary is to be enforced,
+/// then the new position is obtained by deferring to the other physics,
+/// if any, and then clamped to the new range.
+class RangeMaintainingScrollPhysics extends ScrollPhysics {
+  /// Creates scroll physics that maintain the scroll position in range.
+  const RangeMaintainingScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+
+  @override
+  RangeMaintainingScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return RangeMaintainingScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double adjustPositionForNewDimensions({
+    required ScrollMetrics oldPosition,
+    required ScrollMetrics newPosition,
+    required bool isScrolling,
+    required double velocity,
+  }) {
+    bool maintainOverscroll = true;
+    bool enforceBoundary = true;
+    if (velocity != 0.0) {
+      // Don't try to adjust an animating position, the jumping around
+      // would be distracting.
+      maintainOverscroll = false;
+      enforceBoundary = false;
+    }
+    if ((oldPosition.minScrollExtent == newPosition.minScrollExtent) &&
+        (oldPosition.maxScrollExtent == newPosition.maxScrollExtent)) {
+      // If the extents haven't changed then ignore overscroll.
+      maintainOverscroll = false;
+    }
+    if (oldPosition.pixels != newPosition.pixels) {
+      // If the position has been changed already, then it might have
+      // been adjusted to expect new overscroll, so don't try to
+      // maintain the relative overscroll.
+      maintainOverscroll = false;
+      if (oldPosition.minScrollExtent.isFinite && oldPosition.maxScrollExtent.isFinite &&
+          newPosition.minScrollExtent.isFinite && newPosition.maxScrollExtent.isFinite) {
+        // In addition, if the position changed then we only enforce
+        // the new boundary if the previous boundary was not entirely
+        // finite. A common case where the position changes while one
+        // of the extents is infinite is a lazily-loaded list. (If the
+        // boundaries were finite, and the position changed, then we
+        // assume it was intentional.)
+        enforceBoundary = false;
+      }
+    }
+    if ((oldPosition.pixels < oldPosition.minScrollExtent) ||
+        (oldPosition.pixels > oldPosition.maxScrollExtent)) {
+      // If the old position was out of range, then we should
+      // not try to keep the new position in range.
+      enforceBoundary = false;
+    }
+    if (maintainOverscroll) {
+      // Force the new position to be no more out of range
+      // than it was before, if it was overscrolled.
+      if (oldPosition.pixels < oldPosition.minScrollExtent) {
+        final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
+        return newPosition.minScrollExtent - oldDelta;
+      }
+      if (oldPosition.pixels > oldPosition.maxScrollExtent) {
+        final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
+        return newPosition.maxScrollExtent + oldDelta;
+      }
+    }
+    // If we're not forcing the overscroll, defer to other physics.
+    double result = super.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
+    if (enforceBoundary) {
+      // ...but if they put us out of range then reinforce the boundary.
+      result = result.clamp(newPosition.minScrollExtent, newPosition.maxScrollExtent);
+    }
+    return result;
   }
 }
 
@@ -281,18 +553,31 @@ class ScrollPhysics {
 ///
 /// This is the behavior typically seen on iOS.
 ///
+/// [BouncingScrollPhysics] by itself will not create an overscroll effect if
+/// the contents of the scroll view do not extend beyond the size of the
+/// viewport. To create the overscroll and bounce effect regardless of the
+/// length of your scroll view, combine with [AlwaysScrollableScrollPhysics].
+///
+/// {@tool snippet}
+/// ```dart
+/// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScrollConfiguration], which uses this to provide the default
 ///    scroll behavior on iOS.
 ///  * [ClampingScrollPhysics], which is the analogous physics for Android's
 ///    clamping behavior.
+///  * [ScrollPhysics], for more examples of combining [ScrollPhysics] objects
+///    of different types to get the desired scroll physics.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
-  const BouncingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  const BouncingScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
 
   @override
-  BouncingScrollPhysics applyTo(ScrollPhysics ancestor) {
+  BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return BouncingScrollPhysics(parent: buildParent(ancestor));
   }
 
@@ -346,13 +631,13 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) => 0.0;
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
-        velocity: velocity * 0.91, // TODO(abarth): We should move this constant closer to the drag end.
+        velocity: velocity,
         leadingExtent: position.minScrollExtent,
         trailingExtent: position.maxScrollExtent,
         tolerance: tolerance,
@@ -368,9 +653,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double get minFlingVelocity => kMinFlingVelocity * 2.0;
 
   // Methodology:
-  // 1- Use https://github.com/flutter/scroll_overlay to test with Flutter and
-  //    platform scroll views superimposed.
-  // 2- Record incoming speed and make rapid flings in the test app.
+  // 1- Use https://github.com/flutter/platform_tests/tree/master/scroll_overlay to test with
+  //    Flutter and platform scroll views superimposed.
   // 3- If the scrollables stopped overlapping at any moment, adjust the desired
   //    output value of this function at that input speed.
   // 4- Feed new input/output set into a power curve fitter. Change function
@@ -410,11 +694,11 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///    glow color is specified to use [ThemeData.accentColor].
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
-  /// bounds of the content..
-  const ClampingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  /// bounds of the content.
+  const ClampingScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
 
   @override
-  ClampingScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ClampingScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return ClampingScrollPhysics(parent: buildParent(ancestor));
   }
 
@@ -422,17 +706,17 @@ class ClampingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) {
     assert(() {
       if (value == position.pixels) {
-        throw FlutterError(
-          '$runtimeType.applyBoundaryConditions() was called redundantly.\n'
-          'The proposed new position, $value, is exactly equal to the current position of the '
-          'given ${position.runtimeType}, ${position.pixels}.\n'
-          'The applyBoundaryConditions method should only be called when the value is '
-          'going to actually change the pixels, otherwise it is redundant.\n'
-          'The physics object in question was:\n'
-          '  $this\n'
-          'The position object in question was:\n'
-          '  $position\n'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType.applyBoundaryConditions() was called redundantly.'),
+          ErrorDescription(
+            'The proposed new position, $value, is exactly equal to the current position of the '
+            'given ${position.runtimeType}, ${position.pixels}.\n'
+            'The applyBoundaryConditions method should only be called when the value is '
+            'going to actually change the pixels, otherwise it is redundant.'
+          ),
+          DiagnosticsProperty<ScrollPhysics>('The physics object in question was', this, style: DiagnosticsTreeStyle.errorProperty),
+          DiagnosticsProperty<ScrollMetrics>('The position object in question was', position, style: DiagnosticsTreeStyle.errorProperty)
+        ]);
       }
       return true;
     }());
@@ -448,10 +732,10 @@ class ClampingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (position.outOfRange) {
-      double end;
+      double? end;
       if (position.pixels > position.maxScrollExtent)
         end = position.maxScrollExtent;
       if (position.pixels < position.minScrollExtent)
@@ -460,7 +744,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
       return ScrollSpringSimulation(
         spring,
         position.pixels,
-        end,
+        end!,
         math.min(0.0, velocity),
         tolerance: tolerance,
       );
@@ -481,9 +765,13 @@ class ClampingScrollPhysics extends ScrollPhysics {
 
 /// Scroll physics that always lets the user scroll.
 ///
+/// This overrides the default behavior which is to disable scrolling
+/// when there is no content to scroll. It does not override the
+/// handling of overscrolling.
+///
 /// On Android, overscrolls will be clamped by default and result in an
-/// overscroll glow. On iOS, overscrolls will load a spring that will return
-/// the scroll view to its normal range when released.
+/// overscroll glow. On iOS, overscrolls will load a spring that will return the
+/// scroll view to its normal range when released.
 ///
 /// See also:
 ///
@@ -495,10 +783,10 @@ class ClampingScrollPhysics extends ScrollPhysics {
 ///    found on Android.
 class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that always lets the user scroll.
-  const AlwaysScrollableScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  const AlwaysScrollableScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
 
   @override
-  AlwaysScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
+  AlwaysScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return AlwaysScrollableScrollPhysics(parent: buildParent(ancestor));
   }
 
@@ -518,10 +806,10 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
 ///    found on Android.
 class NeverScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that does not let the user scroll.
-  const NeverScrollableScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  const NeverScrollableScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
 
   @override
-  NeverScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
+  NeverScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return NeverScrollableScrollPhysics(parent: buildParent(ancestor));
   }
 

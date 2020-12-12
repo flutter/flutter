@@ -1,16 +1,15 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
+import 'constants.dart';
 import 'theme.dart';
 
-const Color _kDisabledBackground = Color(0xFFA9A9A9);
 // Measured against iOS 12 in Xcode.
-const Color _kDisabledForeground = Color(0xFFD1D1D1);
-
 const EdgeInsets _kButtonPadding = EdgeInsets.all(16.0);
 const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
   vertical: 14.0,
@@ -22,22 +21,28 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 /// Takes in a text or an icon that fades out and in on touch. May optionally have a
 /// background.
 ///
+/// The [padding] defaults to 16.0 pixels. When using a [CupertinoButton] within
+/// a fixed height parent, like a [CupertinoNavigationBar], a smaller, or even
+/// [EdgeInsets.zero], should be used to prevent clipping larger [child]
+/// widgets.
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/buttons/>
 class CupertinoButton extends StatefulWidget {
   /// Creates an iOS-style button.
   const CupertinoButton({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.padding,
     this.color,
-    this.disabledColor,
-    this.minSize = 44.0,
-    this.pressedOpacity = 0.1,
+    this.disabledColor = CupertinoColors.quaternarySystemFill,
+    this.minSize = kMinInteractiveDimensionCupertino,
+    this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
-    @required this.onPressed,
+    required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
        _filled = false,
        super(key: key);
 
@@ -48,15 +53,16 @@ class CupertinoButton extends StatefulWidget {
   /// To specify a custom background color, use the [color] argument of the
   /// default constructor.
   const CupertinoButton.filled({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.padding,
-    this.disabledColor,
-    this.minSize = 44.0,
-    this.pressedOpacity = 0.1,
+    this.disabledColor = CupertinoColors.quaternarySystemFill,
+    this.minSize = kMinInteractiveDimensionCupertino,
+    this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
-    @required this.onPressed,
+    required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
        color = null,
        _filled = true,
        super(key: key);
@@ -69,7 +75,7 @@ class CupertinoButton extends StatefulWidget {
   /// The amount of space to surround the child inside the bounds of the button.
   ///
   /// Defaults to 16.0 pixels.
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   /// The color of the button's background.
   ///
@@ -77,42 +83,38 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// Defaults to the [CupertinoTheme]'s `primaryColor` when the
   /// [CupertinoButton.filled] constructor is used.
-  final Color color;
+  final Color? color;
 
   /// The color of the button's background when the button is disabled.
   ///
   /// Ignored if the [CupertinoButton] doesn't also have a [color].
   ///
-  /// Defaults to a standard iOS disabled color when [color] is specified and
-  /// [disabledColor] is null.
+  /// Defaults to [CupertinoColors.quaternarySystemFill] when [color] is
+  /// specified. Must not be null.
   final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   /// Minimum size of the button.
   ///
-  /// Defaults to 44.0 which the iOS Human Interface Guideline recommends as the
-  /// minimum tappable area
-  ///
-  /// See also:
-  ///
-  ///  * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/adaptivity-and-layout/>
-  final double minSize;
+  /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
+  /// Interface Guidelines recommends as the minimum tappable area.
+  final double? minSize;
 
   /// The opacity that the button will fade to when it is pressed.
   /// The button will have an opacity of 1.0 when it is not pressed.
   ///
-  /// This defaults to 0.1. If null, opacity will not change on pressed if using
+  /// This defaults to 0.4. If null, opacity will not change on pressed if using
   /// your own custom effects is desired.
-  final double pressedOpacity;
+  final double? pressedOpacity;
 
   /// The radius of the button's corners when it has a background color.
   ///
   /// Defaults to round corners of 8 logical pixels.
-  final BorderRadius borderRadius;
+  final BorderRadius? borderRadius;
 
   final bool _filled;
 
@@ -136,8 +138,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   static const Duration kFadeInDuration = Duration(milliseconds: 100);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0);
 
-  AnimationController _animationController;
-  Animation<double> _opacityAnimation;
+  late AnimationController _animationController;
+  late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
@@ -166,7 +168,6 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   void dispose() {
     _animationController.dispose();
-    _animationController = null;
     super.dispose();
   }
 
@@ -209,15 +210,19 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
-    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
-    final Color backgroundColor = widget.color ?? (widget._filled ? primaryColor : null);
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
+    final Color primaryColor = themeData.primaryColor;
+    final Color? backgroundColor = widget.color == null
+      ? (widget._filled ? primaryColor : null)
+      : CupertinoDynamicColor.maybeResolve(widget.color, context);
+
     final Color foregroundColor = backgroundColor != null
-        ? CupertinoTheme.of(context).primaryContrastingColor
-        : enabled
-            ? primaryColor
-            : _kDisabledForeground;
-    final TextStyle textStyle =
-        CupertinoTheme.of(context).textTheme.textStyle.copyWith(color: foregroundColor);
+      ? themeData.primaryContrastingColor
+      : enabled
+        ? primaryColor
+        : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
+
+    final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -231,16 +236,16 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           constraints: widget.minSize == null
             ? const BoxConstraints()
             : BoxConstraints(
-              minWidth: widget.minSize,
-              minHeight: widget.minSize,
-            ),
+                minWidth: widget.minSize!,
+                minHeight: widget.minSize!,
+              ),
           child: FadeTransition(
             opacity: _opacityAnimation,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
-                  ? widget.disabledColor ?? _kDisabledBackground
+                  ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
                   : backgroundColor,
               ),
               child: Padding(

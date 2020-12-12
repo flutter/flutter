@@ -1,8 +1,6 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
@@ -85,7 +83,7 @@ void main() {
       ),
       moreOrLessEquals(0.0),
     );
-  }, skip: Platform.isWindows); // floating point math not quite deterministic on Windows?
+  }, skip: isWindows); // floating point math not quite deterministic on Windows?
 
   test('ConstantTween', () {
     final ConstantTween<double> tween = ConstantTween<double>(100.0);
@@ -94,5 +92,35 @@ void main() {
     expect(tween.lerp(0.0), 100.0);
     expect(tween.lerp(0.5), 100.0);
     expect(tween.lerp(1.0), 100.0);
+  });
+
+  test('ReverseTween', () {
+    final ReverseTween<int> tween = ReverseTween<int>(IntTween(begin: 5, end: 9));
+    expect(tween.lerp(0.5), 7);
+    expect(tween.lerp(0.7), 6);
+  });
+
+  test('ColorTween', () {
+    final ColorTween tween = ColorTween(
+      begin: const Color(0xff000000),
+      end: const Color(0xffffffff)
+    );
+    expect(tween.lerp(0.0), const Color(0xff000000));
+    expect(tween.lerp(0.5), const Color(0xff7f7f7f));
+    expect(tween.lerp(0.7), const Color(0xffb2b2b2));
+    expect(tween.lerp(1.0), const Color(0xffffffff));
+  });
+
+  test('StepTween', () {
+    final StepTween tween = StepTween(begin: 5, end: 9);
+    expect(tween.lerp(0.5), 7);
+    expect(tween.lerp(0.7), 7);
+  });
+
+  test('CurveTween', () {
+    final CurveTween tween = CurveTween(curve: Curves.easeIn);
+    expect(tween.transform(0.0), 0.0);
+    expect(tween.transform(0.5), 0.31640625);
+    expect(tween.transform(1.0), 1.0);
   });
 }

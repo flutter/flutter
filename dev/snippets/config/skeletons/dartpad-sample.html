@@ -1,0 +1,42 @@
+{@inject-html}
+<a name="{{id}}"></a>
+<div class="anchor-container">
+    <a class="anchor-button-overlay anchor-button" title="Copy link to clipboard"
+       onmouseenter="fixHref(this, '{{id}}');"
+       onclick="fixHref(this, '{{id}}'); copyStringToClipboard(this.href);"
+       href="#">
+        <i class="material-icons copy-image">link</i>
+    </a>
+</div>
+<div class="snippet-buttons">
+    <script>var visibleSnippet{{serial}} = "longSnippet{{serial}}";</script>
+    <button id="longSnippet{{serial}}Button"
+            onclick="visibleSnippet{{serial}} = showSnippet('longSnippet{{serial}}', visibleSnippet{{serial}});"
+            selected>
+        Interactive App
+    </button>
+    <button id="shortSnippet{{serial}}Button"
+            onclick="visibleSnippet{{serial}} = showSnippet('shortSnippet{{serial}}', visibleSnippet{{serial}});">
+        Sample code
+    </button>
+</div>
+<div class="snippet-container">
+    <div class="snippet" id="longSnippet{{serial}}">
+        {{description}}
+        <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&null_safety=true&sample_id={{id}}&sample_channel={{channel}}"></iframe>
+        <div class="snippet-description">To create a local project with this code sample, run:<br/>
+            <span class="snippet-create-command">flutter create --sample={{id}} mysample</span>
+        </div>
+    </div>
+    <div class="snippet" id="shortSnippet{{serial}}" hidden>
+        {{description}}
+        <div class="copyable-container">
+            <button class="copy-button-overlay copy-button" title="Copy to clipboard"
+                    onclick="copyTextToClipboard(visibleSnippet{{serial}});">
+                <i class="material-icons copy-image">assignment</i>
+            </button>
+            <pre class="language-{{language}}"><code class="language-{{language}}">{{code}}</code></pre>
+        </div>
+    </div>
+</div>
+{@end-inject-html}

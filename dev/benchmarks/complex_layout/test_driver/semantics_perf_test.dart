@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,9 +34,9 @@ void main() {
       });
 
       final Iterable<TimelineEvent> semanticsEvents = timeline.events.where((TimelineEvent event) => event.name == 'Semantics');
-      if (semanticsEvents.length != 1)
-        fail('Expected exactly one semantics event, got ${semanticsEvents.length}');
-      final Duration semanticsTreeCreation = semanticsEvents.first.duration;
+      if (semanticsEvents.length != 2)
+        fail('Expected exactly two semantics events, got ${semanticsEvents.length}');
+      final Duration semanticsTreeCreation = Duration(microseconds: semanticsEvents.last.timestampMicros - semanticsEvents.first.timestampMicros);
 
       final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
       File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);

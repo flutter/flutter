@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -86,6 +86,11 @@ bool debugRepaintTextRainbowEnabled = false;
 ///
 /// This check helps developers that want a consistent look and feel detect
 /// where this inconsistency would occur.
+///
+/// This check assumes that elevations on [PhysicalModelLayer] objects have
+/// been set to non-null values before the scene is built. If this assumption
+/// is violated, the check will throw exceptions. (The scene building would
+/// also fail in that case, however.)
 bool debugCheckElevationsEnabled = false;
 
 /// The current color to overlay when repainting a layer.
@@ -119,8 +124,10 @@ bool debugPrintMarkNeedsPaintStacks = false;
 ///
 /// See also:
 ///
-///  * [debugProfilePaintsEnabled], which does something similar for
-///    painting but using the timeline view.
+///  * [debugProfileLayoutsEnabled], which does something similar for layout
+///    but using the timeline view.
+///  * [debugProfilePaintsEnabled], which does something similar for painting
+///    but using the timeline view.
 ///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
 ///    being rebuilt.
 ///  * The discussion at [RendererBinding.drawFrame].
@@ -132,6 +139,21 @@ bool debugPrintLayouts = false;
 /// enabled by the test framework.
 bool debugCheckIntrinsicSizes = false;
 
+/// Adds [dart:developer.Timeline] events for every [RenderObject] layout.
+///
+/// For details on how to use [dart:developer.Timeline] events in the Dart
+/// Observatory to optimize your app, see:
+/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
+///
+/// See also:
+///
+///  * [debugPrintLayouts], which does something similar for layout but using
+///    console output.
+///  * [debugProfileBuildsEnabled], which does something similar for widgets
+///    being rebuilt.
+///  * [debugProfilePaintsEnabled], which does something similar for painting.
+bool debugProfileLayoutsEnabled = false;
+
 /// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
 ///
 /// This is only enabled in debug builds. The timing information this exposes is
@@ -140,15 +162,15 @@ bool debugCheckIntrinsicSizes = false;
 ///
 /// For details on how to use [dart:developer.Timeline] events in the Dart
 /// Observatory to optimize your app, see:
-/// <https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md>
+/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
 ///
 /// See also:
 ///
-///  * [debugPrintLayouts], which does something similar for layout but using
-///    console output.
 ///  * [debugProfileBuildsEnabled], which does something similar for widgets
 ///    being rebuilt, and [debugPrintRebuildDirtyWidgets], its console
 ///    equivalent.
+///  * [debugProfileLayoutsEnabled], which does something similar for layout,
+///    and [debugPrintLayouts], its console equivalent.
 ///  * The discussion at [RendererBinding.drawFrame].
 ///  * [RepaintBoundary], which can be used to contain repaints when unchanged
 ///    areas are being excessively repainted.
@@ -171,7 +193,7 @@ typedef ProfilePaintCallback = void Function(RenderObject renderObject);
 ///    callback to generate aggregate profile statistics describing what paints
 ///    occurred when the `ext.flutter.inspector.trackRepaintWidgets` service
 ///    extension is enabled.
-ProfilePaintCallback debugOnProfilePaint;
+ProfilePaintCallback? debugOnProfilePaint;
 
 /// Setting to true will cause all clipping effects from the layer tree to be
 /// ignored.
@@ -224,7 +246,7 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 ///
 /// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
 /// true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth = 2.0 }) {
+void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double outlineWidth = 2.0 }) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
@@ -243,8 +265,8 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See <https://docs.flutter.io/flutter/rendering/rendering-library.html> for
-/// a complete list.
+/// See [the rendering library](rendering/rendering-library.html) for a complete
+/// list.
 ///
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the

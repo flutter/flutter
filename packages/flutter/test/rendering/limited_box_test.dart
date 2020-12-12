@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,17 +32,17 @@ void main() {
     expect(
       parent.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderConstrainedOverflowBox#00000 NEEDS-PAINT\n'
+        'RenderConstrainedOverflowBox#00000 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 0.0\n'
         ' │ maxWidth: Infinity\n'
         ' │ minHeight: 0.0\n'
         ' │ maxHeight: Infinity\n'
         ' │\n'
-        ' └─child: RenderLimitedBox#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' └─child: RenderLimitedBox#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         '   │ parentData: offset=Offset(350.0, 200.0) (can use size)\n'
         '   │ constraints: BoxConstraints(unconstrained)\n'
         '   │ size: Size(100.0, 200.0)\n'
@@ -118,11 +118,11 @@ void main() {
     expect(
       parent.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderConstrainedOverflowBox#00000 NEEDS-PAINT\n'
+        'RenderConstrainedOverflowBox#00000 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 10.0\n'
         ' │ maxWidth: 500.0\n'
         ' │ minHeight: 0.0\n'
@@ -154,11 +154,11 @@ void main() {
     expect(
       parent.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderConstrainedOverflowBox#00000 NEEDS-PAINT\n'
+        'RenderConstrainedOverflowBox#00000 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ alignment: center\n'
+        ' │ alignment: Alignment.center\n'
         ' │ minWidth: 10.0\n'
         ' │ maxWidth: use parent maxWidth constraint\n'
         ' │ minHeight: use parent minHeight constraint\n'
@@ -173,5 +173,4 @@ void main() {
       ),
     );
   });
-
 }

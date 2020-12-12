@@ -1,100 +1,68 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
+import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
-import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-  TestRenderingFlutterBinding(); // initializes the imageCache
-  group(ImageProvider, () {
-    tearDown(() {
-      imageCache.clear();
-    });
+  TestRenderingFlutterBinding();
 
-    test('NetworkImage non-null url test', () {
-      expect(() {
-        NetworkImage(nonconst(null));
-      }, throwsAssertionError);
-    });
-
-    test('ImageProvider can evict images', () async {
-      final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-      final MemoryImage imageProvider = MemoryImage(bytes);
-      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-      final Completer<void> completer = Completer<void>();
-      stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
-      await completer.future;
-
-      expect(imageCache.currentSize, 1);
-      expect(await MemoryImage(bytes).evict(), true);
-      expect(imageCache.currentSize, 0);
-    });
-
-    test('ImageProvider.evict respects the provided ImageCache', () async {
-      final ImageCache otherCache = ImageCache();
-      final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-      final MemoryImage imageProvider = MemoryImage(bytes);
-      otherCache.putIfAbsent(imageProvider, () => imageProvider.load(imageProvider));
-      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-      final Completer<void> completer = Completer<void>();
-      stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
-      await completer.future;
-
-      expect(otherCache.currentSize, 1);
-      expect(imageCache.currentSize, 1);
-      expect(await imageProvider.evict(cache: otherCache), true);
-      expect(otherCache.currentSize, 0);
-      expect(imageCache.currentSize, 1);
-    });
-
-    test('ImageProvider errors can always be caught', () async {
-      final ErrorImageProvider imageProvider = ErrorImageProvider();
-      final Completer<bool> caughtError = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
-        caughtError.complete(false);
-      };
-      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-      stream.addListener((ImageInfo info, bool syncCall) {
-        caughtError.complete(false);
-      }, onError: (dynamic error, StackTrace stackTrace) {
-        caughtError.complete(true);
-      });
-      expect(await caughtError.future, true);
-    });
+  FlutterExceptionHandler? oldError;
+  setUp(() {
+    oldError = FlutterError.onError;
   });
 
-  test('ImageProvide.obtainKey errors will be caught', () async {
+  tearDown(() {
+    FlutterError.onError = oldError;
+    PaintingBinding.instance!.imageCache!.clear();
+    PaintingBinding.instance!.imageCache!.clearLiveImages();
+  });
+
+  test('obtainKey errors will be caught', () async {
     final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
     final Completer<bool> caughtError = Completer<bool>();
     FlutterError.onError = (FlutterErrorDetails details) {
       caughtError.complete(false);
     };
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-    stream.addListener((ImageInfo info, bool syncCall) {
+    stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
       caughtError.complete(false);
-    }, onError: (dynamic error, StackTrace stackTrace) {
+    }, onError: (dynamic error, StackTrace? stackTrace) {
       caughtError.complete(true);
-    });
+    }));
     expect(await caughtError.future, true);
   });
 
-  test('ImageProvider.resolve sync errors will be caught', () async {
+  test('obtainKey errors will be caught - check location', () async {
+    final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
+    final Completer<bool> caughtError = Completer<bool>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      caughtError.complete(true);
+    };
+    await imageProvider.obtainCacheStatus(configuration: ImageConfiguration.empty);
+
+    expect(await caughtError.future, true);
+  });
+
+  test('resolve sync errors will be caught', () async {
     bool uncaught = false;
     final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
       handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
         uncaught = true;
-      }
+      },
     ));
     await testZone.run(() async {
       final ImageProvider imageProvider = LoadErrorImageProvider();
@@ -103,21 +71,21 @@ void main() {
         throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace stackTrace) {
+      result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+      }, onError: (dynamic error, StackTrace? stackTrace) {
         caughtError.complete(true);
-      });
+      }));
       expect(await caughtError.future, true);
     });
     expect(uncaught, false);
   });
 
-   test('ImageProvider.resolve errors in the completer will be caught', () async {
+  test('resolve errors in the completer will be caught', () async {
     bool uncaught = false;
     final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
       handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
         uncaught = true;
-      }
+      },
     ));
     await testZone.run(() async {
       final ImageProvider imageProvider = LoadErrorCompleterImageProvider();
@@ -126,39 +94,116 @@ void main() {
         throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace stackTrace) {
+      result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+      }, onError: (dynamic error, StackTrace? stackTrace) {
         caughtError.complete(true);
-      });
+      }));
       expect(await caughtError.future, true);
     });
     expect(uncaught, false);
   });
 
-  test('ImageProvider.resolve errors in the http client will be caught', () async {
-    bool uncaught = false;
-    final HttpClientMock httpClientMock = HttpClientMock();
-    when(httpClientMock.getUrl(any)).thenThrow(Error());
+  test('File image with empty file throws expected error and evicts from cache', () async {
+    final Completer<StateError> error = Completer<StateError>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error.complete(details.exception as StateError);
+    };
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final File file = fs.file('/empty.png')..createSync(recursive: true);
+    final FileImage provider = FileImage(file);
 
-    await HttpOverrides.runZoned(() async {
-      const ImageProvider imageProvider = NetworkImage('asdasdasdas');
-      final Completer<bool> caughtError = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
-        throw Error();
-      };
-      final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace stackTrace) {
-        caughtError.complete(true);
-      });
-      expect(await caughtError.future, true);
-    }, createHttpClient: (SecurityContext context) => httpClientMock, zoneSpecification: ZoneSpecification(
-      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
-        uncaught = true;
-      }
-    ));
-    expect(uncaught, false);
+    expect(imageCache!.statusForKey(provider).untracked, true);
+    expect(imageCache!.pendingImageCount, 0);
+
+    provider.resolve(ImageConfiguration.empty);
+
+    expect(imageCache!.statusForKey(provider).pending, true);
+    expect(imageCache!.pendingImageCount, 1);
+
+    expect(await error.future, isStateError);
+    expect(imageCache!.statusForKey(provider).untracked, true);
+    expect(imageCache!.pendingImageCount, 0);
+  });
+
+  test('File image with empty file throws expected error (load)', () async {
+    final Completer<StateError> error = Completer<StateError>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error.complete(details.exception as StateError);
+    };
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final File file = fs.file('/empty.png')..createSync(recursive: true);
+    final FileImage provider = FileImage(file);
+
+    expect(provider.load(provider, (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+      return Future<Codec>.value(FakeCodec());
+    }), isA<MultiFrameImageStreamCompleter>());
+
+    expect(await error.future, isStateError);
+  });
+
+  Future<Codec> _decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+    return FakeCodec();
+  }
+
+  test('File image sets tag', () async {
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
+    final FileImage provider = FileImage(file);
+
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, file.path);
+  });
+
+  test('Memory image sets tag', () async {
+    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
+    final MemoryImage provider = MemoryImage(bytes);
+
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
+  });
+
+  test('Asset image sets tag', () async {
+    const String asset = 'images/blue.png';
+    final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
+    final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
+    final MultiFrameImageStreamCompleter completer = provider.load(key, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, asset);
+  });
+
+  test('Resize image sets tag', () async {
+    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
+    final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
+    final MultiFrameImageStreamCompleter completer = provider.load(
+      await provider.obtainKey(ImageConfiguration.empty),
+      _decoder,
+    ) as MultiFrameImageStreamCompleter;
+
+    expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });
 }
 
-class HttpClientMock extends Mock implements HttpClient {}
+class FakeCodec implements Codec {
+  @override
+  void dispose() {}
+
+  @override
+  int get frameCount => throw UnimplementedError();
+
+  @override
+  Future<FrameInfo> getNextFrame() {
+    throw UnimplementedError();
+  }
+
+  @override
+  int get repetitionCount => throw UnimplementedError();
+}
+
+class _TestAssetBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async {
+    return Uint8List.fromList(kBlueSquarePng).buffer.asByteData();
+  }
+}

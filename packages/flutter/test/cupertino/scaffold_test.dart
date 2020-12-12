@@ -1,11 +1,14 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/mocks_for_image_cache.dart';
+import '../image_data.dart';
+import '../rendering/mock_canvas.dart';
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
@@ -25,8 +28,8 @@ void main() {
     expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
   });
 
-testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
-    BuildContext childContext;
+  testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
+    late BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -53,6 +56,53 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     expect(tester.getRect(find.byType(Container)), const Rect.fromLTRB(0, 44, 800, 600));
   });
 
+  testWidgets('dark mode and obstruction work', (WidgetTester tester) async {
+    const Color dynamicColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFF8F8F8),
+      darkColor: Color(0xEE333333),
+    );
+
+    const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFFFFFFF),
+      darkColor: Color(0xFF000000),
+    );
+
+    late BuildContext childContext;
+    Widget scaffoldWithBrightness(Brightness brightness) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(
+            platformBrightness: brightness,
+            viewInsets: const EdgeInsets.only(top: 20),
+          ),
+          child: CupertinoPageScaffold(
+            backgroundColor: backgroundColor,
+            navigationBar: const CupertinoNavigationBar(
+              middle: Text('Title'),
+              backgroundColor: dynamicColor,
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                childContext = context;
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(scaffoldWithBrightness(Brightness.light));
+
+    expect(MediaQuery.of(childContext).padding.top, 0);
+    expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.color));
+
+    await tester.pumpWidget(scaffoldWithBrightness(Brightness.dark));
+
+    expect(MediaQuery.of(childContext).padding.top, greaterThan(0));
+    expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.darkColor));
+  });
+
   testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -70,7 +120,7 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
 
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
 
-    BuildContext childContext;
+    late BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -111,6 +161,45 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     expect(tester.getSize(find.byType(Container)).height, 600.0);
   });
 
+  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
+    const Widget child = CupertinoPageScaffold(
+      resizeToAvoidBottomInset: false,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text('Opaque'),
+        backgroundColor: Color(0xFFF8F8F8),
+      ),
+      child: Placeholder(),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data:  MediaQueryData(viewInsets: EdgeInsets.only(bottom: 20.0)),
+          child: child,
+        ),
+      ),
+    );
+
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: 300),
+          ),
+          child: child,
+        ),
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
+  });
+
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
     const Center page1Center = Center();
 
@@ -119,14 +208,14 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             backgroundColor: CupertinoColors.white,
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -149,7 +238,7 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
   });
 
   testWidgets('Contents have automatic sliver padding between translucent bars', (WidgetTester tester) async {
-    final Container content = Container(height: 600.0, width: 600.0);
+    const SizedBox content = SizedBox(height: 600.0, width: 600.0);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -159,14 +248,14 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
           ),
           child: CupertinoTabScaffold(
             tabBar: CupertinoTabBar(
-              items: const <BottomNavigationBarItem>[
+              items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24)),
-                  title: Text('Tab 1'),
+                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                  label: 'Tab 1',
                 ),
                 BottomNavigationBarItem(
-                  icon: ImageIcon(TestImageProvider(24, 24)),
-                  title: Text('Tab 2'),
+                  icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                  label: 'Tab 2',
                 ),
               ],
             ),
@@ -177,7 +266,7 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
                       middle: Text('Title'),
                     ),
                     child: ListView(
-                      children: <Widget>[
+                      children: const <Widget>[
                         content,
                       ],
                     ),
@@ -209,14 +298,14 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 1'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
               ),
               BottomNavigationBarItem(
-                icon: ImageIcon(TestImageProvider(24, 24)),
-                title: Text('Tab 2'),
+                icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
               ),
             ],
           ),
@@ -320,11 +409,11 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
-    expect(decoration.color, CupertinoColors.white);
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
   testWidgets('Overrides background color', (WidgetTester tester) async {
@@ -337,21 +426,21 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, const Color(0xFF010203));
   });
 
   testWidgets('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           // Acts as a 20px status bar at the root of the app.
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
-            child: child,
+            child: child!,
           );
         },
         home: CupertinoPageScaffold(
@@ -394,5 +483,80 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     expect(tester.getTopLeft(find.text('0')).dy, 64);
     expect(tester.getTopLeft(find.text('6')).dy, 364);
     expect(find.text('12'), findsNothing);
+  });
+
+  testWidgets('resizeToAvoidBottomInset is supported even when no navigationBar', (WidgetTester tester) async {
+    Widget buildFrame(bool showNavigationBar, bool showKeyboard) {
+      return CupertinoApp(
+        home: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: const EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: showKeyboard ? 300 : 20),
+          ),
+          child: CupertinoPageScaffold(
+            resizeToAvoidBottomInset: true,
+            navigationBar: showNavigationBar ? const CupertinoNavigationBar(
+              middle: Text('Title'),
+            ) : null,
+            child: const Center(
+              child: CupertinoTextField(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When there is a nav bar and no keyboard.
+    await tester.pumpWidget(buildFrame(true, false));
+    final Offset positionNoInsetWithNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+
+    // When there is a nav bar and keyboard, the CupertinoTextField moves up.
+    await tester.pumpWidget(buildFrame(true, true));
+    await tester.pumpAndSettle();
+    final Offset positionWithInsetWithNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionWithInsetWithNavBar.dy, lessThan(positionNoInsetWithNavBar.dy));
+
+    // When there is no nav bar and no keyboard, the CupertinoTextField is still
+    // centered.
+    await tester.pumpWidget(buildFrame(false, false));
+    final Offset positionNoInsetNoNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionNoInsetNoNavBar, equals(positionNoInsetWithNavBar));
+
+    // When there is a keyboard but no nav bar, the CupertinoTextField also
+    // moves up to the same position as when there is a keyboard and nav bar.
+    await tester.pumpWidget(buildFrame(false, true));
+    await tester.pumpAndSettle();
+    final Offset positionWithInsetNoNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionWithInsetNoNavBar.dy, lessThan(positionNoInsetNoNavBar.dy));
+    expect(positionWithInsetNoNavBar, equals(positionWithInsetWithNavBar));
+  });
+
+  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+            child: const CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(
+                middle: Text('middle'),
+                leading: Text('leading'),
+                trailing: Text('trailing'),
+              ),
+              child: Text('content'),
+            ),
+          );
+        }),
+      ),
+    );
+    final Iterable<RichText> richTextList = tester.widgetList<RichText>(
+      find.descendant(of: find.byType(CupertinoNavigationBar), matching: find.byType(RichText)),
+    );
+
+    expect(richTextList.length, greaterThan(0));
+    expect(richTextList.any((RichText text) => text.textScaleFactor != 1), isFalse);
+
+    expect(tester.widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText))).textScaleFactor, 99);
   });
 }

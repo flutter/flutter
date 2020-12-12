@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,41 +43,53 @@ class _HomeState extends State<Home> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                FlatButton(
-                  child: const Text('Test Underlines'),
-                  color: Colors.red.shade800,
-                  textColor: Colors.white,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Colors.red.shade800,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'underlines'); },
+                  child: const Text('Test Underlines'),
                 ),
-                FlatButton(
-                  child: const Text('Test Font Fallback'),
-                  color: Colors.orange.shade700,
-                  textColor: Colors.white,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Colors.orange.shade700,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'fallback'); },
+                  child: const Text('Test Font Fallback'),
                 ),
-                FlatButton(
-                  child: const Text('Test Bidi Formatting'),
-                  color: Colors.yellow.shade700,
-                  textColor: Colors.black,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.black,
+                    backgroundColor: Colors.yellow.shade700,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'bidi'); },
+                  child: const Text('Test Bidi Formatting'),
                 ),
-                FlatButton(
-                  child: const Text('TextSpan Fuzzer'),
-                  color: Colors.green.shade400,
-                  textColor: Colors.black,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.black,
+                    backgroundColor: Colors.green.shade400,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'fuzzer'); },
+                  child: const Text('TextSpan Fuzzer'),
                 ),
-                FlatButton(
-                  child: const Text('Diacritics Fuzzer'),
-                  color: Colors.blue.shade400,
-                  textColor: Colors.white,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Colors.blue.shade400,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'zalgo'); },
+                  child: const Text('Diacritics Fuzzer'),
                 ),
-                FlatButton(
-                  child: const Text('Painting Fuzzer'),
-                  color: Colors.purple.shade200,
-                  textColor: Colors.black,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.black,
+                    backgroundColor: Colors.purple.shade200,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'painting'); },
+                  child: const Text('Painting Fuzzer'),
                 ),
               ],
             ),
@@ -145,7 +157,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((TextSpan child) => _fiddleWith(child))?.toList() ?? <TextSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan))?.toList() ?? <TextSpan>[]),
     );
   }
 
@@ -332,7 +344,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     if (node.children == null || node.children.isEmpty)
       return 0;
     int result = 0;
-    for (TextSpan child in node.children)
+    for (final TextSpan child in node.children.cast<TextSpan>())
       result = math.max(result, depthOf(child));
     return result;
   }
@@ -556,13 +568,11 @@ class _UnderlinesState extends State<Underlines> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> lines = <Widget>[_wrap(null)];
-    for (TextDecorationStyle style in TextDecorationStyle.values)
-      lines.add(_wrap(style));
     final Size size = MediaQuery.of(context).size;
     return Container(
       color: Colors.black,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Expanded(
             child: SingleChildScrollView(
@@ -572,43 +582,57 @@ class _UnderlinesState extends State<Underlines> {
                   vertical: size.height * 0.1,
                 ),
                 child: ListBody(
-                  children: lines,
+                  children: <Widget>[
+                    _wrap(null),
+                    for (final TextDecorationStyle style in TextDecorationStyle.values) _wrap(style),
+                  ],
                 ),
               ),
             ),
           ),
           Material(
-            child: ButtonBar(
-              children: <Widget>[
-                FlatButton(
-                  onPressed: () {
-                    setState(() {
-                      _text += 'i';
-                    });
-                  },
-                  color: Colors.yellow,
-                  child: const Text('ADD i'),
-                ),
-                FlatButton(
-                  onPressed: () {
-                    setState(() {
-                      _text += 'w';
-                    });
-                  },
-                  color: Colors.yellow,
-                  child: const Text('ADD w'),
-                ),
-                FlatButton(
-                  onPressed: _text == '' ? null : () {
-                    setState(() {
-                      _text = _text.substring(0, _text.length - 1);
-                    });
-                  },
-                  color: Colors.red,
-                  textColor: Colors.white,
-                  child: const Text('REMOVE'),
-                ),
-              ],
+            child: Container(
+              alignment: AlignmentDirectional.centerEnd,
+              padding: const EdgeInsets.all(8),
+              child: OverflowBar(
+                spacing: 8,
+                children: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _text += 'i';
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.yellow,
+                    ),
+                    child: const Text('ADD i'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _text += 'w';
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.yellow,
+                    ),
+                    child: const Text('ADD w'),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      primary: Colors.white,
+                      backgroundColor: Colors.red,
+                    ),
+                    onPressed: _text == '' ? null : () {
+                      setState(() {
+                        _text = _text.substring(0, _text.length - 1);
+                      });
+                    },
+                    child: const Text('REMOVE'),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -647,9 +671,6 @@ class _FallbackState extends State<Fallback> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> lines = <Widget>[];
-    for (String font in androidFonts)
-      lines.add(Text(multiScript, style: style.copyWith(fontFamily: font, fontSize: math.exp(_fontSize))));
     final Size size = MediaQuery.of(context).size;
     return Container(
       color: Colors.black,
@@ -666,7 +687,16 @@ class _FallbackState extends State<Fallback> {
                   ),
                   child: IntrinsicWidth(
                     child: ListBody(
-                      children: lines,
+                      children: <Widget>[
+                        for (final String font in androidFonts)
+                          Text(
+                            multiScript,
+                            style: style.copyWith(
+                              fontFamily: font,
+                              fontSize: math.exp(_fontSize),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -1007,6 +1037,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
           ),
           Material(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 SwitchListTile(
                   title: const Text('Enable Fuzzer'),
@@ -1036,20 +1067,26 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                 const ListTile(
                   title: Text('There should be no red visible.'),
                 ),
-                ButtonBar(
-                  children: <Widget>[
-                    FlatButton(
-                      onPressed: _ticker.isActive ? null : () => _update(null),
-                      child: const Text('ITERATE'),
-                    ),
-                    FlatButton(
-                      onPressed: _ticker.isActive ? null : () {
-                        print('The currently visible text is: $_text');
-                        print(_text.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
-                      },
-                      child: const Text('DUMP TEXT TO LOGS'),
-                    ),
-                  ],
+
+                Container(
+                  alignment: AlignmentDirectional.centerEnd,
+                  padding: const EdgeInsets.all(8),
+                  child: OverflowBar(
+                    spacing: 8,
+                    children: <Widget>[
+                      TextButton(
+                        onPressed: _ticker.isActive ? null : () => _update(null),
+                        child: const Text('ITERATE'),
+                      ),
+                      TextButton(
+                        onPressed: _ticker.isActive ? null : () {
+                          print('The currently visible text is: $_text');
+                          print(_text.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
+                        },
+                        child: const Text('DUMP TEXT TO LOGS'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -1401,8 +1438,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
     }
   }
   base ??= String.fromCharCode(randomCharacter(random));
-  final List<int> characters = <int>[];
-  characters.addAll(these);
+  final List<int> characters = these.toList();
   return base + String.fromCharCodes(characters);
 }
 

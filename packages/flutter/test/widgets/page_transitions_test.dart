@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 class TestOverlayRoute extends OverlayRoute<void> {
-  TestOverlayRoute({ RouteSettings settings }) : super(settings: settings);
+  TestOverlayRoute({ RouteSettings? settings }) : super(settings: settings);
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield OverlayEntry(builder: _build);
@@ -15,7 +15,7 @@ class TestOverlayRoute extends OverlayRoute<void> {
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
-  const PersistentBottomSheetTest({ Key key }) : super(key: key);
+  const PersistentBottomSheetTest({ Key? key }) : super(key: key);
 
   @override
   PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();
@@ -27,7 +27,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   bool setStateCalled = false;
 
   void showBottomSheet() {
-    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
       return const Text('bottomSheet');
     })
     .closed.whenComplete(() {
@@ -61,9 +61,9 @@ void main() {
     expect(find.text('Settings'), findsNothing);
     expect(find.text('Overlay'), findsNothing);
 
-    expect(Navigator.canPop(containerKey1.currentContext), isFalse);
-    Navigator.pushNamed(containerKey1.currentContext, '/settings');
-    expect(Navigator.canPop(containerKey1.currentContext), isTrue);
+    expect(Navigator.canPop(containerKey1.currentContext!), isFalse);
+    Navigator.pushNamed(containerKey1.currentContext!, '/settings');
+    expect(Navigator.canPop(containerKey1.currentContext!), isTrue);
 
     await tester.pump();
 
@@ -83,7 +83,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
     expect(find.text('Overlay'), findsNothing);
 
-    Navigator.push(containerKey2.currentContext, TestOverlayRoute());
+    Navigator.push(containerKey2.currentContext!, TestOverlayRoute());
 
     await tester.pump();
 
@@ -97,8 +97,8 @@ void main() {
     expect(find.text('Settings'), isOnstage);
     expect(find.text('Overlay'), isOnstage);
 
-    expect(Navigator.canPop(containerKey2.currentContext), isTrue);
-    Navigator.pop(containerKey2.currentContext);
+    expect(Navigator.canPop(containerKey2.currentContext!), isTrue);
+    Navigator.pop(containerKey2.currentContext!);
     await tester.pump();
 
     expect(find.text('Home'), findsNothing);
@@ -111,8 +111,8 @@ void main() {
     expect(find.text('Settings'), isOnstage);
     expect(find.text('Overlay'), findsNothing);
 
-    expect(Navigator.canPop(containerKey2.currentContext), isTrue);
-    Navigator.pop(containerKey2.currentContext);
+    expect(Navigator.canPop(containerKey2.currentContext!), isTrue);
+    Navigator.pop(containerKey2.currentContext!);
     await tester.pump();
     await tester.pump();
 
@@ -126,7 +126,7 @@ void main() {
     expect(find.text('Settings'), findsNothing);
     expect(find.text('Overlay'), findsNothing);
 
-    expect(Navigator.canPop(containerKey1.currentContext), isFalse);
+    expect(Navigator.canPop(containerKey1.currentContext!), isFalse);
   });
 
   testWidgets('Check back gesture disables Heroes', (WidgetTester tester) async {
@@ -157,12 +157,9 @@ void main() {
       ),
     };
 
-    await tester.pumpWidget(MaterialApp(
-      routes: routes,
-      theme: ThemeData(platform: TargetPlatform.iOS),
-    ));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
-    Navigator.pushNamed(containerKey1.currentContext, '/settings');
+    Navigator.pushNamed(containerKey1.currentContext!, '/settings');
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 16));
@@ -199,9 +196,9 @@ void main() {
     settingsOffset = tester.getTopLeft(find.text('Settings'));
     expect(settingsOffset.dx, greaterThan(100.0));
     expect(settingsOffset.dy, 100.0);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Check back gesture doesn\'t start during transitions', (WidgetTester tester) async {
+  testWidgets("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -209,12 +206,9 @@ void main() {
       '/settings': (_) => Scaffold(key: containerKey2, body: const Text('Settings')),
     };
 
-    await tester.pumpWidget(MaterialApp(
-      routes: routes,
-      theme: ThemeData(platform: TargetPlatform.iOS),
-    ));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
-    Navigator.pushNamed(containerKey1.currentContext, '/settings');
+    Navigator.pushNamed(containerKey1.currentContext!, '/settings');
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -245,7 +239,7 @@ void main() {
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), findsNothing);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
   testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
@@ -256,12 +250,9 @@ void main() {
       '/sheet': (_) => PersistentBottomSheetTest(key: containerKey2),
     };
 
-    await tester.pumpWidget(MaterialApp(
-      routes: routes,
-      theme: ThemeData(platform: TargetPlatform.iOS),
-    ));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
-    Navigator.pushNamed(containerKey1.currentContext, '/sheet');
+    Navigator.pushNamed(containerKey1.currentContext!, '/sheet');
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -276,7 +267,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    Navigator.pushNamed(containerKey1.currentContext, '/sheet');
+    Navigator.pushNamed(containerKey1.currentContext!, '/sheet');
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -285,7 +276,7 @@ void main() {
     expect(find.text('Sheet'), isOnstage);
 
     // Show the bottom sheet.
-    final PersistentBottomSheetTestState sheet = containerKey2.currentState;
+    final PersistentBottomSheetTestState sheet = containerKey2.currentState! as PersistentBottomSheetTestState;
     sheet.showBottomSheet();
 
     await tester.pump(const Duration(seconds: 1));
@@ -302,7 +293,7 @@ void main() {
 
     // Sheet did not call setState (since the gesture did nothing).
     expect(sheet.setStateCalled, isFalse);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{

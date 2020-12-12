@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,20 +14,20 @@ class RunningProcessInfo {
         assert(commandLine != null);
 
   final String commandLine;
-  final int pid;
+  final String pid;
   final DateTime creationDate;
 
   @override
   bool operator ==(Object other) {
-    return other is RunningProcessInfo &&
-        other.pid == pid &&
-        other.commandLine == commandLine &&
-        other.creationDate == creationDate;
+    return other is RunningProcessInfo
+        && other.pid == pid
+        && other.commandLine == commandLine
+        && other.creationDate == creationDate;
   }
 
   @override
   int get hashCode {
-    // TODO(dnfield): Replace this when Object.hashValues lands.
+    // TODO(dnfield): Replace this when Object.hashValues lands, https://github.com/dart-lang/sdk/issues/11617
     int hash = 17;
     if (pid != null) {
       hash = hash * 23 + pid.hashCode;
@@ -47,7 +47,7 @@ class RunningProcessInfo {
   }
 }
 
-Future<bool> killProcess(int pid, {ProcessManager processManager}) async {
+Future<bool> killProcess(String pid, {ProcessManager processManager}) async {
   assert(pid != null, 'Must specify a pid to kill');
   processManager ??= const LocalProcessManager();
   ProcessResult result;
@@ -55,14 +55,14 @@ Future<bool> killProcess(int pid, {ProcessManager processManager}) async {
     result = await processManager.run(<String>[
       'taskkill.exe',
       '/pid',
-      pid.toString(),
+      pid,
       '/f',
     ]);
   } else {
     result = await processManager.run(<String>[
       'kill',
       '-9',
-      pid.toString(),
+      pid,
     ]);
   }
   return result.exitCode == 0;
@@ -85,11 +85,10 @@ Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
   // a process.
   // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
   final String script = processName != null
-      ? '"Get-CimInstance Win32_Process -Filter \\\"name=\'$processName\'\\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'
+      ? '"Get-CimInstance Win32_Process -Filter \\"name=\'$processName\'\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'
       : '"Get-CimInstance Win32_Process | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"';
   // Unfortunately, there doesn't seem to be a good way to get ProcessManager to
-  // run this. May be a bug in Dart.
-  // TODO(dnfield): fix this when https://github.com/dart-lang/sdk/issues/36175 is resolved.
+  // run this.
   final ProcessResult result = await Process.run(
     'powershell -command $script',
     <String>[],
@@ -100,7 +99,7 @@ Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
     print(result.stdout);
     return;
   }
-  for (RunningProcessInfo info in processPowershellOutput(result.stdout)) {
+  for (final RunningProcessInfo info in processPowershellOutput(result.stdout as String)) {
     yield info;
   }
 }
@@ -122,7 +121,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
   int creationDateHeaderEnd;
   int commandLineHeaderStart;
   bool inTableBody = false;
-  for (String line in output.split('\n')) {
+  for (final String line in output.split('\n')) {
     if (line.startsWith('ProcessId')) {
       commandLineHeaderStart = line.indexOf('CommandLine');
       creationDateHeaderEnd = commandLineHeaderStart - 1;
@@ -163,7 +162,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
       time = '${hours + 12}${time.substring(2)}';
     }
 
-    final int pid = int.parse(line.substring(0, processIdHeaderSize).trim());
+    final String pid = line.substring(0, processIdHeaderSize).trim();
     final DateTime creationDate = DateTime.parse('$year-$month-${day}T$time');
     final String commandLine = line.substring(commandLineHeaderStart).trim();
     yield RunningProcessInfo(pid, creationDate, commandLine);
@@ -191,7 +190,7 @@ Stream<RunningProcessInfo> posixRunningProcesses(
     print(result.stdout);
     return;
   }
-  for (RunningProcessInfo info in processPsOutput(result.stdout, processName)) {
+  for (final RunningProcessInfo info in processPsOutput(result.stdout as String, processName)) {
     yield info;
   }
 }
@@ -254,7 +253,7 @@ Iterable<RunningProcessInfo> processPsOutput(
     final DateTime creationDate = DateTime.parse('$year-$month-${day}T$time');
     line = line.substring(24).trim();
     final int nextSpace = line.indexOf(' ');
-    final int pid = int.parse(line.substring(0, nextSpace));
+    final String pid = line.substring(0, nextSpace);
     final String commandLine = line.substring(nextSpace + 1);
     yield RunningProcessInfo(pid, creationDate, commandLine);
   }

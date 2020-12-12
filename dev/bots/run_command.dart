@@ -1,137 +1,229 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:core' hide print;
+import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
-final bool hasColor = stdout.supportsAnsiEscapes;
+import 'utils.dart';
 
-final String bold = hasColor ? '\x1B[1m' : '';
-final String red = hasColor ? '\x1B[31m' : '';
-final String green = hasColor ? '\x1B[32m' : '';
-final String yellow = hasColor ? '\x1B[33m' : '';
-final String cyan = hasColor ? '\x1B[36m' : '';
-final String reset = hasColor ? '\x1B[0m' : '';
-final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
-const String arrow = '⏩';
-const String clock = '🕐';
-
-const Duration _kLongTimeout = Duration(minutes: 45);
-
-String elapsedTime(DateTime start) {
-  return DateTime.now().difference(start).toString();
-}
-
-void printProgress(String action, String workingDir, String command) {
-  print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
-}
-
+/// Runs the `executable` and returns standard output as a stream of lines.
+///
+/// The returned stream reaches its end immediately after the command exits.
+///
+/// If `expectNonZeroExit` is false and the process exits with a non-zero exit
+/// code fails the test immediately by exiting the test process with exit code
+/// 1.
 Stream<String> runAndGetStdout(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectNonZeroExit = false,
-  int expectedExitCode,
-  String failureMessage,
-  Duration timeout = _kLongTimeout,
-  Function beforeExit,
 }) async* {
-  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory);
-
-  printProgress('RUNNING', relativeWorkingDir, commandDescription);
-
-  final DateTime start = DateTime.now();
-  final Process process = await Process.start(executable, arguments,
+  final StreamController<String> output = StreamController<String>();
+  final Future<CommandResult> command = runCommand(
+    executable,
+    arguments,
     workingDirectory: workingDirectory,
     environment: environment,
+    expectNonZeroExit: expectNonZeroExit,
+    // Capture the output so it's not printed to the console by default.
+    outputMode: OutputMode.capture,
+    outputListener: (String line, io.Process process) {
+      output.add(line);
+    },
   );
 
-  stderr.addStream(process.stderr);
-  final Stream<String> lines = process.stdout.transform(utf8.decoder).transform(const LineSplitter());
-  await for (String line in lines) {
-    yield line;
-  }
+  // Close the stream controller after the command is complete. Otherwise,
+  // the yield* will never finish.
+  command.whenComplete(output.close);
 
-  final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
-    stderr.writeln('Process timed out after $timeout');
-    return expectNonZeroExit ? 0 : 1;
-  });
-  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
-  if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
-    if (failureMessage != null) {
-      print(failureMessage);
-    }
-    print(
-        '$redLine\n'
-            '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset\n'
-            '${bold}Command:$cyan $commandDescription$reset\n'
-            '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-            '$redLine'
-    );
-    beforeExit?.call();
-    exit(1);
+  yield* output.stream;
+}
+
+/// Represents a running process launched using [startCommand].
+class Command {
+  Command._(this.process, this._time, this._savedStdout, this._savedStderr);
+
+  /// The raw process that was launched for this command.
+  final io.Process process;
+
+  final Stopwatch _time;
+  final Future<List<List<int>>> _savedStdout;
+  final Future<List<List<int>>> _savedStderr;
+
+  /// Evaluates when the [process] exits.
+  ///
+  /// Returns the result of running the command.
+  Future<CommandResult> get onExit async {
+    final int exitCode = await process.exitCode;
+    _time.stop();
+
+    // Saved output is null when OutputMode.print is used.
+    final String flattenedStdout = _savedStdout != null ? _flattenToString(await _savedStdout) : null;
+    final String flattenedStderr = _savedStderr != null ? _flattenToString(await _savedStderr) : null;
+    return CommandResult._(exitCode, _time.elapsed, flattenedStdout, flattenedStderr);
   }
 }
 
-Future<void> runCommand(String executable, List<String> arguments, {
+/// The result of running a command using [startCommand] and [runCommand];
+class CommandResult {
+  CommandResult._(this.exitCode, this.elapsedTime, this.flattenedStdout, this.flattenedStderr);
+
+  /// The exit code of the process.
+  final int exitCode;
+
+  /// The amount of time it took the process to complete.
+  final Duration elapsedTime;
+
+  /// Standard output decoded as a string using UTF8 decoder.
+  final String flattenedStdout;
+
+  /// Standard error output decoded as a string using UTF8 decoder.
+  final String flattenedStderr;
+}
+
+/// Starts the `executable` and returns a command object representing the
+/// running process.
+///
+/// `outputListener` is called for every line of standard output from the
+/// process, and is given the [Process] object. This can be used to interrupt
+/// an indefinitely running process, for example, by waiting until the process
+/// emits certain output.
+///
+/// `outputMode` controls where the standard output from the command process
+/// goes. See [OutputMode].
+Future<Command> startCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
-  bool expectNonZeroExit = false,
-  int expectedExitCode,
-  String failureMessage,
-  bool printOutput = true,
-  bool skip = false,
-  Duration timeout = _kLongTimeout,
+  OutputMode outputMode = OutputMode.print,
+  bool Function(String) removeLine,
+  void Function(String, io.Process) outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory);
-  if (skip) {
-    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return;
-  }
+  final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
-  final DateTime start = DateTime.now();
-  final Process process = await Process.start(executable, arguments,
+  final Stopwatch time = Stopwatch()..start();
+  final io.Process process = await io.Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
   );
 
   Future<List<List<int>>> savedStdout, savedStderr;
-  if (printOutput) {
-    await Future.wait<void>(<Future<void>>[
-      stdout.addStream(process.stdout),
-      stderr.addStream(process.stderr),
-    ]);
-  } else {
-    savedStdout = process.stdout.toList();
-    savedStderr = process.stderr.toList();
+  final Stream<List<int>> stdoutSource = process.stdout
+    .transform<String>(const Utf8Decoder())
+    .transform(const LineSplitter())
+    .where((String line) => removeLine == null || !removeLine(line))
+    .map((String line) {
+      final String formattedLine = '$line\n';
+      if (outputListener != null) {
+        outputListener(formattedLine, process);
+      }
+      return formattedLine;
+    })
+    .transform(const Utf8Encoder());
+  switch (outputMode) {
+    case OutputMode.print:
+      stdoutSource.listen(io.stdout.add);
+      process.stderr.listen(io.stderr.add);
+      break;
+    case OutputMode.capture:
+      savedStdout = stdoutSource.toList();
+      savedStderr = process.stderr.toList();
+      break;
   }
 
-  final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
-    stderr.writeln('Process timed out after $timeout');
-    return expectNonZeroExit ? 0 : 1;
-  });
-  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
-  if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
-    if (failureMessage != null) {
-      print(failureMessage);
-    }
-    if (!printOutput) {
-      stdout.writeln(utf8.decode((await savedStdout).expand<int>((List<int> ints) => ints).toList()));
-      stderr.writeln(utf8.decode((await savedStderr).expand<int>((List<int> ints) => ints).toList()));
-    }
-    print(
-        '$redLine\n'
-            '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset\n'
-            '${bold}Command:$cyan $commandDescription$reset\n'
-            '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-            '$redLine'
-    );
-    exit(1);
+  return Command._(process, time, savedStdout, savedStderr);
+}
+
+/// Runs the `executable` and waits until the process exits.
+///
+/// If the process exits with a non-zero exit code, exits this process with
+/// exit code 1, unless `expectNonZeroExit` is set to true.
+///
+/// `outputListener` is called for every line of standard output from the
+/// process, and is given the [Process] object. This can be used to interrupt
+/// an indefinitely running process, for example, by waiting until the process
+/// emits certain output.
+///
+/// Returns the result of the finished process, or null if `skip` is true.
+///
+/// `outputMode` controls where the standard output from the command process
+/// goes. See [OutputMode].
+Future<CommandResult> runCommand(String executable, List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool expectNonZeroExit = false,
+  int expectedExitCode,
+  String failureMessage,
+  OutputMode outputMode = OutputMode.print,
+  bool skip = false,
+  bool Function(String) removeLine,
+  void Function(String, io.Process) outputListener,
+}) async {
+  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
+  final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
+  if (skip) {
+    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
+    return null;
   }
+
+  final Command command = await startCommand(executable, arguments,
+    workingDirectory: workingDirectory,
+    environment: environment,
+    outputMode: outputMode,
+    removeLine: removeLine,
+    outputListener: outputListener,
+  );
+
+  final CommandResult result = await command.onExit;
+
+  if ((result.exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && result.exitCode != expectedExitCode)) {
+    // Print the output when we get unexpected results (unless output was
+    // printed already).
+    switch (outputMode) {
+      case OutputMode.print:
+        break;
+      case OutputMode.capture:
+        io.stdout.writeln(result.flattenedStdout);
+        io.stderr.writeln(result.flattenedStderr);
+        break;
+    }
+    exitWithError(<String>[
+      if (failureMessage != null)
+        failureMessage
+      else
+        '${bold}ERROR: ${red}Last command exited with ${result.exitCode} (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset',
+      '${bold}Command: $green$commandDescription$reset',
+      '${bold}Relative working directory: $cyan$relativeWorkingDir$reset',
+    ]);
+  }
+  print('$clock ELAPSED TIME: ${prettyPrintDuration(result.elapsedTime)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');
+  return result;
+}
+
+/// Flattens a nested list of UTF-8 code units into a single string.
+String _flattenToString(List<List<int>> chunks) =>
+  utf8.decode(chunks.expand<int>((List<int> ints) => ints).toList());
+
+/// Specifies what to do with the command output from [runCommand] and [startCommand].
+enum OutputMode {
+  /// Forwards standard output and standard error streams to the test process'
+  /// respective standard streams.
+  ///
+  /// Use this mode if all you want is print the output of the command to the
+  /// console. The output is no longer available after the process exits.
+  print,
+
+  /// Saves standard output and standard error streams in memory.
+  ///
+  /// Captured output can be retrieved from the [CommandResult] object.
+  ///
+  /// Use this mode in tests that need to inspect the output of a command, or
+  /// when the output should not be printed to console.
+  capture,
 }

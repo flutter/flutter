@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ void main() {
   group('TimeOfDay.format', () {
     testWidgets('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
       Future<String> pumpTest(bool alwaysUse24HourFormat) async {
-        String formattedValue;
+        late String formattedValue;
         await tester.pumpWidget(MaterialApp(
           home: MediaQuery(
             data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),

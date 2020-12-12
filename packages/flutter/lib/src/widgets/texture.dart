@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,26 +28,39 @@ import 'framework.dart';
 ///
 /// See also:
 ///
-///  * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
 ///    for how to create and manage backend textures on Android.
-///  * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
 ///    for how to create and manage backend textures on iOS.
 class Texture extends LeafRenderObjectWidget {
-  /// Creates a widget backed by the texture identified by [textureId].
+  /// Creates a widget backed by the texture identified by [textureId], and use
+  /// [filterQuality] to set texture's [FilterQuality].
   const Texture({
-    Key key,
-    @required this.textureId,
+    Key? key,
+    required this.textureId,
+    this.filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
        super(key: key);
 
   /// The identity of the backend texture.
   final int textureId;
 
+  /// {@template flutter.widgets.Texture.filterQuality}
+  /// The quality of sampling the texture and rendering it on screen.
+  ///
+  /// When the texture is scaled, a default [FilterQuality.low] is used for a higher quality but slower
+  /// interpolation (typically bilinear). It can be changed to [FilterQuality.none] for a lower quality but
+  /// faster interpolation (typically nearest-neighbor). See also [FilterQuality.medium] and
+  /// [FilterQuality.high] for more options.
+  /// {@endtemplate}
+  final FilterQuality filterQuality;
+
   @override
-  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, filterQuality: filterQuality);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {
     renderObject.textureId = textureId;
+    renderObject.filterQuality = filterQuality;
   }
 }

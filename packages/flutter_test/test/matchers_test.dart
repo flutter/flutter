@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,9 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Class that makes it easy to mock common toStringDeep behavior.
 class _MockToStringDeep {
-  _MockToStringDeep(String str) {
+  _MockToStringDeep(String str) : _lines = <String>[] {
     final List<String> lines = str.split('\n');
-    _lines = <String>[];
     for (int i = 0; i < lines.length - 1; ++i)
       _lines.add('${lines[i]}\n');
 
@@ -29,7 +28,7 @@ class _MockToStringDeep {
   /// Lines in the message to display when [toStringDeep] is called.
   /// For correct toStringDeep behavior, each line should be terminated with a
   /// line break.
-  List<String> _lines;
+  final List<String> _lines;
 
   String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
     final StringBuffer sb = StringBuffer();
@@ -237,6 +236,33 @@ void main() {
     );
   });
 
+  test('isSameColorAs', () {
+    expect(
+      const Color(0x87654321),
+      isSameColorAs(const _CustomColor(0x87654321)),
+    );
+
+    expect(
+      const _CustomColor(0x87654321),
+      isSameColorAs(const Color(0x87654321)),
+    );
+
+    expect(
+      const Color(0x12345678),
+      isNot(isSameColorAs(const _CustomColor(0x87654321))),
+    );
+
+    expect(
+      const _CustomColor(0x87654321),
+      isNot(isSameColorAs(const Color(0x12345678))),
+    );
+
+    expect(
+      const _CustomColor(0xFF123456),
+      isSameColorAs(const _CustomColor(0xFF123456, isEqual: false)),
+    );
+  });
+
   group('coversSameAreaAs', () {
     test('empty Paths', () {
       expect(
@@ -311,7 +337,7 @@ void main() {
   });
 
   group('matchesGoldenFile', () {
-    _FakeComparator comparator;
+    late _FakeComparator comparator;
 
     Widget boilerplate(Widget child) {
       return Directionality(
@@ -326,6 +352,7 @@ void main() {
     });
 
     group('matches', () {
+
       testWidgets('if comparator succeeds', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
@@ -402,88 +429,6 @@ void main() {
     });
   });
 
-  group('matchesSkiaGoldFile', () {
-    _FakeComparator comparator;
-
-    Widget boilerplate(Widget child) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: child,
-      );
-    }
-
-    setUp(() {
-      comparator = _FakeComparator();
-      goldenFileComparator = comparator;
-    });
-
-    group('matches', () {
-      testWidgets('if comparator succeeds', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(const Text('hello')));
-        final Finder finder = find.byType(Text);
-        await expectLater(finder, matchesSkiaGoldFile('foo.png'));
-        expect(comparator.invocation, _ComparatorInvocation.compare);
-        expect(comparator.imageBytes, null);
-        expect(comparator.golden, Uri.parse('foo.png'));
-      });
-    });
-
-    group('does not match', () {
-      testWidgets('if comparator returns false', (WidgetTester tester) async {
-        comparator.behavior = _ComparatorBehavior.returnFalse;
-        await tester.pumpWidget(boilerplate(const Text('hello')));
-        final Finder finder = find.byType(Text);
-        try {
-          await expectLater(finder, matchesSkiaGoldFile('foo.png'));
-          fail('TestFailure expected but not thrown');
-        } on TestFailure catch (error) {
-          expect(comparator.invocation, _ComparatorInvocation.compare);
-          expect(error.message, contains('does not match'));
-        }
-      });
-
-      testWidgets('if comparator throws', (WidgetTester tester) async {
-        comparator.behavior = _ComparatorBehavior.throwTestFailure;
-        await tester.pumpWidget(boilerplate(const Text('hello')));
-        final Finder finder = find.byType(Text);
-        try {
-          await expectLater(finder, matchesSkiaGoldFile('foo.png'));
-          fail('TestFailure expected but not thrown');
-        } on TestFailure catch (error) {
-          expect(comparator.invocation, _ComparatorInvocation.compare);
-          expect(error.message, contains('fake message'));
-        }
-      });
-
-      testWidgets('if finder finds no widgets', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(Container()));
-        final Finder finder = find.byType(Text);
-        try {
-          await expectLater(finder, matchesSkiaGoldFile('foo.png'));
-          fail('TestFailure expected but not thrown');
-        } on TestFailure catch (error) {
-          expect(comparator.invocation, isNull);
-          expect(error.message, contains('no widget was found'));
-        }
-      });
-
-      testWidgets(
-        'if finder finds multiple widgets', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(Column(
-          children: const <Widget>[Text('hello'), Text('world')],
-        )));
-        final Finder finder = find.byType(Text);
-        try {
-          await expectLater(finder, matchesSkiaGoldFile('foo.png'));
-          fail('TestFailure expected but not thrown');
-        } on TestFailure catch (error) {
-          expect(comparator.invocation, isNull);
-          expect(error.message, contains('too many widgets'));
-        }
-      });
-    });
-  });
-
   group('matchesSemanticsData', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -493,6 +438,7 @@ void main() {
         namesRoute: true,
         header: true,
         button: true,
+        link: true,
         onTap: () { },
         onLongPress: () { },
         label: 'foo',
@@ -520,6 +466,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scan',
@@ -541,6 +488,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scan',
@@ -562,6 +510,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scans',
@@ -580,10 +529,12 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (int index in SemanticsAction.values.keys)
+      for (final int index in SemanticsAction.values.keys)
         actions |= index;
-      for (int index in SemanticsFlag.values.keys)
-        flags |= index;
+      for (final int index in SemanticsFlag.values.keys)
+        // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
+        if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline)
+          flags |= index;
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
@@ -604,9 +555,10 @@ void main() {
         scrollExtentMin: null,
         platformViewId: 105,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        currentValueLength: 10,
+        maxValueLength: 15,
       );
-      final _FakeSemanticsNode node = _FakeSemanticsNode();
-      node.data = data;
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
       expect(node, matchesSemantics(
          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
@@ -614,18 +566,26 @@ void main() {
          elevation: 3.0,
          thickness: 4.0,
          platformViewId: 105,
+         currentValueLength: 10,
+         maxValueLength: 15,
          /* Flags */
          hasCheckedState: true,
          isChecked: true,
          isSelected: true,
          isButton: true,
+         isSlider: true,
+         isLink: true,
          isTextField: true,
+         isReadOnly: true,
          hasEnabledState: true,
          isFocused: true,
+         isFocusable: true,
          isEnabled: true,
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
          isObscured: true,
+         // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
+         //isMultiline: true,
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
@@ -703,9 +663,9 @@ enum _ComparatorInvocation {
 
 class _FakeComparator implements GoldenFileComparator {
   _ComparatorBehavior behavior = _ComparatorBehavior.returnTrue;
-  _ComparatorInvocation invocation;
-  Uint8List imageBytes;
-  Uri golden;
+  _ComparatorInvocation? invocation;
+  Uint8List? imageBytes;
+  Uri? golden;
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
@@ -720,7 +680,6 @@ class _FakeComparator implements GoldenFileComparator {
       case _ComparatorBehavior.throwTestFailure:
         throw TestFailure('fake message');
     }
-    return Future<bool>.value(false);
   }
 
   @override
@@ -730,10 +689,29 @@ class _FakeComparator implements GoldenFileComparator {
     this.imageBytes = imageBytes;
     return Future<void>.value();
   }
+
+  @override
+  Uri getTestUri(Uri key, int? version) {
+    return key;
+  }
 }
 
 class _FakeSemanticsNode extends SemanticsNode {
+  _FakeSemanticsNode(this.data);
+
   SemanticsData data;
   @override
   SemanticsData getSemanticsData() => data;
+}
+
+@immutable
+class _CustomColor extends Color {
+  const _CustomColor(int value, {this.isEqual}) : super(value);
+  final bool? isEqual;
+
+  @override
+  bool operator ==(Object other) => isEqual ?? super == other;
+
+  @override
+  int get hashCode => hashValues(super.hashCode, isEqual);
 }

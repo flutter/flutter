@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,8 +25,9 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class BottomAppBarTheme extends Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.BottomAppBarTheme].
+@immutable
+class BottomAppBarTheme with Diagnosticable {
+  /// Creates a theme that can be used for [ThemeData.bottomAppBarTheme].
   const BottomAppBarTheme({
     this.color,
     this.elevation,
@@ -36,20 +37,20 @@ class BottomAppBarTheme extends Diagnosticable {
   /// Default value for [BottomAppBar.color].
   ///
   /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
-  final Color color;
+  final Color? color;
 
   /// Default value for [BottomAppBar.elevation].
-  final double elevation;
+  final double? elevation;
 
   /// Default value for [BottomAppBar.shape].
-  final NotchedShape shape;
+  final NotchedShape? shape;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomAppBarTheme copyWith({
-    Color color,
-    double elevation,
-    NotchedShape shape,
+    Color? color,
+    double? elevation,
+    NotchedShape? shape,
   }) {
     return BottomAppBarTheme(
       color: color ?? this.color,
@@ -68,7 +69,7 @@ class BottomAppBarTheme extends Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomAppBarTheme lerp(BottomAppBarTheme a, BottomAppBarTheme b, double t) {
+  static BottomAppBarTheme lerp(BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {
     assert(t != null);
     return BottomAppBarTheme(
       color: Color.lerp(a?.color, b?.color, t),
@@ -87,21 +88,21 @@ class BottomAppBarTheme extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final BottomAppBarTheme typedOther = other;
-    return typedOther.color == color
-        && typedOther.elevation == elevation
-        && typedOther.shape == shape;
+    return other is BottomAppBarTheme
+        && other.color == color
+        && other.elevation == elevation
+        && other.shape == shape;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
   }

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -49,6 +49,62 @@ void main() {
       const LogicalKeyboardKey key2 = LogicalKeyboardKey(0x01, keyLabel: 'label2', debugName: 'key2');
       expect(key1, equals(key1));
       expect(key1, equals(key2));
+    });
+    test('Basic synonyms can be looked up.', () async {
+      expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));
+      expect(LogicalKeyboardKey.controlLeft.synonyms.first, equals(LogicalKeyboardKey.control));
+      expect(LogicalKeyboardKey.altLeft.synonyms.first, equals(LogicalKeyboardKey.alt));
+      expect(LogicalKeyboardKey.metaLeft.synonyms.first, equals(LogicalKeyboardKey.meta));
+      expect(LogicalKeyboardKey.shiftRight.synonyms.first, equals(LogicalKeyboardKey.shift));
+      expect(LogicalKeyboardKey.controlRight.synonyms.first, equals(LogicalKeyboardKey.control));
+      expect(LogicalKeyboardKey.altRight.synonyms.first, equals(LogicalKeyboardKey.alt));
+      expect(LogicalKeyboardKey.metaRight.synonyms.first, equals(LogicalKeyboardKey.meta));
+    });
+    test('Synonyms get collapsed properly.', () async {
+      expect(LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{}), isEmpty);
+      expect(
+          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.metaLeft,
+          }),
+          equals(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shift,
+            LogicalKeyboardKey.control,
+            LogicalKeyboardKey.alt,
+            LogicalKeyboardKey.meta,
+          }));
+      expect(
+          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.controlRight,
+            LogicalKeyboardKey.altRight,
+            LogicalKeyboardKey.metaRight,
+          }),
+          equals(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shift,
+            LogicalKeyboardKey.control,
+            LogicalKeyboardKey.alt,
+            LogicalKeyboardKey.meta,
+          }));
+      expect(
+          LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shiftLeft,
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.altLeft,
+            LogicalKeyboardKey.metaLeft,
+            LogicalKeyboardKey.shiftRight,
+            LogicalKeyboardKey.controlRight,
+            LogicalKeyboardKey.altRight,
+            LogicalKeyboardKey.metaRight,
+          }),
+          equals(<LogicalKeyboardKey>{
+            LogicalKeyboardKey.shift,
+            LogicalKeyboardKey.control,
+            LogicalKeyboardKey.alt,
+            LogicalKeyboardKey.meta,
+          }));
     });
   });
 }

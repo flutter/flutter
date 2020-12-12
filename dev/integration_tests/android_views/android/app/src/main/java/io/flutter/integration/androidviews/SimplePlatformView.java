@@ -1,38 +1,47 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.integration.androidviews;
+package io.flutter.integration.platformviews;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.PixelFormat;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
 public class SimplePlatformView implements PlatformView, MethodChannel.MethodCallHandler {
-    private final View mView;
-    private final MethodChannel mMethodChannel;
-    private final TouchPipe mTouchPipe;
+    private final TextView view;
+    private final MethodChannel methodChannel;
+    private final io.flutter.integration.platformviews.TouchPipe touchPipe;
 
     SimplePlatformView(Context context, MethodChannel methodChannel) {
-        mMethodChannel = methodChannel;
-        mView = new View(context) {
+        this.methodChannel = methodChannel;
+        view = new TextView(context) {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
-                return super.onTouchEvent(event);
+                return true;
             }
         };
-        mView.setBackgroundColor(0xff0000ff);
-        mMethodChannel.setMethodCallHandler(this);
-        mTouchPipe = new TouchPipe(mMethodChannel, mView);
+        view.setTextSize(72);
+        view.setBackgroundColor(0xff0000ff);
+        view.setText("Hello from Android view");
+        this.methodChannel.setMethodCallHandler(this);
+        touchPipe = new io.flutter.integration.platformviews.TouchPipe(this.methodChannel, view);
     }
 
     @Override
     public View getView() {
-        return mView;
+        return view;
     }
 
     @Override
@@ -43,14 +52,52 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
         switch(methodCall.method) {
             case "pipeTouchEvents":
-                mTouchPipe.enable();
+                touchPipe.enable();
                 result.success(null);
                 return;
             case "stopTouchEvents":
-                mTouchPipe.disable();
+                touchPipe.disable();
                 result.success(null);
                 return;
+            case "showAndHideAlertDialog":
+                showAndHideAlertDialog(result);
+                return;
+            case "addWindowAndWaitForClick":
+                addWindow(result);
+                return;
+
         }
         result.notImplemented();
     }
+
+    private void showAndHideAlertDialog(MethodChannel.Result result) {
+        Context context = view.getContext();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        TextView textView = new TextView(context);
+        textView.setText("This alert dialog will close in 1 second");
+        builder.setView(textView);
+        final AlertDialog alertDialog = builder.show();
+        result.success(null);
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                alertDialog.hide();
+            }
+        }, 1000);
+    }
+
+    private void addWindow(final MethodChannel.Result result) {
+        Context context = view.getContext();
+        final Button button = new Button(context);
+        button.setText("This view is added as a window");
+        final WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, 0, PixelFormat.OPAQUE);
+        layoutParams.gravity = Gravity.FILL;
+        windowManager.addView(button, layoutParams);
+        button.setOnClickListener(v -> {
+            windowManager.removeView(button);
+            result.success(null);
+        });
+    }
+
 }

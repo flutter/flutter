@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,11 +16,12 @@ import 'package:flutter/widgets.dart';
 
 // Public API.
 part 'animated_icons/animated_icons.dart';
+
 // Provides a public interface for referring to the private icon
 // implementations.
 part 'animated_icons/animated_icons_data.dart';
 
-// Animated icons data files.
+// Generated animated icon data files.
 part 'animated_icons/data/add_event.g.dart';
 part 'animated_icons/data/arrow_menu.g.dart';
 part 'animated_icons/data/close_menu.g.dart';

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,16 +7,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   group(GlobalMaterialLocalizations, () {
     test('uses exact locale when exists', () async {
-      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT'));
+      final GlobalMaterialLocalizations localizations =
+        await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT')) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10\u00A0000');
     });
 
     test('falls back to language code when exact locale is missing', () async {
-      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX'));
+      final GlobalMaterialLocalizations localizations =
+        await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX')) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10.000');
     });
 
@@ -67,7 +70,8 @@ void main() {
 
     group('formatMinute', () {
       test('formats English', () async {
-        final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US'));
+        final GlobalMaterialLocalizations localizations =
+          await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US')) as GlobalMaterialLocalizations;
         expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
       });
     });
@@ -155,6 +159,28 @@ void main() {
         expect(formatted[DateType.monthYear], 'August 2018');
       });
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/67644.
+  testWidgets('en_US is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
+    late DateFormat dateFormat;
+
+    await tester.pumpWidget(MaterialApp(
+      supportedLocales: const <Locale>[
+        Locale('en', 'US'),
+      ],
+      locale: const Locale('en', 'US'),
+      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+        GlobalMaterialLocalizations.delegate,
+      ],
+      home: Builder(builder: (BuildContext context) {
+        dateFormat = DateFormat('EEE, d MMM yyyy HH:mm:ss', 'en_US');
+
+        return Container();
+      }),
+    ));
+
+    expect(dateFormat.locale, 'en_US');
   });
 }
 

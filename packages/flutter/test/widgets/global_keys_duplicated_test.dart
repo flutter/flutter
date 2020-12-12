@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,13 +53,13 @@ void main() {
     expect(error.toString(), startsWith('Multiple widgets used the same GlobalKey.\n'));
     expect(error.toString(), isNot(contains('different widgets that both had the following description')));
     expect(error.toString(), contains('Container'));
-    expect(error.toString(), contains('Container-[<\'x\'>]'));
+    expect(error.toString(), contains("Container-[<'x'>]"));
     expect(error.toString(), contains('[GlobalObjectKey ${describeIdentity(0)}]'));
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));
   });
 
   testWidgets('GlobalKey children of two nodes', (WidgetTester tester) async {
-    StateSetter nestedSetState;
+    late StateSetter nestedSetState;
     bool flag = false;
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,

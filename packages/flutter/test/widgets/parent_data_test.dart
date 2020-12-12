@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,10 +11,10 @@ import 'test_widgets.dart';
 class TestParentData {
   TestParentData({ this.top, this.right, this.bottom, this.left });
 
-  final double top;
-  final double right;
-  final double bottom;
-  final double left;
+  final double? top;
+  final double? right;
+  final double? bottom;
+  final double? left;
 }
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
@@ -22,21 +22,21 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
     find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement)
   );
   expect(element, isNotNull);
-  expect(element.renderObject is RenderStack, isTrue);
-  final RenderStack renderObject = element.renderObject;
+  expect(element.renderObject, isA<RenderStack>());
+  final RenderStack renderObject = element.renderObject as RenderStack;
   try {
-    RenderObject child = renderObject.firstChild;
-    for (TestParentData expected in expectedParentData) {
-      expect(child is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox decoratedBox = child;
-      expect(decoratedBox.parentData is StackParentData, isTrue);
-      final StackParentData parentData = decoratedBox.parentData;
+    RenderObject? child = renderObject.firstChild;
+    for (final TestParentData expected in expectedParentData) {
+      expect(child, isA<RenderDecoratedBox>());
+      final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
+      expect(decoratedBox.parentData, isA<StackParentData>());
+      final StackParentData parentData = decoratedBox.parentData! as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData;
-      child = decoratedBoxParentData.nextSibling;
+      final StackParentData? decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
+      child = decoratedBoxParentData?.nextSibling;
     }
     expect(child, isNull);
   } catch (e) {
@@ -49,7 +49,6 @@ final TestParentData kNonPositioned = TestParentData();
 
 void main() {
   testWidgets('ParentDataWidget control test', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -251,41 +250,78 @@ void main() {
 
   testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Stack(
+      Directionality(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
-          Positioned(
-            top: 5.0,
-            bottom: 8.0,
-            child: Positioned(
-              top: 6.0,
-              left: 7.0,
-              child: DecoratedBox(decoration: kBoxDecorationB),
+        child: Stack(
+          textDirection: TextDirection.ltr,
+          children: const <Widget>[
+            Positioned(
+              top: 5.0,
+              bottom: 8.0,
+              child: Positioned(
+                top: 6.0,
+                left: 7.0,
+                child: DecoratedBox(decoration: kBoxDecorationB),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
-    expect(tester.takeException(), isFlutterError);
+
+    dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Incorrect use of ParentDataWidget.\n'
+        'The following ParentDataWidgets are providing parent data to the same RenderObject:\n'
+        '- Positioned(left: 7.0, top: 6.0) (typically placed directly inside a Stack widget)\n'
+        '- Positioned(top: 5.0, bottom: 8.0) (typically placed directly inside a Stack widget)\n'
+        'However, a RenderObject can only receive parent data from at most one ParentDataWidget.\n'
+        'Usually, this indicates that at least one of the offending ParentDataWidgets listed '
+        'above is not placed directly inside a compatible ancestor widget.\n'
+        'The ownership chain for the RenderObject that received the parent data was:\n'
+        '  DecoratedBox ← Positioned ← Positioned ← Stack ← Directionality ← [root]'
+      ),
+    );
 
     await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
 
     checkTree(tester, <TestParentData>[]);
 
     await tester.pumpWidget(
-      Container(
-        child: Row(
-          children: const <Widget>[
-            Positioned(
-              top: 6.0,
-              left: 7.0,
-              child: DecoratedBox(decoration: kBoxDecorationB),
-            ),
-          ],
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Container(
+          child: Row(
+            children: const <Widget>[
+              Positioned(
+                top: 6.0,
+                left: 7.0,
+                child: DecoratedBox(decoration: kBoxDecorationB),
+              ),
+            ],
+          ),
         ),
       ),
     );
-    expect(tester.takeException(), isFlutterError);
+    exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Incorrect use of ParentDataWidget.\n'
+        'The ParentDataWidget Positioned(left: 7.0, top: 6.0) wants to apply ParentData of type '
+        'StackParentData to a RenderObject, which has been set up to accept ParentData of '
+        'incompatible type FlexParentData.\n'
+        'Usually, this means that the Positioned widget has the wrong ancestor RenderObjectWidget. '
+        'Typically, Positioned widgets are placed directly inside Stack widgets.\n'
+        'The offending Positioned is currently placed inside a Row widget.\n'
+        'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
+        '  DecoratedBox ← Positioned ← Row ← Container ← Directionality ← [root]'
+      ),
+    );
 
     await tester.pumpWidget(
       Stack(textDirection: TextDirection.ltr)
@@ -353,19 +389,129 @@ void main() {
   });
 
   testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
-    await tester.pumpWidget(Row(
-      children: <Widget>[
-        Stack(
-        textDirection: TextDirection.ltr,
-          children: <Widget>[
-            Expanded(
-              child: Container(),
-            ),
-          ],
-        ),
-      ],
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        children: <Widget>[
+          Stack(
+            textDirection: TextDirection.ltr,
+            children: <Widget>[
+              Expanded(
+                child: Container(),
+              ),
+            ],
+          ),
+        ],
+      ),
     ));
 
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Incorrect use of ParentDataWidget.\n'
+        'The ParentDataWidget Expanded(flex: 1) wants to apply ParentData of type '
+        'FlexParentData to a RenderObject, which has been set up to accept ParentData of '
+        'incompatible type StackParentData.\n'
+        'Usually, this means that the Expanded widget has the wrong ancestor RenderObjectWidget. '
+        'Typically, Expanded widgets are placed directly inside Flex widgets.\n'
+        'The offending Expanded is currently placed inside a Stack widget.\n'
+        'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
+        '  LimitedBox ← Container ← Expanded ← Stack ← Row ← Directionality ← [root]'
+      ),
+    );
   });
+
+  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      OneAncestorWidget(
+        child: Container(),
+      ),
+    );
+    DummyParentData parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
+    expect(parentData.string, isNull);
+
+    await tester.pumpWidget(
+      OneAncestorWidget(
+        child: TestParentDataWidget(
+          string: 'Foo',
+          child: Container(),
+        ),
+      ),
+    );
+    parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
+    expect(parentData.string, 'Foo');
+
+    await tester.pumpWidget(
+      AnotherAncestorWidget(
+        child: TestParentDataWidget(
+          string: 'Bar',
+          child: Container(),
+        ),
+      ),
+    );
+    parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
+    expect(parentData.string, 'Bar');
+  });
+}
+
+class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
+  const TestParentDataWidget({
+    Key? key,
+    required this.string,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  final String string;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is DummyParentData);
+    final DummyParentData parentData = renderObject.parentData! as DummyParentData;
+    parentData.string = string;
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => OneAncestorWidget;
+}
+
+class DummyParentData extends ParentData {
+  String? string;
+}
+
+class OneAncestorWidget extends SingleChildRenderObjectWidget {
+  const OneAncestorWidget({
+    Key? key,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderOne createRenderObject(BuildContext context) => RenderOne();
+}
+
+class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
+  const AnotherAncestorWidget({
+    Key? key,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderAnother createRenderObject(BuildContext context) => RenderAnother();
+}
+
+class RenderOne extends RenderProxyBox {
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! DummyParentData)
+      child.parentData = DummyParentData();
+  }
+}
+
+class RenderAnother extends RenderProxyBox {
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! DummyParentData)
+      child.parentData = DummyParentData();
+  }
 }

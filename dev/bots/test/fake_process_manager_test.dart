@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,7 +34,7 @@ void main() {
         ],
       };
       processManager.fakeResults = calls;
-      for (String key in calls.keys) {
+      for (final String key in calls.keys) {
         final Process process = await processManager.start(key.split(' '));
         String output = '';
         process.stdout.listen((List<int> item) {
@@ -56,7 +56,7 @@ void main() {
         ],
       };
       processManager.fakeResults = calls;
-      for (String key in calls.keys) {
+      for (final String key in calls.keys) {
         final ProcessResult result = await processManager.run(key.split(' '));
         expect(result.stdout, equals(calls[key][0].stdout));
       }
@@ -73,7 +73,7 @@ void main() {
         ],
       };
       processManager.fakeResults = calls;
-      for (String key in calls.keys) {
+      for (final String key in calls.keys) {
         final ProcessResult result = processManager.runSync(key.split(' '));
         expect(result.stdout, equals(calls[key][0].stdout));
       }
@@ -90,7 +90,7 @@ void main() {
         ],
       };
       processManager.fakeResults = calls;
-      for (String key in calls.keys) {
+      for (final String key in calls.keys) {
         final Process process = await processManager.start(key.split(' '));
         String output = '';
         process.stdout.listen((List<int> item) {

@@ -18,7 +18,7 @@ The Material and Cupertino libraries use
 [Application Resource Bundle](https://code.google.com/p/arb/wiki/ApplicationResourceBundleSpecification)
 files, which have a `.arb` extension, to store localized translations
 of messages, format strings, and other values. This format is also
-used by the Dart [intl](https://pub.dartlang.org/packages/intl)
+used by the Dart [intl](https://pub.dev/packages/intl)
 package and it is supported by the
 [Google Translators Toolkit](https://translate.google.com/toolkit).
 
@@ -165,7 +165,7 @@ app called `gen_localizations`.
 You can see what that script would generate by running this command:
 
 ```dart
-dart dev/tools/localizations/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
+dart dev/tools/localizations/bin/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
 ```
 
 The gen_localizations app just combines the contents of all of the
@@ -182,9 +182,35 @@ To in-place update the generated localizations file using the default
 values, you can just run:
 
 ```dart
-dart dev/tools/localizations/gen_localizations.dart --overwrite
+dart dev/tools/localizations/bin/gen_localizations.dart --overwrite
 ```
 
+
+### Special handling for the Kannada (kn) translations
+
+Originally, the cupertino_kn.arb and material_kn.arb files contained unicode
+characters that can cause current versions of Emacs on Linux to crash. There is
+more information here: https://github.com/flutter/flutter/issues/36704.
+
+Rather than risking developers' editor sessions, the strings in these arb files
+(and the code generated for them) have been encoded using the appropriate
+escapes for JSON and Dart. The JSON format arb files were rewritten with
+dev/tools/localization/bin/encode_kn_arb_files.dart. The localizations code
+generator uses generateEncodedString()
+from dev/tools/localization/localizations_utils.dart.
+
+### Support for Pashto (ps) translations
+
+When Flutter first set up i18n for the Material library, Pashto (ps)
+translations were included for the first set of Material widgets.
+However, Pashto was never set up to be continuously maintained in
+Flutter by Google, so material_ps.arb was never updated beyond the
+initial commit.
+
+To prevent breaking applications that rely on these original Pashto
+translations, they will be kept. However, all new strings will have
+the English translation until support for Pashto is provided.
+See https://github.com/flutter/flutter/issues/60598.
 
 ### Translations Status, Reporting Errors
 
@@ -194,7 +220,7 @@ Google contributes translations for all the languages supported by
 this package. (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
-[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=BUG.md).
+[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=2_bug.md).
 
 
 ### See Also
@@ -207,5 +233,5 @@ ordinary Flutter app.
 covers the `.arb` file format used to store localized translations
 of messages, format strings, and other values.
 
-The Dart [intl](https://pub.dartlang.org/packages/intl)
+The Dart [intl](https://pub.dev/packages/intl)
 package supports internationalization.

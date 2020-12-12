@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,11 +29,11 @@ class BouncingScrollSimulation extends Simulation {
   /// for the `spring` description if it is omitted; these defaults assume
   /// that the unit of length is the logical pixel.
   BouncingScrollSimulation({
-    @required double position,
-    @required double velocity,
-    @required this.leadingExtent,
-    @required this.trailingExtent,
-    @required this.spring,
+    required double position,
+    required double velocity,
+    required this.leadingExtent,
+    required this.trailingExtent,
+    required this.spring,
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : assert(position != null),
        assert(velocity != null),
@@ -49,6 +49,8 @@ class BouncingScrollSimulation extends Simulation {
       _springSimulation = _overscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
     } else {
+      // Taken from UIScrollView.decelerationRate (.normal = 0.998)
+      // 0.998^1000 = ~0.135
       _frictionSimulation = FrictionSimulation(0.135, position, velocity);
       final double finalX = _frictionSimulation.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
@@ -87,9 +89,9 @@ class BouncingScrollSimulation extends Simulation {
   /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
   final SpringDescription spring;
 
-  FrictionSimulation _frictionSimulation;
-  Simulation _springSimulation;
-  double _springTime;
+  late FrictionSimulation _frictionSimulation;
+  late Simulation _springSimulation;
+  late double _springTime;
   double _timeOffset = 0.0;
 
   Simulation _underscrollSimulation(double x, double dx) {
@@ -101,7 +103,7 @@ class BouncingScrollSimulation extends Simulation {
   }
 
   Simulation _simulation(double time) {
-    Simulation simulation;
+    final Simulation simulation;
     if (time > _springTime) {
       _timeOffset = _springTime.isFinite ? _springTime : 0.0;
       simulation = _springSimulation;
@@ -123,7 +125,7 @@ class BouncingScrollSimulation extends Simulation {
 
   @override
   String toString() {
-    return '$runtimeType(leadingExtent: $leadingExtent, trailingExtent: $trailingExtent)';
+    return '${objectRuntimeType(this, 'BouncingScrollSimulation')}(leadingExtent: $leadingExtent, trailingExtent: $trailingExtent)';
   }
 }
 
@@ -141,8 +143,8 @@ class BouncingScrollSimulation extends Simulation {
 class ClampingScrollSimulation extends Simulation {
   /// Creates a scroll physics simulation that matches Android scrolling.
   ClampingScrollSimulation({
-    @required this.position,
-    @required this.velocity,
+    required this.position,
+    required this.velocity,
     this.friction = 0.015,
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration),
@@ -163,8 +165,8 @@ class ClampingScrollSimulation extends Simulation {
   /// The more friction the particle experiences, the sooner it stops.
   final double friction;
 
-  double _duration;
-  double _distance;
+  late double _duration;
+  late double _distance;
 
   // See DECELERATION_RATE.
   static final double _kDecelerationRate = math.log(0.78) / math.log(0.9);

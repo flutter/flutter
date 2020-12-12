@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
+class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _TestSliverPersistentHeaderDelegate({
+    required this.minExtent,
+    required this.maxExtent,
+    required this.child,
+    this.vsync = const TestVSync(),
+    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
+  });
+
+  final Widget child;
+
+  @override
+  final double maxExtent;
+
+  @override
+  final double minExtent;
+
+  @override
+  final TickerProvider? vsync;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;
+
+  @override
+  bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
+}
 
 void main() {
   const TextStyle textStyle = TextStyle();
@@ -195,34 +224,36 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
   });
 
-  testWidgets('entering text does not scroll a sourrounding PageView', (WidgetTester tester) async {
+  testWidgets('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
 
     final TextEditingController textController = TextEditingController();
     final PageController pageController = PageController(initialPage: 1);
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: PageView(
-              controller: pageController,
-              children: <Widget>[
-                Container(
-                  color: Colors.red,
-                ),
-                Container(
-                  child: TextField(
-                    controller: textController,
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: PageView(
+                controller: pageController,
+                children: <Widget>[
+                  Container(
+                    color: Colors.red,
                   ),
-                  color: Colors.green,
-                ),
-                Container(
-                  color: Colors.red,
-                ),
-              ],
+                  Container(
+                    child: TextField(
+                      controller: textController,
+                    ),
+                    color: Colors.green,
+                  ),
+                  Container(
+                    color: Colors.red,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -257,7 +288,7 @@ void main() {
             children: <Widget>[
               EditableText(
                 backgroundCursorColor: Colors.grey,
-                maxLines: null, // multi-line
+                maxLines: null, // multiline
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,
@@ -335,16 +366,141 @@ void main() {
     expect(scrollController.offset, greaterThan(0.0));
     expect(find.byKey(container), findsNothing);
   });
+
+  testWidgets(
+    'A pinned persistent header should not scroll when its descendant EditableText gains focus',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/25507.
+      ScrollController controller;
+      final TextEditingController textEditingController = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+
+      const Key headerKey = Key('header');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: SizedBox(
+              height: 600.0,
+              width: 600.0,
+              child: CustomScrollView(
+                controller: controller = ScrollController(initialScrollOffset: 0),
+                slivers: List<Widget>.generate(50, (int i) {
+                  return i == 10
+                  ? SliverPersistentHeader(
+                    pinned: true,
+                    floating: false,
+                    delegate: _TestSliverPersistentHeaderDelegate(
+                      minExtent: 50,
+                      maxExtent: 50,
+                      child: Container(
+                        alignment: Alignment.topCenter,
+                        child: EditableText(
+                          key: headerKey,
+                          backgroundCursorColor: Colors.grey,
+                          controller: textEditingController,
+                          focusNode: focusNode,
+                          style: textStyle,
+                          cursorColor: cursorColor,
+                        ),
+                      ),
+                    ),
+                  )
+                  : SliverToBoxAdapter(
+                    child: Container(
+                      height: 100.0,
+                      child: Text('Tile $i'),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The persistent header should now be pinned at the top.
+      controller.jumpTo(100.0 * 15);
+      await tester.pumpAndSettle();
+      expect(controller.offset, 100.0 * 15);
+
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+      // The scroll offset should remain the same.
+      expect(controller.offset, 100.0 * 15);
+  });
+
+  testWidgets(
+    'A pinned persistent header should not scroll when its descendant EditableText gains focus (no animation)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/25507.
+      ScrollController controller;
+      final TextEditingController textEditingController = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+
+      const Key headerKey = Key('header');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: SizedBox(
+              height: 600.0,
+              width: 600.0,
+              child: CustomScrollView(
+                controller: controller = ScrollController(initialScrollOffset: 0),
+                slivers: List<Widget>.generate(50, (int i) {
+                  return i == 10
+                    ? SliverPersistentHeader(
+                      pinned: true,
+                      floating: false,
+                      delegate: _TestSliverPersistentHeaderDelegate(
+                        minExtent: 50,
+                        maxExtent: 50,
+                        vsync: null,
+                        child: Container(
+                          alignment: Alignment.topCenter,
+                          child: EditableText(
+                            key: headerKey,
+                            backgroundCursorColor: Colors.grey,
+                            controller: textEditingController,
+                            focusNode: focusNode,
+                            style: textStyle,
+                            cursorColor: cursorColor,
+                          ),
+                        ),
+                      ),
+                    )
+                    : SliverToBoxAdapter(
+                      child: Container(
+                        height: 100.0,
+                        child: Text('Tile $i'),
+                      ),
+                    );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The persistent header should now be pinned at the top.
+      controller.jumpTo(100.0 * 15);
+      await tester.pumpAndSettle();
+      expect(controller.offset, 100.0 * 15);
+
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+      // The scroll offset should remain the same.
+      expect(controller.offset, 100.0 * 15);
+  });
 }
 
 class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const NoImplicitScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  const NoImplicitScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
 
   @override
   bool get allowImplicitScrolling => false;
 
   @override
-  NoImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
+  NoImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
 }

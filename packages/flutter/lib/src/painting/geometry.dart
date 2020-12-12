@@ -1,10 +1,9 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'dart:math' as math;
 
 import 'basic_types.dart';
 
@@ -39,10 +38,10 @@ import 'basic_types.dart';
 ///
 /// The arguments must not be null.
 Offset positionDependentBox({
-  @required Size size,
-  @required Size childSize,
-  @required Offset target,
-  @required bool preferBelow,
+  required Size size,
+  required Size childSize,
+  required Offset target,
+  required bool preferBelow,
   double verticalOffset = 0.0,
   double margin = 10.0,
 }) {

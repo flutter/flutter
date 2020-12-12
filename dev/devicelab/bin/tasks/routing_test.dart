@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 void main() {
@@ -34,7 +35,8 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '--disable-service-auth-codes', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
+        // --fast-start does not support routes.
+        <String>['run', '--verbose', '--disable-service-auth-codes', '--no-fast-start', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
       );
       run.stdout
         .transform<String>(utf8.decoder)
@@ -80,6 +82,9 @@ void main() {
         });
       int result;
       result = await drive.exitCode;
+      await flutter('install', options: <String>[
+        '--uninstall-only',
+      ]);
       if (result != 0)
         throw 'Failed to drive test app (exit code $result).';
       result = await run.exitCode;

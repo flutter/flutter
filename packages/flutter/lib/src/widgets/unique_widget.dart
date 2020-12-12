@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,18 +23,18 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   /// The [key] argument must not be null because it identifies the unique
   /// inflated instance of this widget.
   const UniqueWidget({
-    @required GlobalKey<T> key,
+    required GlobalKey<T> key,
   }) : assert(key != null),
        super(key: key);
 
   @override
-  T createState();
+  T createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
 
   /// The state for the unique inflated instance of this widget.
   ///
   /// Might be null if the widget is not currently in the tree.
-  T get currentState {
-    final GlobalKey<T> globalKey = key;
+  T? get currentState {
+    final GlobalKey<T> globalKey = key! as GlobalKey<T>;
     return globalKey.currentState;
   }
 }

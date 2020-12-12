@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // String userAvatarUrl;
 
 /// A circle that represents a user.
@@ -17,7 +18,10 @@ import 'theme_data.dart';
 /// such an image, the user's initials. A given user's initials should
 /// always be paired with the same background color, for consistency.
 ///
-/// {@tool sample}
+/// The [onBackgroundImageError] parameter must be null if the [backgroundImage]
+/// is null.
+///
+/// {@tool snippet}
 ///
 /// If the avatar is to have an image, the image should be specified in the
 /// [backgroundImage] property:
@@ -31,7 +35,7 @@ import 'theme_data.dart';
 ///
 /// The image will be cropped to have a circle shape.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// If the avatar is to just have the user's initials, they are typically
 /// provided using a [Text] widget as the [child] and a [backgroundColor]:
@@ -53,22 +57,24 @@ import 'theme_data.dart';
 class CircleAvatar extends StatelessWidget {
   /// Creates a circle that represents a user.
   const CircleAvatar({
-    Key key,
+    Key? key,
     this.child,
     this.backgroundColor,
     this.backgroundImage,
+    this.onBackgroundImageError,
     this.foregroundColor,
     this.radius,
     this.minRadius,
     this.maxRadius,
   }) : assert(radius == null || (minRadius == null && maxRadius == null)),
+       assert(backgroundImage != null || onBackgroundImageError == null),
        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget. If the [CircleAvatar] is to have an image, use
   /// [backgroundImage] instead.
-  final Widget child;
+  final Widget? child;
 
   /// The color with which to fill the circle. Changing the background
   /// color will cause the avatar to animate to the new color.
@@ -76,7 +82,7 @@ class CircleAvatar extends StatelessWidget {
   /// If a [backgroundColor] is not specified, the theme's
   /// [ThemeData.primaryColorLight] is used with dark foreground colors, and
   /// [ThemeData.primaryColorDark] with light foreground colors.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// The default text color for text in the circle.
   ///
@@ -85,13 +91,17 @@ class CircleAvatar extends StatelessWidget {
   ///
   /// Defaults to [ThemeData.primaryColorLight] for dark background colors, and
   /// [ThemeData.primaryColorDark] for light background colors.
-  final Color foregroundColor;
+  final Color? foregroundColor;
 
   /// The background image of the circle. Changing the background
   /// image will cause the avatar to animate to the new image.
   ///
   /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
-  final ImageProvider backgroundImage;
+  final ImageProvider? backgroundImage;
+
+  /// An optional error callback for errors emitted when loading
+  /// [backgroundImage].
+  final ImageErrorListener? onBackgroundImageError;
 
   /// The size of the avatar, expressed as the radius (half the diameter).
   ///
@@ -105,7 +115,7 @@ class CircleAvatar extends StatelessWidget {
   ///
   /// Changes to the [radius] are animated (including changing from an explicit
   /// [radius] to a [minRadius]/[maxRadius] pair or vice versa).
-  final double radius;
+  final double? radius;
 
   /// The minimum size of the avatar, expressed as the radius (half the
   /// diameter).
@@ -121,7 +131,7 @@ class CircleAvatar extends StatelessWidget {
   /// However, if the [minRadius] is 40 and the [CircleAvatar] has a parent
   /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
   /// the size will snap to 40 pixels instantly.
-  final double minRadius;
+  final double? minRadius;
 
   /// The maximum size of the avatar, expressed as the radius (half the
   /// diameter).
@@ -137,7 +147,7 @@ class CircleAvatar extends StatelessWidget {
   /// However, if the [maxRadius] is 40 and the [CircleAvatar] has a parent
   /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
   /// the size will snap to 40 pixels instantly.
-  final double maxRadius;
+  final double? maxRadius;
 
   // The default radius if nothing is specified.
   static const double _defaultRadius = 20.0;
@@ -166,10 +176,10 @@ class CircleAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    TextStyle textStyle = theme.primaryTextTheme.subhead.copyWith(color: foregroundColor);
-    Color effectiveBackgroundColor = backgroundColor;
+    TextStyle textStyle = theme.primaryTextTheme.subtitle1!.copyWith(color: foregroundColor);
+    Color? effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
+      switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
         case Brightness.dark:
           effectiveBackgroundColor = theme.primaryColorLight;
           break;
@@ -178,7 +188,7 @@ class CircleAvatar extends StatelessWidget {
           break;
       }
     } else if (foregroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
+      switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
         case Brightness.dark:
           textStyle = textStyle.copyWith(color: theme.primaryColorLight);
           break;
@@ -200,7 +210,11 @@ class CircleAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveBackgroundColor,
         image: backgroundImage != null
-          ? DecorationImage(image: backgroundImage, fit: BoxFit.cover)
+          ? DecorationImage(
+              image: backgroundImage!,
+              onError: onBackgroundImageError,
+              fit: BoxFit.cover,
+            )
           : null,
         shape: BoxShape.circle,
       ),
@@ -215,7 +229,7 @@ class CircleAvatar extends StatelessWidget {
                   data: theme.iconTheme.copyWith(color: textStyle.color),
                   child: DefaultTextStyle(
                     style: textStyle,
-                    child: child,
+                    child: child!,
                   ),
                 ),
               ),

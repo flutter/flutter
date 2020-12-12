@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,21 +13,31 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
     (Element element) => element is MultiChildRenderObjectElement
   ));
   expect(element, isNotNull);
-  expect(element.renderObject is RenderStack, isTrue);
-  final RenderStack renderObject = element.renderObject;
+  expect(element.renderObject, isA<RenderStack>());
+  final RenderStack renderObject = element.renderObject as RenderStack;
   try {
-    RenderObject child = renderObject.firstChild;
-    for (BoxDecoration decoration in expectedDecorations) {
-      expect(child is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox decoratedBox = child;
+    RenderObject? child = renderObject.firstChild;
+    for (final BoxDecoration decoration in expectedDecorations) {
+      expect(child, isA<RenderDecoratedBox>());
+      final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
       expect(decoratedBox.decoration, equals(decoration));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData;
+      final StackParentData decoratedBoxParentData = decoratedBox.parentData! as StackParentData;
       child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);
   } catch (e) {
     print(renderObject.toStringDeep());
     rethrow;
+  }
+}
+
+class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
+  MockMultiChildRenderObjectWidget({ Key? key, required List<Widget> children }) : super(key: key, children: children);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    assert(false);
+    return FakeRenderObject();
   }
 }
 
@@ -345,4 +355,11 @@ void main() {
 
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
   });
+}
+
+class FakeRenderObject extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
 }

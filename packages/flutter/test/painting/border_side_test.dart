@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,9 +15,6 @@ void main() {
         style: BorderStyle.solid,
       ),
     );
-    expect(() => BorderSide(color: nonconst(null)), throwsAssertionError);
-    expect(() => BorderSide(width: nonconst(null)), throwsAssertionError);
-    expect(() => BorderSide(style: nonconst(null)), throwsAssertionError);
     expect(() => BorderSide(width: nonconst(-1.0)), throwsAssertionError);
     expect(
       const BorderSide(width: -0.0),
@@ -54,11 +51,8 @@ void main() {
     expect(      BorderSide.canMerge(none3, BorderSide.none), isTrue);
     expect(      BorderSide.canMerge(none3, side2), isFalse);
     expect(      BorderSide.canMerge(none3, yellowNone), isTrue);
-    expect(() => BorderSide.canMerge(null, null), throwsAssertionError);
-    expect(() => BorderSide.canMerge(null, side2), throwsAssertionError);
     expect(      BorderSide.canMerge(side2, BorderSide.none), isTrue);
     expect(      BorderSide.canMerge(side2, none3), isFalse);
-    expect(() => BorderSide.canMerge(side2, null), throwsAssertionError);
     expect(      BorderSide.canMerge(side2, side3), isTrue);
     expect(      BorderSide.canMerge(side2, yellowNone), isTrue);
     expect(      BorderSide.canMerge(side3, side2), isTrue);
@@ -76,11 +70,8 @@ void main() {
     expect(      BorderSide.merge(none3, BorderSide.none), none3);
     expect(() => BorderSide.merge(none3, side2), throwsAssertionError);
     expect(      BorderSide.merge(none3, yellowNone), none3);
-    expect(() => BorderSide.merge(null, null), throwsAssertionError);
-    expect(() => BorderSide.merge(null, side2), throwsAssertionError);
     expect(      BorderSide.merge(side2, BorderSide.none), side2);
     expect(() => BorderSide.merge(side2, none3), throwsAssertionError);
-    expect(() => BorderSide.merge(side2, null), throwsAssertionError);
     expect(      BorderSide.merge(side2, side3), side5);
     expect(      BorderSide.merge(side2, yellowNone), side2);
     expect(      BorderSide.merge(side3, side2), side5);
@@ -121,7 +112,7 @@ void main() {
     expect(paint2.color, const Color(0x00000000));
     expect(paint2.blendMode, BlendMode.srcOver);
   });
-  test('BorderSide - won\'t lerp into negative widths', () {
+  test("BorderSide - won't lerp into negative widths", () {
     const BorderSide side0 = BorderSide(width: 0.0);
     const BorderSide side1 = BorderSide(width: 1.0);
     const BorderSide side2 = BorderSide(width: 2.0);

@@ -1,12 +1,13 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
 import 'package:dart_style/dart_style.dart';
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 
 import 'configuration.dart';
 
@@ -47,7 +48,7 @@ class SnippetGenerator {
   static DartFormatter formatter = DartFormatter(pageWidth: 80, fixes: StyleFix.all);
 
   /// This returns the output file for a given snippet ID. Only used for
-  /// [SnippetType.application] snippets.
+  /// [SnippetType.sample] snippets.
   File getOutputFile(String id) => File(path.join(configuration.outputDirectory.path, '$id.dart'));
 
   /// Gets the path to the template file requested.
@@ -59,8 +60,8 @@ class SnippetGenerator {
 
   /// Injects the [injections] into the [template], and turning the
   /// "description" injection into a comment. Only used for
-  /// [SnippetType.application] snippets.
-  String interpolateTemplate(List<_ComponentTuple> injections, String template) {
+  /// [SnippetType.sample] snippets.
+  String interpolateTemplate(List<_ComponentTuple> injections, String template, Map<String, Object> metadata) {
     final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
     return template.replaceAllMapped(moustacheRegExp, (Match match) {
       if (match[1] == 'description') {
@@ -82,12 +83,12 @@ class SnippetGenerator {
         return description.join('\n').trim();
       } else {
         // If the match isn't found in the injections, then just remove the
-        // moustache reference, since we want to allow the sections to be
+        // mustache reference, since we want to allow the sections to be
         // "optional" in the input: users shouldn't be forced to add an empty
         // "```dart preamble" section if that section would be empty.
-        return injections
-            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null)
-            ?.mergedContent ?? '';
+        final _ComponentTuple result = injections
+            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null);
+        return result?.mergedContent ?? (metadata[match[1]] ?? '').toString();
       }
     }).trim();
   }
@@ -98,12 +99,12 @@ class SnippetGenerator {
   /// components, and we care about the order of the injections.
   ///
   /// Takes into account the [type] and doesn't substitute in the id and the app
-  /// if not a [SnippetType.application] snippet.
+  /// if not a [SnippetType.sample] snippet.
   String interpolateSkeleton(SnippetType type, List<_ComponentTuple> injections, String skeleton, Map<String, Object> metadata) {
     final List<String> result = <String>[];
     const HtmlEscape htmlEscape = HtmlEscape();
     String language;
-    for (_ComponentTuple injection in injections) {
+    for (final _ComponentTuple injection in injections) {
       if (!injection.name.startsWith('code')) {
         continue;
       }
@@ -123,19 +124,27 @@ class SnippetGenerator {
     description = description.trim().isNotEmpty
         ? '<div class="snippet-description">{@end-inject-html}$description{@inject-html}</div>'
         : '';
+
+    // DartPad only supports stable or master as valid channels. Use master
+    // if not on stable so that local runs will work (although they will
+    // still take their sample code from the master docs server).
+    final String channel = metadata['channel'] == 'stable' ? 'stable' : 'master';
+
     final Map<String, String> substitutions = <String, String>{
       'description': description,
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
-    }..addAll(type == SnippetType.application
-        ? <String, String>{
-            'serial': metadata['serial'].toString() ?? '0',
-            'id':
-                injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent,
-            'app':
-                htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent),
-          }
-        : <String, String>{'serial': '', 'id': '', 'app': ''});
+      'serial': '',
+      'id': metadata['id'] as String,
+      'channel': channel,
+      'element': metadata['element'] as String ?? '',
+      'app': '',
+    };
+    if (type == SnippetType.sample) {
+      substitutions
+        ..['serial'] = metadata['serial']?.toString() ?? '0'
+        ..['app'] = htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent);
+    }
     return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
       return substitutions[match[1]];
     });
@@ -150,7 +159,7 @@ class SnippetGenerator {
     final List<_ComponentTuple> components = <_ComponentTuple>[];
     String language;
     final RegExp codeStartEnd = RegExp(r'^\s*```([-\w]+|[-\w]+ ([-\w]+))?\s*$');
-    for (String line in input.split('\n')) {
+    for (final String line in input.split('\n')) {
       final Match match = codeStartEnd.firstMatch(line);
       if (match != null) { // If we saw the start or end of a code block
         inCodeBlock = !inCodeBlock;
@@ -175,7 +184,8 @@ class SnippetGenerator {
     }
     return <_ComponentTuple>[
       _ComponentTuple('description', description),
-    ]..addAll(components);
+      ...components,
+    ];
   }
 
   String _loadFileAsUtf8(File file) {
@@ -185,7 +195,7 @@ class SnippetGenerator {
   String _addLineNumbers(String app) {
     final StringBuffer buffer = StringBuffer();
     int count = 0;
-    for (String line in app.split('\n')) {
+    for (final String line in app.split('\n')) {
       count++;
       buffer.writeln('${count.toString().padLeft(5, ' ')}: $line');
     }
@@ -198,22 +208,35 @@ class SnippetGenerator {
   /// comment markers).
   ///
   /// The [type] is the type of snippet to create: either a
-  /// [SnippetType.application] or a [SnippetType.sample].
+  /// [SnippetType.sample] or a [SnippetType.snippet].
+  ///
+  /// [showDartPad] indicates whether DartPad should be shown where possible.
+  /// Currently, this value only has an effect if [type] is
+  /// [SnippetType.sample], in which case an alternate skeleton file is
+  /// used to create the final HTML output.
   ///
   /// The [template] must not be null if the [type] is
-  /// [SnippetType.application], and specifies the name of the template to use
+  /// [SnippetType.sample], and specifies the name of the template to use
   /// for the application code.
   ///
   /// The [id] is a string ID to use for the output file, and to tell the user
   /// about in the `flutter create` hint. It must not be null if the [type] is
-  /// [SnippetType.application].
-  String generate(File input, SnippetType type, {String template, String id, File output, Map<String, Object> metadata}) {
-    assert(template != null || type != SnippetType.application);
-    assert(id != null || type != SnippetType.application);
+  /// [SnippetType.sample].
+  String generate(
+    File input,
+    SnippetType type, {
+    bool showDartPad = false,
+    String template,
+    File output,
+    @required Map<String, Object> metadata,
+  }) {
+    assert(template != null || type != SnippetType.sample);
+    assert(metadata != null && metadata['id'] != null);
     assert(input != null);
+    assert(!showDartPad || type == SnippetType.sample, 'Only application samples work with dartpad.');
     final List<_ComponentTuple> snippetData = parseInput(_loadFileAsUtf8(input));
     switch (type) {
-      case SnippetType.application:
+      case SnippetType.sample:
         final Directory templatesDir = configuration.templatesDirectory;
         if (templatesDir == null) {
           stderr.writeln('Unable to find the templates directory.');
@@ -225,9 +248,8 @@ class SnippetGenerator {
               'The template $template was not found in the templates directory ${templatesDir.path}');
           exit(1);
         }
-        snippetData.add(_ComponentTuple('id', <String>[id]));
         final String templateContents = _loadFileAsUtf8(templateFile);
-        String app = interpolateTemplate(snippetData, templateContents);
+        String app = interpolateTemplate(snippetData, templateContents, metadata);
 
         try {
           app = formatter.format(app);
@@ -237,7 +259,7 @@ class SnippetGenerator {
         }
 
         snippetData.add(_ComponentTuple('app', app.split('\n')));
-        final File outputFile = output ?? getOutputFile(id);
+        final File outputFile = output ?? getOutputFile(metadata['id'] as String);
         stderr.writeln('Writing to ${outputFile.absolute.path}');
         outputFile.writeAsStringSync(app);
 
@@ -248,20 +270,17 @@ class SnippetGenerator {
           (_ComponentTuple data) => data.name == 'description',
           orElse: () => null,
         );
-        metadata ??= <String, Object>{};
         metadata.addAll(<String, Object>{
-          'id': id,
           'file': path.basename(outputFile.path),
-          'description': description != null
-              ? description.mergedContent
-              : null,
+          'description': description?.mergedContent,
         });
         metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;
-      case SnippetType.sample:
+      case SnippetType.snippet:
         break;
     }
-    final String skeleton = _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type));
+    final String skeleton =
+        _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type, showDartPad: showDartPad));
     return interpolateSkeleton(type, snippetData, skeleton, metadata);
   }
 }

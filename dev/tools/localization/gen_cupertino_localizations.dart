@@ -1,8 +1,12 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'localizations_utils.dart';
 
 HeaderGenerator generateCupertinoHeader = (String regenerateInstructions) {
   return '''
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +16,6 @@ HeaderGenerator generateCupertinoHeader = (String regenerateInstructions) {
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -34,16 +37,16 @@ ConstructorGenerator generateCupertinoConstructor = (LocaleInfo locale) {
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
-  const CupertinoLocalization${camelCase(locale)}({
+  const CupertinoLocalization${locale.camelCase()}({
     String localeName = '$localeName',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat dayFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat singleDigitHourFormat,
-    @required intl.DateFormat singleDigitMinuteFormat,
-    @required intl.DateFormat doubleDigitMinuteFormat,
-    @required intl.DateFormat singleDigitSecondFormat,
-    @required intl.NumberFormat decimalFormat,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
@@ -60,7 +63,7 @@ ConstructorGenerator generateCupertinoConstructor = (LocaleInfo locale) {
 const String cupertinoFactoryName = 'getCupertinoTranslation';
 
 const String cupertinoFactoryDeclaration = '''
-GlobalCupertinoLocalizations getCupertinoTranslation(
+GlobalCupertinoLocalizations? getCupertinoTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
   intl.DateFormat dayFormat,

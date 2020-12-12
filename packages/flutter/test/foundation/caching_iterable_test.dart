@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import '../flutter_test_alternative.dart';
 
-int yieldCount;
+int yieldCount = 0;
 
 Iterable<int> range(int start, int end) sync* {
   assert(yieldCount == 0);
@@ -55,7 +55,7 @@ void main() {
     final Iterable<int> integers = CachingIterable<int>(range(1, 5).iterator);
     expect(yieldCount, equals(0));
 
-    final Iterable<int> evens = integers.where((int i) => i % 2 == 0);
+    final Iterable<int> evens = integers.where((int i) => i.isEven);
     expect(yieldCount, equals(0));
 
     expect(evens.first, equals(2));

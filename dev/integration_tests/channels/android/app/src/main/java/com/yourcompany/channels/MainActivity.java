@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,22 +9,26 @@ import java.nio.ByteBuffer;
 import java.util.Date;
 
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 
-import io.flutter.app.FlutterActivity;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.*;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    GeneratedPluginRegistrant.registerWith(this);
-    setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "binary-msg", BinaryCodec.INSTANCE));
-    setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "string-msg", StringCodec.INSTANCE));
-    setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "json-msg", JSONMessageCodec.INSTANCE));
-    setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", ExtendedStandardMessageCodec.INSTANCE));
-    setupMethodHandshake(new MethodChannel(getFlutterView(), "json-method", JSONMethodCodec.INSTANCE));
-    setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", new StandardMethodCodec(ExtendedStandardMessageCodec.INSTANCE)));
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    super.configureFlutterEngine(flutterEngine);
+
+    DartExecutor dartExecutor = flutterEngine.getDartExecutor();
+    setupMessageHandshake(new BasicMessageChannel<>(dartExecutor, "binary-msg", BinaryCodec.INSTANCE));
+    setupMessageHandshake(new BasicMessageChannel<>(dartExecutor, "string-msg", StringCodec.INSTANCE));
+    setupMessageHandshake(new BasicMessageChannel<>(dartExecutor, "json-msg", JSONMessageCodec.INSTANCE));
+    setupMessageHandshake(new BasicMessageChannel<>(dartExecutor, "std-msg", ExtendedStandardMessageCodec.INSTANCE));
+    setupMethodHandshake(new MethodChannel(dartExecutor, "json-method", JSONMethodCodec.INSTANCE));
+    setupMethodHandshake(new MethodChannel(dartExecutor, "std-method", new StandardMethodCodec(ExtendedStandardMessageCodec.INSTANCE)));
   }
 
   private <T> void setupMessageHandshake(final BasicMessageChannel<T> channel) {

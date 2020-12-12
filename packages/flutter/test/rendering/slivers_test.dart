@@ -1,7 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -21,6 +22,7 @@ void main() {
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        '   needs compositing\n'
         '   parentData: MISSING\n'
         '   constraints: MISSING\n'
         '   size: MISSING\n'
@@ -37,6 +39,7 @@ void main() {
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+        '   needs compositing\n'
         '   parentData: <none>\n'
         '   constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '   size: Size(800.0, 600.0)\n'
@@ -73,7 +76,8 @@ void main() {
     expect(
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderViewport#00000 NEEDS-PAINT\n'
+        'RenderViewport#00000 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
+        ' │ needs compositing\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -82,14 +86,14 @@ void main() {
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
         ' │ anchor: 0.0\n'
         ' │\n'
-        ' ├─center child: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─center child: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │ │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │ │   crossAxisDirection: AxisDirection.right,\n'
-        ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
-        ' │ │   cacheOrigin: 0.0 )\n'
+        ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
+        ' │ │   cacheOrigin: 0.0)\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, paintExtent: 400.0,\n'
         ' │ │   maxPaintExtent: 400.0, cacheExtent: 400.0)\n'
         ' │ │\n'
@@ -98,14 +102,14 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 1: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 1: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 400.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │ │   0.0, remainingPaintExtent: 200.0, crossAxisExtent: 800.0,\n'
         ' │ │   crossAxisDirection: AxisDirection.right,\n'
-        ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 450.0\n'
-        ' │ │   cacheOrigin: 0.0 )\n'
+        ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 450.0,\n'
+        ' │ │   cacheOrigin: 0.0)\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, paintExtent: 200.0,\n'
         ' │ │   maxPaintExtent: 400.0, hasVisualOverflow: true, cacheExtent:\n'
         ' │ │   400.0)\n'
@@ -115,14 +119,14 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 2: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 2: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 800.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │ │   0.0, remainingPaintExtent: 0.0, crossAxisExtent: 800.0,\n'
         ' │ │   crossAxisDirection: AxisDirection.right,\n'
-        ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 50.0\n'
-        ' │ │   cacheOrigin: 0.0 )\n'
+        ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 50.0,\n'
+        ' │ │   cacheOrigin: 0.0)\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, hidden,\n'
         ' │ │   maxPaintExtent: 400.0, hasVisualOverflow: true, cacheExtent:\n'
         ' │ │   50.0)\n'
@@ -132,14 +136,14 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 3: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 3: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 1200.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │ │   0.0, remainingPaintExtent: 0.0, crossAxisExtent: 800.0,\n'
         ' │ │   crossAxisDirection: AxisDirection.right,\n'
-        ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 0.0\n'
-        ' │ │   cacheOrigin: 0.0 )\n'
+        ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 0.0,\n'
+        ' │ │   cacheOrigin: 0.0)\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, hidden,\n'
         ' │ │   maxPaintExtent: 400.0, hasVisualOverflow: true)\n'
         ' │ │\n'
@@ -148,14 +152,14 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' └─child 4: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' └─child 4: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         '   │ parentData: paintOffset=Offset(0.0, 1600.0) (can use size)\n'
         '   │ constraints: SliverConstraints(AxisDirection.down,\n'
         '   │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         '   │   0.0, remainingPaintExtent: 0.0, crossAxisExtent: 800.0,\n'
         '   │   crossAxisDirection: AxisDirection.right,\n'
-        '   │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 0.0\n'
-        '   │   cacheOrigin: 0.0 )\n'
+        '   │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 0.0,\n'
+        '   │   cacheOrigin: 0.0)\n'
         '   │ geometry: SliverGeometry(scrollExtent: 400.0, hidden,\n'
         '   │   maxPaintExtent: 400.0, hasVisualOverflow: true)\n'
         '   │\n'
@@ -284,11 +288,11 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    final RenderSliver sliverA = a.parent;
-    final RenderSliver sliverB = b.parent;
-    final RenderSliver sliverC = c.parent;
-    final RenderSliver sliverD = d.parent;
-    final RenderSliver sliverE = e.parent;
+    final RenderSliver sliverA = a.parent! as RenderSliver;
+    final RenderSliver sliverB = b.parent! as RenderSliver;
+    final RenderSliver sliverC = c.parent! as RenderSliver;
+    final RenderSliver sliverD = d.parent! as RenderSliver;
+    final RenderSliver sliverE = e.parent! as RenderSliver;
 
     expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
     expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
@@ -831,10 +835,13 @@ void main() {
       final HitTestEntry entry1 = HitTestEntry(_DummyHitTestTarget());
       final HitTestEntry entry2 = HitTestEntry(_DummyHitTestTarget());
       final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
+      final Matrix4 transform = Matrix4.translationValues(40.0, 150.0, 0.0);
 
-      final HitTestResult wrapped = HitTestResult();
+      final HitTestResult wrapped = MyHitTestResult()
+        ..publicPushTransform(transform);
       wrapped.add(entry1);
       expect(wrapped.path, equals(<HitTestEntry>[entry1]));
+      expect(entry1.transform, transform);
 
       final SliverHitTestResult wrapping = SliverHitTestResult.wrap(wrapped);
       expect(wrapping.path, equals(<HitTestEntry>[entry1]));
@@ -843,10 +850,12 @@ void main() {
       wrapping.add(entry2);
       expect(wrapping.path, equals(<HitTestEntry>[entry1, entry2]));
       expect(wrapped.path, equals(<HitTestEntry>[entry1, entry2]));
+      expect(entry2.transform, transform);
 
       wrapped.add(entry3);
       expect(wrapping.path, equals(<HitTestEntry>[entry1, entry2, entry3]));
       expect(wrapped.path, equals(<HitTestEntry>[entry1, entry2, entry3]));
+      expect(entry3.transform, transform);
     });
 
     test('addWithAxisOffset', () {
@@ -861,8 +870,7 @@ void main() {
         crossAxisOffset: 0.0,
         mainAxisPosition: 0.0,
         crossAxisPosition: 0.0,
-        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
-          expect(result, isNotNull);
+        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return true;
@@ -880,8 +888,7 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
-          expect(result, isNotNull);
+        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return false;
@@ -899,8 +906,7 @@ void main() {
         crossAxisOffset: -6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
-          expect(result, isNotNull);
+        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return false;
@@ -912,6 +918,111 @@ void main() {
       mainAxisPositions.clear();
       crossAxisPositions.clear();
     });
+
+    test('addWithAxisOffset with non zero paintOffset', () {
+      final SliverHitTestResult result = SliverHitTestResult();
+      late double recordedMainAxisPosition;
+      late double recordedCrossAxisPosition;
+      final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
+      const Offset paintOffset = Offset(7, 11);
+
+      final bool isHit = result.addWithAxisOffset(
+        paintOffset: paintOffset,
+        mainAxisOffset: 5.0,
+        crossAxisOffset: 6.0,
+        mainAxisPosition: 10.0,
+        crossAxisPosition: 20.0,
+        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+          recordedMainAxisPosition = mainAxisPosition;
+          recordedCrossAxisPosition = crossAxisPosition;
+          result.add(entry);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(recordedMainAxisPosition, 10.0 - 5.0);
+      expect(recordedCrossAxisPosition, 20.0 - 6.0);
+      expect(
+        entry.transform!..translate(paintOffset.dx, paintOffset.dy),
+        Matrix4.identity(),
+      );
+    });
+  });
+
+  test('SliverConstraints check for NaN on all double properties', () {
+    const SliverConstraints constraints = SliverConstraints(
+      axisDirection: AxisDirection.down,
+      cacheOrigin: double.nan,
+      crossAxisDirection: AxisDirection.left,
+      crossAxisExtent: double.nan,
+      growthDirection: GrowthDirection.forward,
+      overlap: double.nan,
+      precedingScrollExtent: double.nan,
+      remainingCacheExtent: double.nan,
+      remainingPaintExtent: double.nan,
+      scrollOffset: double.nan,
+      userScrollDirection: ScrollDirection.idle,
+      viewportMainAxisExtent: double.nan,
+    );
+    bool threw = false;
+    try {
+      constraints.debugAssertIsValid();
+    } on FlutterError catch (error) {
+      expect(
+        error.message,
+        'SliverConstraints is not valid:\n'
+        '  The "scrollOffset" is NaN.\n'
+        '  The "overlap" is NaN.\n'
+        '  The "crossAxisExtent" is NaN.\n'
+        '  The "scrollOffset" is NaN, expected greater than or equal to zero.\n'
+        '  The "viewportMainAxisExtent" is NaN, expected greater than or equal to zero.\n'
+        '  The "remainingPaintExtent" is NaN, expected greater than or equal to zero.\n'
+        '  The "remainingCacheExtent" is NaN, expected greater than or equal to zero.\n'
+        '  The "cacheOrigin" is NaN, expected less than or equal to zero.\n'
+        '  The "precedingScrollExtent" is NaN, expected greater than or equal to zero.\n'
+        '  The constraints are not normalized.\n'
+        'The offending constraints were:\n'
+        '  SliverConstraints(AxisDirection.down, GrowthDirection.forward, ScrollDirection.idle, scrollOffset: NaN, remainingPaintExtent: NaN, overlap: NaN, crossAxisExtent: NaN, crossAxisDirection: AxisDirection.left, viewportMainAxisExtent: NaN, remainingCacheExtent: NaN, cacheOrigin: NaN)',
+      );
+      threw = true;
+    }
+    expect(threw, true);
+  });
+
+  test('SliverConstraints check for sign on relevant double properties', () {
+    const SliverConstraints constraints = SliverConstraints(
+      axisDirection: AxisDirection.down,
+      cacheOrigin: 1.0,
+      crossAxisDirection: AxisDirection.left,
+      crossAxisExtent: 0.0,
+      growthDirection: GrowthDirection.forward,
+      overlap: 0.0,
+      precedingScrollExtent: -1.0,
+      remainingCacheExtent: -1.0,
+      remainingPaintExtent: -1.0,
+      scrollOffset: -1.0,
+      userScrollDirection: ScrollDirection.idle,
+      viewportMainAxisExtent: 0.0,
+    );
+    bool threw = false;
+    try {
+      constraints.debugAssertIsValid();
+    } on FlutterError catch (error) {
+      expect(
+        error.message,
+        'SliverConstraints is not valid:\n'
+        '  The "scrollOffset" is negative.\n'
+        '  The "remainingPaintExtent" is negative.\n'
+        '  The "remainingCacheExtent" is negative.\n'
+        '  The "cacheOrigin" is positive.\n'
+        '  The "precedingScrollExtent" is negative.\n'
+        '  The constraints are not normalized.\n'
+        'The offending constraints were:\n'
+        '  SliverConstraints(AxisDirection.down, GrowthDirection.forward, ScrollDirection.idle, scrollOffset: -1.0, remainingPaintExtent: -1.0, crossAxisExtent: 0.0, crossAxisDirection: AxisDirection.left, viewportMainAxisExtent: 0.0, remainingCacheExtent: -1.0, cacheOrigin: 1.0)',
+      );
+      threw = true;
+    }
+    expect(threw, true);
   });
 }
 
@@ -920,4 +1031,8 @@ class _DummyHitTestTarget implements HitTestTarget {
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     // Nothing to do.
   }
+}
+
+class MyHitTestResult extends HitTestResult {
+  void publicPushTransform(Matrix4 transform) => pushTransform(transform);
 }

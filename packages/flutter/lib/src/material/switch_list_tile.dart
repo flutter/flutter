@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // void setState(VoidCallback fn) { }
 // bool _isSelected;
 
@@ -39,14 +40,15 @@ enum _SwitchListTileType { material, adaptive }
 /// appear selected when the switch is on, pass the same value to both.
 ///
 /// The switch is shown on the right by default in left-to-right languages (i.e.
-/// in the [ListTile.trailing] slot). The [secondary] widget is placed in the
-/// [ListTile.leading] slot. This cannot be changed; there is not sufficient
-/// space in a [ListTile]'s [ListTile.leading] slot for a [Switch].
+/// in the [ListTile.trailing] slot) which can be changed using [controlAffinity].
+/// The [secondary] widget is placed in the [ListTile.leading] slot.
 ///
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+///
+/// ![SwitchListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile.png)
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
@@ -54,14 +56,180 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart
 /// bool _lights = false;
 ///
+/// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: SwitchListTile(
-///       title: const Text('Lights'),
-///       value: _lights,
-///       onChanged: (bool value) { setState(() { _lights = value; }); },
-///       secondary: const Icon(Icons.lightbulb_outline),
-///     ),
+///   return SwitchListTile(
+///     title: const Text('Lights'),
+///     value: _lights,
+///     onChanged: (bool value) { setState(() { _lights = value; }); },
+///     secondary: const Icon(Icons.lightbulb_outline),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## Semantics in SwitchListTile
+///
+/// Since the entirety of the SwitchListTile is interactive, it should represent
+/// itself as a single interactive entity.
+///
+/// To do so, a SwitchListTile widget wraps its children with a [MergeSemantics]
+/// widget. [MergeSemantics] will attempt to merge its descendant [Semantics]
+/// nodes into one node in the semantics tree. Therefore, SwitchListTile will
+/// throw an error if any of its children requires its own [Semantics] node.
+///
+/// For example, you cannot nest a [RichText] widget as a descendant of
+/// SwitchListTile. [RichText] has an embedded gesture recognizer that
+/// requires its own [Semantics] node, which directly conflicts with
+/// SwitchListTile's desire to merge all its descendants' semantic nodes
+/// into one. Therefore, it may be necessary to create a custom radio tile
+/// widget to accommodate similar use cases.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+///
+/// ![Switch list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_semantics.png)
+///
+/// Here is an example of a custom labeled radio widget, called
+/// LinkedLabelRadio, that includes an interactive [RichText] widget that
+/// handles tap gestures.
+///
+/// ```dart imports
+/// import 'package:flutter/gestures.dart';
+/// ```
+/// ```dart preamble
+/// class LinkedLabelSwitch extends StatelessWidget {
+///   const LinkedLabelSwitch({
+///     this.label,
+///     this.padding,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: padding,
+///       child: Row(
+///         children: <Widget>[
+///           Expanded(
+///             child: RichText(
+///               text: TextSpan(
+///                 text: label,
+///                 style: TextStyle(
+///                   color: Colors.blueAccent,
+///                   decoration: TextDecoration.underline,
+///                 ),
+///                 recognizer: TapGestureRecognizer()
+///                   ..onTap = () {
+///                   print('Label has been tapped.');
+///                 },
+///               ),
+///             ),
+///           ),
+///           Switch(
+///             value: value,
+///             onChanged: (bool newValue) {
+///               onChanged(newValue);
+///             },
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool _isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return LinkedLabelSwitch(
+///     label: 'Linked, tappable label text',
+///     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///     value: _isSelected,
+///     onChanged: (bool newValue) {
+///       setState(() {
+///         _isSelected = newValue;
+///       });
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## SwitchListTile isn't exactly what I want
+///
+/// If the way SwitchListTile pads and positions its elements isn't quite what
+/// you're looking for, you can create custom labeled switch widgets by
+/// combining [Switch] with other widgets, such as [Text], [Padding] and
+/// [InkWell].
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+///
+/// ![Custom switch list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_custom.png)
+///
+/// Here is an example of a custom LabeledSwitch widget, but you can easily
+/// make your own configurable widget.
+///
+/// ```dart preamble
+/// class LabeledSwitch extends StatelessWidget {
+///   const LabeledSwitch({
+///     this.label,
+///     this.padding,
+///     this.groupValue,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool groupValue;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return InkWell(
+///       onTap: () {
+///         onChanged(!value);
+///       },
+///       child: Padding(
+///         padding: padding,
+///         child: Row(
+///           children: <Widget>[
+///             Expanded(child: Text(label)),
+///             Switch(
+///               value: value,
+///               onChanged: (bool newValue) {
+///                 onChanged(newValue);
+///               },
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool _isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return LabeledSwitch(
+///     label: 'This is the label text',
+///     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///     value: _isSelected,
+///     onChanged: (bool newValue) {
+///       setState(() {
+///         _isSelected = newValue;
+///       });
+///     },
 ///   );
 /// }
 /// ```
@@ -88,9 +256,10 @@ class SwitchListTile extends StatelessWidget {
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
   const SwitchListTile({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -101,27 +270,38 @@ class SwitchListTile extends StatelessWidget {
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
+    this.contentPadding,
     this.secondary,
     this.selected = false,
+    this.autofocus = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
+    this.shape,
+    this.selectedTileColor,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
+       assert(autofocus != null),
        super(key: key);
 
-  /// Creates the wrapped switch with [Switch.adaptive].
+  /// Creates a Material [ListTile] with an adaptive [Switch], following
+  /// Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
-  /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
-  /// material design switch otherwise.
+  /// This widget uses [Switch.adaptive] to change the graphics of the switch
+  /// component based on the ambient [ThemeData.platform]. On iOS and macOS, a
+  /// [CupertinoSwitch] will be used. On other platforms a Material design
+  /// [Switch] will be used.
   ///
   /// If a [CupertinoSwitch] is created, the following parameters are
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
-  /// [activeThumbImage], [inactiveThumbImage], [materialTapTargetSize].
+  /// [activeThumbImage], [inactiveThumbImage].
   const SwitchListTile.adaptive({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
+    this.tileColor,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -132,13 +312,19 @@ class SwitchListTile extends StatelessWidget {
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
+    this.contentPadding,
     this.secondary,
     this.selected = false,
+    this.autofocus = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
+    this.shape,
+    this.selectedTileColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
+       assert(autofocus != null),
        super(key: key);
 
   /// Whether this switch is checked.
@@ -169,56 +355,59 @@ class SwitchListTile extends StatelessWidget {
   ///   title: Text('Selection'),
   /// )
   /// ```
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
   ///
   /// Defaults to accent color of the current [Theme].
-  final Color activeColor;
+  final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
-  final Color activeTrackColor;
+  final Color? activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
-  final Color inactiveThumbColor;
+  final Color? inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
   ///
   /// Defaults to the colors described in the Material design specification.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
-  final Color inactiveTrackColor;
+  final Color? inactiveTrackColor;
+
+  /// {@macro flutter.material.ListTile.tileColor}
+  final Color? tileColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
-  final ImageProvider activeThumbImage;
+  final ImageProvider? activeThumbImage;
 
   /// An image to use on the thumb of this switch when the switch is off.
   ///
   /// Ignored if created with [SwitchListTile.adaptive].
-  final ImageProvider inactiveThumbImage;
+  final ImageProvider? inactiveThumbImage;
 
   /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
-  final Widget title;
+  final Widget? title;
 
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// A widget to display on the opposite side of the tile from the switch.
   ///
   /// Typically an [Icon] widget.
-  final Widget secondary;
+  final Widget? secondary;
 
   /// Whether this list tile is intended to display three lines of text.
   ///
@@ -229,7 +418,16 @@ class SwitchListTile extends StatelessWidget {
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
-  final bool dense;
+  final bool? dense;
+
+  /// The tile's internal padding.
+  ///
+  /// Insets a [SwitchListTile]'s contents: its [title], [subtitle],
+  /// [secondary], and [Switch] widgets.
+  ///
+  /// If null, [ListTile]'s default of `EdgeInsets.symmetric(horizontal: 16.0)`
+  /// is used.
+  final EdgeInsetsGeometry? contentPadding;
 
   /// Whether to render icons and text in the [activeColor].
   ///
@@ -240,12 +438,26 @@ class SwitchListTile extends StatelessWidget {
   /// Normally, this property is left to its default value, false.
   final bool selected;
 
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   /// If adaptive, creates the switch with [Switch.adaptive].
   final _SwitchListTileType _switchListTileType;
 
+  /// Defines the position of control and [secondary], relative to text.
+  ///
+  /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
+  final ListTileControlAffinity controlAffinity;
+
+  /// {@macro flutter.material.ListTileTheme.shape}
+  final ShapeBorder? shape;
+
+  /// If non-null, defines the background color when [SwitchListTile.selected] is true.
+  final Color? selectedTileColor;
+
   @override
   Widget build(BuildContext context) {
-    Widget control;
+    final Widget control;
     switch (_switchListTileType) {
       case _SwitchListTileType.adaptive:
         control = Switch.adaptive(
@@ -258,6 +470,7 @@ class SwitchListTile extends StatelessWidget {
           activeTrackColor: activeTrackColor,
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
+          autofocus: autofocus,
         );
         break;
 
@@ -272,21 +485,41 @@ class SwitchListTile extends StatelessWidget {
           activeTrackColor: activeTrackColor,
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
+          autofocus: autofocus,
         );
     }
+
+    Widget? leading, trailing;
+    switch (controlAffinity) {
+      case ListTileControlAffinity.leading:
+        leading = control;
+        trailing = secondary;
+        break;
+      case ListTileControlAffinity.trailing:
+      case ListTileControlAffinity.platform:
+        leading = secondary;
+        trailing = control;
+        break;
+    }
+
     return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
         child: ListTile(
-          leading: secondary,
+          leading: leading,
           title: title,
           subtitle: subtitle,
-          trailing: control,
+          trailing: trailing,
           isThreeLine: isThreeLine,
           dense: dense,
+          contentPadding: contentPadding,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(!value); } : null,
+          onTap: onChanged != null ? () { onChanged!(!value); } : null,
           selected: selected,
+          selectedTileColor: selectedTileColor,
+          autofocus: autofocus,
+          shape: shape,
+          tileColor: tileColor,
         ),
       ),
     );

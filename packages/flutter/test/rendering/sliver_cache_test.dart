@@ -1,8 +1,7 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
 
@@ -878,31 +877,42 @@ void main() {
   });
 }
 
-void expectSliverConstraints({ RenderSliver sliver, double cacheOrigin, double remainingPaintExtent, double remainingCacheExtent, double scrollOffset }) {
+void expectSliverConstraints({
+  required RenderSliver sliver,
+  required double cacheOrigin,
+  required double remainingPaintExtent,
+  required double remainingCacheExtent,
+  required double scrollOffset,
+}) {
   expect(sliver.constraints.cacheOrigin, cacheOrigin, reason: 'cacheOrigin');
   expect(sliver.constraints.remainingPaintExtent, remainingPaintExtent, reason: 'remainingPaintExtent');
   expect(sliver.constraints.remainingCacheExtent, remainingCacheExtent, reason: 'remainingCacheExtent');
   expect(sliver.constraints.scrollOffset, scrollOffset, reason: 'scrollOffset');
 }
 
-void expectSliverGeometry({ RenderSliver sliver, double paintExtent, double cacheExtent, bool visible }) {
-  expect(sliver.geometry.paintExtent, paintExtent, reason: 'paintExtent');
-  expect(sliver.geometry.cacheExtent, cacheExtent, reason: 'cacheExtent');
-  expect(sliver.geometry.visible, visible, reason: 'visible');
+void expectSliverGeometry({
+  required RenderSliver sliver,
+  required double paintExtent,
+  required double cacheExtent,
+  required bool visible,
+}) {
+  expect(sliver.geometry!.paintExtent, paintExtent, reason: 'paintExtent');
+  expect(sliver.geometry!.cacheExtent, cacheExtent, reason: 'cacheExtent');
+  expect(sliver.geometry!.visible, visible, reason: 'visible');
 }
 
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   TestRenderSliverBoxChildManager({
-    this.children,
+    required this.children,
   });
 
-  RenderSliverMultiBoxAdaptor _renderObject;
+  RenderSliverMultiBoxAdaptor? _renderObject;
   List<RenderBox> children;
 
   RenderSliverList createRenderSliverList() {
     assert(_renderObject == null);
     _renderObject = RenderSliverList(childManager: this);
-    return _renderObject;
+    return _renderObject! as RenderSliverList;
   }
 
   RenderSliverFixedExtentList createRenderSliverFixedExtentList() {
@@ -911,7 +921,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
       childManager: this,
       itemExtent: 100.0,
     );
-    return _renderObject;
+    return _renderObject! as RenderSliverFixedExtentList;
   }
 
   RenderSliverGrid createRenderSliverGrid() {
@@ -923,18 +933,18 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
         childAspectRatio: 4.0,
       ),
     );
-    return _renderObject;
+    return _renderObject! as RenderSliverGrid;
   }
 
-  int _currentlyUpdatingChildIndex;
+  int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, { @required RenderBox after }) {
+  void createChild(int index, { required RenderBox? after }) {
     if (index < 0 || index >= children.length)
       return;
     try {
       _currentlyUpdatingChildIndex = index;
-      _renderObject.insert(children[index], after: after);
+      _renderObject!.insert(children[index], after: after);
     } finally {
       _currentlyUpdatingChildIndex = null;
     }
@@ -942,19 +952,19 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void removeChild(RenderBox child) {
-    _renderObject.remove(child);
+    _renderObject!.remove(child);
   }
 
   @override
   double estimateMaxScrollOffset(
     SliverConstraints constraints, {
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
   }) {
-    assert(lastIndex >= firstIndex);
-    return children.length * (trailingScrollOffset - leadingScrollOffset) / (lastIndex - firstIndex + 1);
+    assert(lastIndex! >= firstIndex!);
+    return children.length * (trailingScrollOffset! - leadingScrollOffset!) / (lastIndex! - firstIndex! + 1);
   }
 
   @override
@@ -963,7 +973,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 

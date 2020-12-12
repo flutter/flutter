@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,6 +24,9 @@ class AndroidClassName {
 
   /// The class name used for toggle switches.
   static const String toggleSwitch = 'android.widget.Switch';
+
+  /// The default className for buttons.
+  static const String button = 'android.widget.Button';
 }
 
 /// Action constants which correspond to `AccessibilityAction` in Android.
@@ -193,8 +196,8 @@ class AndroidSemanticsAction {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final AndroidSemanticsAction typedOther = other;
-    return id == typedOther.id;
+    return other is AndroidSemanticsAction
+        && other.id == id;
   }
 
   /// Creates a new [AndroidSemanticsAction] from an integer `value`.

@@ -1,0 +1,3 @@
+lib/generated_plugin_registrant.dart
+vmservice.out
+*.sksl.json

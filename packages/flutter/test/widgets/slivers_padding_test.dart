@@ -1,10 +1,23 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
+class _MockRenderSliver extends RenderSliver {
+  @override
+  void performLayout() {
+    geometry = const SliverGeometry(
+      paintOrigin: 10,
+      paintExtent: 10,
+      maxPaintExtent: 10,
+    );
+  }
+
+}
 
 Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
   return tester.pumpWidget(
@@ -168,11 +181,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(10.0, 60.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(100.0, 490.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -190,11 +203,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-60.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-490.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -212,11 +225,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(800.0-60.0, 10.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(800.0-490.0, 100.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -234,11 +247,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(60.0, 10.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(490.0, 100.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -422,5 +435,113 @@ void main() {
       tester.getRect(find.widgetWithText(Container, '0')),
       const Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
     );
+  });
+
+  testWidgets('SliverPadding includes preceding padding in the precedingScrollExtent provided to child', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/49195
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 30),
+            sliver: SliverFillRemaining(
+              hasScrollBody: false,
+              child: Container(
+                key: key,
+                color: Colors.red,
+              ),
+            )
+          ),
+        ]
+      ),
+    ));
+    await tester.pump();
+
+    // The value of 570 is expected since SliverFillRemaining will fill all of
+    // the space available to it. In this test, the extent of the viewport is
+    // 600 pixels. If the SliverPadding widget provides the right constraints
+    // to SliverFillRemaining, with 30 pixels preceding it, it should only have
+    // a height of 570.
+    expect(
+      tester.renderObject<RenderBox>(find.byKey(key)).size.height,
+      equals(570),
+    );
+  });
+
+  testWidgets('SliverPadding consumes only its padding from the overlap of its parent\'s constraints', (WidgetTester tester) async {
+    final _MockRenderSliver mock = _MockRenderSliver();
+    final RenderSliverPadding renderObject = RenderSliverPadding(
+      padding: const EdgeInsets.only(top: 20),
+    );
+    renderObject.child = mock;
+    renderObject.layout(const SliverConstraints(
+        viewportMainAxisExtent: 100.0,
+        overlap: 100.0,
+        cacheOrigin: 0.0,
+        scrollOffset: 0.0,
+        axisDirection: AxisDirection.down,
+        growthDirection: GrowthDirection.forward,
+        crossAxisExtent: 100.0,
+        crossAxisDirection: AxisDirection.right,
+        userScrollDirection: ScrollDirection.idle,
+        remainingPaintExtent: 100.0,
+        remainingCacheExtent: 100.0,
+        precedingScrollExtent: 0.0,
+      ),
+      parentUsesSize: true,
+    );
+    expect(mock.constraints.overlap, 80.0);
+  });
+
+  testWidgets('SliverPadding passes the overlap to the child if it\'s negative', (WidgetTester tester) async {
+    final _MockRenderSliver mock = _MockRenderSliver();
+    final RenderSliverPadding renderObject = RenderSliverPadding(
+      padding: const EdgeInsets.only(top: 20),
+    );
+    renderObject.child = mock;
+    renderObject.layout(const SliverConstraints(
+        viewportMainAxisExtent: 100.0,
+        overlap: -100.0,
+        cacheOrigin: 0.0,
+        scrollOffset: 0.0,
+        axisDirection: AxisDirection.down,
+        growthDirection: GrowthDirection.forward,
+        crossAxisExtent: 100.0,
+        crossAxisDirection: AxisDirection.right,
+        userScrollDirection: ScrollDirection.idle,
+        remainingPaintExtent: 100.0,
+        remainingCacheExtent: 100.0,
+        precedingScrollExtent: 0.0,
+      ),
+      parentUsesSize: true,
+    );
+    expect(mock.constraints.overlap, -100.0);
+  });
+
+  testWidgets('SliverPadding passes the paintOrigin of the child on', (WidgetTester tester) async {
+    final _MockRenderSliver mock = _MockRenderSliver();
+    final RenderSliverPadding renderObject = RenderSliverPadding(
+      padding: const EdgeInsets.only(top: 20),
+    );
+    renderObject.child = mock;
+    renderObject.layout(const SliverConstraints(
+        viewportMainAxisExtent: 100.0,
+        overlap: 100.0,
+        cacheOrigin: 0.0,
+        scrollOffset: 0.0,
+        axisDirection: AxisDirection.down,
+        growthDirection: GrowthDirection.forward,
+        crossAxisExtent: 100.0,
+        crossAxisDirection: AxisDirection.right,
+        userScrollDirection: ScrollDirection.idle,
+        remainingPaintExtent: 100.0,
+        remainingCacheExtent: 100.0,
+        precedingScrollExtent: 0.0,
+      ),
+      parentUsesSize: true,
+    );
+    expect(renderObject.geometry!.paintOrigin, 10.0);
   });
 }

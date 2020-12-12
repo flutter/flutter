@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // class MyDataObject { }
 
 /// The callback used by [ReorderableListView] to move an item to a new
@@ -25,7 +26,9 @@ import 'material_localizations.dart';
 /// [ReorderableListView] will need to account for this when inserting before
 /// [newIndex].
 ///
-/// {@tool sample}
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
+///
+/// {@tool snippet}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
@@ -50,13 +53,53 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// those children that are actually visible.
 ///
 /// All [children] must have a key.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
+///
+/// This sample shows by dragging the user can reorder the items of the list.
+/// The [onReorder] parameter is required and will be called when a child
+/// widget is dragged to a new position.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+///
+/// ```dart
+/// List<String> _list = List.generate(5, (i) => "${i}");
+///
+/// Widget build(BuildContext context){
+///   return ReorderableListView(
+///     padding : const EdgeInsets.symmetric(horizontal:40),
+///     children:[
+///       for(var i=0 ; i<_list.length ; i++)
+///         ListTile(
+///              key:Key('$i'),
+///              title: Text(_list[i]),
+///         ),
+///     ],
+///     onReorder: (oldIndex, newIndex){
+///       setState((){
+///         if(oldIndex < newIndex){
+///           newIndex-=1;
+///         }
+///         final element = _list.removeAt(oldIndex);
+///         _list.insert(newIndex, element);
+///       });
+///     },
+///   );
+/// }
+///
+/// ```
+///
+///{@end-tool}
+///
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
   ReorderableListView({
+    Key? key,
     this.header,
-    @required this.children,
-    @required this.onReorder,
+    required this.children,
+    required this.onReorder,
+    this.scrollController,
     this.scrollDirection = Axis.vertical,
     this.padding,
     this.reverse = false,
@@ -66,12 +109,13 @@ class ReorderableListView extends StatefulWidget {
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
-       );
+       ),
+       super(key: key);
 
   /// A non-reorderable header widget to show before the list.
   ///
   /// If null, no header will appear before the list.
-  final Widget header;
+  final Widget? header;
 
   /// The widgets to display.
   final List<Widget> children;
@@ -81,8 +125,17 @@ class ReorderableListView extends StatefulWidget {
   /// List [children] can only drag along this [Axis].
   final Axis scrollDirection;
 
+  /// Creates a [ScrollPosition] to manage and determine which portion
+  /// of the content is visible in the scroll view.
+  ///
+  /// This can be used in many ways, such as setting an initial scroll offset,
+  /// (via [ScrollController.initialScrollOffset]), reading the current scroll position
+  /// (via [ScrollController.offset]), or changing it (via [ScrollController.jumpTo] or
+  /// [ScrollController.animateTo]).
+  final ScrollController? scrollController;
+
   /// The amount of space by which to inset the [children].
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
   /// Whether the scroll view scrolls in the reading direction.
   ///
@@ -123,7 +176,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   final GlobalKey _overlayKey = GlobalKey(debugLabel: '$ReorderableListView overlay key');
 
   // This entry contains the scrolling list itself.
-  OverlayEntry _listOverlayEntry;
+  late OverlayEntry _listOverlayEntry;
 
   @override
   void initState() {
@@ -134,6 +187,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         return _ReorderableListContent(
           header: widget.header,
           children: widget.children,
+          scrollController: widget.scrollController,
           scrollDirection: widget.scrollDirection,
           onReorder: widget.onReorder,
           padding: widget.padding,
@@ -157,18 +211,20 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 // ReorderableListView.
 class _ReorderableListContent extends StatefulWidget {
   const _ReorderableListContent({
-    @required this.header,
-    @required this.children,
-    @required this.scrollDirection,
-    @required this.padding,
-    @required this.onReorder,
-    @required this.reverse,
+    required this.header,
+    required this.children,
+    required this.scrollController,
+    required this.scrollDirection,
+    required this.padding,
+    required this.onReorder,
+    required this.reverse,
   });
 
-  final Widget header;
+  final Widget? header;
   final List<Widget> children;
+  final ScrollController? scrollController;
   final Axis scrollDirection;
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
   final ReorderCallback onReorder;
   final bool reverse;
 
@@ -185,9 +241,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // the currently dragging widget, such as when it first builds.
   static const double _defaultDropAreaExtent = 100.0;
 
-  // The additional margin to place around a computed drop area.
-  static const double _dropAreaMargin = 8.0;
-
   // How long an animation to reorder an element in the list takes.
   static const Duration _reorderAnimationDuration = Duration(milliseconds: 200);
 
@@ -196,22 +249,22 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   static const Duration _scrollAnimationDuration = Duration(milliseconds: 200);
 
   // Controls scrolls and measures scroll progress.
-  ScrollController _scrollController;
+  late ScrollController _scrollController;
 
   // This controls the entrance of the dragging widget into a new place.
-  AnimationController _entranceController;
+  late AnimationController _entranceController;
 
   // This controls the 'ghost' of the dragging widget, which is left behind
   // where the widget used to be.
-  AnimationController _ghostController;
+  late AnimationController _ghostController;
 
   // The member of widget.children currently being dragged.
   //
   // Null if no drag is underway.
-  Key _dragging;
+  Key? _dragging;
 
   // The last computed size of the feedback widget being dragged.
-  Size _draggingFeedbackSize;
+  Size? _draggingFeedbackSize;
 
   // The location that the dragging widget occupied before it started to drag.
   int _dragStartIndex = 0;
@@ -233,17 +286,16 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     if (_draggingFeedbackSize == null) {
       return _defaultDropAreaExtent;
     }
-    double dropAreaWithoutMargin;
+    final double dropAreaWithoutMargin;
     switch (widget.scrollDirection) {
       case Axis.horizontal:
-        dropAreaWithoutMargin = _draggingFeedbackSize.width;
+        dropAreaWithoutMargin = _draggingFeedbackSize!.width;
         break;
       case Axis.vertical:
-      default:
-        dropAreaWithoutMargin = _draggingFeedbackSize.height;
+        dropAreaWithoutMargin = _draggingFeedbackSize!.height;
         break;
     }
-    return dropAreaWithoutMargin + _dropAreaMargin;
+    return dropAreaWithoutMargin;
   }
 
   @override
@@ -256,7 +308,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   @override
   void didChangeDependencies() {
-    _scrollController = PrimaryScrollController.of(context) ?? ScrollController();
+    _scrollController = widget.scrollController ?? PrimaryScrollController.of(context) ?? ScrollController();
     super.didChangeDependencies();
   }
 
@@ -293,8 +345,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   void _scrollTo(BuildContext context) {
     if (_scrolling)
       return;
-    final RenderObject contextObject = context.findRenderObject();
-    final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject);
+    final RenderObject contextObject = context.findRenderObject()!;
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(contextObject)!;
     assert(viewport != null);
     // If and only if the current scroll offset falls in-between the offsets
     // necessary to reveal the selected context at the top or bottom of the
@@ -328,12 +380,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   // Wraps children in Row or Column, so that the children flow in
   // the widget's scrollDirection.
-  Widget _buildContainerForScrollDirection({ List<Widget> children }) {
+  Widget _buildContainerForScrollDirection({ required List<Widget> children }) {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
         return Row(children: children);
       case Axis.vertical:
-      default:
         return Column(children: children);
     }
   }
@@ -342,7 +393,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final GlobalObjectKey keyIndexGlobalKey = GlobalObjectKey(toWrap.key);
+    final _ReorderableListViewChildGlobalKey keyIndexGlobalKey = _ReorderableListViewChildGlobalKey(toWrap.key!, this);
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -355,7 +406,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         _ghostIndex = index;
         _currentIndex = index;
         _entranceController.value = 1.0;
-        _draggingFeedbackSize = keyIndexGlobalKey.currentContext.size;
+        _draggingFeedbackSize = keyIndexGlobalKey.currentContext!.size;
       });
     }
 
@@ -365,10 +416,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         if (startIndex != endIndex)
           widget.onReorder(startIndex, endIndex);
         // Animates leftover space in the drop area closed.
-        // TODO(djshuckerow): bring the animation in line with the Material
-        // specifications.
-        _ghostController.reverse(from: 0.1);
-        _entranceController.reverse(from: 0.1);
+        _ghostController.reverse(from: 0);
+        _entranceController.reverse(from: 0);
         _dragging = null;
       });
     }
@@ -433,7 +482,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       );
     }
 
-    Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
+    Widget buildDragTarget(BuildContext context, List<Key?> acceptedCandidates, List<dynamic> rejectedCandidates) {
       final Widget toWrapWithSemantics = wrapWithSemantics();
 
       // We build the draggable inside of a layout builder so that we can
@@ -474,13 +523,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       }
 
       // Determine the size of the drop area to show under the dragging widget.
-      Widget spacing;
+      final Widget spacing;
       switch (widget.scrollDirection) {
         case Axis.horizontal:
           spacing = SizedBox(width: _dropAreaExtent);
           break;
         case Axis.vertical:
-        default:
           spacing = SizedBox(height: _dropAreaExtent);
           break;
       }
@@ -516,7 +564,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     return Builder(builder: (BuildContext context) {
       return DragTarget<Key>(
         builder: buildDragTarget,
-        onWillAccept: (Key toAccept) {
+        onWillAccept: (Key? toAccept) {
           setState(() {
             _nextIndex = index;
             _requestAnimationToNextIndex();
@@ -526,7 +574,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           return _dragging == toAccept && toAccept != toWrap.key;
         },
         onAccept: (Key accepted) { },
-        onLeave: (Key leaving) { },
+        onLeave: (Object? leaving) { },
       );
     });
   }
@@ -536,15 +584,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     assert(debugCheckHasMaterialLocalizations(context));
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      final List<Widget> wrappedChildren = <Widget>[];
-      if (widget.header != null) {
-        wrappedChildren.add(widget.header);
-      }
-      for (int i = 0; i < widget.children.length; i += 1) {
-        wrappedChildren.add(_wrap(widget.children[i], i, constraints));
-      }
       const Key endWidgetKey = Key('DraggableList - End Widget');
-      Widget finalDropArea;
+      final Widget finalDropArea;
       switch (widget.scrollDirection) {
         case Axis.horizontal:
           finalDropArea = SizedBox(
@@ -554,7 +595,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
         case Axis.vertical:
-        default:
           finalDropArea = SizedBox(
             key: endWidgetKey,
             height: _defaultDropAreaExtent,
@@ -562,26 +602,52 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
       }
-      if (widget.reverse) {
-        wrappedChildren.insert(0, _wrap(
-          finalDropArea,
-          widget.children.length,
-          constraints),
-        );
-      } else {
-        wrappedChildren.add(_wrap(
-          finalDropArea,
-          widget.children.length,
-          constraints),
-        );
-      }
+
+      // If the reorderable list only has one child element, reordering
+      // should not be allowed.
+      final bool hasMoreThanOneChildElement = widget.children.length > 1;
+
       return SingleChildScrollView(
         scrollDirection: widget.scrollDirection,
-        child: _buildContainerForScrollDirection(children: wrappedChildren),
         padding: widget.padding,
         controller: _scrollController,
         reverse: widget.reverse,
+        child: _buildContainerForScrollDirection(
+          children: <Widget>[
+            if (widget.reverse && hasMoreThanOneChildElement) _wrap(finalDropArea, widget.children.length, constraints),
+            if (widget.header != null) widget.header!,
+            for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
+            if (!widget.reverse && hasMoreThanOneChildElement) _wrap(finalDropArea, widget.children.length, constraints),
+          ],
+        ),
       );
     });
   }
+}
+
+// A global key that takes its identity from the object and uses a value of a
+// particular type to identify itself.
+//
+// The difference with GlobalObjectKey is that it uses [==] instead of [identical]
+// of the objects used to generate widgets.
+@optionalTypeArgs
+class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
+
+  const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
+
+  final Key subKey;
+
+  final _ReorderableListContentState state;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ReorderableListViewChildGlobalKey
+        && other.subKey == subKey
+        && other.state == state;
+  }
+
+  @override
+  int get hashCode => hashValues(subKey, state);
 }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,14 +16,14 @@ import 'theme_data.dart';
 /// [InputChip], [ChoiceChip], [FilterChip], and [ActionChip].
 ///
 /// A chip theme describes the color, shape and text styles for the chips it is
-/// applied to
+/// applied to.
 ///
 /// Descendant widgets obtain the current theme's [ChipThemeData] object using
 /// [ChipTheme.of]. When a widget uses [ChipTheme.of], it is automatically
 /// rebuilt if the theme later changes.
 ///
 /// The [ThemeData] object given by the [Theme.of] call also contains a default
-/// [Theme.chipTheme] that can be customized by copying it (using
+/// [ThemeData.chipTheme] that can be customized by copying it (using
 /// [ChipThemeData.copyWith]).
 ///
 /// See also:
@@ -40,14 +40,14 @@ import 'theme_data.dart';
 ///    theme.
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class ChipTheme extends InheritedWidget {
+class ChipTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
   ///
   /// The [data] and [child] arguments must not be null.
   const ChipTheme({
-    Key key,
-    @required this.data,
-    @required Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(child != null),
        assert(data != null),
        super(key: key, child: child);
@@ -62,7 +62,7 @@ class ChipTheme extends InheritedWidget {
   /// Defaults to the ambient [ThemeData.chipTheme] if there is no
   /// [ChipTheme] in the given build context.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
@@ -85,8 +85,13 @@ class ChipTheme extends InheritedWidget {
   ///  * [ChipThemeData], which describes the actual configuration of a chip
   ///    theme.
   static ChipThemeData of(BuildContext context) {
-    final ChipTheme inheritedTheme = context.inheritFromWidgetOfExactType(ChipTheme);
+    final ChipTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<ChipTheme>();
     return inheritedTheme?.data ?? Theme.of(context).chipTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return ChipTheme(data: data, child: child);
   }
 
   @override
@@ -112,9 +117,9 @@ class ChipTheme extends InheritedWidget {
 ///
 /// The simplest way to create a ChipThemeData is to use [copyWith] on the one
 /// you get from [ChipTheme.of], or create an entirely new one with
-/// [ChipThemeData..fromDefaults].
+/// [ChipThemeData.fromDefaults].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
@@ -162,7 +167,8 @@ class ChipTheme extends InheritedWidget {
 ///  * [Theme] widget, which performs a similar function to [ChipTheme],
 ///    but for overall themes.
 ///  * [ThemeData], which has a default [ChipThemeData].
-class ChipThemeData extends Diagnosticable {
+@immutable
+class ChipThemeData with Diagnosticable {
   /// Create a [ChipThemeData] given a set of exact values. All the values
   /// must be specified except for [shadowColor], [selectedShadowColor],
   /// [elevation], and [pressElevation], which may be null.
@@ -170,28 +176,29 @@ class ChipThemeData extends Diagnosticable {
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
   const ChipThemeData({
-    @required this.backgroundColor,
+    required this.backgroundColor,
     this.deleteIconColor,
-    @required this.disabledColor,
-    @required this.selectedColor,
-    @required this.secondarySelectedColor,
+    required this.disabledColor,
+    required this.selectedColor,
+    required this.secondarySelectedColor,
     this.shadowColor,
     this.selectedShadowColor,
-    @required this.labelPadding,
-    @required this.padding,
-    @required this.shape,
-    @required this.labelStyle,
-    @required this.secondaryLabelStyle,
-    @required this.brightness,
+    this.showCheckmark,
+    this.checkmarkColor,
+    this.labelPadding,
+    required this.padding,
+    this.side,
+    this.shape,
+    required this.labelStyle,
+    required this.secondaryLabelStyle,
+    required this.brightness,
     this.elevation,
     this.pressElevation,
   }) : assert(backgroundColor != null),
        assert(disabledColor != null),
        assert(selectedColor != null),
        assert(secondarySelectedColor != null),
-       assert(labelPadding != null),
        assert(padding != null),
-       assert(shape != null),
        assert(labelStyle != null),
        assert(secondaryLabelStyle != null),
        assert(brightness != null);
@@ -214,10 +221,10 @@ class ChipThemeData extends Diagnosticable {
   ///
   /// This is used to generate the default chip theme for a [ThemeData].
   factory ChipThemeData.fromDefaults({
-    Brightness brightness,
-    Color primaryColor,
-    @required Color secondaryColor,
-    @required TextStyle labelStyle,
+    Brightness? brightness,
+    Color? primaryColor,
+    required Color secondaryColor,
+    required TextStyle labelStyle,
   }) {
     assert(primaryColor != null || brightness != null,
       'One of primaryColor or brightness must be specified');
@@ -237,8 +244,6 @@ class ChipThemeData extends Diagnosticable {
     const int disabledAlpha = 0x0c; // 38% * 12% = 5%
     const int selectAlpha = 0x3d; // 12% + 12% = 24%
     const int textLabelAlpha = 0xde; // 87%
-    const ShapeBorder shape = StadiumBorder();
-    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(horizontal: 8.0);
     const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
 
     primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);
@@ -258,12 +263,10 @@ class ChipThemeData extends Diagnosticable {
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       secondarySelectedColor: secondarySelectedColor,
-      labelPadding: labelPadding,
       padding: padding,
-      shape: shape,
       labelStyle: labelStyle,
       secondaryLabelStyle: secondaryLabelStyle,
-      brightness: brightness,
+      brightness: brightness!,
     );
   }
 
@@ -276,14 +279,15 @@ class ChipThemeData extends Diagnosticable {
   /// (slightly transparent black) for light themes, and Color(0xdeffffff)
   /// (slightly transparent white) for dark themes.
   ///
-  /// May be set to null, in which case the ambient [IconTheme.color] is used.
-  final Color deleteIconColor;
+  /// May be set to null, in which case the ambient [IconThemeData.color] is used.
+  final Color? deleteIconColor;
 
   /// Color to be used for the chip's background indicating that it is disabled.
   ///
-  /// The chip is disabled when [isEnabled] is false, or all three of
-  /// [SelectableChipAttributes.onSelected], [TappableChipAttributes.onPressed],
-  /// and [DeletableChipAttributes.onDelete] are null.
+  /// The chip is disabled when [DisabledChipAttributes.isEnabled] is false, or
+  /// all three of [SelectableChipAttributes.onSelected],
+  /// [TappableChipAttributes.onPressed], and
+  /// [DeletableChipAttributes.onDeleted] are null.
   ///
   /// It defaults to [Colors.black38].
   final Color disabledColor;
@@ -291,14 +295,14 @@ class ChipThemeData extends Diagnosticable {
   /// Color to be used for the chip's background, indicating that it is
   /// selected.
   ///
-  /// The chip is selected when [selected] is true.
+  /// The chip is selected when [SelectableChipAttributes.selected] is true.
   final Color selectedColor;
 
   /// An alternate color to be used for the chip's background, indicating that
   /// it is selected. For example, this color is used by [ChoiceChip] when the
   /// choice is selected.
   ///
-  /// The chip is selected when [selected] is true.
+  /// The chip is selected when [SelectableChipAttributes.selected] is true.
   final Color secondarySelectedColor;
 
   /// Color of the chip's shadow when the elevation is greater than 0.
@@ -308,7 +312,7 @@ class ChipThemeData extends Diagnosticable {
   /// See also:
   ///
   ///  * [selectedShadowColor]
-  final Color shadowColor;
+  final Color? shadowColor;
 
   /// Color of the chip's shadow when the elevation is greater than 0 and the
   /// chip is selected.
@@ -318,23 +322,63 @@ class ChipThemeData extends Diagnosticable {
   /// See also:
   ///
   ///  * [shadowColor]
-  final Color selectedShadowColor;
+  final Color? selectedShadowColor;
 
-  /// The padding around the [label] widget.
+  /// Whether or not to show a check mark when [SelectableChipAttributes.selected] is true.
+  ///
+  /// For instance, the [ChoiceChip] sets this to false so that it can be
+  /// selected without showing the check mark.
+  ///
+  /// Defaults to true.
+  final bool? showCheckmark;
+
+  /// Color of the chip's check mark when a check mark is visible.
+  ///
+  /// This will override the color set by the platform's brightness setting.
+  final Color? checkmarkColor;
+
+  /// The padding around the [Chip.label] widget.
   ///
   /// By default, this is 4 logical pixels at the beginning and the end of the
   /// label, and zero on top and bottom.
-  final EdgeInsetsGeometry labelPadding;
+  final EdgeInsetsGeometry? labelPadding;
 
   /// The padding between the contents of the chip and the outside [shape].
   ///
   /// Defaults to 4 logical pixels on all sides.
   final EdgeInsetsGeometry padding;
 
+  /// The color and weight of the chip's outline.
+  ///
+  /// If null, the chip defaults to the border side of [shape].
+  ///
+  /// This value is combined with [shape] to create a shape decorated with an
+  /// outline. If it is a [MaterialStateBorderSide],
+  /// [MaterialStateProperty.resolve] is used for the following
+  /// [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
+  final BorderSide? side;
+
   /// The border to draw around the chip.
   ///
-  /// Defaults to a [StadiumBorder]. Must not be null.
-  final ShapeBorder shape;
+  /// If null, the chip defaults to a [StadiumBorder].
+  ///
+  /// This shape is combined with [side] to create a shape decorated with an
+  /// outline. If it is a [MaterialStateOutlinedBorder],
+  /// [MaterialStateProperty.resolve] is used for the following
+  /// [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
+  final OutlinedBorder? shape;
 
   /// The style to be applied to the chip's label.
   ///
@@ -357,31 +401,33 @@ class ChipThemeData extends Diagnosticable {
   /// The elevation to be applied to the chip.
   ///
   /// If null, the chip defaults to 0.
-  final double elevation;
+  final double? elevation;
 
   /// The elevation to be applied to the chip during the press motion.
   ///
   /// If null, the chip defaults to 8.
-  final double pressElevation;
+  final double? pressElevation;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
-    Color backgroundColor,
-    Color deleteIconColor,
-    Color disabledColor,
-    Color selectedColor,
-    Color secondarySelectedColor,
-    Color shadowColor,
-    Color selectedShadowColor,
-    EdgeInsetsGeometry labelPadding,
-    EdgeInsetsGeometry padding,
-    ShapeBorder shape,
-    TextStyle labelStyle,
-    TextStyle secondaryLabelStyle,
-    Brightness brightness,
-    double elevation,
-    double pressElevation,
+    Color? backgroundColor,
+    Color? deleteIconColor,
+    Color? disabledColor,
+    Color? selectedColor,
+    Color? secondarySelectedColor,
+    Color? shadowColor,
+    Color? selectedShadowColor,
+    Color? checkmarkColor,
+    EdgeInsetsGeometry? labelPadding,
+    EdgeInsetsGeometry? padding,
+    BorderSide? side,
+    OutlinedBorder? shape,
+    TextStyle? labelStyle,
+    TextStyle? secondaryLabelStyle,
+    Brightness? brightness,
+    double? elevation,
+    double? pressElevation,
   }) {
     return ChipThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -391,8 +437,10 @@ class ChipThemeData extends Diagnosticable {
       secondarySelectedColor: secondarySelectedColor ?? this.secondarySelectedColor,
       shadowColor: shadowColor ?? this.shadowColor,
       selectedShadowColor: selectedShadowColor ?? this.selectedShadowColor,
+      checkmarkColor: checkmarkColor ?? this.checkmarkColor,
       labelPadding: labelPadding ?? this.labelPadding,
       padding: padding ?? this.padding,
+      side: side ?? this.side,
       shape: shape ?? this.shape,
       labelStyle: labelStyle ?? this.labelStyle,
       secondaryLabelStyle: secondaryLabelStyle ?? this.secondaryLabelStyle,
@@ -407,27 +455,47 @@ class ChipThemeData extends Diagnosticable {
   /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static ChipThemeData lerp(ChipThemeData a, ChipThemeData b, double t) {
+  static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
     return ChipThemeData(
-      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t)!,
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
-      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
-      selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
-      secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
+      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t)!,
+      selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t)!,
+      secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t)!,
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       selectedShadowColor: Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
+      checkmarkColor: Color.lerp(a?.checkmarkColor, b?.checkmarkColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
-      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
-      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
-      labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
-      secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t)!,
+      side: _lerpSides(a?.side, b?.side, t),
+      shape: _lerpShapes(a?.shape, b?.shape, t),
+      labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t)!,
+      secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t)!,
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
     );
+  }
+
+  // Special case because BorderSide.lerp() doesn't support null arguments.
+  static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
+    if (b == null)
+      return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
+    return BorderSide.lerp(a, b, t);
+  }
+
+  // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
+  static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
+    if (a == null && b == null)
+      return null;
+    return ShapeBorder.lerp(a, b, t) as OutlinedBorder?;
   }
 
   @override
@@ -440,8 +508,10 @@ class ChipThemeData extends Diagnosticable {
       secondarySelectedColor,
       shadowColor,
       selectedShadowColor,
+      checkmarkColor,
       labelPadding,
       padding,
+      side,
       shape,
       labelStyle,
       secondaryLabelStyle,
@@ -459,22 +529,24 @@ class ChipThemeData extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final ChipThemeData otherData = other;
-    return otherData.backgroundColor == backgroundColor
-        && otherData.deleteIconColor == deleteIconColor
-        && otherData.disabledColor == disabledColor
-        && otherData.selectedColor == selectedColor
-        && otherData.secondarySelectedColor == secondarySelectedColor
-        && otherData.shadowColor == shadowColor
-        && otherData.selectedShadowColor == selectedShadowColor
-        && otherData.labelPadding == labelPadding
-        && otherData.padding == padding
-        && otherData.shape == shape
-        && otherData.labelStyle == labelStyle
-        && otherData.secondaryLabelStyle == secondaryLabelStyle
-        && otherData.brightness == brightness
-        && otherData.elevation == elevation
-        && otherData.pressElevation == pressElevation;
+    return other is ChipThemeData
+        && other.backgroundColor == backgroundColor
+        && other.deleteIconColor == deleteIconColor
+        && other.disabledColor == disabledColor
+        && other.selectedColor == selectedColor
+        && other.secondarySelectedColor == secondarySelectedColor
+        && other.shadowColor == shadowColor
+        && other.selectedShadowColor == selectedShadowColor
+        && other.checkmarkColor == checkmarkColor
+        && other.labelPadding == labelPadding
+        && other.padding == padding
+        && other.side == side
+        && other.shape == shape
+        && other.labelStyle == labelStyle
+        && other.secondaryLabelStyle == secondaryLabelStyle
+        && other.brightness == brightness
+        && other.elevation == elevation
+        && other.pressElevation == pressElevation;
   }
 
   @override
@@ -484,17 +556,19 @@ class ChipThemeData extends Diagnosticable {
     final ChipThemeData defaultData = ChipThemeData.fromDefaults(
       secondaryColor: defaultTheme.primaryColor,
       brightness: defaultTheme.brightness,
-      labelStyle: defaultTheme.textTheme.body2,
+      labelStyle: defaultTheme.textTheme.bodyText1!,
     );
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(DiagnosticsProperty<Color>('deleteIconColor', deleteIconColor, defaultValue: defaultData.deleteIconColor));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
-    properties.add(DiagnosticsProperty<Color>('selectedColor', selectedColor, defaultValue: defaultData.selectedColor));
-    properties.add(DiagnosticsProperty<Color>('secondarySelectedColor', secondarySelectedColor, defaultValue: defaultData.secondarySelectedColor));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: defaultData.shadowColor));
-    properties.add(DiagnosticsProperty<Color>('selectedShadowColor', selectedShadowColor, defaultValue: defaultData.selectedShadowColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: defaultData.deleteIconColor));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
+    properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: defaultData.selectedColor));
+    properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: defaultData.secondarySelectedColor));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor));
+    properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: defaultData.selectedShadowColor));
+    properties.add(ColorProperty('checkMarkColor', checkmarkColor, defaultValue: defaultData.checkmarkColor));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: defaultData.labelPadding));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultData.padding));
+    properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: defaultData.side));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
     properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultData.labelStyle));
     properties.add(DiagnosticsProperty<TextStyle>('secondaryLabelStyle', secondaryLabelStyle, defaultValue: defaultData.secondaryLabelStyle));

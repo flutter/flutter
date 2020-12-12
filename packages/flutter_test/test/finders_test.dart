@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,10 +30,50 @@ void main() {
     });
   });
 
+  group('textContaining', () {
+    testWidgets('finds Text widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Text('this is a test'),
+      ));
+      expect(find.textContaining(RegExp(r'test')), findsOneWidget);
+      expect(find.textContaining('test'), findsOneWidget);
+      expect(find.textContaining('a'), findsOneWidget);
+      expect(find.textContaining('s'), findsOneWidget);
+    });
+
+    testWidgets('finds Text.rich widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+          const Text.rich(
+            TextSpan(text: 'this', children: <TextSpan>[
+              TextSpan(text: 'is'),
+              TextSpan(text: 'a'),
+              TextSpan(text: 'test'),
+            ],
+            ),
+          )));
+
+      expect(find.textContaining(RegExp(r'isatest')), findsOneWidget);
+      expect(find.textContaining('isatest'), findsOneWidget);
+    });
+
+    testWidgets('finds EditableText widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: _boilerplate(TextField(
+            controller: TextEditingController()..text = 'this is test',
+          )),
+        ),
+      ));
+
+      expect(find.textContaining(RegExp(r'test')), findsOneWidget);
+      expect(find.textContaining('test'), findsOneWidget);
+    });
+  });
+
   group('semantics', () {
     testWidgets('Throws StateError if semantics are not enabled', (WidgetTester tester) async {
       expect(() => find.bySemanticsLabel('Add'), throwsStateError);
-    });
+    }, semanticsEnabled: false);
 
     testWidgets('finds Semantically labeled widgets', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
@@ -41,7 +81,7 @@ void main() {
         Semantics(
           label: 'Add',
           button: true,
-          child: const FlatButton(
+          child: const TextButton(
             child: Text('+'),
             onPressed: null,
           ),
@@ -128,7 +168,7 @@ void main() {
     final Text text = find.descendant(
       of: find.byKey(key1),
       matching: find.byType(Text),
-    ).last.evaluate().single.widget;
+    ).last.evaluate().single.widget as Text;
 
     expect(text.data, '1');
   });
@@ -157,6 +197,11 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
 
   @override
   bool get sizedByParent => true;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.smallest;
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {

@@ -1,19 +1,31 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'inherited_theme.dart';
 import 'media_query.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // String _name;
 
-/// The text style to apply to descendant [Text] widgets without explicit style.
-class DefaultTextStyle extends InheritedWidget {
+/// The text style to apply to descendant [Text] widgets which don't have an
+/// explicit style.
+///
+/// See also:
+///
+///  * [AnimatedDefaultTextStyle], which animates changes in the text style
+///    smoothly over a given duration.
+///  * [DefaultTextStyleTransition], which takes a provided [Animation] to
+///    animate changes in text style smoothly over time.
+class DefaultTextStyle extends InheritedTheme {
   /// Creates a default text style for the given subtree.
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
@@ -27,14 +39,15 @@ class DefaultTextStyle extends InheritedWidget {
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   const DefaultTextStyle({
-    Key key,
-    @required this.style,
+    Key? key,
+    required this.style,
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
-    @required Widget child,
+    this.textHeightBehavior,
+    required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
        assert(overflow != null),
@@ -43,19 +56,21 @@ class DefaultTextStyle extends InheritedWidget {
        assert(textWidthBasis != null),
        super(key: key, child: child);
 
-  /// A const-constructible default text style that provides fallback values.
+  /// A const-constructable default text style that provides fallback values.
   ///
   /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
   ///
-  /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
+  /// This constructor creates a [DefaultTextStyle] with an invalid [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback()
+  const DefaultTextStyle.fallback({ Key? key })
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
-      textWidthBasis = TextWidthBasis.parent;
+      textWidthBasis = TextWidthBasis.parent,
+      textHeightBehavior = null,
+      super(key: key, child: const _NullWidget());
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -74,14 +89,14 @@ class DefaultTextStyle extends InheritedWidget {
   /// See the source below for an example of how to do this (since that's
   /// essentially what this constructor does).
   static Widget merge({
-    Key key,
-    TextStyle style,
-    TextAlign textAlign,
-    bool softWrap,
-    TextOverflow overflow,
-    int maxLines,
-    TextWidthBasis textWidthBasis,
-    @required Widget child,
+    Key? key,
+    TextStyle? style,
+    TextAlign? textAlign,
+    bool? softWrap,
+    TextOverflow? overflow,
+    int? maxLines,
+    TextWidthBasis? textWidthBasis,
+    required Widget child,
   }) {
     assert(child != null);
     return Builder(
@@ -104,15 +119,21 @@ class DefaultTextStyle extends InheritedWidget {
   /// The text style to apply.
   final TextStyle style;
 
-  /// How the text should be aligned horizontally.
-  final TextAlign textAlign;
+  /// How each line of text in the Text widget should be aligned horizontally.
+  final TextAlign? textAlign;
 
   /// Whether the text should break at soft line breaks.
   ///
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
+  ///
+  /// This also decides the [overflow] property's behavior. If this is true or null,
+  /// the glyph causing overflow, and those that follow, will not be rendered.
   final bool softWrap;
 
   /// How visual overflow should be handled.
+  ///
+  /// If [softWrap] is true or null, the glyph causing overflow, and those that follow,
+  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow overflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
@@ -124,11 +145,15 @@ class DefaultTextStyle extends InheritedWidget {
   ///
   /// If this is non-null, it will override even explicit null values of
   /// [Text.maxLines].
-  final int maxLines;
+  final int? maxLines;
 
   /// The strategy to use when calculating the width of the Text.
+  ///
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
+
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final ui.TextHeightBehavior? textHeightBehavior;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -141,7 +166,7 @@ class DefaultTextStyle extends InheritedWidget {
   /// DefaultTextStyle style = DefaultTextStyle.of(context);
   /// ```
   static DefaultTextStyle of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(DefaultTextStyle) ?? const DefaultTextStyle.fallback();
+    return context.dependOnInheritedWidgetOfExactType<DefaultTextStyle>() ?? const DefaultTextStyle.fallback();
   }
 
   @override
@@ -151,18 +176,106 @@ class DefaultTextStyle extends InheritedWidget {
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
-        textWidthBasis != oldWidget.textWidthBasis;
+        textWidthBasis != oldWidget.textWidthBasis ||
+        textHeightBehavior != oldWidget.textHeightBehavior;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return DefaultTextStyle(
+      style: style,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      overflow: overflow,
+      maxLines: maxLines,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      child: child,
+    );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    style?.debugFillProperties(properties);
+    style.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+  }
+}
+
+class _NullWidget extends StatelessWidget {
+  const _NullWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    throw FlutterError(
+      'A DefaultTextStyle constructed with DefaultTextStyle.fallback cannot be incorporated into the widget tree, '
+      'it is meant only to provide a fallback value returned by DefaultTextStyle.of() '
+      'when no enclosing default text style is present in a BuildContext.'
+    );
+  }
+}
+
+/// The [TextHeightBehavior] that will apply to descendant [Text] and [EditableText]
+/// widgets which have not explicitly set [Text.textHeightBehavior].
+///
+/// If there is a [DefaultTextStyle] with a non-null [DefaultTextStyle.textHeightBehavior]
+/// below this widget, the [DefaultTextStyle.textHeightBehavior] will be used
+/// over this widget's [TextHeightBehavior].
+///
+/// See also:
+///
+///  * [DefaultTextStyle], which defines a [TextStyle] to apply to descendant
+///    [Text] widgets.
+class DefaultTextHeightBehavior extends InheritedTheme {
+  /// Creates a default text height behavior for the given subtree.
+  ///
+  /// The [textHeightBehavior] and [child] arguments are required and must not be null.
+  const DefaultTextHeightBehavior({
+    Key? key,
+    required this.textHeightBehavior,
+    required Widget child,
+  }) :  assert(textHeightBehavior != null),
+        assert(child != null),
+        super(key: key, child: child);
+
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final TextHeightBehavior textHeightBehavior;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If no such instance exists, this method will return `null`.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DefaultTextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
+  /// ```
+  static TextHeightBehavior? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
+  }
+
+  @override
+  bool updateShouldNotify(DefaultTextHeightBehavior oldWidget) {
+    return textHeightBehavior != oldWidget.textHeightBehavior;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return DefaultTextHeightBehavior(
+      textHeightBehavior: textHeightBehavior,
+      child: child,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -179,7 +292,14 @@ class DefaultTextStyle extends InheritedWidget {
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// {@tool sample}
+/// {@tool snippet}
+///
+/// This example shows how to display text using the [Text] widget with the
+/// [overflow] set to [TextOverflow.ellipsis].
+///
+/// ![If the text is shorter than the available space, it is displayed in full without an ellipsis.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text.png)
+///
+/// ![If the text overflows, the Text widget displays an ellipsis to trim the overflowing text](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_ellipsis.png)
 ///
 /// ```dart
 /// Text(
@@ -196,7 +316,9 @@ class DefaultTextStyle extends InheritedWidget {
 /// that follows displays "Hello beautiful world" with different styles
 /// for each word.
 ///
-/// {@tool sample}
+/// {@tool snippet}
+///
+/// ![The word "Hello" is shown with the default text styles. The word "beautiful" is italicized. The word "world" is bold.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_rich.png)
 ///
 /// ```dart
 /// const Text.rich(
@@ -216,7 +338,7 @@ class DefaultTextStyle extends InheritedWidget {
 /// To make [Text] react to touch events, wrap it in a [GestureDetector] widget
 /// with a [GestureDetector.onTap] handler.
 ///
-/// In a material design application, consider using a [FlatButton] instead, or
+/// In a material design application, consider using a [TextButton] instead, or
 /// if that isn't appropriate, at least using an [InkWell] instead of
 /// [GestureDetector].
 ///
@@ -235,9 +357,13 @@ class Text extends StatelessWidget {
   /// closest enclosing [DefaultTextStyle].
   ///
   /// The [data] parameter must not be null.
+  ///
+  /// The [overflow] property's behavior is affected by the [softWrap] argument.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
+  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   const Text(
-    this.data, {
-    Key key,
+    String this.data, {
+    Key? key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -249,6 +375,7 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
+    this.textHeightBehavior,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -256,12 +383,19 @@ class Text extends StatelessWidget {
        textSpan = null,
        super(key: key);
 
-  /// Creates a text widget with a [TextSpan].
+  /// Creates a text widget with a [InlineSpan].
+  ///
+  /// The following subclasses of [InlineSpan] may be used to build rich text:
+  ///
+  /// * [TextSpan]s define text and children [InlineSpan]s.
+  /// * [WidgetSpan]s define embedded inline widgets.
   ///
   /// The [textSpan] parameter must not be null.
+  ///
+  /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(
-    this.textSpan, {
-    Key key,
+    InlineSpan this.textSpan, {
+    Key? key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -273,6 +407,7 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
+    this.textHeightBehavior,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -283,25 +418,25 @@ class Text extends StatelessWidget {
   /// The text to display.
   ///
   /// This will be null if a [textSpan] is provided instead.
-  final String data;
+  final String? data;
 
-  /// The text to display as a [TextSpan].
+  /// The text to display as a [InlineSpan].
   ///
   /// This will be null if [data] is provided instead.
-  final TextSpan textSpan;
+  final InlineSpan? textSpan;
 
   /// If non-null, the style to use for this text.
   ///
   /// If the style's "inherit" property is true, the style will be merged with
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
-  final TextStyle style;
+  final TextStyle? style;
 
   /// {@macro flutter.painting.textPainter.strutStyle}
-  final StrutStyle strutStyle;
+  final StrutStyle? strutStyle;
 
   /// How the text should be aligned horizontally.
-  final TextAlign textAlign;
+  final TextAlign? textAlign;
 
   /// The directionality of the text.
   ///
@@ -316,7 +451,7 @@ class Text extends StatelessWidget {
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   /// Used to select a font when the same Unicode character can
   /// be rendered differently, depending on the locale.
@@ -325,15 +460,17 @@ class Text extends StatelessWidget {
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
   ///
   /// See [RenderParagraph.locale] for more information.
-  final Locale locale;
+  final Locale? locale;
 
   /// Whether the text should break at soft line breaks.
   ///
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
-  final bool softWrap;
+  final bool? softWrap;
 
   /// How visual overflow should be handled.
-  final TextOverflow overflow;
+  ///
+  /// Defaults to retrieving the value from the nearest [DefaultTextStyle] ancestor.
+  final TextOverflow? overflow;
 
   /// The number of font pixels for each logical pixel.
   ///
@@ -343,7 +480,7 @@ class Text extends StatelessWidget {
   /// The value given to the constructor as textScaleFactor. If null, will
   /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
-  final double textScaleFactor;
+  final double? textScaleFactor;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -356,7 +493,7 @@ class Text extends StatelessWidget {
   /// an explicit number for its [DefaultTextStyle.maxLines], then the
   /// [DefaultTextStyle] value will take precedence. You can use a [RichText]
   /// widget directly to entirely override the [DefaultTextStyle].
-  final int maxLines;
+  final int? maxLines;
 
   /// An alternative semantics label for this text.
   ///
@@ -370,19 +507,22 @@ class Text extends StatelessWidget {
   /// ```dart
   /// Text(r'$$', semanticsLabel: 'Double dollars')
   /// ```
-  final String semanticsLabel;
+  final String? semanticsLabel;
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
-  final TextWidthBasis textWidthBasis;
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
+  final TextWidthBasis? textWidthBasis;
+
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final ui.TextHeightBehavior? textHeightBehavior;
 
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
-    TextStyle effectiveTextStyle = style;
-    if (style == null || style.inherit)
+    TextStyle? effectiveTextStyle = style;
+    if (style == null || style!.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     if (MediaQuery.boldTextOverride(context))
-      effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
+      effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     Widget result = RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
@@ -393,10 +533,11 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
-        children: textSpan != null ? <TextSpan>[textSpan] : null,
+        children: textSpan != null ? <InlineSpan>[textSpan!] : null,
       ),
     );
     if (semanticsLabel != null) {
@@ -416,7 +557,7 @@ class Text extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('data', data, showName: false));
     if (textSpan != null) {
-      properties.add(textSpan.toDiagnosticsNode(name: 'textSpan', style: DiagnosticsTreeStyle.transition));
+      properties.add(textSpan!.toDiagnosticsNode(name: 'textSpan', style: DiagnosticsTreeStyle.transition));
     }
     style?.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -426,6 +567,8 @@ class Text extends StatelessWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }

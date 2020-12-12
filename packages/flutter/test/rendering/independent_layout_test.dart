@@ -1,6 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -25,8 +27,8 @@ class TestLayout {
       ),
     );
   }
-  RenderBox root;
-  RenderBox child;
+  late RenderBox root;
+  late RenderBox child;
   bool painted = false;
 }
 
@@ -44,11 +46,12 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration, window: null);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: ui.window);
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
+    pipelineOwner.requestVisualUpdate();
     // Lay out the onscreen in the default binding
     layout(onscreen.root, phase: EnginePhase.paint);
     expect(onscreen.child.hasSize, isTrue);
@@ -73,11 +76,12 @@ void main() {
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    final RenderView renderView = RenderView(configuration: testConfiguration, window: null);
+    final RenderView renderView = RenderView(configuration: testConfiguration, window: ui.window);
     final PipelineOwner pipelineOwner = PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
+    pipelineOwner.requestVisualUpdate();
     // Lay out the offscreen
     pipelineOwner.flushLayout();
     expect(offscreen.child.hasSize, isTrue);

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ void main() {
   group('$ReorderableListView', () {
     const double itemHeight = 48.0;
     const List<String> originalListItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
-    List<String> listItems;
+    late List<String> listItems;
 
     void onReorder(int oldIndex, int newIndex) {
       if (oldIndex < newIndex) {
@@ -30,7 +30,7 @@ void main() {
       );
     }
 
-    Widget build({ Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr }) {
+    Widget build({ Widget? header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr }) {
       return MaterialApp(
         home: Directionality(
           textDirection: textDirection,
@@ -54,6 +54,33 @@ void main() {
     });
 
     group('in vertical mode', () {
+      testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
+        bool onReorderWasCalled = false;
+        final List<String> currentListItems = listItems.take(1).toList();
+        final ReorderableListView reorderableListView = ReorderableListView(
+          header: const Text('Header'),
+          children: currentListItems.map<Widget>(listItemToWidget).toList(),
+          scrollDirection: Axis.vertical,
+          onReorder: (_, __) => onReorderWasCalled = true,
+        );
+        final List<String> currentOriginalListItems = originalListItems.take(1).toList();
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 10,
+            child: reorderableListView,
+          ),
+        ));
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.moveTo(tester.getBottomLeft(find.text('Item 1')) * 2);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.up();
+        expect(onReorderWasCalled, false);
+        expect(currentListItems, orderedEquals(<String>['Item 1']));
+      });
+
       testWidgets('reorders its contents only when a drag finishes', (WidgetTester tester) async {
         await tester.pumpWidget(build());
         expect(listItems, orderedEquals(originalListItems));
@@ -143,53 +170,92 @@ void main() {
 
         Element getContentElement() {
           final SingleChildScrollView listScrollView = tester.widget(find.byType(SingleChildScrollView));
-          final Widget scrollContents = listScrollView.child;
+          final Widget scrollContents = listScrollView.child!;
           final Element contentElement = tester.element(find.byElementPredicate((Element element) => element.widget == scrollContents));
           return contentElement;
         }
 
-        const double kNonDraggingListHeight = 292.0;
-        // The list view pads the drop area by 8dp.
-        const double kDraggingListHeight = 300.0;
+        const double kDraggingListHeight = 292.0;
         // Drag a normal text item
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size!.height, kDraggingListHeight);
         TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kDraggingListHeight);
+        expect(getContentElement().size!.height, kDraggingListHeight);
 
         // Move it
         await drag.moveTo(tester.getCenter(find.text('Last item')));
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kDraggingListHeight);
+        expect(getContentElement().size!.height, kDraggingListHeight);
 
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size!.height, kDraggingListHeight);
 
         // Drag a tall item
         drag = await tester.startGesture(tester.getCenter(find.text('Tall item')));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kDraggingListHeight);
+        expect(getContentElement().size!.height, kDraggingListHeight);
         // Move it
         await drag.moveTo(tester.getCenter(find.text('Last item')));
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kDraggingListHeight);
+        expect(getContentElement().size!.height, kDraggingListHeight);
 
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.height, kNonDraggingListHeight);
+        expect(getContentElement().size!.height, kDraggingListHeight);
+      });
+
+      testWidgets('Vertical drop area golden', (WidgetTester tester) async {
+        final Widget reorderableListView = ReorderableListView(
+          children: <Widget>[
+            Container(
+              key: const Key('pink'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.pink,
+            ),
+            Container(
+              key: const Key('blue'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.blue,
+            ),
+            Container(
+              key: const Key('green'),
+              width: double.infinity,
+              height: itemHeight,
+              color: Colors.green,
+            ),
+          ],
+          scrollDirection: Axis.vertical,
+          onReorder: (int oldIndex, int newIndex) { },
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 3,
+            child: reorderableListView,
+          ),
+        ));
+
+        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byKey(const Key('blue')),
+          matchesGoldenFile('reorderable_list_test.vertical.drop_area.png'),
+        );
       });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+          return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
               .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+              .findAncestorStateOfType<_StatefulState>()!;
         }
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
@@ -222,6 +288,35 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
+      });
+
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  scrollDirection: Axis.vertical,
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        // When the widget is rebuilt, the state of child should be consistent.
+        await tester.pumpWidget(build());
+        final Element e0 = tester.element(find.byKey(firstBox));
+        await tester.pumpWidget(build());
+        final Element e1 = tester.element(find.byKey(firstBox));
+        expect(e0, equals(e1));
       });
 
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
@@ -261,6 +356,65 @@ void main() {
           find.byType(SingleChildScrollView),
         );
         expect(scrollView.controller, primary2);
+      });
+
+      testWidgets('Test custom ScrollController behavior when set', (WidgetTester tester) async {
+        const Key firstBox = Key('C');
+        const Key secondBox = Key('B');
+        const Key thirdBox = Key('A');
+        final ScrollController customController = ScrollController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 200,
+                child: ReorderableListView(
+                  scrollController: customController,
+                  onReorder: (int oldIndex, int newIndex) { },
+                  children: const <Widget>[
+                    SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: firstBox),
+                    SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: secondBox),
+                    SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: thirdBox),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Check initial scroll offset of first list item relative to
+        // the offset of the list view.
+        customController.animateTo(
+          40.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear
+        );
+        await tester.pumpAndSettle();
+        Offset listViewTopLeft = tester.getTopLeft(
+          find.byType(ReorderableListView),
+        );
+        Offset firstBoxTopLeft = tester.getTopLeft(
+          find.byKey(firstBox)
+        );
+        expect(firstBoxTopLeft.dy, listViewTopLeft.dy - 40.0);
+
+        // Drag the UI to see if the scroll controller updates accordingly
+        await tester.drag(
+          find.text('B'),
+          const Offset(0.0, -100.0),
+        );
+        listViewTopLeft = tester.getTopLeft(
+          find.byType(ReorderableListView),
+        );
+        firstBoxTopLeft = tester.getTopLeft(
+          find.byKey(firstBox),
+        );
+        // Initial scroll controller offset: 40.0
+        // Drag UI by 100.0 upwards vertically
+        // First 20.0 px always ignored, so scroll offset is only
+        // shifted by 80.0.
+        // Final offset: 40.0 + 80.0 = 120.0
+        expect(customController.offset, 120.0);
       });
 
       testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
@@ -304,8 +458,8 @@ void main() {
           final Semantics semantics = find.ancestor(
             of: find.byKey(Key(listItems[index])),
             matching: find.byType(Semantics),
-          ).evaluate().first.widget;
-          return semantics.properties.customSemanticsActions;
+          ).evaluate().first.widget as Semantics;
+          return semantics.properties.customSemanticsActions!;
         }
 
         const CustomSemanticsAction moveToStart = CustomSemanticsAction(label: 'Move to the start');
@@ -316,7 +470,7 @@ void main() {
         testWidgets('Provides the correct accessibility actions in LTR and RTL modes', (WidgetTester tester) async {
           // The a11y actions for a vertical list are the same in LTR and RTL modes.
           final SemanticsHandle handle = tester.ensureSemantics();
-          for (TextDirection direction in TextDirection.values) {
+          for (final TextDirection direction in TextDirection.values) {
             await tester.pumpWidget(build());
 
             // The first item can be moved down or to the end.
@@ -355,14 +509,14 @@ void main() {
           // Test out move to end: move Item 1 to the end of the list.
           await tester.pumpWidget(build());
           Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
-          firstSemanticsActions[moveToEnd]();
+          firstSemanticsActions[moveToEnd]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
 
           // Test out move after: move Item 2 (the current first item) one space down.
           await tester.pumpWidget(build());
           firstSemanticsActions = getSemanticsActions(0);
-          firstSemanticsActions[moveDown]();
+          firstSemanticsActions[moveDown]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 3', 'Item 2', 'Item 4', 'Item 1']));
 
@@ -376,28 +530,28 @@ void main() {
           // Test out move to end: move Item 2 to the end of the list.
           await tester.pumpWidget(build());
           Map<CustomSemanticsAction, VoidCallback> middleSemanticsActions = getSemanticsActions(1);
-          middleSemanticsActions[moveToEnd]();
+          middleSemanticsActions[moveToEnd]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
 
           // Test out move after: move Item 3 (the current second item) one space down.
           await tester.pumpWidget(build());
           middleSemanticsActions = getSemanticsActions(1);
-          middleSemanticsActions[moveDown]();
+          middleSemanticsActions[moveDown]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 4', 'Item 3', 'Item 2']));
 
           // Test out move after: move Item 3 (the current third item) one space up.
           await tester.pumpWidget(build());
           middleSemanticsActions = getSemanticsActions(2);
-          middleSemanticsActions[moveUp]();
+          middleSemanticsActions[moveUp]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
 
           // Test out move to start: move Item 4 (the current third item) to the start of the list.
           await tester.pumpWidget(build());
           middleSemanticsActions = getSemanticsActions(2);
-          middleSemanticsActions[moveToStart]();
+          middleSemanticsActions[moveToStart]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
@@ -411,14 +565,14 @@ void main() {
           // Test out move to start: move Item 4 to the start of the list.
           await tester.pumpWidget(build());
           Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          lastSemanticsActions[moveToStart]();
+          lastSemanticsActions[moveToStart]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
 
           // Test out move up: move Item 3 (the current last item) one space up.
           await tester.pumpWidget(build());
           lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          lastSemanticsActions[moveUp]();
+          lastSemanticsActions[moveUp]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
@@ -441,7 +595,7 @@ void main() {
                   child: SwitchListTile(
                     title: const Text('Switch tile'),
                     value: true,
-                    onChanged: (bool newValue) { },
+                    onChanged: (bool? newValue) { },
                   ),
                 ),
               ),
@@ -469,6 +623,7 @@ void main() {
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,
+            isFocusable: true,
             hasEnabledState: true,
             label: 'Switch tile',
             hasTapAction: true,
@@ -485,6 +640,33 @@ void main() {
     });
 
     group('in horizontal mode', () {
+      testWidgets('reorder is not triggered when children length is less or equals to 1', (WidgetTester tester) async {
+        bool onReorderWasCalled = false;
+        final List<String> currentListItems = listItems.take(1).toList();
+        final ReorderableListView reorderableListView = ReorderableListView(
+          header: const Text('Header'),
+          children: currentListItems.map<Widget>(listItemToWidget).toList(),
+          scrollDirection: Axis.horizontal,
+          onReorder: (_, __) => onReorderWasCalled = true,
+        );
+        final List<String> currentOriginalListItems = originalListItems.take(1).toList();
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            height: itemHeight * 10,
+            child: reorderableListView,
+          ),
+        ));
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.moveTo(tester.getBottomLeft(find.text('Item 1')) * 2);
+        expect(currentListItems, orderedEquals(currentOriginalListItems));
+        await drag.up();
+        expect(onReorderWasCalled, false);
+        expect(currentListItems, orderedEquals(<String>['Item 1']));
+      });
+
       testWidgets('allows reordering from the very top to the very bottom', (WidgetTester tester) async {
         await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
         expect(listItems, orderedEquals(originalListItems));
@@ -571,54 +753,92 @@ void main() {
 
         Element getContentElement() {
           final SingleChildScrollView listScrollView = tester.widget(find.byType(SingleChildScrollView));
-          final Widget scrollContents = listScrollView.child;
+          final Widget scrollContents = listScrollView.child!;
           final Element contentElement = tester.element(find.byElementPredicate((Element element) => element.widget == scrollContents));
           return contentElement;
         }
 
-        const double kNonDraggingListWidth = 292.0;
-        // The list view pads the drop area by 8dp.
-        const double kDraggingListWidth = 300.0;
+        const double kDraggingListWidth = 292.0;
         // Drag a normal text item
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size!.width, kDraggingListWidth);
         TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Normal item')));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kDraggingListWidth);
+        expect(getContentElement().size!.width, kDraggingListWidth);
 
         // Move it
         await drag.moveTo(tester.getCenter(find.text('Last item')));
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kDraggingListWidth);
+        expect(getContentElement().size!.width, kDraggingListWidth);
 
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size!.width, kDraggingListWidth);
 
         // Drag a tall item
         drag = await tester.startGesture(tester.getCenter(find.text('Tall item')));
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kDraggingListWidth);
+        expect(getContentElement().size!.width, kDraggingListWidth);
         // Move it
         await drag.moveTo(tester.getCenter(find.text('Last item')));
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kDraggingListWidth);
+        expect(getContentElement().size!.width, kDraggingListWidth);
 
         // Drop it
         await drag.up();
         await tester.pumpAndSettle();
-        expect(getContentElement().size.width, kNonDraggingListWidth);
+        expect(getContentElement().size!.width, kDraggingListWidth);
       });
 
+      testWidgets('Horizontal drop area golden', (WidgetTester tester) async {
+        final Widget reorderableListView = ReorderableListView(
+          children: <Widget>[
+            Container(
+              key: const Key('pink'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.pink,
+            ),
+            Container(
+              key: const Key('blue'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.blue,
+            ),
+            Container(
+              key: const Key('green'),
+              height: double.infinity,
+              width: itemHeight,
+              color: Colors.green,
+            ),
+          ],
+          scrollDirection: Axis.horizontal,
+          onReorder: (int oldIndex, int newIndex) { },
+        );
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
+            width: itemHeight * 3,
+            child: reorderableListView,
+          ),
+        ));
+
+        await tester.startGesture(tester.getCenter(find.byKey(const Key('blue'))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byKey(const Key('blue')),
+          matchesGoldenFile('reorderable_list_test.horizontal.drop_area.png'),
+        );
+      });
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+          return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
               .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+              .findAncestorStateOfType<_StatefulState>()!;
         }
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
@@ -655,13 +875,42 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
+      testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
+        const Key firstBox = Key('key');
+        Widget build() {
+          return MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: ReorderableListView(
+                  scrollDirection: Axis.horizontal,
+                  children: const <Widget>[
+                    SizedBox(key: firstBox, width: 10, height: 10),
+                  ],
+                  onReorder: (_, __) {},
+                ),
+              ),
+            ),
+          );
+        }
+
+        // When the widget is rebuilt, the state of child should be consistent.
+        await tester.pumpWidget(build());
+        final Element e0 = tester.element(find.byKey(firstBox));
+        await tester.pumpWidget(build());
+        final Element e1 = tester.element(find.byKey(firstBox));
+        expect(e0, equals(e1));
+      });
+
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
           final Semantics semantics = find.ancestor(
             of: find.byKey(Key(listItems[index])),
             matching: find.byType(Semantics),
-          ).evaluate().first.widget;
-          return semantics.properties.customSemanticsActions;
+          ).evaluate().first.widget as Semantics;
+          return semantics.properties.customSemanticsActions!;
         }
 
         const CustomSemanticsAction moveToStart = CustomSemanticsAction(label: 'Move to the start');
@@ -744,14 +993,14 @@ void main() {
           // Test out move to end: move Item 1 to the end of the list.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
           Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
-          firstSemanticsActions[moveToEnd]();
+          firstSemanticsActions[moveToEnd]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
 
           // Test out move after: move Item 2 (the current first item) one space to the right.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
           firstSemanticsActions = getSemanticsActions(0);
-          firstSemanticsActions[moveRight]();
+          firstSemanticsActions[moveRight]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 3', 'Item 2', 'Item 4', 'Item 1']));
 
@@ -767,14 +1016,14 @@ void main() {
           // Test out move to end: move Item 1 to the end of the list.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
           Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
-          firstSemanticsActions[moveToEnd]();
+          firstSemanticsActions[moveToEnd]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
 
           // Test out move after: move Item 2 (the current first item) one space to the left.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
           firstSemanticsActions = getSemanticsActions(0);
-          firstSemanticsActions[moveLeft]();
+          firstSemanticsActions[moveLeft]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 3', 'Item 2', 'Item 4', 'Item 1']));
 
@@ -788,28 +1037,28 @@ void main() {
           // Test out move to end: move Item 2 to the end of the list.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
           Map<CustomSemanticsAction, VoidCallback> middleSemanticsActions = getSemanticsActions(1);
-          middleSemanticsActions[moveToEnd]();
+          middleSemanticsActions[moveToEnd]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
 
           // Test out move after: move Item 3 (the current second item) one space to the right.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
           middleSemanticsActions = getSemanticsActions(1);
-          middleSemanticsActions[moveRight]();
+          middleSemanticsActions[moveRight]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 4', 'Item 3', 'Item 2']));
 
           // Test out move after: move Item 3 (the current third item) one space to the left.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
           middleSemanticsActions = getSemanticsActions(2);
-          middleSemanticsActions[moveLeft]();
+          middleSemanticsActions[moveLeft]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
 
           // Test out move to start: move Item 4 (the current third item) to the start of the list.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
           middleSemanticsActions = getSemanticsActions(2);
-          middleSemanticsActions[moveToStart]();
+          middleSemanticsActions[moveToStart]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
@@ -825,28 +1074,28 @@ void main() {
           // Test out move to end: move Item 2 to the end of the list.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
           Map<CustomSemanticsAction, VoidCallback> middleSemanticsActions = getSemanticsActions(1);
-          middleSemanticsActions[moveToEnd]();
+          middleSemanticsActions[moveToEnd]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
 
           // Test out move after: move Item 3 (the current second item) one space to the left.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
           middleSemanticsActions = getSemanticsActions(1);
-          middleSemanticsActions[moveLeft]();
+          middleSemanticsActions[moveLeft]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 4', 'Item 3', 'Item 2']));
 
           // Test out move after: move Item 3 (the current third item) one space to the right.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
           middleSemanticsActions = getSemanticsActions(2);
-          middleSemanticsActions[moveRight]();
+          middleSemanticsActions[moveRight]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
 
           // Test out move to start: move Item 4 (the current third item) to the start of the list.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
           middleSemanticsActions = getSemanticsActions(2);
-          middleSemanticsActions[moveToStart]();
+          middleSemanticsActions[moveToStart]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
@@ -860,14 +1109,14 @@ void main() {
           // Test out move to start: move Item 4 to the start of the list.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
           Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          lastSemanticsActions[moveToStart]();
+          lastSemanticsActions[moveToStart]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
 
           // Test out move before: move Item 3 (the current last item) one space to the left.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
           lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          lastSemanticsActions[moveLeft]();
+          lastSemanticsActions[moveLeft]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
@@ -883,14 +1132,14 @@ void main() {
           // Test out move to start: move Item 4 to the start of the list.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
           Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          lastSemanticsActions[moveToStart]();
+          lastSemanticsActions[moveToStart]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
 
           // Test out move before: move Item 3 (the current last item) one space to the right.
           await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
           lastSemanticsActions = getSemanticsActions(listItems.length - 1);
-          lastSemanticsActions[moveRight]();
+          lastSemanticsActions[moveRight]!();
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
@@ -924,6 +1173,58 @@ void main() {
       ));
       expect(tester.getCenter(find.text('A')).dy, lessThan(tester.getCenter(find.text('B')).dy));
     });
+
+    testWidgets('Animation test when placing an item in place', (WidgetTester tester) async {
+      const Key testItemKey = Key('Test item');
+      final Widget reorderableListView = ReorderableListView(
+        children: const <Widget>[
+          SizedBox(
+            key: Key('First item'),
+            height: itemHeight,
+            child: Text('First item'),
+          ),
+          SizedBox(
+            key: testItemKey,
+            height: itemHeight,
+            child: Text('Test item'),
+          ),
+          SizedBox(
+            key: Key('Last item'),
+            height: itemHeight,
+            child: Text('Last item'),
+          ),
+        ],
+        scrollDirection: Axis.vertical,
+        onReorder: (int oldIndex, int newIndex) { },
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: SizedBox(
+          height: itemHeight * 10,
+          child: reorderableListView,
+        ),
+      ));
+
+      Offset getTestItemPosition() {
+        final RenderBox testItem = tester.renderObject<RenderBox>(find.byKey(testItemKey));
+        return testItem.localToGlobal(Offset.zero);
+      }
+      // Before pick it up.
+      final Offset startPosition = getTestItemPosition();
+
+      // Pick it up.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(testItemKey)));
+      await tester.pump(kLongPressTimeout + kPressTimeout);
+      expect(getTestItemPosition(), startPosition);
+
+      // Put it down.
+      await gesture.up();
+      await tester.pump();
+      expect(getTestItemPosition(), startPosition);
+
+      // After put it down.
+      await tester.pumpAndSettle();
+      expect(getTestItemPosition(), startPosition);
+    });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
   });
 }
@@ -939,14 +1240,14 @@ Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async 
 class _Stateful extends StatefulWidget {
   // Ignoring the preference for const constructors because we want to test with regular non-const instances.
   // ignore:prefer_const_constructors_in_immutables
-  _Stateful({Key key}) : super(key: key);
+  _Stateful({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _StatefulState();
 }
 
 class _StatefulState extends State<_Stateful> {
-  bool checked = false;
+  bool? checked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -956,7 +1257,7 @@ class _StatefulState extends State<_Stateful> {
       child: Material(
         child: Checkbox(
           value: checked,
-          onChanged: (bool newValue) => checked = newValue,
+          onChanged: (bool? newValue) => checked = newValue,
         ),
       ),
     );

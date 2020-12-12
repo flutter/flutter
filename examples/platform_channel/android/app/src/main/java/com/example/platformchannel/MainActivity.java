@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,8 +13,9 @@ import android.os.BatteryManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-
-import io.flutter.app.FlutterActivity;
+import androidx.annotation.NonNull;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.EventSink;
 import io.flutter.plugin.common.EventChannel.StreamHandler;
@@ -29,44 +30,42 @@ public class MainActivity extends FlutterActivity {
   private static final String CHARGING_CHANNEL = "samples.flutter.io/charging";
 
   @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    GeneratedPluginRegistrant.registerWith(this);
-    new EventChannel(getFlutterView(), CHARGING_CHANNEL).setStreamHandler(
-        new StreamHandler() {
-          private BroadcastReceiver chargingStateChangeReceiver;
-          @Override
-          public void onListen(Object arguments, EventSink events) {
-            chargingStateChangeReceiver = createChargingStateChangeReceiver(events);
-            registerReceiver(
-                chargingStateChangeReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-          }
-
-          @Override
-          public void onCancel(Object arguments) {
-            unregisterReceiver(chargingStateChangeReceiver);
-            chargingStateChangeReceiver = null;
-          }
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    new EventChannel(flutterEngine.getDartExecutor(), CHARGING_CHANNEL).setStreamHandler(
+      new StreamHandler() {
+        private BroadcastReceiver chargingStateChangeReceiver;
+        @Override
+        public void onListen(Object arguments, EventSink events) {
+          chargingStateChangeReceiver = createChargingStateChangeReceiver(events);
+          registerReceiver(
+              chargingStateChangeReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         }
+
+        @Override
+        public void onCancel(Object arguments) {
+          unregisterReceiver(chargingStateChangeReceiver);
+          chargingStateChangeReceiver = null;
+        }
+      }
     );
 
-    new MethodChannel(getFlutterView(), BATTERY_CHANNEL).setMethodCallHandler(
-        new MethodCallHandler() {
-          @Override
-          public void onMethodCall(MethodCall call, Result result) {
-            if (call.method.equals("getBatteryLevel")) {
-              int batteryLevel = getBatteryLevel();
+    new MethodChannel(flutterEngine.getDartExecutor(), BATTERY_CHANNEL).setMethodCallHandler(
+      new MethodCallHandler() {
+        @Override
+        public void onMethodCall(MethodCall call, Result result) {
+          if (call.method.equals("getBatteryLevel")) {
+            int batteryLevel = getBatteryLevel();
 
-              if (batteryLevel != -1) {
-                result.success(batteryLevel);
-              } else {
-                result.error("UNAVAILABLE", "Battery level not available.", null);
-              }
+            if (batteryLevel != -1) {
+              result.success(batteryLevel);
             } else {
-              result.notImplemented();
+              result.error("UNAVAILABLE", "Battery level not available.", null);
             }
+          } else {
+            result.notImplemented();
           }
         }
+      }
     );
   }
 

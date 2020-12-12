@@ -1,14 +1,16 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'colors.dart';
 import 'floating_action_button_theme.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -56,44 +58,48 @@ class _DefaultHeroTag {
 /// disabled. Consider changing the [backgroundColor] if disabling the floating
 /// action button.
 ///
-/// {@tool snippet --template=stateless_widget_material}
-/// This example shows how to make a simple [FloatingActionButton] in a
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// This example shows how to display a [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Floating Action Button Sample'),
+///       title: const Text('Floating Action Button'),
 ///     ),
 ///     body: Center(
-///       child: Text('Press the button below!')
+///       child: const Text('Press the button below!')
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       child: Icon(Icons.thumb_up),
-///       backgroundColor: Colors.pink,
+///       child: Icon(Icons.navigation),
+///       backgroundColor: Colors.green,
 ///     ),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// This example shows how to make an extended [FloatingActionButton] in a
-/// [Scaffold], with a  pink [backgroundColor] and a thumbs up [Icon] and a
-/// [Text] label.
+/// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
+/// [Text] label that reads "Approve".
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Floating Action Button Sample'),
+///       title: const Text('Floating Action Button Label'),
 ///     ),
 ///     body: Center(
-///       child: Text('Press the extended button below!'),
+///       child: const Text('Press the button with a label below!'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton.extended(
 ///       onPressed: () {
@@ -111,66 +117,88 @@ class _DefaultHeroTag {
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
-///  * [RaisedButton], another kind of button that appears to float above the
-///    content.
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [mini] and [clipBehavior] arguments must be non-null. Additionally,
+  /// The [mini] and [clipBehavior] arguments must not be null. Additionally,
   /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
   /// must be non-negative.
   const FloatingActionButton({
-    Key key,
+    Key? key,
     this.child,
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
+    this.focusColor,
+    this.hoverColor,
+    this.splashColor,
     this.heroTag = const _DefaultHeroTag(),
     this.elevation,
+    this.focusElevation,
+    this.hoverElevation,
     this.highlightElevation,
     this.disabledElevation,
-    @required this.onPressed,
+    required this.onPressed,
+    this.mouseCursor,
     this.mini = false,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.materialTapTargetSize,
     this.isExtended = false,
   }) : assert(elevation == null || elevation >= 0.0),
+       assert(focusElevation == null || focusElevation >= 0.0),
+       assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(mini != null),
+       assert(clipBehavior != null),
        assert(isExtended != null),
+       assert(autofocus != null),
        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
        super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
   ///
-  /// The [label] and [clipBehavior] arguments must non-null. Additionally,
-  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
-  /// must be non-negative.
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
+  /// (if specified) must be non-negative.
   FloatingActionButton.extended({
-    Key key,
+    Key? key,
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
+    this.focusColor,
+    this.hoverColor,
     this.heroTag = const _DefaultHeroTag(),
     this.elevation,
+    this.focusElevation,
+    this.hoverElevation,
+    this.splashColor,
     this.highlightElevation,
     this.disabledElevation,
-    @required this.onPressed,
+    required this.onPressed,
+    this.mouseCursor = SystemMouseCursors.click,
     this.shape,
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
-    Widget icon,
-    @required Widget label,
+    this.focusNode,
+    this.autofocus = false,
+    Widget? icon,
+    required Widget label,
   }) : assert(elevation == null || elevation >= 0.0),
+       assert(focusElevation == null || focusElevation >= 0.0),
+       assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(isExtended != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        _sizeConstraints = _kExtendedSizeConstraints,
        mini = false,
        child = _ChildOverflowBox(
@@ -196,23 +224,52 @@ class FloatingActionButton extends StatelessWidget {
   /// The widget below this widget in the tree.
   ///
   /// Typically an [Icon].
-  final Widget child;
+  final Widget? child;
 
   /// Text that describes the action that will occur when the button is pressed.
   ///
   /// This text is displayed when the user long-presses on the button and is
   /// used for accessibility.
-  final String tooltip;
+  final String? tooltip;
 
-  /// The default icon and text color.
+  /// The default foreground color for icons and text within the button.
   ///
-  /// Defaults to [ThemeData.accentIconTheme.color] for the current theme.
-  final Color foregroundColor;
+  /// If this property is null, then the
+  /// [FloatingActionButtonThemeData.foregroundColor] of
+  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [ColorScheme.onSecondary] color of [ThemeData.colorScheme]
+  /// is used.
+  ///
+  /// Although the color of theme's `accentIconTheme` currently provides a
+  /// default that supersedes the `onSecondary` color, this dependency
+  /// has been deprecated:  https://flutter.dev/go/remove-fab-accent-theme-dependency.
+  /// It will be removed in the future.
+  final Color? foregroundColor;
 
-  /// The color to use when filling the button.
+  /// The button's background color.
   ///
-  /// Defaults to [ThemeData.accentColor] for the current theme.
-  final Color backgroundColor;
+  /// If this property is null, then the
+  /// [FloatingActionButtonThemeData.backgroundColor] of
+  /// [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// null, then the [Theme]'s [ColorScheme.secondary] color is used.
+  final Color? backgroundColor;
+
+  /// The color to use for filling the button when the button has input focus.
+  ///
+  /// Defaults to [ThemeData.focusColor] for the current theme.
+  final Color? focusColor;
+
+  /// The color to use for filling the button when the button has a pointer
+  /// hovering over it.
+  ///
+  /// Defaults to [ThemeData.hoverColor] for the current theme.
+  final Color? hoverColor;
+
+  /// The splash color for this [FloatingActionButton]'s [InkWell].
+  ///
+  /// If null, [FloatingActionButtonThemeData.splashColor] is used, if that is
+  /// null, [ThemeData.splashColor] is used.
+  final Color? splashColor;
 
   /// The tag to apply to the button's [Hero] widget.
   ///
@@ -226,12 +283,15 @@ class FloatingActionButton extends StatelessWidget {
   /// there would be a tag conflict (multiple heroes on one route can't have the
   /// same tag). The material design specification recommends only using one
   /// floating action button per screen.
-  final Object heroTag;
+  final Object? heroTag;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
+  final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
   ///
@@ -244,7 +304,37 @@ class FloatingActionButton extends StatelessWidget {
   ///
   ///  * [highlightElevation], the elevation when the button is pressed.
   ///  * [disabledElevation], the elevation when the button is disabled.
-  final double elevation;
+  final double? elevation;
+
+  /// The z-coordinate at which to place this button relative to its parent when
+  /// the button has the input focus.
+  ///
+  /// This controls the size of the shadow below the floating action button.
+  ///
+  /// Defaults to 8, the appropriate elevation for floating action buttons
+  /// while they have focus. The value is always non-negative.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  ///  * [disabledElevation], the elevation when the button is disabled.
+  final double? focusElevation;
+
+  /// The z-coordinate at which to place this button relative to its parent when
+  /// the button is enabled and has a pointer hovering over it.
+  ///
+  /// This controls the size of the shadow below the floating action button.
+  ///
+  /// Defaults to 8, the appropriate elevation for floating action buttons while
+  /// they have a pointer hovering over them. The value is always non-negative.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  ///  * [disabledElevation], the elevation when the button is disabled.
+  final double? hoverElevation;
 
   /// The z-coordinate at which to place this button relative to its parent when
   /// the user is touching the button.
@@ -257,7 +347,7 @@ class FloatingActionButton extends StatelessWidget {
   /// See also:
   ///
   ///  * [elevation], the default elevation.
-  final double highlightElevation;
+  final double? highlightElevation;
 
   /// The z-coordinate at which to place this button when the button is disabled
   /// ([onPressed] is null).
@@ -265,14 +355,14 @@ class FloatingActionButton extends StatelessWidget {
   /// This controls the size of the shadow below the floating action button.
   ///
   /// Defaults to the same value as [elevation]. Setting this to zero makes the
-  /// floating action button work similar to a [RaisedButton] but the titular
+  /// floating action button work similar to an [ElevatedButton] but the titular
   /// "floating" effect is lost. The value is always non-negative.
   ///
   /// See also:
   ///
   ///  * [elevation], the default elevation.
   ///  * [highlightElevation], the elevation when the button is pressed.
-  final double disabledElevation;
+  final double? disabledElevation;
 
   /// Controls the size of this button.
   ///
@@ -289,9 +379,11 @@ class FloatingActionButton extends StatelessWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// True if this is an "extended" floating action button.
@@ -305,6 +397,12 @@ class FloatingActionButton extends StatelessWidget {
   /// floating action buttons are scaled and faded in.
   final bool isExtended;
 
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   /// Configures the minimum size of the tap target.
   ///
   /// Defaults to [ThemeData.materialTapTargetSize].
@@ -312,11 +410,13 @@ class FloatingActionButton extends StatelessWidget {
   /// See also:
   ///
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
-  final MaterialTapTargetSize materialTapTargetSize;
+  final MaterialTapTargetSize? materialTapTargetSize;
 
   final BoxConstraints _sizeConstraints;
 
   static const double _defaultElevation = 6;
+  static const double _defaultFocusElevation = 6;
+  static const double _defaultHoverElevation = 8;
   static const double _defaultHighlightElevation = 12;
   static const ShapeBorder _defaultShape = CircleBorder();
   static const ShapeBorder _defaultExtendedShape = StadiumBorder();
@@ -326,16 +426,49 @@ class FloatingActionButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
 
+    // Applications should no longer use accentIconTheme's color to configure
+    // the foreground color of floating action buttons. For more information, see
+    // https://flutter.dev/go/remove-fab-accent-theme-dependency.
+    if (this.foregroundColor == null && floatingActionButtonTheme.foregroundColor == null) {
+      final bool accentIsDark = theme.accentColorBrightness == Brightness.dark;
+      final Color defaultAccentIconThemeColor = accentIsDark ? Colors.white : Colors.black;
+      if (theme.accentIconTheme.color != defaultAccentIconThemeColor) {
+        debugPrint(
+          'Warning: '
+          'The support for configuring the foreground color of '
+          'FloatingActionButtons using ThemeData.accentIconTheme '
+          'has been deprecated. Please use ThemeData.floatingActionButtonTheme '
+          'instead. See '
+          'https://flutter.dev/go/remove-fab-accent-theme-dependency. '
+          'This feature was deprecated after v1.13.2.'
+        );
+      }
+    }
+
+    final Color foregroundColor = this.foregroundColor
+      ?? floatingActionButtonTheme.foregroundColor
+      ?? theme.colorScheme.onSecondary;
     final Color backgroundColor = this.backgroundColor
       ?? floatingActionButtonTheme.backgroundColor
       ?? theme.colorScheme.secondary;
-    final Color foregroundColor = this.foregroundColor
-      ?? floatingActionButtonTheme.foregroundColor
-      ?? theme.accentIconTheme.color
-      ?? theme.colorScheme.onSecondary;
+    final Color focusColor = this.focusColor
+      ?? floatingActionButtonTheme.focusColor
+      ?? theme.focusColor;
+    final Color hoverColor = this.hoverColor
+      ?? floatingActionButtonTheme.hoverColor
+      ?? theme.hoverColor;
+    final Color splashColor = this.splashColor
+      ?? floatingActionButtonTheme.splashColor
+      ?? theme.splashColor;
     final double elevation = this.elevation
       ?? floatingActionButtonTheme.elevation
       ?? _defaultElevation;
+    final double focusElevation = this.focusElevation
+      ?? floatingActionButtonTheme.focusElevation
+      ?? _defaultFocusElevation;
+    final double hoverElevation = this.hoverElevation
+      ?? floatingActionButtonTheme.hoverElevation
+      ?? _defaultHoverElevation;
     final double disabledElevation = this.disabledElevation
       ?? floatingActionButtonTheme.disabledElevation
       ?? elevation;
@@ -344,7 +477,7 @@ class FloatingActionButton extends StatelessWidget {
       ?? _defaultHighlightElevation;
     final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
       ?? theme.materialTapTargetSize;
-    final TextStyle textStyle = theme.accentTextTheme.button.copyWith(
+    final TextStyle textStyle = theme.textTheme.button!.copyWith(
       color: foregroundColor,
       letterSpacing: 1.2,
     );
@@ -352,48 +485,65 @@ class FloatingActionButton extends StatelessWidget {
       ?? floatingActionButtonTheme.shape
       ?? (isExtended ? _defaultExtendedShape : _defaultShape);
 
-    Widget result;
-
-    if (child != null) {
-      result = IconTheme.merge(
-        data: IconThemeData(
-          color: foregroundColor,
-        ),
-        child: child,
-      );
-    }
-
-    result = RawMaterialButton(
+    Widget result = RawMaterialButton(
       onPressed: onPressed,
+      mouseCursor: mouseCursor,
       elevation: elevation,
+      focusElevation: focusElevation,
+      hoverElevation: hoverElevation,
       highlightElevation: highlightElevation,
       disabledElevation: disabledElevation,
       constraints: _sizeConstraints,
       materialTapTargetSize: materialTapTargetSize,
       fillColor: backgroundColor,
+      focusColor: focusColor,
+      hoverColor: hoverColor,
+      splashColor: splashColor,
       textStyle: textStyle,
       shape: shape,
       clipBehavior: clipBehavior,
-      child: result,
+      focusNode: focusNode,
+      autofocus: autofocus,
+      child: child,
     );
 
     if (tooltip != null) {
-      result = MergeSemantics(
-        child: Tooltip(
-          message: tooltip,
-          child: result,
-        ),
+      result = Tooltip(
+        message: tooltip!,
+        child: result,
       );
     }
 
     if (heroTag != null) {
       result = Hero(
-        tag: heroTag,
+        tag: heroTag!,
         child: result,
       );
     }
 
-    return result;
+    return MergeSemantics(child: result);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
+    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
+    properties.add(ObjectFlagProperty<Object>('heroTag', heroTag, ifPresent: 'hero'));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: null));
+    properties.add(DoubleProperty('hoverElevation', hoverElevation, defaultValue: null));
+    properties.add(DoubleProperty('highlightElevation', highlightElevation, defaultValue: null));
+    properties.add(DoubleProperty('disabledElevation', disabledElevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(FlagProperty('isExtended', value: isExtended, ifTrue: 'extended'));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }
 
@@ -404,8 +554,8 @@ class FloatingActionButton extends StatelessWidget {
 // and MainAxisSize.min, to be as wide as their label and icon.
 class _ChildOverflowBox extends SingleChildRenderObjectWidget {
   const _ChildOverflowBox({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
   }) : super(key: key, child: child);
 
   @override
@@ -417,15 +567,14 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
-    renderObject
-      ..textDirection = Directionality.of(context);
+    renderObject.textDirection = Directionality.of(context);
   }
 }
 
 class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   _RenderChildOverflowBox({
-    RenderBox child,
-    TextDirection textDirection,
+    RenderBox? child,
+    TextDirection? textDirection,
   }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
 
   @override
@@ -435,12 +584,26 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   double computeMinIntrinsicHeight(double width) => 0.0;
 
   @override
-  void performLayout() {
+  Size computeDryLayout(BoxConstraints constraints) {
     if (child != null) {
-      child.layout(const BoxConstraints(), parentUsesSize: true);
+      final Size childSize = child!.getDryLayout(const BoxConstraints());
+      return Size(
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, childSize.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, childSize.height)),
+      );
+    } else {
+      return constraints.biggest;
+    }
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    if (child != null) {
+      child!.layout(const BoxConstraints(), parentUsesSize: true);
       size = Size(
-        math.max(constraints.minWidth, math.min(constraints.maxWidth, child.size.width)),
-        math.max(constraints.minHeight, math.min(constraints.maxHeight, child.size.height)),
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, child!.size.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, child!.size.height)),
       );
       alignChild();
     } else {

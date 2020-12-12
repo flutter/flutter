@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,10 +16,10 @@ import 'transitions.dart';
 // to expose to the public API (like the controller).
 class _ChildEntry {
   _ChildEntry({
-    @required this.controller,
-    @required this.animation,
-    @required this.transition,
-    @required this.widgetChild,
+    required this.controller,
+    required this.animation,
+    required this.transition,
+    required this.widgetChild,
   }) : assert(animation != null),
        assert(transition != null),
        assert(controller != null);
@@ -61,10 +61,12 @@ typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animat
 /// The `previousChildren` list is an unmodifiable list, sorted with the oldest
 /// at the beginning and the newest at the end. It does not include the
 /// `currentChild`.
-typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, List<Widget> previousChildren);
+typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, List<Widget> previousChildren);
 
-/// A widget that by default does a [FadeTransition] between a new widget and
-/// the widget previously set on the [AnimatedSwitcher] as a child.
+/// A widget that by default does a cross-fade between a new widget and the
+/// widget previously set on the [AnimatedSwitcher] as a child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2W7POjFb88g}
 ///
 /// If they are swapped fast enough (i.e. before [duration] elapses), more than
 /// one previous child can exist and be transitioning out while the newest one
@@ -85,53 +87,48 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 /// progress indicator and the image will be fading out while a new progress
 /// indicator is fading in.)
 ///
-/// {@tool sample}
+/// The type of transition can be changed from a cross-fade to a custom
+/// transition by setting the [transitionBuilder].
+///
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// This sample shows a counter that animates the scale of a text widget
+/// whenever the value changes.
 ///
 /// ```dart
-/// class ClickCounter extends StatefulWidget {
-///   const ClickCounter({Key key}) : super(key: key);
+/// int _count = 0;
 ///
-///   @override
-///   _ClickCounterState createState() => _ClickCounterState();
-/// }
-///
-/// class _ClickCounterState extends State<ClickCounter> {
-///   int _count = 0;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Material(
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             AnimatedSwitcher(
-///               duration: const Duration(milliseconds: 500),
-///               transitionBuilder: (Widget child, Animation<double> animation) {
-///                 return ScaleTransition(child: child, scale: animation);
-///               },
-///               child: Text(
-///                 '$_count',
-///                 // This key causes the AnimatedSwitcher to interpret this as a "new"
-///                 // child each time the count changes, so that it will begin its animation
-///                 // when the count changes.
-///                 key: ValueKey<int>(_count),
-///                 style: Theme.of(context).textTheme.display1,
-///               ),
-///             ),
-///             RaisedButton(
-///               child: const Text('Increment'),
-///               onPressed: () {
-///                 setState(() {
-///                   _count += 1;
-///                 });
-///               },
-///             ),
-///           ],
+/// @override
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.white,
+///     child: Column(
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: <Widget>[
+///         AnimatedSwitcher(
+///           duration: const Duration(milliseconds: 500),
+///           transitionBuilder: (Widget child, Animation<double> animation) {
+///             return ScaleTransition(child: child, scale: animation);
+///           },
+///           child: Text(
+///             '$_count',
+///             // This key causes the AnimatedSwitcher to interpret this as a "new"
+///             // child each time the count changes, so that it will begin its animation
+///             // when the count changes.
+///             key: ValueKey<int>(_count),
+///             style: Theme.of(context).textTheme.headline4,
+///           ),
 ///         ),
-///       ),
-///     );
-///   }
+///         ElevatedButton(
+///           child: const Text('Increment'),
+///           onPressed: () {
+///             setState(() {
+///               _count += 1;
+///             });
+///           },
+///         ),
+///       ],
+///     ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
@@ -140,16 +137,19 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 ///
 ///  * [AnimatedCrossFade], which only fades between two children, but also
 ///    interpolates their sizes, and is reversible.
-///  * [FadeTransition] which [AnimatedSwitcher] uses to perform the transition.
+///  * [AnimatedOpacity], which can be used to switch between nothingness and
+///    a given child by fading the child in and out.
+///  * [FadeTransition], which [AnimatedSwitcher] uses to perform the transition.
 class AnimatedSwitcher extends StatefulWidget {
   /// Creates an [AnimatedSwitcher].
   ///
   /// The [duration], [transitionBuilder], [layoutBuilder], [switchInCurve], and
   /// [switchOutCurve] parameters must not be null.
   const AnimatedSwitcher({
-    Key key,
+    Key? key,
     this.child,
-    @required this.duration,
+    required this.duration,
+    this.reverseDuration,
     this.switchInCurve = Curves.linear,
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
@@ -172,15 +172,24 @@ class AnimatedSwitcher extends StatefulWidget {
   /// (see [Widget.canUpdate]).
   ///
   /// To change the kind of transition used, see [transitionBuilder].
-  final Widget child;
+  final Widget? child;
 
   /// The duration of the transition from the old [child] value to the new one.
   ///
   /// This duration is applied to the given [child] when that property is set to
-  /// a new child. The same duration is used when fading out. Changing
-  /// [duration] will not affect the durations of transitions already in
-  /// progress.
+  /// a new child. The same duration is used when fading out, unless
+  /// [reverseDuration] is set. Changing [duration] will not affect the
+  /// durations of transitions already in progress.
   final Duration duration;
+
+  /// The duration of the transition from the new [child] value to the old one.
+  ///
+  /// This duration is applied to the given [child] when that property is set to
+  /// a new child. Changing [reverseDuration] will not affect the durations of
+  /// transitions already in progress.
+  ///
+  /// If not set, then the value of [duration] is used by default.
+  final Duration? reverseDuration;
 
   /// The animation curve to use when transitioning in a new [child].
   ///
@@ -263,21 +272,28 @@ class AnimatedSwitcher extends StatefulWidget {
   /// each other.
   ///
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
-  static Widget defaultLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
-    List<Widget> children = previousChildren;
-    if (currentChild != null)
-      children = children.toList()..add(currentChild);
+  static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
-      children: children,
+      children: <Widget>[
+        ...previousChildren,
+        if (currentChild != null) currentChild,
+      ],
       alignment: Alignment.center,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
   }
 }
 
 class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
-  _ChildEntry _currentEntry;
+  _ChildEntry? _currentEntry;
   final Set<_ChildEntry> _outgoingEntries = <_ChildEntry>{};
-  List<Widget> _outgoingWidgets = const <Widget>[];
+  List<Widget>? _outgoingWidgets = const <Widget>[];
   int _childNumber = 0;
 
   @override
@@ -295,37 +311,37 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     if (widget.transitionBuilder != oldWidget.transitionBuilder) {
       _outgoingEntries.forEach(_updateTransitionForEntry);
       if (_currentEntry != null)
-        _updateTransitionForEntry(_currentEntry);
+        _updateTransitionForEntry(_currentEntry!);
       _markChildWidgetCacheAsDirty();
     }
 
     final bool hasNewChild = widget.child != null;
     final bool hasOldChild = _currentEntry != null;
     if (hasNewChild != hasOldChild ||
-        hasNewChild && !Widget.canUpdate(widget.child, _currentEntry.widgetChild)) {
+        hasNewChild && !Widget.canUpdate(widget.child!, _currentEntry!.widgetChild)) {
       // Child has changed, fade current entry out and add new entry.
       _childNumber += 1;
       _addEntryForNewChild(animate: true);
     } else if (_currentEntry != null) {
       assert(hasOldChild && hasNewChild);
-      assert(Widget.canUpdate(widget.child, _currentEntry.widgetChild));
+      assert(Widget.canUpdate(widget.child!, _currentEntry!.widgetChild));
       // Child has been updated. Make sure we update the child widget and
       // transition in _currentEntry even though we're not going to start a new
       // animation, but keep the key from the previous transition so that we
       // update the transition instead of replacing it.
-      _currentEntry.widgetChild = widget.child;
-      _updateTransitionForEntry(_currentEntry); // uses entry.widgetChild
+      _currentEntry!.widgetChild = widget.child!;
+      _updateTransitionForEntry(_currentEntry!); // uses entry.widgetChild
       _markChildWidgetCacheAsDirty();
     }
   }
 
-  void _addEntryForNewChild({ @required bool animate }) {
+  void _addEntryForNewChild({ required bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);
       assert(!_outgoingEntries.contains(_currentEntry));
-      _outgoingEntries.add(_currentEntry);
-      _currentEntry.controller.reverse();
+      _outgoingEntries.add(_currentEntry!);
+      _currentEntry!.controller.reverse();
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
     }
@@ -333,6 +349,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       return;
     final AnimationController controller = AnimationController(
       duration: widget.duration,
+      reverseDuration: widget.reverseDuration,
       vsync: this,
     );
     final Animation<double> animation = CurvedAnimation(
@@ -341,7 +358,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       reverseCurve: widget.switchOutCurve,
     );
     _currentEntry = _newEntry(
-      child: widget.child,
+      child: widget.child!,
       controller: controller,
       animation: animation,
       builder: widget.transitionBuilder,
@@ -355,10 +372,10 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }
 
   _ChildEntry _newEntry({
-    @required Widget child,
-    @required AnimatedSwitcherTransitionBuilder builder,
-    @required AnimationController controller,
-    @required Animation<double> animation,
+    required Widget child,
+    required AnimatedSwitcherTransitionBuilder builder,
+    required AnimationController controller,
+    required Animation<double> animation,
   }) {
     final _ChildEntry entry = _ChildEntry(
       widgetChild: child,
@@ -395,15 +412,15 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     _outgoingWidgets ??= List<Widget>.unmodifiable(
       _outgoingEntries.map<Widget>((_ChildEntry entry) => entry.transition),
     );
-    assert(_outgoingEntries.length == _outgoingWidgets.length);
-    assert(_outgoingEntries.isEmpty || _outgoingEntries.last.transition == _outgoingWidgets.last);
+    assert(_outgoingEntries.length == _outgoingWidgets!.length);
+    assert(_outgoingEntries.isEmpty || _outgoingEntries.last.transition == _outgoingWidgets!.last);
   }
 
   @override
   void dispose() {
     if (_currentEntry != null)
-      _currentEntry.controller.dispose();
-    for (_ChildEntry entry in _outgoingEntries)
+      _currentEntry!.controller.dispose();
+    for (final _ChildEntry entry in _outgoingEntries)
       entry.controller.dispose();
     super.dispose();
   }
@@ -411,6 +428,6 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   @override
   Widget build(BuildContext context) {
     _rebuildOutgoingWidgetsIfNeeded();
-    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets);
+    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!);
   }
 }

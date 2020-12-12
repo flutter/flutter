@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_test/flutter_test.dart' as flutter_test show expect;
+
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as real_test show expect;
 
 // We have to use real_test's expect because the flutter_test expect() goes
@@ -14,17 +16,17 @@ import 'package:test_api/test_api.dart' as real_test show expect;
 // of this test is to see how we handle leaking APIs.
 
 class TestAPI {
-  Future<Object> testGuard1() {
-    return TestAsyncUtils.guard<Object>(() async { return null; });
+  Future<Object?> testGuard1() {
+    return TestAsyncUtils.guard<Object?>(() async { return null; });
   }
-  Future<Object> testGuard2() {
-    return TestAsyncUtils.guard<Object>(() async { return null; });
+  Future<Object?> testGuard2() {
+    return TestAsyncUtils.guard<Object?>(() async { return null; });
   }
 }
 
 class TestAPISubclass extends TestAPI {
-  Future<Object> testGuard3() {
-    return TestAsyncUtils.guard<Object>(() async { return null; });
+  Future<Object?> testGuard3() {
+    return TestAsyncUtils.guard<Object?>(() async { return null; });
   }
 }
 
@@ -37,7 +39,7 @@ Future<Object> _guardedThrower() {
 void main() {
   test('TestAsyncUtils - one class', () async {
     final TestAPI testAPI = TestAPI();
-    Future<Object> f1, f2;
+    Future<Object?>? f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard2();
@@ -59,7 +61,7 @@ void main() {
 
   test('TestAsyncUtils - two classes, all callers in superclass', () async {
     final TestAPI testAPI = TestAPISubclass();
-    Future<Object> f1, f2;
+    Future<Object?>? f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard2();
@@ -81,7 +83,7 @@ void main() {
 
   test('TestAsyncUtils - two classes, mixed callers', () async {
     final TestAPISubclass testAPI = TestAPISubclass();
-    Future<Object> f1, f2;
+    Future<Object?>? f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard3();
@@ -103,7 +105,7 @@ void main() {
 
   test('TestAsyncUtils - expect() catches pending async work', () async {
     final TestAPI testAPI = TestAPISubclass();
-    Future<Object> f1;
+    Future<Object?>? f1;
     f1 = testAPI.testGuard1();
     try {
       flutter_test.expect(0, 0);
@@ -124,7 +126,7 @@ void main() {
   });
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
-    Future<Object> f1, f2;
+    Future<Object?>? f1, f2;
     try {
       f1 = tester.pump();
       f2 = tester.pump();
@@ -151,22 +153,22 @@ void main() {
       real_test.expect(information[3].level, DiagnosticLevel.info);
       real_test.expect(information[4].level, DiagnosticLevel.info);
       real_test.expect(information[5].level, DiagnosticLevel.info);
-      real_test.expect(information[0], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[1], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[2], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[3], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[4], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[5], isInstanceOf<DiagnosticsStackTrace>());
-      final DiagnosticsStackTrace stackTraceProperty = information[5];
+      real_test.expect(information[0], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[1], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[2], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[3], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[4], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[5], isA<DiagnosticsStackTrace>());
+      final DiagnosticsStackTrace stackTraceProperty = information[5] as DiagnosticsStackTrace;
       real_test.expect(stackTraceProperty.name, '\nWhen the first method was called, this was the stack');
-      real_test.expect(stackTraceProperty.value, isInstanceOf<StackTrace>());
+      real_test.expect(stackTraceProperty.value, isA<StackTrace>());
     }
     await f1;
     await f2;
   });
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
-    Future<Object> f1;
+    Future<Object?>? f1;
     try {
       f1 = tester.pump();
       TestAsyncUtils.verifyAllScopesClosed();
@@ -191,7 +193,7 @@ void main() {
   });
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
-    Future<Object> f1;
+    Future<Object?>? f1;
     try {
       f1 = tester.pump();
       TestAsyncUtils.verifyAllScopesClosed();
