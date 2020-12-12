@@ -358,6 +358,9 @@ class ManifestAssetBundle implements AssetBundle {
               != licenseBytes) {
         entries[_kNoticeZippedFile] = DevFSByteContent(
           ZLibEncoder(
+            // A zlib dictionary is a hinting string sequence with the most
+            // likely string occurrences at the end. This ends up just being
+            // common English words with domain specific words like copyright.
             dictionary: utf8.encode('copyrightsoftwaretothisinandorofthe'),
             gzip: true,
             level: 9,

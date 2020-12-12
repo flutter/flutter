@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -313,6 +315,19 @@ Future<void> main() async {
         'lib/armeabi-v7a/libapp.so',
         'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(releaseHostApk));
+
+      section('Check the NOTICE file is correct');
+
+      await inDirectory(hostApp, () async {
+        await exec('unzip', <String>[releaseHostApk, 'assets/flutter_assets/NOTICES.Z']);
+        checkFileExists(path.join(hostApp.path, 'assets', 'flutter_assets', 'NOTICES.Z'));
+
+        final Uint8List licenseData = File(path.join(hostApp.path, 'assets', 'flutter_assets', 'NOTICES.Z')).readAsBytesSync();
+        final String licenseString = utf8.decode(gzip.decode(licenseData));
+        if (!licenseString.contains('skia') || !licenseString.contains('Flutter Authors')) {
+          return TaskResult.failure('License content missing');
+        }
+      });
 
       section('Check release AndroidManifest.xml');
 

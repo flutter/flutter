@@ -64,6 +64,9 @@ abstract class AssetBundle {
   /// caller is going to be doing its own caching. (It might not be cached if
   /// it's set to true either, that depends on the asset bundle
   /// implementation.)
+  ///
+  /// If the `unzip` argument is set to true, it would first unzip file at the
+  /// specified location before retrieving the string content.
   Future<String> loadString(
     String key,
     {
@@ -82,12 +85,13 @@ abstract class AssetBundle {
     if (data.lengthInBytes < 50 * 1024 && !unzip) {
       return _utf8Decode(data);
     }
+
     // For strings larger than 50 KB, run the computation in an isolate to
     // avoid causing main thread jank.
     return compute(
       unzip ? _utf8ZipDecode : _utf8Decode,
       data,
-      debugLabel: 'UTF8 decode for "$key"',
+      debugLabel: '${unzip ? "Unzip and ": ""}UTF8 decode for "$key"',
     );
   }
 
@@ -181,7 +185,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   @override
   Future<String> loadString(String key, { bool cache = true, bool unzip = false }) {
     if (cache)
-      return _stringCache.putIfAbsent(key, () => super.loadString(key));
+      return _stringCache.putIfAbsent(key, () => super.loadString(key, unzip: unzip));
     return super.loadString(key, unzip: unzip);
   }
 
