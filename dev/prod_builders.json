@@ -121,6 +121,12 @@
          "flaky": true
       },
       {
+         "name": "Linux web_benchmarks_canvaskit",
+         "repo": "flutter",
+         "task_name": "linux_web_benchmarks_canvaskit",
+         "flaky": true
+      },
+      {
          "name": "Linux web_benchmarks_html",
          "repo": "flutter",
          "task_name": "linux_web_benchmarks_html",
@@ -155,6 +161,12 @@
         "repo":"flutter",
         "task_name":"linux_web_smoke_test",
         "flaky":false
+      },
+      {
+         "name":"Linux flutter_plugins",
+         "repo":"flutter",
+         "task_name":"flutter_plugins",
+         "flaky":false
       },
       {
          "name": "Mac build_aar_module_test",

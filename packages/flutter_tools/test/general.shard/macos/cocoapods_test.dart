@@ -460,6 +460,8 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
+      when(mockProcessManager.runSync(<String>['which', 'sysctl']))
+          .thenReturn(ProcessResult(0, 0, '', ''));
       when(mockProcessManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
           .thenReturn(ProcessResult(0, 0, 'hw.optional.arm64: 1', ''));
 
@@ -497,6 +499,8 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
+      when(mockProcessManager.runSync(<String>['which', 'sysctl']))
+          .thenReturn(ProcessResult(0, 0, '', ''));
       when(mockProcessManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
           .thenReturn(ProcessResult(0, 1, '', ''));
 

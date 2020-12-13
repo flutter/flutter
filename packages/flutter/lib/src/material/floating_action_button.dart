@@ -58,7 +58,7 @@ class _DefaultHeroTag {
 /// disabled. Consider changing the [backgroundColor] if disabling the floating
 /// action button.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// This example shows how to display a [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
@@ -85,7 +85,7 @@ class _DefaultHeroTag {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// This example shows how to make an extended [FloatingActionButton] in a
 /// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label that reads "Approve".
@@ -415,10 +415,8 @@ class FloatingActionButton extends StatelessWidget {
   final BoxConstraints _sizeConstraints;
 
   static const double _defaultElevation = 6;
-  // TODO(gspencer): verify focus and hover elevation values are correct
-  // according to spec.
-  static const double _defaultFocusElevation = 8;
-  static const double _defaultHoverElevation = 10;
+  static const double _defaultFocusElevation = 6;
+  static const double _defaultHoverElevation = 8;
   static const double _defaultHighlightElevation = 12;
   static const ShapeBorder _defaultShape = CircleBorder();
   static const ShapeBorder _defaultExtendedShape = StadiumBorder();

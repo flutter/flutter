@@ -278,7 +278,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       case DatePickerMode.year:
         return Padding(
           padding: const EdgeInsets.only(top: _subHeaderHeight),
-          child: _YearPicker(
+          child: YearPicker(
             key: _yearPickerKey,
             currentDate: widget.currentDate,
             firstDate: widget.firstDate,
@@ -1095,12 +1095,12 @@ const _DayPickerGridDelegate _dayPickerGridDelegate = _DayPickerGridDelegate();
 ///  * [showDatePicker], which shows a dialog containing a Material Design
 ///    date picker.
 ///
-class _YearPicker extends StatefulWidget {
+class YearPicker extends StatefulWidget {
   /// Creates a year picker.
   ///
   /// The [firstDate], [lastDate], [selectedDate], and [onChanged]
   /// arguments must be non-null. The [lastDate] must be after the [firstDate].
-  _YearPicker({
+  YearPicker({
     Key? key,
     DateTime? currentDate,
     required this.firstDate,
@@ -1147,7 +1147,7 @@ class _YearPicker extends StatefulWidget {
   _YearPickerState createState() => _YearPickerState();
 }
 
-class _YearPickerState extends State<_YearPicker> {
+class _YearPickerState extends State<YearPicker> {
   late ScrollController _scrollController;
 
   // The approximate number of years necessary to fill the available space.
@@ -1160,7 +1160,7 @@ class _YearPickerState extends State<_YearPicker> {
   }
 
   @override
-  void didUpdateWidget(_YearPicker oldWidget) {
+  void didUpdateWidget(YearPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedDate != oldWidget.selectedDate) {
       _scrollController.jumpTo(_scrollOffsetForYear(widget.selectedDate));

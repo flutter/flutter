@@ -117,6 +117,68 @@ void main() {
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('injects the wrapper and the Gradle version is derivated from the AGP version', () {
+      const Map<String, String> testCases = <String, String>{
+        // AGP version : Gradle version
+        '1.0.0': '2.3',
+        '3.3.1': '4.10.2',
+        '3.0.0': '4.1',
+        '3.0.5': '4.1',
+        '3.0.9': '4.1',
+        '3.1.0': '4.4',
+        '3.2.0': '4.6',
+        '3.3.0': '4.10.2',
+        '3.4.0': '5.6.2',
+        '3.5.0': '5.6.2',
+        '4.0.0': '6.7',
+        '4.0.5': '6.7',
+        '4.1.0': '6.7',
+      };
+
+      for (final MapEntry<String, String> entry in testCases.entries) {
+        final Directory sampleAppAndroid = globals.fs.systemTempDirectory.createTempSync('android');
+        sampleAppAndroid
+          .childFile('build.gradle')
+          .writeAsStringSync('''
+  buildscript {
+      dependencies {
+          classpath 'com.android.tools.build:gradle:${entry.key}'
+      }
+  }
+  ''');
+        gradleUtils.injectGradleWrapperIfNeeded(sampleAppAndroid);
+
+        expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
+
+        expect(sampleAppAndroid
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+          .childFile('gradle-wrapper.jar')
+          .existsSync(), isTrue);
+
+        expect(sampleAppAndroid
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+          .childFile('gradle-wrapper.properties')
+          .existsSync(), isTrue);
+
+        expect(sampleAppAndroid
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+          .childFile('gradle-wrapper.properties')
+          .readAsStringSync(),
+              'distributionBase=GRADLE_USER_HOME\n'
+              'distributionPath=wrapper/dists\n'
+              'zipStoreBase=GRADLE_USER_HOME\n'
+              'zipStorePath=wrapper/dists\n'
+              'distributionUrl=https\\://services.gradle.org/distributions/gradle-${entry.value}-all.zip\n');
+      }
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache.test(rootOverride: tempDir, fileSystem: memoryFileSystem),
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   group('GradleUtils.getExecutable', () {

@@ -863,6 +863,7 @@ class DebuggingOptions {
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
+    this.nativeNullAssertions = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -897,7 +898,8 @@ class DebuggingOptions {
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
-      nullAssertions = false;
+      nullAssertions = false,
+      nativeNullAssertions = false;
 
   final bool debuggingEnabled;
 
@@ -946,6 +948,12 @@ class DebuggingOptions {
   final bool fastStart;
 
   final bool nullAssertions;
+
+  /// Additional null runtime checks inserted for web applications.
+  ///
+  /// See also:
+  ///   * https://github.com/dart-lang/sdk/blob/master/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
+  final bool nativeNullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }

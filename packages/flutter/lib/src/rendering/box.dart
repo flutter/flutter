@@ -13,6 +13,9 @@ import 'package:vector_math/vector_math_64.dart';
 import 'debug.dart';
 import 'object.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 // This class should only be used in debug builds.
 class _DebugSize extends Size {
   _DebugSize(Size source, this._owner, this._canBeUsedByParent) : super.copy(source);
@@ -1769,6 +1772,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<BoxConstraints, Size>? _cachedDryLayoutSizes;
+  bool _computingThisDryLayout = false;
 
   /// Returns the [Size] that this [RenderBox] would like to be given the
   /// provided [BoxConstraints].
@@ -1800,17 +1804,33 @@ abstract class RenderBox extends RenderObject {
     }());
     if (shouldCache) {
       _cachedDryLayoutSizes ??= <BoxConstraints, Size>{};
-      return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => computeDryLayout(constraints));
+      return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
     }
-    return computeDryLayout(constraints);
+    return _computeDryLayout(constraints);
+  }
+
+  Size _computeDryLayout(BoxConstraints constraints) {
+    assert(() {
+      assert(!_computingThisDryLayout);
+      _computingThisDryLayout = true;
+      return true;
+    }());
+    final Size result =  computeDryLayout(constraints);
+    assert(() {
+      assert(_computingThisDryLayout);
+      _computingThisDryLayout = false;
+      return true;
+    }());
+    return result;
   }
 
   /// Computes the value returned by [getDryLayout]. Do not call this
   /// function directly, instead, call [getDryLayout].
   ///
-  /// Override in subclasses that implement [performLayout] or [performResize].
-  /// This method should return the [Size] that this [RenderBox] would like to
-  /// be given the provided [BoxConstraints].
+  /// Override in subclasses that implement [performLayout] or [performResize]
+  /// or when setting [sizedByParent] to true without overriding
+  /// [performResize]. This method should return the [Size] that this
+  /// [RenderBox] would like to be given the provided [BoxConstraints].
   ///
   /// The size returned by this method must match the [size] that the
   /// [RenderBox] will compute for itself in [performLayout] (or
@@ -1907,7 +1927,7 @@ abstract class RenderBox extends RenderObject {
         assert(_size._owner == this);
         if (RenderObject.debugActiveLayout != null) {
           assert(
-            debugDoingThisResize || debugDoingThisLayout ||
+            debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
               (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
             'RenderBox.size accessed beyond the scope of resize, layout, or '
             'permitted parent access. RenderBox can always access its own size, '

@@ -66,6 +66,7 @@ export 'package:flutter/rendering.dart' show
   WrapCrossAlignment;
 
 // Examples can assume:
+// // @dart = 2.9
 // class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }
 // WidgetTester tester;
 // bool _visible;
@@ -1474,7 +1475,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=T4Uehk3_wlY}
 ///
-/// {@tool sample --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
 ///
 /// In this example, the image is stretched to fill the entire [Container], which would
 /// not happen normally without using FittedBox.
@@ -2758,7 +2759,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// needed, prefer removing the widget from the tree entirely rather than
 /// keeping it alive in an [Offstage] subtree.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
 ///
 /// This example shows a [FlutterLogo] widget when the `_offstage` member field
 /// is false, and hides it without any room in the parent when it is true. When
@@ -2882,7 +2883,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// 16.0/9.0. If the maximum width is infinite, the initial width is determined
 /// by applying the aspect ratio to the maximum height.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// This examples shows how AspectRatio sets width when its parent's width
 /// constraint is infinite. Since its parent's allowed height is a fixed value,
@@ -2914,7 +2915,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// the height to be between 0.0 and 100.0. We'll select a width of 100.0 (the
 /// biggest allowed) and a height of 50.0 (to match the aspect ratio).
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -2948,7 +2949,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// will eventually select a size for the child that meets the layout
 /// constraints but fails to meet the aspect ratio constraints.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -4809,7 +4810,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_rnZaagadyo}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// its middle child, a [Container] here, expands to fill the space.
 ///
@@ -4848,7 +4849,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
 /// children expanded, utilizing the [flex] factor to prioritize available space.
 ///
@@ -5199,7 +5200,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad --template=freeform_no_null_safety}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -5577,6 +5578,9 @@ class RichText extends MultiChildRenderObjectWidget {
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(DiagnosticsProperty<StrutStyle>('strutStyle', strutStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -5964,7 +5968,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
 /// This example makes a [Container] react to being touched, showing a count of
 /// the number of pointer downs and ups.
 ///
@@ -6134,7 +6138,7 @@ class Listener extends SingleChildRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
 /// This example makes a [Container] react to being entered by a mouse
 /// pointer, showing a count of the number of entries and exits.
 ///
@@ -6303,7 +6307,7 @@ class MouseRegion extends StatefulWidget {
   ///    override [State.dispose] and call [onExit], or create your own widget
   ///    using [RenderMouseRegion].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
   /// The following example shows a blue rectangular that turns yellow when
   /// hovered. Since the hover state is completely contained within a widget
   /// that unconditionally creates the `MouseRegion`, you can ignore the
@@ -6331,7 +6335,7 @@ class MouseRegion extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
   /// The following example shows a widget that hides its content one second
   /// after being hovered, and also exposes the enter and exit callbacks.
   /// Because the widget conditionally creates the `MouseRegion`, and leaks the
@@ -6620,7 +6624,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// The following sample has an [IgnorePointer] widget wrapping the `Column`
 /// which contains a button.
 /// When [ignoring] is set to `true` anything inside the `Column` can
@@ -6736,7 +6740,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
 /// The following sample has an [AbsorbPointer] widget wrapping the button on
 /// top of the stack, which absorbs pointer events, preventing its child button
 /// __and__ the button below it in the stack from receiving the pointer events.

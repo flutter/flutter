@@ -39,6 +39,9 @@ const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 /// Whether the dart2js build should output source maps.
 const String kSourceMapsEnabled = 'SourceMaps';
 
+/// Whether the dart2js native null assertions are enabled.
+const String kNativeNullAssertions = 'NativeNullAssertions';
+
 /// The caching strategy for the generated service worker.
 enum ServiceWorkerStrategy {
   /// Download the app shell eagerly and all other assets lazily.
@@ -132,7 +135,7 @@ import '$generatedImport';
 import '$mainImport' as entrypoint;
 
 Future<void> main() async {
-  registerPlugins(webPluginRegistry);
+  registerPlugins(webPluginRegistrar);
   await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
@@ -190,6 +193,7 @@ class Dart2JSTarget extends Target {
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
+    final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
 
     final List<String> sharedCommandOptions = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -197,6 +201,8 @@ class Dart2JSTarget extends Target {
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=${globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json')}',
       ...?decodeDartDefines(environment.defines, kExtraFrontEndOptions),
+      if (nativeNullAssertions)
+        '--native-null-assertions',
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else

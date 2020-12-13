@@ -2389,7 +2389,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// to describe their decoration. (In fact, this class is merely the
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// This sample shows how to style a `TextField` using an `InputDecorator`. The
 /// TextField displays a "send message" icon to the left of the input area,
@@ -2414,7 +2414,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// This sample shows how to style a "collapsed" `TextField` using an
 /// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
@@ -2434,7 +2434,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
@@ -2455,7 +2455,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// This sample shows how to style a `TextField` with a round border and
 /// additional text before and after the input area. It displays "Prefix" before
@@ -2518,7 +2518,7 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
@@ -2564,7 +2564,7 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.hintStyle,
     this.filled = false,
     this.fillColor,
@@ -2752,9 +2752,9 @@ class InputDecoration {
   ///
   /// When [FloatingLabelBehavior.never] the label will always appear in an empty
   /// field in place of the content.
-  ///
-  /// Defaults to [FloatingLabelBehavior.auto].
   /// {@endtemplate}
+  ///
+  /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
@@ -2836,7 +2836,7 @@ class InputDecoration {
   /// setting the constraints' minimum height and width to a value lower than
   /// 48px.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
@@ -3004,7 +3004,7 @@ class InputDecoration {
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
   /// This example shows the differences between two `TextField` widgets when
   /// [suffixIconConstraints] is set to the default value and when one is not.
   ///
@@ -3700,6 +3700,8 @@ class InputDecorationTheme with Diagnosticable {
   final bool hasFloatingPlaceholder;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
+  ///
+  /// Defaults to [FloatingLabelBehavior.auto].
   final FloatingLabelBehavior floatingLabelBehavior;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses
