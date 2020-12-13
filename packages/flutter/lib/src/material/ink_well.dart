@@ -1045,7 +1045,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   void reactivate() {
     _setInkFeature(true);
-    updateKeepAlive();
     super.reactivate();
   }
 
