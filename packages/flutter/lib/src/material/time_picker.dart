@@ -34,6 +34,7 @@ import 'time.dart';
 import 'time_picker_theme.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 const Duration _kDialogSizeAnimationDuration = Duration(milliseconds: 200);

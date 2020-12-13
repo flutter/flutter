@@ -12,6 +12,7 @@ import 'animations.dart';
 import 'curves.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // Animation<Offset> _animation;
 // AnimationController _controller;
 
@@ -436,7 +437,7 @@ class ConstantTween<T> extends Tween<T> {
   T lerp(double t) => begin as T;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ReverseTween')}(value: $begin)';
+  String toString() => '${objectRuntimeType(this, 'ConstantTween')}(value: $begin)';
 }
 
 /// Transforms the value of the given animation by the given curve.

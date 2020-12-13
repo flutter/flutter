@@ -12,6 +12,7 @@ import 'debug.dart';
 import 'object.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // int rows, columns;
 // String _name;
 // bool inherit;

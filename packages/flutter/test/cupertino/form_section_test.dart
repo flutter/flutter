@@ -8,20 +8,33 @@ import 'package:flutter/rendering.dart';
 
 void main() {
   testWidgets('Shows header', (WidgetTester tester) async {
-    const Widget header = Text('Enter Value');
-
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoFormSection(
-            header: header,
+            header: const Text('Header'),
             children: <Widget>[CupertinoTextFormFieldRow()],
           ),
         ),
       ),
     );
 
-    expect(header, tester.widget(find.byType(Text)));
+    expect(find.text('Header'), findsOneWidget);
+  });
+
+  testWidgets('Shows footer', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoFormSection(
+            footer: const Text('Footer'),
+            children: <Widget>[CupertinoTextFormFieldRow()],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Footer'), findsOneWidget);
   });
 
   testWidgets('Shows long dividers in edge-to-edge section part 1',

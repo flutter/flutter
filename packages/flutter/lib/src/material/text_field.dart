@@ -25,6 +25,9 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(
   /// The build context for the TextField.
@@ -198,7 +201,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// callback. This callback is applied to the text field's current value when
 /// the user finishes editing.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 ///
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
 /// callback.
@@ -302,10 +305,11 @@ class TextField extends StatefulWidget {
   /// [TextField.noMaxLength] then only the current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
-  /// is ignored, unless [maxLengthEnforced] is set to false. The text field
-  /// enforces the length with a [LengthLimitingTextInputFormatter], which is
-  /// evaluated after the supplied [inputFormatters], if any. The [maxLength]
-  /// value must be either null or greater than zero.
+  /// is ignored, unless [maxLengthEnforcement] is set to
+  /// [MaxLengthEnforcement.none].
+  /// The text field enforces the length with a [LengthLimitingTextInputFormatter],
+  /// which is evaluated after the supplied [inputFormatters], if any.
+  /// The [maxLength] value must be either null or greater than zero.
   ///
   /// If [maxLengthEnforced] is set to false, then more than [maxLength]
   /// characters may be entered, and the error counter and divider will
@@ -356,6 +360,7 @@ class TextField extends StatefulWidget {
     this.expands = false,
     this.maxLength,
     this.maxLengthEnforced = true,
+    this.maxLengthEnforcement,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -391,6 +396,10 @@ class TextField extends StatefulWidget {
        assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
+       assert(
+         maxLengthEnforced || maxLengthEnforcement == null,
+         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
+       ),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(selectionHeightStyle != null),
@@ -568,9 +577,11 @@ class TextField extends StatefulWidget {
   /// to [TextField.noMaxLength] then only the current character count is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
-  /// is ignored, unless [maxLengthEnforced] is set to false. The text field
-  /// enforces the length with a [LengthLimitingTextInputFormatter], which is
-  /// evaluated after the supplied [inputFormatters], if any.
+  /// is ignored, unless [maxLengthEnforcement] is set to
+  /// [MaxLengthEnforcement.none].
+  ///
+  /// The text field enforces the length with a [LengthLimitingTextInputFormatter],
+  /// which is evaluated after the supplied [inputFormatters], if any.
   ///
   /// This value must be either null, [TextField.noMaxLength], or greater than 0.
   /// If null (the default) then there is no limit to the number of characters
@@ -580,7 +591,8 @@ class TextField extends StatefulWidget {
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
   ///
-  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
+  /// If [maxLengthEnforced] is set to false or [maxLengthEnforcement] is
+  /// [MaxLengthEnforcement.none], then more than [maxLength]
   /// characters may be entered, but the error counter and divider will switch
   /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
   /// exceeded.
@@ -588,13 +600,20 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.lengthLimitingTextInputFormatter.maxLength}
   final int? maxLength;
 
-  /// If true, prevents the field from allowing more than [maxLength]
-  /// characters.
-  ///
   /// If [maxLength] is set, [maxLengthEnforced] indicates whether or not to
   /// enforce the limit, or merely provide a character counter and warning when
   /// [maxLength] is exceeded.
+  ///
+  /// If true, prevents the field from allowing more than [maxLength]
+  /// characters.
   final bool maxLengthEnforced;
+
+  /// Determines how the [maxLength] limit should be enforced.
+  ///
+  /// {@macro flutter.services.textFormatter.effectiveMaxLengthEnforcement}
+  ///
+  /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
+  final MaxLengthEnforcement? maxLengthEnforcement;
 
   /// {@macro flutter.widgets.editableText.onChanged}
   ///
@@ -810,6 +829,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, defaultValue: true, ifFalse: 'maxLength not enforced'));
+    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
     properties.add(EnumProperty<TextInputAction>('textInputAction', textInputAction, defaultValue: null));
     properties.add(EnumProperty<TextCapitalization>('textCapitalization', textCapitalization, defaultValue: TextCapitalization.none));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
@@ -834,6 +854,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => widget.maxLengthEnforcement
+    ?? LengthLimitingTextInputFormatter.inferredDefaultMaxLengthEnforcement;
 
   bool _isHovering = false;
 
@@ -1095,7 +1118,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
-      if (widget.maxLength != null && widget.maxLengthEnforced) LengthLimitingTextInputFormatter(widget.maxLength)
+      if (widget.maxLength != null && widget.maxLengthEnforced)
+        LengthLimitingTextInputFormatter(
+          widget.maxLength,
+          maxLengthEnforcement: _effectiveMaxLengthEnforcement,
+        ),
     ];
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
@@ -1226,6 +1253,16 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       },
     );
 
+    final int? semanticsMaxValueLength;
+    if (widget.maxLengthEnforced &&
+      _effectiveMaxLengthEnforcement != MaxLengthEnforcement.none &&
+      widget.maxLength != null &&
+      widget.maxLength! > 0) {
+      semanticsMaxValueLength = widget.maxLength;
+    } else {
+      semanticsMaxValueLength = null;
+    }
+
     return MouseRegion(
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
@@ -1236,9 +1273,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           animation: controller, // changes the _currentLength
           builder: (BuildContext context, Widget? child) {
             return Semantics(
-              maxValueLength: widget.maxLengthEnforced && widget.maxLength != null && widget.maxLength! > 0
-                  ? widget.maxLength
-                  : null,
+              maxValueLength: semanticsMaxValueLength,
               currentValueLength: _currentLength,
               onTap: () {
                 if (!_effectiveController.selection.isValid)

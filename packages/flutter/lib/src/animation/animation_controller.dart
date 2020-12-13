@@ -17,6 +17,7 @@ import 'listener_helpers.dart';
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
 // Examples can assume:
+// // @dart = 2.9
 // AnimationController _controller, fadeAnimationController, sizeAnimationController;
 // bool dismissed;
 // void setState(VoidCallback fn) { }
@@ -508,6 +509,17 @@ class AnimationController extends Animation<double>
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.completed].
   TickerFuture animateTo(double target, { Duration? duration, Curve curve = Curves.linear }) {
+    assert(() {
+      if (this.duration == null && duration == null) {
+        throw FlutterError(
+          'AnimationController.animateTo() called with no explicit duration and no default duration.\n'
+          'Either the "duration" argument to the animateTo() method should be provided, or the '
+          '"duration" property should be set, either in the constructor or later, before '
+          'calling the animateTo() function.'
+        );
+      }
+      return true;
+    }());
     assert(
       _ticker != null,
       'AnimationController.animateTo() called after AnimationController.dispose()\n'
@@ -530,6 +542,17 @@ class AnimationController extends Animation<double>
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.dismissed].
   TickerFuture animateBack(double target, { Duration? duration, Curve curve = Curves.linear }) {
+    assert(() {
+      if (this.duration == null && reverseDuration == null && duration == null) {
+        throw FlutterError(
+          'AnimationController.animateBack() called with no explicit duration and no default duration or reverseDuration.\n'
+          'Either the "duration" argument to the animateBack() method should be provided, or the '
+          '"duration" or "reverseDuration" property should be set, either in the constructor or later, before '
+          'calling the animateBack() function.'
+        );
+      }
+      return true;
+    }());
     assert(
       _ticker != null,
       'AnimationController.animateBack() called after AnimationController.dispose()\n'
@@ -555,17 +578,8 @@ class AnimationController extends Animation<double>
     }
     Duration? simulationDuration = duration;
     if (simulationDuration == null) {
-      assert(() {
-        if ((this.duration == null && _direction == _AnimationDirection.reverse && reverseDuration == null) || this.duration == null) {
-          throw FlutterError(
-            'AnimationController.animateTo() called with no explicit duration and no default duration or reverseDuration.\n'
-            'Either the "duration" argument to the animateTo() method should be provided, or the '
-            '"duration" and/or "reverseDuration" property should be set, either in the constructor or later, before '
-            'calling the animateTo() function.'
-          );
-        }
-        return true;
-      }());
+      assert(!(this.duration == null && _direction == _AnimationDirection.forward));
+      assert(!(this.duration == null && _direction == _AnimationDirection.reverse && reverseDuration == null));
       final double range = upperBound - lowerBound;
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       final Duration directionDuration =

@@ -8,9 +8,12 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 // Content padding determined via SwiftUI's `Form` view in the iOS 14.2 SDK.
 const EdgeInsetsGeometry _kDefaultPadding =
-    EdgeInsetsDirectional.fromSTEB(16.0, 6.0, 6.0, 6.0);
+    EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 6.0, 6.0);
 
 /// An iOS-style form row.
 ///
@@ -149,22 +152,7 @@ class CupertinoFormRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final TextStyle textStyle = themeData.textTheme.textStyle;
-
-    final List<Widget> rowChildren = <Widget>[
-      if (prefix != null)
-        DefaultTextStyle(
-          style: textStyle,
-          child: prefix!,
-        ),
-      Flexible(
-        child: Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: child,
-        ),
-      ),
-    ];
+    final TextStyle textStyle = CupertinoTheme.of(context).textTheme.textStyle;
 
     return Padding(
       padding: padding ?? _kDefaultPadding,
@@ -172,7 +160,19 @@ class CupertinoFormRow extends StatelessWidget {
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: rowChildren,
+            children: <Widget>[
+              if (prefix != null)
+                DefaultTextStyle(
+                  style: textStyle,
+                  child: prefix!,
+                ),
+              Flexible(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: child,
+                ),
+              ),
+            ],
           ),
           if (helper != null)
             Align(

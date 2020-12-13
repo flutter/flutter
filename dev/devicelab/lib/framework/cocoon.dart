@@ -48,9 +48,6 @@ class Cocoon {
 
   static final Logger logger = Logger('CocoonClient');
 
-  String get commitBranch => _commitBranch ?? _readCommitBranch();
-  String _commitBranch;
-
   String get commitSha => _commitSha ?? _readCommitSha();
   String _commitSha;
 
@@ -64,18 +61,12 @@ class Cocoon {
     return _commitSha = result.stdout as String;
   }
 
-  /// Parse the local repo for the current running branch.
-  String _readCommitBranch() {
-    final ProcessResult result = processRunSync('git', <String>['rev-parse', '--abbrev-ref', 'HEAD']);
-    if (result.exitCode != 0) {
-      throw CocoonException(result.stderr as String);
-    }
-
-    return _commitBranch = result.stdout as String;
-  }
-
   /// Send [TaskResult] to Cocoon.
-  Future<void> sendTaskResult({String builderName, TaskResult result}) async {
+  Future<void> sendTaskResult({@required String builderName, @required TaskResult result, @required String gitBranch}) async {
+    assert(builderName != null);
+    assert(gitBranch != null);
+    assert(result != null);
+
     // Skip logging on test runs
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((LogRecord rec) {
@@ -83,7 +74,7 @@ class Cocoon {
     });
 
     final Map<String, dynamic> status = <String, dynamic>{
-      'CommitBranch': commitBranch,
+      'CommitBranch': gitBranch,
       'CommitSha': commitSha,
       'BuilderName': builderName,
       'NewStatus': result.succeeded ? 'Succeeded' : 'Failed',
