@@ -15,6 +15,11 @@ import 'framework.dart';
 /// This widget allows to generate dynamic and vibrant shades depending on the chosen blend modes.
 /// Different blending modes can modify how the color is applied,
 /// and to which parts of the image.
+/// ColorFiltered widget is different from BackdropFilter and ImageFiltered as both
+/// is used to apply filter, e.g. blur, to the existing painted filter, i.e,
+/// it may or may not be used simultaneously with ColorFiltered Widget.
+/// ColorFiltered widget is more widely used than BackdropFilter and ImageFiltered
+/// as it allows more rendering choices.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
 ///
@@ -54,10 +59,8 @@ import 'framework.dart';
 /// See Also:
 ///
 ///  * [BlendMode], describing how to blend a source image with destination image.
-///  * [Image], the class in the [dart:ui](https://api.flutter.dev/flutter/dart-ui/dart-ui-library.html) library.
-///  * [Colors], constants which represent Material Design's [color palette](https://material.io/design/color/).
-///  * Cookbook: [Display images from the internet](https://flutter.dev/docs/cookbook/images/network-image)
-///
+///  * [ColorFilter], describing what to apply when compositing a layer with a particular color.
+
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a [ColorFilter] to its child.
