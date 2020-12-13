@@ -78,8 +78,7 @@ class BottomNavigationBarItem {
 
   /// The text label for this [BottomNavigationBarItem].
   ///
-  /// This will be used to create a [Text] widget to put in the bottom navigation bar,
-  /// and in Material Design [BottomNavigationBar]s.
+  /// This will be used to create a [Text] widget to put in the bottom navigation bar.
   final String? label;
 
   /// The color of the background radial animation for material [BottomNavigationBar].
