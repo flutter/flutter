@@ -16,7 +16,7 @@ import 'framework.dart';
 /// Different blending modes can modify how the color is applied,
 /// and to which parts of the image.
 /// ColorFiltered widget is different from BackdropFilter and ImageFiltered as both
-/// is used to apply filter, e.g. blur, to the existing painted filter, i.e,
+/// is used to apply filter, e.g. blur,to the existing painted filter, i.e,
 /// it may or may not be used simultaneously with ColorFiltered Widget.
 /// ColorFiltered widget is more widely used than BackdropFilter and ImageFiltered
 /// as it allows more rendering choices.
