@@ -187,20 +187,31 @@ class ChangeNotifier implements Listenable {
   }
 
   void _removeAt(int index) {
+    // The list holding the listeners is not growable for performances reasons.
+    // We still want to shrink this list if a lot of listeners have been added
+    // and then removed outside a notifyListeners iteration.
+    // We do this only when the real number of listeners is half the length
+    // of our list.
     _count -= 1;
     if (_count * 2 <= _listeners.length) {
       final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_count, null);
 
+      // Listeners before the index are at the same place.
       for (int i = 0; i < index; i++)
         newListeners[i] = _listeners[i];
 
+      // Listeners after the index move towards the start of the list.
       for (int i = index; i < _count; i++)
         newListeners[i] = _listeners[i + 1];
 
       _listeners = newListeners;
     } else {
+      // When there are more listeners than half the length of the list, we only
+      // shift our listeners, so that we avoid to reallocate memory for the
+      // whole list.
       for (int i = index; i < _count; i++)
         _listeners[i] = _listeners[i + 1];
+      _listeners[_count] = null;
     }
   }
 
@@ -224,9 +235,15 @@ class ChangeNotifier implements Listenable {
       final VoidCallback? _listener = _listeners[i];
       if (_listener == listener) {
         if (_notificationCallStackDepth > 0) {
+          // We don't resize the list during notifyListeners iterations
+          // but we set to null, the listeners we want to remove. We will
+          // effectively resize the list at the end of all notifyListeners
+          // iterations.
           _listeners[i] = null;
           _reentrantlyRemovedListeners++;
         } else {
+          // When we are outside the notifyListeners iterations we can
+          // effectively shrink the list.
           _removeAt(i);
         }
         break;
