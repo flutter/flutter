@@ -2307,7 +2307,6 @@ abstract class RenderBox extends RenderObject {
       _cachedDryLayoutSizes?.clear();
       if (parent is RenderObject) {
         markParentNeedsLayout();
-        return;
       }
     }
     super.markNeedsLayout();

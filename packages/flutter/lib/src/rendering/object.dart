@@ -1526,6 +1526,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If [sizedByParent] has changed, calls
   /// [markNeedsLayoutForSizedByParentChange] instead of [markNeedsLayout].
+  @mustCallSuper
   void markNeedsLayout() {
     assert(_debugCanPerformMutations);
     if (_needsLayout) {
