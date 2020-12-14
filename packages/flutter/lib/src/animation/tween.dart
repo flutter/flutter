@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' show Color, Size, Rect;
 
 import 'package:flutter/foundation.dart';
@@ -12,9 +11,8 @@ import 'animations.dart';
 import 'curves.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// Animation<Offset> _animation;
-// AnimationController _controller;
+// late Animation<Offset> _animation;
+// late AnimationController _controller;
 
 /// An object that can produce a value of type `T` given an [Animation<double>]
 /// as input.
