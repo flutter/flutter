@@ -614,10 +614,6 @@ abstract class Device {
   /// Check if the device is supported by Flutter.
   bool isSupported();
 
-  // String meant to be displayed to the user indicating if the device is
-  // supported by Flutter, and, if not, why.
-  String supportMessage() => isSupported() ? 'Supported' : 'Unsupported';
-
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
 

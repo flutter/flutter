@@ -286,7 +286,7 @@ class FakeDoctor extends Doctor {
 
 class MockSimControl extends Mock implements SimControl {
   MockSimControl() {
-    when(getConnectedDevices()).thenAnswer((Invocation _) async => <SimDevice>[]);
+    when(getAvailableDevices()).thenAnswer((Invocation _) async => <SimDevice>[]);
   }
 }
 

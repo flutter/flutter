@@ -785,12 +785,19 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         "availability" : "(available)",
         "name" : "iPhone 5s",
         "udid" : "TEST-PHONE-UDID"
+      },
+      {
+        "state" : "Shutdown",
+        "isAvailable" : false,
+        "name" : "iPhone 11",
+        "udid" : "TEST-PHONE-UNAVAILABLE-UDID",
+        "availabilityError" : "runtime profile not found"
       }
     ],
     "tvOS 11.4" : [
       {
         "state" : "Shutdown",
-        "availability" : "(available)",
+        "isAvailable" : true,
         "name" : "Apple TV",
         "udid" : "TEST-TV-UDID"
       }
@@ -824,11 +831,12 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
     testWithoutContext('getDevices succeeds', () async {
       final List<SimDevice> devices = await simControl.getDevices();
+      expect(devices.length, 4);
 
       final SimDevice watch = devices[0];
       expect(watch.category, 'watchOS 4.3');
       expect(watch.state, 'Shutdown');
-      expect(watch.availability, '(available)');
+      expect(watch.isAvailable, true);
       expect(watch.name, 'Apple Watch - 38mm');
       expect(watch.udid, 'TEST-WATCH-UDID');
       expect(watch.isBooted, isFalse);
@@ -836,18 +844,31 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       final SimDevice phone = devices[1];
       expect(phone.category, 'iOS 11.4');
       expect(phone.state, 'Booted');
-      expect(phone.availability, '(available)');
+      expect(phone.isAvailable, true);
       expect(phone.name, 'iPhone 5s');
       expect(phone.udid, 'TEST-PHONE-UDID');
       expect(phone.isBooted, isTrue);
 
-      final SimDevice tv = devices[2];
+      final SimDevice unavailablePhone = devices[2];
+      expect(unavailablePhone.category, 'iOS 11.4');
+      expect(unavailablePhone.state, 'Shutdown');
+      expect(unavailablePhone.isAvailable, isFalse);
+      expect(unavailablePhone.name, 'iPhone 11');
+      expect(unavailablePhone.udid, 'TEST-PHONE-UNAVAILABLE-UDID');
+      expect(unavailablePhone.isBooted, isFalse);
+
+      final SimDevice tv = devices[3];
       expect(tv.category, 'tvOS 11.4');
       expect(tv.state, 'Shutdown');
-      expect(tv.availability, '(available)');
+      expect(tv.isAvailable, true);
       expect(tv.name, 'Apple TV');
       expect(tv.udid, 'TEST-TV-UDID');
       expect(tv.isBooted, isFalse);
+    });
+
+    testWithoutContext('getAvailableDevices succeeds', () async {
+      final List<SimDevice> devices = await simControl.getAvailableDevices();
+      expect(devices.length, 3);
     });
 
     testWithoutContext('getDevices handles bad simctl output', () async {
@@ -904,6 +925,15 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         () async => await simControl.launch(deviceId, appId),
         throwsToolExit(message: r'Unable to launch'),
       );
+    });
+
+    testWithoutContext('.boot() calls the right command', () async {
+      await simControl.boot(deviceId);
+      verify(mockProcessManager.run(
+        <String>['xcrun', 'simctl', 'boot', deviceId],
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      ));
     });
   });
 
