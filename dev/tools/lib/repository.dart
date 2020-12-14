@@ -29,8 +29,7 @@ class Repository {
     this.useExistingCheckout = false,
   })  : git = Git(processManager),
         assert(localUpstream != null),
-        assert(useExistingCheckout != null) {
-  }
+        assert(useExistingCheckout != null);
 
   final String name;
   final String upstream;
