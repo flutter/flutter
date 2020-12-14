@@ -1369,14 +1369,107 @@ abstract class RenderBox extends RenderObject {
         shouldCache = false;
       return true;
     }());
+
+    double result;
+
     if (shouldCache) {
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
-      return _cachedIntrinsicDimensions!.putIfAbsent(
+
+      result =  _cachedIntrinsicDimensions!.putIfAbsent(
         _IntrinsicDimensionsCacheEntry(dimension, argument),
         () => computer(argument),
       );
+    } else {
+      result = computer(argument);
     }
-    return computer(argument);
+
+    assert(() {
+      if (debugCheckIntrinsicSizes) {
+        // Look in the cache for the alternate dimension, and call
+        // [_debugCheckIntrinsics] setting the correct min and max val. E.g.
+        // if we are currently computing the min width, look in the cache for
+        // the max width.
+        switch (dimension) {
+          case _IntrinsicDimension.minWidth:
+            _debugCheckIntrinsics(
+              dimension: 'width',
+              constraint: argument,
+              min: result,
+              max: _cachedIntrinsicDimensions?[_IntrinsicDimensionsCacheEntry(_IntrinsicDimension.maxWidth, argument)],
+            );
+            break;
+          case _IntrinsicDimension.maxWidth:
+            _debugCheckIntrinsics(
+              dimension: 'width',
+              constraint: argument,
+              min: _cachedIntrinsicDimensions?[_IntrinsicDimensionsCacheEntry(_IntrinsicDimension.minWidth, argument)],
+              max: result,
+            );
+            break;
+          case _IntrinsicDimension.minHeight:
+            _debugCheckIntrinsics(
+              dimension: 'height',
+              constraint: argument,
+              min: result,
+              max: _cachedIntrinsicDimensions?[_IntrinsicDimensionsCacheEntry(_IntrinsicDimension.maxHeight, argument)],
+            );
+            break;
+          case _IntrinsicDimension.maxHeight:
+            _debugCheckIntrinsics(
+              dimension: 'height',
+              constraint: argument,
+              min: _cachedIntrinsicDimensions?[_IntrinsicDimensionsCacheEntry(_IntrinsicDimension.minHeight, argument)],
+              max: result,
+            );
+            break;
+        }
+      }
+      return true;
+    }());
+
+    return result;
+  }
+
+  void _debugCheckIntrinsics({
+    required String dimension,
+    required double constraint,
+    required double? min,
+    required double? max,
+  }) {
+    final List<DiagnosticsNode> failures = <DiagnosticsNode>[];
+
+    void _testIntrinsic(String minOrMax, double? val) {
+      if (val == null) {
+        return;
+      }
+
+      if (val < 0) {
+        failures.add(ErrorDescription(' * get${minOrMax}Intrinsic$dimension($constraint) returned a negative value: $val'));
+      }
+      if (!val.isFinite) {
+        failures.add(ErrorDescription(' * get${minOrMax}Intrinsic$dimension($constraint) returned non-finite value: $val'));
+      }
+    }
+
+    _testIntrinsic('Min', min);
+    _testIntrinsic('Max', max);
+
+    if (min != null && max != null && min > max) {
+      failures.add(ErrorDescription(' * getMinIntrinsic$dimension($constraint) returned a larger value ($min) than getMaxIntrinsic$dimension($constraint) ($max)'));
+    }
+
+    if (failures.isNotEmpty) {
+      // TODO(jacobr): consider nesting the failures object so it is collapsible.
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.'),
+        ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:'), // should this be tagged as an error or not?
+        ...failures,
+        ErrorHint(
+          'If you are not writing your own RenderBox subclass, then this is not\n'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+        ),
+      ]);
+    }
   }
 
   /// Returns the minimum width that this box could be without failing to
@@ -2215,52 +2308,7 @@ abstract class RenderBox extends RenderObject {
         ]);
       }
       if (debugCheckIntrinsicSizes) {
-        // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
-        RenderObject.debugCheckingIntrinsics = true;
-        final List<DiagnosticsNode> failures = <DiagnosticsNode>[];
-
-        double testIntrinsic(double function(double extent), String name, double constraint) {
-          final double result = function(constraint);
-          if (result < 0) {
-            failures.add(ErrorDescription(' * $name($constraint) returned a negative value: $result'));
-          }
-          if (!result.isFinite) {
-            failures.add(ErrorDescription(' * $name($constraint) returned a non-finite value: $result'));
-          }
-          return result;
-        }
-
-        void testIntrinsicsForValues(double getMin(double extent), double getMax(double extent), String name, double constraint) {
-          final double min = testIntrinsic(getMin, 'getMinIntrinsic$name', constraint);
-          final double max = testIntrinsic(getMax, 'getMaxIntrinsic$name', constraint);
-          if (min > max) {
-            failures.add(ErrorDescription(' * getMinIntrinsic$name($constraint) returned a larger value ($min) than getMaxIntrinsic$name($constraint) ($max)'));
-          }
-        }
-
-        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.infinity);
-        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
-        if (constraints.hasBoundedWidth)
-          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxHeight);
-        if (constraints.hasBoundedHeight)
-          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxWidth);
-
-        // TODO(ianh): Test that values are internally consistent in more ways than the above.
-
-        RenderObject.debugCheckingIntrinsics = false;
-        if (failures.isNotEmpty) {
-          // TODO(jacobr): consider nesting the failures object so it is collapsible.
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.'),
-            ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:'), // should this be tagged as an error or not?
-            ...failures,
-            ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
-            ),
-          ]);
-        }
 
         // Checking that getDryLayout computes the same size.
         _dryLayoutCalculationValid = true;
