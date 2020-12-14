@@ -890,12 +890,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
 
-  web_benchmarks_canvaskit:
-    description: >
-      Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
-    stage: devicelab
-    required_agent_capabilities: ["linux-vm"]
-
   # android_splash_screen_integration_test:
   #   description: >
   #     Runs end-to-end test of Flutter's Android splash behavior.
