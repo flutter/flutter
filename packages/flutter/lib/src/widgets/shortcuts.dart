@@ -409,7 +409,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// class IncrementIntent extends Intent {
 ///   const IncrementIntent();
 /// }
-/// 
+///
 /// class DecrementIntent extends Intent {
 ///   const DecrementIntent();
 /// }
@@ -417,7 +417,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///
 /// ```dart
 /// int count = 0;
-/// 
+///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
@@ -480,41 +480,41 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///     count += amount;
 ///     notifyListeners();
 ///   }
-/// 
+///
 ///   void decrementBy(int amount) {
 ///     count -= amount;
 ///     notifyListeners();
 ///   }
 /// }
-/// 
+///
 /// class IncrementIntent extends Intent {
 ///   const IncrementIntent(this.amount);
-/// 
+///
 ///   final int amount;
 /// }
-/// 
+///
 /// class DecrementIntent extends Intent {
 ///   const DecrementIntent(this.amount);
-/// 
+///
 ///   final int amount;
 /// }
-/// 
+///
 /// class IncrementAction extends Action<IncrementIntent> {
 ///   IncrementAction(this.model);
-/// 
+///
 ///   final Model model;
-/// 
+///
 ///   @override
 ///   void invoke(covariant IncrementIntent intent) {
 ///     model.incrementBy(intent.amount);
 ///   }
 /// }
-/// 
+///
 /// class DecrementAction extends Action<DecrementIntent> {
 ///   DecrementAction(this.model);
-/// 
+///
 ///   final Model model;
-/// 
+///
 ///   @override
 ///   void invoke(covariant DecrementIntent intent) {
 ///     model.decrementBy(intent.amount);
@@ -524,7 +524,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///
 /// ```dart
 /// Model model = Model();
-/// 
+///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(

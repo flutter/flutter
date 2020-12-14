@@ -1282,7 +1282,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// void main() => runApp(MyApp());
 ///
 /// class MyApp extends StatefulWidget {
-///   const MyApp({Key? key}) : super(key: key);
+///   const MyApp({Key key}) : super(key: key);
 ///
 ///   @override
 ///   State<StatefulWidget> createState() => _MyAppState();

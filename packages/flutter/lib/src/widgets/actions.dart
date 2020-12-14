@@ -546,7 +546,7 @@ class ActionDispatcher with Diagnosticable {
 /// class Model {
 ///   ValueNotifier<bool> isDirty = ValueNotifier<bool>(false);
 ///   ValueNotifier<int> data = ValueNotifier<int>(0);
-/// 
+///
 ///   int save() {
 ///     if (!isDirty.value) {
 ///       return data.value;
@@ -555,61 +555,61 @@ class ActionDispatcher with Diagnosticable {
 ///     isDirty.value = false;
 ///     return data.value;
 ///   }
-/// 
+///
 ///   void setValue(int newValue) {
 ///     data.value = newValue;
 ///     isDirty.value = true;
 ///   }
 /// }
-/// 
+///
 /// class ModifyIntent extends Intent {
 ///   const ModifyIntent(this.value);
-/// 
+///
 ///   final int value;
 /// }
-/// 
+///
 /// // An Action that modifies the model by setting it to the value that it gets
 /// // from the Intent passed to it when invoked.
 /// class ModifyAction extends Action<ModifyIntent> {
 ///   ModifyAction(this.model);
-/// 
+///
 ///   final Model model;
-/// 
+///
 ///   @override
 ///   void invoke(covariant ModifyIntent intent) {
 ///     model.setValue(intent.value);
 ///   }
 /// }
-/// 
+///
 /// // An intent for saving data.
 /// class SaveIntent extends Intent {
 ///   const SaveIntent();
 /// }
-/// 
+///
 /// // An Action that saves the data in the model it is created with.
 /// class SaveAction extends Action<SaveIntent> {
 ///   SaveAction(this.model);
-/// 
+///
 ///   final Model model;
-/// 
+///
 ///   @override
 ///   int invoke(covariant SaveIntent intent) {
 ///     return model.save();
 ///   }
 /// }
-/// 
+///
 /// class SaveButton extends StatefulWidget {
 ///   const SaveButton(this.valueNotifier);
-/// 
+///
 ///   final ValueNotifier<bool> valueNotifier;
-/// 
+///
 ///   @override
 ///   _SaveButtonState createState() => _SaveButtonState();
 /// }
-/// 
+///
 /// class _SaveButtonState extends State<SaveButton> {
 ///   int savedValue = 0;
-/// 
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return AnimatedBuilder(
@@ -638,7 +638,7 @@ class ActionDispatcher with Diagnosticable {
 /// ```dart
 /// Model model = Model();
 /// int count = 0;
-/// 
+///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Actions(
