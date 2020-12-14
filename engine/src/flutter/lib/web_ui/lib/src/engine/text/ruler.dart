@@ -9,7 +9,7 @@ String _buildCssFontString({
   required ui.FontStyle? fontStyle,
   required ui.FontWeight? fontWeight,
   required double? fontSize,
-  required String? fontFamily,
+  required String fontFamily,
 }) {
   final StringBuffer result = StringBuffer();
 
@@ -81,7 +81,7 @@ class ParagraphGeometricStyle {
   ///
   /// - Always returns "Ahem" in tests.
   /// - Provides correct defaults when [fontFamily] doesn't have a value.
-  String? get effectiveFontFamily {
+  String get effectiveFontFamily {
     if (assertionsEnabled) {
       // In widget tests we use a predictable-size font "Ahem". This makes
       // widget tests predictable and less flaky.
@@ -89,10 +89,11 @@ class ParagraphGeometricStyle {
         return 'Ahem';
       }
     }
-    if (fontFamily == null || fontFamily!.isEmpty) {
+    final String? localFontFamily = fontFamily;
+    if (localFontFamily == null || localFontFamily.isEmpty) {
       return DomRenderer.defaultFontFamily;
     }
-    return fontFamily;
+    return localFontFamily;
   }
 
   String? _cssFontString;
@@ -107,6 +108,24 @@ class ParagraphGeometricStyle {
       fontSize: fontSize,
       fontFamily: effectiveFontFamily,
     );
+  }
+
+  TextHeightStyle? _cachedHeightStyle;
+
+  TextHeightStyle get textHeightStyle {
+    TextHeightStyle? style = _cachedHeightStyle;
+    if (style == null) {
+      style = TextHeightStyle(
+        fontFamily: effectiveFontFamily,
+        fontSize: fontSize ?? DomRenderer.defaultFontSize,
+        height: lineHeight,
+        // TODO(mdebbar): Pass the actual value when font features become supported
+        //                https://github.com/flutter/flutter/issues/64595
+        fontFeatures: null,
+      );
+      _cachedHeightStyle = style;
+    }
+    return style;
   }
 
   @override
@@ -166,6 +185,40 @@ class ParagraphGeometricStyle {
       return super.toString();
     }
   }
+}
+
+/// Contains all styles that have an effect on the height of text.
+///
+/// This is useful as a cache key for [TextHeightRuler]. It's more efficient
+/// than using the entire [ParagraphGeometricStyle] as a cache key.
+class TextHeightStyle {
+  TextHeightStyle({
+    required this.fontFamily,
+    required this.fontSize,
+    required this.height,
+    required this.fontFeatures,
+  });
+
+  final String fontFamily;
+  final double fontSize;
+  final double? height;
+  final List<ui.FontFeature>? fontFeatures;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is TextHeightStyle && other.hashCode == hashCode;
+  }
+
+  @override
+  late final int hashCode = ui.hashValues(
+    fontFamily,
+    fontSize,
+    height,
+    ui.hashList(fontFeatures),
+  );
 }
 
 /// Provides text dimensions found on [_element]. The idea behind this class is
@@ -293,6 +346,21 @@ class TextDimensions {
     _invalidateBoundsCache();
   }
 
+  void applyHeightStyle(TextHeightStyle textHeightStyle) {
+    final String fontFamily = textHeightStyle.fontFamily;
+    final double fontSize = textHeightStyle.fontSize;
+    final html.CssStyleDeclaration style = _element.style;
+    style
+      ..fontSize = '${fontSize.floor()}px'
+      ..fontFamily = canonicalizeFontFamily(fontFamily);
+
+    final double? height = textHeightStyle.height;
+    if (height != null) {
+      style.lineHeight = height.toString();
+    }
+    _invalidateBoundsCache();
+  }
+
   /// Appends element and probe to hostElement that is setup for a specific
   /// TextStyle.
   void appendToHost(html.HtmlElement hostElement) {
@@ -320,6 +388,67 @@ class TextDimensions {
       cachedHeight += 1.0;
     }
     return cachedHeight;
+  }
+}
+
+/// Performs height measurement for the given [textHeightStyle].
+///
+/// The two results of this ruler's measurement are:
+///
+/// 1. [alphabeticBaseline].
+/// 2. [height].
+class TextHeightRuler {
+  TextHeightRuler(this.textHeightStyle, this.rulerHost);
+
+  final TextHeightStyle textHeightStyle;
+  final RulerHost rulerHost;
+
+  // Elements used to measure the line-height metric.
+  late final html.HtmlElement _probe = _createProbe();
+  late final html.HtmlElement _host = _createHost();
+  final TextDimensions _dimensions = TextDimensions(html.ParagraphElement());
+
+  /// The alphabetic baseline for this ruler's [textHeightStyle].
+  late final double alphabeticBaseline = _probe.getBoundingClientRect().bottom.toDouble();
+
+  /// The height for this ruler's [textHeightStyle].
+  late final double height = _dimensions.height;
+
+  html.HtmlElement _createHost() {
+    final html.DivElement host = html.DivElement();
+    host.style
+      ..visibility = 'hidden'
+      ..position = 'absolute'
+      ..top = '0'
+      ..left = '0'
+      ..display = 'flex'
+      ..flexDirection = 'row'
+      ..alignItems = 'baseline'
+      ..margin = '0'
+      ..border = '0'
+      ..padding = '0';
+
+    if (assertionsEnabled) {
+      host.setAttribute('data-ruler', 'line-height');
+    }
+
+    _dimensions.applyHeightStyle(textHeightStyle);
+
+    // Force single-line (even if wider than screen) and preserve whitespaces.
+    _dimensions._element.style.whiteSpace = 'pre';
+
+    // To measure line-height, all we need is a whitespace.
+    _dimensions.updateTextToSpace();
+
+    _dimensions.appendToHost(host);
+    rulerHost.addElement(host);
+    return host;
+  }
+
+  html.HtmlElement _createProbe() {
+    final html.HtmlElement probe = html.DivElement();
+    _host.append(probe);
+    return probe;
   }
 }
 
@@ -375,25 +504,14 @@ class ParagraphRuler {
   /// but a [ParagraphRuler] can only belong to one [RulerManager].
   final RulerManager rulerManager;
 
-  /// Probe to use for measuring alphabetic base line.
-  final html.HtmlElement _probe = html.DivElement();
-
-  /// Cached value of alphabetic base line.
-  double? _cachedAlphabeticBaseline;
-
   ParagraphRuler(this.style, this.rulerManager) {
     _configureSingleLineHostElements();
-    // Since alphabeticbaseline will be same regardless of constraints.
-    // We can measure it using a probe on the single line dimensions
-    // host.
-    _singleLineHost.append(_probe);
     _configureMinIntrinsicHostElements();
     _configureConstrainedHostElements();
   }
 
   /// The alphabetic baseline of the paragraph being measured.
-  double get alphabeticBaseline =>
-      (_cachedAlphabeticBaseline ??= _probe.getBoundingClientRect().bottom as double?)!;
+  double get alphabeticBaseline => _textHeightRuler.alphabeticBaseline;
 
   // Elements used to measure single-line metrics.
   final html.DivElement _singleLineHost = html.DivElement();
@@ -411,18 +529,10 @@ class ParagraphRuler {
       TextDimensions(html.ParagraphElement());
 
   // Elements used to measure the line-height metric.
-  html.DivElement? _lineHeightHost;
-  TextDimensions? _lineHeightDimensions;
-  TextDimensions? get lineHeightDimensions {
-    // Lazily create the elements for line-height measurement since they are not
-    // always needed.
-    if (_lineHeightDimensions == null) {
-      _lineHeightHost = html.DivElement();
-      _lineHeightDimensions = TextDimensions(html.ParagraphElement());
-      _configureLineHeightHostElements();
-      _lineHeightHost!.append(_probe);
-    }
-    return _lineHeightDimensions;
+  late final TextHeightRuler _textHeightRuler =
+      TextHeightRuler(style.textHeightStyle, rulerManager);
+  double get lineHeight {
+    return _textHeightRuler.height;
   }
 
   /// The number of times this ruler was used this frame.
@@ -475,7 +585,7 @@ class ParagraphRuler {
     singleLineDimensions._element.style.whiteSpace = 'pre';
 
     singleLineDimensions.appendToHost(_singleLineHost);
-    rulerManager.addHostElement(_singleLineHost);
+    rulerManager.addElement(_singleLineHost);
   }
 
   void _configureMinIntrinsicHostElements() {
@@ -508,7 +618,7 @@ class ParagraphRuler {
       ..whiteSpace = 'pre-line';
 
     _minIntrinsicHost.append(minIntrinsicDimensions._element);
-    rulerManager.addHostElement(_minIntrinsicHost);
+    rulerManager.addElement(_minIntrinsicHost);
   }
 
   void _configureConstrainedHostElements() {
@@ -542,36 +652,7 @@ class ParagraphRuler {
     }
 
     constrainedDimensions.appendToHost(_constrainedHost);
-    rulerManager.addHostElement(_constrainedHost);
-  }
-
-  void _configureLineHeightHostElements() {
-    _lineHeightHost!.style
-      ..visibility = 'hidden'
-      ..position = 'absolute'
-      ..top = '0'
-      ..left = '0'
-      ..display = 'flex'
-      ..flexDirection = 'row'
-      ..alignItems = 'baseline'
-      ..margin = '0'
-      ..border = '0'
-      ..padding = '0';
-
-    if (assertionsEnabled) {
-      _lineHeightHost!.setAttribute('data-ruler', 'line-height');
-    }
-
-    lineHeightDimensions!.applyStyle(style);
-
-    // Force single-line (even if wider than screen) and preserve whitespaces.
-    lineHeightDimensions!._element.style.whiteSpace = 'pre';
-
-    // To measure line-height, all we need is a whitespace.
-    lineHeightDimensions!.updateTextToSpace();
-
-    lineHeightDimensions!.appendToHost(_lineHeightHost!);
-    rulerManager.addHostElement(_lineHeightHost!);
+    rulerManager.addElement(_constrainedHost);
   }
 
   /// The paragraph being measured.
@@ -803,7 +884,7 @@ class ParagraphRuler {
 
     final double maxLinesLimit = style.maxLines == null
         ? double.infinity
-        : style.maxLines! * lineHeightDimensions!.height;
+        : style.maxLines! * lineHeight;
 
     html.Rectangle<num>? previousRect;
     for (html.Rectangle<num> rect in clientRects) {
@@ -847,7 +928,7 @@ class ParagraphRuler {
     _singleLineHost.remove();
     _minIntrinsicHost.remove();
     _constrainedHost.remove();
-    _lineHeightHost?.remove();
+    _textHeightRuler._host.remove();
     assert(() {
       _debugIsDisposed = true;
       return true;

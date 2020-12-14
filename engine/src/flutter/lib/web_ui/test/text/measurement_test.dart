@@ -254,6 +254,7 @@ void testMain()  async {
 
         // Should fit on a single line.
         expect(result.isSingleLine, true);
+        expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 50);
         expect(result.minIntrinsicWidth, 50);
         expect(result.width, 50);
@@ -274,6 +275,7 @@ void testMain()  async {
         // The long text doesn't fit in 70px of width, so it needs to wrap.
         result = instance.measure(build(ahemStyle, 'foo bar baz'), constraints);
         expect(result.isSingleLine, false);
+        expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 110);
         expect(result.minIntrinsicWidth, 30);
         expect(result.width, 70);
@@ -299,6 +301,7 @@ void testMain()  async {
         // The long text doesn't fit in 50px of width, so it needs to wrap.
         result = instance.measure(build(ahemStyle, '1234567890'), constraints);
         expect(result.isSingleLine, false);
+        expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 100);
         expect(result.minIntrinsicWidth, 100);
         expect(result.width, 50);
@@ -318,6 +321,7 @@ void testMain()  async {
         result =
             instance.measure(build(ahemStyle, 'abcdefghijk lm'), constraints);
         expect(result.isSingleLine, false);
+        expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 140);
         expect(result.minIntrinsicWidth, 110);
         expect(result.width, 50);
@@ -340,6 +344,7 @@ void testMain()  async {
             ui.ParagraphConstraints(width: 8);
         result = instance.measure(build(ahemStyle, 'AA'), narrowConstraints);
         expect(result.isSingleLine, false);
+        expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 20);
         expect(result.minIntrinsicWidth, 20);
         expect(result.width, 8);
@@ -358,6 +363,7 @@ void testMain()  async {
         // Extremely narrow constraints with new line in the middle.
         result = instance.measure(build(ahemStyle, 'AA\nA'), narrowConstraints);
         expect(result.isSingleLine, false);
+        expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 20);
         expect(result.minIntrinsicWidth, 20);
         expect(result.width, 8);
@@ -377,6 +383,7 @@ void testMain()  async {
         // Extremely narrow constraints with new line in the end.
         result = instance.measure(build(ahemStyle, 'AAA\n'), narrowConstraints);
         expect(result.isSingleLine, false);
+        expect(result.alphabeticBaseline, 8);
         expect(result.maxIntrinsicWidth, 30);
         expect(result.minIntrinsicWidth, 30);
         expect(result.width, 8);
