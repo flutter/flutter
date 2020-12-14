@@ -49,6 +49,41 @@ void testMain() {
       );
     });
 
+    test('clips platform views with RRects', () async {
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (viewId) => html.DivElement()..id = 'view-0',
+      );
+      await _createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.pushClipRRect(ui.RRect.fromLTRBR(0, 0, 10, 10, ui.Radius.circular(3)));
+      sb.addPlatformView(0, width: 10, height: 10);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      expect(
+        domRenderer.sceneElement!.querySelectorAll('#sk_path_defs').single,
+        isNotNull,
+      );
+      expect(
+        domRenderer.sceneElement!
+            .querySelectorAll('#sk_path_defs')
+            .single
+            .querySelectorAll('clipPath')
+            .single,
+        isNotNull,
+      );
+      expect(
+        domRenderer.sceneElement!
+            .querySelectorAll('flt-clip')
+            .single
+            .style
+            .clipPath,
+        'url("#svgClip1")',
+      );
+    });
     test('correctly transforms platform views', () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
