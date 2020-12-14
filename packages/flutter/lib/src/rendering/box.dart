@@ -1358,25 +1358,34 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<_IntrinsicDimensionsCacheEntry, double>? _cachedIntrinsicDimensions;
+  static final Map<RenderBox, Map<_IntrinsicDimensionsCacheEntry, double>> _debugCachedIntrinsicDimensionsForChecks = <RenderBox, Map<_IntrinsicDimensionsCacheEntry, double>>{};
 
   double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double computer(double argument)) {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
-    bool shouldCache = true;
+
+    double? debugCachedResult;
+
+    // Use a separate cache for debug-only intrinisic size checks.
     assert(() {
-      // we don't want the checked-mode intrinsic tests to affect
-      // who gets marked dirty, etc.
-      if (RenderObject.debugCheckingIntrinsics)
-        shouldCache = false;
+      if (RenderObject.debugCheckingIntrinsics) {
+        _debugCachedIntrinsicDimensionsForChecks[this] ??= <_IntrinsicDimensionsCacheEntry, double>{};
+
+        debugCachedResult = _debugCachedIntrinsicDimensionsForChecks[this]!.putIfAbsent(
+          _IntrinsicDimensionsCacheEntry(dimension, argument),
+          () => computer(argument),
+        );
+      }
       return true;
     }());
-    if (shouldCache) {
-      _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
-      return _cachedIntrinsicDimensions!.putIfAbsent(
-        _IntrinsicDimensionsCacheEntry(dimension, argument),
-        () => computer(argument),
-      );
+    if (debugCachedResult != null) {
+      return debugCachedResult!;
     }
-    return computer(argument);
+
+    _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
+    return _cachedIntrinsicDimensions!.putIfAbsent(
+      _IntrinsicDimensionsCacheEntry(dimension, argument),
+      () => computer(argument),
+    );
   }
 
   /// Returns the minimum width that this box could be without failing to
@@ -2215,6 +2224,8 @@ abstract class RenderBox extends RenderObject {
         ]);
       }
       if (debugCheckIntrinsicSizes) {
+        _debugCachedIntrinsicDimensionsForChecks.clear();
+
         // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
