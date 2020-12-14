@@ -125,7 +125,7 @@ void SceneUpdateContext::Reset(const SkISize& frame_size,
 
   // Adjust scene scaling to match the device pixel ratio.
   const float inv_dpr = 1.0f / device_pixel_ratio;
-  metrics_node_.SetScale(inv_dpr, inv_dpr, 1.0f);
+  layer_tree_node_.SetScale(inv_dpr, inv_dpr, 1.0f);
 
   // Set up the input interceptor at the top of the scene, if applicable.
   if (input_interceptor_node_.has_value()) {
