@@ -756,12 +756,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
     }
 
-    // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
     );
+    // Update the text selection delegate so that the engine knows what we did.
+    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
   }
 
   // Handles shortcut functionality including cut, copy, paste and select all
@@ -778,39 +778,44 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
+    TextEditingValue? value;
     if (key == LogicalKeyboardKey.keyX && !_readOnly) {
       if (!selection.isCollapsed) {
         Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-        textSelectionDelegate.textEditingValue = TextEditingValue(
+        value = TextEditingValue(
           text: selection.textBefore(text) + selection.textAfter(text),
           selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
         );
       }
-      return;
-    }
-    if (key == LogicalKeyboardKey.keyV && !_readOnly) {
+    } else if (key == LogicalKeyboardKey.keyV && !_readOnly) {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
-        textSelectionDelegate.textEditingValue = TextEditingValue(
+        value = TextEditingValue(
           text: selection.textBefore(text) + data.text! + selection.textAfter(text),
           selection: TextSelection.collapsed(
             offset: math.min(selection.start, selection.end) + data.text!.length,
           ),
         );
       }
-      return;
-    }
-    if (key == LogicalKeyboardKey.keyA) {
-      _handleSelectionChange(
-        selection.copyWith(
+    } else if (key == LogicalKeyboardKey.keyA) {
+      value = TextEditingValue(
+        text: text,
+        selection: selection.copyWith(
           baseOffset: 0,
           extentOffset: textSelectionDelegate.textEditingValue.text.length,
         ),
-        SelectionChangedCause.keyboard,
       );
-      return;
+    }
+    if (value != null) {
+      if (textSelectionDelegate.textEditingValue.selection != value.selection) {
+        _handleSelectionChange(
+          value.selection,
+          SelectionChangedCause.keyboard,
+        );
+      }
+      textSelectionDelegate.textEditingValue = value;
     }
   }
 
@@ -836,9 +841,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         textAfter = textAfter.substring(deleteCount);
       }
     }
+    final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
+    if (selection != newSelection) {
+      _handleSelectionChange(
+        newSelection,
+        SelectionChangedCause.keyboard,
+      );
+    }
     textSelectionDelegate.textEditingValue = TextEditingValue(
       text: textBefore + textAfter,
-      selection: TextSelection.collapsed(offset: cursorPosition),
+      selection: newSelection,
     );
   }
 

@@ -1818,7 +1818,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// Subclasses that return true must not change the dimensions of this render
   /// object in [performLayout]. Instead, that work should be done by
-  /// [performResize].
+  /// [performResize] or - for subclasses of [RenderBox] - in
+  /// [RenderBox.computeDryLayout].
   @protected
   bool get sizedByParent => false;
 

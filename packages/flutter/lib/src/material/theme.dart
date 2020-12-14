@@ -40,7 +40,6 @@ class Theme extends StatelessWidget {
   const Theme({
     Key? key,
     required this.data,
-    this.isMaterialAppTheme = false,
     required this.child,
   }) : assert(child != null),
        assert(data != null),
@@ -48,17 +47,6 @@ class Theme extends StatelessWidget {
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
-
-  /// True if this theme was installed by the [MaterialApp].
-  ///
-  /// When an app uses the [Navigator] to push a route, the route's widgets
-  /// will only inherit from the app's theme, even though the widget that
-  /// triggered the push may inherit from a theme that "shadows" the app's
-  /// theme because it's deeper in the widget tree. Apps can find the shadowing
-  /// theme with `Theme.of(context, shadowThemeOnly: true)` and pass it along
-  /// to the class that creates a route's widgets. Material widgets that push
-  /// routes, like [PopupMenuButton] and [DropdownButton], do this.
-  final bool isMaterialAppTheme;
 
   /// The widget below this widget in the tree.
   ///
@@ -209,7 +197,6 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   const AnimatedTheme({
     Key? key,
     required this.data,
-    this.isMaterialAppTheme = false,
     Curve curve = Curves.linear,
     Duration duration = kThemeAnimationDuration,
     VoidCallback? onEnd,
@@ -220,9 +207,6 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
-
-  /// True if this theme was created by the [MaterialApp]. See [Theme.isMaterialAppTheme].
-  final bool isMaterialAppTheme;
 
   /// The widget below this widget in the tree.
   ///
@@ -245,7 +229,6 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      isMaterialAppTheme: widget.isMaterialAppTheme,
       child: widget.child,
       data: _data!.evaluate(animation!),
     );

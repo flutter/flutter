@@ -686,7 +686,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
         if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistry);',
+          '  registerPlugins(webPluginRegistrar);',
         '  await ui.webOnlyInitializePlatform();',
         '  if (entrypoint.main is _UnaryFunction) {',
         '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
@@ -748,6 +748,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool allowExistingDdsInstance = false,
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher.connectedInstance;

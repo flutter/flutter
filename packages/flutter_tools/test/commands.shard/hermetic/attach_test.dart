@@ -179,7 +179,7 @@ void main() {
         const String outputDill = '/tmp/output.dill';
 
         final MockHotRunner mockHotRunner = MockHotRunner();
-        when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
+        when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter'), allowExistingDdsInstance: true))
             .thenAnswer((_) async => 0);
         when(mockHotRunner.exited).thenReturn(false);
         when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
@@ -311,7 +311,7 @@ void main() {
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
         .thenAnswer((_) async {});
-      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
+      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter'), allowExistingDdsInstance: true))
         .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
         any,
@@ -395,7 +395,7 @@ void main() {
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
         .thenAnswer((_) async {});
-      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
+      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter'), allowExistingDdsInstance: true))
         .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
         any,

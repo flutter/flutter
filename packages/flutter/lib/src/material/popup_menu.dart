@@ -21,6 +21,7 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
 // dynamic _selection;
