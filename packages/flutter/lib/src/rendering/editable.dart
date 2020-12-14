@@ -678,6 +678,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
         }
       } else {
+        // The directional arrows move the TextSelection.extentOffset, while the
+        // base remains fixed.
         if (rightArrow && newSelection.extentOffset < _plainText.length) {
           int nextExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
@@ -1849,6 +1851,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// Select text between the global positions [from] and [to].
+  ///
+  /// [from] corresponds to the [TextSelection.baseOffset], and [to] corresponds
+  /// to the [TextSelection.extentOffset].
   void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     assert(cause != null);
     assert(from != null);
@@ -1861,12 +1866,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ? null
       : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
 
-    int baseOffset = fromPosition.offset;
-    int extentOffset = fromPosition.offset;
-    if (toPosition != null) {
-      baseOffset = math.min(fromPosition.offset, toPosition.offset);
-      extentOffset = math.max(fromPosition.offset, toPosition.offset);
-    }
+    final int baseOffset = fromPosition.offset;
+    final int extentOffset = toPosition?.offset ?? fromPosition.offset;
 
     final TextSelection newSelection = TextSelection(
       baseOffset: baseOffset,
