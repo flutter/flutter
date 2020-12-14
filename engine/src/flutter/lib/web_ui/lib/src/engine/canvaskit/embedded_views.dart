@@ -262,10 +262,12 @@ class HtmlViewEmbedder {
             html.Element pathDefs =
                 _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
-            html.Element newClipPath =
-                html.Element.html('<clipPath id="svgClip$_clipPathCount">'
-                    '<path d="${path.toSvgString()}">'
-                    '</path></clipPath>');
+            html.Node newClipPath = html.DocumentFragment.svg(
+              '<clipPath id="svgClip$_clipPathCount">'
+              '<path d="${path.toSvgString()}">'
+              '</path></clipPath>',
+              treeSanitizer: _NullTreeSanitizer(),
+            );
             pathDefs.append(newClipPath);
             clipView.style.clipPath = 'url(#svgClip$_clipPathCount)';
           } else if (mutator.path != null) {
@@ -274,10 +276,12 @@ class HtmlViewEmbedder {
             html.Element pathDefs =
                 _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
-            html.Element newClipPath =
-                html.Element.html('<clipPath id="svgClip$_clipPathCount">'
-                    '<path d="${path.toSvgString()}">'
-                    '</path></clipPath>');
+            html.Node newClipPath = html.DocumentFragment.svg(
+              '<clipPath id="svgClip$_clipPathCount">'
+              '<path d="${path.toSvgString()}">'
+              '</path></clipPath>',
+              treeSanitizer: _NullTreeSanitizer(),
+            );
             pathDefs.append(newClipPath);
             clipView.style.clipPath = 'url(#svgClip$_clipPathCount)';
           }
@@ -324,7 +328,7 @@ class HtmlViewEmbedder {
       return;
     }
     _svgPathDefs = html.Element.html(
-      '$kSvgResourceHeader><defs id="sk_path_defs"></defs></svg>',
+      '$kSvgResourceHeader<defs id="sk_path_defs"></defs></svg>',
       treeSanitizer: _NullTreeSanitizer(),
     );
     skiaSceneHost!.append(_svgPathDefs!);
