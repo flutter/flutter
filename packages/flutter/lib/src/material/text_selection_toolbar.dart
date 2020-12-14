@@ -19,9 +19,13 @@ import 'material_localizations.dart';
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
 
-// The type for a Function that builds a toolbar's container with the given
-// child.
-typedef _ToolbarBuilder = Widget Function(BuildContext context, Widget child);
+/// The type for a Function that builds a toolbar's container with the given
+/// child.
+///
+/// See also:
+///
+///   * [TextSelectionToolbar.toolbarBuilder], which is of this type.
+typedef ToolbarBuilder = Widget Function(BuildContext context, Widget child);
 
 /// A fully-functional Material-style text selection toolbar.
 ///
@@ -38,7 +42,8 @@ class TextSelectionToolbar extends StatelessWidget {
     required this.anchorBelow,
     this.toolbarBuilder = _defaultToolbarBuilder,
     required this.children,
-  }) : super(key: key);
+  }) : assert(children.length > 0),
+       super(key: key);
 
   /// The focal point above which the toolbar attempts to position itself.
   ///
@@ -54,6 +59,8 @@ class TextSelectionToolbar extends StatelessWidget {
   ///
   /// Typically these are buttons.
   ///
+  /// Must not be empty.
+  ///
   /// See also:
   ///   * [TextSelectionToolbarTextButton], which builds a default Material-
   ///     style text selection toolbar text button.
@@ -63,7 +70,7 @@ class TextSelectionToolbar extends StatelessWidget {
   ///
   /// Useful for customizing the high-level background of the toolbar. The given
   /// child Widget will contain all of the [children].
-  final _ToolbarBuilder toolbarBuilder;
+  final ToolbarBuilder toolbarBuilder;
 
   // Build the default Android Material text selection menu toolbar.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
@@ -166,7 +173,7 @@ class _TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_TextSelectionToolbarLayoutDelegate oldDelegate) {
-    return anchor != oldDelegate.anchor;
+    return anchor != oldDelegate.anchor || fitsAbove != oldDelegate.fitsAbove;
   }
 }
 
@@ -189,7 +196,7 @@ class _TextSelectionToolbarOverflowable extends StatefulWidget {
 
   // Builds the toolbar that will be populated with the children and fit inside
   // of the layout that adjusts to overflow.
-  final _ToolbarBuilder toolbarBuilder;
+  final ToolbarBuilder toolbarBuilder;
 
   @override
   _TextSelectionToolbarOverflowableState createState() => _TextSelectionToolbarOverflowableState();
@@ -298,7 +305,9 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
 
   @override
   void updateRenderObject(BuildContext context, _TextSelectionToolbarTrailingEdgeAlignRenderBox renderObject) {
-    renderObject.overflowOpen = overflowOpen;
+    renderObject
+        ..overflowOpen = overflowOpen
+        ..textDirection = textDirection;
   }
 }
 
