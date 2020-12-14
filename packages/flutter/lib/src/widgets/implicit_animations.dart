@@ -19,6 +19,7 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // class MyWidget extends ImplicitlyAnimatedWidget {
 //   MyWidget() : super(duration: const Duration(seconds: 1));
 //   final Color targetColor = Colors.black;
@@ -297,7 +298,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -317,7 +318,7 @@ typedef TweenConstructor<T extends Object> = Tween<T> Function(T targetValue);
 
 /// Signature for callbacks passed to [ImplicitlyAnimatedWidgetState.forEachTween].
 ///
-/// {@template flutter.widgets.implicit_animations.tweenVisitorArguments}
+/// {@template flutter.widgets.TweenVisitor.arguments}
 /// The `tween` argument should contain the current tween value. This will
 /// initially be null when the state is first initialized.
 ///
@@ -448,7 +449,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// result back into the member variable. The arguments to `visitor` are as
   /// follows:
   ///
-  /// {@macro flutter.widgets.implicit_animations.tweenVisitorArguments}
+  /// {@macro flutter.widgets.TweenVisitor.arguments}
   ///
   /// ### When this method will be called
   ///
@@ -574,7 +575,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// The following example (depicted above) transitions an AnimatedContainer
 /// between two states. It adjusts the `height`, `width`, `color`, and
@@ -664,7 +665,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Align the [child] within the container.
@@ -813,6 +814,47 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+///
+/// The following code implements the [AnimatedPadding] widget, using a [curve] of
+/// [Curves.easeInOut].
+///
+/// ```dart
+/// double padValue = 0.0;
+/// _updatePadding(double value) {
+///   setState(() {
+///     padValue = value;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: [
+///       AnimatedPadding(
+///         padding: EdgeInsets.all(padValue),
+///         duration: const Duration(seconds: 2),
+///         curve: Curves.easeInOut,
+///         child: Container(
+///           width: MediaQuery.of(context).size.width,
+///           height: MediaQuery.of(context).size.height / 5,
+///           color: Colors.blue,
+///         ),
+///       ),
+///       Text('Padding: $padValue'),
+///       ElevatedButton(
+///         child: Text('Change padding'),
+///         onPressed: () {
+///           _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
+///         }
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
@@ -840,7 +882,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -893,7 +935,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// The following code implements the [AnimatedAlign] widget, using a [curve] of
 /// [Curves.fastOutSlowIn].
@@ -974,7 +1016,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// If non-null, sets its height to the child's height multiplied by this factor.
@@ -1058,6 +1100,47 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+///
+/// The following example transitions an AnimatedPositioned
+/// between two states. It adjusts the `height`, `width`, and
+/// [Positioned] properties when tapped.
+///
+/// ```dart
+/// bool selected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Container(
+///     width: 200,
+///     height: 350,
+///     child: Stack(
+///       children: [
+///         AnimatedPositioned(
+///           width: selected ? 200.0 : 50.0,
+///           height: selected ? 50.0 : 200.0,
+///           top: selected ? 50.0 : 150.0,
+///           duration: Duration(seconds: 2),
+///           curve: Curves.fastOutSlowIn,
+///           child: GestureDetector(
+///             onTap: () {
+///               setState(() {
+///                 selected = !selected;
+///               });
+///             },
+///             child: Container(
+///               color: Colors.blue,
+///               child: Center(child: Text('Tap me')),
+///             ),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+///```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedPositionedDirectional], which adapts to the ambient
@@ -1108,7 +1191,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.
@@ -1243,7 +1326,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The offset of the child's start edge from the start of the stack.
@@ -1307,7 +1390,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     return Positioned.directional(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       child: widget.child,
       start: _start?.evaluate(animation!),
       top: _top?.evaluate(animation!),
@@ -1404,7 +1487,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The target opacity.
@@ -1469,7 +1552,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state_no_null_safety}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
 /// [FloatingActionButton]. Pressing the button animates the lists' opacity.
 ///
@@ -1640,7 +1723,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The target text style.
@@ -1772,7 +1855,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The type of shape.
@@ -1780,7 +1863,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// This property is not animated.
   final BoxShape shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;

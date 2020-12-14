@@ -50,9 +50,9 @@ export 'package:flutter/painting.dart' show
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? size }) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
-    locale: Localizations.localeOf(context, nullOk: true),
-    textDirection: Directionality.of(context),
+    devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
+    locale: Localizations.maybeLocaleOf(context),
+    textDirection: Directionality.maybeOf(context),
     size: size,
     platform: defaultTargetPlatform,
   );
@@ -726,7 +726,7 @@ class Image extends StatefulWidget {
   /// be passed as the `child` argument to the [loadingBuilder]. For example,
   /// consider the following builders used in conjunction:
   ///
-  /// {@template flutter.widgets.image.chainedBuildersExample}
+  /// {@template flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   /// ```dart
   /// Image(
   ///   ...
@@ -754,7 +754,7 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
   ///
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
@@ -818,9 +818,9 @@ class Image extends StatefulWidget {
   /// builder will contain the _result_ of the [frameBuilder]. For example,
   /// consider the following builders used in conjunction:
   ///
-  /// {@macro flutter.widgets.image.chainedBuildersExample}
+  /// {@macro flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
   ///
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
@@ -865,7 +865,7 @@ class Image extends StatefulWidget {
   /// [FlutterError.onError]. If it is provided, the caller should either handle
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
   ///
   /// The following sample uses [errorBuilder] to show a '😢' in place of the
   /// image that fails to load, and prints the error to the console.
@@ -1145,7 +1145,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _updateInvertColors() {
-    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
+    _invertColors = MediaQuery.maybeOf(context)?.invertColors
         ?? SemanticsBinding.instance!.accessibilityFeatures.invertColors;
   }
 

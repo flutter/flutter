@@ -10,6 +10,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
@@ -40,7 +41,7 @@ import 'theme_data.dart';
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// ![RadioListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile.png)
 ///
@@ -92,7 +93,7 @@ import 'theme_data.dart';
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// ![Radio list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_semantics.png)
 ///
@@ -196,7 +197,7 @@ import 'theme_data.dart';
 /// combining [Radio] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// ![Custom radio list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_custom.png)
 ///
@@ -320,7 +321,9 @@ class RadioListTile<T> extends StatelessWidget {
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
     this.contentPadding,
-
+    this.shape,
+    this.tileColor,
+    this.selectedTileColor,
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -384,7 +387,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// The default is false.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
   /// This example shows how to enable deselecting a radio button by setting the
   /// [toggleable] attribute.
   ///
@@ -483,6 +486,16 @@ class RadioListTile<T> extends StatelessWidget {
   /// To control this value, set [value] and [groupValue] appropriately.
   bool get checked => value == groupValue;
 
+  /// If specified, [shape] defines the shape of the [RadioListTile]'s [InkWell] border.
+  final ShapeBorder? shape;
+
+  /// If specified, defines the background color for `RadioListTile` when
+  /// [RadioListTile.selected] is false.
+  final Color? tileColor;
+
+  /// If non-null, defines the background color when [RadioListTile.selected] is true.
+  final Color? selectedTileColor;
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Radio<T>(
@@ -508,7 +521,7 @@ class RadioListTile<T> extends StatelessWidget {
     }
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context)!.accentColor,
+        selectedColor: activeColor ?? Theme.of(context).accentColor,
         child: ListTile(
           leading: leading,
           title: title,
@@ -517,6 +530,9 @@ class RadioListTile<T> extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
+          shape: shape,
+          tileColor: tileColor,
+          selectedTileColor: selectedTileColor,
           onTap: onChanged != null ? () {
             if (toggleable && checked) {
               onChanged!(null);

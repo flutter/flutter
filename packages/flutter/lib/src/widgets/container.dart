@@ -11,6 +11,7 @@ import 'framework.dart';
 import 'image.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 /// A widget that paints a [Decoration] either before or after its child paints.
@@ -290,7 +291,7 @@ class Container extends StatelessWidget {
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Align the [child] within the container.
@@ -406,7 +407,7 @@ class Container extends StatelessWidget {
       assert(decoration != null);
       current = ClipPath(
         clipper: _DecorationClipper(
-          textDirection: Directionality.of(context),
+          textDirection: Directionality.maybeOf(context),
           decoration: decoration!,
         ),
         clipBehavior: clipBehavior,

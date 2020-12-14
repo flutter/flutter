@@ -991,8 +991,8 @@ void main() {
                 data: MediaQueryData(textScaleFactor: textScaleFactor),
                 child: Material(
                   child: Theme(
-                    data: Theme.of(context)!.copyWith(
-                      sliderTheme: Theme.of(context)!.sliderTheme.copyWith(showValueIndicator: show),
+                    data: Theme.of(context).copyWith(
+                      sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
                     ),
                     child: Center(
                       child: OverflowBox(
@@ -2086,12 +2086,12 @@ void main() {
                   ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
-                      Navigator.of(context)!.pushReplacement(
+                      Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context)!.pop(); },
+                              onPressed: () { Navigator.of(context).pop(); },
                             );
                           },
                         ),

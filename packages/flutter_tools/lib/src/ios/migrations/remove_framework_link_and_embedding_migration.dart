@@ -5,15 +5,15 @@
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
+import '../../base/project_migrator.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../../reporting/reporting.dart';
-import 'ios_migrator.dart';
 
 // Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
 // This caused issues switching between a real device and simulator due to architecture mismatch.
 // Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
-class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
+class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveFrameworkLinkAndEmbeddingMigration(
     IosProject project,
     Logger logger,
@@ -91,9 +91,9 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
     }
 
     // Embed and thin frameworks in a script instead of using Xcode's link / embed build phases.
-    const String thinBinaryScript = 'xcode_backend.sh\\" thin';
+    const String thinBinaryScript = r'xcode_backend.sh\" thin';
     if (line.contains(thinBinaryScript) && !line.contains(' embed')) {
-      return line.replaceFirst(thinBinaryScript, 'xcode_backend.sh\\" embed_and_thin');
+      return line.replaceFirst(thinBinaryScript, r'xcode_backend.sh\" embed_and_thin');
     }
 
     if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {

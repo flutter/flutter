@@ -11,7 +11,7 @@ import 'framework.dart';
 /// Animated widget that automatically transitions its size over a given
 /// duration whenever the given child's size changes.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state_no_null_safety}
 /// This example makes a [Container] react to being touched, causing the child
 /// of the [AnimatedSize] widget, here a [FlutterLogo], to animate.
 ///
@@ -103,7 +103,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// The [TickerProvider] for this widget.
   final TickerProvider vsync;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
@@ -116,7 +116,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
       reverseDuration: reverseDuration,
       curve: curve,
       vsync: vsync,
-      textDirection: Directionality.of(context),
+      textDirection: Directionality.maybeOf(context),
       clipBehavior: clipBehavior,
     );
   }
@@ -129,7 +129,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
       ..reverseDuration = reverseDuration
       ..curve = curve
       ..vsync = vsync
-      ..textDirection = Directionality.of(context)
+      ..textDirection = Directionality.maybeOf(context)
       ..clipBehavior = clipBehavior;
   }
 

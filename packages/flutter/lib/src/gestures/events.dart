@@ -229,7 +229,8 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 /// See also:
 ///
-///  * [Window.devicePixelRatio], which defines the device's current resolution.
+///  * [dart:ui.FlutterView.devicePixelRatio], which defines the device's
+///    current resolution.
 ///  * [Listener], a widget that calls callbacks in response to common pointer
 ///    events.
 @immutable
@@ -2111,7 +2112,7 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
   }
 }
 
-/// Determine the approriate hit slop pixels based on the [kind] of pointer.
+/// Determine the appropriate hit slop pixels based on the [kind] of pointer.
 double computeHitSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
@@ -2124,7 +2125,7 @@ double computeHitSlop(PointerDeviceKind kind) {
   }
 }
 
-/// Determine the approriate pan slop pixels based on the [kind] of pointer.
+/// Determine the appropriate pan slop pixels based on the [kind] of pointer.
 double computePanSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
@@ -2137,7 +2138,7 @@ double computePanSlop(PointerDeviceKind kind) {
   }
 }
 
-/// Determine the approriate scale slop pixels based on the [kind] of pointer.
+/// Determine the appropriate scale slop pixels based on the [kind] of pointer.
 double computeScaleSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:

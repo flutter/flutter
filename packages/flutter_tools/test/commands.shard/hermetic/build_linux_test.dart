@@ -26,7 +26,8 @@ const String _kTestFlutterRoot = '/flutter';
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{
-    'FLUTTER_ROOT': _kTestFlutterRoot
+    'FLUTTER_ROOT': _kTestFlutterRoot,
+    'HOME': '/',
   }
 );
 final Platform notLinuxPlatform = FakePlatform(
@@ -208,6 +209,55 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
+  testUsingContext('Linux build extracts errors from stdout', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+
+    // This contains a mix of routine build output and various types of errors
+    // (Dart error, compile error, link error), edited down for compactness.
+    const String stdout = r'''
+ninja: Entering directory `build/linux/release'
+[1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
+lib/main.dart:4:3: Error: Method not found: 'foo'.
+[2/6] Building CXX object CMakeFiles/foo.dir/main.cc.o
+/foo/linux/main.cc:6:2: error: expected ';' after class
+/foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
+/foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
+/foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+[3/6] Building CXX object CMakeFiles/foo_bar.dir/flutter/generated_plugin_registrant.cc.o
+[4/6] Building CXX object CMakeFiles/foo_bar.dir/my_application.cc.o
+[5/6] Linking CXX executable intermediates_do_not_run/foo_bar
+main.cc:(.text+0x13): undefined reference to `Foo::bar()'
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+''';
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release',
+        stdout: stdout,
+      ),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+    // Just the warnings and errors should be surfaced.
+    expect(testLogger.errorText, r'''
+lib/main.dart:4:3: Error: Method not found: 'foo'.
+/foo/linux/main.cc:6:2: error: expected ';' after class
+/foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
+/foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
+/foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+''');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
   testUsingContext('Linux verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
@@ -312,17 +362,17 @@ void main() {
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-      '  "DART_DEFINES=\\"foo.bar%3D2,fizz.far%3D3\\""',
-      '  "DART_OBFUSCATION=\\"true\\""',
-      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
-      '  "SPLIT_DEBUG_INFO=\\"foo/\\""',
-      '  "TRACK_WIDGET_CREATION=\\"true\\""',
-      '  "TREE_SHAKE_ICONS=\\"true\\""',
+      r'  "DART_DEFINES=\"foo.bar%3D2,fizz.far%3D3\""',
+      r'  "DART_OBFUSCATION=\"true\""',
+      r'  "EXTRA_FRONT_END_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
+      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
+      r'  "SPLIT_DEBUG_INFO=\"foo/\""',
+      r'  "TRACK_WIDGET_CREATION=\"true\""',
+      r'  "TREE_SHAKE_ICONS=\"true\""',
       '  "FLUTTER_ROOT=\\"$_kTestFlutterRoot\\""',
       '  "PROJECT_DIR=\\"${fileSystem.currentDirectory.path}\\""',
-      '  "FLUTTER_TARGET=\\"lib/other.dart\\""',
-      '  "BUNDLE_SKSL_PATH=\\"foo/bar.sksl.json\\""',
+      r'  "FLUTTER_TARGET=\"lib/other.dart\""',
+      r'  "BUNDLE_SKSL_PATH=\"foo/bar.sksl.json\""',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

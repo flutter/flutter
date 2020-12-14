@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
+import 'dart:convert' show Encoding, json;
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -15,6 +15,17 @@ import 'package:meta/meta.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
+typedef ProcessRunSync = ProcessResult Function(
+  String,
+  List<String>, {
+  Map<String, String> environment,
+  bool includeParentEnvironment,
+  bool runInShell,
+  Encoding stderrEncoding,
+  Encoding stdoutEncoding,
+  String workingDirectory,
+});
+
 /// Class for test runner to interact with Flutter's infrastructure service, Cocoon.
 ///
 /// Cocoon assigns bots to run these devicelab tasks on real devices.
@@ -24,11 +35,13 @@ class Cocoon {
     String serviceAccountTokenPath,
     @visibleForTesting Client httpClient,
     @visibleForTesting FileSystem filesystem,
+    @visibleForTesting this.processRunSync = Process.runSync,
   }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath, httpClient: httpClient, filesystem: filesystem);
-
 
   /// Client to make http requests to Cocoon.
   final AuthenticatedCocoonClient _httpClient;
+
+  final ProcessRunSync processRunSync;
 
   /// Url used to send results to.
   static const String baseCocoonApiUrl = 'https://flutter-dashboard.appspot.com/api';
@@ -40,17 +53,20 @@ class Cocoon {
 
   /// Parse the local repo for the current running commit.
   String _readCommitSha() {
-    final ProcessResult result = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+    final ProcessResult result = processRunSync('git', <String>['rev-parse', 'HEAD']);
     if (result.exitCode != 0) {
-      throw Exception(result.stderr);
+      throw CocoonException(result.stderr as String);
     }
 
-    _commitSha = result.stdout as String;
-    return _commitSha;
+    return _commitSha = result.stdout as String;
   }
 
   /// Send [TaskResult] to Cocoon.
-  Future<void> sendTaskResult({String taskName, TaskResult result}) async {
+  Future<void> sendTaskResult({@required String builderName, @required TaskResult result, @required String gitBranch}) async {
+    assert(builderName != null);
+    assert(gitBranch != null);
+    assert(result != null);
+
     // Skip logging on test runs
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((LogRecord rec) {
@@ -58,8 +74,9 @@ class Cocoon {
     });
 
     final Map<String, dynamic> status = <String, dynamic>{
+      'CommitBranch': gitBranch,
       'CommitSha': commitSha,
-      'TaskName': taskName,
+      'BuilderName': builderName,
       'NewStatus': result.succeeded ? 'Succeeded' : 'Failed',
     };
 
@@ -149,4 +166,14 @@ class AuthenticatedCocoonClient extends BaseClient {
     }
     return response;
   }
+}
+
+class CocoonException implements Exception {
+  CocoonException(this.message) : assert(message != null);
+
+  /// The message to show to the issuer to explain the error.
+  final String message;
+
+  @override
+  String toString() => 'CocoonException: $message';
 }

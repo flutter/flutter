@@ -34,7 +34,7 @@ import 'ticker_provider.dart';
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 /// This example shows a simple Container that can be panned and zoomed.
 ///
 /// ```dart
@@ -140,9 +140,18 @@ class InteractiveViewer extends StatefulWidget {
   /// If set to false, then the child will be given infinite constraints. This
   /// is often useful when a child should be bigger than the InteractiveViewer.
   ///
+  /// For example, for a child which is bigger than the viewport but can be
+  /// panned to reveal parts that were initially offscreen, [constrained] must
+  /// be set to false to allow it to size itself properly. If [constrained] is
+  /// true and the child can only size itself to the viewport, then areas
+  /// initially outside of the viewport will not be able to receive user
+  /// interaction events. If experiencing regions of the child that are not
+  /// receptive to user gestures, make sure [constrained] is false and the child
+  /// is sized properly.
+  ///
   /// Defaults to true.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
   /// This example shows how to create a pannable table. Because the table is
   /// larger than the entire screen, setting `constrained` to false is necessary
   /// to allow it to be drawn to its full size. The parts of the table that
@@ -218,6 +227,11 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// The scale will be clamped between this and [maxScale] inclusively.
   ///
+  /// Scale is also affected by [boundaryMargin]. If the scale would result in
+  /// viewing beyond the boundary, then it will not be allowed. By default,
+  /// boundaryMargin is EdgeInsets.zero, so scaling below 1.0 will not be
+  /// allowed in most cases without first increasing the boundaryMargin.
+  ///
   /// Defaults to 0.8.
   ///
   /// Cannot be null, and must be a finite number greater than zero and less
@@ -229,7 +243,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction.
   ///
-  /// {@template flutter.widgets.interactiveViewer.onInteraction}
+  /// {@template flutter.widgets.InteractiveViewer.onInteractionEnd}
   /// Will be called even if the interaction is disabled with
   /// [panEnabled] or [scaleEnabled].
   ///
@@ -251,7 +265,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will not have
   /// changed due to this interaction.
   ///
-  /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
   /// The coordinates provided in the details' `focalPoint` and
   /// `localFocalPoint` are normal Flutter event coordinates, not
@@ -270,7 +284,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction.
   ///
-  /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
   /// The coordinates provided in the details' `focalPoint` and
   /// `localFocalPoint` are normal Flutter event coordinates, not
@@ -291,7 +305,7 @@ class InteractiveViewer extends StatefulWidget {
   /// listeners are notified. If the value is set, InteractiveViewer will update
   /// to respect the new value.
   ///
-  /// {@tool dartpad --template=stateful_widget_material_ticker}
+  /// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
   /// This example shows how transformationController can be used to animate the
   /// transformation back to its starting position.
   ///

@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
@@ -84,7 +85,7 @@ import 'constants.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 ///
 /// This example shows how to listen to page updates in [TabBar] and [TabBarView]
 /// when using [DefaultTabController].
@@ -395,7 +396,7 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// Typically a [Scaffold] whose [AppBar] includes a [TabBar].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The closest instance of this class that encloses the given context.

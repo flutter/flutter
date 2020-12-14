@@ -32,7 +32,6 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     });
 
     setUp(() {
@@ -97,18 +96,6 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
-      testUsingContext('throw tool exit if the version file cannot be written', () async {
-        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
-        when(version.ensureVersionFile()).thenThrow(const FileSystemException());
-
-        expect(() async => await runner.run(<String>['dummy']), throwsToolExit());
-
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => platform,
-      }, initializeFlutterRoot: false);
-
     testUsingContext('Doesnt crash on invalid .packages file', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages')
@@ -139,9 +126,9 @@ void main() {
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync('git fetch https://github.com/flutter/flutter.git --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git tag --points-at HEAD'.split(' '),
+        when(processManager.runSync('git tag --points-at random'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git describe --match *.*.* --first-parent --long --tags'.split(' '),
+        when(processManager.runSync('git describe --match *.*.* --long --tags random'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);

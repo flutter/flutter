@@ -176,7 +176,7 @@ void main() {
 
   testWidgets('Card clipBehavior property defers to theme when null', (WidgetTester tester) async {
     await tester.pumpWidget(Builder(builder: (BuildContext context) {
-      final ThemeData themeData = Theme.of(context)!;
+      final ThemeData themeData = Theme.of(context);
       return Theme(
         data: themeData.copyWith(
           cardTheme: themeData.cardTheme.copyWith(

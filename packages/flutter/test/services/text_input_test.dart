@@ -199,7 +199,7 @@ void main() {
         'args': <dynamic>[
           1,
           jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : \"abcdefg\"}}')
+              '{"action": "actionCommand", "data": {"input_context" : "abcdefg"}}')
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -226,7 +226,7 @@ void main() {
         'args': <dynamic>[
           1,
           jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : 0.5}}')
+              '{"action": "actionCommand", "data": {"input_context" : 0.5}}')
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -254,7 +254,7 @@ void main() {
         'args': <dynamic>[
           1,
           jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : ["abc", "efg"]}}')
+              '{"action": "actionCommand", "data": {"input_context" : ["abc", "efg"]}}')
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -283,7 +283,7 @@ void main() {
         'args': <dynamic>[
           1,
           jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : "abc"}}')
+              '{"action": "actionCommand", "data": {"input_context" : "abc"}}')
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
@@ -312,7 +312,7 @@ void main() {
         'args': <dynamic>[
           1,
           jsonDecode(
-              '{"action": "actionCommand", "data": {\"input_context\" : [0.5, 0.8]}}')
+              '{"action": "actionCommand", "data": {"input_context" : [0.5, 0.8]}}')
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });

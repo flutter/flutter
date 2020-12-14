@@ -96,7 +96,7 @@ Future<void> buildMacOS({
       else
         '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      ...environmentVariablesAsXcodeBuildSettings(globals.platform)
+      'EXCLUDED_ARCHS=arm64', // TODO(jmagman): Allow ARM https://github.com/flutter/flutter/issues/69221
     ],
     trace: true,
     stdoutErrorMatcher: verboseLogging ? null : _anyOutput,
@@ -132,7 +132,9 @@ Future<void> buildMacOS({
       excludePath: 'Versions', // Avoid double counting caused by symlinks
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(getBuildDirectory()), 'macos-code-size-analysis', 'json',
+      globals.fs
+        .directory(globals.fsUtils.homeDirPath)
+        .childDirectory('.flutter-devtools'), 'macos-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
     globals.printStatus(

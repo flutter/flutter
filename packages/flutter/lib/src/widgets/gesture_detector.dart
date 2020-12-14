@@ -48,6 +48,7 @@ export 'package:flutter/gestures.dart' show
 export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 
 // Examples can assume:
+// // @dart = 2.9
 // bool _lights;
 // void setState(VoidCallback fn) { }
 // String _last;
@@ -297,7 +298,7 @@ class GestureDetector extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// A pointer that might cause a tap with a primary button has contacted the
@@ -991,7 +992,7 @@ class RawGestureDetector extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The gestures that this widget will attempt to recognize.

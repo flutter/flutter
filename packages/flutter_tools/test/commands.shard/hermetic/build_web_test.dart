@@ -54,8 +54,8 @@ void main() {
       fileSystem.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
-      false,
       null,
+      true,
       true,
     ), throwsToolExit());
   }, overrides: <Type, Generator>{

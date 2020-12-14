@@ -57,7 +57,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// Outline buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
 ///
 /// Here is an example of a basic [OutlineButton].
 ///
@@ -446,7 +446,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   Color _getFillColor() {
     if (widget.highlightElevation == null || widget.highlightElevation == 0.0)
       return Colors.transparent;
-    final Color color = widget.color ?? Theme.of(context)!.canvasColor;
+    final Color color = widget.color ?? Theme.of(context).canvasColor;
     final Tween<Color?> colorTween = ColorTween(
       begin: color.withAlpha(0x00),
       end: color.withAlpha(0xFF),
@@ -470,7 +470,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide!;
 
-    final Color themeColor = Theme.of(context)!.colorScheme.onSurface.withOpacity(0.12);
+    final Color themeColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
     return BorderSide(
       color: _outlineColor ?? themeColor,
@@ -489,7 +489,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
 
     return AnimatedBuilder(
       animation: _controller,

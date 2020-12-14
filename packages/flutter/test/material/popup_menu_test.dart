@@ -4,12 +4,14 @@
 
 import 'dart:ui' show window, SemanticsFlag;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 void main() {
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
@@ -123,7 +125,7 @@ void main() {
     await tester.tap(find.byKey(withCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    Navigator.of(popupContext)!.pop();
+    Navigator.of(popupContext).pop();
     await tester.pump();
     expect(cancels, equals(2));
   });
@@ -138,7 +140,7 @@ void main() {
       return MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: Material(
@@ -189,7 +191,7 @@ void main() {
     await tester.pumpWidget(buildApp(directional: true));
 
     // Try to bring up the popup menu and select the first item from it
-    Focus.of(popupButtonKey.currentContext!)!.requestFocus();
+    Focus.of(popupButtonKey.currentContext!).requestFocus();
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
@@ -238,10 +240,10 @@ void main() {
         ),
       ),
     );
-    Focus.of(childKey.currentContext!)!.requestFocus();
+    Focus.of(childKey.currentContext!).requestFocus();
     await tester.pump();
 
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(itemBuilderCalled, isFalse);
     expect(onSelectedCalled, isFalse);
   });
@@ -254,7 +256,7 @@ void main() {
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(
+            data: MediaQuery.of(context).copyWith(
               navigationMode: NavigationMode.directional,
             ),
             child: Material(
@@ -281,10 +283,10 @@ void main() {
         }),
       ),
     );
-    Focus.of(childKey.currentContext!)!.requestFocus();
+    Focus.of(childKey.currentContext!).requestFocus();
     await tester.pump();
 
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
   testWidgets('PopupMenuItem is only focusable when enabled', (WidgetTester tester) async {
@@ -319,7 +321,7 @@ void main() {
     // Open the popup to build and show the menu contents.
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
-    final FocusNode childNode = Focus.of(childKey.currentContext!)!;
+    final FocusNode childNode = Focus.of(childKey.currentContext!);
     // Now that the contents are shown, request focus on the child text.
     childNode.requestFocus();
     await tester.pumpAndSettle();
@@ -362,13 +364,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(itemBuilderCalled, isTrue);
-    expect(Focus.of(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
     Widget build(TargetPlatform platform) {
+      debugDefaultTargetPlatformOverride = platform;
       return MaterialApp(
-        theme: ThemeData(platform: platform),
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
@@ -404,6 +406,8 @@ void main() {
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
+
+    debugDefaultTargetPlatformOverride = null;
   });
 
   group('PopupMenuButton with Icon', () {
@@ -755,14 +759,12 @@ void main() {
 
     await tester.pump();
 
-    expect(MediaQuery.of(popupContext)!.padding, EdgeInsets.zero);
+    expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
-    const Offset offset = Offset(100.0, 100.0);
-
-    final PopupMenuButton<int> popupMenuButton =
-      PopupMenuButton<int>(
+    PopupMenuButton<int> buildMenuButton({Offset offset = const Offset(0.0, 0.0)}) {
+      return  PopupMenuButton<int>(
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
@@ -777,14 +779,36 @@ void main() {
           ];
         },
       );
+    }
 
+    // Popup a menu without any offset.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Center(
-            child: Material(
-              child: popupMenuButton,
-            ),
+          body: Material(
+            child: buildMenuButton(),
+          ),
+        ),
+      ),
+    );
+
+    // Popup the menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    // Initial state, the menu start at Offset(8.0, 8.0), the 8 pixels is edge padding when offset.dx < 8.0.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
+
+    // Collapse the menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    // Popup a new menu with Offset(50.0, 50.0).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(offset: const Offset(50.0, 50.0)),
           ),
         ),
       ),
@@ -793,8 +817,8 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
-    // The position is different than the offset because the default position isn't at the origin.
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(364.0, 324.0));
+    // This time the menu should start at Offset(50.0, 50.0), the padding only added when offset.dx < 8.0.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(50.0, 50.0));
   });
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
@@ -1270,7 +1294,7 @@ void main() {
             textDirection: textDirection,
             child: PopupMenuTheme(
               data: PopupMenuTheme.of(context).copyWith(
-                textStyle: Theme.of(context)!.textTheme.subtitle1!.copyWith(fontSize: fontSize),
+                textStyle: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: fontSize),
               ),
               child: child!,
             ),
@@ -1778,6 +1802,79 @@ void main() {
       tester.getBottomLeft(find.byKey(_lastKey)).dy,
       lessThan(600 - windowPaddingBottom), // Device height is 600.
     );
+  });
+
+  group('feedback', () {
+    late FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback.dispose();
+    });
+
+    Widget buildFrame({ bool? widgetEnableFeedack, bool? themeEnableFeedback }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: PopupMenuTheme(
+            data: PopupMenuThemeData(
+              enableFeedback: themeEnableFeedback,
+            ),
+            child: PopupMenuButton<int>(
+              enableFeedback: widgetEnableFeedack,
+              child: const Text('Show Menu'),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  const PopupMenuItem<int>(
+                    value: 1,
+                    child: Text('One'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('PopupMenuButton enableFeedback works properly', (WidgetTester tester) async {
+      //PopupMenuButton with enabled feedback
+      await tester.pumpWidget(buildFrame(widgetEnableFeedack: true));
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+
+      //PopupMenuButton with disabled feedback
+      await tester.pumpWidget(buildFrame(widgetEnableFeedack: false));
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+
+      //PopupMenuButton with enabled feedback by default
+      await tester.pumpWidget(buildFrame());
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 0);
+
+      //PopupMenu with disabled feedback using PopupMenuButtonTheme
+      await tester.pumpWidget(buildFrame(themeEnableFeedback: false));
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 0);
+
+      //PopupMenu enableFeedback property overrides PopupMenuButtonTheme
+      await tester.pumpWidget(buildFrame(widgetEnableFeedack: false,themeEnableFeedback: true));
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }
 

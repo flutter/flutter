@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -14,14 +15,12 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-final Platform _kNoColorTerminalPlatform = FakePlatform(
-  stdoutSupportsAnsi: false);
+final Platform _kNoColorTerminalPlatform = FakePlatform(stdoutSupportsAnsi: false);
 
 void main() {
   String analyzerSeparator;
@@ -45,7 +44,6 @@ void main() {
     int exitCode = 0,
   }) async {
     try {
-      arguments.insert(0, '--flutter-root=${Cache.flutterRoot}');
       await createTestCommandRunner(command).run(arguments);
       expect(toolExit, isFalse, reason: 'Expected ToolExit exception');
     } on ToolExit catch (e) {
@@ -65,43 +63,64 @@ void main() {
     logger.clear();
   }
 
-  void _createDotPackages(String projectPath) {
+  void _createDotPackages(String projectPath, [bool nullSafe = false]) {
     final StringBuffer flutterRootUri = StringBuffer('file://');
     final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(Cache.flutterRoot);
     if (platform.isWindows) {
       flutterRootUri
           ..write('/')
-          ..write(canonicalizedFlutterRootPath.replaceAll('\\', '/'));
+          ..write(canonicalizedFlutterRootPath.replaceAll(r'\', '/'));
     } else {
       flutterRootUri.write(canonicalizedFlutterRootPath);
     }
     final String dotPackagesSrc = '''
-# Generated
-flutter:$flutterRootUri/packages/flutter/lib/
-sky_engine:$flutterRootUri/bin/cache/pkg/sky_engine/lib/
-flutter_project:lib/
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter",
+      "rootUri": "$flutterRootUri/packages/flutter",
+      "packageUri": "lib/",
+      "languageVersion": "2.10"
+    },
+    {
+      "name": "sky_engine",
+      "rootUri": "$flutterRootUri/bin/cache/pkg/sky_engine",
+      "packageUri": "lib/",
+      "languageVersion": "2.10"
+    },
+    {
+      "name": "flutter_project",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "${nullSafe ? "2.10" : "2.7"}"
+    }
+  ]
+}
 ''';
-    fileSystem.file(fileSystem.path.join(projectPath, '.packages'))
+
+    fileSystem.file(fileSystem.path.join(projectPath, '.dart_tool', 'package_config.json'))
       ..createSync(recursive: true)
       ..writeAsStringSync(dotPackagesSrc);
   }
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     processManager = const LocalProcessManager();
     platform = const LocalPlatform();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     fileSystem = LocalFileSystem.instance;
-    logger = BufferLogger(
-      outputPreferences: OutputPreferences.test(),
-      terminal: terminal,
-    );
+    logger = BufferLogger.test();
     analyzerSeparator = platform.isWindows ? '-' : '•';
     artifacts = CachedArtifacts(
       cache: globals.cache,
       fileSystem: fileSystem,
       platform: platform,
+    );
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      fileSystem: fileSystem,
+      platform: platform,
+      userMessages: UserMessages(),
     );
   });
 
@@ -318,33 +337,6 @@ StringBuffer bar = StringBuffer('baz');
           artifacts: artifacts,
         ),
         arguments: <String>['analyze', '--no-pub'],
-        statusTextContains: <String>['No issues found!'],
-      );
-    } finally {
-      tryToDelete(tempDir);
-    }
-  });
-
-  testUsingContext('analyze once supports analyzing null-safe code', () async {
-    const String contents = '''
-int? bar;
-''';
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_null_safety.');
-    _createDotPackages(tempDir.path);
-
-    tempDir.childFile('main.dart').writeAsStringSync(contents);
-    try {
-      await runCommand(
-        command: AnalyzeCommand(
-          workingDirectory: fileSystem.directory(tempDir),
-          platform: _kNoColorTerminalPlatform,
-          fileSystem: fileSystem,
-          logger: logger,
-          processManager: processManager,
-          terminal: terminal,
-          artifacts: artifacts,
-        ),
-        arguments: <String>['analyze', '--no-pub', '--enable-experiment=non-nullable'],
         statusTextContains: <String>['No issues found!'],
       );
     } finally {

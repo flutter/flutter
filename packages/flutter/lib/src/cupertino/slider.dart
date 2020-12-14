@@ -14,6 +14,7 @@ import 'theme.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // int _cupertinoSliderValue = 1;
 // void setState(VoidCallback fn) { }
 
@@ -243,7 +244,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
       activeColor: CupertinoDynamicColor.resolve(
         widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
         context,
-      )!,
+      ),
       thumbColor: widget.thumbColor,
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
@@ -282,13 +283,13 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       divisions: divisions,
       activeColor: activeColor,
-      thumbColor: CupertinoDynamicColor.resolve(thumbColor, context)!,
-      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)!,
+      thumbColor: CupertinoDynamicColor.resolve(thumbColor, context),
+      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
       vsync: vsync,
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -299,12 +300,12 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..divisions = divisions
       ..activeColor = activeColor
-      ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)!
-      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)!
+      ..thumbColor = CupertinoDynamicColor.resolve(thumbColor, context)
+      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
-      ..textDirection = Directionality.of(context)!;
+      ..textDirection = Directionality.of(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }

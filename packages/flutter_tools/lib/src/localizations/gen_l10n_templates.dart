@@ -23,8 +23,8 @@ import 'package:intl/intl.dart' as intl;
 /// Callers can lookup localized strings with an instance of @(class) returned
 /// by `@(class).of(context)`.
 ///
-/// Applications need to include `@(class).delegate()` in their app\'s
-/// localizationDelegates list, and the locales they support in the app\'s
+/// Applications need to include `@(class).delegate()` in their app's
+/// localizationDelegates list, and the locales they support in the app's
 /// supportedLocales list. For example:
 ///
 /// ```
@@ -47,7 +47,7 @@ import 'package:intl/intl.dart' as intl;
 ///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
-///   intl: 0.16.1
+///   intl: ^0.17.0-nullsafety.2
 ///
 ///   # rest of dependencies
 /// ```
@@ -72,12 +72,12 @@ import 'package:intl/intl.dart' as intl;
 /// be consistent with the languages listed in the @(class).supportedLocales
 /// property.
 abstract class @(class) {
-  @(class)(String locale) : assert(locale != null), localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   // ignore: unused_field
   final String localeName;
 
-  static @(class) of(BuildContext context) {
+  static @(class)? of(BuildContext context) {
     return Localizations.of<@(class)>(context, @(class));
   }
 
@@ -180,12 +180,16 @@ class @(class) extends @(baseLanguageClassName) {
 ''';
 
 const String baseClassGetterTemplate = '''
-  // @(comment)
+  /// @(comment)
+  ///
+@(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
 const String baseClassMethodTemplate = '''
-  // @(comment)
+  /// @(comment)
+  ///
+@(templateLocaleTranslationComment)
   String @(name)(@(parameters));
 ''';
 
@@ -215,18 +219,28 @@ const String loadBodyDeferredLoadingTemplate = '''return @(lookupName)(locale);'
 
 // DELEGATE LOOKUP TEMPLATES
 
-const String lookupFunctionTemplate = '''
+const String lookupFunctionTemplate = r'''
 @(class) @(lookupName)(Locale locale) {
   @(lookupBody)
-  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
-  return null;
+
+  throw FlutterError(
+    '@(class).delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }''';
 
-const String lookupFunctionDeferredLoadingTemplate = '''
+const String lookupFunctionDeferredLoadingTemplate = r'''
 Future<@(class)> @(lookupName)(Locale locale) {
   @(lookupBody)
-  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
-  return null;
+
+  throw FlutterError(
+    '@(class).delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }''';
 
 const String lookupBodyTemplate = '''

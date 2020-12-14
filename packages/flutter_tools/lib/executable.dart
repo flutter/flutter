@@ -6,10 +6,14 @@ import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
+import 'src/base/user_messages.dart';
+import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -46,10 +50,8 @@ import 'src/globals.dart' as globals;
 import 'src/isolated/devtools_launcher.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
-import 'src/isolated/web_compilation_delegate.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
-import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
@@ -74,6 +76,15 @@ Future<void> main(List<String> args) async {
   final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
                           (args.contains('--machine') && args.contains('attach'));
 
+  // Cache.flutterRoot must be set early because other features use it (e.g.
+  // enginePath's initializer uses it). This can only work with the real
+  // instances of the platform or filesystem, so just use those.
+  Cache.flutterRoot = Cache.defaultFlutterRoot(
+    platform: const LocalPlatform(),
+    fileSystem: LocalFileSystem.instance,
+    userMessages: UserMessages(),
+  );
+
   await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(
       verboseHelp: verboseHelp,
@@ -95,7 +106,10 @@ Future<void> main(List<String> args) async {
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
     DowngradeCommand(),
-    DriveCommand(verboseHelp: verboseHelp),
+    DriveCommand(verboseHelp: verboseHelp,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    ),
     EmulatorsCommand(),
     FormatCommand(),
     GenerateCommand(),
@@ -129,7 +143,6 @@ Future<void> main(List<String> args) async {
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp,
      overrides: <Type, Generator>{
-       WebCompilationProxy: () => BuildRunnerWebCompilationProxy(),
        // The web runner is not supported in google3 because it depends
        // on dwds.
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
