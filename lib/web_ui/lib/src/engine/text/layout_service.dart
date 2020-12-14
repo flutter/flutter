@@ -318,6 +318,28 @@ class LineBuilder {
   bool get isEmpty => _segments.isEmpty;
   bool get isNotEmpty => _segments.isNotEmpty;
 
+  /// The horizontal offset necessary for the line to be correctly aligned.
+  double get alignOffset {
+    final double emptySpace = maxWidth - width;
+    final ui.TextDirection textDirection =
+        paragraph.paragraphStyle._textDirection ?? ui.TextDirection.ltr;
+    final ui.TextAlign textAlign =
+        paragraph.paragraphStyle._textAlign ?? ui.TextAlign.start;
+
+    switch (textAlign) {
+      case ui.TextAlign.center:
+        return emptySpace / 2.0;
+      case ui.TextAlign.right:
+        return emptySpace;
+      case ui.TextAlign.start:
+        return textDirection == ui.TextDirection.rtl ? emptySpace : 0.0;
+      case ui.TextAlign.end:
+        return textDirection == ui.TextDirection.rtl ? 0.0 : emptySpace;
+      default:
+        return 0.0;
+    }
+  }
+
   /// Measures the width of text between the end of this line and [newEnd].
   double getAdditionalWidthTo(LineBreakResult newEnd) {
     // If the extension is all made of space characters, it shouldn't add
@@ -509,8 +531,7 @@ class LineBuilder {
       hardBreak: end.isHard,
       width: width + ellipsisWidth,
       widthWithTrailingSpaces: widthIncludingSpace + ellipsisWidth,
-      // TODO(mdebbar): Calculate actual align offset.
-      left: 0.0,
+      left: alignOffset,
       lineNumber: lineNumber,
     );
   }
