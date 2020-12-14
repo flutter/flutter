@@ -359,10 +359,10 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   @override
   void reset() {
+    // setState will be called in the superclass, so even though state is being
+    // manipulated, no setState call is needed here.
+    _effectiveController!.text = widget.initialValue ?? '';
     super.reset();
-    setState(() {
-      _effectiveController!.text = widget.initialValue ?? '';
-    });
   }
 
   void _handleControllerChanged() {
