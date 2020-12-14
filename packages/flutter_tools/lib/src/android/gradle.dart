@@ -540,6 +540,11 @@ Future<void> _performCodeSizeAnalysis(
   globals.printStatus(
     'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
   );
+  globals.printStatus(
+    '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+    'pub global activate devtools; pub global run devtools '
+    '--appSizeBase=${outputFile.path}'
+  );
 }
 
 /// Builds AAR and POM files.
