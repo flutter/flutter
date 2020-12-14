@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -319,17 +320,18 @@ Future<void> main() async {
       section('Check the NOTICE file is correct');
 
       await inDirectory(hostApp, () async {
-        if (Platform.isWindows) {
-          await exec('7za', <String>['x', releaseHostApk, 'assets/flutter_assets/NOTICES.Z']);
-        } else {
-          await exec('unzip', <String>[releaseHostApk, 'assets/flutter_assets/NOTICES.Z']);
-        }
-        checkFileExists(path.join(hostApp.path, 'assets', 'flutter_assets', 'NOTICES.Z'));
+        final File apkFile = File(releaseHostApk);
+        final Archive apk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
+        // Shouldn't be missing since we already checked it exists above.
+        final ArchiveFile noticesFile = apk.findFile('assets/flutter_assets/NOTICES.Z');
 
-        final Uint8List licenseData = File(path.join(hostApp.path, 'assets', 'flutter_assets', 'NOTICES.Z')).readAsBytesSync();
+        final Uint8List licenseData = noticesFile.content as Uint8List;
+        if (licenseData == null) {
+          return TaskResult.failure('Invalid license file.');
+        }
         final String licenseString = utf8.decode(gzip.decode(licenseData));
         if (!licenseString.contains('skia') || !licenseString.contains('Flutter Authors')) {
-          return TaskResult.failure('License content missing');
+          return TaskResult.failure('License content missing.');
         }
       });
 
