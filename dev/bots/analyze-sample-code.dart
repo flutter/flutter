@@ -8,7 +8,6 @@
 //   bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
