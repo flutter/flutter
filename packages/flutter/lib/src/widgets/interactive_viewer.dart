@@ -584,7 +584,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       alignedTranslation.dy,
     );
 
-    return _validateMatrix(nextMatrix);
+    try {
+      return _validateMatrix(nextMatrix);
+    } catch (stacktrace) {
+      // If the matrix is invalid and can't be corrected, reject this
+      // translation and keep the original matrix. This doesn't interfere with
+      // inertia animations because it usually happens in corners where
+      // animations will stop anyway.
+      return matrix;
+    }
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -634,8 +642,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   }
 
   // If the given matrix is valid, return it. If it is invalid, return the
-  // closest translated matrix that is valid. If none exists, return the
-  // original matrix.
+  // closest translated matrix that is valid. If none is possible, then throw an
+  // error.
   //
   // A valid matrix is defined as a matrix where all sides of the viewport
   // intersect the boundary. This allows the viewport to partially see beyond
@@ -721,10 +729,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       correctedNextViewport.point0,
     );
 
+    // If this matrix is invalid and uncorrectable, then throw an error.
     if (!correctedViewportSide01.intersectsRect(_boundaryRect)
         || !correctedViewportSide12.intersectsRect(_boundaryRect)
         || !correctedViewportSide23.intersectsRect(_boundaryRect)
         || !correctedViewportSide30.intersectsRect(_boundaryRect)) {
+      throw FlutterError('Matrix is invalid and not correctable');
       /*
       final LineSegment? correctedInvalidSide = <LineSegment?>[
         correctedViewportSide01,
@@ -738,7 +748,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       // TODO(justinmc): This case is possible when 2 sides go invalid at the
       // same time. Can happen when the boundary corner is in the viewport
       // corner. Fix by correcting both sides at once?
-      return Matrix4.identity();
     }
 
     // TODO(justinmc): Instead of identity matrix, return the original matrix?
