@@ -140,6 +140,11 @@ Future<void> buildMacOS({
     globals.printStatus(
       'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
     );
+    globals.printStatus(
+      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+      'flutter pub global activate devtools; flutter pub global run devtools '
+      '--appSizeBase=${outputFile.path}'
+    );
   }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

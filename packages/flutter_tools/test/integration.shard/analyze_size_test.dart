@@ -10,6 +10,7 @@ import 'test_utils.dart';
 
 const String apkDebugMessage = 'A summary of your APK analysis can be found at: ';
 const String iosDebugMessage = 'A summary of your iOS bundle analysis can be found at: ';
+const String runDevToolsMessage = 'flutter pub global activate devtools; flutter pub global run devtools ';
 
 void main() {
   testWithoutContext('--analyze-size flag produces expected output on hello_world for Android', () async {
@@ -35,6 +36,13 @@ void main() {
     final String outputFilePath = line.split(apkDebugMessage).last.trim();
     expect(fileSystem.file(fileSystem.path.join(woringDirectory, outputFilePath)), exists);
     expect(outputFilePath, contains('.flutter-devtools'));
+
+    final String devToolsCommand = result.stdout.toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains(runDevToolsMessage));
+    final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
+    expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
+
     expect(result.exitCode, 0);
   });
 
@@ -60,6 +68,13 @@ void main() {
 
     final String outputFilePath = line.split(iosDebugMessage).last.trim();
     expect(fileSystem.file(fileSystem.path.join(woringDirectory, outputFilePath)), exists);
+
+    final String devToolsCommand = result.stdout.toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains(runDevToolsMessage));
+    final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
+    expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
+
     expect(result.exitCode, 0);
   }, skip: true); // Extremely flaky due to https://github.com/flutter/flutter/issues/68144
 

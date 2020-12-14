@@ -86,6 +86,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     globals.printStatus(
       'A summary of your Windows bundle analysis can be found at: ${outputFile.path}',
     );
+    globals.printStatus(
+      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+      'flutter pub global activate devtools; flutter pub global run devtools '
+      '--appSizeBase=${outputFile.path}'
+    );
   }
 }
 

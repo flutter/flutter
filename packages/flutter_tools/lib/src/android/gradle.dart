@@ -542,7 +542,7 @@ Future<void> _performCodeSizeAnalysis(
   );
   globals.printStatus(
     '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-    'pub global activate devtools; pub global run devtools '
+    'flutter pub global activate devtools; flutter pub global run devtools '
     '--appSizeBase=${outputFile.path}'
   );
 }

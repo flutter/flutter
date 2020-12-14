@@ -84,6 +84,11 @@ Future<void> buildLinux(
     globals.printStatus(
       'A summary of your Linux bundle analysis can be found at: ${outputFile.path}',
     );
+    globals.printStatus(
+      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+      'flutter pub global activate devtools; flutter pub global run devtools '
+      '--appSizeBase=${outputFile.path}'
+    );
   }
 }
 
