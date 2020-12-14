@@ -1855,7 +1855,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
 
     final int baseOffset = fromPosition.offset;
-    final int extentOffset = toPosition == null ? fromPosition.offset : toPosition.offset;
+    final int extentOffset = toPosition?.offset ?? fromPosition.offset;
 
     final TextSelection newSelection = TextSelection(
       baseOffset: baseOffset,
