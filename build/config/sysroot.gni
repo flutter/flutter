@@ -53,7 +53,7 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
 
 if ((is_mac || is_ios) && xcode_toolchain == "") {
   xcode_toolchain_args = []
-  if (use_goma) {
+  if (use_goma && create_xcode_symlinks) {
     xcode_toolchain_args += [
       "--symlink",
       rebase_path(root_gen_dir),

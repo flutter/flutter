@@ -11,6 +11,15 @@ declare_args() {
   # Set to true to enable distributed compilation using Goma.
   use_goma = false
 
+  # Set to true to create symlinks to Xcode toolchain/SDK directories.
+  #
+  # RBE does not allow for include paths outside of the buildroot. Creating
+  # symlinks is a work around for that when using a local Xcode toolchain.
+  # This property should not be set to true on LUCI.
+  #
+  # If use_goma is false, this property is ignored.
+  create_xcode_symlinks = false
+
   # Set the default value based on the platform.
   if (is_win) {
     # Absolute directory containing the Goma source code.

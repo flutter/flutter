@@ -20,7 +20,7 @@ declare_args() {
 
 if (mac_sdk_path == "") {
   find_sdk_args = []
-  if (use_goma) {
+  if (use_goma && create_xcode_symlinks) {
     # RBE has a restriction that paths cannot come from outside the build root.
     find_sdk_args += [
       "--symlink",

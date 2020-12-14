@@ -19,7 +19,7 @@ def main(argv):
   parser.add_argument('--symlink',
                       help='Whether to create a symlink in the buildroot to the SDK.')
   parser.add_argument('--sdk',
-                      choices=['iphone', 'iphonesimulator'],
+                      choices=['iphoneos', 'iphonesimulator'],
                       help='Which SDK to find.')
   args = parser.parse_args()
 

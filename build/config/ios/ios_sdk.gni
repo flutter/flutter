@@ -30,7 +30,7 @@ declare_args() {
 
 if (ios_sdk_path == "") {
   ios_sdk_args = []
-  if (use_goma) {
+  if (use_goma && create_xcode_symlinks) {
     ios_sdk_args += [
       "--symlink",
       rebase_path(root_gen_dir),
