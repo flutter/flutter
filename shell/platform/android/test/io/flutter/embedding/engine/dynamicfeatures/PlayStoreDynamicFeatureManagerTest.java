@@ -65,7 +65,7 @@ public class PlayStoreDynamicFeatureManagerTest {
     }
 
     @Override
-    public void downloadDynamicFeature(int loadingUnitId, String moduleName) {
+    public void installDynamicFeature(int loadingUnitId, String moduleName) {
       // Override this to skip the online SplitInstallManager portion.
       loadAssets(loadingUnitId, moduleName);
       loadDartLibrary(loadingUnitId, moduleName);
@@ -85,7 +85,7 @@ public class PlayStoreDynamicFeatureManagerTest {
     jni.setDynamicFeatureManager(playStoreManager);
     assertEquals(jni.loadingUnitId, 0);
 
-    playStoreManager.downloadDynamicFeature(123, "TestModuleName");
+    playStoreManager.installDynamicFeature(123, "TestModuleName");
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.updateAssetManagerCalled, 1);
     assertEquals(jni.dynamicFeatureInstallFailureCalled, 0);
@@ -109,7 +109,7 @@ public class PlayStoreDynamicFeatureManagerTest {
 
     assertEquals(jni.loadingUnitId, 0);
 
-    playStoreManager.downloadDynamicFeature(123, "TestModuleName");
+    playStoreManager.installDynamicFeature(123, "TestModuleName");
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.updateAssetManagerCalled, 1);
     assertEquals(jni.dynamicFeatureInstallFailureCalled, 0);
@@ -133,7 +133,7 @@ public class PlayStoreDynamicFeatureManagerTest {
 
     assertEquals(jni.loadingUnitId, 0);
 
-    playStoreManager.downloadDynamicFeature(123, "TestModuleName");
+    playStoreManager.installDynamicFeature(123, "TestModuleName");
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.updateAssetManagerCalled, 1);
     assertEquals(jni.dynamicFeatureInstallFailureCalled, 0);
@@ -156,7 +156,7 @@ public class PlayStoreDynamicFeatureManagerTest {
 
     assertEquals(jni.loadingUnitId, 0);
 
-    playStoreManager.downloadDynamicFeature(123, "TestModuleName");
+    playStoreManager.installDynamicFeature(123, "TestModuleName");
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.updateAssetManagerCalled, 1);
     assertEquals(jni.dynamicFeatureInstallFailureCalled, 0);

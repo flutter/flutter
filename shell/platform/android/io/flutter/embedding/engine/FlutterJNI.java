@@ -1010,7 +1010,7 @@ public class FlutterJNI {
   @UiThread
   public void requestDartDeferredLibrary(int loadingUnitId) {
     if (dynamicFeatureManager != null) {
-      dynamicFeatureManager.downloadDynamicFeature(loadingUnitId, null);
+      dynamicFeatureManager.installDynamicFeature(loadingUnitId, null);
     } else {
       // TODO(garyq): Add link to setup/instructions guide wiki.
       Log.e(
