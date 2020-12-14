@@ -14,20 +14,6 @@ information into the pre-defined key values in the `LogicalKeyboardKey` and
 The `data` subdirectory contains both some local data files and the templates
 used to generate the source files.
 
-- `data/physical_key_data.json`: contains the merged physical key data from
-  all the other sources. This file will be regenerated if "--collect" is
-  specified for the gen_keycodes script.
-- `data/logical_key_data.json`: contains the list of unprintable logical keys.
-  This file will be regenerated if "--collect" is specified for the
-  gen_keycodes script.
-- `data/key_name_to_android_name.json`: contains a mapping from Flutter key
-  names to Android keycode names (with the "KEY\_" prefix stripped off).
-- `data/keyboard_key.tmpl`: contains the template for the `keyboard_key.dart`
-  file. Markers that begin and end with "@@@" denote the locations where
-  generated data will be inserted.
-- `data/keyboard_maps.tmpl`: contains the template for the `keyboard_maps.dart`
-  file. Markers that begin and end with "@@@" denote the locations where
-  generated data will be inserted.
 - `data/printable.json`: contains a mapping between Flutter key name and its
   printable character. This character is used as the key label.
 - `data/synonyms.json`: contains a mapping between pseudo-keys that represent

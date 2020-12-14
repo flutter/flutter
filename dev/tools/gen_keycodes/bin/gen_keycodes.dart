@@ -109,7 +109,7 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'android-domkey',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_android_name.json'),
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'android_key_name_to_name.json'),
     help: 'The path to where the Android keycode to DomKey mapping is.',
   );
   argParser.addOption(

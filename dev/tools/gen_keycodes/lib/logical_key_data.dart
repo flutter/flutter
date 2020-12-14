@@ -277,7 +277,7 @@ class LogicalKeyData {
   // Map Web key to the pair of key names
   static Map<String, _ModifierPair> get chromeModifiers {
     return _webModifiers ??= () {
-      final String rawJson = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_modifiers.json',)).readAsStringSync();
+      final String rawJson = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'chromium_modifiers.json',)).readAsStringSync();
       return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
         final List<dynamic> pair = value as List<dynamic>;
         return MapEntry<String, _ModifierPair>(key, _ModifierPair(pair[0] as String, pair[1] as String));
