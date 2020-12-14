@@ -11,7 +11,6 @@ import 'package:ui/ui.dart' as ui;
 
 import 'layout_service_helper.dart';
 
-const bool skipTextAlign = true;
 const bool skipWordSpacing = true;
 
 final EngineParagraphStyle ahemStyle = EngineParagraphStyle(
@@ -641,7 +640,7 @@ void testMain() async {
       l('defgh', 4, 9, hardBreak: false, width: 50.0, left: 0.0),
       l('i', 9, 10, hardBreak: true, width: 10.0, left: 40.0),
     ]);
-  }, skip: skipTextAlign);
+  });
 
   test('handles rtl with textAlign', () {
     CanvasParagraph paragraph;
@@ -694,5 +693,5 @@ void testMain() async {
       l('defgh', 4, 9, hardBreak: false, width: 50.0, left: 0.0),
       l('i', 9, 10, hardBreak: true, width: 10.0, left: 40.0),
     ]);
-  }, skip: skipTextAlign);
+  });
 }
