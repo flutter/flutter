@@ -1463,6 +1463,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   void debugAssertDoesMeetConstraints();
 
+  /// Marks the object dirty for [debugAssertDoesMeetConstraints].
+  ///
+  /// Do not call this directly. This will be called by [markNeedsLayout] in
+  /// checked mode.
+  ///
+  /// Override this to do additional cleanup in [markNeedsLayout] when it is
+  /// called. For example, you might be implementing some sort of caching
+  /// mechanism used for [debugAssertDoesMeetConstraints]. This allows you to
+  /// hook into [markNeedsLayout] in the render tree to do invalidation.
+  @protected
+  void debugMarkDirtyForAssertDoesMeetConstraints() {}
+
   /// When true, debugAssertDoesMeetConstraints() is currently
   /// executing asserts for verifying the consistent behavior of
   /// intrinsic dimensions methods.
@@ -1528,6 +1540,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [markNeedsLayoutForSizedByParentChange] instead of [markNeedsLayout].
   @mustCallSuper
   void markNeedsLayout() {
+    assert(() {
+      debugMarkDirtyForAssertDoesMeetConstraints();
+      return true;
+    }());
+
     assert(_debugCanPerformMutations);
     if (_needsLayout) {
       assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
