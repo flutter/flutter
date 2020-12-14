@@ -705,6 +705,9 @@ class SimpleDialogOption extends StatelessWidget {
 ///     case Department.state:
 ///       // ...
 ///     break;
+///     case null:
+///       // dialog dismissed
+///     break;
 ///   }
 /// }
 /// ```
