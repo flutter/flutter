@@ -168,10 +168,29 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
   Object? toPrimitives() => value;
 }
 
-// _RestorablePrimitiveValue and its subclasses do not allow null values in
-// anticipation of NNBD (non-nullability by default).
-class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
-  _RestorablePrimitiveValue(T _defaultValue) : super(_defaultValue);
+// _RestorablePrimitiveValueN and its subclasses allows for null values.
+// See [_RestorablePrimitiveValue] for the non-nullable version of this class.
+class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
+  _RestorablePrimitiveValueN(this._defaultValue)
+    : assert(debugIsSerializableForRestoration(_defaultValue)),
+      super();
+
+  final T _defaultValue;
+
+  @override
+  T createDefaultValue() => _defaultValue;
+
+  @override
+  void didUpdateValue(T? oldValue) {
+    assert(debugIsSerializableForRestoration(value));
+    notifyListeners();
+  }
+
+  @override
+  T fromPrimitives(Object? serialized) => serialized as T;
+
+  @override
+  Object? toPrimitives() => value;
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [num].
@@ -278,7 +297,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   T? _value;
 
   @override
-  void initWithValue(T? value) {
+  void initWithValue(T value) {
     assert(value != null);
     _value?.removeListener(notifyListeners);
     _value = value;
@@ -309,8 +328,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// [ChangeNotifier] instance.
 abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
   @override
-  void initWithValue(T? value) {
-    assert(value != null);
+  void initWithValue(T value) {
     _diposeOldValue();
     super.initWithValue(value);
   }
