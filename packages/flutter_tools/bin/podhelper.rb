@@ -19,8 +19,6 @@ end
 
 # Same as flutter_ios_podfile_setup for macOS.
 def flutter_macos_podfile_setup
-  # Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
-  install! 'cocoapods', :disable_input_output_paths => true
 end
 
 # Add iOS build settings to pod targets.
