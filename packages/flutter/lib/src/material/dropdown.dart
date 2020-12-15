@@ -1113,6 +1113,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ActivateIntent: CallbackAction<ActivateIntent>(
         onInvoke: (ActivateIntent intent) => _handleTap(),
       ),
+      ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
+        onInvoke: (ButtonActivateIntent intent) => _handleTap(),
+      ),
     };
     focusNode!.addListener(_handleFocusChanged);
     final FocusManager focusManager = WidgetsBinding.instance!.focusManager;

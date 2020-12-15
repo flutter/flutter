@@ -9,8 +9,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// String userAvatarUrl;
+// late String userAvatarUrl;
 
 /// A circle that represents a user.
 ///

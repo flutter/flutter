@@ -179,7 +179,7 @@ class _MaterialStateColor extends MaterialStateColor {
 /// To use a [MaterialStateMouseCursor], you should create a subclass of
 /// [MaterialStateMouseCursor] and implement the abstract `resolve` method.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example defines a mouse cursor that resolves to
 /// [SystemMouseCursors.forbidden] when its widget is disabled.
@@ -294,7 +294,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// To use a [MaterialStateBorderSide], you should create a subclass of a
 /// [MaterialStateBorderSide] and override the abstract `resolve` method.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
 /// This example defines a subclass of [MaterialStateBorderSide], that resolves
 /// to a red border side when its widget is selected.
@@ -302,7 +302,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// ```dart preamble
 /// class RedSelectedBorderSide extends MaterialStateBorderSide {
 ///   @override
-///   BorderSide resolve(Set<MaterialState> states) {
+///   BorderSide? resolve(Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.selected)) {
 ///       return BorderSide(
 ///         width: 1,
@@ -352,7 +352,7 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 /// [OutlinedBorder] and implement [MaterialStateOutlinedBorder]'s abstract
 /// `resolve` method.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
 /// This example defines a subclass of [RoundedRectangleBorder] and an
 /// implementation of [MaterialStateOutlinedBorder], that resolves to
@@ -361,7 +361,7 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 /// ```dart preamble
 /// class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
 ///   @override
-///   OutlinedBorder resolve(Set<MaterialState> states) {
+///   OutlinedBorder? resolve(Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.selected)) {
 ///       return RoundedRectangleBorder();
 ///     }
@@ -423,7 +423,7 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example shows how you can override the default text and icon
 /// color (the "foreground color") of a [TextButton] with a

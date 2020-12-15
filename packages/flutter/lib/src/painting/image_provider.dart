@@ -17,9 +17,6 @@ import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// Signature for the callback taken by [_createErrorHandlerAndKey].
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 
@@ -239,10 +236,9 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 /// ```dart
 /// class MyImage extends StatefulWidget {
 ///   const MyImage({
-///     Key key,
-///     @required this.imageProvider,
-///   }) : assert(imageProvider != null),
-///        super(key: key);
+///     Key? key,
+///     required this.imageProvider,
+///   }) : super(key: key);
 ///
 ///   final ImageProvider imageProvider;
 ///
@@ -251,8 +247,8 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 /// }
 ///
 /// class _MyImageState extends State<MyImage> {
-///   ImageStream _imageStream;
-///   ImageInfo _imageInfo;
+///   ImageStream? _imageStream;
+///   ImageInfo? _imageInfo;
 ///
 ///   @override
 ///   void didChangeDependencies() {
@@ -271,15 +267,15 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///   }
 ///
 ///   void _getImage() {
-///     final ImageStream oldImageStream = _imageStream;
+///     final ImageStream? oldImageStream = _imageStream;
 ///     _imageStream = widget.imageProvider.resolve(createLocalImageConfiguration(context));
-///     if (_imageStream.key != oldImageStream?.key) {
+///     if (_imageStream!.key != oldImageStream?.key) {
 ///       // If the keys are the same, then we got the same image back, and so we don't
 ///       // need to update the listeners. If the key changed, though, we must make sure
 ///       // to switch our listeners to the new image stream.
 ///       final ImageStreamListener listener = ImageStreamListener(_updateImage);
 ///       oldImageStream?.removeListener(listener);
-///       _imageStream.addListener(listener);
+///       _imageStream!.addListener(listener);
 ///     }
 ///   }
 ///
@@ -293,7 +289,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int? cache
 ///
 ///   @override
 ///   void dispose() {
-///     _imageStream.removeListener(ImageStreamListener(_updateImage));
+///     _imageStream?.removeListener(ImageStreamListener(_updateImage));
 ///     _imageInfo?.dispose();
 ///     _imageInfo = null;
 ///     super.dispose();

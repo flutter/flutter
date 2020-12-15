@@ -50,6 +50,7 @@ void main() {
         projectUnderTest.ios.generatedEnvironmentVariableExportScript.createSync(recursive: true);
         projectUnderTest.ios.deprecatedCompiledDartFramework.createSync(recursive: true);
         projectUnderTest.ios.deprecatedProjectFlutterFramework.createSync(recursive: true);
+        projectUnderTest.ios.flutterPodspec.createSync(recursive: true);
 
         projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
@@ -71,6 +72,7 @@ void main() {
         expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript.existsSync(), isFalse);
         expect(projectUnderTest.ios.deprecatedCompiledDartFramework.existsSync(), isFalse);
         expect(projectUnderTest.ios.deprecatedProjectFlutterFramework.existsSync(), isFalse);
+        expect(projectUnderTest.ios.flutterPodspec.existsSync(), isFalse);
 
         expect(projectUnderTest.linux.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);

@@ -25,9 +25,6 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(
   /// The build context for the TextField.
@@ -201,13 +198,13 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// callback. This callback is applied to the text field's current value when
 /// the user finishes editing.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
 /// callback.
 ///
 /// ```dart
-/// TextEditingController _controller;
+/// late TextEditingController _controller;
 ///
 /// void initState() {
 ///   super.initState();
@@ -359,6 +356,11 @@ class TextField extends StatefulWidget {
     this.minLines,
     this.expands = false,
     this.maxLength,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provides more specific '
+      'behavior related to the maxLength limit. '
+      'This feature was deprecated after v1.25.0-5.0.pre.'
+    )
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
     this.onChanged,
@@ -606,6 +608,11 @@ class TextField extends StatefulWidget {
   ///
   /// If true, prevents the field from allowing more than [maxLength]
   /// characters.
+  @Deprecated(
+    'Use maxLengthEnforcement parameter which provides more specific '
+    'behavior related to the maxLength limit. '
+    'This feature was deprecated after v1.25.0-5.0.pre.'
+  )
   final bool maxLengthEnforced;
 
   /// Determines how the [maxLength] limit should be enforced.
@@ -759,9 +766,9 @@ class TextField extends StatefulWidget {
   /// Widget counter(
   ///   BuildContext context,
   ///   {
-  ///     int currentLength,
-  ///     int maxLength,
-  ///     bool isFocused,
+  ///     required int currentLength,
+  ///     required int? maxLength,
+  ///     required bool isFocused,
   ///   }
   /// ) {
   ///   return Text(
@@ -856,7 +863,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   MaxLengthEnforcement get _effectiveMaxLengthEnforcement => widget.maxLengthEnforcement
-    ?? LengthLimitingTextInputFormatter.inferredDefaultMaxLengthEnforcement;
+    ?? LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(Theme.of(context).platform);
 
   bool _isHovering = false;
 
