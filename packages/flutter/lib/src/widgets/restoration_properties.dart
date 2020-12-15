@@ -156,11 +156,6 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
   T createDefaultValue() => _defaultValue;
 
   @override
-  set value(T value) {
-    super.value = value;
-  }
-
-  @override
   void didUpdateValue(T? oldValue) {
     assert(debugIsSerializableForRestoration(value));
     notifyListeners();
@@ -184,6 +179,12 @@ class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveVa
   T fromPrimitives(Object? serialized) {
     assert(serialized != null);
     return serialized! as T;
+  }
+
+  @override
+  set value(T value) {
+    assert(value != null);
+    super.value = value;
   }
 
   @override
