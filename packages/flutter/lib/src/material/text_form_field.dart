@@ -11,6 +11,9 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A [FormField] that contains a [TextField].
 ///
 /// This is a convenience widget that wraps a [TextField] widget in a
@@ -67,7 +70,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This example shows how to move the focus to the next field when the user
 /// presses the SPACE key.
 ///
@@ -162,7 +165,13 @@ class TextFormField extends FormField<String> {
       'This feature was deprecated after v1.19.0.'
     )
     bool autovalidate = false,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provides more specific '
+      'behavior related to the maxLength limit. '
+      'This feature was deprecated after v1.25.0-5.0.pre.'
+    )
     bool maxLengthEnforced = true,
+    MaxLengthEnforcement? maxLengthEnforcement,
     int? maxLines = 1,
     int? minLines,
     bool expands = false,
@@ -202,6 +211,10 @@ class TextFormField extends FormField<String> {
          'autovalidate and autovalidateMode should not be used together.'
        ),
        assert(maxLengthEnforced != null),
+       assert(
+         maxLengthEnforced || maxLengthEnforcement == null,
+         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
+       ),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
@@ -259,6 +272,7 @@ class TextFormField extends FormField<String> {
            smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
            enableSuggestions: enableSuggestions,
            maxLengthEnforced: maxLengthEnforced,
+           maxLengthEnforcement: maxLengthEnforcement,
            maxLines: maxLines,
            minLines: minLines,
            expands: expands,
@@ -345,10 +359,10 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   @override
   void reset() {
+    // setState will be called in the superclass, so even though state is being
+    // manipulated, no setState call is needed here.
+    _effectiveController!.text = widget.initialValue ?? '';
     super.reset();
-    setState(() {
-      _effectiveController!.text = widget.initialValue ?? '';
-    });
   }
 
   void _handleControllerChanged() {

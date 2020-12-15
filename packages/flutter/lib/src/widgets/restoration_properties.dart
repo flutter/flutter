@@ -10,6 +10,9 @@ import 'package:flutter/services.dart';
 import 'editable_text.dart';
 import 'restoration.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A [RestorableProperty] that makes the wrapped value accessible to the owning
 /// [State] object via the [value] getter and setter.
 ///
@@ -19,7 +22,7 @@ import 'restoration.dart';
 ///
 /// ## Using a RestorableValue
 ///
-/// {@tool dartpad --template=stateful_widget_restoration}
+/// {@tool dartpad --template=stateful_widget_restoration_no_null_safety}
 /// A [StatefulWidget] that has a restorable [int] property.
 ///
 /// ```dart

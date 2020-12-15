@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -23,7 +24,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'devices.dart';
-import 'migrations/ios_migrator.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
@@ -102,13 +102,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  final List<IOSMigrator> migrators = <IOSMigrator>[
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
   ];
 
-  final IOSMigration migration = IOSMigration(migrators);
+  final ProjectMigration migration = ProjectMigration(migrators);
   if (!migration.run()) {
     return XcodeBuildResult(success: false);
   }

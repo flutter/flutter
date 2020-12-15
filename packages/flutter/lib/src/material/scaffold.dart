@@ -30,11 +30,11 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// TabController tabController;
+// late TabController tabController;
 // void setState(VoidCallback fn) { }
-// String appBarTitle;
-// int tabCount;
-// TickerProvider tickerProvider;
+// late String appBarTitle;
+// late int tabCount;
+// late TickerProvider tickerProvider;
 
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
@@ -165,7 +165,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///       _counter++;
   ///     });
   ///     if (_counter % 10 == 0) {
-  ///       _scaffoldMessengerKey.currentState.showSnackBar(const SnackBar(
+  ///       _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
   ///         content: Text('A multiple of ten!'),
   ///       ));
   ///     }
@@ -1569,7 +1569,7 @@ class Scaffold extends StatefulWidget {
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openDrawer() {
-  ///   _scaffoldKey.currentState.openDrawer();
+  ///   _scaffoldKey.currentState!.openDrawer();
   /// }
   ///
   /// void _closeDrawer() {
@@ -1632,7 +1632,7 @@ class Scaffold extends StatefulWidget {
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openEndDrawer() {
-  ///   _scaffoldKey.currentState.openEndDrawer();
+  ///   _scaffoldKey.currentState!.openEndDrawer();
   /// }
   ///
   /// void _closeEndDrawer() {

@@ -677,7 +677,6 @@ tasks:
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true # https://github.com/flutter/flutter/issues/71613
 
   ios_app_with_extensions_test:
     description: >
@@ -888,12 +887,6 @@ tasks:
   web_benchmarks_html:
     description: >
       Runs Web benchmarks on Chrome on a Linux machine using the HTML rendering backend.
-    stage: devicelab
-    required_agent_capabilities: ["linux-vm"]
-
-  web_benchmarks_canvaskit:
-    description: >
-      Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
 

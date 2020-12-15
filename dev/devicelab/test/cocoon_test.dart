@@ -27,7 +27,6 @@ void main() {
       _processResult;
 
   // Expected test values.
-  const String commitBranch = 'flutter-1.23-candidate.18';
   const String commitSha = 'a4952838bf288a81d8ea11edfd4b4cd649fa94cc';
   const String serviceAccountTokenPath = 'test_account_file';
   const String serviceAccountToken = 'test_token';
@@ -43,18 +42,6 @@ void main() {
 
       final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken);
-    });
-
-    test('returns expected commit branch', () {
-      _processResult = ProcessResult(1, 0, commitBranch, '');
-      cocoon = Cocoon(
-        serviceAccountTokenPath: serviceAccountTokenPath,
-        filesystem: fs,
-        httpClient: mockClient,
-        processRunSync: runSyncStub,
-      );
-
-      expect(cocoon.commitBranch, commitBranch);
     });
 
     test('returns expected commit sha', () {
@@ -78,7 +65,6 @@ void main() {
         processRunSync: runSyncStub,
       );
 
-      expect(() => cocoon.commitBranch, throwsA(isA<CocoonException>()));
       expect(() => cocoon.commitSha, throwsA(isA<CocoonException>()));
     });
 
@@ -93,7 +79,7 @@ void main() {
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});
       // This should not throw an error.
-      await cocoon.sendTaskResult(builderName: 'builderAbc', result: result);
+      await cocoon.sendTaskResult(builderName: 'builderAbc', gitBranch: 'branchAbc', result: result);
     });
 
     test('throws client exception on non-200 responses', () async {
@@ -106,7 +92,20 @@ void main() {
       );
 
       final TaskResult result = TaskResult.success(<String, dynamic>{});
-      expect(() => cocoon.sendTaskResult(builderName: 'builderAbc', result: result), throwsA(isA<ClientException>()));
+      expect(() => cocoon.sendTaskResult(builderName: 'builderAbc', gitBranch: 'branchAbc', result: result), throwsA(isA<ClientException>()));
+    });
+
+    test('null git branch throws error', () async {
+      mockClient = MockClient((Request request) async => Response('', 500));
+
+      cocoon = Cocoon(
+        serviceAccountTokenPath: serviceAccountTokenPath,
+        filesystem: fs,
+        httpClient: mockClient,
+      );
+
+      final TaskResult result = TaskResult.success(<String, dynamic>{});
+      expect(() => cocoon.sendTaskResult(builderName: 'builderAbc', gitBranch: null, result: result), throwsA(isA<AssertionError>()));
     });
   });
 

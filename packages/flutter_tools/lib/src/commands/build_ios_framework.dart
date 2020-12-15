@@ -109,6 +109,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   FlutterVersion _flutterVersion;
 
   @override
+  bool get reportNullSafety => false;
+
+  @override
   final String name = 'ios-framework';
 
   @override
@@ -292,10 +295,7 @@ LICENSE
   s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
   s.platform              = :ios, '8.0'
-  s.vendored_frameworks   = 'Flutter.framework'
-  s.prepare_command       = <<-CMD
-unzip Flutter.framework -d Flutter.framework
-CMD
+  s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
 
@@ -311,56 +311,31 @@ end
     Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
-      ' ├─Populating Flutter.framework...',
+      ' ├─Populating Flutter.xcframework...',
     );
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts.getArtifactPath(
-      Artifact.flutterFramework,
+      Artifact.flutterXcframework,
       platform: TargetPlatform.ios,
       mode: buildInfo.mode,
     );
     final String flutterFrameworkFileName = globals.fs.path.basename(
       engineCacheFlutterFrameworkDirectory,
     );
-    final Directory fatFlutterFrameworkCopy = modeDirectory.childDirectory(
+    final Directory flutterFrameworkCopy = modeDirectory.childDirectory(
       flutterFrameworkFileName,
     );
 
     try {
-      // Copy universal engine cache framework to mode directory.
+      // Copy xcframework engine cache framework to mode directory.
       globals.fsUtils.copyDirectorySync(
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
-        fatFlutterFrameworkCopy,
+        flutterFrameworkCopy,
       );
-
-      if (buildInfo.mode != BuildMode.debug) {
-        final File fatFlutterFrameworkBinary = fatFlutterFrameworkCopy.childFile('Flutter');
-
-        // Remove simulator architecture in profile and release mode.
-        final List<String> lipoCommand = <String>[
-          ...globals.xcode.xcrunCommand(),
-          'lipo',
-          fatFlutterFrameworkBinary.path,
-          '-remove',
-          'x86_64',
-          '-output',
-          fatFlutterFrameworkBinary.path
-        ];
-        final RunResult lipoResult = await globals.processUtils.run(
-          lipoCommand,
-          allowReentrantFlutter: false,
-        );
-
-        if (lipoResult.exitCode != 0) {
-          throwToolExit(
-            'Unable to remove simulator architecture in ${buildInfo.mode}: ${lipoResult.stderr}',
-          );
-        }
-      }
     } finally {
       status.stop();
     }
 
-    await _produceXCFrameworkFromUniversal(buildInfo, fatFlutterFrameworkCopy);
+    await _produceUniversalFromXCFramework(buildInfo, flutterFrameworkCopy);
   }
 
   Future<void> _produceAppFramework(
@@ -474,7 +449,6 @@ end
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
-        'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];
@@ -555,112 +529,34 @@ end
     }
   }
 
-  Future<void> _produceXCFrameworkFromUniversal(BuildInfo buildInfo, Directory fatFramework) async {
-    if (boolArg('xcframework')) {
-      final String frameworkBinaryName = globals.fs.path.basenameWithoutExtension(
-          fatFramework.basename);
+  Future<void> _produceUniversalFromXCFramework(BuildInfo buildInfo, Directory xcframework) async {
+    if (boolArg('universal')) {
+      final String frameworkBinaryName =
+          globals.fs.path.basenameWithoutExtension(xcframework.basename);
 
       final Status status = globals.logger.startProgress(
-        ' ├─Creating $frameworkBinaryName.xcframework...',
+        ' ├─Creating $frameworkBinaryName.framework...',
       );
       try {
-        if (buildInfo.mode == BuildMode.debug) {
-          await _produceDebugXCFramework(fatFramework, frameworkBinaryName);
-        } else {
-          await _produceXCFramework(
-              <Directory>[fatFramework], frameworkBinaryName,
-              fatFramework.parent);
-        }
+        final Iterable<Directory> frameworks = xcframework
+            .listSync()
+            .whereType<Directory>()
+            .map((Directory triple) => triple
+                .listSync()
+                .whereType<Directory>()
+                .firstWhere((Directory frameworkDirectory) =>
+                    frameworkDirectory.basename ==
+                    '$frameworkBinaryName.framework'));
+
+        await _produceUniversalFramework(
+            frameworks, frameworkBinaryName, xcframework.parent);
       } finally {
         status.stop();
       }
     }
 
-    if (!boolArg('universal')) {
-      fatFramework.deleteSync(recursive: true);
-    }
-  }
-
-  Future<void> _produceDebugXCFramework(Directory fatFramework, String frameworkBinaryName) async {
-    final String frameworkFileName = fatFramework.basename;
-    final File fatFlutterFrameworkBinary = fatFramework.childFile(
-      frameworkBinaryName,
-    );
-    final Directory temporaryOutput = globals.fs.systemTempDirectory.createTempSync(
-      'flutter_tool_build_ios_framework.',
-    );
-    try {
-      // Copy universal framework to variant directory.
-      final Directory iPhoneBuildOutput = temporaryOutput.childDirectory(
-        'ios',
-      )..createSync(recursive: true);
-      final Directory simulatorBuildOutput = temporaryOutput.childDirectory(
-        'simulator',
-      )..createSync(recursive: true);
-      final Directory armFlutterFrameworkDirectory = iPhoneBuildOutput
-        .childDirectory(frameworkFileName);
-      final File armFlutterFrameworkBinary = armFlutterFrameworkDirectory
-        .childFile(frameworkBinaryName);
-      globals.fsUtils.copyDirectorySync(fatFramework, armFlutterFrameworkDirectory);
-
-      // Create iOS framework.
-      List<String> lipoCommand = <String>[
-        ...globals.xcode.xcrunCommand(),
-        'lipo',
-        fatFlutterFrameworkBinary.path,
-        '-remove',
-        'x86_64',
-        '-output',
-        armFlutterFrameworkBinary.path
-      ];
-
-      RunResult lipoResult = await globals.processUtils.run(
-        lipoCommand,
-        allowReentrantFlutter: false,
-      );
-
-      if (lipoResult.exitCode != 0) {
-        throwToolExit('Unable to create ARM framework: ${lipoResult.stderr}');
-      }
-
-      // Create simulator framework.
-      final Directory simulatorFlutterFrameworkDirectory = simulatorBuildOutput
-        .childDirectory(frameworkFileName);
-      final File simulatorFlutterFrameworkBinary = simulatorFlutterFrameworkDirectory
-        .childFile(frameworkBinaryName);
-      globals.fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
-
-      lipoCommand = <String>[
-        ...globals.xcode.xcrunCommand(),
-        'lipo',
-        fatFlutterFrameworkBinary.path,
-        '-thin',
-        'x86_64',
-        '-output',
-        simulatorFlutterFrameworkBinary.path
-      ];
-
-      lipoResult = await globals.processUtils.run(
-        lipoCommand,
-        allowReentrantFlutter: false,
-      );
-
-      if (lipoResult.exitCode != 0) {
-        throwToolExit(
-            'Unable to create simulator framework: ${lipoResult.stderr}');
-      }
-
-      // Create XCFramework from iOS and simulator frameworks.
-      await _produceXCFramework(
-        <Directory>[
-          armFlutterFrameworkDirectory,
-          simulatorFlutterFrameworkDirectory
-        ],
-        frameworkBinaryName,
-        fatFramework.parent,
-      );
-    } finally {
-      temporaryOutput.deleteSync(recursive: true);
+    if (!boolArg('xcframework')) {
+      xcframework.deleteSync(recursive: true);
     }
   }
 
