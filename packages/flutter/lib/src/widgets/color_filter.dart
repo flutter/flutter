@@ -11,6 +11,8 @@ import 'framework.dart';
 
 /// Applies a [ColorFilter] to its child.
 ///
+/// Use the [ColorFilter.mode] constructor to apply a [Color] using a [BlendMode].
+///
 /// Causes the child to be modified using a color to tint the resulting rendering.
 /// This widget allows to generate dynamic and vibrant shades depending on the chosen blend modes.
 /// Different blending modes can modify how the color is applied,
@@ -25,8 +27,8 @@ import 'framework.dart';
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// This sample shows how to filter images with a color
-/// and blend them using the [BlendMode.modulate] and [BlendMode.saturation] modes.
+/// These two images have two [ColorFilter]s applied with different [BlendMode]s,
+/// a red color via [BlendMode.modulate] and a grey color via [BlendMode.saturation].
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -58,8 +60,8 @@ import 'framework.dart';
 ///
 /// See Also:
 ///
-///  * [BlendMode], describing how to blend a source image with destination image.
-///  * [ColorFilter], describing what to apply when compositing a layer with a particular color.
+///  * [BlendMode], describes how to blend a source image with the destination image.
+///  * [ColorFilter], describing which constructor to apply when compositing a layer with a particular color.
 
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
