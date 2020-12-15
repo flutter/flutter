@@ -47,6 +47,17 @@ enum _RefreshIndicatorMode {
   canceled, // Animating the indicator's fade-out after not arming.
 }
 
+/// Used to configure the [RefreshIndicator] trigger mode.
+enum RefreshIndicatorTriggerMode {
+  /// The indicator can trigger when the child's [Scrollable] descendant overscrolls
+  /// by drag(not inertia), regardless of whether its initial scroll position is on the edge or not.
+  loose,
+
+  /// The indicator can only trigger when the child's [Scrollable] descendant overscrolls
+  /// by drag and its initial scroll position is on the edge.
+  strict,
+}
+
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
 /// When the child's [Scrollable] descendant overscrolls, an animated circular
@@ -55,6 +66,8 @@ enum _RefreshIndicatorMode {
 /// the [onRefresh] callback is called. The callback is expected to update the
 /// scrollable's contents and then complete the [Future] it returns. The refresh
 /// indicator disappears after the callback's [Future] has completed.
+///
+/// The trigger mode is configured by [RefreshIndicator.triggerMode].
 ///
 /// ## Troubleshooting
 ///
@@ -106,11 +119,13 @@ class RefreshIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
-    this.strokeWidth = 2.0
+    this.strokeWidth = 2.0,
+    this.triggerMode = RefreshIndicatorTriggerMode.strict,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
        assert(strokeWidth != null),
+       assert(triggerMode != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -159,6 +174,11 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// By default, the value of `strokeWidth` is 2.0 pixels.
   final double strokeWidth;
+
+  /// Defines `triggerMode` for `RefreshIndicator`.
+  ///
+  /// By default, the value of `triggerMode` is [RefreshIndicatorTriggerMode.strict].
+  final RefreshIndicatorTriggerMode triggerMode;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -216,11 +236,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   bool _shouldStart(ScrollNotification notification) {
-    // The indicator will be pulled out in two cases,
+    // The indicator will be pulled out in two cases depend on [widget.triggerMode],
     // 1, Begin drag when the scrollable widget at the edge with zero scroll position.
     // 2, Keep drag before overscroll occurs when the scrollable widget has
     //    a non-zero scroll position(do not release finger before overscroll).
-    return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null))
+    return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.loose))
       && notification.metrics.extentBefore == 0.0
       && _mode == null
       && _start(notification.metrics.axisDirection);

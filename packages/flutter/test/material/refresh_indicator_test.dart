@@ -501,12 +501,13 @@ void main() {
     );
   });
 
-  testWidgets('Top RefreshIndicator should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Top RefreshIndicator(loose mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
+          triggerMode: RefreshIndicatorTriggerMode.loose,
           onRefresh: holdRefresh,
           child: ListView(
             controller: scrollController,
@@ -535,12 +536,13 @@ void main() {
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
-  testWidgets('Bottom RefreshIndicator should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Bottom RefreshIndicator(loose mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
+          triggerMode: RefreshIndicatorTriggerMode.loose,
           onRefresh: holdRefresh,
           child: ListView(
             reverse: true,
@@ -571,12 +573,13 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71936
-  testWidgets('RefreshIndicator should not be shown when overscroll occurs due to inertia', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator(loose mode) should not be shown when overscroll occurs due to inertia', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
+          triggerMode: RefreshIndicatorTriggerMode.loose,
           onRefresh: holdRefresh,
           child: ListView(
             controller: scrollController,
@@ -600,6 +603,75 @@ void main() {
 
     // Release finger before reach the edge.
     await tester.fling(find.text('X'), const Offset(0.0, 99.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+  });
+
+  testWidgets('Top RefreshIndicator(strict mode) should not be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 800.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(50.0);
+
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+  });
+
+  testWidgets('Bottom RefreshIndicator(strict mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: ListView(
+            reverse: true,
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 800.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(50.0);
+
+    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
