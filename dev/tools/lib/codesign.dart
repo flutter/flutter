@@ -188,8 +188,23 @@ class CodesignCommand extends Command<void> {
   void verifySignatures() {
     final List<String> unsignedBinaries = <String>[];
     final List<String> wrongEntitlementBinaries = <String>[];
+    final List<String> unexpectedBinaries = <String>[];
 
     for (final String binaryPath in findBinaryPaths(framework.cacheDirectory)) {
+      bool verifySignature = false;
+      bool verifyEntitlements = false;
+      if (binariesWithEntitlements.contains(binaryPath)) {
+        verifySignature = true;
+        verifyEntitlements = true;
+      }
+      if (binariesWithoutEntitlements.contains(binaryPath)) {
+        verifySignature = true;
+      }
+      if (!verifySignature && !verifyEntitlements) {
+        unexpectedBinaries.add(binaryPath);
+        stdio.printError('Unexpected binary $binaryPath found in cache!');
+        continue;
+      }
       stdio.printTrace('Verifying the code signature of $binaryPath');
       final io.ProcessResult codeSignResult = processManager.runSync(
         <String>[
@@ -205,7 +220,8 @@ class CodesignCommand extends Command<void> {
             'The `codesign` command failed with exit code ${codeSignResult.exitCode}:\n'
             '${codeSignResult.stderr}\n');
         continue;
-      } else {
+      }
+      if (verifyEntitlements) {
         stdio.printTrace('Verifying entitlements of $binaryPath');
         if (!hasExpectedEntitlements(binaryPath)) {
           wrongEntitlementBinaries.add(binaryPath);
@@ -213,6 +229,7 @@ class CodesignCommand extends Command<void> {
       }
     }
 
+    // First print all deviations from expectations
     if (unsignedBinaries.isNotEmpty) {
       stdio.printError('Found ${unsignedBinaries.length} unsigned binaries:');
       unsignedBinaries.forEach(print);
@@ -224,13 +241,24 @@ class CodesignCommand extends Command<void> {
       wrongEntitlementBinaries.forEach(print);
     }
 
+    if (unexpectedBinaries.isNotEmpty) {
+      stdio.printError('Found ${unexpectedBinaries.length} unexpected binaries in the cache:');
+      unexpectedBinaries.forEach(print);
+    }
+
+    // Finally, exit on any invalid state
     if (unsignedBinaries.isNotEmpty) {
       throw ConductorException('Test failed because unsigned binaries detected.');
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
       throw ConductorException(
-          'Test failed because files found with the wrong entitlements:\n${wrongEntitlementBinaries.join('\n')}');
+          'Test failed because files found with the wrong entitlements:\n'
+          '${wrongEntitlementBinaries.join('\n')}');
+    }
+
+    if (unexpectedBinaries.isNotEmpty) {
+      throw ConductorException('Test failed because unexpected binaries found in the cache.');
     }
 
     stdio.printStatus(
@@ -291,7 +319,7 @@ class CodesignCommand extends Command<void> {
     final String output = entitlementResult.stdout as String;
     for (final String entitlement in expectedEntitlements) {
       final bool entitlementExpected = binariesWithEntitlements
-          .contains(fileSystem.path.basename(binaryPath));
+          .contains(binaryPath);
       if (output.contains(entitlement) != entitlementExpected) {
         stdio.printError(
             'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} entitlement $entitlement.');

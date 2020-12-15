@@ -7,6 +7,7 @@ import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/repository.dart';
 import 'package:file/memory.dart';
+import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
@@ -26,9 +27,16 @@ void main() {
     FakePlatform platform;
     TestStdio stdio;
     FakeProcessManager processManager;
-    const List<String> cachedBinaries = <String>[
-      '$flutterCache/dart',
-      '$flutterCache/dartaotruntime',
+    const List<String> binariesWithEntitlements = <String>[
+      '$flutterCache/dart-sdk/bin/dart',
+      '$flutterCache/dart-sdk/bin/dartaotruntime',
+    ];
+    const List<String> binariesWithoutEntitlements = <String>[
+      '$flutterCache/engine/darwin-x64/font-subset',
+    ];
+    const List<String> allBinaries = <String>[
+      ...binariesWithEntitlements,
+      ...binariesWithoutEntitlements,
     ];
 
     void createRunner({
@@ -46,8 +54,13 @@ void main() {
         processManager: processManager,
         stdio: stdio,
       );
+      final FakeCodesignCommand command = FakeCodesignCommand(
+        checkouts: checkouts,
+        binariesWithEntitlements: binariesWithEntitlements,
+        binariesWithoutEntitlements: binariesWithoutEntitlements,
+      );
       runner = CommandRunner<void>('codesign-test', '')
-        ..addCommand(CodesignCommand(checkouts: checkouts));
+        ..addCommand(command);
     }
 
     test('throws exception if not run from macos', () async {
@@ -69,7 +82,7 @@ void main() {
 
     test('succeeds if every binary is codesigned and has correct entitlements', () async {
       final List<FakeCommand> codesignCheckCommands = <FakeCommand>[];
-      for (final String bin in cachedBinaries) {
+      for (final String bin in binariesWithEntitlements) {
         codesignCheckCommands.add(
           FakeCommand(
             command: <String>['codesign', '-vvv', bin],
@@ -79,7 +92,14 @@ void main() {
           FakeCommand(
             command: <String>['codesign', '--display', '--entitlements', ':-', bin],
             stdout: expectedEntitlements.join('\n'),
-          )
+          ),
+        );
+      }
+      for (final String bin in binariesWithoutEntitlements) {
+        codesignCheckCommands.add(
+          FakeCommand(
+            command: <String>['codesign', '-vvv', bin],
+          ),
         );
       }
       createRunner(commands: <FakeCommand>[
@@ -115,44 +135,59 @@ void main() {
             '${checkoutsParentDirectory}checkouts/framework/bin/cache',
             '-type',
             'f',
-            '-perm',
-            '+111',
           ],
-          stdout: cachedBinaries.join('\n'),
+          stdout: allBinaries.join('\n'),
         ),
-        for (String bin in cachedBinaries)
+        for (String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
           ),
         ...codesignCheckCommands,
       ]);
-      await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
+      try {
+        await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
+      } on ConductorException {
+        print(stdio.error);
+        rethrow;
+      }
     });
 
     test('fails if a single binary is not codesigned', () async {
       final List<FakeCommand> codesignCheckCommands = <FakeCommand>[];
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/dart'],
+          command: <String>['codesign', '-vvv', '$flutterCache/dart-sdk/bin/dart'],
         ),
       );
       codesignCheckCommands.add(
         FakeCommand(
-          command: const <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dart'],
+          command: const <String>[
+            'codesign',
+            '--display',
+            '--entitlements',
+            ':-',
+            '$flutterCache/dart-sdk/bin/dart',
+          ],
           stdout: expectedEntitlements.join('\n'),
         )
       );
       // Not signed
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/dartaotruntime'],
+          command: <String>['codesign', '-vvv', '$flutterCache/dart-sdk/bin/dartaotruntime'],
           exitCode: 1,
         ),
       );
       codesignCheckCommands.add(
         FakeCommand(
-          command: const <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dartaotruntime'],
+          command: const <String>[
+            'codesign',
+            '--display',
+            '--entitlements',
+            ':-',
+            '$flutterCache/dart-sdk/bin/dartaotruntime',
+          ],
           stdout: expectedEntitlements.join('\n'),
         )
       );
@@ -189,12 +224,10 @@ void main() {
             '${checkoutsParentDirectory}checkouts/framework/bin/cache',
             '-type',
             'f',
-            '-perm',
-            '+111',
           ],
-          stdout: cachedBinaries.join('\n'),
+          stdout: binariesWithEntitlements.join('\n'),
         ),
-        for (String bin in cachedBinaries)
+        for (String bin in binariesWithEntitlements)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -211,24 +244,24 @@ void main() {
       final List<FakeCommand> codesignCheckCommands = <FakeCommand>[];
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/dart'],
+          command: <String>['codesign', '-vvv', '$flutterCache/dart-sdk/bin/dart'],
         ),
       );
       codesignCheckCommands.add(
         FakeCommand(
-          command: const <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dart'],
+          command: const <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dart-sdk/bin/dart'],
           stdout: expectedEntitlements.join('\n'),
         )
       );
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/dartaotruntime'],
+          command: <String>['codesign', '-vvv', '$flutterCache/dart-sdk/bin/dartaotruntime'],
         ),
       );
       // No entitlements
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dartaotruntime'],
+          command: <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dart-sdk/bin/dartaotruntime'],
         )
       );
       createRunner(commands: <FakeCommand>[
@@ -264,12 +297,10 @@ void main() {
             '${checkoutsParentDirectory}checkouts/framework/bin/cache',
             '-type',
             'f',
-            '-perm',
-            '+111',
           ],
-          stdout: cachedBinaries.join('\n'),
+          stdout: binariesWithEntitlements.join('\n'),
         ),
-        for (String bin in cachedBinaries)
+        for (String bin in binariesWithEntitlements)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -282,4 +313,18 @@ void main() {
       );
     });
   });
+}
+
+class FakeCodesignCommand extends CodesignCommand {
+  FakeCodesignCommand({
+    @required Checkouts checkouts,
+    @required this.binariesWithEntitlements,
+    @required this.binariesWithoutEntitlements,
+  }) : super(checkouts: checkouts);
+
+  @override
+  final List<String> binariesWithEntitlements;
+
+  @override
+  final List<String> binariesWithoutEntitlements;
 }
