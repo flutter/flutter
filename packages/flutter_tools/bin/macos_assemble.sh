@@ -98,26 +98,24 @@ BuildApp() {
       --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
       --build-inputs="${build_inputs_path}"                                   \
       --build-outputs="${build_outputs_path}"                                 \
-      --output="${ephemeral_dir}"                                             \
+      --output="${BUILT_PRODUCTS_DIR}"                                        \
      "${build_mode}_macos_bundle_flutter_assets"
 }
 
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFrameworks() {
-  local ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
-
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand rsync -av --delete --filter "- .DS_Store/" "${ephemeral_dir}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete --filter "- .DS_Store/" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual FlutterMacOS.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
 
   # Copy Xcode behavior and don't copy over headers or modules.
-  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${ephemeral_dir}/FlutterMacOS.framework" "${xcode_frameworks_dir}/"
+  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${BUILT_PRODUCTS_DIR}/FlutterMacOS.framework" "${xcode_frameworks_dir}/"
 
   # Sign the binaries we moved.
   if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
