@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -934,6 +935,69 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       ));
+    });
+  });
+
+  group('boot', () {
+    SimControl simControl;
+    MockXcode mockXcode;
+
+    setUp(() {
+      simControl = MockSimControl();
+      mockXcode = MockXcode();
+      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
+    });
+
+    testUsingContext('success', () async {
+      final IOSSimulator device = IOSSimulator(
+        'x',
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        xcode: mockXcode,
+      );
+      when(simControl.boot(any)).thenAnswer((_) async =>
+          RunResult(ProcessResult(0, 0, '', ''), <String>['simctl']));
+
+      expect(await device.boot(), isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('already booted', () async {
+      final IOSSimulator device = IOSSimulator(
+        'x',
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        xcode: mockXcode,
+      );
+      // 149 means the device is already booted.
+      when(simControl.boot(any)).thenAnswer((_) async =>
+          RunResult(ProcessResult(0, 149, '', ''), <String>['simctl']));
+
+      expect(await device.boot(), isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('failed', () async {
+      final IOSSimulator device = IOSSimulator(
+        'x',
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        xcode: mockXcode,
+      );
+      when(simControl.boot(any)).thenAnswer((_) async =>
+          RunResult(ProcessResult(0, 1, '', ''), <String>['simctl']));
+
+      expect(await device.boot(), isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 

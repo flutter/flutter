@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
@@ -336,32 +333,6 @@ void main() {
 
       expect(emulator.id, '1234');
       expect(emulator.name, 'iPhone 12');
-      await emulator.launch();
-      expect(fakeProcessManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
-      Xcode: () => mockXcode,
-    });
-
-    testUsingContext('launches app with placeholder emulator ID', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          'open',
-          '-n',
-          '-a',
-          '/fake/simulator.app',
-        ]),
-        const FakeCommand(command: <String>[
-          'open',
-          '-a',
-          '/fake/simulator.app',
-        ]),
-      ]);
-
-      final PlaceholderIOSEmulator emulator = PlaceholderIOSEmulator();
-
-      expect(emulator.id, 'apple_ios_simulator');
-      expect(emulator.name, 'iOS Simulator (launch app only)');
       await emulator.launch();
       expect(fakeProcessManager.hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
