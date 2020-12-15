@@ -9,7 +9,7 @@ import 'divider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 /// A thin horizontal line, with padding on either side.
 ///

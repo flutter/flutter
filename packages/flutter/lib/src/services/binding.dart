@@ -104,7 +104,19 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     // TODO(ianh): Remove this complexity once these bugs are fixed.
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
-      rawLicenses.complete(await rootBundle.loadString('NOTICES', cache: false));
+      rawLicenses.complete(
+        await rootBundle.loadString(
+          // NOTICES for web isn't compressed since we don't have access to
+          // dart:io on the client side and it's already compressed between
+          // the server and client.
+          //
+          // The compressed version doesn't have a more common .gz extension
+          // because gradle for Android non-transparently manipulates .gz files.
+          kIsWeb ? 'NOTICES' : 'NOTICES.Z',
+          cache: false,
+          unzip: !kIsWeb,
+        )
+      );
     }, Priority.animation);
     await rawLicenses.future;
     final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
@@ -166,14 +178,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   // App life cycle
 
-  /// Initializes the [lifecycleState] with the [Window.initialLifecycleState]
-  /// from the window.
+  /// Initializes the [lifecycleState] with the
+  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState].
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// [Window.initialLifecycleState] may already be stale and it no longer makes
-  /// sense to use the initial state at dart vm startup as the current state
-  /// anymore.
+  /// [dart:ui.SingletonFlutterWindow.initialLifecycleState] may already be
+  /// stale and it no longer makes sense to use the initial state at dart vm
+  /// startup as the current state anymore.
   ///
   /// The latest state should be obtained by subscribing to
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
@@ -249,13 +261,14 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   Future<ByteData?> _sendPlatformMessage(String channel, ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
-    // ui.window is accessed directly instead of using ServicesBinding.instance.window
-    // because this method might be invoked before any binding is initialized.
-    // This issue was reported in #27541. It is not ideal to statically access
-    // ui.window because the Window may be dependency injected elsewhere with
-    // a different instance. However, static access at this location seems to be
-    // the least bad option.
-    ui.window.sendPlatformMessage(channel, message, (ByteData? reply) {
+    // ui.PlatformDispatcher.instance is accessed directly instead of using
+    // ServicesBinding.instance.platformDispatcher because this method might be
+    // invoked before any binding is initialized. This issue was reported in
+    // #27541. It is not ideal to statically access
+    // ui.PlatformDispatcher.instance because the PlatformDispatcher may be
+    // dependency injected elsewhere with a different instance. However, static
+    // access at this location seems to be the least bad option.
+    ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message, (ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {

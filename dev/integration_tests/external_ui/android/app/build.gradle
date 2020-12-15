@@ -19,16 +19,12 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 29
-
-    lintOptions {
-        disable 'InvalidPackage'
-    }
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "io.flutter.externalui"
         minSdkVersion 16
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
     }

@@ -36,6 +36,11 @@ typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> deta
 /// Used by [DragTarget.builder].
 typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
 
+/// Signature for when a [Draggable] is dragged across the screen.
+///
+/// Used by [Draggable.onDragUpdate].
+typedef DragUpdateCallback = void Function(DragUpdateDetails details);
+
 /// Signature for when a [Draggable] is dropped without being accepted by a [DragTarget].
 ///
 /// Used by [Draggable.onDraggableCanceled].
@@ -99,7 +104,7 @@ enum DragAnchor {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// The following example has a [Draggable] widget along with a [DragTarget]
 /// in a row demonstrating an incremented `acceptedData` integer value when
@@ -187,6 +192,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
+    this.onDragUpdate,
     this.onDraggableCanceled,
     this.onDragEnd,
     this.onDragCompleted,
@@ -298,6 +304,12 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Called when the draggable starts being dragged.
   final VoidCallback? onDragStarted;
 
+  /// Called when the draggable is being dragged.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
+  final DragUpdateCallback? onDragUpdate;
+
   /// Called when the draggable is dropped without being accepted by a [DragTarget].
   ///
   /// This function might be called after this widget has been removed from the
@@ -374,6 +386,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     DragAnchor dragAnchor = DragAnchor.child,
     int? maxSimultaneousDrags,
     VoidCallback? onDragStarted,
+    DragUpdateCallback? onDragUpdate,
     DraggableCanceledCallback? onDraggableCanceled,
     DragEndCallback? onDragEnd,
     VoidCallback? onDragCompleted,
@@ -390,6 +403,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
+    onDragUpdate: onDragUpdate,
     onDraggableCanceled: onDraggableCanceled,
     onDragEnd: onDragEnd,
     onDragCompleted: onDragCompleted,
@@ -474,6 +488,11 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
+      onDragUpdate: (DragUpdateDetails details) {
+        if (mounted && widget.onDragUpdate != null) {
+          widget.onDragUpdate!(details);
+        }
+      },
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
         if (mounted) {
           setState(() {
@@ -708,6 +727,7 @@ class _DragAvatar<T extends Object> extends Drag {
     this.dragStartPoint = Offset.zero,
     this.feedback,
     this.feedbackOffset = Offset.zero,
+    this.onDragUpdate,
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
   }) : assert(overlayState != null),
@@ -725,6 +745,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final Offset dragStartPoint;
   final Widget? feedback;
   final Offset feedbackOffset;
+  final DragUpdateCallback? onDragUpdate;
   final _OnDragEnd? onDragEnd;
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
@@ -737,8 +758,12 @@ class _DragAvatar<T extends Object> extends Drag {
 
   @override
   void update(DragUpdateDetails details) {
+    final Offset oldPosition = _position;
     _position += _restrictAxis(details.delta);
     updateDrag(_position);
+    if (onDragUpdate != null && _position != oldPosition) {
+      onDragUpdate!(details);
+    }
   }
 
   @override

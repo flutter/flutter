@@ -20,8 +20,7 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-final Platform _kNoColorTerminalPlatform = FakePlatform(
-  stdoutSupportsAnsi: false);
+final Platform _kNoColorTerminalPlatform = FakePlatform(stdoutSupportsAnsi: false);
 
 void main() {
   String analyzerSeparator;
@@ -45,7 +44,6 @@ void main() {
     int exitCode = 0,
   }) async {
     try {
-      arguments.insert(0, '--flutter-root=${Cache.flutterRoot}');
       await createTestCommandRunner(command).run(arguments);
       expect(toolExit, isFalse, reason: 'Expected ToolExit exception');
     } on ToolExit catch (e) {
@@ -112,10 +110,7 @@ void main() {
     platform = const LocalPlatform();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     fileSystem = LocalFileSystem.instance;
-    logger = BufferLogger(
-      outputPreferences: OutputPreferences.test(),
-      terminal: terminal,
-    );
+    logger = BufferLogger.test();
     analyzerSeparator = platform.isWindows ? '-' : '•';
     artifacts = CachedArtifacts(
       cache: globals.cache,

@@ -472,7 +472,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
-    Widget bottomSheet = MediaQuery.removePadding(
+    final Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
       child: Builder(
@@ -490,11 +490,6 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         },
       ),
     );
-    if (isScrollControlled)
-      bottomSheet = Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-        child: bottomSheet
-      );
     return capturedThemes.wrap(bottomSheet);
   }
 }
@@ -577,8 +572,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
 /// a [GridView] and have the bottom sheet be draggable, you should set this
-/// parameter to true. When this parameter is set to true the top of [BottomSheet] will be padded
-/// such that it avoids any system top padding given by the [MediaQuery]
+/// parameter to true.
 ///
 /// The `useRootNavigator` parameter ensures that the root navigator is used to
 /// display the [BottomSheet] when set to `true`. This is useful in the case
@@ -602,7 +596,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// This example demonstrates how to use `showModalBottomSheet` to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
@@ -675,7 +669,7 @@ Future<T?> showModalBottomSheet<T>({
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator)!;
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(_ModalBottomSheetRoute<T>(
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),

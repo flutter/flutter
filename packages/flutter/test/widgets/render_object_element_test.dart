@@ -231,6 +231,11 @@ class RenderSwapper extends RenderBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
   void performLayout() {
     assert(constraints.hasBoundedWidth);
     assert(constraints.hasTightHeight);

@@ -109,6 +109,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       }
     }
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
+    final BuildInfo buildInfo = await getBuildInfo();
 
     if (exportOptionsPlist == null) {
       return xcarchiveResult;
@@ -121,7 +122,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
 
     // Build IPA from generated xcarchive.
-    final BuildableIOSApp app = await buildableIOSApp;
+    final BuildableIOSApp app = await buildableIOSApp(buildInfo);
     Status status;
     RunResult result;
     final String outputPath = globals.fs.path.absolute(app.ipaOutputPath);
@@ -195,14 +196,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   bool get configOnly;
   bool get shouldCodesign;
 
-  BuildInfo get buildInfo {
-    _buildInfo ??= getBuildInfo();
-    return _buildInfo;
-  }
-
-  BuildInfo _buildInfo;
-
-  Future<BuildableIOSApp> get buildableIOSApp async {
+  Future<BuildableIOSApp> buildableIOSApp(BuildInfo buildInfo) async {
     _buildableIOSApp ??= await applicationPackages.getPackageForPlatform(
       TargetPlatform.ios,
       buildInfo: buildInfo,
@@ -215,6 +209,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
+    final BuildInfo buildInfo = await getBuildInfo();
 
     if (!globals.platform.isMacOS) {
       throwToolExit('Building for iOS is only supported on macOS.');
@@ -232,7 +227,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       );
     }
 
-    final BuildableIOSApp app = await buildableIOSApp;
+    final BuildableIOSApp app = await buildableIOSApp(buildInfo);
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');
@@ -291,11 +286,21 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         type: 'ios',
       );
       final File outputFile = globals.fsUtils.getUniqueFile(
-        globals.fs.directory(getBuildDirectory()),'ios-code-size-analysis', 'json',
+        globals.fs
+          .directory(globals.fsUtils.homeDirPath)
+          .childDirectory('.flutter-devtools'), 'ios-code-size-analysis', 'json',
       )..writeAsStringSync(jsonEncode(output));
       // This message is used as a sentinel in analyze_apk_size_test.dart
       globals.printStatus(
         'A summary of your iOS bundle analysis can be found at: ${outputFile.path}',
+      );
+
+      // DevTools expects a file path relative to the .flutter-devtools/ dir.
+      final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+      globals.printStatus(
+        '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+        'flutter pub global activate devtools; flutter pub global run devtools '
+        '--appSizeBase=$relativeAppSizePath'
       );
     }
 
