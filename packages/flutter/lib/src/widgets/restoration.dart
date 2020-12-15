@@ -413,7 +413,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// [RestorableProperty]. Whenever new restoration data has been provided to
   /// the [RestorationMixin] the property is registered to, either this method
   /// or [fromPrimitives] is called before [initWithValue] is invoked.
-  T? createDefaultValue();
+  T createDefaultValue();
 
   /// Called by the [RestorationMixin] to convert the `data` previously
   /// retrieved from [toPrimitives] back into an object of type `T` that this
@@ -427,7 +427,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// [RestorableProperty]. Whenever new restoration data has been provided to
   /// the [RestorationMixin] the property is registered to, either this method
   /// or [createDefaultValue] is called before [initWithValue] is invoked.
-  T? fromPrimitives(Object? data);
+  T fromPrimitives(Object? data);
 
   /// Called by the [RestorationMixin] with the `value` returned by either
   /// [createDefaultValue] or [fromPrimitives] to set the value that this

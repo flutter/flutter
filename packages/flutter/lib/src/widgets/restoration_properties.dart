@@ -143,62 +143,11 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   void didUpdateValue(T? oldValue);
 }
 
-/// A [RestorableProperty] almost identical to [RestorableValue], except
-/// that it also allows null values.
-abstract class RestorableValueN<T> extends RestorableProperty<T> {
-  /// The current value stored in this property.
-  ///
-  /// A representation of the current value is stored in the restoration data.
-  /// During state restoration, the property will restore the value to what it
-  /// was when the restoration data it is getting restored from was collected.
-  ///
-  /// The [value] can only be accessed after the property has been registered
-  /// with a [RestorationMixin] by calling
-  /// [RestorationMixin.registerForRestoration].
-  T? get value {
-    assert(isRegistered);
-    return _value;
-  }
-  T? _value;
-  set value(T? newValue) {
-    assert(isRegistered);
-    if (newValue != _value) {
-      final T? oldValue = _value;
-      _value = newValue;
-      didUpdateValue(oldValue);
-    }
-  }
-
-  @mustCallSuper
-  @override
-  void initWithValue(T? value) {
-    _value = value;
-  }
-
-  /// Called whenever a new value is assigned to [value].
-  ///
-  /// The new value can be accessed via the regular [value] getter and the
-  /// previous value is provided as `oldValue`.
-  ///
-  /// Subclasses should call [notifyListeners] from this method, if the new
-  /// value changes what [toPrimitives] returns.
-  @protected
-  void didUpdateValue(T? oldValue);
-}
-
-// _RestorablePrimitiveValue and its subclasses do not allow null values in
-// anticipation of NNBD (non-nullability by default).
-//
-// If necessary, we can in the future define a new subclass hierarchy that
-// does allow null values for primitive types. Borrowing from lisp where
-// functions that returned a bool ended in 'p', a suggested naming scheme for
-// these new subclasses could be to add 'N' (for nullable) to the end of a
-// class name (e.g. RestorableIntN, RestorableStringN, etc.) to distinguish them
-// from their non-nullable friends.
-class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
-  _RestorablePrimitiveValue(this._defaultValue)
-    : assert(_defaultValue != null),
-      assert(debugIsSerializableForRestoration(_defaultValue)),
+// _RestorablePrimitiveValueN and its subclasses allows for null values.
+// See [_RestorablePrimitiveValue] for the non-nullable version of this class.
+class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
+  _RestorablePrimitiveValueN(this._defaultValue)
+    : assert(debugIsSerializableForRestoration(_defaultValue)),
       super();
 
   final T _defaultValue;
@@ -208,7 +157,6 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
 
   @override
   set value(T value) {
-    assert(value != null);
     super.value = value;
   }
 
@@ -217,6 +165,20 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
     assert(debugIsSerializableForRestoration(value));
     notifyListeners();
   }
+
+  @override
+  T fromPrimitives(Object? serialized) => serialized as T;
+
+  @override
+  Object? toPrimitives() => value;
+}
+
+// _RestorablePrimitiveValue and its subclasses do not allow null values in
+// anticipation of NNBD (non-nullability by default).
+class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
+  _RestorablePrimitiveValue(T _defaultValue)
+    : assert(_defaultValue != null),
+      super(_defaultValue);
 
   @override
   T fromPrimitives(Object? serialized) {
@@ -229,35 +191,6 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
     assert(value != null);
     return value;
   }
-}
-
-// _RestorablePrimitiveValueN and its subclasses allows null values.
-class _RestorablePrimitiveValueN<T extends Object> extends RestorableValueN<T> {
-  _RestorablePrimitiveValueN(this._defaultValue)
-    : assert(debugIsSerializableForRestoration(_defaultValue)),
-      super();
-
-  final T? _defaultValue;
-
-  @override
-  T? createDefaultValue() => _defaultValue;
-
-  @override
-  set value(T? value) {
-    super.value = value;
-  }
-
-  @override
-  void didUpdateValue(T? oldValue) {
-    assert(debugIsSerializableForRestoration(value));
-    notifyListeners();
-  }
-
-  @override
-  T? fromPrimitives(Object? serialized) => serialized as T?;
-
-  @override
-  Object? toPrimitives() => value;
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [num].
@@ -328,7 +261,7 @@ class RestorableBool extends _RestorablePrimitiveValue<bool> {
 /// nullable.
 ///
 /// {@macro flutter.widgets.RestorableNum}
-class RestorableBoolN extends _RestorablePrimitiveValueN<bool> {
+class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
   /// Creates a [RestorableBoolN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
