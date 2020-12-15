@@ -946,6 +946,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDel
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCallbackCache.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterDartProject.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterHeadlessDartRunner.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h
@@ -964,6 +965,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartPro
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProjectTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngineGroup.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngineGroupTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEnginePlatformViewTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngineTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h
