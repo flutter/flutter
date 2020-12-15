@@ -37,6 +37,10 @@ void main() {
     tryToDelete(tempDir);
   });
 
+  tearDownAll(() async {
+    await _restoreFlutterToolsSnapshot();
+  });
+
   testUsingContext('generated plugin registrant passes analysis', () async {
     await _createProject(projectDir, <String>[]);
     // We need to add a dependency with web support to trigger
@@ -137,6 +141,27 @@ Future<void> _ensureFlutterToolsSnapshot() async {
     print(snapshotResult.stderr);
   }
   expect(snapshotResult.exitCode, 0);
+}
+
+Future<void> _restoreFlutterToolsSnapshot() async {
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
+    globals.fs.path.join(
+      '..',
+      '..',
+      'bin',
+      'cache',
+      'flutter_tools.snapshot',
+    ),
+  );
+
+  final File snapshotBackup =
+      globals.fs.file(flutterToolsSnapshotPath + '.bak');
+  if (!snapshotBackup.existsSync()) {
+    // No backup to restore.
+    return;
+  }
+
+  snapshotBackup.renameSync(flutterToolsSnapshotPath);
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
