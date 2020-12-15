@@ -698,12 +698,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  plugin_test_win:
-    description: >
-      Checks that the project template works and supports plugins on Windows.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
-
   hot_mode_dev_cycle_win__benchmark:
     description: >
       Measures the performance of Dart VM hot patching feature on Windows.
