@@ -19,7 +19,6 @@
       "fuchsia.intl.PropertyProvider",
       "fuchsia.logger.LogSink",
       "fuchsia.net.NameLookup",
-      "fuchsia.netstack.Netstack",
       "fuchsia.posix.socket.Provider",
       "fuchsia.sysmem.Allocator",
       "fuchsia.timezone.Timezone",

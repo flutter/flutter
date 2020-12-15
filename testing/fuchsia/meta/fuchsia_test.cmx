@@ -14,7 +14,6 @@
       "fuchsia.deprecatedtimezone.Timezone",
       "fuchsia.intl.PropertyProvider",
       "fuchsia.logger.LogSink",
-      "fuchsia.netstack.Netstack",
       "fuchsia.process.Launcher",
       "fuchsia.settings.Intl",
       "fuchsia.sysmem.Allocator",
