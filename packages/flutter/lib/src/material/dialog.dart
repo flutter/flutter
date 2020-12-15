@@ -19,7 +19,7 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
-// BuildContext context;
+// late BuildContext context;
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
@@ -704,6 +704,9 @@ class SimpleDialogOption extends StatelessWidget {
 ///     break;
 ///     case Department.state:
 ///       // ...
+///     break;
+///     case null:
+///       // dialog dismissed
 ///     break;
 ///   }
 /// }

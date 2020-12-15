@@ -17,8 +17,8 @@ import 'listener_helpers.dart';
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
 // Examples can assume:
-// AnimationController _controller, fadeAnimationController, sizeAnimationController;
-// bool dismissed;
+// late AnimationController _controller, fadeAnimationController, sizeAnimationController;
+// late bool dismissed;
 // void setState(VoidCallback fn) { }
 
 /// The direction in which an animation is running.
@@ -136,7 +136,7 @@ enum AnimationBehavior {
 ///
 /// ```dart
 /// class Foo extends StatefulWidget {
-///   Foo({ Key key, this.duration }) : super(key: key);
+///   Foo({ Key? key, required this.duration }) : super(key: key);
 ///
 ///   final Duration duration;
 ///
@@ -145,7 +145,7 @@ enum AnimationBehavior {
 /// }
 ///
 /// class _FooState extends State<Foo> with SingleTickerProviderStateMixin {
-///   AnimationController _controller;
+///   late AnimationController _controller;
 ///
 ///   @override
 ///   void initState() {
