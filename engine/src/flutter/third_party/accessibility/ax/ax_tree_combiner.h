@@ -46,7 +46,6 @@ class AX_EXPORT AXTreeCombiner {
   AXTreeUpdate combined_;
 };
 
-
 }  // namespace ui
 
 #endif  // UI_ACCESSIBILITY_AX_TREE_COMBINER_H_

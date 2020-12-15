@@ -12,12 +12,9 @@ using base::NumberToString;
 
 namespace ui {
 
-AXRelativeBounds::AXRelativeBounds()
-    : offset_container_id(-1) {
-}
+AXRelativeBounds::AXRelativeBounds() : offset_container_id(-1) {}
 
-AXRelativeBounds::~AXRelativeBounds() {
-}
+AXRelativeBounds::~AXRelativeBounds() {}
 
 AXRelativeBounds::AXRelativeBounds(const AXRelativeBounds& other) {
   offset_container_id = other.offset_container_id;

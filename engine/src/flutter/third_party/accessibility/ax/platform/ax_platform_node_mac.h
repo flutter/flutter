@@ -49,7 +49,7 @@ AX_EXPORT bool IsNameExposedInAXValueForRole(ax::mojom::Role role);
 }  // namespace ui
 
 AX_EXPORT
-@interface AXPlatformNodeCocoa : NSAccessibilityElement<NSAccessibility>
+@interface AXPlatformNodeCocoa : NSAccessibilityElement <NSAccessibility>
 
 // Maps AX roles to native roles. Returns NSAccessibilityUnknownRole if not
 // found.

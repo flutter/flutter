@@ -37,8 +37,7 @@ struct AtkUtilAuraLinuxClass {
 
 G_DEFINE_TYPE(AtkUtilAuraLinux, atk_util_auralinux, ATK_TYPE_UTIL)
 
-static void atk_util_auralinux_init(AtkUtilAuraLinux *ax_util) {
-}
+static void atk_util_auralinux_init(AtkUtilAuraLinux* ax_util) {}
 
 static AtkObject* AtkUtilAuraLinuxGetRoot() {
   ui::AXPlatformNode* application = ui::AXPlatformNodeAuraLinux::application();
@@ -90,7 +89,7 @@ static void AtkUtilAuraLinuxRemoveKeyEventListener(guint listener_id) {
   GetActiveKeySnoopFunctions().erase(listener_id);
 }
 
-static void atk_util_auralinux_class_init(AtkUtilAuraLinuxClass *klass) {
+static void atk_util_auralinux_class_init(AtkUtilAuraLinuxClass* klass) {
   AtkUtilClass* atk_class = ATK_UTIL_CLASS(g_type_class_peek(ATK_TYPE_UTIL));
 
   atk_class->get_root = AtkUtilAuraLinuxGetRoot;
@@ -144,9 +143,8 @@ void AtkUtilAuraLinux::InitializeForTesting() {
 
 // static
 // Disable CFI-icall since the key snooping function could be in another DSO.
-__attribute__((no_sanitize("cfi-icall")))
-DiscardAtkKeyEvent AtkUtilAuraLinux::HandleAtkKeyEvent(
-    AtkKeyEventStruct* key_event) {
+__attribute__((no_sanitize("cfi-icall"))) DiscardAtkKeyEvent
+AtkUtilAuraLinux::HandleAtkKeyEvent(AtkKeyEventStruct* key_event) {
   DCHECK(key_event);
 
   if (!ui::AXPlatformNode::GetAccessibilityMode().has_mode(

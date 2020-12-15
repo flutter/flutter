@@ -19,7 +19,7 @@ namespace ui {
 // as an AXNodeData. This is the primary interface to use when
 // an accessibility tree will be sent over an IPC before being
 // consumed.
-template<typename AXNodeSource, typename AXNodeData, typename AXTreeData>
+template <typename AXNodeSource, typename AXNodeData, typename AXTreeData>
 class AXTreeSource {
  public:
   virtual ~AXTreeSource() {}
@@ -52,8 +52,7 @@ class AXTreeSource {
   virtual bool IsIgnored(AXNodeSource node) const = 0;
 
   // Returns true if two nodes are equal.
-  virtual bool IsEqual(AXNodeSource node1,
-                       AXNodeSource node2) const = 0;
+  virtual bool IsEqual(AXNodeSource node1, AXNodeSource node2) const = 0;
 
   // Return a AXNodeSource representing null.
   virtual AXNodeSource GetNull() const = 0;

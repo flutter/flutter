@@ -150,9 +150,9 @@ gfx::NativeViewAccessible TestAXNodeWrapper::GetNativeViewAccessible() {
 gfx::NativeViewAccessible TestAXNodeWrapper::GetParent() {
   TestAXNodeWrapper* parent_wrapper =
       GetOrCreate(tree_, node_->GetUnignoredParent());
-  return parent_wrapper ?
-      parent_wrapper->ax_platform_node()->GetNativeViewAccessible() :
-      nullptr;
+  return parent_wrapper
+             ? parent_wrapper->ax_platform_node()->GetNativeViewAccessible()
+             : nullptr;
 }
 
 int TestAXNodeWrapper::GetChildCount() const {
@@ -161,9 +161,9 @@ int TestAXNodeWrapper::GetChildCount() const {
 
 gfx::NativeViewAccessible TestAXNodeWrapper::ChildAtIndex(int index) {
   TestAXNodeWrapper* child_wrapper = InternalGetChild(index);
-  return child_wrapper ?
-      child_wrapper->ax_platform_node()->GetNativeViewAccessible() :
-      nullptr;
+  return child_wrapper
+             ? child_wrapper->ax_platform_node()->GetNativeViewAccessible()
+             : nullptr;
 }
 
 gfx::Rect TestAXNodeWrapper::GetBoundsRect(
@@ -370,9 +370,8 @@ void TestAXNodeWrapper::ReplaceIntAttribute(int32_t node_id,
   std::vector<std::pair<ax::mojom::IntAttribute, int32_t>>& attributes =
       new_data.int_attributes;
 
-  base::EraseIf(attributes, [attribute](auto& pair) {
-    return pair.first == attribute;
-  });
+  base::EraseIf(attributes,
+                [attribute](auto& pair) { return pair.first == attribute; });
 
   new_data.AddIntAttribute(attribute, value);
   node->SetData(new_data);
@@ -873,9 +872,7 @@ const ui::AXUniqueId& TestAXNodeWrapper::GetUniqueId() const {
 }
 
 TestAXNodeWrapper::TestAXNodeWrapper(AXTree* tree, AXNode* node)
-    : tree_(tree),
-      node_(node),
-      platform_node_(AXPlatformNode::Create(this)) {
+    : tree_(tree), node_(node), platform_node_(AXPlatformNode::Create(this)) {
 #if defined(OS_WIN)
   native_event_target_ = gfx::kMockAcceleratedWidget;
 #else
