@@ -12,6 +12,7 @@
 #import "FlutterCodecs.h"
 #import "FlutterDartProject.h"
 #import "FlutterEngine.h"
+#import "FlutterEngineGroup.h"
 #import "FlutterHeadlessDartRunner.h"
 #import "FlutterMacros.h"
 #import "FlutterPlatformViews.h"

@@ -47,6 +47,7 @@ FlutterCallbackCache.html
 FlutterCallbackInformation.html
 FlutterDartProject.html
 FlutterEngine.html
+FlutterEngineGroup.html
 FlutterError.html
 FlutterEventChannel.html
 FlutterHeadlessDartRunner.html

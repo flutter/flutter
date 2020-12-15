@@ -32,6 +32,7 @@
 #include "flutter/shell/common/vsync_waiter_fallback.h"
 #include "flutter/shell/version/version.h"
 #include "flutter/testing/testing.h"
+#include "gmock/gmock.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -42,6 +43,77 @@
 
 namespace flutter {
 namespace testing {
+namespace {
+class MockPlatformViewDelegate : public PlatformView::Delegate {
+  MOCK_METHOD1(OnPlatformViewCreated, void(std::unique_ptr<Surface> surface));
+
+  MOCK_METHOD0(OnPlatformViewDestroyed, void());
+
+  MOCK_METHOD1(OnPlatformViewSetNextFrameCallback,
+               void(const fml::closure& closure));
+
+  MOCK_METHOD1(OnPlatformViewSetViewportMetrics,
+               void(const ViewportMetrics& metrics));
+
+  MOCK_METHOD1(OnPlatformViewDispatchPlatformMessage,
+               void(fml::RefPtr<PlatformMessage> message));
+
+  MOCK_METHOD1(OnPlatformViewDispatchPointerDataPacket,
+               void(std::unique_ptr<PointerDataPacket> packet));
+
+  MOCK_METHOD3(OnPlatformViewDispatchSemanticsAction,
+               void(int32_t id,
+                    SemanticsAction action,
+                    std::vector<uint8_t> args));
+
+  MOCK_METHOD1(OnPlatformViewSetSemanticsEnabled, void(bool enabled));
+
+  MOCK_METHOD1(OnPlatformViewSetAccessibilityFeatures, void(int32_t flags));
+
+  MOCK_METHOD1(OnPlatformViewRegisterTexture,
+               void(std::shared_ptr<Texture> texture));
+
+  MOCK_METHOD1(OnPlatformViewUnregisterTexture, void(int64_t texture_id));
+
+  MOCK_METHOD1(OnPlatformViewMarkTextureFrameAvailable,
+               void(int64_t texture_id));
+
+  MOCK_METHOD3(LoadDartDeferredLibrary,
+               void(intptr_t loading_unit_id,
+                    std::unique_ptr<const fml::Mapping> snapshot_data,
+                    std::unique_ptr<const fml::Mapping> snapshot_instructions));
+
+  MOCK_METHOD3(LoadDartDeferredLibraryError,
+               void(intptr_t loading_unit_id,
+                    const std::string error_message,
+                    bool transient));
+
+  MOCK_METHOD1(UpdateAssetManager,
+               void(std::shared_ptr<AssetManager> asset_manager));
+};
+
+class MockSurface : public Surface {
+  MOCK_METHOD0(IsValid, bool());
+
+  MOCK_METHOD1(AcquireFrame,
+               std::unique_ptr<SurfaceFrame>(const SkISize& size));
+
+  MOCK_CONST_METHOD0(GetRootTransformation, SkMatrix());
+
+  MOCK_METHOD0(GetContext, GrDirectContext*());
+
+  MOCK_METHOD0(MakeRenderContextCurrent, std::unique_ptr<GLContextResult>());
+
+  MOCK_METHOD0(ClearRenderContext, bool());
+};
+
+class MockPlatformView : public PlatformView {
+ public:
+  MockPlatformView(MockPlatformViewDelegate& delegate, TaskRunners task_runners)
+      : PlatformView(delegate, task_runners) {}
+  MOCK_METHOD0(CreateRenderingSurface, std::unique_ptr<Surface>());
+};
+}  // namespace
 
 static bool ValidateShell(Shell* shell) {
   if (!shell) {
@@ -2316,6 +2388,53 @@ TEST_F(ShellTest, AssetManagerMulti) {
         std::find(expected_results.begin(), expected_results.end(), result),
         expected_results.end());
   }
+}
+
+TEST_F(ShellTest, Spawn) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+  configuration.SetEntrypoint("fixturesAreFunctionalMain");
+
+  fml::AutoResetWaitableEvent main_latch;
+  AddNativeCallback(
+      "SayHiFromFixturesAreFunctionalMain",
+      CREATE_NATIVE_ENTRY([&main_latch](auto args) { main_latch.Signal(); }));
+
+  RunEngine(shell.get(), std::move(configuration));
+  main_latch.Wait();
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+
+  {
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        shell->GetTaskRunners().GetPlatformTaskRunner(),
+        [this, &spawner = shell, &latch, settings]() {
+          MockPlatformViewDelegate platform_view_delegate;
+          auto spawn = spawner->Spawn(
+              settings,
+              [&platform_view_delegate](Shell& shell) {
+                auto result = std::make_unique<MockPlatformView>(
+                    platform_view_delegate, shell.GetTaskRunners());
+                ON_CALL(*result, CreateRenderingSurface())
+                    .WillByDefault(::testing::Invoke(
+                        [] { return std::make_unique<MockSurface>(); }));
+                return result;
+              },
+              [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+          ASSERT_NE(nullptr, spawn.get());
+          ASSERT_TRUE(ValidateShell(spawn.get()));
+          DestroyShell(std::move(spawn));
+          latch.Signal();
+        });
+    latch.Wait();
+  }
+
+  DestroyShell(std::move(shell));
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 }  // namespace testing

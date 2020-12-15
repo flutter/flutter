@@ -134,4 +134,28 @@ FLUTTER_ASSERT_ARC
   [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
+- (void)testSpawn {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  FlutterEngine* spawn = [engine spawnWithEntrypoint:nil libraryURI:nil];
+  XCTAssertNotNil(spawn);
+}
+
+- (void)testDeallocNotification {
+  XCTestExpectation* deallocNotification = [self expectationWithDescription:@"deallocNotification"];
+  NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+  id<NSObject> observer;
+  @autoreleasepool {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+    observer = [center addObserverForName:FlutterEngineWillDealloc
+                                   object:engine
+                                    queue:[NSOperationQueue mainQueue]
+                               usingBlock:^(NSNotification* note) {
+                                 [deallocNotification fulfill];
+                               }];
+  }
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+  [center removeObserver:observer];
+}
+
 @end

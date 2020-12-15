@@ -221,6 +221,19 @@ class Shell final : public PlatformView::Delegate,
   ~Shell();
 
   //----------------------------------------------------------------------------
+  /// @brief      Creates one Shell from another Shell where the created Shell
+  ///             takes the opportunity to share any internal components it can.
+  ///             This results is a Shell that has a smaller startup time cost
+  ///             and a smaller memory footprint than an Shell created with a
+  ///             Create function.
+  ///
+  /// @see        http://flutter.dev/go/multiple-engines
+  std::unique_ptr<Shell> Spawn(
+      Settings settings,
+      const CreateCallback<PlatformView>& on_create_platform_view,
+      const CreateCallback<Rasterizer>& on_create_rasterizer);
+
+  //----------------------------------------------------------------------------
   /// @brief      Starts an isolate for the given RunConfiguration.
   ///
   void RunEngine(RunConfiguration run_configuration);
