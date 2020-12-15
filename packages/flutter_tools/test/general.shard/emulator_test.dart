@@ -326,6 +326,7 @@ void main() {
       final IOSSimulator simulator = IOSSimulator(
         '1234',
         name: 'iPhone 12',
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-3',
         simControl: simControl,
         xcode: mockXcode,
       );
@@ -333,6 +334,8 @@ void main() {
 
       expect(emulator.id, '1234');
       expect(emulator.name, 'iPhone 12');
+      expect(emulator.category, Category.mobile);
+      expect(emulator.platformDisplay, 'iOS-14-3');
       await emulator.launch();
       expect(fakeProcessManager.hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
@@ -367,7 +370,7 @@ class FakeEmulator extends Emulator {
   Category get category => Category.mobile;
 
   @override
-  PlatformType get platformType => PlatformType.android;
+  String get platformDisplay => PlatformType.android.toString();
 
   @override
   Future<void> launch() {

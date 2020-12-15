@@ -44,7 +44,9 @@ class IOSEmulator extends Emulator {
   Category get category => Category.mobile;
 
   @override
-  PlatformType get platformType => PlatformType.ios;
+  String get platformDisplay =>
+      // com.apple.CoreSimulator.SimRuntime.iOS-10-3 => iOS-10-3
+      _simulator.simulatorCategory?.split('.')?.last ?? 'ios';
 
   @override
   Future<void> launch() async {

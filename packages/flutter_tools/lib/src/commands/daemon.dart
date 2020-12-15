@@ -933,7 +933,7 @@ Map<String, dynamic> _emulatorToMap(Emulator emulator) {
     'id': emulator.id,
     'name': emulator.name,
     'category': emulator.category?.toString(),
-    'platformType': emulator.platformType?.toString(),
+    'platformType': emulator.platformDisplay,
   };
 }
 
