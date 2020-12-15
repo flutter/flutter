@@ -266,13 +266,13 @@ void main() {
   testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController',
       (WidgetTester tester) async {
     Widget viewWithScroll() {
-      return Directionality(
+      return const Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: const MediaQueryData(),
+          data: MediaQueryData(),
           child: CupertinoScrollbar(
             isAlwaysShown: true,
-            child: const SingleChildScrollView(
+            child: SingleChildScrollView(
               child: SizedBox(
                 width: 4000.0,
                 height: 4000.0,

@@ -561,10 +561,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// visible.
 ///
 /// By default, the thumb will fade in and out as the child scroll view
-/// scrolls. When [isAlwaysShown] is true, and a [controller] is specified, the
-/// scrollbar thumb will remain visible without the fade animation.
+/// scrolls. When [isAlwaysShown] is true, the scrollbar thumb will remain
+/// visible without the fade animation. This requires that a [ScrollController]
+/// is provided to [controller], or that the [PrimaryScrollController] is available.
 ///
-/// Scrollbars are interactive and will use the [PrimaryScrollController] if
+/// Scrollbars are interactive and will also use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
 /// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
 /// exclusive of the thumb will trigger a [ScrollIncrementType.page] based on
