@@ -19,6 +19,12 @@
          "flaky": false
       },
       {
+         "name": "Linux dartdocs",
+         "repo": "flutter",
+         "task_name": "linux_dartdocs",
+         "flaky": false
+      },
+      {
          "name": "Linux docs",
          "repo": "flutter",
          "task_name": "linux_docs",
@@ -106,6 +112,12 @@
          "name": "Linux plugin_test",
          "repo": "flutter",
          "task_name": "linux_plugin_test",
+         "flaky": false
+      },
+      {
+         "name": "Linux technical_debt__cost",
+         "repo": "flutter",
+         "task_name": "linux_technical_debt__cost",
          "flaky": false
       },
       {
