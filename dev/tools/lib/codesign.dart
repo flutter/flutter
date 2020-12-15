@@ -108,6 +108,7 @@ class CodesignCommand extends Command<void> {
     }
   }
 
+  /// Binaries that are expected to be codesigned and have entitlements.
   List<String> get binariesWithEntitlements {
     return <String>[
       'artifacts/libimobiledevice/idevicesyslog',
@@ -141,6 +142,7 @@ class CodesignCommand extends Command<void> {
     ].map((String relativePath) => fileSystem.path.join(framework.cacheDirectory, relativePath)).toList();
   }
 
+  /// Binaries that are only expected to be codesigned.
   List<String> get binariesWithoutEntitlements {
     return <String>[
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
@@ -156,6 +158,13 @@ class CodesignCommand extends Command<void> {
     ].map((String relativePath) => fileSystem.path.join(framework.cacheDirectory, relativePath)).toList();
   }
 
+  /// Verify the existence of all expected binaries in cache.
+  ///
+  /// This function ignores code signatures and entitlements, and is intended to
+  /// be run on every commit. It should throw if either new binaries are added
+  /// to the cache or expected binaries removed. In either case, this class'
+  /// [binariesWithEntitlements] or [binariesWithoutEntitlements] lists should
+  /// be updated accordingly.
   @visibleForTesting
   void verifyExist() {
     final Set<String> foundFiles = <String>{};
@@ -184,6 +193,7 @@ class CodesignCommand extends Command<void> {
     stdio.printStatus('All expected binaries present.');
   }
 
+  /// Verify code signatures and entitlements of all binaries in the cache.
   @visibleForTesting
   void verifySignatures() {
     final List<String> unsignedBinaries = <String>[];

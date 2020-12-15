@@ -151,6 +151,7 @@ void main() {
         print(stdio.error);
         rethrow;
       }
+      expect(processManager.hasRemainingExpectations, false);
     });
 
     test('fails if a single binary is not codesigned', () async {
@@ -238,6 +239,7 @@ void main() {
         () async => await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because unsigned binaries detected.'),
       );
+      expect(processManager.hasRemainingExpectations, false);
     });
 
     test('fails if a single binary has the wrong entitlements', () async {
@@ -310,6 +312,68 @@ void main() {
       expect(
         () async => await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because files found with the wrong entitlements'),
+      );
+      expect(processManager.hasRemainingExpectations, false);
+    });
+
+    test('does not check signatures or entitlements if --no-$kSignatures specified', () async {
+      createRunner(commands: <FakeCommand>[
+        const FakeCommand(command: <String>[
+          'git',
+          'clone',
+          '--',
+          kUpstreamRemote,
+          '${checkoutsParentDirectory}checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          revision,
+        ]),
+        const FakeCommand(command: <String>[
+          flutterBin,
+          'help',
+        ]),
+        const FakeCommand(command: <String>[
+          flutterBin,
+          'help',
+        ]),
+        const FakeCommand(command: <String>[
+          flutterBin,
+          'precache',
+          '--ios',
+          '--macos',
+        ]),
+        FakeCommand(
+          command: const <String>[
+            'find',
+            '${checkoutsParentDirectory}checkouts/framework/bin/cache',
+            '-type',
+            'f',
+          ],
+          stdout: allBinaries.join('\n'),
+        ),
+        for (String bin in allBinaries)
+          FakeCommand(
+            command: <String>['file', '--mime-type', '-b', bin],
+            stdout: 'application/x-mach-binary',
+          ),
+      ]);
+      try {
+        await runner.run(<String>[
+          'codesign',
+          '--$kVerify',
+          '--no-$kSignatures',
+          '--$kRevision',
+          revision,
+        ]);
+      } on ConductorException {
+        print(stdio.error);
+        rethrow;
+      }
+      expect(
+        processManager.hasRemainingExpectations,
+        false,
       );
     });
   });
