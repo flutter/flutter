@@ -1,0 +1,14 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ax.mojom;
+
+import "ui/accessibility/ax_enums.mojom";
+
+// See ui::AXEventIntent for documentation.
+struct EventIntent {
+  Command command;
+  TextBoundary text_boundary;
+  MoveDirection move_direction;
+};

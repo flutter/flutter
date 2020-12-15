@@ -1,0 +1,149 @@
+# Copyright 2018 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+
+mojom("mojom") {
+  sources = [
+    "ax_action_data.mojom",
+    "ax_assistant_structure.mojom",
+    "ax_event.mojom",
+    "ax_event_intent.mojom",
+    "ax_node_data.mojom",
+    "ax_relative_bounds.mojom",
+    "ax_tree_data.mojom",
+    "ax_tree_id.mojom",
+    "ax_tree_update.mojom",
+  ]
+
+  public_deps = [
+    "//mojo/public/mojom/base",
+    "//ui/accessibility:ax_constants_mojo",
+    "//ui/accessibility:ax_enums_mojo",
+    "//ui/gfx/geometry/mojom",
+    "//ui/gfx/mojom",
+    "//ui/gfx/range/mojom",
+    "//url/mojom:url_mojom_gurl",
+  ]
+
+  cpp_typemaps = [
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AXActionData"
+          cpp = "::ui::AXActionData"
+        },
+      ]
+      traits_sources = [ "ax_action_data_mojom_traits.cc" ]
+      traits_headers = [ "ax_action_data_mojom_traits.h" ]
+      traits_public_deps = [ "//ui/accessibility" ]
+    },
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AssistantTree"
+          cpp = "::std::unique_ptr<::ui::AssistantTree>"
+          move_only = true
+          nullable_is_same_type = true
+        },
+        {
+          mojom = "ax.mojom.AssistantNode"
+          cpp = "::std::unique_ptr<::ui::AssistantNode>"
+          move_only = true
+        },
+      ]
+      traits_sources = [ "ax_assistant_structure_mojom_traits.cc" ]
+      traits_headers = [ "ax_assistant_structure_mojom_traits.h" ]
+      traits_public_deps = [
+        "//ui/accessibility:ax_assistant",
+        "//ui/gfx",
+        "//ui/gfx/geometry/mojom",
+        "//ui/gfx/geometry/mojom:mojom_traits",
+        "//ui/gfx/range/mojom",
+      ]
+    },
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AXEventIntent"
+          cpp = "::ui::AXEventIntent"
+        },
+      ]
+      traits_sources = [ "ax_event_intent_mojom_traits.cc" ]
+      traits_headers = [ "ax_event_intent_mojom_traits.h" ]
+      traits_public_deps = [ "//ui/accessibility" ]
+    },
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AXEvent"
+          cpp = "::ui::AXEvent"
+        },
+      ]
+      traits_sources = [ "ax_event_mojom_traits.cc" ]
+      traits_headers = [ "ax_event_mojom_traits.h" ]
+      traits_public_deps = [ "//ui/accessibility" ]
+    },
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AXNodeData"
+          cpp = "::ui::AXNodeData"
+        },
+      ]
+      traits_sources = [ "ax_node_data_mojom_traits.cc" ]
+      traits_headers = [ "ax_node_data_mojom_traits.h" ]
+      traits_public_deps = [ "//ui/accessibility" ]
+    },
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AXRelativeBounds"
+          cpp = "::ui::AXRelativeBounds"
+        },
+      ]
+      traits_sources = [ "ax_relative_bounds_mojom_traits.cc" ]
+      traits_headers = [ "ax_relative_bounds_mojom_traits.h" ]
+      traits_public_deps = [
+        "//ui/gfx",
+        "//ui/gfx/geometry/mojom",
+        "//ui/gfx/geometry/mojom:mojom_traits",
+        "//ui/gfx/mojom",
+      ]
+    },
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AXTreeData"
+          cpp = "::ui::AXTreeData"
+        },
+      ]
+      traits_sources = [ "ax_tree_data_mojom_traits.cc" ]
+      traits_headers = [ "ax_tree_data_mojom_traits.h" ]
+      traits_public_deps = [ "//ui/accessibility" ]
+    },
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AXTreeID"
+          cpp = "::ui::AXTreeID"
+        },
+      ]
+      traits_sources = [ "ax_tree_id_mojom_traits.cc" ]
+      traits_headers = [ "ax_tree_id_mojom_traits.h" ]
+      traits_public_deps = [ "//ui/accessibility" ]
+    },
+    {
+      types = [
+        {
+          mojom = "ax.mojom.AXTreeUpdate"
+          cpp = "::ui::AXTreeUpdate"
+        },
+      ]
+      traits_sources = [ "ax_tree_update_mojom_traits.cc" ]
+      traits_headers = [ "ax_tree_update_mojom_traits.h" ]
+      traits_public_deps = [ "//ui/accessibility" ]
+    },
+  ]
+}

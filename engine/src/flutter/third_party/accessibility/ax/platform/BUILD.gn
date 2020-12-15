@@ -1,0 +1,141 @@
+# Copyright 2020 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/features.gni")
+import("//build/config/linux/pkg_config.gni")
+import("//build/config/ui.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//testing/libfuzzer/fuzzer_test.gni")
+import("//testing/test.gni")
+import("//tools/json_schema_compiler/json_schema_api.gni")
+import("//ui/base/ui_features.gni")
+
+if (is_win) {
+  import("//build/toolchain/win/midl.gni")
+}
+
+if (is_win) {
+  midl("ichromeaccessible") {
+    sources = [ "ichromeaccessible.idl" ]
+  }
+}
+
+if (is_android) {
+  import("//build/config/android/rules.gni")
+}
+
+source_set("platform") {
+  defines = [ "AX_IMPLEMENTATION" ]
+
+  visibility = [ "//ui/accessibility" ]
+
+  sources = [
+    # Used by by browser_accessibility_state_impl.cc.
+    "ax_platform_node.cc",
+    "ax_platform_node.h",
+    "ax_platform_node_delegate.h",
+
+    # Used by browser_accessibility.cc.
+    "ax_unique_id.cc",
+    "ax_unique_id.h",
+
+    # Used by accessibility_tree_formatter_blink.cc.
+    "compute_attributes.cc",
+    "compute_attributes.h",
+
+    # Used by //ui/accessibility:ax_assistant.
+    "ax_android_constants.cc",
+    "ax_android_constants.h",
+
+    # Used by //ui/views/views/ax_virtual_view.h.
+    "ax_platform_node_base.cc",
+    "ax_platform_node_base.h",
+    "ax_platform_node_delegate_base.cc",
+    "ax_platform_node_delegate_base.h",
+
+    # Used by //chrome/test/browser_tests/browser_view_browsertest.cc
+    "ax_platform_node_test_helper.cc",
+    "ax_platform_node_test_helper.h",
+  ]
+
+  public_deps = [
+    "//ui/accessibility:ax_base",
+    "//ui/display",
+  ]
+
+  if (has_native_accessibility) {
+    sources += [
+      "ax_fragment_root_delegate_win.h",
+      "ax_fragment_root_win.cc",
+      "ax_fragment_root_win.h",
+      "ax_platform_node_delegate_utils_win.cc",
+      "ax_platform_node_delegate_utils_win.h",
+      "ax_platform_node_textchildprovider_win.cc",
+      "ax_platform_node_textchildprovider_win.h",
+      "ax_platform_node_textprovider_win.cc",
+      "ax_platform_node_textprovider_win.h",
+      "ax_platform_node_textrangeprovider_win.cc",
+      "ax_platform_node_textrangeprovider_win.h",
+      "ax_platform_node_win.cc",
+      "ax_platform_node_win.h",
+      "ax_platform_relation_win.cc",
+      "ax_platform_relation_win.h",
+      "ax_platform_text_boundary.cc",
+      "ax_platform_text_boundary.h",
+      "ax_system_caret_win.cc",
+      "ax_system_caret_win.h",
+      "uia_registrar_win.cc",
+      "uia_registrar_win.h",
+    ]
+
+    if (is_win) {
+      public_deps += [
+        "//third_party/iaccessible2",
+        "//ui/accessibility/platform:ichromeaccessible",
+      ]
+
+      libs = [
+        "oleacc.lib",
+        "uiautomationcore.lib",
+      ]
+    }
+
+    if (is_mac) {
+      sources += [
+        "ax_platform_node_mac.h",
+        "ax_platform_node_mac.mm",
+      ]
+
+      frameworks = [
+        "AppKit.framework",
+        "Foundation.framework",
+      ]
+    }
+
+    if (use_atk) {
+      sources += [
+        "atk_util_auralinux.cc",
+        "atk_util_auralinux.h",
+        "atk_util_auralinux_gtk.cc",
+        "ax_platform_atk_hyperlink.cc",
+        "ax_platform_atk_hyperlink.h",
+        "ax_platform_node_auralinux.cc",
+        "ax_platform_node_auralinux.h",
+      ]
+
+      # ax_platform_text_boundary.h includes atk.h, so ATK is needed
+      # as a public config to ensure anything that includes this is
+      # able to find atk.h.
+      public_configs = [ "//build/config/linux/atk" ]
+
+      if (use_glib) {
+        configs += [ "//build/config/linux:glib" ]
+      }
+
+      if (use_x11) {
+        public_deps += [ "//ui/gfx/x" ]
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ax.mojom;
+
+import "ui/accessibility/ax_enums.mojom";
+import "ui/accessibility/mojom/ax_tree_id.mojom";
+
+// See ui::AXTreeData for comments / explanations of these fields.
+struct AXTreeData {
+  ax.mojom.AXTreeID tree_id;
+  ax.mojom.AXTreeID parent_tree_id;
+  ax.mojom.AXTreeID focused_tree_id;
+  string doctype;
+  bool loaded;
+  float loading_progress;
+  string mimetype;
+  string title;
+  string url;
+  int32 focus_id;
+  bool sel_is_backward;
+  int32 sel_anchor_object_id;
+  int32 sel_anchor_offset;
+  ax.mojom.TextAffinity sel_anchor_affinity;
+  int32 sel_focus_object_id;
+  int32 sel_focus_offset;
+  ax.mojom.TextAffinity sel_focus_affinity;
+  int32 root_scroller_id;
+};
