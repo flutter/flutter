@@ -331,17 +331,17 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
   @override
   void initWithValue(T value) {
-    _diposeOldValue();
+    _disposeOldValue();
     super.initWithValue(value);
   }
 
   @override
   void dispose() {
-    _diposeOldValue();
+    _disposeOldValue();
     super.dispose();
   }
 
-  void _diposeOldValue() {
+  void _disposeOldValue() {
     if (_value != null) {
       // Scheduling a microtask for dispose to give other entities a chance
       // to remove their listeners first.
