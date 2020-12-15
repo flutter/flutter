@@ -130,7 +130,7 @@ class _PlatformAdaptiveIcons {
 ///
 ///  * [Icon]
 ///  * [IconButton]
-///  * <https://material.io/resources/icons>
+///  * <https://design.google.com/icons/>
 class Icons {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
