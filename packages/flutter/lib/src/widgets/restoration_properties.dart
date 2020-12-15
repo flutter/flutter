@@ -183,10 +183,16 @@ class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveVa
   }
 
   @override
-  T fromPrimitives(Object? serialized) => serialized as T;
+  T fromPrimitives(Object? serialized) {
+    assert (serialized != null);
+    return serialized as T;
+  }
 
   @override
-  Object toPrimitives() => value;
+  Object toPrimitives() {
+    assert (value != null);
+    return value;
+  }
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [num].
