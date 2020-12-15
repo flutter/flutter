@@ -17,9 +17,6 @@ import 'scaffold.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// Shows a full screen search page and returns the search result selected by
 /// the user when the page is closed.
 ///
@@ -107,7 +104,7 @@ abstract class SearchDelegate<T> {
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({
-  ///     String hintText,
+  ///     required String hintText,
   ///   }) : super(
   ///     searchFieldLabel: hintText,
   ///     keyboardType: TextInputType.text,
