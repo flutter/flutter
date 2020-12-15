@@ -27,6 +27,7 @@ const String kVerify = 'verify';
 const String kSignatures = 'signatures';
 const String kRevision = 'revision';
 
+/// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
   CodesignCommand({
     @required this.checkouts,
@@ -109,6 +110,9 @@ class CodesignCommand extends Command<void> {
   }
 
   /// Binaries that are expected to be codesigned and have entitlements.
+  ///
+  /// This list should be kept in sync with the actual contents of Flutter's
+  /// cache.
   List<String> get binariesWithEntitlements {
     return <String>[
       'artifacts/libimobiledevice/idevicesyslog',
@@ -143,6 +147,9 @@ class CodesignCommand extends Command<void> {
   }
 
   /// Binaries that are only expected to be codesigned.
+  ///
+  /// This list should be kept in sync with the actual contents of Flutter's
+  /// cache.
   List<String> get binariesWithoutEntitlements {
     return <String>[
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
@@ -276,7 +283,7 @@ class CodesignCommand extends Command<void> {
         'expected entitlements.');
   }
 
-  /// Find every binary file in the given [rootDirectory]
+  /// Find every binary file in the given [rootDirectory].
   List<String> findBinaryPaths(String rootDirectory) {
     final io.ProcessResult result = processManager.runSync(
       <String>[
@@ -293,7 +300,7 @@ class CodesignCommand extends Command<void> {
     return allFiles.where(isBinary).toList();
   }
 
-  /// Check mime-type of file at [filePath] to determine if it is binary
+  /// Check mime-type of file at [filePath] to determine if it is binary.
   bool isBinary(String filePath) {
     final io.ProcessResult result = processManager.runSync(
       <String>[
