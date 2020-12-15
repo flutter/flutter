@@ -1186,12 +1186,12 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
       renderObject.debugChildIntegrityEnabled = false; // Moving children will temporary violate the integrity.
       newChildren.keys.forEach(processElement);
-      if (_didUnderflow) {
-        final int lastKey = _childElements.lastKey() ?? -1;
-        final int rightBoundary = lastKey + 1;
-        newChildren[rightBoundary] = _childElements[rightBoundary];
-        processElement(rightBoundary);
-      }
+      // if (_didUnderflow) {
+      //   final int lastKey = _childElements.lastKey() ?? -1;
+      //   final int rightBoundary = lastKey + 1;
+      //   newChildren[rightBoundary] = _childElements[rightBoundary];
+      //   processElement(rightBoundary);
+      // }
     } finally {
       _currentlyUpdatingChildIndex = null;
       renderObject.debugChildIntegrityEnabled = true;
