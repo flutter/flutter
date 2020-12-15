@@ -672,7 +672,7 @@ void main() {
       final Offset scenePoint = transformationController.toScene(localFocalPoint);
       expect(scenePoint, const Offset(100, 100));
     });
-    
+
      testWidgets('Scaling amount is equal forth and back with a mouse scroll', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
@@ -697,7 +697,7 @@ void main() {
       await scrollAt(center, tester, const Offset(0.0, -200.0));
       await tester.pumpAndSettle();
       // math.exp round the number too short compared to the one in transformationController.
-      expect(double.parse((transformationController.value.getMaxScaleOnAxis()).toStringAsFixed(15)), math.exp(400 / 200));
+      expect(transformationController.value.getMaxScaleOnAxis(), closeTo(math.exp(400 / 200), 0.000000000000001));
       await scrollAt(center, tester, const Offset(0.0, 200.0));
       await scrollAt(center, tester, const Offset(0.0, 200.0));
       await tester.pumpAndSettle();
