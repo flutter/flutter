@@ -348,9 +348,6 @@ class _TableElement extends RenderObjectElement {
   @override
   RenderTable get renderObject => super.renderObject as RenderTable;
 
-  // This class ignores the child's slot entirely.
-  // Instead of doing incremental updates to the child list, it replaces the entire list each frame.
-
   List<_TableElementRow> _children = const<_TableElementRow>[];
 
   @override
