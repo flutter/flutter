@@ -51,7 +51,14 @@ void main() {
     final RenderTable table = RenderTable(textDirection: TextDirection.ltr);
     final List<RenderBox> children = List<RenderBox>.generate(6, (_) => RenderPositionedBox());
 
-    table.setFlatChildren(6, children);
+    RenderBox? preChild;
+    for (final RenderBox child in children) {
+      table.insertChild(child, after: preChild);
+      preChild = child;
+    }
+
+    table.updateInfo(1, 6);
+
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
 
     const double expectedWidth = 100.0 / 6;
@@ -60,154 +67,160 @@ void main() {
     }
   });
 
-//  List<List<RenderBox>> getRenderObject(int rows, int columns) {
-//    List<RenderBox> rowRO;
-//    final List<List<RenderBox>> result = <List<RenderBox>>[];
-//
-//    for (int row = 0; row < rows; row++) {
-//      rowRO = <RenderBox>[];
-//      for (int index = 0; index < columns; index++) {
-//        rowRO.add(RenderPositionedBox());
-//      }
-//      result.add(rowRO);
-//    }
-//
-//    return result;
-//  }
-//
-//  test('Table test: combinations', () {
-//    RenderTable table;
-//    layout(RenderPositionedBox(child: table = RenderTable(
-//      columns: 5,
-////      rows: 5,
-//      defaultColumnWidth: const IntrinsicColumnWidth(),
-//      textDirection: TextDirection.ltr,
-//      defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
-//      textBaseline: TextBaseline.alphabetic,
-//      children:  getRenderObject(5, 5),
-//    )));
-//
-//    expect(table.size, equals(const Size(0.0, 0.0)));
-//
-//    table.setChild(2, 4, sizedBox(100.0, 200.0));
-//
-//    pumpFrame();
-//
-//    expect(table.size, equals(const Size(100.0, 200.0)));
-//
-//    table.setChild(0, 0, sizedBox(10.0, 30.0));
-//    table.setChild(1, 0, sizedBox(20.0, 20.0));
-//    table.setChild(2, 0, sizedBox(30.0, 10.0));
-//
-//    pumpFrame();
-//
-//    expect(table.size, equals(const Size(130.0, 230.0)));
-//
-//    expect(table, hasAGoodToStringDeep);
-//    expect(
-//      table.toStringDeep(minLevel: DiagnosticLevel.info),
-//      equalsIgnoringHashCodes(
-//        'RenderTable#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
-//        ' │ parentData: offset=Offset(335.0, 185.0) (can use size)\n'
-//        ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
-//        ' │ size: Size(130.0, 230.0)\n'
-//        ' │ default column width: IntrinsicColumnWidth(flex: null)\n'
-//        ' │ table size: 5×5\n'
-//        ' │ column offsets: 0.0, 10.0, 30.0, 130.0, 130.0\n'
-//        ' │ row offsets: 0.0, 30.0, 30.0, 30.0, 30.0, 230.0\n'
-//        ' │\n'
-//        ' ├─child (0, 0): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
-//        ' │   parentData: offset=Offset(0.0, 0.0); default vertical alignment\n'
-//        ' │     (can use size)\n'
-//        ' │   constraints: BoxConstraints(w=10.0, 0.0<=h<=Infinity)\n'
-//        ' │   size: Size(10.0, 30.0)\n'
-//        ' │   additionalConstraints: BoxConstraints(w=10.0, h=30.0)\n'
-//        ' │\n'
-//        ' ├─child (1, 0): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
-//        ' │   parentData: offset=Offset(10.0, 0.0); default vertical alignment\n'
-//        ' │     (can use size)\n'
-//        ' │   constraints: BoxConstraints(w=20.0, 0.0<=h<=Infinity)\n'
-//        ' │   size: Size(20.0, 20.0)\n'
-//        ' │   additionalConstraints: BoxConstraints(w=20.0, h=20.0)\n'
-//        ' │\n'
-//        ' ├─child (2, 0): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
-//        ' │   parentData: offset=Offset(30.0, 0.0); default vertical alignment\n'
-//        ' │     (can use size)\n'
-//        ' │   constraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
-//        ' │   size: Size(100.0, 10.0)\n'
-//        ' │   additionalConstraints: BoxConstraints(w=30.0, h=10.0)\n'
-//        ' │\n'
-//        ' ├─child (3, 0) is null\n'
-//        ' ├─child (4, 0) is null\n'
-//        ' ├─child (0, 1) is null\n'
-//        ' ├─child (1, 1) is null\n'
-//        ' ├─child (2, 1) is null\n'
-//        ' ├─child (3, 1) is null\n'
-//        ' ├─child (4, 1) is null\n'
-//        ' ├─child (0, 2) is null\n'
-//        ' ├─child (1, 2) is null\n'
-//        ' ├─child (2, 2) is null\n'
-//        ' ├─child (3, 2) is null\n'
-//        ' ├─child (4, 2) is null\n'
-//        ' ├─child (0, 3) is null\n'
-//        ' ├─child (1, 3) is null\n'
-//        ' ├─child (2, 3) is null\n'
-//        ' ├─child (3, 3) is null\n'
-//        ' ├─child (4, 3) is null\n'
-//        ' ├─child (0, 4) is null\n'
-//        ' ├─child (1, 4) is null\n'
-//        ' ├─child (2, 4): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
-//        ' │   parentData: offset=Offset(30.0, 30.0); default vertical alignment\n'
-//        ' │     (can use size)\n'
-//        ' │   constraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
-//        ' │   size: Size(100.0, 200.0)\n'
-//        ' │   additionalConstraints: BoxConstraints(w=100.0, h=200.0)\n'
-//        ' │\n'
-//        ' ├─child (3, 4) is null\n'
-//        ' └─child (4, 4) is null\n',
-//      ),
-//    );
-//  });
+  test('Table test: combinations', () {
+    final RenderTable table = RenderTable(
+      defaultColumnWidth: const IntrinsicColumnWidth(),
+      textDirection: TextDirection.ltr,
+      defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+    );
 
-//  test('Table test: removing cells', () {
-//    RenderTable table;
-//    RenderBox child;
-//    table = RenderTable(
-//      columns: 5,
-//      rows: 5,
-//      textDirection: TextDirection.ltr,
-//      children: getRenderObject(5, 5),
-//    );
-//    table.setChild(4, 4, child = sizedBox(10.0, 10.0));
-//
-//    layout(table);
-//
-//    expect(child.attached, isTrue);
-//    table.rows = 4;
-//    expect(child.attached, isFalse);
-//  });
+    layout(RenderPositionedBox(child: table));
+
+    expect(table.size, equals(const Size(0.0, 0.0)));
+
+    table.insertChild(null);
+    table.insertChild(null);
+    table.insertChild(sizedBox(100.0, 200.0));
+    table.updateInfo(1, 3);
+    pumpFrame();
+
+    expect(table.size, equals(const Size(100.0, 200.0)));
+
+    for (int index = 0; index < 19; index++)
+      table.insertChild(null);
+
+    table.insertChild(sizedBox(30.0, 10.0));
+    table.insertChild(sizedBox(20.0, 20.0));
+    table.insertChild(sizedBox(10.0, 30.0));
+    table.updateInfo(5, 5);
+    pumpFrame();
+
+    expect(table.size, equals(const Size(130.0, 230.0)));
+
+    expect(table, hasAGoodToStringDeep);
+    expect(
+      table.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+        'RenderTable#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
+        ' │ parentData: offset=Offset(335.0, 185.0) (can use size)\n'
+        ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
+        ' │ size: Size(130.0, 230.0)\n'
+        ' │ default column width: IntrinsicColumnWidth(flex: null)\n'
+        ' │ table size: 5×5\n'
+        ' │ column offsets: 0.0, 10.0, 30.0, 130.0, 130.0\n'
+        ' │ row offsets: 0.0, 30.0, 30.0, 30.0, 30.0, 230.0\n'
+        ' │\n'
+        ' ├─child (0, 0): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(0.0, 0.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=10.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(10.0, 30.0)\n'
+        ' │   additionalConstraints: BoxConstraints(w=10.0, h=30.0)\n'
+        ' │\n'
+        ' ├─child (1, 0): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(10.0, 0.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=20.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(20.0, 20.0)\n'
+        ' │   additionalConstraints: BoxConstraints(w=20.0, h=20.0)\n'
+        ' │\n'
+        ' ├─child (2, 0): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(30.0, 0.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(100.0, 10.0)\n'
+        ' │   additionalConstraints: BoxConstraints(w=30.0, h=10.0)\n'
+        ' │\n'
+        ' ├─child (3, 0) is null\n'
+        ' ├─child (4, 0) is null\n'
+        ' ├─child (0, 1) is null\n'
+        ' ├─child (1, 1) is null\n'
+        ' ├─child (2, 1) is null\n'
+        ' ├─child (3, 1) is null\n'
+        ' ├─child (4, 1) is null\n'
+        ' ├─child (0, 2) is null\n'
+        ' ├─child (1, 2) is null\n'
+        ' ├─child (2, 2) is null\n'
+        ' ├─child (3, 2) is null\n'
+        ' ├─child (4, 2) is null\n'
+        ' ├─child (0, 3) is null\n'
+        ' ├─child (1, 3) is null\n'
+        ' ├─child (2, 3) is null\n'
+        ' ├─child (3, 3) is null\n'
+        ' ├─child (4, 3) is null\n'
+        ' ├─child (0, 4) is null\n'
+        ' ├─child (1, 4) is null\n'
+        ' ├─child (2, 4): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(30.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(100.0, 200.0)\n'
+        ' │   additionalConstraints: BoxConstraints(w=100.0, h=200.0)\n'
+        ' │\n'
+        ' ├─child (3, 4) is null\n'
+        ' └─child (4, 4) is null\n',
+      ),
+    );
+  });
+
+  test('Table test: removing cells', () {
+    RenderTable table;
+    final RenderBox child = sizedBox(10.0, 10.0);
+    table = RenderTable(
+      columns: 5,
+      rows: 5,
+      textDirection: TextDirection.ltr,
+    );
+    for (int index = 0; index < 5 * 5; index++) {
+      if (index == 0) {
+        table.insertChild(child);
+      } else {
+        table.insertChild(null);
+      }
+    }
+
+    layout(table);
+    expect(child.attached, isTrue);
+    table.removeChild(child);
+    table.insertChild(RenderPositionedBox());
+    expect(child.attached, isFalse);
+  });
 
   test('Table test: replacing cells', () {
     RenderTable table;
     final RenderBox child1 = RenderPositionedBox();
     final RenderBox child2 = RenderPositionedBox();
     final RenderBox child3 = RenderPositionedBox();
+    final RenderBox child4 = RenderPositionedBox();
+    final RenderBox child5 = RenderPositionedBox();
+    final RenderBox child6 = RenderPositionedBox();
     table = RenderTable(textDirection: TextDirection.ltr);
-    table.setFlatChildren(3, <RenderBox>[
-      child1, RenderPositionedBox(), child2,
-      RenderPositionedBox(), child3, RenderPositionedBox(),
-    ]);
+
+    table.insertChild(child1);
+    table.insertChild(child2, after: child1);
+    table.insertChild(child3, after: child2);
+
+    table.insertChild(child4, after: child1);
+    table.insertChild(child5, after: child2);
+    table.insertChild(child6, after: child3);
+
+    table.updateInfo(2, 3);
+
     expect(table.rows, equals(2));
     layout(table);
-    table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(), child1, RenderPositionedBox(),
-      child2, RenderPositionedBox(), child3,
-    ]);
+
+    table.moveChild(child4,);
+    table.moveChild(child5, after: child1);
+    table.moveChild(child6, after: child2);
     pumpFrame();
-    table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(), child1, RenderPositionedBox(),
-      child2, RenderPositionedBox(), child3,
-    ]);
+
+    table.removeChild(child4);
+    table.removeChild(child5);
+    table.removeChild(child6);
+    table.insertChild(RenderPositionedBox(),);
+    table.insertChild(RenderPositionedBox(), after: child1);
+    table.insertChild(RenderPositionedBox(), after: child2);
     pumpFrame();
     expect(table.columns, equals(3));
     expect(table.rows, equals(2));
@@ -219,28 +232,28 @@ void main() {
       border: TableBorder.all(),
     );
     layout(table);
-    table.setFlatChildren(1, <RenderBox>[ ]);
+    table.updateInfo(0, 0);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path());
-    table.setFlatChildren(1, <RenderBox>[ RenderPositionedBox() ]);
+    table.insertChild(RenderPositionedBox());
+    table.updateInfo(1, 1);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path());
-    table.setFlatChildren(1, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox() ]);
+    table.insertChild(RenderPositionedBox());
+    table.updateInfo(2, 1);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path());
-    table.setFlatChildren(2, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox() ]);
+    table.updateInfo(1, 2);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path());
-    table.setFlatChildren(2, <RenderBox>[
-      RenderPositionedBox(), RenderPositionedBox(),
-      RenderPositionedBox(), RenderPositionedBox(),
-    ]);
+    table.insertChild(RenderPositionedBox());
+    table.insertChild(RenderPositionedBox());
+    table.updateInfo(2, 2);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
-    table.setFlatChildren(3, <RenderBox>[
-      RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
-      RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
-    ]);
+    table.insertChild(RenderPositionedBox());
+    table.insertChild(RenderPositionedBox());
+    table.updateInfo(2, 3);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
   });
@@ -250,12 +263,6 @@ void main() {
         BoxConstraints.tightFor(width: 100, height: 100);
     final RenderTable table = RenderTable(
       textDirection: TextDirection.rtl,
-      children: <List<RenderBox>>[
-        List<RenderBox>.generate(
-          7,
-          (int _) => RenderConstrainedBox(additionalConstraints: cellConstraints),
-        ),
-      ],
       columnWidths: const <int, TableColumnWidth>{
         0: FlexColumnWidth(1.0),
         1: FlexColumnWidth(0.123),
@@ -266,6 +273,10 @@ void main() {
         6: FlexColumnWidth(0.123),
       },
     );
+
+    for (int index = 0; index < 7; index++)
+      table.insertChild(RenderConstrainedBox(additionalConstraints: cellConstraints));
+    table.updateInfo(1, 7);
 
     layout(table, constraints: BoxConstraints.tight(const Size(800.0, 600.0)));
     expect(table.hasSize, true);

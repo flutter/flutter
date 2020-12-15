@@ -376,15 +376,13 @@ class RenderTable extends RenderBox {
     ImageConfiguration configuration = ImageConfiguration.empty,
     TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
     TextBaseline? textBaseline,
-    List<List<RenderBox>>? children,
   }) : assert(columns == null || columns >= 0),
        assert(rows == null || rows >= 0),
-       assert(rows == null || children == null),
        assert(defaultColumnWidth != null),
        assert(textDirection != null),
        assert(configuration != null),
        _textDirection = textDirection,
-       _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0),
+       _columns = columns ?? 0,
        _rows = rows ?? 0,
        _columnWidths = columnWidths ?? HashMap<int, TableColumnWidth>(),
        _defaultColumnWidth = defaultColumnWidth,
@@ -393,69 +391,19 @@ class RenderTable extends RenderBox {
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
-    children?.forEach(addRow);
   }
 
   // Children are stored in row-major order.
   // _children.length must be rows * columns
-  List<RenderBox?> _children = <RenderBox?>[];
+  final List<RenderBox?> _children = <RenderBox?>[];
 
   /// The number of vertical alignment lines in this table.
-  ///
-  /// Changing the number of columns will remove any children that no longer fit
-  /// in the table.
-  ///
-  /// Changing the number of columns is an expensive operation because the table
-  /// needs to rearrange its internal representation.
   int get columns => _columns;
   int _columns;
-  set columns(int value) {
-    assert(value != null);
-    assert(value >= 0);
-    if (value == columns)
-      return;
-    final int oldColumns = columns;
-    final List<RenderBox?> oldChildren = _children;
-    _columns = value;
-    _children = List<RenderBox?>.filled(columns * rows, null, growable: false);
-    final int columnsToCopy = math.min(columns, oldColumns);
-    for (int y = 0; y < rows; y += 1) {
-      for (int x = 0; x < columnsToCopy; x += 1)
-        _children[x + y * columns] = oldChildren[x + y * oldColumns];
-    }
-    if (oldColumns > columns) {
-      for (int y = 0; y < rows; y += 1) {
-        for (int x = columns; x < oldColumns; x += 1) {
-          final int xy = x + y * oldColumns;
-          if (oldChildren[xy] != null)
-            dropChild(oldChildren[xy]!);
-        }
-      }
-    }
-    markNeedsLayout();
-  }
 
   /// The number of horizontal alignment lines in this table.
-  ///
-  /// Changing the number of rows will remove any children that no longer fit
-  /// in the table.
   int get rows => _rows;
   int _rows;
-  set rows(int value) {
-    assert(value != null);
-    assert(value >= 0);
-    if (value == rows)
-      return;
-    if (_rows > value) {
-      for (int xy = columns * value; xy < _children.length; xy += 1) {
-        if (_children[xy] != null)
-          dropChild(_children[xy]!);
-      }
-    }
-    _rows = value;
-    _children.length = columns * rows;
-    markNeedsLayout();
-  }
 
   /// How the horizontal extents of the columns of this table should be determined.
   ///
@@ -585,130 +533,10 @@ class RenderTable extends RenderBox {
       child.parentData = TableCellParentData();
   }
 
-  /// Replaces the children of this table with the given cells.
-  ///
-  /// The cells are divided into the specified number of columns before
-  /// replacing the existing children.
-  ///
-  /// If the new cells contain any existing children of the table, those
-  /// children are simply moved to their new location in the table rather than
-  /// removed from the table and re-added.
-  void setFlatChildren(int columns, List<RenderBox?> cells) {
-    if (listEquals(cells, _children) && columns == _columns)
-      return;
-    assert(columns >= 0);
-    // consider the case of a newly empty table
-    if (columns == 0 || cells.isEmpty) {
-      assert(cells == null || cells.isEmpty);
-      _columns = columns;
-      if (_children.isEmpty) {
-        assert(_rows == 0);
-        return;
-      }
-      for (final RenderBox? oldChild in _children) {
-        if (oldChild != null)
-          dropChild(oldChild);
-      }
-      _rows = 0;
-      _children.clear();
-      markNeedsLayout();
-      return;
-    }
-    assert(cells != null);
-    assert(cells.length % columns == 0);
-    // fill a set with the cells that are moving (it's important not
-    // to dropChild a child that's remaining with us, because that
-    // would clear their parentData field)
-    final Set<RenderBox> lostChildren = HashSet<RenderBox>();
-    for (int y = 0; y < _rows; y += 1) {
-      for (int x = 0; x < _columns; x += 1) {
-        final int xyOld = x + y * _columns;
-        final int xyNew = x + y * columns;
-        if (_children[xyOld] != null && (x >= columns || xyNew >= cells.length || _children[xyOld] != cells[xyNew]))
-          lostChildren.add(_children[xyOld]!);
-      }
-    }
-    // adopt cells that are arriving, and cross cells that are just moving off our list of lostChildren
-    int y = 0;
-    while (y * columns < cells.length) {
-      for (int x = 0; x < columns; x += 1) {
-        final int xyNew = x + y * columns;
-        final int xyOld = x + y * _columns;
-        if (cells[xyNew] != null && (x >= _columns || y >= _rows || _children[xyOld] != cells[xyNew])) {
-          if (!lostChildren.remove(cells[xyNew]))
-            adoptChild(cells[xyNew]!);
-        }
-      }
-      y += 1;
-    }
-    // drop all the lost children
-    lostChildren.forEach(dropChild);
-    // update our internal values
-    _columns = columns;
-    _rows = cells.length ~/ columns;
-    _children = List<RenderBox?>.from(cells);
-    assert(_children.length == rows * columns);
-    markNeedsLayout();
-  }
-
-  /// Replaces the children of this table with the given cells.
-  void setChildren(List<List<RenderBox>>? cells) {
-    // TODO(ianh): Make this smarter, like setFlatChildren
-    if (cells == null) {
-      setFlatChildren(0, const <RenderBox?>[]);
-      return;
-    }
-    for (final RenderBox? oldChild in _children) {
-      if (oldChild != null)
-        dropChild(oldChild);
-    }
-    _children.clear();
-    _columns = cells.isNotEmpty ? cells.first.length : 0;
-    _rows = 0;
-    cells.forEach(addRow);
-    assert(_children.length == rows * columns);
-  }
-
-  /// Adds a row to the end of the table.
-  ///
-  /// The newly added children must not already have parents.
-  void addRow(List<RenderBox?> cells) {
-    assert(cells.length == columns);
-    assert(_children.length == rows * columns);
-    _rows += 1;
-    _children.addAll(cells);
-    for (final RenderBox? cell in cells) {
-      if (cell != null)
-        adoptChild(cell);
-    }
-    markNeedsLayout();
-  }
-
-  /// Replaces the child at the given position with the given child.
-  ///
-  /// If the given child is already located at the given position, this function
-  /// does not modify the table. Otherwise, the given child must not already
-  /// have a parent.
-  void setChild(int x, int y, RenderBox? value) {
-    assert(x != null);
-    assert(y != null);
-    assert(x >= 0 && x < columns && y >= 0 && y < rows);
-    assert(_children.length == rows * columns);
-    final int xy = x + y * columns;
-    final RenderBox? oldChild = _children[xy];
-    if (oldChild == value)
-      return;
-    if (oldChild != null)
-      dropChild(oldChild);
-    _children[xy] = value;
-    if (value != null)
-      adoptChild(value);
-  }
-
   /// Insert child into this render object's child list after the given child.
   ///
   /// If `after` is null, then this inserts the child at the start of the list.
-  void insertChild(RenderBox child, { RenderBox? after }) {
+  void insertChild(RenderBox? child, { RenderBox? after }) {
     if (child != null)
       adoptChild(child);
     if (after == null) {
@@ -725,6 +553,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     _columns = columns;
     _rows = rows;
+    markNeedsLayout();
   }
 
   /// Move the given `child` in the child list to be after another child.

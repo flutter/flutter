@@ -348,7 +348,7 @@ void main() {
     expect(boxA2, isNotNull);
     expect(boxG2, isNotNull);
     expect(boxA1, equals(boxA2));
-//    expect(boxG1, isNot(equals(boxG2)));
+    expect(boxG1, equals(equals(boxG2)));
   });
 
   testWidgets('Really small deficit double precision error', (WidgetTester tester) async {
