@@ -397,7 +397,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no background custom painter.
-  set painter(CustomPainter? value) {
+  set painter(covariant CustomPainter? value) {
     if (_painter == value)
       return;
     final CustomPainter? oldPainter = _painter;
@@ -422,7 +422,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no foreground custom painter.
-  set foregroundPainter(CustomPainter? value) {
+  set foregroundPainter(covariant CustomPainter? value) {
     if (_foregroundPainter == value)
       return;
     final CustomPainter? oldPainter = _foregroundPainter;
