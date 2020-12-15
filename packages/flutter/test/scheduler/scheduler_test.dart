@@ -226,18 +226,15 @@ void main() {
 
     // Simulate an animation frame firing between warm-up begin frame and warm-up draw frame.
     // Expect a timer that reschedules the frame.
-    window.onBeginFrame!(Duration.zero);
-    runZoned<void>(window.onDrawFrame!, zoneSpecification: timerInterceptor);
-    expect(timers.length, 1);
-    final VoidCallback rescheduleFrame = timers.single;
-    timers.clear();
-
-    warmUpDrawFrame();
-
-    // Fire the reschedule timer.
-    // Expect a frame is scheduled.
     expect(scheduler.hasScheduledFrame, isFalse);
-    rescheduleFrame();
+    window.onBeginFrame!(Duration.zero);
+    expect(scheduler.hasScheduledFrame, isFalse);
+    window.onDrawFrame!();
+    expect(scheduler.hasScheduledFrame, isFalse);
+
+    // The draw frame part of the warm-up frame will run the post-frame
+    // callback that reschedules the engine frame.
+    warmUpDrawFrame();
     expect(scheduler.hasScheduledFrame, isTrue);
   });
 }

@@ -980,9 +980,9 @@ mixin SchedulerBinding on BindingBase {
   void _handleDrawFrame() {
     if (_rescheduleAfterWarmUpFrame) {
       _rescheduleAfterWarmUpFrame = false;
-      // Reschedule in a timer to allow the draw-frame phase of the warm-up
-      // frame to finish.
-      Timer.run(() {
+      // Reschedule in a post-frame callback to allow the draw-frame phase of
+      // the warm-up frame to finish.
+      addPostFrameCallback((Duration timeStamp) {
         // Force an engine frame.
         //
         // We need to reset _hasScheduledFrame here because we cancelled the
