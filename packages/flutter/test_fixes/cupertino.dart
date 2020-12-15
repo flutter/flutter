@@ -5,9 +5,7 @@
 import 'package:flutter/cupertino.dart';
 
 void main() {
-
   // Change made in https://github.com/flutter/flutter/pull/41859
   const CupertinoTextThemeData themeData = CupertinoTextThemeData(brightness: Brightness.dark);
   themeData.copyWith(brightness: Brightness.light);
-
 }

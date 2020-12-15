@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Spec file for "dart fix", see <insert URL>.
+# TODO(Piinks): Add link to public user guide when available.
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -12,7 +12,7 @@ version: 1
 transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/41859
-  - title: 'Removed brightness'
+  - title: 'Remove brightness'
     date: 2020-12-10
     element:
       uris: [ 'cupertino.dart' ]
@@ -23,7 +23,7 @@ transforms:
         name: 'brightness'
 
   # Changes made in https://github.com/flutter/flutter/pull/41859
-  - title: 'Removed brightness'
+  - title: 'Remove brightness'
     date: 2020-12-10
     element:
       uris: [ 'cupertino.dart' ]
