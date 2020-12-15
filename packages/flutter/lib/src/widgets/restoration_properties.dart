@@ -170,27 +170,23 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
 
 // _RestorablePrimitiveValueN and its subclasses allows for null values.
 // See [_RestorablePrimitiveValue] for the non-nullable version of this class.
-class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
+class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
   _RestorablePrimitiveValueN(this._defaultValue)
-    : assert(debugIsSerializableForRestoration(_defaultValue)),
+    : assert(_defaultValue != null),
+      assert(debugIsSerializableForRestoration(_defaultValue)),
       super();
 
-  final T _defaultValue;
-
   @override
-  T createDefaultValue() => _defaultValue;
-
-  @override
-  void didUpdateValue(T? oldValue) {
-    assert(debugIsSerializableForRestoration(value));
-    notifyListeners();
+  set value(T value) {
+    assert(value != null);
+    super.value = value;
   }
 
   @override
   T fromPrimitives(Object? serialized) => serialized as T;
 
   @override
-  Object? toPrimitives() => value;
+  Object toPrimitives() => value;
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [num].
