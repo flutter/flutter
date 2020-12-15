@@ -199,7 +199,7 @@ void main() {
     expect(find.byType(Scrollbar), paints..rect());
   });
 
-  testWidgets('On first render with isAlwaysShown: true, the thumb shows', (WidgetTester tester) async {
+  testWidgets('On first render with isAlwaysShown: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
