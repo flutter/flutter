@@ -1,0 +1,27 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ax.mojom;
+
+import "ui/accessibility/ax_enums.mojom";
+import "ui/accessibility/mojom/ax_relative_bounds.mojom";
+
+// See ui::AXNodeData for comments / explanations of these fields.
+struct AXNodeData {
+  int32 id;
+  ax.mojom.Role role;
+  uint32 state;
+  uint64 actions;
+  map<ax.mojom.StringAttribute, string> string_attributes;
+  map<ax.mojom.IntAttribute, int32> int_attributes;
+  map<ax.mojom.FloatAttribute, float> float_attributes;
+  map<ax.mojom.BoolAttribute, bool> bool_attributes;
+  map<ax.mojom.IntListAttribute, array<int32>>
+      intlist_attributes;
+  map<ax.mojom.StringListAttribute, array<string>>
+      stringlist_attributes;
+  map<string, string> html_attributes;
+  array<int32> child_ids;
+  ax.mojom.AXRelativeBounds relative_bounds;
+};

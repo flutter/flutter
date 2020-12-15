@@ -1,0 +1,21 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ax.mojom;
+
+import "ui/accessibility/ax_enums.mojom";
+import "ui/accessibility/mojom/ax_event_intent.mojom";
+import "ui/accessibility/mojom/ax_node_data.mojom";
+import "ui/accessibility/mojom/ax_tree_data.mojom";
+
+// See ui::AXTreeUpdate for comments / explanations of these fields.
+struct AXTreeUpdate {
+  bool has_tree_data;
+  AXTreeData tree_data;
+  int32 node_id_to_clear;
+  int32 root_id;
+  array<AXNodeData> nodes;
+  ax.mojom.EventFrom event_from;
+  array<EventIntent> event_intents;
+};

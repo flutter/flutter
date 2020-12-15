@@ -1,0 +1,64 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import "objidl.idl";
+import "oaidl.idl";
+        
+const long DISPID_CHROME_BULK_FETCH   = -1600;
+const long DISPID_CHROME_ON_BULK_FETCH_RESULT   = -1601;
+const long DISPID_CHROME_HIT_TEST = -1602;
+const long DISPID_CHROME_ON_HIT_TEST_RESULT = -1603;
+
+// Interface to be implemented by the client that calls IChromeAccessible.
+// For every method in IChromeAccessible, there's a corresponding response
+// method in IChromeAccessibleDelegate.
+[object, uuid(0e3edc14-79f4-413f-b854-d3b6860d74a2), pointer_default(unique)]
+interface IChromeAccessibleDelegate : IUnknown
+{
+  [propput, id(DISPID_CHROME_ON_BULK_FETCH_RESULT)] HRESULT bulkFetchResult(
+    [in] LONG requestID,
+    [in] BSTR resultJson
+  );
+
+  [propput, id(DISPID_CHROME_ON_HIT_TEST_RESULT)] HRESULT hitTestResult(
+    [in] LONG requestID,
+    [in] IUnknown* result
+  );
+};
+
+// Chrome-specific interface exposed on every IAccessible object.
+//
+// This interface is EXPERIMENTAL and only available behind a flag.
+// Run Chrome with --enable-features=IChromeAccessible to use it.
+//
+// Do not depend on this interface remaining stable! It's only designed
+// for prototyping ideas, and anything that's stabilized should move to
+// an open standard API.
+[object, uuid(6175bd95-3b2e-4ebc-bc51-9cab782bec92), pointer_default(unique)]
+interface IChromeAccessible : IUnknown
+{
+  // TODO(crbug.com/1083834): Fully document this interface.
+  // Fetch multiple accessibility properties of one or more accessibility
+  // nodes as JSON. This method is asynchronous; the result is returned
+  // by calling put_bulkFetchResult on |delegate|. The client can pass any
+  // valid LONG as requestID and the same value will be passed to
+  // put_bulkFetchResult to enable matching of requests and responses.
+  [propget, id(DISPID_CHROME_BULK_FETCH)] HRESULT bulkFetch(
+    [in] BSTR inputJson,
+    [in] LONG requestID,
+    [in] IChromeAccessibleDelegate* delegate
+  );
+
+  // Hit-test the given pixel in screen physical pixel coordinates.
+  // This method is asynchronous; the result is returned
+  // by calling put_hitTestResult on |delegate|. The client can pass any
+  // valid LONG as requestID and the same value will be passed to
+  // put_hitTestResult to enable matching of requests and responses.
+  [propget, id(DISPID_CHROME_HIT_TEST)] HRESULT hitTest(
+    [in] LONG screenPhysicalPixelX,
+    [in] LONG screenPhysicalPixelY,
+    [in] LONG requestID,
+    [in] IChromeAccessibleDelegate* delegate
+  );
+};
