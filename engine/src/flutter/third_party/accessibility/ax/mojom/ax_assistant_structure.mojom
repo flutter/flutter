@@ -1,0 +1,63 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ax.mojom;
+
+import "mojo/public/mojom/base/string16.mojom";
+import "ui/gfx/geometry/mojom/geometry.mojom";
+import "ui/gfx/range/mojom/range.mojom";
+import "url/mojom/url.mojom";
+
+// Tree structure for assistant. The tree is represented as a flat array of
+// nodes, each containing a children_indices vector that points to its child
+// nodes. The purpose is to work around max depth restriction of recursive
+// data structure in mojo.
+struct AssistantTree {
+  array<AssistantNode> nodes;
+};
+
+// Represents view structure to be passed to assistant. The view structure is
+// synthesized from the AXNode.
+struct AssistantNode {
+  array<int32> children_indices;
+
+  // Geometry of the view in pixels
+  gfx.mojom.Rect rect;
+
+  // Text of the view.
+  mojo_base.mojom.String16 text;
+
+  // Text properties
+  float text_size;
+  uint32 color;
+  uint32 bgcolor;
+  bool bold;
+  bool italic;
+  bool underline;
+  bool line_through;
+
+  // Selected portion of the text.
+  gfx.mojom.Range? selection;
+
+  // Fake Android view class name of the element.  Each node is assigned
+  // a closest approximation of Android's views to keep the server happy.
+  string class_name;
+
+  // Accessibility functionality of the node inferred from DOM or based on HTML
+  // role attribute.
+  string? role;
+};
+
+// Additional information to current context.
+struct AssistantExtra {
+  url.mojom.Url url;
+  gfx.mojom.Rect bounds_pixel;
+  mojo_base.mojom.String16 title;
+};
+
+// Assistant structure, including Assistant tree and extra.
+struct AssistantStructure {
+  AssistantTree? assistant_tree;
+  AssistantExtra? assistant_extra;
+};

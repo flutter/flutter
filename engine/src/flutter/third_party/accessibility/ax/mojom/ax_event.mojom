@@ -1,0 +1,17 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ax.mojom;
+
+import "ui/accessibility/ax_enums.mojom";
+import "ui/accessibility/mojom/ax_event_intent.mojom";
+
+// See ui::AXEvent for documentation.
+struct AXEvent {
+  Event event_type;
+  int32 id;
+  EventFrom event_from;
+  array<EventIntent> event_intents;
+  int32 action_request_id;
+};

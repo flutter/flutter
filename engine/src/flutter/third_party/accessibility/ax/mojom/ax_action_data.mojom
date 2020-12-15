@@ -1,0 +1,32 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ax.mojom;
+
+import "ui/accessibility/ax_enums.mojom";
+import "ui/accessibility/mojom/ax_tree_id.mojom";
+import "ui/gfx/geometry/mojom/geometry.mojom";
+
+// A compact representation of an accessibility action and the arguments
+// associated with that action. See ui::AXActionData for full documentation.
+struct AXActionData {
+  Action action;
+  ax.mojom.AXTreeID target_tree_id;
+  string source_extension_id;
+  int32 target_node_id;
+  int32 request_id;
+  int32 flags;
+  int32 anchor_node_id;
+  int32 anchor_offset;
+  int32 focus_node_id;
+  int32 focus_offset;
+  int32 custom_action_id;
+  gfx.mojom.Rect target_rect;
+  gfx.mojom.Point target_point;
+  string value;
+  Event hit_test_event_to_fire;
+  ScrollAlignment horizontal_scroll_alignment;
+  ScrollAlignment vertical_scroll_alignment;
+  ScrollBehavior scroll_behavior;
+};

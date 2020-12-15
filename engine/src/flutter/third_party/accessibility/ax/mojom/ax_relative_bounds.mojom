@@ -1,0 +1,15 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ax.mojom;
+
+import "ui/gfx/geometry/mojom/geometry.mojom";
+import "ui/gfx/mojom/transform.mojom";
+
+// See ui::RelativeBounds for documentation.
+struct AXRelativeBounds {
+  int32 offset_container_id;
+  gfx.mojom.RectF bounds;
+  gfx.mojom.Transform transform;
+};

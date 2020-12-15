@@ -1,0 +1,18 @@
+dmazzoni@chromium.org
+dtseng@chromium.org
+aboxhall@chromium.org
+nektar@chromium.org
+dougt@chromium.org
+aleventhal@chromium.org
+katie@chromium.org
+
+per-file *.mojom=set noparent
+per-file *.mojom=file://ipc/SECURITY_OWNERS
+
+per-file *_param_traits*.*=set noparent
+per-file *_param_traits*.*=file://ipc/SECURITY_OWNERS
+
+per-file ax_language_detection*=chrishall@chromium.org
+
+# TEAM: chromium-accessibility@chromium.org
+# COMPONENT: Internals>Accessibility
