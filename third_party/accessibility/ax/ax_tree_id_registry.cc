@@ -79,8 +79,7 @@ void AXTreeIDRegistry::RemoveAXTreeID(AXTreeID ax_tree_id) {
     id_to_action_handler_.erase(action_it);
 }
 
-AXTreeIDRegistry::AXTreeIDRegistry() {
-}
+AXTreeIDRegistry::AXTreeIDRegistry() {}
 
 AXTreeIDRegistry::~AXTreeIDRegistry() {}
 

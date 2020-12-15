@@ -52,7 +52,6 @@ class AXPlatformNodeTextProviderTest : public AXPlatformNodeWinTest {
   }
 };
 
-
 TEST_F(AXPlatformNodeTextProviderTest, ITextProviderRangeFromChild) {
   ui::AXNodeData text_data;
   text_data.id = 2;

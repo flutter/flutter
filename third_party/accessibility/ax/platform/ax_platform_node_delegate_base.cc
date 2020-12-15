@@ -212,16 +212,16 @@ int AXPlatformNodeDelegateBase::ChildIteratorBase::GetIndexInParent() const {
   return index_;
 }
 
-AXPlatformNodeDelegate& AXPlatformNodeDelegateBase::ChildIteratorBase::
-operator*() const {
+AXPlatformNodeDelegate&
+AXPlatformNodeDelegateBase::ChildIteratorBase::operator*() const {
   AXPlatformNode* platform_node =
       AXPlatformNode::FromNativeViewAccessible(GetNativeViewAccessible());
   DCHECK(platform_node && platform_node->GetDelegate());
   return *(platform_node->GetDelegate());
 }
 
-AXPlatformNodeDelegate* AXPlatformNodeDelegateBase::ChildIteratorBase::
-operator->() const {
+AXPlatformNodeDelegate*
+AXPlatformNodeDelegateBase::ChildIteratorBase::operator->() const {
   AXPlatformNode* platform_node =
       AXPlatformNode::FromNativeViewAccessible(GetNativeViewAccessible());
   return platform_node ? platform_node->GetDelegate() : nullptr;

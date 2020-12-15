@@ -147,7 +147,10 @@ class AX_EXPORT AXPlatformNodeAuraLinux : public AXPlatformNodeBase {
   AtkRole GetAtkRole() const;
   void GetAtkState(AtkStateSet* state_set);
   AtkRelationSet* GetAtkRelations();
-  void GetExtents(gint* x, gint* y, gint* width, gint* height,
+  void GetExtents(gint* x,
+                  gint* y,
+                  gint* width,
+                  gint* height,
                   AtkCoordType coord_type);
   void GetPosition(gint* x, gint* y, AtkCoordType coord_type);
   void GetSize(gint* width, gint* height);

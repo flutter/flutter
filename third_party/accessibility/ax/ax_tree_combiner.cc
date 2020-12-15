@@ -10,11 +10,9 @@
 
 namespace ui {
 
-AXTreeCombiner::AXTreeCombiner() {
-}
+AXTreeCombiner::AXTreeCombiner() {}
 
-AXTreeCombiner::~AXTreeCombiner() {
-}
+AXTreeCombiner::~AXTreeCombiner() {}
 
 void AXTreeCombiner::AddTree(const AXTreeUpdate& tree, bool is_root) {
   if (tree.tree_data.tree_id == AXTreeIDUnknown()) {
@@ -72,8 +70,8 @@ bool AXTreeCombiner::Combine() {
 
   // Debug-mode check that the resulting combined tree is valid.
   AXTree tree;
-  DCHECK(tree.Unserialize(combined_))
-      << combined_.ToString() << "\n" << tree.error();
+  DCHECK(tree.Unserialize(combined_)) << combined_.ToString() << "\n"
+                                      << tree.error();
 
   return true;
 }
@@ -139,8 +137,7 @@ void AXTreeCombiner::ProcessTree(const AXTreeUpdate* tree) {
       if (child_tree && child_tree->nodes.empty())
         child_tree = nullptr;
       if (child_tree) {
-        node.child_ids.push_back(MapId(child_tree_id,
-                                       child_tree->nodes[0].id));
+        node.child_ids.push_back(MapId(child_tree_id, child_tree->nodes[0].id));
       }
     }
 

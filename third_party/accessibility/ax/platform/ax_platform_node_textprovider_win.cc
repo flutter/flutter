@@ -287,7 +287,6 @@ HRESULT AXPlatformNodeTextProviderWin::GetConversionTarget(
 ITextRangeProvider* AXPlatformNodeTextProviderWin::GetRangeFromChild(
     ui::AXPlatformNodeWin* ancestor,
     ui::AXPlatformNodeWin* descendant) {
-
   DCHECK(ancestor);
   DCHECK(descendant);
   DCHECK(descendant->GetDelegate());

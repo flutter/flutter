@@ -245,8 +245,7 @@ class AXTreeSourceWithInvalidId
     : public AXTreeSource<const AXNode*, AXNodeData, AXTreeData> {
  public:
   AXTreeSourceWithInvalidId(AXTree* tree, int invalid_id)
-      : tree_(tree),
-        invalid_id_(invalid_id) {}
+      : tree_(tree), invalid_id_(invalid_id) {}
   ~AXTreeSourceWithInvalidId() override {}
 
   // AXTreeSource implementation.
