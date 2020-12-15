@@ -2269,7 +2269,7 @@ class AXPosition {
         base::BindRepeating(&AtStartOfWordPredicate),
         base::BindRepeating(&AtEndOfWordPredicate),
         base::BindRepeating(&GetWordStartOffsetsFunc));
-      }
+  }
 
   // Word end positions are one past the last character of the word.
   AXPositionInstance CreateNextWordEndPosition(

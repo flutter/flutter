@@ -6,10 +6,8 @@
 
 namespace ui {
 
-ClientTreeNode::ClientTreeNode() {
-}
+ClientTreeNode::ClientTreeNode() {}
 
-ClientTreeNode::~ClientTreeNode() {
-}
+ClientTreeNode::~ClientTreeNode() {}
 
 }  // namespace ui

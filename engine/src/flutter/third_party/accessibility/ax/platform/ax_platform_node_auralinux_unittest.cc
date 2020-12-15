@@ -55,10 +55,9 @@ class AXPlatformNodeAuraLinuxTest : public AXPlatformNodeTest {
   AtkObject* GetRootAtkObject() { return AtkObjectFromNode(GetRootAsAXNode()); }
 };
 
-static void EnsureAtkObjectHasAttributeWithValue(
-    AtkObject* atk_object,
-    const gchar* attribute_name,
-    const gchar* attribute_value) {
+static void EnsureAtkObjectHasAttributeWithValue(AtkObject* atk_object,
+                                                 const gchar* attribute_name,
+                                                 const gchar* attribute_value) {
   AtkAttributeSet* attributes = atk_object_get_attributes(atk_object);
   bool saw_attribute = false;
 
@@ -81,9 +80,8 @@ static void EnsureAtkObjectHasAttributeWithValue(
   atk_attribute_set_free(attributes);
 }
 
-static void EnsureAtkObjectDoesNotHaveAttribute(
-    AtkObject* atk_object,
-    const gchar* attribute_name) {
+static void EnsureAtkObjectDoesNotHaveAttribute(AtkObject* atk_object,
+                                                const gchar* attribute_name) {
   AtkAttributeSet* attributes = atk_object_get_attributes(atk_object);
   AtkAttributeSet* current = attributes;
   while (current) {

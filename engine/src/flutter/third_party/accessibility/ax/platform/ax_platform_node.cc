@@ -51,11 +51,9 @@ void AXPlatformNode::RegisterNativeWindowHandler(
 
 AXPlatformNode::AXPlatformNode() {}
 
-AXPlatformNode::~AXPlatformNode() {
-}
+AXPlatformNode::~AXPlatformNode() {}
 
-void AXPlatformNode::Destroy() {
-}
+void AXPlatformNode::Destroy() {}
 
 int32_t AXPlatformNode::GetUniqueId() const {
   DCHECK(GetDelegate()) << "|GetUniqueId| must be called after |Init|.";

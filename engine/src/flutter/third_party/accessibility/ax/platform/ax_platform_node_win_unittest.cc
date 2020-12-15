@@ -31,9 +31,9 @@
 #include "ui/accessibility/platform/test_ax_node_wrapper.h"
 #include "ui/base/win/atl_module.h"
 
-using Microsoft::WRL::ComPtr;
 using base::win::ScopedBstr;
 using base::win::ScopedVariant;
+using Microsoft::WRL::ComPtr;
 
 namespace ui {
 

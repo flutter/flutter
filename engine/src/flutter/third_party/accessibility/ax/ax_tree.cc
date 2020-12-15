@@ -1444,8 +1444,8 @@ bool AXTree::UpdateNode(const AXNodeData& src,
     node->SetData(src);
   } else {
     if (!is_new_root) {
-      error_ = base::StringPrintf(
-          "%d is not in the tree and not the new root", src.id);
+      error_ = base::StringPrintf("%d is not in the tree and not the new root",
+                                  src.id);
       return false;
     }
 
@@ -1467,8 +1467,8 @@ bool AXTree::UpdateNode(const AXNodeData& src,
   // Now build a new children vector, reusing nodes when possible,
   // and swap it in.
   std::vector<AXNode*> new_children;
-  bool success = CreateNewChildVector(
-      node, src.child_ids, &new_children, update_state);
+  bool success =
+      CreateNewChildVector(node, src.child_ids, &new_children, update_state);
   node->SwapChildren(&new_children);
 
   // Update the root of the tree if needed.
@@ -1797,8 +1797,7 @@ void AXTree::MarkNodesForDestructionRecursive(AXNode::AXID node_id,
   }
 }
 
-void AXTree::DestroySubtree(AXNode* node,
-                            AXTreeUpdateState* update_state) {
+void AXTree::DestroySubtree(AXNode* node, AXTreeUpdateState* update_state) {
   DCHECK(GetTreeUpdateInProgressState());
   // |update_state| must already contain information about all of the expected
   // changes and invalidations to apply. If any of these are missing, observers
@@ -1872,10 +1871,8 @@ bool AXTree::CreateNewChildVector(AXNode* node,
         // If this case occurs, continue so this node isn't left in an
         // inconsistent state, but return failure at the end.
         error_ = base::StringPrintf(
-            "Node %d reparented from %d to %d",
-            child->id(),
-            child->parent() ? child->parent()->id() : 0,
-            node->id());
+            "Node %d reparented from %d to %d", child->id(),
+            child->parent() ? child->parent()->id() : 0, node->id());
         success = false;
         continue;
       }

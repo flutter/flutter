@@ -64,16 +64,12 @@ class AX_EXPORT AXTreeSourceAdapter
   AXTree* tree_;
 };
 
-AXSerializableTree::AXSerializableTree()
-    : AXTree() {}
+AXSerializableTree::AXSerializableTree() : AXTree() {}
 
-AXSerializableTree::AXSerializableTree(
-    const AXTreeUpdate& initial_state)
-    : AXTree(initial_state) {
-}
+AXSerializableTree::AXSerializableTree(const AXTreeUpdate& initial_state)
+    : AXTree(initial_state) {}
 
-AXSerializableTree::~AXSerializableTree() {
-}
+AXSerializableTree::~AXSerializableTree() {}
 
 AXTreeSource<const AXNode*, AXNodeData, AXTreeData>*
 AXSerializableTree::CreateTreeSource() {

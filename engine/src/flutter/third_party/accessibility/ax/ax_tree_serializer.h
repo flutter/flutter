@@ -159,8 +159,7 @@ class AXTreeSerializer {
   // would be updated are being reparented. If so, update |out_lca| to point
   // to the least common ancestor of the previous LCA and the previous
   // parent of the node being reparented.
-  bool AnyDescendantWasReparented(AXSourceNode node,
-                                  AXSourceNode* out_lca);
+  bool AnyDescendantWasReparented(AXSourceNode node, AXSourceNode* out_lca);
 
   ClientTreeNode* ClientTreeNodeById(int32_t id);
 
@@ -297,7 +296,7 @@ AXTreeSerializer<AXSourceNode, AXNodeData, AXTreeData>::LeastCommonAncestor(
   int client_index = static_cast<int>(client_ancestors.size() - 1);
   while (source_index >= 0 && client_index >= 0) {
     if (tree_->GetId(ancestors[source_index]) !=
-            client_ancestors[client_index]->id) {
+        client_ancestors[client_index]->id) {
       return lca;
     }
     lca = ancestors[source_index];

@@ -117,7 +117,7 @@ TEST(CombineAXTreesTest, MapAllIdAttributes) {
                                 22);
   tree.nodes[0].AddIntAttribute(ax::mojom::IntAttribute::kActivedescendantId,
                                 22);
-  std::vector<int32_t> ids { 22 };
+  std::vector<int32_t> ids{22};
   tree.nodes[0].AddIntListAttribute(
       ax::mojom::IntListAttribute::kIndirectChildIds, ids);
   tree.nodes[0].AddIntListAttribute(ax::mojom::IntListAttribute::kControlsIds,
