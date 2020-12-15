@@ -1461,6 +1461,7 @@ FILE: ../../../flutter/shell/platform/windows/window_binding_handler_delegate.h
 FILE: ../../../flutter/shell/platform/windows/window_state.h
 FILE: ../../../flutter/shell/profiling/sampling_profiler.cc
 FILE: ../../../flutter/shell/profiling/sampling_profiler.h
+FILE: ../../../flutter/shell/profiling/sampling_profiler_unittest.cc
 FILE: ../../../flutter/shell/version/version.cc
 FILE: ../../../flutter/shell/version/version.h
 FILE: ../../../flutter/sky/packages/flutter_services/lib/empty.dart

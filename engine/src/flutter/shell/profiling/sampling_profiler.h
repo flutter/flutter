@@ -10,6 +10,7 @@
 #include <optional>
 #include <string>
 
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
 
@@ -97,17 +98,23 @@ class SamplingProfiler {
                    Sampler sampler,
                    int num_samples_per_sec);
 
+  ~SamplingProfiler();
+
   /**
    * @brief Starts the SamplingProfiler by triggering `SampleRepeatedly`.
    *
    */
-  void Start() const;
+  void Start();
+
+  void Stop();
 
  private:
   const std::string thread_label_;
   const fml::RefPtr<fml::TaskRunner> profiler_task_runner_;
   const Sampler sampler_;
   const uint32_t num_samples_per_sec_;
+  bool is_running_ = false;
+  std::atomic<fml::AutoResetWaitableEvent*> shutdown_latch_ = nullptr;
 
   void SampleRepeatedly(fml::TimeDelta task_delay) const;
 
