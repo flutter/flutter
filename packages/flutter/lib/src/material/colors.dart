@@ -6,9 +6,6 @@ import 'dart:ui' show Color;
 
 import 'package:flutter/painting.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// Defines a single color as well a color swatch with ten shades of the color.
 ///
 /// The color's shades are referred to by index. The greater the index, the
@@ -113,7 +110,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// using an integer for the specific color desired, as follows:
 ///
 /// ```dart
-/// Color selection = Colors.green[400]; // Selects a mid-range green.
+/// Color selection = Colors.green[400]!; // Selects a mid-range green.
 /// ```
 /// {@end-tool}
 /// {@tool snippet}
