@@ -2554,7 +2554,7 @@ abstract class BuildContext {
 class BuildOwner {
   /// Creates an object that manages widgets.
   BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
-        = focusManager ?? FocusManager();
+      focusManager = focusManager ?? FocusManager();
 
   /// Called on each build pass when the first buildable element is marked
   /// dirty.
