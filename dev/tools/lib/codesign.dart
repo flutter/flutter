@@ -10,29 +10,9 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import './globals.dart';
 import './repository.dart';
 import './stdio.dart';
-
-const List<String> binariesWithEntitlements = <String>[
-  'ideviceinfo',
-  'idevicename',
-  'idevicescreenshot',
-  'idevicesyslog',
-  'libimobiledevice.6.dylib',
-  'libplist.3.dylib',
-  'iproxy',
-  'libusbmuxd.4.dylib',
-  'libssl.1.0.0.dylib',
-  'libcrypto.1.0.0.dylib',
-  'libzip.5.0.dylib',
-  'libzip.5.dylib',
-  'gen_snapshot',
-  'dart',
-  'dartaotruntime',
-  'flutter_tester',
-  'gen_snapshot_arm64',
-  'gen_snapshot_armv7',
-];
 
 const List<String> expectedEntitlements = <String>[
   'com.apple.security.cs.allow-jit',
@@ -95,13 +75,13 @@ class CodesignCommand extends Command<void> {
   @override
   void run() {
     if (!platform.isMacOS) {
-      throw Exception(
+      throw ConductorException(
           'Error! Expected operating system "macos", actual operating system is: '
           '"${platform.operatingSystem}"');
     }
 
     if (argResults['verify'] as bool != true) {
-      throw Exception(
+      throw ConductorException(
           'Sorry, but codesigning is not implemented yet. Please pass the '
           '--$kVerify flag to verify signatures.');
     }
@@ -115,18 +95,99 @@ class CodesignCommand extends Command<void> {
         workingDirectory: framework.checkoutDirectory.path,
       ).stdout as String).trim();
     }
-    verify(revision, argResults[kSignatures] as bool);
-  }
-
-  @visibleForTesting
-  void verify(String revision, bool signatures) {
-    final List<String> unsignedBinaries = <String>[];
-    final List<String> wrongEntitlementBinaries = <String>[];
 
     framework.checkout(revision);
 
     // Ensure artifacts present
     framework.runFlutter(<String>['precache', '--ios', '--macos']);
+
+    if (argResults[kSignatures] as bool) {
+      verifySignatures();
+    } else {
+      verifyExist();
+    }
+  }
+
+  List<String> get binariesWithEntitlements {
+    return <String>[
+      'artifacts/libimobiledevice/idevicesyslog',
+      'artifacts/libimobiledevice/idevicescreenshot',
+      'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
+      'artifacts/libplist/libplist-2.0.3.dylib',
+      'artifacts/usbmuxd/libusbmuxd-2.0.6.dylib',
+      'artifacts/usbmuxd/iproxy',
+      'artifacts/openssl/libssl.1.1.dylib',
+      'artifacts/openssl/libcrypto.1.1.dylib',
+      'artifacts/engine/android-arm-release/darwin-x64/gen_snapshot',
+      'artifacts/engine/ios-profile/gen_snapshot_arm64',
+      'artifacts/engine/ios-profile/gen_snapshot_armv7',
+      'artifacts/engine/darwin-x64-profile/gen_snapshot',
+      'artifacts/engine/darwin-x64/flutter_tester',
+      'artifacts/engine/darwin-x64/gen_snapshot',
+      'artifacts/engine/android-x64-profile/darwin-x64/gen_snapshot',
+      'artifacts/engine/android-arm64-release/darwin-x64/gen_snapshot',
+      'artifacts/engine/ios/gen_snapshot_arm64',
+      'artifacts/engine/ios/gen_snapshot_armv7',
+      'artifacts/engine/android-arm64-profile/darwin-x64/gen_snapshot',
+      'artifacts/engine/android-x64-release/darwin-x64/gen_snapshot',
+      'artifacts/engine/ios-release/gen_snapshot_arm64',
+      'artifacts/engine/ios-release/gen_snapshot_armv7',
+      'artifacts/engine/darwin-x64-release/gen_snapshot',
+      'artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
+      'artifacts/ios-deploy/ios-deploy',
+      'dart-sdk/bin/dartaotruntime',
+      'dart-sdk/bin/dart',
+      'dart-sdk/bin/utils/gen_snapshot',
+    ].map((String relativePath) => fileSystem.path.join(framework.cacheDirectory, relativePath)).toList();
+  }
+
+  List<String> get binariesWithoutEntitlements {
+    return <String>[
+      'artifacts/engine/ios-profile/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
+      'artifacts/engine/ios-profile/Flutter.xcframework/ios-x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/darwin-x64-profile/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+      'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+      'artifacts/engine/darwin-x64/font-subset',
+      'artifacts/engine/ios/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
+      'artifacts/engine/ios/Flutter.xcframework/ios-x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/Flutter.xcframework/ios-armv7_arm64/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/Flutter.xcframework/ios-x86_64-simulator/Flutter.framework/Flutter',
+      'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    ].map((String relativePath) => fileSystem.path.join(framework.cacheDirectory, relativePath)).toList();
+  }
+
+  @visibleForTesting
+  void verifyExist() {
+    final Set<String> foundFiles = <String>{};
+    for (final String binaryPath in findBinaryPaths(framework.cacheDirectory)) {
+      if (binariesWithEntitlements.contains(binaryPath)) {
+        foundFiles.add(binaryPath);
+      } else if (binariesWithoutEntitlements.contains(binaryPath)) {
+        foundFiles.add(binaryPath);
+      } else {
+        throw ConductorException('Found unexpected binary in cache: $binaryPath');
+      }
+    }
+
+    final List<String> allExpectedFiles = binariesWithEntitlements + binariesWithoutEntitlements;
+    if (foundFiles.length < allExpectedFiles.length) {
+      final List<String> unfoundFiles = allExpectedFiles.where(
+        (String file) => !foundFiles.contains(file),
+      ).toList();
+      stdio.printError('Expected binaries not found in cache:\n\n${unfoundFiles.join('\n')}\n');
+      stdio.printError('If this commit is removing binaries from the cache, this test should be fixed by');
+      stdio.printError('removing the relevant entry from either the `binariesWithEntitlements` or');
+      stdio.printError('`binariesWithoutEntitlements` getters in dev/tools/lib/codesign.dart.');
+      throw ConductorException('Did not find all expected binaries!');
+    }
+
+    stdio.printStatus('All expected binaries present.');
+  }
+
+  @visibleForTesting
+  void verifySignatures() {
+    final List<String> unsignedBinaries = <String>[];
+    final List<String> wrongEntitlementBinaries = <String>[];
 
     for (final String binaryPath in findBinaryPaths(framework.cacheDirectory)) {
       stdio.printTrace('Verifying the code signature of $binaryPath');
@@ -164,17 +225,16 @@ class CodesignCommand extends Command<void> {
     }
 
     if (unsignedBinaries.isNotEmpty) {
-      throw Exception('Test failed because unsigned binaries detected.');
+      throw ConductorException('Test failed because unsigned binaries detected.');
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
-      throw Exception(
-        'Test failed because files found with the wrong entitlements:\n${wrongEntitlementBinaries.join('\n')}'
-      );
+      throw ConductorException(
+          'Test failed because files found with the wrong entitlements:\n${wrongEntitlementBinaries.join('\n')}');
     }
 
     stdio.printStatus(
-        'Verified that binaries for commit $revision are codesigned and have '
+        'Verified that binaries for commit ${argResults[kRevision] as String} are codesigned and have '
         'expected entitlements.');
   }
 
@@ -186,8 +246,6 @@ class CodesignCommand extends Command<void> {
         rootDirectory,
         '-type',
         'f',
-        '-perm',
-        '+111', // is executable
       ],
     );
     final List<String> allFiles = (result.stdout as String)
@@ -212,39 +270,34 @@ class CodesignCommand extends Command<void> {
 
   /// Check if the binary has the expected entitlements.
   bool hasExpectedEntitlements(String binaryPath) {
-    try {
-      final io.ProcessResult entitlementResult = processManager.runSync(
-        <String>[
-          'codesign',
-          '--display',
-          '--entitlements',
-          ':-',
-          binaryPath,
-        ],
-      );
+    final io.ProcessResult entitlementResult = processManager.runSync(
+      <String>[
+        'codesign',
+        '--display',
+        '--entitlements',
+        ':-',
+        binaryPath,
+      ],
+    );
 
-      if (entitlementResult.exitCode != 0) {
-        stdio.printError(
-            'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
-            '${entitlementResult.stderr}\n');
-        return false;
-      }
-
-      bool passes = true;
-      final String output = entitlementResult.stdout as String;
-      for (final String entitlement in expectedEntitlements) {
-        final bool entitlementExpected = binariesWithEntitlements
-            .contains(fileSystem.path.basename(binaryPath));
-        if (output.contains(entitlement) != entitlementExpected) {
-          stdio.printError(
-              'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} entitlement $entitlement.');
-          passes = false;
-        }
-      }
-      return passes;
-    } catch (e) {
-      stdio.printError((e as Exception).toString());
+    if (entitlementResult.exitCode != 0) {
+      stdio.printError(
+          'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
+          '${entitlementResult.stderr}\n');
       return false;
     }
+
+    bool passes = true;
+    final String output = entitlementResult.stdout as String;
+    for (final String entitlement in expectedEntitlements) {
+      final bool entitlementExpected = binariesWithEntitlements
+          .contains(fileSystem.path.basename(binaryPath));
+      if (output.contains(entitlement) != entitlementExpected) {
+        stdio.printError(
+            'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} entitlement $entitlement.');
+        passes = false;
+      }
+    }
+    return passes;
   }
 }

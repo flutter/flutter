@@ -24,3 +24,12 @@ String stdoutToString(dynamic input) {
   final String str = input as String;
   return str.trim();
 }
+
+class ConductorException implements Exception {
+  ConductorException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'Exception: $message';
+}
