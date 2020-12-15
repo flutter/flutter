@@ -175,6 +175,20 @@ class TextLayoutService {
       }
     }
 
+    // ************************************************** //
+    // *** PARAGRAPH BASELINE & HEIGHT & LONGEST LINE *** //
+    // ************************************************** //
+
+    for (final EngineLineMetrics line in lines) {
+      height += line.height;
+      if (alphabeticBaseline == -1.0) {
+        alphabeticBaseline = line.baseline;
+      }
+      if (longestLine < line.width) {
+        longestLine = line.width;
+      }
+    }
+
     // ******************************** //
     // *** MAX/MIN INTRINSIC WIDTHS *** //
     // ******************************** //
@@ -276,6 +290,7 @@ class LineBuilder {
     required this.maxWidth,
     required this.start,
     required this.lineNumber,
+    required this.accumulatedHeight,
   }) : end = start;
 
   /// Creates a [LineBuilder] for the first line in a paragraph.
@@ -290,6 +305,7 @@ class LineBuilder {
       maxWidth: maxWidth,
       lineNumber: 0,
       start: LineBreakResult.sameIndex(0, LineBreakType.prohibited),
+      accumulatedHeight: 0.0,
     );
   }
 
@@ -301,6 +317,10 @@ class LineBuilder {
   final LineBreakResult start;
   final int lineNumber;
 
+  /// The accumulated height of all preceding lines, excluding the current line.
+  final double accumulatedHeight;
+
+  /// The index of the end of the line so far.
   LineBreakResult end;
 
   /// The width of the line so far, excluding trailing white space.
@@ -311,6 +331,12 @@ class LineBuilder {
 
   /// The width of trailing white space in the line.
   double get widthOfTrailingSpace => widthIncludingSpace - width;
+
+  /// The alphabetic baseline of the line so far.
+  double alphabeticBaseline = 0.0;
+
+  /// The height of the line so far.
+  double height = 0.0;
 
   /// The last segment in this line.
   LineSegment get lastSegment => _segments.last;
@@ -359,6 +385,10 @@ class LineBuilder {
       isEmpty || !end.isHard,
       'Cannot extend a line that ends with a hard break.',
     );
+
+    alphabeticBaseline =
+        math.max(alphabeticBaseline, spanometer.alphabeticBaseline);
+    height = math.max(height, spanometer.height);
 
     _addSegment(_createSegment(newEnd));
   }
@@ -508,23 +538,18 @@ class LineBuilder {
       availableWidth: availableWidthForSegment,
       allowEmpty: allowEmpty,
     );
-    extendTo(LineBreakResult.sameIndex(breakingPoint, LineBreakType.prohibited));
+    extendTo(
+        LineBreakResult.sameIndex(breakingPoint, LineBreakType.prohibited));
   }
 
   /// Builds the [EngineLineMetrics] instance that represents this line.
   EngineLineMetrics build({String? ellipsis}) {
-    double ellipsisWidth = 0.0;
-    String text = paragraph
-        .toPlainText()
-        .substring(start.index, end.indexWithoutTrailingNewlines);
+    final double ellipsisWidth =
+        ellipsis == null ? 0.0 : spanometer.measureText(ellipsis);
 
-    if (ellipsis != null) {
-      ellipsisWidth = spanometer.measureText(ellipsis);
-      text += ellipsis;
-    }
-
-    return EngineLineMetrics.withText(
-      text,
+    return EngineLineMetrics.rich(
+      lineNumber,
+      ellipsis: ellipsis,
       startIndex: start.index,
       endIndex: end.index,
       endIndexWithoutNewlines: end.indexWithoutTrailingNewlines,
@@ -532,7 +557,8 @@ class LineBuilder {
       width: width + ellipsisWidth,
       widthWithTrailingSpaces: widthIncludingSpace + ellipsisWidth,
       left: alignOffset,
-      lineNumber: lineNumber,
+      height: height,
+      baseline: accumulatedHeight + alphabeticBaseline,
     );
   }
 
@@ -549,6 +575,7 @@ class LineBuilder {
       maxWidth: maxWidth,
       start: end,
       lineNumber: lineNumber + 1,
+      accumulatedHeight: accumulatedHeight + height,
     );
   }
 }
@@ -567,11 +594,18 @@ class Spanometer {
   final CanvasParagraph paragraph;
   final html.CanvasRenderingContext2D context;
 
+  static RulerHost _rulerHost = RulerHost();
+
+  static Map<TextHeightStyle, TextHeightRuler> _rulers =
+      <TextHeightStyle, TextHeightRuler>{};
+
   String _cssFontString = '';
 
   double? get letterSpacing => _currentSpan!.style._letterSpacing;
 
+  TextHeightRuler? _currentRuler;
   FlatTextSpan? _currentSpan;
+
   FlatTextSpan? get currentSpan => _currentSpan;
   set currentSpan(FlatTextSpan? span) {
     if (span == _currentSpan) {
@@ -581,8 +615,19 @@ class Spanometer {
 
     // No need to update css font string when `span` is null.
     if (span == null) {
+      _currentRuler = null;
       return;
     }
+
+    // Update the height ruler.
+    // If the ruler doesn't exist in the cache, create a new one and cache it.
+    final TextHeightStyle heightStyle = span.style.heightStyle;
+    TextHeightRuler? ruler = _rulers[heightStyle];
+    if (ruler == null) {
+      ruler = TextHeightRuler(heightStyle, _rulerHost);
+      _rulers[heightStyle] = ruler;
+    }
+    _currentRuler = ruler;
 
     // Update the font string if it's different from the previous span.
     final String cssFontString = span.style.cssFontString;
@@ -591,6 +636,12 @@ class Spanometer {
       context.font = cssFontString;
     }
   }
+
+  /// The alphabetic baseline for the current span.
+  double get alphabeticBaseline => _currentRuler!.alphabeticBaseline;
+
+  /// The line height of the current span.
+  double get height => _currentRuler!.height;
 
   /// Measures the width of text between two line breaks.
   ///
