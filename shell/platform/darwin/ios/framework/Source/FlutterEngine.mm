@@ -34,6 +34,7 @@
 
 NSString* const FlutterDefaultDartEntrypoint = nil;
 NSString* const FlutterDefaultInitialRoute = nil;
+NSString* const FlutterEngineWillDealloc = @"FlutterEngineWillDealloc";
 static constexpr int kNumProfilerSamplesPerSec = 5;
 
 @interface FlutterEngineRegistrar : NSObject <FlutterPluginRegistrar>
@@ -54,7 +55,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 @implementation FlutterEngine {
   fml::scoped_nsobject<FlutterDartProject> _dartProject;
-  flutter::ThreadHost _threadHost;
+  std::shared_ptr<flutter::ThreadHost> _threadHost;
   std::unique_ptr<flutter::Shell> _shell;
   NSString* _labelPrefix;
   std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory;
@@ -64,8 +65,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   std::shared_ptr<flutter::FlutterPlatformViewsController> _platformViewsController;
   flutter::IOSRenderingAPI _renderingApi;
-  std::unique_ptr<flutter::ProfilerMetricsIOS> _profiler_metrics;
-  std::unique_ptr<flutter::SamplingProfiler> _profiler;
+  std::shared_ptr<flutter::ProfilerMetricsIOS> _profiler_metrics;
+  std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
   // Channels
   fml::scoped_nsobject<FlutterPlatformPlugin> _platformPlugin;
@@ -180,6 +181,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       [object detachFromEngineForRegistrar:registrar];
     }
   }];
+
+  [[NSNotificationCenter defaultCenter] postNotificationName:FlutterEngineWillDealloc
+                                                      object:self
+                                                    userInfo:nil];
 
   /// nil out weak references.
   [_registrars
@@ -306,7 +311,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   self.isolateId = nil;
   _shell.reset();
   _profiler.reset();
-  _threadHost.Reset();
+  _threadHost.reset();
   _platformViewsController.reset();
 }
 
@@ -368,10 +373,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)startProfiler {
-  FML_DCHECK(!_threadHost.name_prefix.empty());
-  _profiler_metrics = std::make_unique<flutter::ProfilerMetricsIOS>();
-  _profiler = std::make_unique<flutter::SamplingProfiler>(
-      _threadHost.name_prefix.c_str(), _threadHost.profiler_thread->GetTaskRunner(),
+  FML_DCHECK(!_threadHost->name_prefix.empty());
+  _profiler_metrics = std::make_shared<flutter::ProfilerMetricsIOS>();
+  _profiler = std::make_shared<flutter::SamplingProfiler>(
+      _threadHost->name_prefix.c_str(), _threadHost->profiler_thread->GetTaskRunner(),
       [self]() { return self->_profiler_metrics->GenerateSample(); }, kNumProfilerSamplesPerSec);
   _profiler->Start();
 }
@@ -522,6 +527,20 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
           threadHostType};
 }
 
+static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSString* libraryURI) {
+  if (libraryURI) {
+    FML_DCHECK(entrypoint) << "Must specify entrypoint if specifying library";
+    settings->advisory_script_entrypoint = entrypoint.UTF8String;
+    settings->advisory_script_uri = libraryURI.UTF8String;
+  } else if (entrypoint) {
+    settings->advisory_script_entrypoint = entrypoint.UTF8String;
+    settings->advisory_script_uri = std::string("main.dart");
+  } else {
+    settings->advisory_script_entrypoint = std::string("main");
+    settings->advisory_script_uri = std::string("main.dart");
+  }
+}
+
 - (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute {
@@ -537,20 +556,11 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   auto platformData = [_dartProject.get() defaultPlatformData];
 
-  if (libraryURI) {
-    FML_DCHECK(entrypoint) << "Must specify entrypoint if specifying library";
-    settings.advisory_script_entrypoint = entrypoint.UTF8String;
-    settings.advisory_script_uri = libraryURI.UTF8String;
-  } else if (entrypoint) {
-    settings.advisory_script_entrypoint = entrypoint.UTF8String;
-    settings.advisory_script_uri = std::string("main.dart");
-  } else {
-    settings.advisory_script_entrypoint = std::string("main");
-    settings.advisory_script_uri = std::string("main.dart");
-  }
+  SetEntryPoint(&settings, entrypoint, libraryURI);
 
   NSString* threadLabel = [FlutterEngine generateThreadLabel:_labelPrefix];
-  _threadHost = [FlutterEngine makeThreadHost:threadLabel];
+  _threadHost = std::make_shared<flutter::ThreadHost>();
+  *_threadHost = [FlutterEngine makeThreadHost:threadLabel];
 
   // Lambda captures by pointers to ObjC objects are fine here because the
   // create call is synchronous.
@@ -566,9 +576,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
                                     fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-                                    _threadHost.raster_thread->GetTaskRunner(),      // raster
-                                    _threadHost.ui_thread->GetTaskRunner(),          // ui
-                                    _threadHost.io_thread->GetTaskRunner()           // io
+                                    _threadHost->raster_thread->GetTaskRunner(),     // raster
+                                    _threadHost->ui_thread->GetTaskRunner(),         // ui
+                                    _threadHost->io_thread->GetTaskRunner()          // io
   );
 
   // Create the shell. This is a blocking operation.
@@ -919,6 +929,40 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       callback(didTimeout);
     });
   });
+}
+
+- (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint
+                           libraryURI:(/*nullable*/ NSString*)libraryURI {
+  NSAssert(_shell, @"Spawning from an engine without a shell (possibly not run).");
+  FlutterEngine* result = [[FlutterEngine alloc] initWithName:_labelPrefix
+                                                      project:_dartProject.get()
+                                       allowHeadlessExecution:_allowHeadlessExecution];
+
+  flutter::Settings settings = _shell->GetSettings();
+  SetEntryPoint(&settings, entrypoint, libraryURI);
+
+  flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
+      [self](flutter::Shell& shell) {
+        [self recreatePlatformViewController];
+        return std::make_unique<flutter::PlatformViewIOS>(
+            shell, self->_renderingApi, self->_platformViewsController, shell.GetTaskRunners());
+      };
+
+  flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
+      [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
+
+  std::unique_ptr<flutter::Shell> shell =
+      _shell->Spawn(std::move(settings), on_create_platform_view, on_create_rasterizer);
+
+  result->_threadHost = _threadHost;
+  result->_profiler = _profiler;
+  result->_profiler_metrics = _profiler_metrics;
+  [result setupShell:std::move(shell) withObservatoryPublication:NO];
+  return result;
+}
+
+- (const flutter::ThreadHost&)threadHost {
+  return *_threadHost;
 }
 
 @end
