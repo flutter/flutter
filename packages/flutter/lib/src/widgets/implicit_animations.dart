@@ -353,10 +353,10 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   @protected
   AnimationController get controller => _controller;
   late final AnimationController _controller = AnimationController(
-      duration: widget.duration,
-      debugLabel: kDebugMode ? widget.toStringShort() : null,
-      vsync: this,
-    );
+    duration: widget.duration,
+    debugLabel: kDebugMode ? widget.toStringShort() : null,
+    vsync: this,
+  );
 
   /// The animation driving this widget's implicit animations.
   Animation<double> get animation => _animation;
