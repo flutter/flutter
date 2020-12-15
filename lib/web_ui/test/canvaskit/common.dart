@@ -38,6 +38,7 @@ void setUpCanvasKitTest() {
   tearDown(() {
     testCollector.cleanUpAfterTest();
     debugResetBrowserSupportsFinalizationRegistry();
+    OverlayCache.instance.debugClear();
   });
 
   tearDownAll(() {
