@@ -335,11 +335,11 @@ class CodesignCommand extends Command<void> {
     bool passes = true;
     final String output = entitlementResult.stdout as String;
     for (final String entitlement in expectedEntitlements) {
-      final bool entitlementExpected = binariesWithEntitlements
-          .contains(binaryPath);
+      final bool entitlementExpected = binariesWithEntitlements.contains(binaryPath);
       if (output.contains(entitlement) != entitlementExpected) {
         stdio.printError(
-            'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} entitlement $entitlement.');
+            'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} '
+            'entitlement $entitlement.');
         passes = false;
       }
     }
