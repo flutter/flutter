@@ -460,9 +460,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
     if (_state == _ScaleState.accepted && shouldStartIfAccepted) {
       _state = _ScaleState.started;
-      if (dragStartBehavior == DragStartBehavior.start) {
-        _initialSpan = _currentSpan;
-      }
       _dispatchOnStartCallbackIfNeeded();
     }
 
@@ -494,10 +491,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     if (_state == _ScaleState.possible) {
       _state = _ScaleState.started;
+      _dispatchOnStartCallbackIfNeeded();
       if (dragStartBehavior == DragStartBehavior.start) {
         _initialSpan = _currentSpan;
       }
-      _dispatchOnStartCallbackIfNeeded();
     }
   }
 
