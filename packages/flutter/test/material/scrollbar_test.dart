@@ -122,15 +122,15 @@ void main() {
     expect(canvas.invocations.isEmpty, isTrue);
   });
 
-  testWidgets('When isAlwaysShown is true, must pass a controller',
+  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController',
       (WidgetTester tester) async {
     Widget viewWithScroll() {
       return _buildBoilerplate(
         child: Theme(
           data: ThemeData(),
-          child: Scrollbar(
+          child: const Scrollbar(
             isAlwaysShown: true,
-            child: const SingleChildScrollView(
+            child: SingleChildScrollView(
               child: SizedBox(
                 width: 4000.0,
                 height: 4000.0,
@@ -141,12 +141,12 @@ void main() {
       );
     }
 
-    expect(() async {
-      await tester.pumpWidget(viewWithScroll());
-    }, throwsAssertionError);
+    await tester.pumpWidget(viewWithScroll());
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
   });
 
-  testWidgets('When isAlwaysShown is true, must pass a controller that is attached to a scroll view',
+  testWidgets('When isAlwaysShown is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController',
       (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
@@ -188,6 +188,38 @@ void main() {
                 width: 4000.0,
                 height: 4000.0,
               ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), paints..rect());
+  });
+
+  testWidgets('On first render with isAlwaysShown: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(),
+          child: PrimaryScrollController(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                return const Scrollbar(
+                  isAlwaysShown: true,
+                  child: SingleChildScrollView(
+                    primary: true,
+                    child: SizedBox(
+                      width: 4000.0,
+                      height: 4000.0,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),
