@@ -114,6 +114,110 @@ void testMain() {
         'matrix3d(5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 515, 515, 0, 1)',
       );
     });
+
+    test('renders overlays on top of platform views', () async {
+      expect(OverlayCache.instance.debugLength, 0);
+      final CkPicture testPicture = paintPicture(
+        ui.Rect.fromLTRB(0, 0, 10, 10),
+        (CkCanvas canvas) {
+          canvas.drawCircle(ui.Offset(5, 5), 5, CkPaint());
+        }
+      );
+
+      // Initialize all platform views to be used in the test.
+      final List<int> platformViewIds = <int>[];
+      for (int i = 0; i < OverlayCache.kDefaultCacheSize * 2; i++) {
+        ui.platformViewRegistry.registerViewFactory(
+          'test-platform-view',
+          (viewId) => html.DivElement()..id = 'view-$i',
+        );
+        await _createPlatformView(i, 'test-platform-view');
+        platformViewIds.add(i);
+      }
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+
+      void renderTestScene({ required int viewCount }) {
+        LayerSceneBuilder sb = LayerSceneBuilder();
+        sb.pushOffset(0, 0);
+        for (int i = 0; i < viewCount; i++) {
+          sb.addPicture(ui.Offset.zero, testPicture);
+          sb.addPlatformView(i, width: 10, height: 10);
+        }
+        dispatcher.rasterizer!.draw(sb.build().layerTree);
+      }
+
+      int countCanvases() {
+        return domRenderer.sceneElement!.querySelectorAll('canvas').length;
+      }
+
+      // Frame 1:
+      //   Render: up to cache size platform views.
+      //   Expect: main canvas plus platform view overlays; empty cache.
+      renderTestScene(viewCount: OverlayCache.kDefaultCacheSize);
+      expect(countCanvases(), OverlayCache.kDefaultCacheSize + 1);
+      expect(OverlayCache.instance.debugLength, 0);
+
+      // Frame 2:
+      //   Render: zero platform views.
+      //   Expect: main canvas, no overlays; overlays in the cache.
+      await Future<void>.delayed(Duration.zero);
+      renderTestScene(viewCount: 0);
+      expect(countCanvases(), 1);
+      expect(OverlayCache.instance.debugLength, 5);
+
+      // Frame 3:
+      //   Render: less than cache size platform views.
+      //   Expect: overlays reused; cache shrinks.
+      await Future<void>.delayed(Duration.zero);
+      renderTestScene(viewCount: OverlayCache.kDefaultCacheSize - 2);
+      expect(countCanvases(), OverlayCache.kDefaultCacheSize - 1);
+      expect(OverlayCache.instance.debugLength, 2);
+
+      // Frame 4:
+      //   Render: more platform views than max cache size.
+      //   Expect: cache empty (everything reused).
+      await Future<void>.delayed(Duration.zero);
+      renderTestScene(viewCount: OverlayCache.kDefaultCacheSize * 2);
+      expect(countCanvases(), OverlayCache.kDefaultCacheSize * 2 + 1);
+      expect(OverlayCache.instance.debugLength, 0);
+
+      // Frame 5:
+      //   Render: zero platform views.
+      //   Expect: main canvas, no overlays; cache full but does not exceed limit.
+      await Future<void>.delayed(Duration.zero);
+      renderTestScene(viewCount: 0);
+      expect(countCanvases(), 1);
+      expect(OverlayCache.instance.debugLength, 5);
+
+      // Frame 6:
+      //   Render: deleted platform views.
+      //   Expect: error.
+      for (final int id in platformViewIds) {
+        final codec = StandardMethodCodec();
+        final Completer<void> completer = Completer<void>();
+        ui.window.sendPlatformMessage(
+          'flutter/platform_views',
+          codec.encodeMethodCall(MethodCall(
+            'dispose',
+            id,
+          )),
+          completer.complete,
+        );
+        await completer.future;
+      }
+
+      try {
+        renderTestScene(viewCount: platformViewIds.length);
+        fail('Expected to throw');
+      } on AssertionError catch (error) {
+        expect(
+          error.toString(),
+          'Assertion failed: "Cannot render platform view 0. It has not been created, or it has been deleted."',
+        );
+      }
+    });
     // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }

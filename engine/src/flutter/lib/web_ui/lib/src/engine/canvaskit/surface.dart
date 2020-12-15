@@ -38,9 +38,26 @@ class Surface {
   Surface(this.viewEmbedder);
 
   CkSurface? _surface;
-  html.Element? htmlElement;
+
+  /// If true, forces a new WebGL context to be created, even if the window
+  /// size is the same. This is used to restore the UI after the browser tab
+  /// goes dormant and loses the GL context.
+  bool _forceNewContext = true;
+  bool get debugForceNewContext => _forceNewContext;
+
   SkGrContext? _grContext;
   int? _skiaCacheBytes;
+
+  /// The root HTML element for this surface.
+  ///
+  /// This element contains the canvas used to draw the UI. Unlike the canvas,
+  /// this element is permanent. It is never replaced or deleted, until this
+  /// surface is disposed of via [dispose].
+  ///
+  /// Conversely, the canvas that lives inside this element can be swapped, for
+  /// example, when the screen size changes, or when the WebGL context is lost
+  /// due to the browser tab becoming dormant.
+  final html.Element htmlElement = html.Element.tag('flt-canvas-container');
 
   /// Specify the GPU resource cache limits.
   void setSkiaResourceCacheMaxBytes(int bytes) {
@@ -64,7 +81,7 @@ class Surface {
   ///
   /// The given [size] is in physical pixels.
   SurfaceFrame acquireFrame(ui.Size size) {
-    final CkSurface surface = acquireRenderSurface(size);
+    final CkSurface surface = _createOrUpdateSurfaces(size);
 
     if (surface.context != null) {
       canvasKit.setCurrentContext(surface.context!);
@@ -77,21 +94,16 @@ class Surface {
     return SurfaceFrame(surface, submitCallback);
   }
 
-  CkSurface acquireRenderSurface(ui.Size size) {
-    _createOrUpdateSurfaces(size);
-    return _surface!;
-  }
-
   void addToScene() {
     if (!_addedToScene) {
-      skiaSceneHost!.children.insert(0, htmlElement!);
+      skiaSceneHost!.children.insert(0, htmlElement);
     }
     _addedToScene = true;
   }
 
   ui.Size? _currentSize;
 
-  void _createOrUpdateSurfaces(ui.Size size) {
+  CkSurface _createOrUpdateSurfaces(ui.Size size) {
     if (size.isEmpty) {
       throw CanvasKitError('Cannot create surfaces of empty size.');
     }
@@ -99,11 +111,12 @@ class Surface {
     // Check if the window is shrinking in size, and if so, don't allocate a
     // new canvas as the previous canvas is big enough to fit everything.
     final ui.Size? previousSize = _currentSize;
-    if (previousSize != null &&
+    if (!_forceNewContext &&
+        previousSize != null &&
         size.width <= previousSize.width &&
         size.height <= previousSize.height) {
       // The existing surface is still reusable.
-      return;
+      return _surface!;
     }
 
     _currentSize = _currentSize == null
@@ -116,14 +129,17 @@ class Surface {
 
     _surface?.dispose();
     _surface = null;
-    htmlElement?.remove();
-    htmlElement = null;
     _addedToScene = false;
 
-    _surface = _wrapHtmlCanvas(_currentSize!);
+    return _surface = _wrapHtmlCanvas(_currentSize!);
   }
 
   CkSurface _wrapHtmlCanvas(ui.Size physicalSize) {
+    // Clear the container, if it's not empty.
+    while (htmlElement.firstChild != null) {
+      htmlElement.firstChild!.remove();
+    }
+
     // If `physicalSize` is not precise, use a slightly bigger canvas. This way
     // we ensure that the rendred picture covers the entire browser window.
     final int pixelWidth = physicalSize.width.ceil();
@@ -146,9 +162,28 @@ class Surface {
       ..width = '${logicalWidth}px'
       ..height = '${logicalHeight}px';
 
-    htmlElement = htmlCanvas;
-    if (webGLVersion == -1 || canvasKitForceCpuOnly) {
-      return _makeSoftwareCanvasSurface(htmlCanvas);
+    // When the browser tab using WebGL goes dormant the browser and/or OS may
+    // decide to clear GPU resources to let other tabs/programs use the GPU.
+    // When this happens, the browser sends the "webglcontextlost" event as a
+    // notification. When we receive this notification we force a new context.
+    //
+    // See also: https://www.khronos.org/webgl/wiki/HandlingContextLost
+    htmlCanvas.addEventListener('webglcontextlost', (event) {
+      print('Flutter: restoring WebGL context.');
+      _forceNewContext = true;
+      // Force the framework to rerender the frame.
+      EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
+      event.stopPropagation();
+      event.preventDefault();
+    }, false);
+    _forceNewContext = false;
+
+    htmlElement.append(htmlCanvas);
+
+    if (webGLVersion == -1) {
+      return _makeSoftwareCanvasSurface(htmlCanvas, 'WebGL support not detected');
+    } else if (canvasKitForceCpuOnly) {
+      return _makeSoftwareCanvasSurface(htmlCanvas, 'CPU rendering forced by application');
     } else {
       // Try WebGL first.
       final int glContext = canvasKit.GetWebGLContext(
@@ -162,7 +197,7 @@ class Surface {
       );
 
       if (glContext == 0) {
-        return _makeSoftwareCanvasSurface(htmlCanvas);
+        return _makeSoftwareCanvasSurface(htmlCanvas, 'Failed to initialize WebGL context');
       }
 
       _grContext = canvasKit.MakeGrContext(glContext);
@@ -183,7 +218,7 @@ class Surface {
       );
 
       if (skSurface == null) {
-        return _makeSoftwareCanvasSurface(htmlCanvas);
+        return _makeSoftwareCanvasSurface(htmlCanvas, 'Failed to initialize WebGL surface');
       }
 
       return CkSurface(skSurface, _grContext, glContext);
@@ -192,9 +227,11 @@ class Surface {
 
   static bool _didWarnAboutWebGlInitializationFailure = false;
 
-  CkSurface _makeSoftwareCanvasSurface(html.CanvasElement htmlCanvas) {
+  CkSurface _makeSoftwareCanvasSurface(html.CanvasElement htmlCanvas, String reason) {
     if (!_didWarnAboutWebGlInitializationFailure) {
-      html.window.console.warn('WARNING: failed to initialize WebGL. Falling back to CPU-only rendering.');
+      html.window.console.warn(
+        'WARNING: Falling back to CPU-only rendering. $reason.'
+      );
       _didWarnAboutWebGlInitializationFailure = true;
     }
     return CkSurface(
@@ -210,6 +247,11 @@ class Surface {
     }
     _surface!.flush();
     return true;
+  }
+
+  void dispose() {
+    htmlElement.remove();
+    _surface?.dispose();
   }
 }
 
