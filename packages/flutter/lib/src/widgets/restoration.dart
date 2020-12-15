@@ -438,7 +438,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// provided to the [RestorationMixin] the property is registered to. When
   /// [initWithValue] is called, the property should forget its previous value
   /// and re-initialize itself to the newly provided `value`.
-  void initWithValue(T? value);
+  void initWithValue(T value);
 
   /// Called by the [RestorationMixin] to retrieve the information that this
   /// property wants to store in the restoration data.
