@@ -407,6 +407,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(buffer.toString(), contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
