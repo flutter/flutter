@@ -184,13 +184,13 @@ class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveVa
 
   @override
   T fromPrimitives(Object? serialized) {
-    assert (serialized != null);
-    return serialized as T;
+    assert(serialized != null);
+    return serialized! as T;
   }
 
   @override
   Object toPrimitives() {
-    assert (value != null);
+    assert(value != null);
     return value;
   }
 }
