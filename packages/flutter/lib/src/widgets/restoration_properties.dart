@@ -171,27 +171,7 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
 // _RestorablePrimitiveValue and its subclasses do not allow null values in
 // anticipation of NNBD (non-nullability by default).
 class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
-  _RestorablePrimitiveValue(T _defaultValue)
-    : assert(_defaultValue != null),
-      super(_defaultValue);
-
-  @override
-  T fromPrimitives(Object? serialized) {
-    assert(serialized != null);
-    return serialized! as T;
-  }
-
-  @override
-  set value(T value) {
-    assert(value != null);
-    super.value = value;
-  }
-
-  @override
-  Object toPrimitives() {
-    assert(value != null);
-    return value;
-  }
+  _RestorablePrimitiveValue(T _defaultValue) : super(_defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [num].
