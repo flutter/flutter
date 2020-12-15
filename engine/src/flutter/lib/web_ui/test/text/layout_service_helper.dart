@@ -13,9 +13,11 @@ TestLine l(
   int? endIndex, {
   int?  endIndexWithoutNewlines,
   bool? hardBreak,
+  double? height,
   double? width,
   double? widthWithTrailingSpaces,
   double? left,
+  double? baseline,
 }) {
   return TestLine(
     displayText: displayText,
@@ -23,13 +25,16 @@ TestLine l(
     endIndex: endIndex,
     endIndexWithoutNewlines: endIndexWithoutNewlines,
     hardBreak: hardBreak,
+    height: height,
     width: width,
     widthWithTrailingSpaces: widthWithTrailingSpaces,
     left: left,
+    baseline: baseline,
   );
 }
 
 void expectLines(CanvasParagraph paragraph, List<TestLine> expectedLines) {
+  final String text = paragraph.toPlainText();
   final List<EngineLineMetrics> lines =
       paragraph.computeLineMetrics() as List<EngineLineMetrics>;
   expect(lines, hasLength(expectedLines.length));
@@ -43,8 +48,11 @@ void expectLines(CanvasParagraph paragraph, List<TestLine> expectedLines) {
       reason: '${i}th line had the wrong `lineNumber`. Expected: $i. Actual: ${line.lineNumber}',
     );
     if (expectedLine.displayText != null) {
+      final String substring =
+          text.substring(line.startIndex, line.endIndexWithoutNewlines);
+      final String ellipsis = line.ellipsis ?? '';
       expect(
-        line.displayText,
+        substring + ellipsis,
         expectedLine.displayText,
         reason:
             '${i}th line had a different `displayText` value: "${line.displayText}" vs. "${expectedLine.displayText}"',
@@ -128,6 +136,7 @@ class TestLine {
     this.width,
     this.widthWithTrailingSpaces,
     this.left,
+    this.baseline,
   });
 
   final String? displayText;
@@ -139,4 +148,5 @@ class TestLine {
   final double? width;
   final double? widthWithTrailingSpaces;
   final double? left;
+  final double? baseline;
 }

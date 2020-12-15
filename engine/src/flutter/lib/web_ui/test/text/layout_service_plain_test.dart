@@ -49,7 +49,7 @@ void testMain() async {
     paragraph = plain(ahemStyle, '   abc')..layout(constrain(double.infinity));
     expect(paragraph.maxIntrinsicWidth, 60);
     expect(paragraph.minIntrinsicWidth, 30);
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l('   abc', 0, 6, hardBreak: true, width: 60.0),
     ]);
@@ -58,7 +58,7 @@ void testMain() async {
     paragraph = plain(ahemStyle, 'abc   ')..layout(constrain(double.infinity));
     expect(paragraph.maxIntrinsicWidth, 60);
     expect(paragraph.minIntrinsicWidth, 30);
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l('abc   ', 0, 6, hardBreak: true, width: 30.0),
     ]);
@@ -68,7 +68,7 @@ void testMain() async {
       ..layout(constrain(double.infinity));
     expect(paragraph.maxIntrinsicWidth, 100);
     expect(paragraph.minIntrinsicWidth, 20);
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l('  ab   c  ', 0, 10, hardBreak: true, width: 80.0, left: 0.0),
     ]);
@@ -77,7 +77,7 @@ void testMain() async {
     paragraph = plain(ahemStyle, ' ')..layout(constrain(double.infinity));
     expect(paragraph.maxIntrinsicWidth, 10);
     expect(paragraph.minIntrinsicWidth, 0);
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l(' ', 0, 1, hardBreak: true, width: 0.0, left: 0.0),
     ]);
@@ -86,7 +86,7 @@ void testMain() async {
     paragraph = plain(ahemStyle, '     ')..layout(constrain(double.infinity));
     expect(paragraph.maxIntrinsicWidth, 50);
     expect(paragraph.minIntrinsicWidth, 0);
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l('     ', 0, 5, hardBreak: true, width: 0.0, left: 0.0),
     ]);
@@ -97,25 +97,27 @@ void testMain() async {
       ..layout(constrain(50.0));
 
     // Should fit on a single line.
+    expect(paragraph.alphabeticBaseline, 8);
     expect(paragraph.maxIntrinsicWidth, 50);
     expect(paragraph.minIntrinsicWidth, 50);
     expect(paragraph.width, 50);
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
-      l('12345', 0, 5, hardBreak: true, width: 50.0, left: 0.0),
+      l('12345', 0, 5, hardBreak: true, width: 50.0, left: 0.0, height: 10.0, baseline: 8.0),
     ]);
   });
 
   test('simple multi-line text', () {
     final CanvasParagraph paragraph = plain(ahemStyle, 'foo bar baz')
       ..layout(constrain(70.0));
+    expect(paragraph.alphabeticBaseline, 8);
     expect(paragraph.maxIntrinsicWidth, 110);
     expect(paragraph.minIntrinsicWidth, 30);
     expect(paragraph.width, 70);
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
-      l('foo bar ', 0, 8, hardBreak: false, width: 70.0, left: 0.0),
-      l('baz', 8, 11, hardBreak: true, width: 30.0, left: 0.0),
+      l('foo bar ', 0, 8, hardBreak: false, width: 70.0, left: 0.0, height: 10.0, baseline: 8.0),
+      l('baz', 8, 11, hardBreak: true, width: 30.0, left: 0.0, height: 10.0, baseline: 18.0),
     ]);
   });
 
@@ -124,73 +126,79 @@ void testMain() async {
 
     // The long text doesn't fit in 50px of width, so it needs to wrap.
     paragraph = plain(ahemStyle, '1234567890')..layout(constrain(50.0));
+    expect(paragraph.alphabeticBaseline, 8);
     expect(paragraph.maxIntrinsicWidth, 100);
     expect(paragraph.minIntrinsicWidth, 100);
     expect(paragraph.width, 50);
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
-      l('12345', 0, 5, hardBreak: false, width: 50.0, left: 0.0),
-      l('67890', 5, 10, hardBreak: true, width: 50.0, left: 0.0),
+      l('12345', 0, 5, hardBreak: false, width: 50.0, left: 0.0, height: 10.0, baseline: 8.0),
+      l('67890', 5, 10, hardBreak: true, width: 50.0, left: 0.0, height: 10.0, baseline: 18.0),
     ]);
 
     // The first word is force-broken twice.
     paragraph = plain(ahemStyle, 'abcdefghijk lm')..layout(constrain(50.0));
+    expect(paragraph.alphabeticBaseline, 8);
     expect(paragraph.maxIntrinsicWidth, 140);
     expect(paragraph.minIntrinsicWidth, 110);
     expect(paragraph.width, 50);
-    // expect(paragraph.height, 30);
+    expect(paragraph.height, 30);
     expectLines(paragraph, [
-      l('abcde', 0, 5, hardBreak: false, width: 50.0, left: 0.0),
-      l('fghij', 5, 10, hardBreak: false, width: 50.0, left: 0.0),
-      l('k lm', 10, 14, hardBreak: true, width: 40.0, left: 0.0),
+      l('abcde', 0, 5, hardBreak: false, width: 50.0, left: 0.0, height: 10.0, baseline: 8.0),
+      l('fghij', 5, 10, hardBreak: false, width: 50.0, left: 0.0, height: 10.0, baseline: 18.0),
+      l('k lm', 10, 14, hardBreak: true, width: 40.0, left: 0.0, height: 10.0, baseline: 28.0),
     ]);
 
     // Constraints enough only for "abcdef" but not for the trailing space.
     paragraph = plain(ahemStyle, 'abcdef gh')..layout(constrain(60.0));
+    expect(paragraph.alphabeticBaseline, 8);
     expect(paragraph.maxIntrinsicWidth, 90);
     expect(paragraph.minIntrinsicWidth, 60);
     expect(paragraph.width, 60);
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
-      l('abcdef ', 0, 7, hardBreak: false, width: 60.0, left: 0.0),
-      l('gh', 7, 9, hardBreak: true, width: 20.0, left: 0.0),
+      l('abcdef ', 0, 7, hardBreak: false, width: 60.0, left: 0.0, height: 10.0, baseline: 8.0),
+      l('gh', 7, 9, hardBreak: true, width: 20.0, left: 0.0, height: 10.0, baseline: 18.0),
     ]);
 
     // Constraints aren't enough even for a single character. In this case,
     // we show a minimum of one character per line.
     paragraph = plain(ahemStyle, 'AA')..layout(constrain(8.0));
+    expect(paragraph.alphabeticBaseline, 8);
     expect(paragraph.maxIntrinsicWidth, 20);
     expect(paragraph.minIntrinsicWidth, 20);
     expect(paragraph.width, 8);
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
-      l('A', 0, 1, hardBreak: false, width: 10.0, left: 0.0),
-      l('A', 1, 2, hardBreak: true, width: 10.0, left: 0.0),
+      l('A', 0, 1, hardBreak: false, width: 10.0, left: 0.0, height: 10.0, baseline: 8.0),
+      l('A', 1, 2, hardBreak: true, width: 10.0, left: 0.0, height: 10.0, baseline: 18.0),
     ]);
 
     // Extremely narrow constraints with new line in the middle.
     paragraph = plain(ahemStyle, 'AA\nA')..layout(constrain(8.0));
+    expect(paragraph.alphabeticBaseline, 8);
     expect(paragraph.maxIntrinsicWidth, 20);
     expect(paragraph.minIntrinsicWidth, 20);
     expect(paragraph.width, 8);
-    // expect(paragraph.height, 30);
+    expect(paragraph.height, 30);
     expectLines(paragraph, [
-      l('A', 0, 1, hardBreak: false, width: 10.0, left: 0.0),
-      l('A', 1, 3, hardBreak: true, width: 10.0, left: 0.0),
-      l('A', 3, 4, hardBreak: true, width: 10.0, left: 0.0),
+      l('A', 0, 1, hardBreak: false, width: 10.0, left: 0.0, height: 10.0, baseline: 8.0),
+      l('A', 1, 3, hardBreak: true, width: 10.0, left: 0.0, height: 10.0, baseline: 18.0),
+      l('A', 3, 4, hardBreak: true, width: 10.0, left: 0.0, height: 10.0, baseline: 28.0),
     ]);
 
     // Extremely narrow constraints with new line in the end.
     paragraph = plain(ahemStyle, 'AAA\n')..layout(constrain(8.0));
+    expect(paragraph.alphabeticBaseline, 8);
     expect(paragraph.maxIntrinsicWidth, 30);
     expect(paragraph.minIntrinsicWidth, 30);
     expect(paragraph.width, 8);
-    // expect(paragraph.height, 40);
+    expect(paragraph.height, 40);
     expectLines(paragraph, [
-      l('A', 0, 1, hardBreak: false, width: 10.0, left: 0.0),
-      l('A', 1, 2, hardBreak: false, width: 10.0, left: 0.0),
-      l('A', 2, 4, hardBreak: true, width: 10.0, left: 0.0),
-      l('', 4, 4, hardBreak: true, width: 0.0, left: 0.0),
+      l('A', 0, 1, hardBreak: false, width: 10.0, left: 0.0, height: 10.0, baseline: 8.0),
+      l('A', 1, 2, hardBreak: false, width: 10.0, left: 0.0, height: 10.0, baseline: 18.0),
+      l('A', 2, 4, hardBreak: true, width: 10.0, left: 0.0, height: 10.0, baseline: 28.0),
+      l('', 4, 4, hardBreak: true, width: 0.0, left: 0.0, height: 10.0, baseline: 38.0),
     ]);
   });
 
@@ -202,7 +210,7 @@ void testMain() async {
     expect(paragraph.maxIntrinsicWidth, 20);
     expect(paragraph.minIntrinsicWidth, 20);
     expect(paragraph.width, 50);
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
       l('12', 0, 3, hardBreak: true, width: 20.0, left: 0.0),
       l('34', 3, 5, hardBreak: true, width: 20.0, left: 0.0),
@@ -216,7 +224,7 @@ void testMain() async {
     paragraph = plain(ahemStyle, '\n\n1234')..layout(constrain(50.0));
     expect(paragraph.maxIntrinsicWidth, 40);
     expect(paragraph.minIntrinsicWidth, 40);
-    // expect(paragraph.height, 30);
+    expect(paragraph.height, 30);
     expectLines(paragraph, [
       l('', 0, 1, hardBreak: true, width: 0.0, left: 0.0),
       l('', 1, 2, hardBreak: true, width: 0.0, left: 0.0),
@@ -227,7 +235,7 @@ void testMain() async {
     paragraph = plain(ahemStyle, '12\n\n345')..layout(constrain(50.0));
     expect(paragraph.maxIntrinsicWidth, 30);
     expect(paragraph.minIntrinsicWidth, 30);
-    // expect(paragraph.height, 30);
+    expect(paragraph.height, 30);
     expectLines(paragraph, [
       l('12', 0, 3, hardBreak: true, width: 20.0, left: 0.0),
       l('', 3, 4, hardBreak: true, width: 0.0, left: 0.0),
@@ -238,7 +246,7 @@ void testMain() async {
     paragraph = plain(ahemStyle, '1234\n\n')..layout(constrain(50.0));
     expect(paragraph.maxIntrinsicWidth, 40);
     expect(paragraph.minIntrinsicWidth, 40);
-    // expect(paragraph.height, 30);
+    expect(paragraph.height, 30);
     expectLines(paragraph, [
       l('1234', 0, 5, hardBreak: true, width: 40.0, left: 0.0),
       l('', 5, 6, hardBreak: true, width: 0.0, left: 0.0),
@@ -255,7 +263,7 @@ void testMain() async {
       expect(paragraph.maxIntrinsicWidth, 70);
       expect(paragraph.minIntrinsicWidth, 30);
       expect(paragraph.width, double.infinity);
-      // expect(paragraph.height, 20);
+      expect(paragraph.height, 20);
       expectLines(paragraph, [
         l('123', 0, 4, hardBreak: true, width: 30.0, left: 0.0),
         l('456 789', 4, 11, hardBreak: true, width: 70.0, left: 0.0),
@@ -404,7 +412,7 @@ void testMain() async {
     )..layout(constrain(50.0));
     expect(longText.minIntrinsicWidth, 480);
     expect(longText.maxIntrinsicWidth, 480);
-    // expect(longText.height, 10);
+    expect(longText.height, 10);
     expectLines(longText, [
       l('AA...', 0, 2, hardBreak: false, width: 50.0, left: 0.0),
     ]);
@@ -417,7 +425,7 @@ void testMain() async {
     )..layout(constrain(50.0));
     expect(longTextShortPrefix.minIntrinsicWidth, 450);
     expect(longTextShortPrefix.maxIntrinsicWidth, 450);
-    // expect(longTextShortPrefix.height, 20);
+    expect(longTextShortPrefix.height, 20);
     expectLines(longTextShortPrefix, [
       l('AAA', 0, 4, hardBreak: true, width: 30.0, left: 0.0),
       l('AA...', 4, 6, hardBreak: false, width: 50.0, left: 0.0),
@@ -429,7 +437,7 @@ void testMain() async {
       ..layout(constrain(50.0));
     expect(trailingSpace.minIntrinsicWidth, 30);
     expect(trailingSpace.maxIntrinsicWidth, 60);
-    // expect(trailingSpace.height, 10);
+    expect(trailingSpace.height, 10);
     expectLines(trailingSpace, [
       l('AA...', 0, 2, hardBreak: false, width: 50.0, left: 0.0),
     ]);
@@ -439,7 +447,7 @@ void testMain() async {
       ..layout(constrain(30.0));
     expect(paragraph.minIntrinsicWidth, 40);
     expect(paragraph.maxIntrinsicWidth, 40);
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l('...', 0, 0, hardBreak: false, width: 30.0, left: 0.0),
     ]);
@@ -448,7 +456,7 @@ void testMain() async {
     paragraph.layout(constrain(10.0));
     expect(paragraph.minIntrinsicWidth, 40);
     expect(paragraph.maxIntrinsicWidth, 40);
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
 
     // TODO(flutter_web): https://github.com/flutter/flutter/issues/34346
     // expectLines(paragraph, [
@@ -469,7 +477,7 @@ void testMain() async {
     // The height should be that of a single line.
     final CanvasParagraph oneline = plain(maxlinesStyle, 'One line')
       ..layout(constrain(double.infinity));
-    // expect(oneline.height, 10);
+    expect(oneline.height, 10);
     expectLines(oneline, [
       l('One line', 0, 8, hardBreak: true, width: 80.0, left: 0.0),
     ]);
@@ -478,7 +486,7 @@ void testMain() async {
     final CanvasParagraph threelines =
         plain(maxlinesStyle, 'First\nSecond\nThird')
           ..layout(constrain(double.infinity));
-    // expect(threelines.height, 20);
+    expect(threelines.height, 20);
     expectLines(threelines, [
       l('First', 0, 6, hardBreak: true, width: 50.0, left: 0.0),
       l('Second', 6, 13, hardBreak: true, width: 60.0, left: 0.0),
@@ -489,7 +497,7 @@ void testMain() async {
       maxlinesStyle,
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     )..layout(constrain(50.0));
-    // expect(veryLong.height, 20);
+    expect(veryLong.height, 20);
     expectLines(veryLong, [
       l('Lorem ', 0, 6, hardBreak: false, width: 50.0, left: 0.0),
       l('ipsum ', 6, 12, hardBreak: false, width: 50.0, left: 0.0),
@@ -500,7 +508,7 @@ void testMain() async {
       maxlinesStyle,
       'AAA AAAAAAAAAAAAAAAAAAA',
     )..layout(constrain(50.0));
-    // expect(veryLongLastLine.height, 20);
+    expect(veryLongLastLine.height, 20);
     expectLines(veryLongLastLine, [
       l('AAA ', 0, 4, hardBreak: false, width: 30.0, left: 0.0),
       l('AAAAA', 4, 9, hardBreak: false, width: 50.0, left: 0.0),
@@ -525,21 +533,21 @@ void testMain() async {
 
     // Simple no overflow case.
     paragraph = plain(onelineStyle, 'abcdef')..layout(constrain(60.0));
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l('abcdef', 0, 6, hardBreak: true, width: 60.0, left: 0.0),
     ]);
 
     // Simple overflow case.
     paragraph = plain(onelineStyle, 'abcd efg')..layout(constrain(60.0));
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l('abc...', 0, 3, hardBreak: false, width: 60.0, left: 0.0),
     ]);
 
     // Another simple overflow case.
     paragraph = plain(onelineStyle, 'a bcde fgh')..layout(constrain(60.0));
-    // expect(paragraph.height, 10);
+    expect(paragraph.height, 10);
     expectLines(paragraph, [
       l('a b...', 0, 3, hardBreak: false, width: 60.0, left: 0.0),
     ]);
@@ -547,7 +555,7 @@ void testMain() async {
     // The ellipsis is supposed to go on the second line, but because the
     // 2nd line doesn't overflow, no ellipsis is shown.
     paragraph = plain(multilineStyle, 'abcdef ghijkl')..layout(constrain(60.0));
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
       l('abcdef ', 0, 7, hardBreak: false, width: 60.0, left: 0.0),
       l('ghijkl', 7, 13, hardBreak: true, width: 60.0, left: 0.0),
@@ -555,7 +563,7 @@ void testMain() async {
 
     // But when the 2nd line is long enough, the ellipsis is shown.
     paragraph = plain(multilineStyle, 'abcd efghijkl')..layout(constrain(60.0));
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
       l('abcd ', 0, 5, hardBreak: false, width: 40.0, left: 0.0),
       l('efg...', 5, 8, hardBreak: false, width: 60.0, left: 0.0),
@@ -565,7 +573,7 @@ void testMain() async {
     // insert the ellipsis.
     paragraph = plain(multilineStyle, 'abcde f gh ijk')
       ..layout(constrain(60.0));
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
       l('abcde ', 0, 6, hardBreak: false, width: 50.0, left: 0.0),
       l('f g...', 6, 9, hardBreak: false, width: 60.0, left: 0.0),
@@ -573,7 +581,7 @@ void testMain() async {
 
     // First line overflows but second line doesn't.
     paragraph = plain(multilineStyle, 'abcdefg hijk')..layout(constrain(60.0));
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
       l('abcdef', 0, 6, hardBreak: false, width: 60.0, left: 0.0),
       l('g hijk', 6, 12, hardBreak: true, width: 60.0, left: 0.0),
@@ -582,7 +590,7 @@ void testMain() async {
     // Both first and second lines overflow.
     paragraph = plain(multilineStyle, 'abcdefg hijklmnop')
       ..layout(constrain(60.0));
-    // expect(paragraph.height, 20);
+    expect(paragraph.height, 20);
     expectLines(paragraph, [
       l('abcdef', 0, 6, hardBreak: false, width: 60.0, left: 0.0),
       l('g h...', 6, 9, hardBreak: false, width: 60.0, left: 0.0),

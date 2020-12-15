@@ -21,6 +21,7 @@ class EngineLineMetrics implements ui.LineMetrics {
     required this.baseline,
     required this.lineNumber,
   })  : displayText = null,
+        ellipsis = null,
         startIndex = -1,
         endIndex = -1,
         endIndexWithoutNewlines = -1,
@@ -44,14 +45,38 @@ class EngineLineMetrics implements ui.LineMetrics {
         assert(width != null), // ignore: unnecessary_null_comparison
         assert(left != null), // ignore: unnecessary_null_comparison
         assert(lineNumber != null && lineNumber >= 0), // ignore: unnecessary_null_comparison
+        ellipsis = null,
         ascent = double.infinity,
         descent = double.infinity,
         unscaledAscent = double.infinity,
         height = double.infinity,
         baseline = double.infinity;
 
+  EngineLineMetrics.rich(
+    this.lineNumber, {
+    required this.ellipsis,
+    required this.startIndex,
+    required this.endIndex,
+    required this.endIndexWithoutNewlines,
+    required this.hardBreak,
+    required this.width,
+    required this.widthWithTrailingSpaces,
+    required this.left,
+    required this.height,
+    required this.baseline,
+  })  : displayText = null,
+        ascent = double.infinity,
+        descent = double.infinity,
+        unscaledAscent = double.infinity;
+
   /// The text to be rendered on the screen representing this line.
   final String? displayText;
+
+  /// The string to be displayed as an overflow indicator.
+  ///
+  /// When the value is non-null, it means this line is overflowing and the
+  /// [ellipsis] needs to be displayed at the end of it.
+  final String? ellipsis;
 
   /// The index (inclusive) in the text where this line begins.
   final int startIndex;
@@ -1032,6 +1057,19 @@ class EngineTextStyle implements ui.TextStyle {
       fontWeight: _fontWeight,
       fontSize: _fontSize,
       fontFamily: _effectiveFontFamily,
+    );
+  }
+
+  late final TextHeightStyle heightStyle = _createHeightStyle();
+
+  TextHeightStyle _createHeightStyle() {
+    return TextHeightStyle(
+      fontFamily: _effectiveFontFamily,
+      fontSize: _fontSize ?? DomRenderer.defaultFontSize,
+      height: _height,
+      // TODO(mdebbar): Pass the actual value when font features become supported
+      //                https://github.com/flutter/flutter/issues/64595
+      fontFeatures: null,
     );
   }
 
