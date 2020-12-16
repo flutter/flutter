@@ -26,6 +26,7 @@ const List<String> expectedEntitlements = <String>[
 const String kVerify = 'verify';
 const String kSignatures = 'signatures';
 const String kRevision = 'revision';
+const String kUpstream = 'upstream';
 
 /// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
@@ -48,6 +49,11 @@ class CodesignCommand extends Command<void> {
           'signatures or entitlements. Must be used with --verify flag.',
     );
     argParser.addOption(
+      kUpstream,
+      defaultsTo: FrameworkRepository.defaultUpstream,
+      help: 'The git remote URL to use as the Flutter framework\'s upstream.',
+    );
+    argParser.addOption(
       kRevision,
       help: 'The Flutter framework revision to use.',
     );
@@ -61,7 +67,7 @@ class CodesignCommand extends Command<void> {
 
   FrameworkRepository _framework;
   FrameworkRepository get framework =>
-      _framework ??= FrameworkRepository(checkouts, useExistingCheckout: true);
+      _framework ??= FrameworkRepository(checkouts, useExistingCheckout: true, upstream: argResults[kUpstream] as String);
 
   @visibleForTesting
   set framework(FrameworkRepository framework) => _framework = framework;
@@ -96,7 +102,7 @@ class CodesignCommand extends Command<void> {
     } else {
       revision = (processManager.runSync(
         <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: framework.checkoutDirectory.path,
+        workingDirectory: checkouts.directory.path,
       ).stdout as String).trim();
     }
 

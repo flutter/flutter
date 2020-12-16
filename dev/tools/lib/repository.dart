@@ -71,7 +71,7 @@ abstract class Repository {
       );
     }
     if (!_checkoutDirectory.existsSync()) {
-      stdio.printTrace('Cloning $name to ${_checkoutDirectory.path}...');
+      stdio.printTrace('Cloning $name from $upstream to ${_checkoutDirectory.path}...');
       git.run(
         <String>['clone', '--', upstream, _checkoutDirectory.path],
         'Cloning $name repo',
@@ -305,6 +305,7 @@ class FrameworkRepository extends Repository {
       }
     }
 
+    stdio.printTrace('Building tool...');
     // Build tool
     processManager.runSync(<String>[
       fileSystem.path.join(checkoutDirectory.path, 'bin', 'flutter'),
@@ -329,6 +330,7 @@ class FrameworkRepository extends Repository {
     // re-populate.
     final Directory cache = fileSystem.directory(cacheDirectory);
     if (cache.existsSync()) {
+      stdio.printTrace('Deleting cache...');
       cache.deleteSync(recursive: true);
     }
     _ensureToolReady();
