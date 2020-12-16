@@ -25,13 +25,13 @@
          "flaky": true
       },
       {
-         "name": "Linux android_view_scroll_perf_timeline_summary",
+         "name": "Linux android_view_scroll_perf__timeline_summary",
          "repo": "flutter",
          "task_name": "linux_android_view_scroll_perf__timeline_summary",
          "flaky": true
       },
       {
-         "name": "Linux animated_placeholder_perf_e2e_summary",
+         "name": "Linux animated_placeholder_perf__e2e_summary",
          "repo": "flutter",
          "task_name": "linux_animated_placeholder_perf__e2e_summary",
          "flaky": true
@@ -43,13 +43,13 @@
          "flaky": true
       },
       {
-         "name": "Linux backdrop_filter_perf_e2e_summary",
+         "name": "Linux backdrop_filter_perf__e2e_summary",
          "repo": "flutter",
          "task_name": "linux_backdrop_filter_perf__e2e_summary",
          "flaky": true
       },
       {
-         "name": "Linux basic_material_app_android_compile",
+         "name": "Linux basic_material_app_android__compile",
          "repo": "flutter",
          "task_name": "linux_basic_material_app_android__compile",
          "flaky": true
@@ -61,13 +61,13 @@
          "flaky": false
       },
       {
-         "name": "Linux colorfilter_and_fade_perf_e2e_summary",
+         "name": "Linux color_filter_and_fade_perf__e2e_summary",
          "repo": "flutter",
          "task_name": "linux_color_filter_and_fade_perf__e2e_summary",
          "flaky": true
       },
       {
-         "name": "Linux complex_layout_android_compile",
+         "name": "Linux linux_complex_layout_android__compile",
          "repo": "flutter",
          "task_name": "linux_complex_layout_android__compile",
          "flaky": true
