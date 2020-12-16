@@ -6,7 +6,7 @@
 ///
 /// Asynchronous computations are represented by [Future]s and [Stream]s.
 
-import 'dart:async' show Future, Stream, StreamSubscription;
+import 'dart:async' show StreamSubscription;
 
 import 'package:flutter/foundation.dart';
 

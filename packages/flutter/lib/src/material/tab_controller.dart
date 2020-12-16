@@ -9,8 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// BuildContext context;
+// late BuildContext context;
 
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
@@ -33,7 +32,7 @@ import 'constants.dart';
 ///
 /// ```dart
 /// class MyTabbedPage extends StatefulWidget {
-///   const MyTabbedPage({ Key key }) : super(key: key);
+///   const MyTabbedPage({ Key? key }) : super(key: key);
 ///   @override
 ///   _MyTabbedPageState createState() => _MyTabbedPageState();
 /// }
@@ -44,7 +43,7 @@ import 'constants.dart';
 ///     Tab(text: 'RIGHT'),
 ///   ];
 ///
-///   TabController _tabController;
+///   late TabController _tabController;
 ///
 ///   @override
 ///   void initState() {
@@ -70,7 +69,7 @@ import 'constants.dart';
 ///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           final String label = tab.text.toLowerCase();
+///           final String label = tab.text!.toLowerCase();
 ///           return Center(
 ///             child: Text(
 ///               'This is the $label tab',
@@ -85,7 +84,7 @@ import 'constants.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This example shows how to listen to page updates in [TabBar] and [TabBarView]
 /// when using [DefaultTabController].
@@ -106,7 +105,7 @@ import 'constants.dart';
 ///     // closest DefaultTabController.
 ///     child: Builder(
 ///       builder: (BuildContext context) {
-///         final TabController tabController = DefaultTabController.of(context);
+///         final TabController tabController = DefaultTabController.of(context)!;
 ///         tabController.addListener(() {
 ///           if (!tabController.indexIsChanging) {
 ///             // Your code goes here.
@@ -123,7 +122,7 @@ import 'constants.dart';
 ///             children: tabs.map((Tab tab){
 ///               return Center(
 ///                 child: Text(
-///                   tab.text + ' Tab',
+///                   tab.text! + ' Tab',
 ///                   style: Theme.of(context).textTheme.headline5,
 ///                 ),
 ///               );
@@ -405,7 +404,7 @@ class DefaultTabController extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabController.of(context);
+  /// TabController controller = DefaultTabController.of(context)!;
   /// ```
   /// {@end-tool}
   static TabController? of(BuildContext context) {

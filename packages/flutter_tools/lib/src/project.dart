@@ -692,6 +692,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       .childDirectory('Flutter')
       .childDirectory('Flutter.framework');
 
+  /// Used only for "flutter clean" to remove old references.
+  File get flutterPodspec => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childFile('Flutter.podspec');
+
   Directory get pluginRegistrantHost {
     return isModule
         ? _flutterLibRoot

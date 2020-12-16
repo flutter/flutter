@@ -561,10 +561,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// visible.
 ///
 /// By default, the thumb will fade in and out as the child scroll view
-/// scrolls. When [isAlwaysShown] is true, and a [controller] is specified, the
-/// scrollbar thumb will remain visible without the fade animation.
+/// scrolls. When [isAlwaysShown] is true, the scrollbar thumb will remain
+/// visible without the fade animation. This requires that a [ScrollController]
+/// is provided to [controller], or that the [PrimaryScrollController] is available.
 ///
-/// Scrollbars are interactive and will use the [PrimaryScrollController] if
+/// Scrollbars are interactive and will also use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
 /// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
 /// exclusive of the thumb will trigger a [ScrollIncrementType.page] based on
@@ -606,10 +607,7 @@ class RawScrollbar extends StatefulWidget {
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
-  }) : assert(
-         !isAlwaysShown || controller != null,
-         'When isAlwaysShown is true, a ScrollController must be provided.',
-       ),
+  }) : assert(isAlwaysShown != null),
        assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
@@ -681,8 +679,9 @@ class RawScrollbar extends StatefulWidget {
   /// When false, the scrollbar will be shown during scrolling
   /// and will fade out otherwise.
   ///
-  /// When true, the scrollbar will always be visible and never fade out. The
-  /// [controller] property must be set in this case.
+  /// When true, the scrollbar will always be visible and never fade out. If the
+  /// [controller] property has not been set, the [PrimaryScrollController] will
+  /// be used.
   ///
   /// Defaults to false.
   ///
@@ -826,7 +825,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
-        widget.controller!.position.didUpdateScrollPositionBy(0);
+        final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+        assert(
+          scrollController != null,
+          'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
+          'Either Scrollbar.controller was not provided, or a PrimaryScrollController could not be found.',
+        );
+        scrollController!.position.didUpdateScrollPositionBy(0);
       }
     });
   }

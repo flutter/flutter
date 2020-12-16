@@ -13,8 +13,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// Widget bottomAppBarContents;
+// late Widget bottomAppBarContents;
 
 /// A container that is typically used with [Scaffold.bottomNavigationBar], and
 /// can have a notch along the top that makes room for an overlapping
