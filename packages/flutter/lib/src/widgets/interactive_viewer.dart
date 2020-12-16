@@ -311,13 +311,13 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// ```dart
   /// final TransformationController _transformationController = TransformationController();
-  /// Animation<Matrix4> _animationReset;
-  /// AnimationController _controllerReset;
+  /// Animation<Matrix4>? _animationReset;
+  /// late final AnimationController _controllerReset;
   ///
   /// void _onAnimateReset() {
-  ///   _transformationController.value = _animationReset.value;
+  ///   _transformationController.value = _animationReset!.value;
   ///   if (!_controllerReset.isAnimating) {
-  ///     _animationReset?.removeListener(_onAnimateReset);
+  ///     _animationReset!.removeListener(_onAnimateReset);
   ///     _animationReset = null;
   ///     _controllerReset.reset();
   ///   }
@@ -329,7 +329,7 @@ class InteractiveViewer extends StatefulWidget {
   ///     begin: _transformationController.value,
   ///     end: Matrix4.identity(),
   ///   ).animate(_controllerReset);
-  ///   _animationReset.addListener(_onAnimateReset);
+  ///   _animationReset!.addListener(_onAnimateReset);
   ///   _controllerReset.forward();
   /// }
   ///

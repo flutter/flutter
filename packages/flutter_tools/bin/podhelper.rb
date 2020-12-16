@@ -59,7 +59,6 @@ def flutter_additional_ios_build_settings(target)
     build_configuration.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Flutter'
 
     build_configuration.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
-    build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
     # Suppress warning when pod supports a version lower than the minimum supported by Xcode (Xcode 12 - iOS 9).
     # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.

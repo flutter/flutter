@@ -34,7 +34,7 @@ import 'time.dart';
 import 'time_picker_theme.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 const Duration _kDialogSizeAnimationDuration = Duration(milliseconds: 200);
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
@@ -2126,7 +2126,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Show a dialog with [initialTime] equal to the current time.
 ///
 /// ```dart
-/// Future<TimeOfDay> selectedTime = showTimePicker(
+/// Future<TimeOfDay?> selectedTime = showTimePicker(
 ///   initialTime: TimeOfDay.now(),
 ///   context: context,
 /// );
@@ -2155,13 +2155,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Show a dialog with the text direction overridden to be [TextDirection.rtl].
 ///
 /// ```dart
-/// Future<TimeOfDay> selectedTimeRTL = showTimePicker(
+/// Future<TimeOfDay?> selectedTimeRTL = showTimePicker(
 ///   context: context,
 ///   initialTime: TimeOfDay.now(),
-///   builder: (BuildContext context, Widget child) {
+///   builder: (BuildContext context, Widget? child) {
 ///     return Directionality(
 ///       textDirection: TextDirection.rtl,
-///       child: child,
+///       child: child!,
 ///     );
 ///   },
 /// );
@@ -2172,13 +2172,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Show a dialog with time unconditionally displayed in 24 hour format.
 ///
 /// ```dart
-/// Future<TimeOfDay> selectedTime24Hour = showTimePicker(
+/// Future<TimeOfDay?> selectedTime24Hour = showTimePicker(
 ///   context: context,
 ///   initialTime: TimeOfDay(hour: 10, minute: 47),
-///   builder: (BuildContext context, Widget child) {
+///   builder: (BuildContext context, Widget? child) {
 ///     return MediaQuery(
 ///       data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-///       child: child,
+///       child: child!,
 ///     );
 ///   },
 /// );

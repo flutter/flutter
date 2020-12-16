@@ -217,6 +217,57 @@ void main() {
     expect(materialWidget.shape, customBorder);
   });
 
+  testWidgets('showDialog child and builder cannot be simultaneously defined', (WidgetTester tester) async {
+    late BuildContext currentBuildContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                currentBuildContext = context;
+                return Container();
+              }
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(() async {
+      showDialog<void>(
+        context: currentBuildContext,
+        child: const Text('Child'),
+        builder: (BuildContext context) {
+          return const Text('Builder');
+        },
+      );
+    }, throwsAssertionError);
+  });
+
+  testWidgets('showDialog child or builder must be defined', (WidgetTester tester) async {
+    late BuildContext currentBuildContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                currentBuildContext = context;
+                return Container();
+              }
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      () => showDialog<void>(context: currentBuildContext),
+      throwsAssertionError,
+    );
+  });
+
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(

@@ -17,6 +17,18 @@ void main() {
     expect(Icons.search.fontFamily, 'MaterialIcons');
   });
 
+  testWidgets('Certain icons (and their variants) match text direction', (WidgetTester tester) async {
+    expect(Icons.arrow_back.matchTextDirection, true);
+    expect(Icons.arrow_back_rounded.matchTextDirection, true);
+    expect(Icons.arrow_back_outlined.matchTextDirection, true);
+    expect(Icons.arrow_back_sharp.matchTextDirection, true);
+
+    expect(Icons.access_time.matchTextDirection, false);
+    expect(Icons.access_time_rounded.matchTextDirection, false);
+    expect(Icons.access_time_outlined.matchTextDirection, false);
+    expect(Icons.access_time_sharp.matchTextDirection, false);
+  });
+
   testWidgets('Adaptive icons are correct on cupertino platforms',
         (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);

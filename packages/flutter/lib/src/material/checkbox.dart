@@ -67,6 +67,7 @@ class Checkbox extends StatefulWidget {
     this.checkColor,
     this.focusColor,
     this.hoverColor,
+    this.overlayColor,
     this.splashRadius,
     this.materialTapTargetSize,
     this.visualDensity,
@@ -213,6 +214,9 @@ class Checkbox extends StatefulWidget {
 
   /// The color for the checkbox's [Material] when it has the input focus.
   ///
+  /// If [overlayColor] returns a non-null color in the [MaterialState.focused]
+  /// state, it will be used instead.
+  ///
   /// If null, then the value of [CheckboxThemeData.overlayColor] is used in the
   /// focused state. If that is also null, then the value of
   /// [ThemeData.focusColor] is used.
@@ -220,10 +224,32 @@ class Checkbox extends StatefulWidget {
 
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
   ///
+  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
+  /// state, it will be used instead.
+  ///
   /// If null, then the value of [CheckboxThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
   /// [ThemeData.hoverColor] is used.
   final Color? hoverColor;
+
+  /// {@template flutter.material.checkbox.overlayColor}
+  /// The color for the checkbox's [Material].
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [activeColor] with alpha
+  /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
+  /// pressed, focused and hovered state. If that is also null,
+  /// the value of [CheckboxThemeData.overlayColor] is used. If that is
+  /// also null, then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
+  /// is used in the pressed, focused and hovered state.
+  final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.checkbox.splashRadius}
   /// The splash radius of the circular [Material] ink response.
@@ -359,12 +385,27 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
       ?? _defaultFillColor.resolve(inactiveStates);
 
-    final Color effectiveFocusOverlayColor = widget.focusColor
-        ?? themeData.checkboxTheme.overlayColor?.resolve(<MaterialState>{MaterialState.focused})
-        ?? themeData.focusColor;
-    final Color effectiveHoverOverlayColor = widget.hoverColor
-        ?? themeData.checkboxTheme.overlayColor?.resolve(<MaterialState>{MaterialState.hovered})
+    final Set<MaterialState> focusedStates = _states..add(MaterialState.focused);
+    final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
+      ?? widget.focusColor
+      ?? themeData.checkboxTheme.overlayColor?.resolve(focusedStates)
+      ?? themeData.focusColor;
+
+    final Set<MaterialState> hoveredStates = _states..add(MaterialState.hovered);
+    final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
+        ?? widget.hoverColor
+        ?? themeData.checkboxTheme.overlayColor?.resolve(hoveredStates)
         ?? themeData.hoverColor;
+
+    final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
+    final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
+        ?? themeData.checkboxTheme.overlayColor?.resolve(activePressedStates)
+        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+
+    final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
+    final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
+        ?? themeData.checkboxTheme.overlayColor?.resolve(inactivePressedStates)
+        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
     final Color effectiveCheckColor =  widget.checkColor
       ?? themeData.checkboxTheme.checkColor?.resolve(_states)
@@ -388,6 +429,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             inactiveColor: effectiveInactiveColor,
             focusColor: effectiveFocusOverlayColor,
             hoverColor: effectiveHoverOverlayColor,
+            reactionColor: effectiveActivePressedOverlayColor,
+            inactiveReactionColor: effectiveInactivePressedOverlayColor,
             splashRadius: widget.splashRadius ?? themeData.checkboxTheme.splashRadius ?? kRadialReactionRadius,
             onChanged: widget.onChanged,
             additionalConstraints: additionalConstraints,
@@ -411,6 +454,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     required this.inactiveColor,
     required this.focusColor,
     required this.hoverColor,
+    required this.reactionColor,
+    required this.inactiveReactionColor,
     required this.splashRadius,
     required this.onChanged,
     required this.vsync,
@@ -433,6 +478,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveColor;
   final Color focusColor;
   final Color hoverColor;
+  final Color reactionColor;
+  final Color inactiveReactionColor;
   final double splashRadius;
   final ValueChanged<bool?>? onChanged;
   final TickerProvider vsync;
@@ -447,6 +494,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     inactiveColor: inactiveColor,
     focusColor: focusColor,
     hoverColor: hoverColor,
+    reactionColor: reactionColor,
+    inactiveReactionColor: inactiveReactionColor,
     splashRadius: splashRadius,
     onChanged: onChanged,
     vsync: vsync,
@@ -467,6 +516,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveColor = inactiveColor
       ..focusColor = focusColor
       ..hoverColor = hoverColor
+      ..reactionColor = reactionColor
+      ..inactiveReactionColor = inactiveReactionColor
       ..splashRadius = splashRadius
       ..onChanged = onChanged
       ..additionalConstraints = additionalConstraints
@@ -489,6 +540,8 @@ class _RenderCheckbox extends RenderToggleable {
     required Color inactiveColor,
     Color? focusColor,
     Color? hoverColor,
+    Color? reactionColor,
+    Color? inactiveReactionColor,
     required double splashRadius,
     required BoxConstraints additionalConstraints,
     ValueChanged<bool?>? onChanged,
@@ -503,6 +556,8 @@ class _RenderCheckbox extends RenderToggleable {
          inactiveColor: inactiveColor,
          focusColor: focusColor,
          hoverColor: hoverColor,
+         reactionColor: reactionColor,
+         inactiveReactionColor: inactiveReactionColor,
          splashRadius: splashRadius,
          onChanged: onChanged,
          additionalConstraints: additionalConstraints,

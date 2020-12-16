@@ -27,6 +27,9 @@ import 'sliver.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A controller for [PageView].
 ///
 /// A page controller lets you manipulate which page is visible in a [PageView].
@@ -571,6 +574,35 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 /// which determines the size of the pages as a fraction of the viewport size.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
+/// which scroll horizontally.
+///
+/// ```dart
+///  Widget build(BuildContext context) {
+///    final controller = PageController(initialPage: 0);
+///    return PageView(
+///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
+///      /// Use [Axis.vertical] to scroll vertically.
+///      scrollDirection: Axis.horizontal,
+///      controller: controller,
+///      children: [
+///        Center(
+///          child: Text("First Page"),
+///        ),
+///        Center(
+///          child: Text("Second Page"),
+///        ),
+///        Center(
+///          child: Text("Third Page"),
+///        )
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
