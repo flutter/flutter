@@ -210,7 +210,11 @@ class FloatingActionButton extends StatelessWidget {
                  label,
                  const SizedBox(width: 20.0),
                ]
-             : <Widget>[
+             : !isExtended ? <Widget>[
+               const SizedBox(width: 20.0),
+               icon,
+               const SizedBox(width: 20.0),
+           ] : <Widget>[
                  const SizedBox(width: 16.0),
                  icon,
                  const SizedBox(width: 8.0),
