@@ -119,6 +119,7 @@ void PointerDataPacketConverter::ConvertPointerData(
           PointerData synthesized_add_event = pointer_data;
           synthesized_add_event.change = PointerData::Change::kAdd;
           synthesized_add_event.synthesized = 1;
+          synthesized_add_event.buttons = 0;
           state = EnsurePointerState(synthesized_add_event);
           converted_pointers.push_back(synthesized_add_event);
         } else {
@@ -126,6 +127,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         }
 
         FML_DCHECK(!state.isDown);
+        state.buttons = pointer_data.buttons;
         if (LocationNeedsUpdate(pointer_data, state)) {
           UpdateDeltaAndState(pointer_data, state);
           converted_pointers.push_back(pointer_data);
@@ -140,6 +142,7 @@ void PointerDataPacketConverter::ConvertPointerData(
           PointerData synthesized_add_event = pointer_data;
           synthesized_add_event.change = PointerData::Change::kAdd;
           synthesized_add_event.synthesized = 1;
+          synthesized_add_event.buttons = 0;
           state = EnsurePointerState(synthesized_add_event);
           converted_pointers.push_back(synthesized_add_event);
         } else {
@@ -152,6 +155,7 @@ void PointerDataPacketConverter::ConvertPointerData(
           PointerData synthesized_hover_event = pointer_data;
           synthesized_hover_event.change = PointerData::Change::kHover;
           synthesized_hover_event.synthesized = 1;
+          synthesized_hover_event.buttons = 0;
 
           UpdateDeltaAndState(synthesized_hover_event, state);
           converted_pointers.push_back(synthesized_hover_event);
@@ -159,6 +163,7 @@ void PointerDataPacketConverter::ConvertPointerData(
 
         UpdatePointerIdentifier(pointer_data, state, true);
         state.isDown = true;
+        state.buttons = pointer_data.buttons;
         states_[pointer_data.device] = state;
         converted_pointers.push_back(pointer_data);
         break;
@@ -172,6 +177,7 @@ void PointerDataPacketConverter::ConvertPointerData(
 
         UpdatePointerIdentifier(pointer_data, state, false);
         UpdateDeltaAndState(pointer_data, state);
+        state.buttons = pointer_data.buttons;
         converted_pointers.push_back(pointer_data);
         break;
       }
@@ -188,6 +194,7 @@ void PointerDataPacketConverter::ConvertPointerData(
           // Synthesizes a move event if the location does not match.
           PointerData synthesized_move_event = pointer_data;
           synthesized_move_event.change = PointerData::Change::kMove;
+          synthesized_move_event.buttons = state.buttons;
           synthesized_move_event.synthesized = 1;
 
           UpdateDeltaAndState(synthesized_move_event, state);
@@ -195,6 +202,7 @@ void PointerDataPacketConverter::ConvertPointerData(
         }
 
         state.isDown = false;
+        state.buttons = pointer_data.buttons;
         states_[pointer_data.device] = state;
         converted_pointers.push_back(pointer_data);
         break;
@@ -218,6 +226,7 @@ void PointerDataPacketConverter::ConvertPointerData(
             PointerData synthesized_move_event = pointer_data;
             synthesized_move_event.signal_kind = PointerData::SignalKind::kNone;
             synthesized_move_event.change = PointerData::Change::kMove;
+            synthesized_move_event.buttons = state.buttons;
             synthesized_move_event.synthesized = 1;
 
             UpdateDeltaAndState(synthesized_move_event, state);
@@ -228,6 +237,7 @@ void PointerDataPacketConverter::ConvertPointerData(
             synthesized_hover_event.signal_kind =
                 PointerData::SignalKind::kNone;
             synthesized_hover_event.change = PointerData::Change::kHover;
+            synthesized_hover_event.buttons = 0;
             synthesized_hover_event.synthesized = 1;
 
             UpdateDeltaAndState(synthesized_hover_event, state);
