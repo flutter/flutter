@@ -314,6 +314,10 @@ class PersistedPicture extends PersistedLeafSurface {
       // painting. This removes all the setup work and scaffolding objects
       // that won't be useful for anything anyway.
       _recycleCanvas(oldCanvas);
+      if (oldSurface != null) {
+        // Make sure it doesn't get reused/recycled again.
+        oldSurface._canvas = null;
+      }
       if (rootElement != null) {
         domRenderer.clearDom(rootElement!);
       }

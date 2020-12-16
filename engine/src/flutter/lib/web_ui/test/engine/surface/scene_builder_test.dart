@@ -588,6 +588,40 @@ void testMain() {
     expect(canvas2.width > unscaledWidth, true);
     expect(canvas2.height > unscaledHeight, true);
   });
+
+  test('Should recycle canvas once', () async {
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    final Picture picture1 = _drawPicture();
+    EngineLayer oldLayer = builder.pushClipRect(
+      const Rect.fromLTRB(10, 10, 300, 300),
+    );
+    builder.addPicture(Offset.zero, picture1);
+    builder.pop();
+    builder.build();
+
+    // Force update to scene which will utilize reuse code path.
+    final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
+    EngineLayer oldLayer2 = builder2.pushClipRect(
+        const Rect.fromLTRB(5, 10, 300, 300),
+        oldLayer: oldLayer
+    );
+    builder2.addPicture(Offset.zero, _drawEmptyPicture());
+    builder2.pop();
+
+    html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
+    expect(contentAfterReuse, isNotNull);
+
+    final SurfaceSceneBuilder builder3 = SurfaceSceneBuilder();
+    builder3.pushClipRect(
+        const Rect.fromLTRB(25, 10, 300, 300),
+        oldLayer: oldLayer2
+    );
+    builder3.addPicture(Offset.zero, _drawEmptyPicture());
+    builder3.pop();
+    // This build will crash if canvas gets recycled twice.
+    html.HtmlElement contentAfterReuse2 = builder3.build().webOnlyRootElement;
+    expect(contentAfterReuse2, isNotNull);
+  });
 }
 
 typedef TestLayerBuilder = EngineLayer Function(
@@ -758,6 +792,12 @@ Picture _drawPicture() {
       Paint()
         ..style = PaintingStyle.fill
         ..color = const Color.fromRGBO(0, 0, 255, 1));
+  return recorder.endRecording();
+}
+
+Picture _drawEmptyPicture() {
+  final EnginePictureRecorder recorder = PictureRecorder();
+  recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
   return recorder.endRecording();
 }
 
