@@ -2208,12 +2208,13 @@ void main() {
     ));
 
     final ScrollController controller = primaryScrollController(tester);
+    final double initialTabBarHeight = tabBarHeight(tester);
 
     // Scroll the not-pinned appbar out of view, to its collapsed height.
     controller.jumpTo(300.0);
     await tester.pump();
     expect(find.byType(SliverAppBar), findsNothing);
-    expect(appBarHeight(tester), collapsedHeight);
+    expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
   });
 
   testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {
