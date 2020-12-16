@@ -89,6 +89,11 @@ void main() {
         ]),
         const FakeCommand(command: <String>[
           'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit),
+        const FakeCommand(command: <String>[
+          'git',
           'remote',
           'get-url',
           remote,
@@ -130,6 +135,11 @@ void main() {
           kUpstreamRemote,
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -197,6 +207,11 @@ void main() {
           kUpstreamRemote,
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -274,6 +289,11 @@ void main() {
         ]),
         const FakeCommand(command: <String>[
           'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit),
+        const FakeCommand(command: <String>[
+          'git',
           'remote',
           'get-url',
           remote,
@@ -340,6 +360,11 @@ void main() {
           kUpstreamRemote,
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -412,6 +437,11 @@ void main() {
           kUpstreamRemote,
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -500,6 +530,11 @@ void main() {
           kUpstreamRemote,
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -592,6 +627,11 @@ void main() {
           kUpstreamRemote,
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
