@@ -113,6 +113,26 @@ void testMain() {
       testCollector.collectNow();
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/72469
+    test('CkImage can be resurrected', () {
+      browserSupportsFinalizationRegistry = false;
+      final SkImage skImage =
+          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)
+              .getCurrentFrame();
+      final CkImage image = CkImage(skImage);
+      expect(image.box.rawSkiaObject, isNotNull);
+
+      // Pretend that the image is temporarily deleted.
+      image.box.delete();
+      image.box.didDelete();
+      expect(image.box.rawSkiaObject, isNull);
+
+      // Attempting to access the skia object here would previously throw
+      // "Stack Overflow" in Safari.
+      expect(image.box.skiaObject, isNotNull);
+      testCollector.collectNow();
+    });
+
     test('skiaInstantiateWebImageCodec loads an image from the network',
         () async {
       httpRequestFactory = () {

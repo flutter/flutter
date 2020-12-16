@@ -179,11 +179,13 @@ class CkImage implements ui.Image, StackTraceDebugger {
         colorType: canvasKit.ColorType.RGBA_8888,
         colorSpace: SkColorSpaceSRGB,
       );
+      final int originalWidth = skImage.width();
+      final int originalHeight = skImage.height();
       box = SkiaObjectBox<CkImage, SkImage>.resurrectable(this, skImage, () {
         return canvasKit.MakeImage(
           originalBytes.buffer.asUint8List(),
-          width,
-          height,
+          originalWidth,
+          originalHeight,
           canvasKit.AlphaType.Premul,
           canvasKit.ColorType.RGBA_8888,
           SkColorSpaceSRGB,
