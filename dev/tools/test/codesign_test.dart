@@ -15,7 +15,8 @@ import './common.dart';
 
 void main() {
   group('codesign command', () {
-    const String checkoutsParentDirectory = '/path/to/directory/';
+    const String flutterRoot = '/flutter/';
+    const String checkoutsParentDirectory = '${flutterRoot}dev/tools/';
     const String flutterCache =
         '${checkoutsParentDirectory}checkouts/framework/bin/cache';
     const String flutterBin =
@@ -107,9 +108,14 @@ void main() {
           'git',
           'clone',
           '--',
-          kUpstreamRemote,
+          'file://$flutterRoot',
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'checkout',
@@ -186,9 +192,14 @@ void main() {
           'git',
           'clone',
           '--',
-          kUpstreamRemote,
+          'file://$flutterRoot',
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'checkout',
@@ -265,9 +276,14 @@ void main() {
           'git',
           'clone',
           '--',
-          kUpstreamRemote,
+          'file://$flutterRoot',
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'checkout',
@@ -316,9 +332,14 @@ void main() {
           'git',
           'clone',
           '--',
-          kUpstreamRemote,
+          'file://$flutterRoot',
           '${checkoutsParentDirectory}checkouts/framework',
         ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'rev-parse',
+          'HEAD',
+        ], stdout: revision),
         const FakeCommand(command: <String>[
           'git',
           'checkout',
