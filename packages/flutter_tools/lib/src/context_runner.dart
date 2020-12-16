@@ -28,6 +28,7 @@ import 'cache.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
@@ -46,6 +47,7 @@ import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
+import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
@@ -134,6 +136,8 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+        artifacts: globals.artifacts,
+        usage: globals.flutterUsage,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
@@ -176,6 +180,11 @@ Future<T> runInContext<T>(
         operatingSystemUtils: globals.os,
         terminal: globals.terminal,
       ),
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        logger: globals.logger,
+      ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
@@ -185,8 +194,12 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         androidWorkflow: androidWorkflow,
       ),
-      FeatureFlags: () => const FlutterFeatureFlags(),
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FeatureFlags: () => FlutterFeatureFlags(
+        flutterVersion: globals.flutterVersion,
+        config: globals.config,
+        platform: globals.platform,
+      ),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
@@ -229,7 +242,10 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
+      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        logger: globals.logger,
+        flutterUsage: globals.flutterUsage,
+      ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
         logger: globals.logger,

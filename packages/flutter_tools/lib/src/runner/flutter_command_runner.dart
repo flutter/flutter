@@ -16,9 +16,9 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
+import '../web/web_device.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -82,19 +82,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('suppress-analytics',
         negatable: false,
         help: 'Suppress analytics reporting when this command runs.');
-
-    String packagesHelp;
-    bool showPackagesCommand;
-    if (globals.fs.isFileSync(kPackagesFileName)) {
-      packagesHelp = '(defaults to "$kPackagesFileName")';
-      showPackagesCommand = verboseHelp;
-    } else {
-      packagesHelp = '(required, since the current directory does not contain a "$kPackagesFileName" file)';
-      showPackagesCommand = true;
-    }
     argParser.addOption('packages',
-        hide: !showPackagesCommand,
-        help: 'Path to your ".packages" file.\n$packagesHelp');
+        hide: !verboseHelp,
+        help: 'Path to your "package_config.json" file.');
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }
@@ -120,6 +110,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: "List the special 'flutter-tester' device in device listings. "
               'This headless device is used to\ntest Flutter tooling.');
+    argParser.addFlag('show-web-server-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: "List the special 'web-server' device in device listings. "
+    );
   }
 
   @override
@@ -215,11 +210,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
+    if (topLevelResults['show-web-server-device'] as bool ||
+        topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
+      WebServerDevice.showWebServerDevice = true;
+    }
 
     // Set up the tooling configuration.
     final EngineBuildPaths engineBuildPaths = await globals.localEngineLocator.findEnginePath(
       topLevelResults['local-engine-src-path'] as String,
-      topLevelResults['local-engine'] as String
+      topLevelResults['local-engine'] as String,
+      topLevelResults['packages'] as String,
     );
     if (engineBuildPaths != null) {
       contextOverrides.addAll(<Type, dynamic>{
@@ -242,20 +242,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.flutterUsage.suppressAnalytics = true;
         }
 
-        try {
-          await globals.flutterVersion.ensureVersionFile();
-        } on FileSystemException catch (e) {
-          globals.printError('Failed to write the version file to the artifact cache: "$e".');
-          globals.printError('Please ensure you have permissions in the artifact cache directory.');
-          throwToolExit('Failed to write the version file');
-        }
+        globals.flutterVersion.ensureVersionFile();
         final bool machineFlag = topLevelResults['machine'] as bool;
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
-        }
-
-        if (topLevelResults.wasParsed('packages')) {
-          globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(topLevelResults['packages'] as String));
         }
 
         // See if the user specified a specific device.

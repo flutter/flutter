@@ -78,11 +78,21 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       type: 'windows',
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(getBuildDirectory()),'windows-code-size-analysis', 'json',
+      globals.fs
+        .directory(globals.fsUtils.homeDirPath)
+        .childDirectory('.flutter-devtools'), 'windows-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
     globals.printStatus(
       'A summary of your Windows bundle analysis can be found at: ${outputFile.path}',
+    );
+
+    // DevTools expects a file path relative to the .flutter-devtools/ dir.
+    final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+    globals.printStatus(
+      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+      'flutter pub global activate devtools; flutter pub global run devtools '
+      '--appSizeBase=$relativeAppSizePath'
     );
   }
 }

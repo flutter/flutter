@@ -19,7 +19,7 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
-// BuildContext context;
+// late BuildContext context;
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
@@ -58,7 +58,7 @@ class Dialog extends StatelessWidget {
   ///
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
-  /// If `null`, [ThemeData.cardColor] is used.
+  /// If `null`, [ThemeData.dialogBackgroundColor] is used.
   /// {@endtemplate}
   final Color? backgroundColor;
 
@@ -705,6 +705,9 @@ class SimpleDialogOption extends StatelessWidget {
 ///     case Department.state:
 ///       // ...
 ///     break;
+///     case null:
+///       // dialog dismissed
+///     break;
 ///   }
 /// }
 /// ```
@@ -973,12 +976,13 @@ Future<T?> showDialog<T>({
   Widget? child,
 }) {
   assert(child == null || builder == null);
+  assert(child != null || builder != null);
   assert(barrierDismissible != null);
   assert(useSafeArea != null);
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final CapturedThemes themes = InheritedTheme.capture(from: context, to: Navigator.of(context, rootNavigator: useRootNavigator)!.context);
+  final CapturedThemes themes = InheritedTheme.capture(from: context, to: Navigator.of(context, rootNavigator: useRootNavigator).context);
   return showGeneralDialog(
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {

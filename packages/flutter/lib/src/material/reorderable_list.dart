@@ -54,6 +54,42 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// All [children] must have a key.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
+///
+/// This sample shows by dragging the user can reorder the items of the list.
+/// The [onReorder] parameter is required and will be called when a child
+/// widget is dragged to a new position.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// ```dart
+/// List<String> _list = List.generate(5, (i) => "${i}");
+///
+/// Widget build(BuildContext context){
+///   return ReorderableListView(
+///     padding : const EdgeInsets.symmetric(horizontal:40),
+///     children:[
+///       for(var i=0 ; i<_list.length ; i++)
+///         ListTile(
+///              key:Key('$i'),
+///              title: Text(_list[i]),
+///         ),
+///     ],
+///     onReorder: (oldIndex, newIndex){
+///       setState((){
+///         if(oldIndex < newIndex){
+///           newIndex-=1;
+///         }
+///         final element = _list.removeAt(oldIndex);
+///         _list.insert(newIndex, element);
+///       });
+///     },
+///   );
+/// }
+///
+/// ```
+///
+///{@end-tool}
+///
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.

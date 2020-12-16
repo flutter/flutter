@@ -61,9 +61,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'file': '6.0.0-nullsafety.4',
   'process': '4.0.0-nullsafety.4',
   'process_runner': '4.0.0-nullsafety.5',
-  // https://github.com/dart-lang/build/issues/2772
-  'build_runner_core': '5.2.0',
-  'build_modules': '2.10.1',
   'path_provider': '1.6.14',
   'video_player': '2.0.0-nullsafety.2',
   'url_launcher': '6.0.0-nullsafety.1',
@@ -323,6 +320,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         Directory temporaryFlutterSdk;
         if (upgrade) {
           temporaryFlutterSdk = createTemporaryFlutterSdk(
+            globals.logger,
             globals.fs,
             globals.fs.directory(Cache.flutterRoot),
             pubspecs,
@@ -1420,7 +1418,13 @@ String _computeChecksum(Iterable<String> names, String getVersion(String name)) 
 
 /// Create a synthetic Flutter SDK so that pub version solving does not get
 /// stuck on the old versions.
-Directory createTemporaryFlutterSdk(FileSystem fileSystem, Directory realFlutter, List<PubspecYaml> pubspecs) {
+@visibleForTesting
+Directory createTemporaryFlutterSdk(
+  Logger logger,
+  FileSystem fileSystem,
+  Directory realFlutter,
+  List<PubspecYaml> pubspecs,
+) {
   final Set<String> currentPackages = realFlutter
     .childDirectory('packages')
     .listSync()
@@ -1448,6 +1452,12 @@ Directory createTemporaryFlutterSdk(FileSystem fileSystem, Directory realFlutter
       .childFile('pubspec.yaml')
       ..createSync(recursive: true);
     final PubspecYaml pubspecYaml = pubspecsByName[flutterPackage];
+    if (pubspecYaml == null) {
+      logger.printError(
+        "Unexpected package '$flutterPackage' found in packages directory",
+      );
+      continue;
+    }
     final StringBuffer output = StringBuffer('name: $flutterPackage\n');
 
     // Fill in SDK dependency constraint.

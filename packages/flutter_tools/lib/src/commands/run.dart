@@ -30,6 +30,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDartDefineOption();
     usesFlavorOption();
     usesWebRendererOption();
+    addNativeNullAssertions(hide: !verboseHelp);
     argParser
       ..addFlag('trace-startup',
         negatable: false,
@@ -144,6 +145,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
 
+  @override
+  bool get reportNullSafety => true;
+
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
 
@@ -152,8 +156,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   String get traceAllowlist => stringArg('trace-allowlist');
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
-  DebuggingOptions createDebuggingOptions() {
-    final BuildInfo buildInfo = getBuildInfo();
+  Future<DebuggingOptions> createDebuggingOptions() async {
+    final BuildInfo buildInfo = await getBuildInfo();
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
       ? int.parse(stringArg('web-browser-debug-port'))
       : null;
@@ -205,6 +209,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
           && boolArg('fast-start')
           && !runningWithPrebuiltApplication,
         nullAssertions: boolArg('null-assertions'),
+        nativeNullAssertions: boolArg('native-null-assertions'),
       );
     }
   }
@@ -384,7 +389,8 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    final String modeName = getBuildInfo().modeName;
+    final BuildInfo buildInfo = await getBuildInfo();
+    final String modeName = buildInfo.modeName;
     return <CustomDimensions, String>{
       CustomDimensions.commandRunIsEmulator: '$isEmulator',
       CustomDimensions.commandRunTargetName: deviceType,
@@ -407,10 +413,10 @@ class RunCommand extends RunCommandBase {
     return super.shouldRunPub;
   }
 
-  bool shouldUseHotMode() {
+  bool shouldUseHotMode(BuildInfo buildInfo) {
     final bool hotArg = boolArg('hot') ?? false;
     final bool shouldUseHotMode = hotArg && !traceStartup;
-    return getBuildInfo().isDebug && shouldUseHotMode;
+    return buildInfo.isDebug && shouldUseHotMode;
   }
 
   bool get stayResident => boolArg('resident');
@@ -444,7 +450,9 @@ class RunCommand extends RunCommandBase {
   Future<FlutterCommandResult> runCommand() async {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
-    final bool hotMode = shouldUseHotMode();
+    final BuildInfo buildInfo = await getBuildInfo();
+    final bool hotMode = shouldUseHotMode(buildInfo);
+    final String applicationBinaryPath = stringArg('use-application-binary');
 
     writePidFile(stringArg('pid-file'));
 
@@ -462,10 +470,9 @@ class RunCommand extends RunCommandBase {
       );
       AppInstance app;
       try {
-        final String applicationBinaryPath = stringArg('use-application-binary');
         app = await daemon.appDomain.startApp(
           devices.first, globals.fs.currentDirectory.path, targetFile, route,
-          createDebuggingOptions(), hotMode,
+          await createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),
@@ -533,8 +540,8 @@ class RunCommand extends RunCommandBase {
           fileSystemRoots: stringsArg('filesystem-root'),
           fileSystemScheme: stringArg('filesystem-scheme'),
           experimentalFlags: expFlags,
-          target: stringArg('target'),
-          buildInfo: getBuildInfo(),
+          target: targetFile,
+          buildInfo: buildInfo,
           userIdentifier: userIdentifier,
           platform: globals.platform,
         ),
@@ -546,12 +553,11 @@ class RunCommand extends RunCommandBase {
                          await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
-    final String applicationBinaryPath = stringArg('use-application-binary');
     if (hotMode && !webMode) {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: createDebuggingOptions(),
+        debuggingOptions: await createDebuggingOptions(),
         benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
@@ -567,7 +573,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
-        debuggingOptions: createDebuggingOptions(),
+        debuggingOptions: await createDebuggingOptions(),
         stayResident: stayResident,
         urlTunneller: null,
       );
@@ -575,7 +581,7 @@ class RunCommand extends RunCommandBase {
       runner = ColdRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: createDebuggingOptions(),
+        debuggingOptions: await createDebuggingOptions(),
         traceStartup: traceStartup,
         awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
         applicationBinary: applicationBinaryPath == null

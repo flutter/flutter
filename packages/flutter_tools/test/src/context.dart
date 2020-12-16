@@ -114,6 +114,7 @@ void testUsingContext(
           IOSSimulatorUtils: () {
             final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
             when(mock.getAttachedDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
+            when(mock.getAvailableDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
             return mock;
           },
           OutputPreferences: () => OutputPreferences.test(),
@@ -286,7 +287,7 @@ class FakeDoctor extends Doctor {
 
 class MockSimControl extends Mock implements SimControl {
   MockSimControl() {
-    when(getConnectedDevices()).thenAnswer((Invocation _) async => <SimDevice>[]);
+    when(getAvailableDevices()).thenAnswer((Invocation _) async => <SimDevice>[]);
   }
 }
 
@@ -419,14 +420,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   List<String> xcrunCommand() => <String>['xcrun'];
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {
-  MockFlutterVersion({bool isStable = false}) : _isStable = isStable;
-
-  final bool _isStable;
-
-  @override
-  bool get isMaster => !_isStable;
-}
+class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 class MockClock extends Mock implements SystemClock {}
 

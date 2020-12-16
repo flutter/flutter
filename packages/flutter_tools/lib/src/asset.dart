@@ -7,6 +7,7 @@ import 'package:package_config/package_config.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
@@ -72,8 +73,7 @@ abstract class AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
-    bool includeDefaultFonts = true,
-    bool reportLicensedPackages = false,
+    TargetPlatform targetPlatform,
   });
 }
 
@@ -124,6 +124,13 @@ class ManifestAssetBundle implements AssetBundle {
 
   static const String _kAssetManifestJson = 'AssetManifest.json';
   static const String _kNoticeFile = 'NOTICES';
+  // Comically, this can't be name with the more common .gz file extension
+  // because when it's part of an AAR and brought into another APK via gradle,
+  // gradle individually traverses all the files of the AAR and unzips .gz
+  // files (b/37117906). A less common .Z extension still describes how the
+  // file is formatted if users want to manually inspect the application
+  // bundle and is recognized by default file handlers on OS such as macOS.˚
+  static const String _kNoticeZippedFile = 'NOTICES.Z';
 
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
@@ -162,8 +169,7 @@ class ManifestAssetBundle implements AssetBundle {
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     @required String packagesPath,
-    bool includeDefaultFonts = true,
-    bool reportLicensedPackages = false,
+    TargetPlatform targetPlatform,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     FlutterProject flutterProject;
@@ -224,7 +230,6 @@ class ManifestAssetBundle implements AssetBundle {
     final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
     final List<Map<String, dynamic>> fonts = _parseFonts(
       flutterManifest,
-      includeDefaultFonts,
       packageConfig,
       primary: true,
     );
@@ -272,7 +277,6 @@ class ManifestAssetBundle implements AssetBundle {
         }
         fonts.addAll(_parseFonts(
           packageFlutterManifest,
-          includeDefaultFonts,
           packageConfig,
           packageName: package.name,
           primary: false,
@@ -309,7 +313,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     final List<_Asset> materialAssets = <_Asset>[
-      if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
+      if (flutterManifest.usesMaterialDesign)
         ..._getMaterialAssets(),
     ];
     for (final _Asset asset in materialAssets) {
@@ -326,7 +330,6 @@ class ManifestAssetBundle implements AssetBundle {
     final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig);
-    final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
     if (wildcardDirectories.isNotEmpty) {
@@ -344,7 +347,27 @@ class ManifestAssetBundle implements AssetBundle {
 
     _setIfChanged(_kAssetManifestJson, assetManifest);
     _setIfChanged(kFontManifestJson, fontManifest);
-    _setIfChanged(_kNoticeFile, licenses);
+    if (targetPlatform == TargetPlatform.web_javascript) {
+      // Don't compress the NOTICES file on web since the client doesn't have
+      // dart:io to decompress it.
+      _setIfChanged(_kNoticeFile, DevFSStringContent(licenseResult.combinedLicenses));
+    } else {
+      final List<int> licenseBytes = utf8.encode(licenseResult.combinedLicenses);
+      if (entries[_kNoticeZippedFile] == null ||
+          gzip.decode((entries[_kNoticeZippedFile] as DevFSByteContent).bytes)
+              != licenseBytes) {
+        entries[_kNoticeZippedFile] = DevFSByteContent(
+          ZLibEncoder(
+            // A zlib dictionary is a hinting string sequence with the most
+            // likely string occurrences at the end. This ends up just being
+            // common English words with domain specific words like copyright.
+            dictionary: utf8.encode('copyrightsoftwaretothisinandorofthe'),
+            gzip: true,
+            level: 9,
+          ).convert(licenseBytes)
+        );
+      }
+    }
     return 0;
   }
 
@@ -381,13 +404,12 @@ class ManifestAssetBundle implements AssetBundle {
 
   List<Map<String, dynamic>> _parseFonts(
     FlutterManifest manifest,
-    bool includeDefaultFonts,
     PackageConfig packageConfig, {
     String packageName,
     @required bool primary,
   }) {
     return <Map<String, dynamic>>[
-      if (primary && manifest.usesMaterialDesign && includeDefaultFonts)
+      if (primary && manifest.usesMaterialDesign)
         ...kMaterialFonts,
       if (packageName == null)
         ...manifest.fontsDescriptor

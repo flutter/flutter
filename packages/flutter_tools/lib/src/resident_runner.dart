@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart' as dds;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -27,8 +28,6 @@ import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
-import 'dart/language_version.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
@@ -48,7 +47,6 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
     this.userIdentifier,
-    this.nullSafetyMode = NullSafetyMode.autodetect,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -84,7 +82,6 @@ class FlutterDevice {
     String userIdentifier,
   }) async {
     ResidentCompiler generator;
-    NullSafetyMode nullSafetyMode = buildInfo.nullSafetyMode;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
@@ -96,39 +93,21 @@ class FlutterDevice {
     // a warning message and dump some debug information which can be
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
+      // TODO(jonahwilliams): consistently provide these flags across platforms.
       Artifact platformDillArtifact;
-      List<String> extraFrontEndOptions;
+      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions ?? <String>[]);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
         platformDillArtifact = Artifact.webPlatformKernelDill;
-        extraFrontEndOptions = buildInfo.extraFrontEndOptions;
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
         platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-        extraFrontEndOptions =  buildInfo.extraFrontEndOptions;
-      } else {
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          globals.fs.file(buildInfo.packagesPath),
-          logger: globals.logger,
-        );
-        final File entrypointFile = globals.fs.file(target);
-        final LanguageVersion languageVersion = determineLanguageVersion(
-          entrypointFile,
-          packageConfig.packageOf(entrypointFile.absolute.uri),
-        );
-        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
-          platformDillArtifact = Artifact.webPlatformSoundKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--sound-null-safety',
-          ];
-          nullSafetyMode = NullSafetyMode.sound;
-        } else {
-          platformDillArtifact = Artifact.webPlatformKernelDill;
-          extraFrontEndOptions =  <String>[
-            ...?buildInfo.extraFrontEndOptions,
-            '--no-sound-null-safety',
-          ];
-          nullSafetyMode = NullSafetyMode.unsound;
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
         }
+      } else {
+        assert(false);
       }
 
       generator = ResidentCompiler(
@@ -161,12 +140,13 @@ class FlutterDevice {
     } else {
       // The flutter-widget-cache feature only applies to run mode.
       List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      if (featureFlags.isSingleWidgetReloadEnabled) {
-        extraFrontEndOptions = <String>[
-          '--flutter-widget-cache',
-          ...?extraFrontEndOptions,
-        ];
-      }
+      extraFrontEndOptions = <String>[
+        if (featureFlags.isSingleWidgetReloadEnabled)
+         '--flutter-widget-cache',
+        if (featureFlags.isExperimentalInvalidationStrategyEnabled)
+          '--enable-experiment=alternative-invalidation-strategy',
+        ...?extraFrontEndOptions,
+      ];
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(
           Artifact.flutterPatchedSdkPath,
@@ -202,7 +182,6 @@ class FlutterDevice {
       generator: generator,
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
-      nullSafetyMode: nullSafetyMode,
     );
   }
 
@@ -210,7 +189,6 @@ class FlutterDevice {
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
   final String userIdentifier;
-  final NullSafetyMode nullSafetyMode;
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
@@ -244,6 +222,7 @@ class FlutterDevice {
     int ddsPort,
     bool disableServiceAuthCodes = false,
     bool disableDds = false,
+    bool allowExistingDdsInstance = false,
     bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
@@ -254,8 +233,15 @@ class FlutterDevice {
       // FYI, this message is used as a sentinel in tests.
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
+      bool existingDds = false;
       vm_service.VmService service;
       if (!disableDds) {
+        void handleError(Exception e) {
+          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
+          if (!completer.isCompleted) {
+            completer.completeError('failed to connect to $observatoryUri');
+          }
+        }
         // This first try block is meant to catch errors that occur during DDS startup
         // (e.g., failure to bind to a port, failure to connect to the VM service,
         // attaching to a VM service with existing clients, etc.).
@@ -266,11 +252,16 @@ class FlutterDevice {
             ipv6,
             disableServiceAuthCodes,
           );
-        } on Exception catch (e) {
-          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
-          if (!completer.isCompleted && !_isListeningForObservatoryUri) {
-            completer.completeError('failed to connect to $observatoryUri');
+        } on dds.DartDevelopmentServiceException catch (e) {
+          if (!allowExistingDdsInstance ||
+              (e.errorCode != dds.DartDevelopmentServiceException.existingDdsInstanceError)) {
+            handleError(e);
+            return;
+          } else {
+            existingDds = true;
           }
+        } on Exception catch (e) {
+          handleError(e);
           return;
         }
       }
@@ -290,7 +281,8 @@ class FlutterDevice {
               printStructuredErrorLogMethod: printStructuredErrorLogMethod,
               device: device,
             ),
-            device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+            if (!existingDds)
+              device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
           ]
         ) as vm_service.VmService;
       } on Exception catch (exception) {
@@ -369,9 +361,8 @@ class FlutterDevice {
 
   Future<Uri> setupDevFS(
     String fsName,
-    Directory rootDirectory, {
-    String packagesFilePath,
-  }) {
+    Directory rootDirectory,
+  ) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmService,
@@ -737,7 +728,7 @@ class FlutterDevice {
 abstract class ResidentRunner {
   ResidentRunner(
     this.flutterDevices, {
-    this.target,
+    @required this.target,
     @required this.debuggingOptions,
     String projectRootPath,
     this.ipv6,
@@ -745,7 +736,7 @@ abstract class ResidentRunner {
     this.hotMode = true,
     String dillOutputPath,
     this.machine = false,
-  }) : mainPath = findMainDartFile(target),
+  }) : mainPath = globals.fs.path.absolute(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
@@ -873,6 +864,7 @@ abstract class ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool allowExistingDdsInstance = false,
   });
 
   bool get supportsRestart => false;
@@ -1225,6 +1217,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
     GetSkSLMethod getSkSLMethod,
+    bool allowExistingDdsInstance,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -1238,21 +1231,15 @@ abstract class ResidentRunner {
         compileExpression: compileExpression,
         disableDds: debuggingOptions.disableDds,
         ddsPort: debuggingOptions.ddsPort,
+        allowExistingDdsInstance: allowExistingDdsInstance,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         getSkSLMethod: getSkSLMethod,
         printStructuredErrorLogMethod: printStructuredErrorLog,
         ipv6: ipv6,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes
       );
-      // This will wait for at least one flutter view before returning.
-      final Status status = globals.logger.startProgress(
-        'Waiting for ${device.device.name} to report its views...',
-      );
-      try {
-        await device.vmService.getFlutterViews();
-      } finally {
-        status.stop();
-      }
+      await device.vmService.getFlutterViews();
+
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
@@ -1263,13 +1250,16 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<bool> launchDevTools() async {
+  Future<bool> launchDevTools({bool openInBrowser = false}) async {
     if (!supportsServiceProtocol) {
       return false;
     }
     assert(supportsServiceProtocol);
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    await _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
+    unawaited(_devtoolsLauncher.launch(
+      flutterDevices.first.vmService.httpAddress,
+      openInBrowser: openInBrowser,
+    ));
     return true;
   }
 
@@ -1397,17 +1387,6 @@ class OperationResult {
   bool get isOk => code == 0;
 
   static final OperationResult ok = OperationResult(0, '');
-}
-
-/// Given the value of the --target option, return the path of the Dart file
-/// where the app's main function should be.
-String findMainDartFile([ String target ]) {
-  target ??= '';
-  final String targetPath = globals.fs.path.absolute(target);
-  if (globals.fs.isDirectorySync(targetPath)) {
-    return globals.fs.path.join(targetPath, 'lib', 'main.dart');
-  }
-  return targetPath;
 }
 
 Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
@@ -1573,7 +1552,7 @@ class TerminalHandler {
       case 'U':
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
-        return residentRunner.launchDevTools();
+        return residentRunner.launchDevTools(openInBrowser: true);
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
@@ -1666,9 +1645,12 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
-  Future<void> launch(Uri observatoryAddress);
+  /// Launch a Dart DevTools process, optionally targeting a specific VM Service
+  /// URI if [vmServiceUri] is non-null.
+  Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false});
 
-  Future<DevToolsServerAddress> serve();
+  /// Serve Dart DevTools and return the host and port they are available on.
+  Future<DevToolsServerAddress> serve({bool openInBrowser = false});
 
   Future<void> close();
 

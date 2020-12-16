@@ -75,7 +75,7 @@ enum _ContextMenuLocation {
 /// child's corners and allowing its aspect ratio to expand, similar to the
 /// Photos app on iOS.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 ///
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.
@@ -292,7 +292,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         return widget.previewBuilder!(context, animation, widget.child);
       },
     );
-    Navigator.of(context, rootNavigator: true)!.push<void>(_route!);
+    Navigator.of(context, rootNavigator: true).push<void>(_route!);
     _route!.animation!.addStatusListener(_routeAnimationStatusListener);
   }
 
@@ -686,7 +686,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       parent: animation!,
       curve: const Interval(0.9, 1.0),
     ));
-    Navigator.of(context)!.pop();
+    Navigator.of(context).pop();
   }
 
   // Take measurements on the child and _ContextMenuSheet and update the

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
@@ -15,7 +14,7 @@ import 'android/gradle_utils.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpHeaders, HttpStatus, ProcessException, SocketException;
+import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpHeaders, HttpStatus, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
@@ -741,7 +740,7 @@ class PubDependencies extends ArtifactSet {
     FileSystem fileSystem,
   ) async {
     final File toolPackageConfig = fileSystem.file(
-      fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', kPackagesFileName),
+      fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools', '.dart_tool', 'package_config.json'),
     );
     if (!toolPackageConfig.existsSync()) {
       return false;
@@ -925,14 +924,11 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
       _makeFilesExecutable(dir, operatingSystemUtils);
 
-      const List<String> frameworkNames = <String>['Flutter', 'FlutterMacOS'];
-      for (final String frameworkName in frameworkNames) {
-        final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, '$frameworkName.framework.zip'));
-        if (frameworkZip.existsSync()) {
-          final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, '$frameworkName.framework'));
-          framework.createSync();
-          operatingSystemUtils.unzip(frameworkZip, framework);
-        }
+      final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, 'FlutterMacOS.framework.zip'));
+      if (frameworkZip.existsSync()) {
+        final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, 'FlutterMacOS.framework'));
+        framework.createSync();
+        operatingSystemUtils.unzip(frameworkZip, framework);
       }
     }
 
@@ -1792,14 +1788,7 @@ class ArtifactUpdater {
 
       try {
         extractor(tempFile, location);
-      } on ProcessException {
-        retries -= 1;
-        if (retries == 0) {
-          rethrow;
-        }
-        _deleteIgnoringErrors(tempFile);
-        continue;
-      } on ArchiveException {
+      } on Exception {
         retries -= 1;
         if (retries == 0) {
           rethrow;

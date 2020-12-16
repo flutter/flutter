@@ -13,6 +13,9 @@ import 'localizations.dart';
 import 'route.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// An application that uses Cupertino design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly

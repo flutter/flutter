@@ -80,7 +80,7 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// In this example, the children are spaced out equally, unless there's no more
 /// room, in which case they stack vertically and scroll.
 ///
@@ -154,7 +154,7 @@ import 'scrollable.dart';
 /// so that the intrinsic sizing algorithm can short-circuit the computation when it
 /// reaches those parts of the subtree.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// In this example, the column becomes either as big as viewport, or as big as
 /// the contents, whichever is biggest.
 ///
@@ -269,6 +269,11 @@ class SingleChildScrollView extends StatelessWidget {
 
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
+  ///
+  /// When true, the scroll view is used for default [ScrollAction]s. If a
+  /// ScrollAction is not handled by an otherwise focused part of the application,
+  /// the ScrollAction will be evaluated using this scroll view, for example,
+  /// when executing [Shortcuts] key events like page up and down.
   ///
   /// On iOS, this identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
@@ -534,6 +539,15 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   // want the default behavior (returning null). Otherwise, as you
   // scroll, it would shift in its parent if the parent was baseline-aligned,
   // which makes no sense.
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final Size childSize = child!.getDryLayout(_getInnerConstraints(constraints));
+    return constraints.constrain(childSize);
+  }
 
   @override
   void performLayout() {

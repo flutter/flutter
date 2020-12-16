@@ -15,7 +15,6 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -64,7 +63,7 @@ enum BottomNavigationBarType {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
 /// widgets and the [currentIndex] is set to index 0. The selected item is
@@ -267,7 +266,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the unselected [BottomNavigationBarItem.icon] and
   /// [BottomNavigationBarItem.title]s.
   ///
-  /// If null then the [TextTheme.caption]'s color is used.
+  /// If null then the [ThemeData.unselectedWidgetColor]'s color is used.
   final Color? unselectedItemColor;
 
   /// The size, opacity, and color of the icon in the currently selected
@@ -853,7 +852,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         colorTween = ColorTween(
           begin: widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
-            ?? themeData.textTheme.caption!.color,
+            ?? themeData.unselectedWidgetColor,
           end: widget.selectedItemColor
             ?? bottomTheme.selectedItemColor
             ?? widget.fixedColor
