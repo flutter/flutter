@@ -16,7 +16,7 @@ import './stdio.dart';
 import './version.dart';
 
 /// A source code repository.
-class Repository {
+abstract class Repository {
   Repository({
     @required this.name,
     @required this.upstream,
@@ -248,25 +248,12 @@ class Repository {
   ///
   /// This method is for testing purposes.
   @visibleForTesting
-  Repository cloneRepository(String cloneName) {
-    assert(localUpstream);
-    cloneName ??= 'clone-of-$name';
-    return Repository(
-      fileSystem: fileSystem,
-      name: cloneName,
-      parentDirectory: parentDirectory,
-      platform: platform,
-      processManager: processManager,
-      stdio: stdio,
-      upstream: 'file://${checkoutDirectory.path}/',
-      useExistingCheckout: useExistingCheckout,
-    );
-  }
+  Repository cloneRepository(String cloneName);
 }
 
 class FrameworkRepository extends Repository {
   FrameworkRepository(
-    Checkouts checkouts, {
+    this.checkouts, {
     String name = 'framework',
     String upstream = FrameworkRepository.defaultUpstream,
     bool localUpstream = false,
@@ -283,6 +270,7 @@ class FrameworkRepository extends Repository {
           useExistingCheckout: useExistingCheckout,
         );
 
+  final Checkouts checkouts;
   static const String defaultUpstream = 'https://github.com/flutter/flutter.git';
 
   String get cacheDirectory => fileSystem.path.join(
@@ -290,6 +278,18 @@ class FrameworkRepository extends Repository {
         'bin',
         'cache',
       );
+
+  @override
+  Repository cloneRepository(String cloneName) {
+    assert(localUpstream);
+    cloneName ??= 'clone-of-$name';
+    return FrameworkRepository(
+      checkouts,
+      name: cloneName,
+      upstream: 'file://${checkoutDirectory.path}/',
+      useExistingCheckout: useExistingCheckout,
+    );
+  }
 
   void _ensureToolReady() {
     final File toolsStamp =
@@ -321,6 +321,13 @@ class FrameworkRepository extends Repository {
   @override
   void checkout(String revision) {
     super.checkout(revision);
+    // The tool will overwrite old cached artifacts, but not delete unused
+    // artifacts from a previous version. Thus, delete the entire cache and
+    // re-populate.
+    final Directory cache = fileSystem.directory(cacheDirectory);
+    if (cache.existsSync()) {
+      cache.deleteSync(recursive: true);
+    }
     _ensureToolReady();
   }
 

@@ -145,12 +145,7 @@ void main() {
           ),
         ...codesignCheckCommands,
       ]);
-      try {
-        await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
-      } on ConductorException {
-        print(stdio.error);
-        rethrow;
-      }
+      await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
       expect(processManager.hasRemainingExpectations, false);
     });
 
@@ -181,17 +176,11 @@ void main() {
         ),
       );
       codesignCheckCommands.add(
-        FakeCommand(
-          command: const <String>[
-            'codesign',
-            '--display',
-            '--entitlements',
-            ':-',
-            '$flutterCache/dart-sdk/bin/dartaotruntime',
-          ],
-          stdout: expectedEntitlements.join('\n'),
-        )
+        const FakeCommand(
+          command: <String>['codesign', '-vvv', '$flutterCache/engine/darwin-x64/font-subset'],
+        ),
       );
+
       createRunner(commands: <FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
@@ -226,9 +215,9 @@ void main() {
             '-type',
             'f',
           ],
-          stdout: binariesWithEntitlements.join('\n'),
+          stdout: allBinaries.join('\n'),
         ),
-        for (String bin in binariesWithEntitlements)
+        for (String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -266,6 +255,11 @@ void main() {
           command: <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dart-sdk/bin/dartaotruntime'],
         )
       );
+      codesignCheckCommands.add(
+        const FakeCommand(
+          command: <String>['codesign', '-vvv', '$flutterCache/engine/darwin-x64/font-subset'],
+        ),
+      );
       createRunner(commands: <FakeCommand>[
         const FakeCommand(command: <String>[
           'git',
@@ -300,9 +294,9 @@ void main() {
             '-type',
             'f',
           ],
-          stdout: binariesWithEntitlements.join('\n'),
+          stdout: allBinaries.join('\n'),
         ),
-        for (String bin in binariesWithEntitlements)
+        for (String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -368,7 +362,7 @@ void main() {
           revision,
         ]);
       } on ConductorException {
-        print(stdio.error);
+        //print(stdio.error);
         rethrow;
       }
       expect(

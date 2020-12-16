@@ -89,6 +89,9 @@ class CodesignCommand extends Command<void> {
 
     String revision;
     if (argResults.wasParsed(kRevision)) {
+      stdio.printError('Warning! When providing an arbitrary revision, the contents of the cache may not');
+      stdio.printError('match the expected binaries in the conductor tool. It is preferred to check out');
+      stdio.printError('the desired revision and run that version of the conductor.\n');
       revision = argResults[kRevision] as String;
     } else {
       revision = (processManager.runSync(
@@ -102,10 +105,9 @@ class CodesignCommand extends Command<void> {
     // Ensure artifacts present
     framework.runFlutter(<String>['precache', '--ios', '--macos']);
 
+    verifyExist();
     if (argResults[kSignatures] as bool) {
       verifySignatures();
-    } else {
-      verifyExist();
     }
   }
 
@@ -283,8 +285,12 @@ class CodesignCommand extends Command<void> {
         'expected entitlements.');
   }
 
+  List<String> _allBinaryPaths;
   /// Find every binary file in the given [rootDirectory].
   List<String> findBinaryPaths(String rootDirectory) {
+    if (_allBinaryPaths != null) {
+      return _allBinaryPaths;
+    }
     final io.ProcessResult result = processManager.runSync(
       <String>[
         'find',
@@ -297,7 +303,8 @@ class CodesignCommand extends Command<void> {
         .split('\n')
         .where((String s) => s.isNotEmpty)
         .toList();
-    return allFiles.where(isBinary).toList();
+    _allBinaryPaths = allFiles.where(isBinary).toList();
+    return _allBinaryPaths;
   }
 
   /// Check mime-type of file at [filePath] to determine if it is binary.
