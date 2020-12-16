@@ -1439,11 +1439,14 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
   /// [InputDecorator].
   ///
+  /// The [minHeight] argument specifies the minimum height of the 
+  /// [DropDownButton].
+  /// 
   /// For a description of the `onSaved`, `validator`, or `autovalidateMode`
-  /// parameters, see [FormField]. For the rest (other than [decoration]), see
-  /// [DropdownButton].
+  /// parameters, see [FormField]. For the rest (other than [decoration] and 
+  /// [minHeight]), see [DropdownButton].
   ///
-  /// The `items`, `elevation`, `iconSize`, `isDense`, `isExpanded`,
+  /// The `items`, `elevation`, `iconSize`, `minHeight`, `isDense`, `isExpanded`,
   /// `autofocus`, and `decoration`  parameters must not be null.
   DropdownButtonFormField({
     Key? key,
@@ -1463,6 +1466,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool isDense = true,
     bool isExpanded = false,
     double? itemHeight,
+    double minHeight = 56.0,
     Color? focusColor,
     FocusNode? focusNode,
     bool autofocus = false,
@@ -1491,6 +1495,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(isDense != null),
        assert(isExpanded != null),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       assert(minHeight != null),
        assert(autofocus != null),
        assert(autovalidate != null),
        assert(
@@ -1511,7 +1516,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
            final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
-             Theme.of(field.context).inputDecorationTheme,
+             Theme.of(field.context).inputDecorationTheme.copyWith(
+               contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
+             ),
            );
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
@@ -1523,28 +1530,31 @@ class DropdownButtonFormField<T> extends FormField<T> {
                  decoration: effectiveDecoration.copyWith(errorText: field.errorText),
                  isEmpty: state.value == null,
                  isFocused: Focus.of(context).hasFocus,
-                 child: DropdownButtonHideUnderline(
-                   child: DropdownButton<T>(
-                     items: items,
-                     selectedItemBuilder: selectedItemBuilder,
-                     value: state.value,
-                     hint: hint,
-                     disabledHint: disabledHint,
-                     onChanged: onChanged == null ? null : state.didChange,
-                     onTap: onTap,
-                     elevation: elevation,
-                     style: style,
-                     icon: icon,
-                     iconDisabledColor: iconDisabledColor,
-                     iconEnabledColor: iconEnabledColor,
-                     iconSize: iconSize,
-                     isDense: isDense,
-                     isExpanded: isExpanded,
-                     itemHeight: itemHeight,
-                     focusColor: focusColor,
-                     focusNode: focusNode,
-                     autofocus: autofocus,
-                     dropdownColor: dropdownColor,
+                 child: Container(
+                   constraints: BoxConstraints(minHeight: minHeight),
+                   child: DropdownButtonHideUnderline(
+                     child: DropdownButton<T>(
+                       items: items,
+                       selectedItemBuilder: selectedItemBuilder,
+                       value: state.value,
+                       hint: hint,
+                       disabledHint: disabledHint,
+                       onChanged: onChanged == null ? null : state.didChange,
+                       onTap: onTap,
+                       elevation: elevation,
+                       style: style,
+                       icon: icon,
+                       iconDisabledColor: iconDisabledColor,
+                       iconEnabledColor: iconEnabledColor,
+                       iconSize: iconSize,
+                       isDense: isDense,
+                       isExpanded: isExpanded,
+                       itemHeight: itemHeight,
+                       focusColor: focusColor,
+                       focusNode: focusNode,
+                       autofocus: autofocus,
+                       dropdownColor: dropdownColor,
+                     ),
                    ),
                  ),
                );
