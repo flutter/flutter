@@ -1136,7 +1136,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     try {
       final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
       final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
-      final int oldLastIndex = _childElements.lastKey() ?? -1;
       void processElement(int index) {
         _currentlyUpdatingChildIndex = index;
         if (_childElements[index] != null && _childElements[index] != newChildren[index]) {
@@ -1189,7 +1188,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
       renderObject.debugChildIntegrityEnabled = false; // Moving children will temporary violate the integrity.
       newChildren.keys.forEach(processElement);
-      final int newLastIndex = _childElements.lastKey() ?? -1;
       // We don't worry about underflow if the last child is not longer at the
       // end of the child list.
       if (!childrenUpdated && _didUnderflow) {
