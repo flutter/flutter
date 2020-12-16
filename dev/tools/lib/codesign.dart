@@ -49,7 +49,7 @@ class CodesignCommand extends Command<void> {
     );
     argParser.addOption(
       kRevision,
-      help: 'The Flutter FRAMEWORK revision to use.',
+      help: 'The Flutter framework revision to use.',
     );
   }
 

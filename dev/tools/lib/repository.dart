@@ -89,6 +89,9 @@ abstract class Repository {
         }
       }
     }
+
+    final String revision = reverseParse('HEAD');
+    stdio.printTrace('Repository $name is checked out at revision "$revision".');
     return _checkoutDirectory;
   }
 
@@ -147,7 +150,7 @@ abstract class Repository {
       <String>['rev-parse', ref],
       'look up the commit for the ref $ref',
       workingDirectory: checkoutDirectory.path,
-    );
+    ).trim();
     assert(revisionHash.isNotEmpty);
     return revisionHash;
   }
