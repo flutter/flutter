@@ -24,7 +24,7 @@ import 'tooltip.dart';
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
 // dynamic _selection;
-// BuildContext context;
+// late BuildContext context;
 // void setState(VoidCallback fn) { }
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);

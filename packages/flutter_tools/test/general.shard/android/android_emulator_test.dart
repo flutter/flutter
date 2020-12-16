@@ -71,7 +71,7 @@ void main() {
       expect(emulator.name, displayName);
       expect(emulator.manufacturer, manufacturer);
       expect(emulator.category, Category.mobile);
-      expect(emulator.platformType, PlatformType.android);
+      expect(emulator.platformDisplay, 'android');
     });
 
     testWithoutContext('prefers displayname for name', () {

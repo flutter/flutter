@@ -28,6 +28,9 @@ export 'package:flutter/gestures.dart' show
   PointerUpEvent,
   PointerCancelEvent;
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A base class for render boxes that resemble their children.
 ///
 /// A proxy box has a single child and simply mimics all the properties of that

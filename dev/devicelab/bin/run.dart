@@ -22,6 +22,9 @@ List<String> _taskNames = <String>[];
 /// The device-id to run test on.
 String deviceId;
 
+/// The git branch being tested on.
+String gitBranch;
+
 /// The build of the local engine to use.
 ///
 /// Required for A/B test mode.
@@ -88,6 +91,7 @@ Future<void> main(List<String> rawArgs) async {
 
   deviceId = args['device-id'] as String;
   exitOnFirstTestFailure = args['exit'] as bool;
+  gitBranch = args['git-branch'] as String;
   localEngine = args['local-engine'] as String;
   localEngineSrcPath = args['local-engine-src-path'] as String;
   luciBuilder = args['luci-builder'] as String;
@@ -119,7 +123,7 @@ Future<void> _runTasks() async {
     if (serviceAccountTokenFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
       /// Cocoon references LUCI tasks by the [luciBuilder] instead of [taskName].
-      await cocoon.sendTaskResult(builderName: luciBuilder, result: result);
+      await cocoon.sendTaskResult(builderName: luciBuilder, result: result, gitBranch: gitBranch);
     }
 
     if (!result.succeeded) {
@@ -325,6 +329,11 @@ final ArgParser _argParser = ArgParser()
     'exit',
     defaultsTo: true,
     help: 'Exit on the first test failure.',
+  )
+  ..addOption(
+    'git-branch',
+    help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
+          'checkouts run in detached HEAD state, so the branch must be passed.',
   )
   ..addOption(
     'local-engine',

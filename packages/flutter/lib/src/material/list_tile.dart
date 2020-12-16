@@ -426,10 +426,10 @@ enum ListTileControlAffinity {
 /// ```dart preamble
 /// class CustomListItem extends StatelessWidget {
 ///   const CustomListItem({
-///     this.thumbnail,
-///     this.title,
-///     this.user,
-///     this.viewCount,
+///     required this.thumbnail,
+///     required this.title,
+///     required this.user,
+///     required this.viewCount,
 ///   });
 ///
 ///   final Widget thumbnail;
@@ -468,10 +468,10 @@ enum ListTileControlAffinity {
 ///
 /// class _VideoDescription extends StatelessWidget {
 ///   const _VideoDescription({
-///     Key key,
-///     this.title,
-///     this.user,
-///     this.viewCount,
+///     Key? key,
+///     required this.title,
+///     required this.user,
+///     required this.viewCount,
 ///   }) : super(key: key);
 ///
 ///   final String title;
@@ -548,12 +548,12 @@ enum ListTileControlAffinity {
 /// ```dart preamble
 /// class _ArticleDescription extends StatelessWidget {
 ///   _ArticleDescription({
-///     Key key,
-///     this.title,
-///     this.subtitle,
-///     this.author,
-///     this.publishDate,
-///     this.readDuration,
+///     Key? key,
+///     required this.title,
+///     required this.subtitle,
+///     required this.author,
+///     required this.publishDate,
+///     required this.readDuration,
 ///   }) : super(key: key);
 ///
 ///   final String title;
@@ -623,13 +623,13 @@ enum ListTileControlAffinity {
 ///
 /// class CustomListItemTwo extends StatelessWidget {
 ///   CustomListItemTwo({
-///     Key key,
-///     this.thumbnail,
-///     this.title,
-///     this.subtitle,
-///     this.author,
-///     this.publishDate,
-///     this.readDuration,
+///     Key? key,
+///     required this.thumbnail,
+///     required this.title,
+///     required this.subtitle,
+///     required this.author,
+///     required this.publishDate,
+///     required this.readDuration,
 ///   }) : super(key: key);
 ///
 ///   final Widget thumbnail;
@@ -896,7 +896,7 @@ class ListTile extends StatelessWidget {
   /// corresponding [ListTile].
   ///
   /// ```dart
-  ///   int _selectedIndex;
+  ///   int _selectedIndex = 0;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {

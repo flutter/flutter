@@ -365,6 +365,7 @@ Future<void> _runWebToolTests() async {
 /// target app.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
@@ -462,18 +463,6 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
 }) async {
   assert(Platform.isMacOS);
   print('${green}Testing IPA build$reset for $cyan$relativePathToApplication$reset...');
-  // Install Cocoapods.  We don't have these checked in for the examples,
-  // and build ios doesn't take care of it automatically.
-  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
-  if (podfile.existsSync()) {
-    await runCommand('pod',
-      <String>['install'],
-      workingDirectory: podfile.parent.path,
-      environment: <String, String>{
-        'LANG': 'en_US.UTF-8',
-      },
-    );
-  }
   await _flutterBuild(relativePathToApplication, 'IPA', 'ios',
     release: release,
     verifyCaching: verifyCaching,
@@ -655,6 +644,18 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
+  Future<void> runFixTests() async {
+    final List<String> args = <String>[
+      'fix',
+      '--compare-to-golden',
+    ];
+    await runCommand(
+      dart,
+      args,
+      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_fixes'),
+    );
+  }
+
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
       'run',
@@ -713,6 +714,7 @@ Future<void> _runFrameworkTests() async {
       options: <String>['--enable-vmservice'],
       tableData: bigqueryApi?.tabledata,
     );
+    await runFixTests();
     await runPrivateTests();
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
