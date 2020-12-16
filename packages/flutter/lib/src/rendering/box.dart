@@ -1344,6 +1344,10 @@ class _IntrinsicDimensionsCacheEntry {
 /// [computeMinIntrinsicWidth], [computeMaxIntrinsicWidth],
 /// [computeMinIntrinsicHeight], [computeMaxIntrinsicHeight].
 ///
+/// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if you
+/// do override any of these methods, which will add additional checks to
+/// help validate your implementation.
+///
 /// In addition, if the box has any children, it must implement
 /// [computeDistanceToActualBaseline]. [RenderProxyBox] provides a simple
 /// implementation that forwards to the child; [RenderShiftedBox] provides an
@@ -1358,33 +1362,25 @@ abstract class RenderBox extends RenderObject {
   }
 
   Map<_IntrinsicDimensionsCacheEntry, double>? _cachedIntrinsicDimensions;
-  Map<_IntrinsicDimensionsCacheEntry, double>? _debugCachedIntrinsicDimensionsForChecks;
 
   double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double computer(double argument)) {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
-
-    double? debugCachedResult;
-
-    // Use a separate cache for debug-only intrinisic size checks.
+    bool shouldCache = true;
     assert(() {
-      if (RenderObject.debugCheckingIntrinsics) {
-        _debugCachedIntrinsicDimensionsForChecks ??= <_IntrinsicDimensionsCacheEntry, double>{};
-        debugCachedResult = _debugCachedIntrinsicDimensionsForChecks!.putIfAbsent(
-          _IntrinsicDimensionsCacheEntry(dimension, argument),
-          () => computer(argument),
-        );
-      }
+      // we don't want the checked-mode intrinsic tests to affect
+      // who gets marked dirty, etc.
+      if (RenderObject.debugCheckingIntrinsics)
+        shouldCache = false;
       return true;
     }());
-    if (debugCachedResult != null) {
-      return debugCachedResult!;
+    if (shouldCache) {
+      _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
+      return _cachedIntrinsicDimensions!.putIfAbsent(
+        _IntrinsicDimensionsCacheEntry(dimension, argument),
+        () => computer(argument),
+      );
     }
-
-    _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
-    return _cachedIntrinsicDimensions!.putIfAbsent(
-      _IntrinsicDimensionsCacheEntry(dimension, argument),
-      () => computer(argument),
-    );
+    return computer(argument);
   }
 
   /// Returns the minimum width that this box could be without failing to
@@ -2313,10 +2309,6 @@ abstract class RenderBox extends RenderObject {
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
       _cachedDryLayoutSizes?.clear();
-      assert(() {
-        _debugCachedIntrinsicDimensionsForChecks?.clear();
-        return true;
-      }());
       if (parent is RenderObject) {
         markParentNeedsLayout();
         return;

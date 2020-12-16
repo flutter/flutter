@@ -289,9 +289,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
-  /// This can be used to enable additional checks. For example,
-  /// [AutomatedTestWidgetsFlutterBinding] sets this to true, so that all tests
-  /// always run with aggressive intrinsic sizing tests enabled.
+  /// When set to true, tests always run with additional aggressive intrinsic
+  /// sizing tests during layout.
   @protected
   bool get checkIntrinsicSizes => false;
 
@@ -943,9 +942,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   bool get disableShadows => true;
-
-  @override
-  bool get checkIntrinsicSizes => true;
 
   /// The value of [defaultTestTimeout] can be set to `None` to enable debugging flutter tests where
   /// we would not want to timeout the test. This is expected to be used by test tooling which
