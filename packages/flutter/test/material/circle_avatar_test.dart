@@ -95,11 +95,13 @@ void main() {
     bool caughtForegroundImageError = false;
     await tester.pumpWidget(
       wrap(
-        child: CircleAvatar(
+        child: RepaintBoundary(
+          child: CircleAvatar(
           foregroundImage: errorImage,
           backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
           radius: 50.0,
           onForegroundImageError: (_,__) => caughtForegroundImageError = true,
+          ),
         ),
       ),
     );
@@ -110,6 +112,10 @@ void main() {
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.image!.fit, equals(BoxFit.cover));
+    await expectLater(
+      find.byType(CircleAvatar),
+      matchesGoldenFile('circle_avatar.fallback.png'),
+    );
   });
 
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
