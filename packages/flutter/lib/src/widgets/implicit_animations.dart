@@ -352,22 +352,21 @@ typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T t
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
-  AnimationController? get controller => _controller;
-  AnimationController? _controller;
+  AnimationController get controller => _controller;
+  late final AnimationController _controller = AnimationController(
+    duration: widget.duration,
+    debugLabel: kDebugMode ? widget.toStringShort() : null,
+    vsync: this,
+  );
 
   /// The animation driving this widget's implicit animations.
-  Animation<double>? get animation => _animation;
-  Animation<double>? _animation;
+  Animation<double> get animation => _animation;
+  late Animation<double> _animation = _createCurve();
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      debugLabel: kDebugMode ? widget.toStringShort() : null,
-      vsync: this,
-    );
-    _controller!.addStatusListener((AnimationStatus status) {
+    _controller.addStatusListener((AnimationStatus status) {
       switch (status) {
         case AnimationStatus.completed:
           if (widget.onEnd != null)
@@ -378,7 +377,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
         case AnimationStatus.reverse:
       }
     });
-    _updateCurve();
     _constructTweens();
     didUpdateTweens();
   }
@@ -387,27 +385,27 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve)
-      _updateCurve();
-    _controller!.duration = widget.duration;
+      _animation = _createCurve();
+    _controller.duration = widget.duration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
         return tween;
       });
-      _controller!
+      _controller
         ..value = 0.0
         ..forward();
       didUpdateTweens();
     }
   }
 
-  void _updateCurve() {
-    _animation = CurvedAnimation(parent: _controller!, curve: widget.curve);
+  CurvedAnimation _createCurve() {
+    return CurvedAnimation(parent: _controller, curve: widget.curve);
   }
 
   @override
   void dispose() {
-    _controller!.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -419,7 +417,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     if (tween == null)
       return;
     tween
-      ..begin = tween.evaluate(_animation!)
+      ..begin = tween.evaluate(_animation)
       ..end = targetValue;
   }
 
@@ -552,7 +550,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   @override
   void initState() {
     super.initState();
-    controller!.addListener(_handleAnimationChanged);
+    controller.addListener(_handleAnimationChanged);
   }
 
   void _handleAnimationChanged() {
@@ -776,7 +774,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = this.animation!;
+    final Animation<double> animation = this.animation;
     return Container(
       child: widget.child,
       alignment: _alignment?.evaluate(animation),
@@ -907,7 +905,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
   Widget build(BuildContext context) {
     return Padding(
       padding: _padding!
-        .evaluate(animation!)
+        .evaluate(animation)
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity),
       child: widget.child,
     );
@@ -1058,9 +1056,9 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: _alignment!.evaluate(animation!)!,
-      heightFactor: _heightFactorTween?.evaluate(animation!),
-      widthFactor: _widthFactorTween?.evaluate(animation!),
+      alignment: _alignment!.evaluate(animation)!,
+      heightFactor: _heightFactorTween?.evaluate(animation),
+      widthFactor: _widthFactorTween?.evaluate(animation),
       child: widget.child,
     );
   }
@@ -1255,12 +1253,12 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   Widget build(BuildContext context) {
     return Positioned(
       child: widget.child,
-      left: _left?.evaluate(animation!),
-      top: _top?.evaluate(animation!),
-      right: _right?.evaluate(animation!),
-      bottom: _bottom?.evaluate(animation!),
-      width: _width?.evaluate(animation!),
-      height: _height?.evaluate(animation!),
+      left: _left?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      right: _right?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
     );
   }
 
@@ -1392,12 +1390,12 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
     return Positioned.directional(
       textDirection: Directionality.of(context),
       child: widget.child,
-      start: _start?.evaluate(animation!),
-      top: _top?.evaluate(animation!),
-      end: _end?.evaluate(animation!),
-      bottom: _bottom?.evaluate(animation!),
-      width: _width?.evaluate(animation!),
-      height: _height?.evaluate(animation!),
+      start: _start?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      end: _end?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
     );
   }
 
@@ -1529,7 +1527,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = animation!.drive(_opacity!);
+    _opacityAnimation = animation.drive(_opacity!);
   }
 
   @override
@@ -1662,7 +1660,7 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = animation!.drive(_opacity!);
+    _opacityAnimation = animation.drive(_opacity!);
   }
 
   @override
@@ -1792,7 +1790,7 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: _style!.evaluate(animation!),
+      style: _style!.evaluate(animation),
       textAlign: widget.textAlign,
       softWrap: widget.softWrap,
       overflow: widget.overflow,
@@ -1925,11 +1923,11 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       child: widget.child,
       shape: widget.shape,
       clipBehavior: widget.clipBehavior,
-      borderRadius: _borderRadius!.evaluate(animation!),
-      elevation: _elevation!.evaluate(animation!),
-      color: widget.animateColor ? _color!.evaluate(animation!)! : widget.color,
+      borderRadius: _borderRadius!.evaluate(animation),
+      elevation: _elevation!.evaluate(animation),
+      color: widget.animateColor ? _color!.evaluate(animation)! : widget.color,
       shadowColor: widget.animateShadowColor
-          ? _shadowColor!.evaluate(animation!)!
+          ? _shadowColor!.evaluate(animation)!
           : widget.shadowColor,
     );
   }

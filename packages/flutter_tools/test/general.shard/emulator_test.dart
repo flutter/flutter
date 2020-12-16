@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -45,14 +43,10 @@ const FakeCommand kListEmulatorsCommand = FakeCommand(
 );
 
 void main() {
-  MockProcessManager mockProcessManager;
   MockAndroidSdk mockSdk;
-  MockXcode mockXcode;
 
   setUp(() {
-    mockProcessManager = MockProcessManager();
     mockSdk = MockAndroidSdk();
-    mockXcode = MockXcode();
 
     when(mockSdk.avdManagerPath).thenReturn('avdmanager');
     when(mockSdk.getAvdManagerPath()).thenReturn('avdmanager');
@@ -299,24 +293,53 @@ void main() {
   });
 
   group('ios_emulators', () {
-    bool didAttemptToRunSimulator = false;
+    MockXcode mockXcode;
+    FakeProcessManager fakeProcessManager;
+
     setUp(() {
-      when(mockXcode.xcodeSelectPath).thenReturn('/fake/Xcode.app/Contents/Developer');
-      when(mockXcode.getSimulatorPath()).thenAnswer((_) => '/fake/simulator.app');
-      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        final List<String> args = invocation.positionalArguments[0] as List<String>;
-        if (args.length >= 3 && args[0] == 'open' && args[1] == '-a' && args[2] == '/fake/simulator.app') {
-          didAttemptToRunSimulator = true;
-        }
-        return ProcessResult(101, 0, '', '');
-      });
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+      mockXcode = MockXcode();
+      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
+      when(mockXcode.getSimulatorPath())
+          .thenAnswer((_) => '/fake/simulator.app');
     });
+
     testUsingContext('runs correct launch commands', () async {
-      const Emulator emulator = IOSEmulator('ios');
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          'open',
+          '-a',
+          '/fake/simulator.app',
+        ]),
+        const FakeCommand(command: <String>[
+          'xcrun',
+          'simctl',
+          'boot',
+          '1234',
+        ]),
+      ]);
+      final SimControl simControl = SimControl.test(
+        processManager: fakeProcessManager,
+        xcode: mockXcode,
+      );
+
+      final IOSSimulator simulator = IOSSimulator(
+        '1234',
+        name: 'iPhone 12',
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-3',
+        simControl: simControl,
+        xcode: mockXcode,
+      );
+      final IOSEmulator emulator = IOSEmulator(simulator);
+
+      expect(emulator.id, '1234');
+      expect(emulator.name, 'iPhone 12');
+      expect(emulator.category, Category.mobile);
+      expect(emulator.platformDisplay, 'iOS-14-3');
       await emulator.launch();
-      expect(didAttemptToRunSimulator, equals(true));
+      expect(fakeProcessManager.hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       Xcode: () => mockXcode,
     });
   });
@@ -347,35 +370,11 @@ class FakeEmulator extends Emulator {
   Category get category => Category.mobile;
 
   @override
-  PlatformType get platformType => PlatformType.android;
+  String get platformDisplay => PlatformType.android.toString();
 
   @override
   Future<void> launch() {
     throw UnimplementedError('Not implemented in Mock');
   }
 }
-
-class MockProcessManager extends Mock implements ProcessManager {
-
-  @override
-  ProcessResult runSync(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
-  }) {
-    final String program = command[0] as String;
-    final List<String> args = command.sublist(1) as List<String>;
-    switch (program) {
-      case '/usr/bin/xcode-select':
-        throw ProcessException(program, args);
-        break;
-    }
-    throw StateError('Unexpected process call: $command');
-  }
-}
-
 class MockXcode extends Mock implements Xcode {}

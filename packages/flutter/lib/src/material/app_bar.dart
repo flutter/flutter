@@ -91,7 +91,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows an [AppBar] with two simple actions. The first action
 /// opens a [SnackBar], while the second action navigates to a new page.
@@ -1262,7 +1262,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform_no_null_safety}
+/// {@tool dartpad --template=freeform}
 ///
 /// This sample shows a [SliverAppBar] and it's behaviors when using the [pinned], [snap] and [floating] parameters.
 ///
@@ -1274,7 +1274,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// void main() => runApp(MyApp());
 ///
 /// class MyApp extends StatefulWidget {
-///   const MyApp({Key key}) : super(key: key);
+///   const MyApp({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   State<StatefulWidget> createState() => _MyAppState();

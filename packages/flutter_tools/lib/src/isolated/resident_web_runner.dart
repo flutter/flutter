@@ -705,7 +705,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build(packagesPath: debuggingOptions.buildInfo.packagesPath);
+      final int result = await assetBundle.build(
+        packagesPath: debuggingOptions.buildInfo.packagesPath,
+        targetPlatform: TargetPlatform.web_javascript,
+      );
       if (result != 0) {
         return UpdateFSReport(success: false);
       }

@@ -18,9 +18,6 @@ import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'theme.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
 /// developers to be intentional about their [DefaultTextStyle].
 ///
@@ -591,7 +588,7 @@ class MaterialApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -624,7 +621,7 @@ class MaterialApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
