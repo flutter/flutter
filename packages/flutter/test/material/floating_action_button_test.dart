@@ -942,6 +942,38 @@ void main() {
       paints..circle(color: splashColor),
     );
   });
+
+  testWidgets('extended FAB does not show label when isExtended is false', (WidgetTester tester) async {
+    const Key iconKey = Key('icon');
+    const Key labelKey = Key('label');
+    const Icon icon = Icon(Icons.add, key: iconKey);
+    const Text label = Text('', key: labelKey);
+
+    bool didPressedTheIcon = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FloatingActionButton.extended(
+          isExtended: false,
+          label: label,
+          icon: icon,
+          onPressed: () {
+            didPressedTheIcon = true;
+          },
+        ),
+      ),
+    );
+
+    // Verify that Icon is present.
+    expect(didPressedTheIcon, false);
+    await tester.tap(find.byKey(iconKey));
+    await tester.pump();
+    expect(didPressedTheIcon, true);
+
+    // Verify that label is not present.
+    expect(find.byKey(labelKey), findsNothing);
+  });
 }
 
 Offset _rightEdgeOfFab(WidgetTester tester) {
