@@ -1131,6 +1131,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   void performRebuild() {
     super.performRebuild();
     _currentBeforeChild = null;
+    bool childrenUpdated = false;
     assert(_currentlyUpdatingChildIndex == null);
     try {
       final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
@@ -1141,9 +1142,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         if (_childElements[index] != null && _childElements[index] != newChildren[index]) {
           // This index has an old child that isn't used anywhere and should be deactivated.
           _childElements[index] = updateChild(_childElements[index], null, index);
+          childrenUpdated = true;
         }
         final Element? newChild = updateChild(newChildren[index], _build(index), index);
         if (newChild != null) {
+          childrenUpdated = childrenUpdated || _childElements[index] != newChild;
           _childElements[index] = newChild;
           final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
           if (index == 0) {
@@ -1154,6 +1157,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           if (!parentData.keptAlive)
             _currentBeforeChild = newChild.renderObject as RenderBox?;
         } else {
+          childrenUpdated = true;
           _childElements.remove(index);
         }
       }
@@ -1188,7 +1192,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       final int newLastIndex = _childElements.lastKey() ?? -1;
       // We don't worry about underflow if the last child is not longer at the
       // end of the child list.
-      if (_didUnderflow && newLastIndex >= oldLastIndex) {
+      if (!childrenUpdated && _didUnderflow) {
         final int lastKey = _childElements.lastKey() ?? -1;
         final int rightBoundary = lastKey + 1;
         newChildren[rightBoundary] = _childElements[rightBoundary];
