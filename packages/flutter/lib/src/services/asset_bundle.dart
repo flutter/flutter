@@ -64,16 +64,7 @@ abstract class AssetBundle {
   /// caller is going to be doing its own caching. (It might not be cached if
   /// it's set to true either, that depends on the asset bundle
   /// implementation.)
-  ///
-  /// If the `unzip` argument is set to true, it would first unzip file at the
-  /// specified location before retrieving the string content.
-  Future<String> loadString(
-    String key,
-    {
-      bool cache = true,
-      bool unzip = false,
-    }
-  ) async {
+  Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
     // Note: data has a non-nullable type, but might be null when running with
     // weak checking, so we need to null check it anyway (and ignore the warning
@@ -82,26 +73,15 @@ abstract class AssetBundle {
       throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
     // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
     // on a Pixel 4.
-    if (data.lengthInBytes < 50 * 1024 && !unzip) {
-      return _utf8Decode(data);
+    if (data.lengthInBytes < 50 * 1024) {
+      return utf8.decode(data.buffer.asUint8List());
     }
-
     // For strings larger than 50 KB, run the computation in an isolate to
     // avoid causing main thread jank.
-    return compute(
-      unzip ? _utf8ZipDecode : _utf8Decode,
-      data,
-      debugLabel: '${unzip ? "Unzip and ": ""}UTF8 decode for "$key"',
-    );
+    return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
   }
 
-  static String _utf8ZipDecode(ByteData data) {
-    List<int> bytes = data.buffer.asUint8List();
-    bytes = gzip.decode(bytes);
-    return utf8.decode(bytes);
-  }
-
-  static String _utf8Decode(ByteData data) {
+  static String _utf8decode(ByteData data) {
     return utf8.decode(data.buffer.asUint8List());
   }
 
@@ -183,10 +163,10 @@ abstract class CachingAssetBundle extends AssetBundle {
   final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
 
   @override
-  Future<String> loadString(String key, { bool cache = true, bool unzip = false }) {
+  Future<String> loadString(String key, { bool cache = true }) {
     if (cache)
-      return _stringCache.putIfAbsent(key, () => super.loadString(key, unzip: unzip));
-    return super.loadString(key, unzip: unzip);
+      return _stringCache.putIfAbsent(key, () => super.loadString(key));
+    return super.loadString(key);
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
