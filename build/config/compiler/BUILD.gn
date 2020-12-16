@@ -710,6 +710,17 @@ if (is_win) {
   if (allow_deprecated_api_calls) {
     default_warning_flags += [ "-Wno-deprecated-declarations" ]
   }
+
+  if (is_fuchsia) {
+    default_warning_flags += [
+      # Needed for compiling Skia with clang-12
+      "-Wno-psabi",
+
+      # Needed for compiling wuffs with clang-12. This can be removed
+      # once wuffs moves past version 00cc8a50.
+      "-Wno-non-c-typedef-for-linkage",
+    ]
+  }
 }
 
 # chromium_code ---------------------------------------------------------------
