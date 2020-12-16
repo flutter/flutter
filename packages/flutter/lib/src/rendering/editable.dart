@@ -289,6 +289,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     this.hasFocus = hasFocus ?? false;
 
     _selectionPainter.highlightColor = selectionColor;
+    _selectionPainter.highlightedRange = selection;
     _selectionPainter.selectionHeightStyle = selectionHeightStyle;
     _selectionPainter.selectionWidthStyle = selectionWidthStyle;
 
@@ -304,8 +305,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (onCaretChanged == null)
       _lastCaretRect = null;
 
-    setForegroundPainter(foregroundPainter);
-    setPainter(painter);
+    setForegroundPainter(foregroundPainter, force: true);
+    setPainter(painter, force: true);
   }
 
   /// Child model
@@ -313,8 +314,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderEditableCustomPaint? _backgroundRenderObject;
 
   RenderEditablePainter? _foregroundPainter;
-  void setForegroundPainter(RenderEditablePainter? newValue) {
-    if (newValue == _foregroundPainter)
+  void setForegroundPainter(RenderEditablePainter? newValue, { bool force = false }) {
+    if (!force && newValue == _foregroundPainter)
       return;
     final _CompositeRenderEditablePainter effectivePainter = newValue == null
       ? _builtinForegounrdPainters
@@ -335,8 +336,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   RenderEditablePainter? _painter;
-  void setPainter(RenderEditablePainter? newValue) {
-    if (newValue == _painter)
+  void setPainter(RenderEditablePainter? newValue, { bool force = false }) {
+    if (!force && newValue == _painter)
       return;
 
     final _CompositeRenderEditablePainter effectivePainter = newValue == null
@@ -367,7 +368,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _CompositeRenderEditablePainter? _cachedBuiltinForegroundPainters;
   _CompositeRenderEditablePainter _createBuiltinForegroundPainters() {
     return _CompositeRenderEditablePainter(
-      painters: <RenderEditablePainter>[if (paintCursorAboveText) _caretPainter],
+      painters: <RenderEditablePainter>[
+        if (paintCursorAboveText) _caretPainter,
+      ],
     );
   }
 
@@ -1222,6 +1225,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_selection == value)
       return;
     _selection = value;
+    _selectionPainter.highlightedRange = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -1579,6 +1583,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+    _foregroundRenderObject?.attach(owner);
+    _backgroundRenderObject?.attach(owner);
+
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap;
@@ -1596,6 +1603,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_listenerAttached)
       RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
+    _foregroundRenderObject?.detach();
+    _backgroundRenderObject?.detach();
+  }
+
+  @override
+  void redepthChildren() {
+    final RenderObject? foregroundChild = _foregroundRenderObject;
+    final RenderObject? backgroundChild = _backgroundRenderObject;
+    if (foregroundChild != null)
+      redepthChild(foregroundChild);
+    if (backgroundChild != null)
+      redepthChild(backgroundChild);
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    final RenderObject? foregroundChild = _foregroundRenderObject;
+    final RenderObject? backgroundChild = _backgroundRenderObject;
+    if (foregroundChild != null)
+      visitor(foregroundChild);
+    if (backgroundChild != null)
+      visitor(backgroundChild);
   }
 
   bool get _isMultiline => maxLines != 1;
@@ -2109,19 +2138,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  /// Computes the offset to apply to the given [floatingCursorRect] so it perfectly
-  /// snaps to physical pixels.
+  /// Computes the offset to apply to the given [floatingCursorRect] so it
+  /// perfectly snaps to physical pixels.
   Offset integralOffset(Offset sourceOffset) {
     final Offset globalOffset = localToGlobal(sourceOffset);
     final double pixelMultiple = 1.0 / _devicePixelRatio;
     return Offset(
       globalOffset.dx.isFinite
-        ? (globalOffset.dx / pixelMultiple).round() * pixelMultiple
-        : globalOffset.dx,
+        ? (globalOffset.dx / pixelMultiple).round() * pixelMultiple - globalOffset.dx
+        : 0,
       globalOffset.dy.isFinite
-        ? (globalOffset.dy / pixelMultiple).round() * pixelMultiple
-        : globalOffset.dy
-      ) - globalOffset + sourceOffset;
+        ? (globalOffset.dy / pixelMultiple).round() * pixelMultiple - globalOffset.dy
+        : 0,
+      );
   }
 
   @override
@@ -2362,6 +2391,11 @@ class _RenderEditableCustomPaint extends RenderCustomPaint {
     newValue?.renderEditable = parent;
     super.painter = newValue;
   }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    painter?.paint(context.canvas, Size.zero);
+  }
 }
 
 abstract class RenderEditablePainter extends ChangeNotifier implements CustomPainter {
@@ -2444,7 +2478,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
       return;
 
     highlightPaint.color = color;
-    final List<TextBox> boxes = renderEditable.getBoxesForSelection(
+    final List<TextBox> boxes = renderEditable._textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
       boxHeightStyle: selectionHeightStyle,
       boxWidthStyle: selectionWidthStyle
@@ -2568,8 +2602,9 @@ class _FloatingCursorPainter extends RenderEditablePainter {
       }
     }
 
-    final Rect integralRect = renderEditable!.integralOffset(caretRect.topLeft) & caretRect.size;
+    final Rect integralRect = caretRect.shift(renderEditable!.integralOffset(caretRect.topLeft));
     final Radius? radius = cursorRadius;
+    caretPaint.color = caretColor;
     if (radius == null) {
       canvas.drawRect(integralRect, caretPaint);
     } else {
