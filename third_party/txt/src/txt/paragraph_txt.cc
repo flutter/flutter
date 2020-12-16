@@ -807,6 +807,9 @@ void ParagraphTxt::Layout(double width) {
 
       std::shared_ptr<minikin::FontCollection> minikin_font_collection =
           GetMinikinFontCollectionForStyle(run.style());
+      if (!minikin_font_collection) {
+        return;
+      }
 
       // Lay out this run.
       uint16_t* text_ptr = text_.data();
