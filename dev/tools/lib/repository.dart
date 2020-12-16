@@ -273,6 +273,34 @@ class FrameworkRepository extends Repository {
           useExistingCheckout: useExistingCheckout,
         );
 
+  /// A [FrameworkRepository] with the host conductor's repo set as upstream.
+  ///
+  /// This is useful when testing a commit that has not been merged upstream
+  /// yet.
+  factory FrameworkRepository.hostRepoAsUpstream(
+    Checkouts checkouts, {
+    String name = 'framework',
+    bool localUpstream = false,
+    bool useExistingCheckout = false,
+  }) {
+    final Directory flutterRoot = checkouts
+        // flutter/dev/tools/checkouts
+        .directory
+        // flutter/dev/tools
+        .parent
+        // flutter/dev
+        .parent
+        // flutter
+        .parent;
+    return FrameworkRepository(
+      checkouts,
+      name: name,
+      upstream: 'file://${flutterRoot.path}/',
+      localUpstream: localUpstream,
+      useExistingCheckout: useExistingCheckout,
+    );
+  }
+
   final Checkouts checkouts;
   static const String defaultUpstream = 'https://github.com/flutter/flutter.git';
 

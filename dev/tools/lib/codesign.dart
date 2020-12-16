@@ -66,8 +66,7 @@ class CodesignCommand extends Command<void> {
   final Stdio stdio;
 
   FrameworkRepository _framework;
-  FrameworkRepository get framework =>
-      _framework ??= FrameworkRepository(checkouts, useExistingCheckout: true, upstream: argResults[kUpstream] as String);
+  FrameworkRepository get framework => _framework ??= FrameworkRepository.hostRepoAsUpstream(checkouts);
 
   @visibleForTesting
   set framework(FrameworkRepository framework) => _framework = framework;
