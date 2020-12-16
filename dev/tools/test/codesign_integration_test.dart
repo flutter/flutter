@@ -43,7 +43,8 @@ void main() {
       rethrow;
     }
   }, onPlatform: <String, dynamic>{
-    'windows': const Skip('Flutter Conductor only supported on macos/linux'),
+    'windows': const Skip('codesign command is only supported on macos'),
+    'linux': const Skip('codesign command is only supported on macos'),
   });
 }
 
