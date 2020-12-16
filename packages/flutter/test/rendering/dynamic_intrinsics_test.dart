@@ -60,6 +60,21 @@ class RenderIntrinsicSize extends RenderProxyBox {
   }
 }
 
+class RenderInvalidIntrinsics extends RenderBox {
+  @override
+  bool get sizedByParent => true;
+  @override
+  double computeMinIntrinsicWidth(double height) => -1;
+  @override
+  double computeMaxIntrinsicWidth(double height) => -1;
+  @override
+  double computeMinIntrinsicHeight(double width) => -1;
+  @override
+  double computeMaxIntrinsicHeight(double width) => -1;
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => const Size(0, 0);
+}
+
 void main() {
   test('Whether using intrinsics means you get hooked into layout', () {
     RenderBox root;
@@ -108,6 +123,20 @@ void main() {
     pumpFrame();
 
     _expectIntrinsicDimensions(parent, 200);
+  });
+
+  test('Intrinsic checks are turned on', () {
+    expect(() {
+      layout(
+        RenderInvalidIntrinsics(),
+        constraints: const BoxConstraints(
+          minWidth: 0.0,
+          minHeight: 0.0,
+          maxWidth: 1000.0,
+          maxHeight: 1000.0,
+        ),
+      );
+    }, throwsA(isA<TestFailure>()));
   });
 }
 
