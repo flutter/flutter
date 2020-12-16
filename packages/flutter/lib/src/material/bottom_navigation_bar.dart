@@ -492,6 +492,7 @@ class _BottomNavigationTile extends StatelessWidget {
         message: item.label!,
         preferBelow: false,
         verticalOffset: selectedIconSize + selectedFontSize,
+        excludeFromSemantics: true,
         child: result,
       );
     }
