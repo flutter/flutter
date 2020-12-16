@@ -376,14 +376,16 @@ class RenderTable extends RenderBox {
     ImageConfiguration configuration = ImageConfiguration.empty,
     TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
     TextBaseline? textBaseline,
+    List<List<RenderBox>>? children,
   }) : assert(columns == null || columns >= 0),
        assert(rows == null || rows >= 0),
+       assert(rows == null || children == null),
        assert(defaultColumnWidth != null),
        assert(textDirection != null),
        assert(configuration != null),
        _textDirection = textDirection,
-       _columns = columns ?? 0,
-       _rows = rows ?? 0,
+       _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0),
+       _rows = rows ?? (children != null ? children.length : 0),
        _columnWidths = columnWidths ?? HashMap<int, TableColumnWidth>(),
        _defaultColumnWidth = defaultColumnWidth,
        _border = border,
@@ -391,6 +393,13 @@ class RenderTable extends RenderBox {
        _defaultVerticalAlignment = defaultVerticalAlignment,
        _configuration = configuration {
     this.rowDecorations = rowDecorations; // must use setter to initialize box painters array
+    if (children != null) {
+      final List<RenderBox> allChildren = <RenderBox>[];
+      for (final List<RenderBox> rows in children)
+        rows.forEach(allChildren.add);
+
+      allChildren.reversed.forEach(insertChild);
+    }
   }
 
   // Children are stored in row-major order.
@@ -398,12 +407,28 @@ class RenderTable extends RenderBox {
   final List<RenderBox?> _children = <RenderBox?>[];
 
   /// The number of vertical alignment lines in this table.
+  ///
+  /// This can be updated by [setDimensions] after updating children is finish.
   int get columns => _columns;
   int _columns;
 
   /// The number of horizontal alignment lines in this table.
+  ///
+  /// This can be update by [setDimensions] after updating children is finish.
   int get rows => _rows;
   int _rows;
+
+  /// Update the number of row and column of this table.
+  ///
+  /// This method should be called after updating children is finish.
+  void setDimensions(int rows, int columns) {
+    assert(_children.length == rows * columns);
+    if (rows == _rows && columns == _columns)
+      return;
+    _columns = columns;
+    _rows = rows;
+    markNeedsLayout();
+  }
 
   /// How the horizontal extents of the columns of this table should be determined.
   ///
@@ -536,9 +561,10 @@ class RenderTable extends RenderBox {
   /// Insert child into this render object's child list after the given child.
   ///
   /// If `after` is null, then this inserts the child at the start of the list.
-  void insertChild(RenderBox? child, { RenderBox? after }) {
-    if (child != null)
-      adoptChild(child);
+  /// Children are stored in row-major order, you should call [setDimensions]
+  /// after updating children is finish to set the table dimensions.
+  void insertChild(RenderBox child, { RenderBox? after }) {
+    adoptChild(child);
     if (after == null) {
       // insert at the start.
       _children.insert(0, child);
@@ -546,14 +572,6 @@ class RenderTable extends RenderBox {
       assert(_children.contains(after));
       _children.insert(_children.indexOf(after) + 1, child);
     }
-  }
-
-  /// Update the number of row and column of this table.
-  void updateInfo(int rows, int columns) {
-    assert(_children.length == rows * columns);
-    _columns = columns;
-    _rows = rows;
-    markNeedsLayout();
   }
 
   /// Move the given `child` in the child list to be after another child.

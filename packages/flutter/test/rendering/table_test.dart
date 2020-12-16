@@ -57,7 +57,7 @@ void main() {
       preChild = child;
     }
 
-    table.updateInfo(1, 6);
+    table.setDimensions(1, 6);
 
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
 
@@ -79,21 +79,21 @@ void main() {
 
     expect(table.size, equals(const Size(0.0, 0.0)));
 
-    table.insertChild(null);
-    table.insertChild(null);
+    table.insertChild(RenderPositionedBox());
+    table.insertChild(RenderPositionedBox());
     table.insertChild(sizedBox(100.0, 200.0));
-    table.updateInfo(1, 3);
+    table.setDimensions(1, 3);
     pumpFrame();
 
     expect(table.size, equals(const Size(100.0, 200.0)));
 
     for (int index = 0; index < 19; index++)
-      table.insertChild(null);
+      table.insertChild(RenderPositionedBox());
 
     table.insertChild(sizedBox(30.0, 10.0));
     table.insertChild(sizedBox(20.0, 20.0));
     table.insertChild(sizedBox(10.0, 30.0));
-    table.updateInfo(5, 5);
+    table.setDimensions(5, 5);
     pumpFrame();
 
     expect(table.size, equals(const Size(130.0, 230.0)));
@@ -132,25 +132,177 @@ void main() {
         ' │   size: Size(100.0, 10.0)\n'
         ' │   additionalConstraints: BoxConstraints(w=30.0, h=10.0)\n'
         ' │\n'
-        ' ├─child (3, 0) is null\n'
-        ' ├─child (4, 0) is null\n'
-        ' ├─child (0, 1) is null\n'
-        ' ├─child (1, 1) is null\n'
-        ' ├─child (2, 1) is null\n'
-        ' ├─child (3, 1) is null\n'
-        ' ├─child (4, 1) is null\n'
-        ' ├─child (0, 2) is null\n'
-        ' ├─child (1, 2) is null\n'
-        ' ├─child (2, 2) is null\n'
-        ' ├─child (3, 2) is null\n'
-        ' ├─child (4, 2) is null\n'
-        ' ├─child (0, 3) is null\n'
-        ' ├─child (1, 3) is null\n'
-        ' ├─child (2, 3) is null\n'
-        ' ├─child (3, 3) is null\n'
-        ' ├─child (4, 3) is null\n'
-        ' ├─child (0, 4) is null\n'
-        ' ├─child (1, 4) is null\n'
+        ' ├─child (3, 0): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 0.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (4, 0): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 0.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (0, 1): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(0.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=10.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(10.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (1, 1): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(10.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=20.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(20.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (2, 1): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(30.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(100.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (3, 1): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 30.0); default vertical\n'
+        ' │     alignment (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (4, 1): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 30.0); default vertical\n'
+        ' │     alignment (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (0, 2): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(0.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=10.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(10.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (1, 2): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(10.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=20.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(20.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (2, 2): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(30.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(100.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (3, 2): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 30.0); default vertical\n'
+        ' │     alignment (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (4, 2): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 30.0); default vertical\n'
+        ' │     alignment (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (0, 3): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(0.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=10.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(10.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (1, 3): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(10.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=20.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(20.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (2, 3): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(30.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(100.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (3, 3): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 30.0); default vertical\n'
+        ' │     alignment (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (4, 3): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 30.0); default vertical\n'
+        ' │     alignment (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (0, 4): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(0.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=10.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(10.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' ├─child (1, 4): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(10.0, 30.0); default vertical alignment\n'
+        ' │     (can use size)\n'
+        ' │   constraints: BoxConstraints(w=20.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(20.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
         ' ├─child (2, 4): RenderConstrainedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
         ' │   parentData: offset=Offset(30.0, 30.0); default vertical alignment\n'
         ' │     (can use size)\n'
@@ -158,8 +310,23 @@ void main() {
         ' │   size: Size(100.0, 200.0)\n'
         ' │   additionalConstraints: BoxConstraints(w=100.0, h=200.0)\n'
         ' │\n'
-        ' ├─child (3, 4) is null\n'
-        ' └─child (4, 4) is null\n',
+        ' ├─child (3, 4): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        ' │   parentData: offset=Offset(130.0, 30.0); default vertical\n'
+        ' │     alignment (can use size)\n'
+        ' │   constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        ' │   size: Size(0.0, 0.0)\n'
+        ' │   alignment: Alignment.center\n'
+        ' │   widthFactor: expand\n'
+        ' │   heightFactor: expand\n'
+        ' │\n'
+        ' └─child (4, 4): RenderPositionedBox#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        '     parentData: offset=Offset(130.0, 30.0); default vertical\n'
+        '       alignment (can use size)\n'
+        '     constraints: BoxConstraints(w=0.0, 0.0<=h<=Infinity)\n'
+        '     size: Size(0.0, 0.0)\n'
+        '     alignment: Alignment.center\n'
+        '     widthFactor: expand\n'
+        '     heightFactor: expand\n'
       ),
     );
   });
@@ -176,7 +343,7 @@ void main() {
       if (index == 0) {
         table.insertChild(child);
       } else {
-        table.insertChild(null);
+        table.insertChild(RenderPositionedBox());
       }
     }
 
@@ -205,7 +372,7 @@ void main() {
     table.insertChild(child5, after: child2);
     table.insertChild(child6, after: child3);
 
-    table.updateInfo(2, 3);
+    table.setDimensions(2, 3);
 
     expect(table.rows, equals(2));
     layout(table);
@@ -232,28 +399,28 @@ void main() {
       border: TableBorder.all(),
     );
     layout(table);
-    table.updateInfo(0, 0);
+    table.setDimensions(0, 0);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path());
     table.insertChild(RenderPositionedBox());
-    table.updateInfo(1, 1);
+    table.setDimensions(1, 1);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path());
     table.insertChild(RenderPositionedBox());
-    table.updateInfo(2, 1);
+    table.setDimensions(2, 1);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path());
-    table.updateInfo(1, 2);
+    table.setDimensions(1, 2);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path());
     table.insertChild(RenderPositionedBox());
     table.insertChild(RenderPositionedBox());
-    table.updateInfo(2, 2);
+    table.setDimensions(2, 2);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
     table.insertChild(RenderPositionedBox());
     table.insertChild(RenderPositionedBox());
-    table.updateInfo(2, 3);
+    table.setDimensions(2, 3);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
   });
@@ -263,6 +430,12 @@ void main() {
         BoxConstraints.tightFor(width: 100, height: 100);
     final RenderTable table = RenderTable(
       textDirection: TextDirection.rtl,
+      children: <List<RenderBox>>[
+        List<RenderBox>.generate(
+          7,
+          (int _) => RenderConstrainedBox(additionalConstraints: cellConstraints),
+        ),
+      ],
       columnWidths: const <int, TableColumnWidth>{
         0: FlexColumnWidth(1.0),
         1: FlexColumnWidth(0.123),
@@ -273,10 +446,6 @@ void main() {
         6: FlexColumnWidth(0.123),
       },
     );
-
-    for (int index = 0; index < 7; index++)
-      table.insertChild(RenderConstrainedBox(additionalConstraints: cellConstraints));
-    table.updateInfo(1, 7);
 
     layout(table, constraints: BoxConstraints.tight(const Size(800.0, 600.0)));
     expect(table.hasSize, true);

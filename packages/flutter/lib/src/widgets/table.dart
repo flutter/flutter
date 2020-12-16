@@ -375,7 +375,6 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
-    renderObject.setupParentData(child);
     renderObject.insertChild(child as RenderBox, after: slot.value?.renderObject as RenderBox?);
   }
 
@@ -400,8 +399,6 @@ class _TableElement extends RenderObjectElement {
       }
     }
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
-    final List<_TableElementRow> newChildren = <_TableElementRow>[];
-    final Set<List<Element>> taken = <List<Element>>{};
 
     final List<Element> allOldChildren = <Element>[];
     final List<Widget> allNewChildren = <Widget>[];
@@ -410,7 +407,7 @@ class _TableElement extends RenderObjectElement {
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
         oldChildren = oldKeyedRows[row.key]!;
-        taken.add(oldChildren);
+        oldKeyedRows.remove(row.key);
       } else if (oldUnkeyedRows.moveNext()) {
         oldChildren = oldUnkeyedRows.current.children;
       } else {
@@ -422,7 +419,7 @@ class _TableElement extends RenderObjectElement {
     }
     while (oldUnkeyedRows.moveNext())
       allOldChildren.addAll(oldUnkeyedRows.current.children);
-    oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)).forEach(allOldChildren.addAll);
+    oldKeyedRows.values.forEach(allOldChildren.addAll);
 
     final List<Element> updatedChildren = updateChildren(allOldChildren, allNewChildren, forgottenChildren: _forgottenChildren);
 
@@ -432,24 +429,19 @@ class _TableElement extends RenderObjectElement {
     final int rows = newWidget.children.length;
     assert(columns * rows == updatedChildren.length);
 
-    int rowIndex = 0;
-    for (final TableRow row in newWidget.children) {
+    final List<_TableElementRow> newChildren = <_TableElementRow>[];
+    for (int row = 0; row < rows; row++) {
       newChildren.add(_TableElementRow(
-        key: row.key,
-        children: updatedChildren.getRange(rowIndex * columns, rowIndex * columns + columns).toList(),
+        key: newWidget.children[row].key,
+        children: updatedChildren.getRange(row * columns, row * columns + columns).toList(),
       ));
-      rowIndex++;
     }
 
     _children = newChildren;
-    _updateRenderObjectInfo(rows, columns);
+    renderObject.setDimensions(rows, columns);
     _forgottenChildren.clear();
     super.update(newWidget);
     assert(widget == newWidget);
-  }
-
-  void _updateRenderObjectInfo(int rows, int columns) {
-    renderObject.updateInfo(rows, columns);
   }
 
   @override
