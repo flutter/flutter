@@ -11,6 +11,15 @@ import 'package:flutter/gestures.dart';
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
+// TODO(justinmc): Rename to ArrowLeftKeyUpTextIntent.
+class ArrowLeftTextIntent extends Intent {
+  const ArrowLeftTextIntent({
+    required this.renderEditable,
+  });
+
+  final RenderEditable renderEditable;
+}
+
 class DoubleTapDownTextIntent extends Intent {
   const DoubleTapDownTextIntent();
 }
@@ -88,6 +97,7 @@ class TextEditingActionsMap {
     _map ??= <Type, Action<Intent>>{
       SingleTapUpTextIntent: singleTapUpTextAction,
       TapDownTextIntent: tapDownTextAction,
+      ArrowLeftTextIntent: arrowLeftTextAction,
     };
     return _map!;
   }
@@ -166,6 +176,17 @@ class TextEditingActionsMap {
       },
     );
     return _tapDownTextAction!;
+  }
+
+  CallbackAction<ArrowLeftTextIntent>? _arrowLeftTextAction;
+  CallbackAction<ArrowLeftTextIntent> get arrowLeftTextAction {
+    _arrowLeftTextAction ??= CallbackAction<ArrowLeftTextIntent>(
+      onInvoke: (ArrowLeftTextIntent intent) {
+        print('justin arrow left intent handler');
+        intent.renderEditable.moveSelectionLeft();
+      }
+    );
+    return _arrowLeftTextAction!;
   }
 }
 

@@ -616,12 +616,45 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return 0;
   }
 
+  // TODO(justinmc): Definitely need a generic or more organized way to handle
+  // these directional movements.
+  void moveSelectionLeft() {
+    TextSelection newSelection = selection!;
+    if (newSelection.extentOffset <= 0) {
+      return;
+    }
+
+    int previousExtent;
+    if (newSelection.start != newSelection.end) {
+      previousExtent = newSelection.start;
+    } else {
+      previousExtent = previousCharacter(newSelection.extentOffset, _plainText);
+    }
+    final int distance = newSelection.extentOffset - previousExtent;
+    newSelection = newSelection.copyWith(extentOffset: previousExtent);
+    _cursorResetLocation -= distance;
+
+    // Just place the collapsed selection at the end or beginning of the region
+    // if shift isn't down.
+    // We want to put the cursor at the correct location depending on which
+    // arrow is used while there is a selection.
+    final int newOffset = newSelection.extentOffset;
+    newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
+
+    _handleSelectionChange(
+      newSelection,
+      SelectionChangedCause.keyboard,
+    );
+    // Update the text selection delegate so that the engine knows what we did.
+    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
+  }
+
   void _handleMovement(
     LogicalKeyboardKey key, {
     required bool wordModifier,
     required bool lineModifier,
     required bool shift,
-  }){
+  }) {
     if (wordModifier && lineModifier) {
       // If both modifiers are down, nothing happens on any of the platforms.
       return;
@@ -693,6 +726,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
             _cursorResetLocation += distance;
           }
         } else if (leftArrow && newSelection.extentOffset > 0) {
+          // TODO(justinmc): This has been moved to _moveselectionleft above.
+          // How can I handle all of this movement key stuff nicely? Currently I might have some modifier key stuff messed up and removed.
+          // How can I write _moveselectionleft so that it makese sense independent of being what the left key does?
+          print('justin old left arrow handler');
+          // TODO(justinmc): This should be invoked regardless of extentOffset.
+          // Actually, do it in editable text if you can?
+          /*
           int previousExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
             previousExtent = newSelection.start;
@@ -704,6 +744,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           if (shift) {
             _cursorResetLocation -= distance;
           }
+          */
         }
       }
     }

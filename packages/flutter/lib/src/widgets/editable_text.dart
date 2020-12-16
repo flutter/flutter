@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -1550,11 +1551,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
+  void _rawKeyboardListener(RawKeyEvent keyEvent) {
+    if (keyEvent.logicalKey != LogicalKeyboardKey.arrowLeft) {
+      return;
+    }
+
+    final bool isMacOS = keyEvent.data is RawKeyEventDataMacOs;
+    final bool isWordModifierPressed = isMacOS ? keyEvent.isAltPressed : keyEvent.isControlPressed;
+    final bool isLineModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isAltPressed;
+    final bool isShortcutModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
+
+    if (isWordModifierPressed || isLineModifierPressed || isShortcutModifierPressed) {
+      return;
+    }
+
+    Actions.invoke<ArrowLeftTextIntent>(
+      context,
+      ArrowLeftTextIntent(renderEditable: renderEditable),
+      nullOk: true,
+    );
+  }
+
   // State lifecycle:
 
   @override
   void initState() {
     super.initState();
+    RawKeyboard.instance.addListener(_rawKeyboardListener);
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
@@ -1646,6 +1669,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
+    RawKeyboard.instance.removeListener(_rawKeyboardListener);
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
     _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
