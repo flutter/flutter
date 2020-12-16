@@ -16,15 +16,23 @@
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// The current information about a pointer. This struct is used by
-/// PointerDataPacketConverter to fill in necesarry information for raw pointer
-/// packet sent from embedding.
+/// The current information about a pointer.
+///
+/// This struct is used by PointerDataPacketConverter to fill in necessary
+/// information for the raw pointer packet sent from embedding. This struct also
+/// stores the button state of the last pointer down, up, move, or hover event.
+/// When an embedder issues a pointer up or down event where the pointer's
+/// position has changed since the last move or hover event,
+/// PointerDataPacketConverter generates a synthetic move or hover to notify the
+/// framework. In these cases, these events must be issued with the button state
+/// prior to the pointer up or down.
 ///
 struct PointerState {
   int64_t pointer_identifier;
   bool isDown;
   double physical_x;
   double physical_y;
+  int64_t buttons;
 };
 
 //------------------------------------------------------------------------------

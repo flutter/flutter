@@ -15,7 +15,8 @@ void CreateSimulatedPointerData(PointerData& data,  // NOLINT
                                 PointerData::Change change,
                                 int64_t device,
                                 double dx,
-                                double dy) {
+                                double dy,
+                                int64_t buttons) {
   data.time_stamp = 0;
   data.change = change;
   data.kind = PointerData::DeviceKind::kTouch;
@@ -26,7 +27,7 @@ void CreateSimulatedPointerData(PointerData& data,  // NOLINT
   data.physical_y = dy;
   data.physical_delta_x = 0.0;
   data.physical_delta_y = 0.0;
-  data.buttons = 0;
+  data.buttons = buttons;
   data.obscured = 0;
   data.synthesized = 0;
   data.pressure = 0.0;
@@ -53,7 +54,8 @@ void CreateSimulatedMousePointerData(PointerData& data,  // NOLINT
                                      double dx,
                                      double dy,
                                      double scroll_delta_x,
-                                     double scroll_delta_y) {
+                                     double scroll_delta_y,
+                                     int64_t buttons) {
   data.time_stamp = 0;
   data.change = change;
   data.kind = PointerData::DeviceKind::kMouse;
@@ -64,7 +66,7 @@ void CreateSimulatedMousePointerData(PointerData& data,  // NOLINT
   data.physical_y = dy;
   data.physical_delta_x = 0.0;
   data.physical_delta_y = 0.0;
-  data.buttons = 0;
+  data.buttons = buttons;
   data.obscured = 0;
   data.synthesized = 0;
   data.pressure = 0.0;
@@ -103,17 +105,18 @@ TEST(PointerDataPacketConverterTest, CanConvetPointerDataPacket) {
   PointerDataPacketConverter converter;
   auto packet = std::make_unique<PointerDataPacket>(6);
   PointerData data;
-  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kHover, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kHover, 0, 3.0, 0.0, 0);
   packet->SetPointerData(1, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 3.0, 0.0, 1);
   packet->SetPointerData(2, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
   packet->SetPointerData(3, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0, 0);
   packet->SetPointerData(4, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0,
+                             0);
   packet->SetPointerData(5, data);
   auto converted_packet = converter.Convert(std::move(packet));
 
@@ -151,13 +154,14 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeDownAndUp) {
   PointerDataPacketConverter converter;
   auto packet = std::make_unique<PointerDataPacket>(4);
   PointerData data;
-  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 3.0, 0.0, 1);
   packet->SetPointerData(1, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0, 0);
   packet->SetPointerData(2, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0,
+                             0);
   packet->SetPointerData(3, data);
   auto converted_packet = converter.Convert(std::move(packet));
 
@@ -173,10 +177,12 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeDownAndUp) {
   ASSERT_EQ(result[1].synthesized, 1);
   ASSERT_EQ(result[1].physical_delta_x, 3.0);
   ASSERT_EQ(result[1].physical_delta_y, 0.0);
+  ASSERT_EQ(result[1].buttons, 0);
 
   ASSERT_EQ(result[2].change, PointerData::Change::kDown);
   ASSERT_EQ(result[2].pointer_identifier, 1);
   ASSERT_EQ(result[2].synthesized, 0);
+  ASSERT_EQ(result[2].buttons, 1);
 
   // A move should be synthesized.
   ASSERT_EQ(result[3].change, PointerData::Change::kMove);
@@ -184,10 +190,12 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeDownAndUp) {
   ASSERT_EQ(result[3].synthesized, 1);
   ASSERT_EQ(result[3].physical_delta_x, 0.0);
   ASSERT_EQ(result[3].physical_delta_y, 4.0);
+  ASSERT_EQ(result[3].buttons, 1);
 
   ASSERT_EQ(result[4].change, PointerData::Change::kUp);
   ASSERT_EQ(result[4].pointer_identifier, 1);
   ASSERT_EQ(result[4].synthesized, 0);
+  ASSERT_EQ(result[4].buttons, 0);
 
   ASSERT_EQ(result[5].change, PointerData::Change::kRemove);
   ASSERT_EQ(result[5].synthesized, 0);
@@ -197,19 +205,20 @@ TEST(PointerDataPacketConverterTest, CanUpdatePointerIdentifier) {
   PointerDataPacketConverter converter;
   auto packet = std::make_unique<PointerDataPacket>(7);
   PointerData data;
-  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
   packet->SetPointerData(1, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0, 0);
   packet->SetPointerData(2, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
   packet->SetPointerData(3, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 0.0, 1);
   packet->SetPointerData(4, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 0.0, 0);
   packet->SetPointerData(5, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 0.0,
+                             0);
   packet->SetPointerData(6, data);
   auto converted_packet = converter.Convert(std::move(packet));
 
@@ -251,14 +260,14 @@ TEST(PointerDataPacketConverterTest, AlwaysForwardMoveEvent) {
   PointerDataPacketConverter converter;
   auto packet = std::make_unique<PointerDataPacket>(4);
   PointerData data;
-  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
   packet->SetPointerData(1, data);
   // Creates a move event without a location change.
-  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 0.0, 0.0, 1);
   packet->SetPointerData(2, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0, 0);
   packet->SetPointerData(3, data);
 
   auto converted_packet = converter.Convert(std::move(packet));
@@ -288,29 +297,31 @@ TEST(PointerDataPacketConverterTest, CanWorkWithDifferentDevices) {
   PointerDataPacketConverter converter;
   auto packet = std::make_unique<PointerDataPacket>(12);
   PointerData data;
-  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
   packet->SetPointerData(1, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 1, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 1, 0.0, 0.0, 0);
   packet->SetPointerData(2, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 1, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 1, 0.0, 0.0, 1);
   packet->SetPointerData(3, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0, 0);
   packet->SetPointerData(4, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
   packet->SetPointerData(5, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kMove, 1, 0.0, 4.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 1, 0.0, 4.0, 1);
   packet->SetPointerData(6, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 0.0, 1);
   packet->SetPointerData(7, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 1, 0.0, 4.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 1, 0.0, 4.0, 0);
   packet->SetPointerData(8, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 0.0, 0);
   packet->SetPointerData(9, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 0.0,
+                             0);
   packet->SetPointerData(10, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 1, 0.0, 4.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 1, 0.0, 4.0,
+                             0);
   packet->SetPointerData(11, data);
   auto converted_packet = converter.Convert(std::move(packet));
 
@@ -383,9 +394,10 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeAdd) {
   PointerDataPacketConverter converter;
   auto packet = std::make_unique<PointerDataPacket>(2);
   PointerData data;
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 330.0, 450.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 330.0, 450.0,
+                             1);
   packet->SetPointerData(0, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0, 0);
   packet->SetPointerData(1, data);
   auto converted_packet = converter.Convert(std::move(packet));
 
@@ -398,11 +410,13 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeAdd) {
   ASSERT_EQ(result[0].physical_x, 330.0);
   ASSERT_EQ(result[0].physical_y, 450.0);
   ASSERT_EQ(result[0].synthesized, 1);
+  ASSERT_EQ(result[0].buttons, 0);
 
   ASSERT_EQ(result[1].change, PointerData::Change::kDown);
   ASSERT_EQ(result[1].physical_x, 330.0);
   ASSERT_EQ(result[1].physical_y, 450.0);
   ASSERT_EQ(result[1].synthesized, 0);
+  ASSERT_EQ(result[1].buttons, 1);
 
   // A move should be synthesized.
   ASSERT_EQ(result[2].change, PointerData::Change::kMove);
@@ -411,11 +425,13 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeAdd) {
   ASSERT_EQ(result[2].physical_x, 0.0);
   ASSERT_EQ(result[2].physical_y, 0.0);
   ASSERT_EQ(result[2].synthesized, 1);
+  ASSERT_EQ(result[2].buttons, 1);
 
   ASSERT_EQ(result[3].change, PointerData::Change::kUp);
   ASSERT_EQ(result[3].physical_x, 0.0);
   ASSERT_EQ(result[3].physical_y, 0.0);
   ASSERT_EQ(result[3].synthesized, 0);
+  ASSERT_EQ(result[3].buttons, 0);
 }
 
 TEST(PointerDataPacketConverterTest, CanHandleThreeFingerGesture) {
@@ -425,23 +441,27 @@ TEST(PointerDataPacketConverterTest, CanHandleThreeFingerGesture) {
   std::vector<PointerData> result;
   // First finger down.
   auto packet = std::make_unique<PointerDataPacket>(1);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
   packet->SetPointerData(0, data);
   auto converted_packet = converter.Convert(std::move(packet));
   UnpackPointerPacket(result, std::move(converted_packet));
   // Second finger down.
   packet = std::make_unique<PointerDataPacket>(1);
-  CreateSimulatedPointerData(data, PointerData::Change::kDown, 1, 33.0, 44.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 1, 33.0, 44.0,
+                             1);
   packet->SetPointerData(0, data);
   converted_packet = converter.Convert(std::move(packet));
   UnpackPointerPacket(result, std::move(converted_packet));
   // Triggers three cancels.
   packet = std::make_unique<PointerDataPacket>(3);
-  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 1, 33.0, 44.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 1, 33.0, 44.0,
+                             0);
   packet->SetPointerData(0, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 0.0, 0.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 0.0, 0.0,
+                             0);
   packet->SetPointerData(1, data);
-  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 2, 40.0, 50.0);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 2, 40.0, 50.0,
+                             0);
   packet->SetPointerData(2, data);
   converted_packet = converter.Convert(std::move(packet));
   UnpackPointerPacket(result, std::move(converted_packet));
@@ -452,24 +472,28 @@ TEST(PointerDataPacketConverterTest, CanHandleThreeFingerGesture) {
   ASSERT_EQ(result[0].physical_x, 0.0);
   ASSERT_EQ(result[0].physical_y, 0.0);
   ASSERT_EQ(result[0].synthesized, 1);
+  ASSERT_EQ(result[0].buttons, 0);
 
   ASSERT_EQ(result[1].change, PointerData::Change::kDown);
   ASSERT_EQ(result[1].device, 0);
   ASSERT_EQ(result[1].physical_x, 0.0);
   ASSERT_EQ(result[1].physical_y, 0.0);
   ASSERT_EQ(result[1].synthesized, 0);
+  ASSERT_EQ(result[1].buttons, 1);
 
   ASSERT_EQ(result[2].change, PointerData::Change::kAdd);
   ASSERT_EQ(result[2].device, 1);
   ASSERT_EQ(result[2].physical_x, 33.0);
   ASSERT_EQ(result[2].physical_y, 44.0);
   ASSERT_EQ(result[2].synthesized, 1);
+  ASSERT_EQ(result[2].buttons, 0);
 
   ASSERT_EQ(result[3].change, PointerData::Change::kDown);
   ASSERT_EQ(result[3].device, 1);
   ASSERT_EQ(result[3].physical_x, 33.0);
   ASSERT_EQ(result[3].physical_y, 44.0);
   ASSERT_EQ(result[3].synthesized, 0);
+  ASSERT_EQ(result[3].buttons, 1);
 
   ASSERT_EQ(result[4].change, PointerData::Change::kCancel);
   ASSERT_EQ(result[4].device, 1);
@@ -491,23 +515,23 @@ TEST(PointerDataPacketConverterTest, CanConvetScroll) {
   PointerData data;
   CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
                                   PointerData::SignalKind::kNone, 0, 0.0, 0.0,
-                                  0.0, 0.0);
+                                  0.0, 0.0, 0);
   packet->SetPointerData(0, data);
   CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
                                   PointerData::SignalKind::kNone, 1, 0.0, 0.0,
-                                  0.0, 0.0);
+                                  0.0, 0.0, 0);
   packet->SetPointerData(1, data);
   CreateSimulatedMousePointerData(data, PointerData::Change::kDown,
                                   PointerData::SignalKind::kNone, 1, 0.0, 0.0,
-                                  0.0, 0.0);
+                                  0.0, 0.0, 1);
   packet->SetPointerData(2, data);
   CreateSimulatedMousePointerData(data, PointerData::Change::kHover,
                                   PointerData::SignalKind::kScroll, 0, 34.0,
-                                  34.0, 30.0, 0.0);
+                                  34.0, 30.0, 0.0, 0);
   packet->SetPointerData(3, data);
   CreateSimulatedMousePointerData(data, PointerData::Change::kHover,
                                   PointerData::SignalKind::kScroll, 1, 49.0,
-                                  49.0, 50.0, 0.0);
+                                  49.0, 50.0, 0.0, 0);
   packet->SetPointerData(4, data);
   auto converted_packet = converter.Convert(std::move(packet));
 
@@ -536,7 +560,7 @@ TEST(PointerDataPacketConverterTest, CanConvetScroll) {
   ASSERT_EQ(result[2].physical_y, 0.0);
   ASSERT_EQ(result[2].synthesized, 0);
 
-  // Converter will synthesize a hover to position.
+  // Converter will synthesize a hover to position for device 0.
   ASSERT_EQ(result[3].change, PointerData::Change::kHover);
   ASSERT_EQ(result[3].signal_kind, PointerData::SignalKind::kNone);
   ASSERT_EQ(result[3].device, 0);
@@ -544,6 +568,7 @@ TEST(PointerDataPacketConverterTest, CanConvetScroll) {
   ASSERT_EQ(result[3].physical_y, 34.0);
   ASSERT_EQ(result[3].physical_delta_x, 34.0);
   ASSERT_EQ(result[3].physical_delta_y, 34.0);
+  ASSERT_EQ(result[3].buttons, 0);
   ASSERT_EQ(result[3].synthesized, 1);
 
   ASSERT_EQ(result[4].change, PointerData::Change::kHover);
@@ -554,7 +579,7 @@ TEST(PointerDataPacketConverterTest, CanConvetScroll) {
   ASSERT_EQ(result[4].scroll_delta_x, 30.0);
   ASSERT_EQ(result[4].scroll_delta_y, 0.0);
 
-  // Converter will synthesize a move to position.
+  // Converter will synthesize a move to position for device 1.
   ASSERT_EQ(result[5].change, PointerData::Change::kMove);
   ASSERT_EQ(result[5].signal_kind, PointerData::SignalKind::kNone);
   ASSERT_EQ(result[5].device, 1);
@@ -562,6 +587,7 @@ TEST(PointerDataPacketConverterTest, CanConvetScroll) {
   ASSERT_EQ(result[5].physical_y, 49.0);
   ASSERT_EQ(result[5].physical_delta_x, 49.0);
   ASSERT_EQ(result[5].physical_delta_y, 49.0);
+  ASSERT_EQ(result[5].buttons, 1);
   ASSERT_EQ(result[5].synthesized, 1);
 
   ASSERT_EQ(result[6].change, PointerData::Change::kHover);
