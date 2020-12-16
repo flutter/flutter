@@ -20,7 +20,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
 /// A Material Design scrollbar.
 ///
-/// To add a scrollbar thumb to a [ScrollView], simply wrap the scroll view
+/// To add a scrollbar to a [ScrollView], simply wrap the scroll view
 /// widget in a [Scrollbar] widget.
 ///
 /// {@macro flutter.widgets.Scrollbar}
@@ -53,7 +53,7 @@ class Scrollbar extends RawScrollbar {
   /// When null, [thickness] defaults to 8.0 pixels on desktop and web, and 4.0
   /// pixels when on mobile platforms. A null [radius] will result in a default
   /// of an 8.0 pixel circular radius about the corners of the scrollbar thumb,
-  /// except for when executing on the Android platform, which will render the
+  /// except for when executing on [TargetPlatform.android], which will render the
   /// thumb without a radius.
   const Scrollbar({
     Key? key,
