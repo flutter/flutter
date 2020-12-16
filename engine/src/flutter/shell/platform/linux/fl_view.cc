@@ -332,9 +332,9 @@ static gboolean fl_view_scroll_event(GtkWidget* widget, GdkEventScroll* event) {
     return FALSE;
   }
 
-  // TODO(robert-ancell): See if this can be queried from the OS; this value is
-  // chosen arbitrarily to get something that feels reasonable.
-  const int kScrollOffsetMultiplier = 20;
+  // The multiplier is taken from the Chromium source
+  // (ui/events/x/events_x_utils.cc).
+  const int kScrollOffsetMultiplier = 53;
   scroll_delta_x *= kScrollOffsetMultiplier;
   scroll_delta_y *= kScrollOffsetMultiplier;
 
