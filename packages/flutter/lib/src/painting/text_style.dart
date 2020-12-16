@@ -25,6 +25,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 const double _kDefaultFontSize = 14.0;
 
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 /// An immutable style describing how to format and paint text.

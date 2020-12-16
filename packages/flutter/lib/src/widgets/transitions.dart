@@ -25,7 +25,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
 /// use [AnimatedWidget], simply subclass it and implement the build function.
 ///
-///{@tool dartpad --template=stateful_widget_material_ticker}
+///{@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedWidget].
@@ -195,7 +195,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state_no_null_safety}
 /// The following code implements the [SlideTransition] as seen in the video
 /// above:
 ///
@@ -313,7 +313,7 @@ class SlideTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// The following code implements the [ScaleTransition] as seen in the video
 /// above:
@@ -416,7 +416,7 @@ class ScaleTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.elasticOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/rotation_transition.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// The following code implements the [RotationTransition] as seen in the video
 /// above:
@@ -525,7 +525,7 @@ class RotationTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/size_transition.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// This code defines a widget that uses [SizeTransition] to change the size
 /// of [FlutterLogo] continually. It is built with a [Scaffold]
@@ -658,7 +658,7 @@ class SizeTransition extends AnimatedWidget {
 /// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// The following code implements the [FadeTransition] using
 /// the Flutter logo:
@@ -762,7 +762,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 
 /// Animates the opacity of a sliver widget.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state_no_null_safety}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] that uses a
 /// [SliverFadeTransition] to fade the list in and out.
 ///
@@ -904,7 +904,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/positioned_transition.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// The following code implements the [PositionedTransition] as seen in the video
 /// above:
@@ -1010,7 +1010,7 @@ class PositionedTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/relative_positioned_transition.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// The following code implements the [RelativePositionedTransition] as seen in the video
 /// above:
@@ -1130,7 +1130,7 @@ class RelativePositionedTransition extends AnimatedWidget {
 /// [decoration] animated by a [CurvedAnimation] set to [Curves.decelerate]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/decorated_box_transition.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 /// The following code implements the [DecoratedBoxTransition] as seen in the video
 /// above:
 ///
@@ -1310,7 +1310,7 @@ class AlignTransition extends AnimatedWidget {
 /// Animated version of a [DefaultTextStyle] that animates the different properties
 /// of its [TextStyle].
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// The following code implements the [DefaultTextStyleTransition] that shows
 /// a transition between thick blue font and thin red font.
@@ -1438,7 +1438,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
 ///
 /// This code defines a widget that spins a green square continually. It is
 /// built with an [AnimatedBuilder] and makes use of the [child] feature to

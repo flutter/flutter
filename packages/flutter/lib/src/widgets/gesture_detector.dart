@@ -48,6 +48,7 @@ export 'package:flutter/gestures.dart' show
 export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 
 // Examples can assume:
+// // @dart = 2.9
 // bool _lights;
 // void setState(VoidCallback fn) { }
 // String _last;

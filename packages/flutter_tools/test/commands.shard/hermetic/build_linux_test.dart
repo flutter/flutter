@@ -459,6 +459,7 @@ set(BINARY_NAME "fizz_bar")
     );
 
     expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(buffer.toString(), contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

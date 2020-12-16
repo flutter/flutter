@@ -252,7 +252,7 @@ abstract class Emulator {
   String get name;
   String get manufacturer;
   Category get category;
-  PlatformType get platformType;
+  String get platformDisplay;
 
   @override
   int get hashCode => id.hashCode;
@@ -283,7 +283,7 @@ abstract class Emulator {
           emulator.id ?? '',
           emulator.name ?? '',
           emulator.manufacturer ?? '',
-          emulator.platformType?.toString() ?? '',
+          emulator.platformDisplay ?? '',
         ],
     ];
 

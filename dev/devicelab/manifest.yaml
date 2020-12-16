@@ -698,12 +698,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  plugin_test_win:
-    description: >
-      Checks that the project template works and supports plugins on Windows.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
-
   hot_mode_dev_cycle_win__benchmark:
     description: >
       Measures the performance of Dart VM hot patching feature on Windows.
@@ -723,18 +717,6 @@ tasks:
       Measures performance of running flutter test.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-
-  dartdocs:
-    description: >
-      Tracks how many members are still lacking documentation.
-    stage: devicelab
-    required_agent_capabilities: ["linux-vm"]
-
-  technical_debt__cost:
-    description: >
-      Estimates our technical debt (TODOs, analyzer ignores, etc).
-    stage: devicelab
-    required_agent_capabilities: ["linux-vm"]
 
   flutter_gallery__start_up:
     description: >
@@ -883,18 +865,6 @@ tasks:
       Measures the speed of Dart analyzer.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-
-  web_benchmarks_html:
-    description: >
-      Runs Web benchmarks on Chrome on a Linux machine using the HTML rendering backend.
-    stage: devicelab
-    required_agent_capabilities: ["linux-vm"]
-
-  web_benchmarks_canvaskit:
-    description: >
-      Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
-    stage: devicelab
-    required_agent_capabilities: ["linux-vm"]
 
   # android_splash_screen_integration_test:
   #   description: >

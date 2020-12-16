@@ -872,8 +872,8 @@ class DevToolsDomain extends Domain {
 
   Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    final DevToolsServerAddress server = await _devtoolsLauncher.serve();
-
+    final bool openInBrowser = args != null && (args['openInBrowser'] == 'true');
+    final DevToolsServerAddress server = await _devtoolsLauncher.serve(openInBrowser: openInBrowser);
     return<String, dynamic>{
       'host': server?.host,
       'port': server?.port,
@@ -933,7 +933,7 @@ Map<String, dynamic> _emulatorToMap(Emulator emulator) {
     'id': emulator.id,
     'name': emulator.name,
     'category': emulator.category?.toString(),
-    'platformType': emulator.platformType?.toString(),
+    'platformType': emulator.platformDisplay,
   };
 }
 

@@ -63,7 +63,7 @@ enum BottomNavigationBarType {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
 /// widgets and the [currentIndex] is set to index 0. The selected item is
@@ -397,6 +397,9 @@ class _BottomNavigationTile extends StatelessWidget {
     // (or zero if the unselected icons are not any bigger than the selected icon).
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
 
+    // The effective tool tip message to be shown on the BottomNavigationBarItem.
+    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
+
     // Defines the padding for the animating icons + labels.
     //
     // The animations go from "Unselected":
@@ -487,11 +490,12 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
 
-    if (item.label != null) {
+    if (effectiveTooltip != null) {
       result = Tooltip(
-        message: item.label!,
+        message: effectiveTooltip,
         preferBelow: false,
         verticalOffset: selectedIconSize + selectedFontSize,
+        excludeFromSemantics: true,
         child: result,
       );
     }
