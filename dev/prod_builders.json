@@ -7,10 +7,70 @@
          "flaky": false
       },
       {
+         "name": "Linux analyzer benchmark",
+         "repo": "flutter",
+         "task_name": "linux_analyzer_benchmark",
+         "flaky": true
+      },
+      {
+         "name": "Linux android defines test",
+         "repo": "flutter",
+         "task_name": "linux_android_defines_test",
+         "flaky": true
+      },
+      {
+         "name": "Linux android obfuscate test",
+         "repo": "flutter",
+         "task_name": "linux_android_obfuscate_test",
+         "flaky": true
+      },
+      {
+         "name": "Linux android view scroll perf timeline summary",
+         "repo": "flutter",
+         "task_name": "linux_android_view_scroll_perf__timeline_summary",
+         "flaky": true
+      },
+      {
+         "name": "Linux animated placeholder perf e2e summary",
+         "repo": "flutter",
+         "task_name": "linux_animated_placeholder_perf__e2e_summary",
+         "flaky": true
+      },
+      {
+         "name": "Linux animated placeholder perf",
+         "repo": "flutter",
+         "task_name": "linux_animated_placeholder_perf",
+         "flaky": true
+      },
+      {
+         "name": "Linux backdrop filter perf e2e summary",
+         "repo": "flutter",
+         "task_name": "linux_backdrop_filter_perf__e2e_summary",
+         "flaky": true
+      },
+      {
+         "name": "Linux basic material app android compile",
+         "repo": "flutter",
+         "task_name": "linux_basic_material_app_android__compile",
+         "flaky": true
+      },
+      {
          "name": "Linux build_aar_module_test",
          "repo": "flutter",
          "task_name": "linux_build_aar_module_test",
          "flaky": false
+      },
+      {
+         "name": "Linux colorfilter and fade perf e2e summary",
+         "repo": "flutter",
+         "task_name": "linux_color_filter_and_fade_perf__e2e_summary",
+         "flaky": true
+      },
+      {
+         "name": "Linux complex layout android compile",
+         "repo": "flutter",
+         "task_name": "linux_complex_layout_android__compile",
+         "flaky": true
       },
       {
          "name": "Linux customer_testing",
