@@ -168,8 +168,8 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
   Object? toPrimitives() => value;
 }
 
-// _RestorablePrimitiveValueN and its subclasses allows for null values.
-// See [_RestorablePrimitiveValue] for the non-nullable version of this class.
+// _RestorablePrimitiveValue and its subclasses are non-nullable.
+// See [_RestorablePrimitiveValueN] for the nullable version of this class.
 class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
   _RestorablePrimitiveValue(T _defaultValue)
     : assert(_defaultValue != null),
@@ -185,13 +185,13 @@ class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveVa
   @override
   T fromPrimitives(Object? serialized) {
     assert(serialized != null);
-    return serialized! as T;
+    return super.fromPrimitives(serialized);
   }
 
   @override
   Object toPrimitives() {
     assert(value != null);
-    return value;
+    return super.toPrimitives()!;
   }
 }
 
@@ -256,6 +256,10 @@ class RestorableBool extends _RestorablePrimitiveValue<bool> {
   /// Creates a [RestorableBool].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableBoolN] for the nullable version of this class.
   RestorableBool(bool defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
@@ -267,6 +271,10 @@ class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
   /// Creates a [RestorableBoolN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableBool] for the non-nullable version of this class.
   RestorableBoolN(bool? defaultValue) : super(defaultValue);
 }
 
