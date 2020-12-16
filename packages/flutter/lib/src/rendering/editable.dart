@@ -212,7 +212,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     double? cursorHeight,
     Radius? cursorRadius,
     bool paintCursorAboveText = false,
-    Offset? cursorOffset,
+    Offset cursorOffset = Offset.zero,
     double devicePixelRatio = 1.0,
     ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
@@ -265,7 +265,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
          textHeightBehavior: textHeightBehavior,
          textWidthBasis: textWidthBasis,
        ),
-       _backgroundCursorColor = backgroundCursorColor,
        _showCursor = showCursor ?? ValueNotifier<bool>(false),
        _maxLines = maxLines,
        _minLines = minLines,
@@ -275,7 +274,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _cursorWidth = cursorWidth,
        _cursorHeight = cursorHeight,
        _paintCursorOnTop = paintCursorAboveText,
-       _cursorOffset = cursorOffset,
        _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
        _devicePixelRatio = devicePixelRatio,
@@ -289,14 +287,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
+
     _selectionPainter.highlightColor = selectionColor;
     _selectionPainter.selectionHeightStyle = selectionHeightStyle;
     _selectionPainter.selectionWidthStyle = selectionWidthStyle;
-    _caretPainter.color = cursorColor;
-    _caretPainter.cursorRadius = cursorRadius;
 
     _autocorrectHighlightPainter.highlightColor = promptRectColor;
     _autocorrectHighlightPainter.highlightedRange = promptRectRange;
+
+    _caretPainter.caretColor = cursorColor;
+    _caretPainter.cursorRadius = cursorRadius;
+    _caretPainter.cursorOffset = cursorOffset;
+    _caretPainter.backgroundCursorColor = backgroundCursorColor;
 
     // Invalidate last caret rect cache.
     if (onCaretChanged == null)
@@ -310,41 +312,76 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderEditableCustomPaint? _foregroundRenderObject;
   _RenderEditableCustomPaint? _backgroundRenderObject;
 
+  RenderEditablePainter? _foregroundPainter;
   void setForegroundPainter(RenderEditablePainter? newValue) {
-    if (newValue == _foregroundRenderObject?.painter)
+    if (newValue == _foregroundPainter)
       return;
+    final _CompositeRenderEditablePainter effectivePainter = newValue == null
+      ? _builtinForegounrdPainters
+      : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[
+         _builtinForegounrdPainters,
+         newValue,
+      ]);
+
     if (_foregroundRenderObject == null) {
-      final _RenderEditableCustomPaint foregroundRenderObject = _RenderEditableCustomPaint(painter: newValue);
+      final _RenderEditableCustomPaint foregroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
       adoptChild(foregroundRenderObject);
       _foregroundRenderObject = foregroundRenderObject;
     } else {
-      _foregroundRenderObject?.painter = newValue;
+      _foregroundRenderObject?.painter = effectivePainter;
     }
-    newValue?.renderEditable = this;
+    effectivePainter.renderEditable = this;
+    _foregroundPainter = newValue;
   }
 
+  RenderEditablePainter? _painter;
   void setPainter(RenderEditablePainter? newValue) {
-    if (newValue == _backgroundRenderObject?.painter)
+    if (newValue == _painter)
       return;
+
+    final _CompositeRenderEditablePainter effectivePainter = newValue == null
+      ? _builtinPainters
+      : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[_builtinPainters, newValue]);
+
     if (_backgroundRenderObject == null) {
-      final _RenderEditableCustomPaint backgroundRenderObject = _RenderEditableCustomPaint(painter: newValue);
+      final _RenderEditableCustomPaint backgroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
       adoptChild(backgroundRenderObject);
       _backgroundRenderObject = backgroundRenderObject;
     } else {
-      _backgroundRenderObject?.painter = newValue;
+      _backgroundRenderObject?.painter = effectivePainter;
     }
-    newValue?.renderEditable = this;
+    effectivePainter.renderEditable = this;
+    _painter = newValue;
   }
 
   // Caret Painters:
-  final _CaretPainter _floatingCursorPainter = _CaretPainter()
-    .._cursorRadius = _kFloatingCaretRadius;
-  late final _TextCaretPainter _caretPainter = _TextCaretPainter(_onCaretChanged);
+  // The floating painter. This painter controls the painting of _caretPainter's
+  // as well.
+  late final _FloatingCursorPainter _caretPainter = _FloatingCursorPainter(_onCaretChanged);
 
   // Text Highlight painters:
   final _TextHighlightPainter _selectionPainter = _TextHighlightPainter();
   final _TextHighlightPainter _autocorrectHighlightPainter = _TextHighlightPainter();
 
+  _CompositeRenderEditablePainter get _builtinForegounrdPainters => _cachedBuiltinForegroundPainters ??= _createBuiltinForegroundPainters();
+  _CompositeRenderEditablePainter? _cachedBuiltinForegroundPainters;
+  _CompositeRenderEditablePainter _createBuiltinForegroundPainters() {
+    return _CompositeRenderEditablePainter(
+      painters: <RenderEditablePainter>[if (paintCursorAboveText) _caretPainter],
+    );
+  }
+
+  _CompositeRenderEditablePainter get _builtinPainters => _cachedBuiltinPainters ??= _createBuiltinPainters();
+  _CompositeRenderEditablePainter? _cachedBuiltinPainters;
+  _CompositeRenderEditablePainter _createBuiltinPainters() {
+    return _CompositeRenderEditablePainter(
+      painters: <RenderEditablePainter>[
+        _autocorrectHighlightPainter,
+        _selectionPainter,
+        if (!paintCursorAboveText) _caretPainter,
+      ],
+    );
+  }
   /// Called when the selection changes.
   ///
   /// If this is null, then selection changes will be ignored.
@@ -353,10 +390,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double? _textLayoutLastMaxWidth;
   double? _textLayoutLastMinWidth;
 
+  Rect? _lastCaretRect;
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler? onCaretChanged;
   void _onCaretChanged(Rect caretRect) {
-    onCaretChanged?.call(caretRect);
+    if (_lastCaretRect != caretRect)
+      onCaretChanged?.call(caretRect);
+    if (onCaretChanged == null)
+      _lastCaretRect = null;
   }
 
   /// Whether the [handleEvent] will propagate pointer events to selection
@@ -450,8 +491,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// It must not be null. It will make cut, copy and paste functionality work
   /// with the most recently set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
-
-  Rect? _lastCaretRect;
 
   /// Track whether position of the start of the selected text is within the viewport.
   ///
@@ -1033,22 +1072,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// The color to use when painting the cursor.
-  Color? get cursorColor => _caretPainter.color;
+  Color? get cursorColor => _caretPainter.caretColor;
   set cursorColor(Color? value) {
-    _caretPainter.color = value;
+    _caretPainter.caretColor = value;
   }
 
   /// The color to use when painting the cursor aligned to the text while
   /// rendering the floating cursor.
   ///
   /// The default is light grey.
-  Color? get backgroundCursorColor => _backgroundCursorColor;
-  Color? _backgroundCursorColor;
+  Color? get backgroundCursorColor => _caretPainter.backgroundCursorColor;
   set backgroundCursorColor(Color? value) {
-    if (backgroundCursorColor == value)
-      return;
-    _backgroundCursorColor = value;
-    markNeedsPaint();
+    _caretPainter.backgroundCursorColor = value;
   }
 
   /// Whether to paint the cursor.
@@ -1059,11 +1094,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_showCursor == value)
       return;
     if (attached)
-      _showCursor.removeListener(_caretPainter.notifyListeners);
+      _showCursor.removeListener(_showHideCursor);
     _showCursor = value;
     if (attached)
-      _showCursor.addListener(_caretPainter.notifyListeners);
-    markNeedsPaint();
+      _showCursor.addListener(_showHideCursor);
+  }
+
+  void _showHideCursor() {
+    _caretPainter.shouldPaint = showCursor.value;
   }
 
   /// Whether the editable is currently focused.
@@ -1172,8 +1210,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsTextLayout();
   }
 
-  List<ui.TextBox>? _selectionRects;
-
   /// The region of text that is selected, if any.
   ///
   /// The caret position is represented by a collapsed selection.
@@ -1186,7 +1222,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_selection == value)
       return;
     _selection = value;
-    _selectionRects = null;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -1248,7 +1283,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_paintCursorOnTop == value)
       return;
     _paintCursorOnTop = value;
-    markNeedsLayout();
+    _cachedBuiltinForegroundPainters = null;
+    _cachedBuiltinPainters = null;
   }
 
   /// {@template flutter.rendering.RenderEditable.cursorOffset}
@@ -1259,13 +1295,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// platforms. The origin from where the offset is applied to is the arbitrary
   /// location where the cursor ends up being rendered from by default.
   /// {@endtemplate}
-  Offset? get cursorOffset => _cursorOffset;
-  Offset? _cursorOffset;
-  set cursorOffset(Offset? value) {
-    if (_cursorOffset == value)
-      return;
-    _cursorOffset = value;
-    markNeedsLayout();
+  Offset get cursorOffset => _caretPainter.cursorOffset;
+  set cursorOffset(Offset value) {
+    _caretPainter.cursorOffset = value;
   }
 
   /// How rounded the corners of the cursor should be.
@@ -1316,9 +1348,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   bool _floatingCursorOn = false;
-  late Offset _floatingCursorOffset;
   late TextPosition _floatingCursorTextPosition;
-
 
   /// Whether to allow the user to change the selection.
   ///
@@ -1554,7 +1584,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ..onTap = _handleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = _handleLongPress;
     _offset.addListener(markNeedsPaint);
-    _showCursor.addListener(markNeedsPaint);
+    _showCursor.addListener(_showHideCursor);
   }
 
   @override
@@ -1562,7 +1592,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _tap.dispose();
     _longPress.dispose();
     _offset.removeListener(markNeedsPaint);
-    _showCursor.removeListener(markNeedsPaint);
+    _showCursor.removeListener(_showHideCursor);
     if (_listenerAttached)
       RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
@@ -1622,7 +1652,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
 
     final Offset paintOffset = _paintOffset;
-
 
     final List<ui.TextBox> boxes = selection.isCollapsed ?
         <ui.TextBox>[] : _textPainter.getBoxesForSelection(selection);
@@ -1694,12 +1723,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset);
+    final Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset);
     // Add additional cursor offset (generally only if on iOS).
-    if (_cursorOffset != null)
-      rect = rect.shift(_cursorOffset!);
-
-    return rect.shift(integralOffset(rect.topLeft));
+    return rect.shift(integralOffset(rect.topLeft + cursorOffset));
   }
 
   List<ui.TextBox> getBoxesForSelection(TextSelection selection, {
@@ -2083,7 +2109,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  /// Computes the offset to apply to the given [caretRect] so it perfectly
+  /// Computes the offset to apply to the given [floatingCursorRect] so it perfectly
   /// snaps to physical pixels.
   Offset integralOffset(Offset sourceOffset) {
     final Offset globalOffset = localToGlobal(sourceOffset);
@@ -2111,7 +2137,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final BoxConstraints constraints = this.constraints;
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _computeCaretPrototype();
-    _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
     // _textPainter's layout because the intrinsic size calculations are
@@ -2134,54 +2159,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _maxScrollExtent = _getMaxScrollExtent(contentSize);
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(0.0, _maxScrollExtent);
-  }
-
-  void _updateCaretLocation(Offset effectiveOffset, TextPosition textPosition) {
-    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
-           _textLayoutLastMinWidth == constraints.minWidth,
-      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
-    assert(_caretPrototype != null);
-
-    // If the floating cursor is enabled, the text cursor's color is [backgroundCursorColor] while
-    // the floating cursor's color is _cursorColor;
-    final Offset caretOffset = _textPainter.getOffsetForCaret(textPosition, _caretPrototype) + effectiveOffset;
-    Rect caretRect = _caretPrototype.shift(caretOffset + (_cursorOffset ?? Offset.zero));
-
-    final double? caretHeight = _textPainter.getFullHeightForCaret(textPosition, _caretPrototype);
-    if (caretHeight != null) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          final double heightDiff = caretHeight - caretRect.height;
-          // Center the caret vertically along the text.
-          caretRect = Rect.fromLTWH(
-            caretRect.left,
-            caretRect.top + heightDiff / 2,
-            caretRect.width,
-            caretRect.height,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          // Override the height to take the full height of the glyph at the TextPosition
-          // when not on iOS. iOS has special handling that creates a taller caret.
-          // TODO(garyq): See the TODO for _computeCaretPrototype().
-          caretRect = Rect.fromLTWH(
-            caretRect.left,
-            caretRect.top - _kCaretHeightOffset,
-            caretRect.width,
-            caretHeight,
-          );
-          break;
-      }
-    }
-
-    if (caretRect != _lastCaretRect) {
-      _lastCaretRect = caretRect;
-      onCaretChanged?.call(caretRect);
-    }
   }
 
   // The relative origin in relation to the distance the user has theoretically
@@ -2260,20 +2237,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _floatingCursorOn = state != FloatingCursorDragState.End;
     _resetFloatingCursorAnimationValue = resetLerpValue;
     if (_floatingCursorOn) {
-      _floatingCursorOffset = boundedOffset;
       _floatingCursorTextPosition = lastTextPosition;
-      _floatingCursorPainter.color = cursorColor?.withOpacity(0.75);
+      final double? animationValue = _resetFloatingCursorAnimationValue;
+      final EdgeInsets sizeAdjustment = animationValue != null
+        ? EdgeInsets.lerp(_kFloatingCaretSizeIncrease, EdgeInsets.zero, animationValue)!
+        : _kFloatingCaretSizeIncrease;
+      _caretPainter.floatingCursorRect = sizeAdjustment.inflateRect(_caretPrototype.shift(boundedOffset));
     } else {
-      _floatingCursorPainter.color = null;
-      _caretPainter.color = cursorColor;
+      _caretPainter.floatingCursorRect = null;
     }
-
-    final double? animationValue = _resetFloatingCursorAnimationValue;
-    final EdgeInsets sizeAdjustment = animationValue != null
-      ? EdgeInsets.lerp(_kFloatingCaretSizeIncrease, EdgeInsets.zero, animationValue)!
-      : _kFloatingCaretSizeIncrease;
-
-    _floatingCursorPainter.caretRect = sizeAdjustment.inflateRect(_caretPrototype);
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
@@ -2405,6 +2377,248 @@ abstract class RenderEditablePainter extends ChangeNotifier implements CustomPai
   bool shouldRebuildSemantics(covariant RenderEditablePainter oldDelegate) => shouldRepaint(oldDelegate);
 }
 
+class _TextHighlightPainter extends RenderEditablePainter {
+  _TextHighlightPainter({
+      TextRange? highlightedRange,
+      Color? highlightColor
+  }) : _highlightedRange = highlightedRange,
+       _highlightColor = highlightColor;
+
+  final Paint highlightPaint = Paint();
+
+  Color? get highlightColor => _highlightColor;
+  Color? _highlightColor;
+  set highlightColor(Color? newValue) {
+    if (newValue == _highlightColor)
+      return;
+    _highlightColor = newValue;
+    notifyListeners();
+  }
+
+  TextRange? get highlightedRange => _highlightedRange;
+  TextRange? _highlightedRange;
+  set highlightedRange(TextRange? newValue) {
+    if (newValue == _highlightedRange)
+      return;
+    _highlightedRange = newValue;
+    notifyListeners();
+  }
+
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
+  ui.BoxHeightStyle _selectionHeightStyle = ui.BoxHeightStyle.tight;
+  set selectionHeightStyle(ui.BoxHeightStyle value) {
+    assert(value != null);
+    if (_selectionHeightStyle == value)
+      return;
+    _selectionHeightStyle = value;
+    notifyListeners();
+  }
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
+  ui.BoxWidthStyle _selectionWidthStyle = ui.BoxWidthStyle.tight;
+  set selectionWidthStyle(ui.BoxWidthStyle value) {
+    assert(value != null);
+    if (_selectionWidthStyle == value)
+      return;
+    _selectionWidthStyle = value;
+    notifyListeners();
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final TextRange? range = highlightedRange;
+    final Color? color = highlightColor;
+    if (range == null || color == null || range.isCollapsed) {
+      return;
+    }
+
+    final RenderEditable? renderEditable = this.renderEditable;
+    assert(renderEditable != null);
+    if (renderEditable == null)
+      return;
+
+    highlightPaint.color = color;
+    final List<TextBox> boxes = renderEditable.getBoxesForSelection(
+      TextSelection(baseOffset: range.start, extentOffset: range.end),
+      boxHeightStyle: selectionHeightStyle,
+      boxWidthStyle: selectionWidthStyle
+    );
+
+    for (final TextBox box in boxes)
+      canvas.drawRect(box.toRect(), highlightPaint);
+  }
+
+  @override
+  bool shouldRepaint(RenderEditablePainter oldDelegate) {
+    if (identical(oldDelegate, this))
+      return false;
+    return oldDelegate is! _TextHighlightPainter
+        || oldDelegate.highlightPaint.color != highlightPaint.color
+        || oldDelegate.highlightedRange != highlightedRange;
+  }
+}
+
+class _FloatingCursorPainter extends RenderEditablePainter {
+  _FloatingCursorPainter(this.caretPaintCallback);
+
+  bool get shouldPaint => _shouldPaint;
+  bool _shouldPaint = true;
+  set shouldPaint(bool value) {
+    if (shouldPaint == value)
+      return;
+    _shouldPaint = value;
+    notifyListeners();
+  }
+
+  CaretChangedHandler caretPaintCallback;
+
+  bool showRegularCaret = false;
+
+  final Paint caretPaint = Paint();
+
+  Color? get caretColor => _caretColor;
+  Color? _caretColor;
+  set caretColor(Color? value) {
+    if (caretColor?.value == value?.value)
+      return;
+
+    _caretColor = value;
+    notifyListeners();
+  }
+
+  Radius? get cursorRadius => _cursorRadius;
+  Radius? _cursorRadius;
+  set cursorRadius(Radius? value) {
+    if (_cursorRadius == value)
+      return;
+    _cursorRadius = value;
+    notifyListeners();
+  }
+
+  Offset get cursorOffset => _cursorOffset;
+  Offset _cursorOffset = Offset.zero;
+  set cursorOffset(Offset value) {
+    if (_cursorOffset == value)
+      return;
+    _cursorOffset = value;
+    notifyListeners();
+  }
+
+  Color? get backgroundCursorColor => _backgroundCursorColor;
+  Color? _backgroundCursorColor;
+  set backgroundCursorColor(Color? value) {
+    if (backgroundCursorColor?.value == value?.value)
+      return;
+
+    _backgroundCursorColor = value;
+    if (showRegularCaret)
+      notifyListeners();
+  }
+
+  Rect? get floatingCursorRect => _floatingCursorRect;
+  Rect? _floatingCursorRect;
+  set floatingCursorRect(Rect? value) {
+    if (_floatingCursorRect == value)
+      return;
+    _floatingCursorRect = value;
+    notifyListeners();
+  }
+
+  void paintRegularCursor(Canvas canvas, Color caretColor, TextPosition textPosition) {
+    assert(renderEditable != null);
+
+    final Rect caretPrototype = renderEditable!._caretPrototype;
+    final Offset caretOffset = renderEditable!._textPainter.getOffsetForCaret(textPosition, caretPrototype);
+    Rect caretRect = caretPrototype.shift(caretOffset + cursorOffset);
+
+    final double? caretHeight = renderEditable!._textPainter.getFullHeightForCaret(textPosition, caretPrototype);
+    if (caretHeight != null) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          final double heightDiff = caretHeight - caretRect.height;
+          // Center the caret vertically along the text.
+          caretRect = Rect.fromLTWH(
+            caretRect.left,
+            caretRect.top + heightDiff / 2,
+            caretRect.width,
+            caretRect.height,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          // Override the height to take the full height of the glyph at the TextPosition
+          // when not on iOS. iOS has special handling that creates a taller caret.
+          // TODO(garyq): See the TODO for _computeCaretPrototype().
+          caretRect = Rect.fromLTWH(
+            caretRect.left,
+            caretRect.top - _kCaretHeightOffset,
+            caretRect.width,
+            caretHeight,
+          );
+          break;
+      }
+    }
+
+    final Rect integralRect = renderEditable!.integralOffset(caretRect.topLeft) & caretRect.size;
+    final Radius? radius = cursorRadius;
+    if (radius == null) {
+      canvas.drawRect(integralRect, caretPaint);
+    } else {
+      final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
+      canvas.drawRRect(caretRRect, caretPaint);
+    }
+    caretPaintCallback(integralRect);
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!shouldPaint)
+      return;
+
+    assert(renderEditable != null);
+    final TextSelection? selection = renderEditable!.selection;
+
+    if (selection == null || !selection.isCollapsed || !selection.isValid)
+      return;
+
+    final Rect? floatingCursorRect = this.floatingCursorRect;
+
+    final Color? caretColor = floatingCursorRect == null
+      ? this.caretColor
+      : showRegularCaret ? backgroundCursorColor : null;
+    final TextPosition caretTextPosition = floatingCursorRect == null
+      ? selection.extent
+      : renderEditable!._floatingCursorTextPosition;
+    if (caretColor != null) {
+      paintRegularCursor(canvas, caretColor, caretTextPosition);
+    }
+
+    final Color? floatingCursorColor = caretColor?.withOpacity(0.75);
+    // Floating Cursor.
+    if (floatingCursorRect == null || floatingCursorColor == null)
+      return;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCaretRadius),
+      caretPaint..color = floatingCursorColor,
+    );
+  }
+
+  @override
+  bool shouldRepaint(RenderEditablePainter oldDelegate) {
+    return !identical(this, oldDelegate) && oldDelegate is! _FloatingCursorPainter;
+  }
+}
+
 class _CompositeRenderEditablePainter extends RenderEditablePainter {
   _CompositeRenderEditablePainter({ required this.painters });
 
@@ -2468,182 +2682,5 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
         return true;
 
     return false;
-  }
-}
-
-class _TextHighlightPainter extends RenderEditablePainter {
-  _TextHighlightPainter({
-      TextRange? highlightedRange,
-      Color? highlightColor
-  }) : _highlightedRange = highlightedRange,
-       _highlightColor = highlightColor;
-
-  final Paint highlightPaint = Paint();
-
-  Color? get highlightColor => _highlightColor;
-  Color? _highlightColor;
-  set highlightColor(Color? newValue) {
-    if (newValue == _highlightColor)
-      return;
-    _highlightColor = newValue;
-    notifyListeners();
-  }
-
-  TextRange? get highlightedRange => _highlightedRange;
-  TextRange? _highlightedRange;
-  set highlightedRange(TextRange? newValue) {
-    if (newValue == _highlightedRange)
-      return;
-    _highlightedRange = newValue;
-    notifyListeners();
-  }
-
-  /// Controls how tall the selection highlight boxes are computed to be.
-  ///
-  /// See [ui.BoxHeightStyle] for details on available styles.
-  ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
-  ui.BoxHeightStyle _selectionHeightStyle = ui.BoxHeightStyle.tight;
-  set selectionHeightStyle(ui.BoxHeightStyle value) {
-    assert(value != null);
-    if (_selectionHeightStyle == value)
-      return;
-    _selectionHeightStyle = value;
-    notifyListeners();
-  }
-
-  /// Controls how wide the selection highlight boxes are computed to be.
-  ///
-  /// See [ui.BoxWidthStyle] for details on available styles.
-  ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
-  ui.BoxWidthStyle _selectionWidthStyle = ui.BoxWidthStyle.tight;
-  set selectionWidthStyle(ui.BoxWidthStyle value) {
-    assert(value != null);
-    if (_selectionWidthStyle == value)
-      return;
-    _selectionWidthStyle = value;
-    notifyListeners();
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final TextRange? range = highlightedRange;
-    final Color? color = highlightColor;
-    if (range == null || color == null || (highlightedRange?.isCollapsed ?? true)) {
-      return;
-    }
-
-    final RenderEditable? renderEditable = this.renderEditable;
-    assert(renderEditable != null);
-    if (renderEditable == null)
-      return;
-
-    highlightPaint.color = color;
-    final List<TextBox> boxes = renderEditable.getBoxesForSelection(
-      TextSelection(baseOffset: range.start, extentOffset: range.end),
-      boxHeightStyle: selectionHeightStyle,
-      boxWidthStyle: selectionWidthStyle
-    );
-
-    for (final TextBox box in boxes)
-      canvas.drawRect(box.toRect(), highlightPaint);
-  }
-
-  @override
-  bool shouldRepaint(RenderEditablePainter oldDelegate) {
-    if (identical(oldDelegate, this))
-      return false;
-    return oldDelegate is! _TextHighlightPainter
-        || oldDelegate.highlightPaint.color != highlightPaint.color
-        || oldDelegate.highlightedRange != highlightedRange;
-  }
-}
-
-class _CaretPainter extends RenderEditablePainter {
-  Rect? get caretRect => _caretRect;
-  Rect? _caretRect;
-  set caretRect(Rect? value) {
-    if (_caretRect == value)
-      return;
-    _caretRect = value;
-    notifyListeners();
-  }
-
-  Paint? cursorPaint;
-  Color? get color => cursorPaint?.color;
-  set color(Color? value) {
-    if (color?.value == value?.value)
-      return;
-
-    if (value == null) {
-      cursorPaint = null;
-    } else {
-      (cursorPaint ??= Paint())
-        .color = value;
-    }
-    notifyListeners();
-  }
-
-  Radius? get cursorRadius => _cursorRadius;
-  Radius? _cursorRadius;
-  set cursorRadius(Radius? value) {
-    if (_cursorRadius == value)
-      return;
-    _cursorRadius = value;
-    notifyListeners();
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Color? caretColor = color;
-    final Rect? rect = caretRect;
-    final Paint? paint = cursorPaint;
-	  assert(renderEditable != null);
-    if (caretColor == null || rect == null || paint == null)
-      return;
-
-    // If the floating cursor is enabled, the text cursor's color is [backgroundCursorColor] while
-    // the floating cursor's color is _cursorColor;
-    final Rect integralRect = renderEditable!.integralOffset(rect.topLeft) & rect.size;
-    final Radius? radius = cursorRadius;
-    if (radius == null) {
-      canvas.drawRect(integralRect, paint);
-    } else {
-      final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
-      canvas.drawRRect(caretRRect, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(RenderEditablePainter oldPainter) {
-    return !identical(this, oldPainter) && oldPainter is! _CaretPainter;
-  }
-}
-
-class _TextCaretPainter extends _CaretPainter {
-  _TextCaretPainter(this.caretPaintCallback);
-
-  CaretChangedHandler caretPaintCallback;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Color? caretColor = color;
-    final Rect? rect = caretRect;
-    final Paint? paint = cursorPaint;
-	  assert(renderEditable != null);
-    if (caretColor == null || rect == null || paint == null)
-      return;
-
-    // If the floating cursor is enabled, the text cursor's color is [backgroundCursorColor] while
-    // the floating cursor's color is _cursorColor;
-    final Rect integralRect = renderEditable!.integralOffset(rect.topLeft) & rect.size;
-    final Radius? radius = cursorRadius;
-    if (radius == null) {
-      canvas.drawRect(integralRect, paint);
-    } else {
-      final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
-      canvas.drawRRect(caretRRect, paint);
-    }
-
-    caretPaintCallback(integralRect);
   }
 }
