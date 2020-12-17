@@ -734,7 +734,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     ];
     _listenable = Listenable.merge(animations);
     if (widget.route.isCurrent) {
-      print('setting focus in initState');
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
@@ -744,7 +743,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
     if (widget.route.isCurrent) {
-      print('setting focus in didUpdateWidget');
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
   }
@@ -768,7 +766,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   }
 
   bool get _shouldIgnoreFocusRequest {
-    print('_shouldIgnoreFocusRequest');
     return widget.route.animation?.status == AnimationStatus.reverse ||
       (widget.route.navigator?.userGestureInProgress ?? false);
   }
@@ -776,9 +773,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
-    print('_routeSetState');
     if (widget.route.isCurrent && !_shouldIgnoreFocusRequest) {
-      print('Setting focus');
       widget.route.navigator!.focusScopeNode.setFirstFocus(focusScopeNode);
     }
     setState(fn);
@@ -921,7 +916,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// will not be updated.
   @protected
   void setState(VoidCallback fn) {
-    print('setState on ModalRoute');
     if (_scopeKey.currentState != null) {
       _scopeKey.currentState!._routeSetState(fn);
     } else {

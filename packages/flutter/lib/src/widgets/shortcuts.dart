@@ -357,7 +357,6 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
       'set its modifier flags. This was the event: $event and its data: '
       '${event.data}');
     final Intent? matchedIntent = _find(keysPressed: keysPressed);
-    // print('matchedIntent: $matchedIntent');
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus!.context!;
       assert (primaryContext != null);
@@ -365,7 +364,6 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
         primaryContext,
         intent: matchedIntent,
       );
-      // print('action: $action');
       if (action != null && action.isEnabled(matchedIntent)) {
         Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
         return action.consumesKey(matchedIntent)
