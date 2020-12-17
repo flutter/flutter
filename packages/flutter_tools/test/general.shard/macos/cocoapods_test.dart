@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -76,7 +75,6 @@ void main() {
       processManager: mockProcessManager,
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
-      artifacts: Artifacts.test(),
       xcodeProjectInterpreter: mockXcodeProjectInterpreter,
       usage: usage,
     );
@@ -109,7 +107,7 @@ void main() {
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/macos',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': '.', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
+      environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
     )).thenAnswer((_) async => exitsHappy());
     fileSystem.file('.packages').writeAsStringSync('\n');
   });
@@ -373,7 +371,7 @@ void main() {
       ), throwsToolExit(message: 'Podfile is out of date'));
     });
 
-    testWithoutContext('exits if Podfile parses .flutter-plugins', () async {
+    testWithoutContext('exits if iOS Podfile parses .flutter-plugins', () async {
       pretendPodIsInstalled();
 
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
@@ -384,6 +382,22 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'Podfile is out of date'));
+    });
+
+    testWithoutContext('prints warning if macOS Podfile parses .flutter-plugins', () async {
+      pretendPodIsInstalled();
+
+      fileSystem.file(fileSystem.path.join('project', 'macos', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
+
+      await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.macos,
+        buildMode: BuildMode.debug,
+      );
+
+      expect(logger.errorText, contains('Warning: Podfile is out of date'));
+      expect(logger.errorText, contains('rm macos/Podfile'));
     });
 
     testWithoutContext('throws, if Podfile is missing.', () async {
@@ -588,7 +602,6 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/macos',
         environment: <String, String>{
-          'FLUTTER_FRAMEWORK_DIR': '.',
           'COCOAPODS_DISABLE_STATS': 'true',
           'LANG': 'en_US.UTF-8',
         },
