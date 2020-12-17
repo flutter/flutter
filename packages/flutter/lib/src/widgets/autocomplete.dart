@@ -58,8 +58,6 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
 ///   * [RawAutocomplete.displayStringForOption], which is of this type.
 typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
-// TODO(justinmc): Link to Autocomplete and AutocompleteCupertino when they are
-// implemented.
 // TODO(justinmc): Update docs.
 /// A controller for the [AutocompleteCore] widget.
 ///
@@ -668,17 +666,23 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// Create an instance of RawAutocomplete.
   ///
   /// [fieldViewBuilder] and [optionsViewBuilder] must not be null.
+  ///
+  /// [focusNode] and [textEditingController] must either be both passed in or
+  /// neither passed in.
   const RawAutocomplete({
     Key? key,
     required this.fieldViewBuilder,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
     this.displayStringForOption = _defaultStringForOption,
+    this.focusNode,
     this.onSelected,
+    this.textEditingController,
   }) : assert(displayStringForOption != null),
        assert(fieldViewBuilder != null),
        assert(optionsBuilder != null),
        assert(optionsViewBuilder != null),
+       assert((focusNode == null) == (textEditingController == null)),
        super(key: key);
 
   /// Builds the field whose input is used to get the options.
@@ -686,6 +690,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// Pass the provided [TextEditingController] to the field built here so that
   /// RawAutocomplete can listen for changes.
   final AutocompleteFieldViewBuilder fieldViewBuilder;
+
+  final FocusNode? focusNode;
 
   /// Builds the selectable options widgets from a list of options objects.
   ///
@@ -713,6 +719,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// current TextEditingValue.
   final AutocompleteOptionsBuilder<T> optionsBuilder;
 
+  final TextEditingController? textEditingController;
+
   // The default way to convert an option to a string.
   static String _defaultStringForOption(dynamic option) {
     return option.toString();
@@ -725,8 +733,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
-  final TextEditingController _textEditingController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  late TextEditingController _textEditingController;
+  late FocusNode _focusNode;
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
 
@@ -799,10 +807,48 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
   }
 
+  void _updateTextEditingController(TextEditingController? old, TextEditingController? current) {
+    if ((old == null && current == null) || old == current) {
+      return;
+    }
+    if (old == null) {
+      _textEditingController.removeListener(_onChangedField);
+      _textEditingController.dispose();
+      _textEditingController = current!;
+    } else if (current == null) {
+      _textEditingController.removeListener(_onChangedField);
+      _textEditingController = TextEditingController();
+    } else {
+      _textEditingController.removeListener(_onChangedField);
+      _textEditingController = current;
+    }
+    _textEditingController.addListener(_onChangedField);
+  }
+
+  void _updateFocusNode(FocusNode? old, FocusNode? current) {
+    if ((old == null && current == null) || old == current) {
+      return;
+    }
+    if (old == null) {
+      _focusNode.removeListener(_onChangedFocus);
+      _focusNode.dispose();
+      _focusNode = current!;
+    } else if (current == null) {
+      _focusNode.removeListener(_onChangedFocus);
+      _focusNode = FocusNode();
+    } else {
+      _focusNode.removeListener(_onChangedFocus);
+      _focusNode = current;
+    }
+    _focusNode.addListener(_onChangedFocus);
+  }
+
   @override
   void initState() {
     super.initState();
+    _textEditingController = widget.textEditingController ?? TextEditingController();
     _textEditingController.addListener(_onChangedField);
+    _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
@@ -815,11 +861,36 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();
     });
+    _updateTextEditingController(
+      oldWidget.textEditingController,
+      widget.textEditingController,
+    );
+    _updateFocusNode(oldWidget.focusNode, widget.focusNode);
+    if ((oldWidget.textEditingController == null
+        && widget.textEditingController == null)
+        || oldWidget.textEditingController == widget.textEditingController) {
+      return;
+    }
+    if (oldWidget.textEditingController == null) {
+      _textEditingController.removeListener(_onChangedField);
+      _textEditingController.dispose();
+      _textEditingController = widget.textEditingController!;
+    } else if (widget.textEditingController == null) {
+      _textEditingController.removeListener(_onChangedField);
+      _textEditingController = TextEditingController();
+    } else {
+      _textEditingController.removeListener(_onChangedField);
+      _textEditingController = widget.textEditingController!;
+    }
+    _textEditingController.addListener(_onChangedField);
   }
 
   @override
   void dispose() {
     _textEditingController.removeListener(_onChangedField);
+    if (widget.textEditingController == null) {
+      _textEditingController.dispose();
+    }
     _focusNode.removeListener(_onChangedFocus);
     _floatingOptions?.remove();
     _floatingOptions = null;
