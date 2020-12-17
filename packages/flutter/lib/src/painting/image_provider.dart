@@ -118,8 +118,6 @@ class ImageConfiguration {
     result.write('ImageConfiguration(');
     bool hasArguments = false;
     if (bundle != null) {
-      if (hasArguments)
-        result.write(', ');
       result.write('bundle: $bundle');
       hasArguments = true;
     }
