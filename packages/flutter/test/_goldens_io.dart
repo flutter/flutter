@@ -2,8 +2,4 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:flutter_goldens/flutter_goldens.dart' as flutter_goldens;
-
-Future<void> testExecutable(FutureOr<void> testMain()) => flutter_goldens.testExecutable(testMain);
+export 'package:flutter_goldens/flutter_goldens.dart' show testExecutable;
