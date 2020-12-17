@@ -116,8 +116,8 @@ static gboolean setup_gdk_window(FlRenderer* self,
   window_attributes.event_mask =
       gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK |
       GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
-      GDK_BUTTON_RELEASE_MASK | GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK |
-      GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK;
+      GDK_BUTTON_RELEASE_MASK | GDK_SMOOTH_SCROLL_MASK | GDK_KEY_PRESS_MASK |
+      GDK_KEY_RELEASE_MASK;
 
   gint window_attributes_mask = GDK_WA_X | GDK_WA_Y;
 

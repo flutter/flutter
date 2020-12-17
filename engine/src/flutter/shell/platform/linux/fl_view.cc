@@ -322,14 +322,14 @@ static gboolean fl_view_scroll_event(GtkWidget* widget, GdkEventScroll* event) {
   if (event->direction == GDK_SCROLL_SMOOTH) {
     scroll_delta_x = event->delta_x;
     scroll_delta_y = event->delta_y;
-  } else if (event->direction == GDK_SCROLL_UP) {
-    scroll_delta_y = -1;
-  } else if (event->direction == GDK_SCROLL_DOWN) {
-    scroll_delta_y = 1;
-  } else if (event->direction == GDK_SCROLL_LEFT) {
-    scroll_delta_x = -1;
-  } else if (event->direction == GDK_SCROLL_RIGHT) {
-    scroll_delta_x = 1;
+  } else {
+    // We currently skip non-smooth scroll events due to the X11 events being
+    // delivered directly to the FlView X window and bypassing the GtkWindow
+    // handling.
+    // This causes both smooth and non-smooth events to be received (i.e.
+    // duplication).
+    // https://github.com/flutter/flutter/issues/73823
+    return FALSE;
   }
 
   // TODO(robert-ancell): See if this can be queried from the OS; this value is
