@@ -870,11 +870,7 @@ void main() {
         color: const Color(0x1a000000),
       ),
     );
-
-    // final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    // await gesture.addPointer();
-    // addTearDown(gesture.removePointer);
-    // await gesture.moveTo(const Offset(794.0, 5.0));
+    
     await tester.tapAt(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
