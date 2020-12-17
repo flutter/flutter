@@ -20,7 +20,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
 /// A Material Design scrollbar.
 ///
-/// To add a scrollbar to a [ScrollView], simply wrap the scroll view
+/// To add a scrollbar to a [ScrollView], wrap the scroll view
 /// widget in a [Scrollbar] widget.
 ///
 /// {@macro flutter.widgets.Scrollbar}
@@ -173,6 +173,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
         return widget.hoverThickness ?? _kScrollbarThicknessWithTrack;
+      // The default scrollbar thickness is smaller on mobile.
       return widget.thickness ?? (_kScrollbarThickness / (_isMobile ? 2 : 1));
     });
   }
@@ -241,8 +242,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void handleHover(PointerHoverEvent event) {
-    if (_isMobile)
-      return;
+    // Hover events should not be triggered on mobile.
+    assert(!_isMobile);
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position)) {
@@ -258,8 +259,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void handleHoverExit(PointerExitEvent event) {
-    if (_isMobile)
-      return;
+    // Hover events should not be triggered on mobile.
+    assert(!_isMobile);
     super.handleHoverExit(event);
     setState(() { _hoverIsActive = false; });
     _hoverAnimationController.reverse();

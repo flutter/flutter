@@ -781,6 +781,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   late Animation<double> _fadeoutOpacityAnimation;
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
+  late bool _isMobile;
 
 
   /// Used to paint the scrollbar.
@@ -811,6 +812,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        _isMobile = true;
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        _isMobile = false;
+        break;
+    }
     _maybeTriggerScrollbar();
   }
 
@@ -1145,20 +1158,28 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   Widget build(BuildContext context) {
     updateScrollbarPainter();
+
+    Widget child = CustomPaint(
+      key: _scrollbarPainterKey,
+      foregroundPainter: scrollbarPainter,
+      child: RepaintBoundary(child: widget.child),
+    );
+
+    if (!_isMobile) {
+      // Hover events not supported on mobile.
+      child = MouseRegion(
+        onExit: handleHoverExit,
+        onHover: handleHover,
+        child: child
+      );
+    }
+
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
           gestures: _gestures,
-          child: MouseRegion(
-            onExit: handleHoverExit,
-            onHover: handleHover,
-            child: CustomPaint(
-              key: _scrollbarPainterKey,
-              foregroundPainter: scrollbarPainter,
-              child: RepaintBoundary(child: widget.child),
-            ),
-          ),
+          child: child,
         ),
       ),
     );
