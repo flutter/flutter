@@ -649,7 +649,15 @@ class Image extends StatefulWidget {
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
-  /// The [bytes], [scale], and [repeat] arguments must not be null.
+  /// The `bytes` argument specifies encoded image bytes, which can be encoded
+  /// in any of the following supported image formats:
+  /// {@macro flutter.dart:ui.imageFormats}
+  ///
+  /// The `scale` argument specifies the linear scale factor for drawing this
+  /// image at its intended size and applies to both the width and the height.
+  /// {@macro flutter.painting.imageInfo.scale}
+  ///
+  /// The `bytes`, `scale`, and [repeat] arguments must not be null.
   ///
   /// This only accepts compressed image formats (e.g. PNG). Uncompressed
   /// formats like rawRgba (the default format of [dart:ui.Image.toByteData])
