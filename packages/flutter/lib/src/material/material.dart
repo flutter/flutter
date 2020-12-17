@@ -777,8 +777,8 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
 
   @override
   Widget build(BuildContext context) {
-    final ShapeBorder shape = _border!.evaluate(animation!)!;
-    final double elevation = _elevation!.evaluate(animation!);
+    final ShapeBorder shape = _border!.evaluate(animation)!;
+    final double elevation = _elevation!.evaluate(animation);
     return PhysicalShape(
       child: _ShapeBorderPaint(
         child: widget.child,
@@ -792,7 +792,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
       color: ElevationOverlay.applyOverlay(context, widget.color, elevation),
-      shadowColor: _shadowColor!.evaluate(animation!)!,
+      shadowColor: _shadowColor!.evaluate(animation)!,
     );
   }
 }

@@ -85,6 +85,9 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
+
+  /// The pub or pub.bat executable
+  pubExecutable,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -178,6 +181,11 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps:
     case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
       return 'dart_sdk.js.map';
+    case Artifact.pubExecutable:
+      if (platform == TargetPlatform.windows_x64) {
+        return 'pub.bat';
+      }
+      return 'pub';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -457,6 +465,8 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _artifactToFileName(artifact, platform, mode));
       case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', _artifactToFileName(artifact, platform, mode));
+      case Artifact.pubExecutable:
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin',  _artifactToFileName(artifact, platform, mode));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -699,6 +709,8 @@ class LocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
       case Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', 'amd-canvaskit-html-sound', artifactFileName);
+      case Artifact.pubExecutable:
+        return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _artifactToFileName(artifact, platform, mode));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

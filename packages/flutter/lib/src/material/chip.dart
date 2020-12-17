@@ -923,7 +923,7 @@ class InputChip extends StatelessWidget
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {
-///   int _value = 1;
+///   int? _value = 1;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {

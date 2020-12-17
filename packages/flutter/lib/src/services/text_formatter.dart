@@ -415,7 +415,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement? maxLengthEnforcement;
 
-  /// Return an effective [MaxLengthEnforcement] according the target platform.
+  /// Returns a [MaxLengthEnforcement] that follows the specified [platform]'s
+  /// convention.
   ///
   /// {@template flutter.services.textFormatter.effectiveMaxLengthEnforcement}
   /// ### Platform specific behaviors
@@ -432,11 +433,13 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///    [MaxLengthEnforcement.truncateAfterCompositionEnds]. These platforms
   ///    allow the composition to exceed by default.
   /// {@endtemplate}
-  static MaxLengthEnforcement get inferredDefaultMaxLengthEnforcement {
+  static MaxLengthEnforcement getDefaultMaxLengthEnforcement([
+    TargetPlatform? platform,
+  ]) {
     if (kIsWeb) {
       return MaxLengthEnforcement.truncateAfterCompositionEnds;
     } else {
-      switch (defaultTargetPlatform) {
+      switch (platform ?? defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.windows:
           return MaxLengthEnforcement.enforced;
@@ -493,7 +496,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
     assert(maxLength > 0);
 
-    switch (maxLengthEnforcement ?? inferredDefaultMaxLengthEnforcement) {
+    switch (maxLengthEnforcement ?? getDefaultMaxLengthEnforcement()) {
       case MaxLengthEnforcement.none:
         return newValue;
       case MaxLengthEnforcement.enforced:
