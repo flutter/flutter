@@ -16,14 +16,11 @@ import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
 
-/// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
+/// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
 ///
 /// This class is abstract to share logic between the three concrete
 /// implementations. The shelling out is done to avoid complications with
 /// preserving special files (e.g., symbolic links) in the framework structure.
-///
-/// Removes any previous version of the framework that already exists in the
-/// target directory.
 ///
 /// The real implementations are:
 ///   * [DebugUnpackMacOS]
