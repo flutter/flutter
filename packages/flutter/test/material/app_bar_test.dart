@@ -2273,4 +2273,90 @@ void main() {
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
   });
+
+  testWidgets('AppBar foregroundColor and backgroundColor', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff00ffff);
+    final Key leadingIconKey = UniqueKey();
+    final Key actionIconKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor,
+            leading: Icon(Icons.add_circle, key: leadingIconKey),
+            title: const Text('title'),
+            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+          ),
+        ),
+      ),
+    );
+
+    final Material appBarMaterial = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(appBarMaterial.color, backgroundColor);
+
+    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+    ).style;
+    expect(titleTextStyle.color, foregroundColor);
+
+    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(leadingIconTheme.color, foregroundColor);
+
+    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(actionIconTheme.color, foregroundColor);
+  });
+
+
+  testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xff00ff00);
+    final Key leadingIconKey = UniqueKey();
+    final Key actionIconKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          appBarTheme: const AppBarTheme(
+            backwardsCompatibility: false,
+          ),
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            foregroundColor: foregroundColor, // only applies if backwardsCompatibility is false
+            leading: Icon(Icons.add_circle, key: leadingIconKey),
+            title: const Text('title'),
+            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+    ).style;
+    expect(titleTextStyle.color, foregroundColor);
+
+    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(leadingIconTheme.color, foregroundColor);
+
+    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(actionIconTheme.color, foregroundColor);
+  });
+
 }

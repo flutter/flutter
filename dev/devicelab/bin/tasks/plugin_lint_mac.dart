@@ -415,7 +415,7 @@ void _validateIosPodfile(String appPath) {
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"')
     || podfileLockOutput.contains('url_launcher_macos')) {
-    throw TaskResult.failure('Podfile.lock does not contain expected pods');
+    throw TaskResult.failure('iOS Podfile.lock does not contain expected pods');
   }
 
   checkDirectoryNotExists(path.join(
@@ -445,6 +445,11 @@ void _validateIosPodfile(String appPath) {
     'ios',
   ));
 
+  checkDirectoryNotExists(path.join(
+    pluginSymlinks,
+    'url_launcher_macos',
+  ));
+
   checkDirectoryExists(path.join(
     pluginSymlinks,
     'test_plugin_objc',
@@ -463,11 +468,20 @@ void _validateMacOSPodfile(String appPath) {
 
   final File podfileLockFile = File(path.join(appPath, 'macos', 'Podfile.lock'));
   final String podfileLockOutput = podfileLockFile.readAsStringSync();
-  if (!podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/flutter/darwin-x64-release')
+  if (!podfileLockOutput.contains(':path: Flutter/ephemeral\n')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos')
-      || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos')) {
-    throw TaskResult.failure('Podfile.lock does not contain expected pods');
+      || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos')
+      || podfileLockOutput.contains('url_launcher/')) {
+    throw TaskResult.failure('macOS Podfile.lock does not contain expected pods');
   }
+
+  checkFileExists(path.join(
+    appPath,
+    'macos',
+    'Flutter',
+    'ephemeral',
+    'FlutterMacOS.podspec',
+  ));
 
   final String pluginSymlinks = path.join(
     appPath,
@@ -482,6 +496,11 @@ void _validateMacOSPodfile(String appPath) {
     pluginSymlinks,
     'url_launcher_macos',
     'macos',
+  ));
+
+  checkDirectoryNotExists(path.join(
+    pluginSymlinks,
+    'url_launcher',
   ));
 
   checkDirectoryExists(path.join(
