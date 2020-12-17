@@ -991,7 +991,7 @@ class ScrollAction extends Action<ScrollIntent> {
       // test.
       // TODO(paulberry): remove this hack once the feature is implemented.
       if (focus == null) { // ignore: dead_code
-        throw 'impossible';
+        throw 'This throw is unreachable';
       }
       if (Scrollable.of(focus.context!) != null)
         return true;
