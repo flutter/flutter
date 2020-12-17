@@ -75,7 +75,7 @@ AuthClient authClientFromAccessToken(String token, List<String> scopes) {
 Future<Storage> storageFromCredentialsJson(Map<String, dynamic> json) async {
   final AutoRefreshingAuthClient client = await clientViaServiceAccount(
       ServiceAccountCredentials.fromJson(json), Storage.SCOPES);
-  return Storage(client, json[_kProjectId] as String);
+  return Storage(client, json[kProjectId] as String);
 }
 
 /// Get a Google Cloud Storage from just an access token and its project id.
@@ -91,7 +91,7 @@ Future<DatastoreDB> datastoreFromCredentialsJson(
     Map<String, dynamic> json) async {
   final AutoRefreshingAuthClient client = await clientViaServiceAccount(
       ServiceAccountCredentials.fromJson(json), DatastoreImpl.SCOPES);
-  return DatastoreDB(DatastoreImpl(client, json[_kProjectId] as String));
+  return DatastoreDB(DatastoreImpl(client, json[kProjectId] as String));
 }
 
 DatastoreDB datastoreFromAccessToken(String token, String projectId) {
@@ -111,4 +111,5 @@ const String kSubResultKey = 'subResult';
 const String kFlutterFrameworkRepo = 'flutter/flutter';
 const String kFlutterEngineRepo = 'flutter/engine';
 
-const String _kProjectId = 'project_id';
+/// The key for the GCP project id in the credentials json.
+const String kProjectId = 'project_id';
