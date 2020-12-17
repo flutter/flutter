@@ -459,6 +459,10 @@ Dart_Handle System::VmoMap(fml::RefPtr<Handle> vmo) {
   return ConstructDartObject(kMapResult, ToDart(ZX_OK), object);
 }
 
+uint64_t System::ClockGetMonotonic() {
+  return zx_clock_get_monotonic();
+}
+
 uint64_t System::ClockGet(uint32_t clock_id) {
   zx_time_t result = 0;
   zx_clock_get(clock_id, &result);

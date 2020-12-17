@@ -189,6 +189,7 @@ class System extends NativeFieldWrapperClass2 {
   static MapResult vmoMap(Handle vmo) native 'System_VmoMap';
 
   // Time operations.
+  static int clockGetMonotonic() native 'System_ClockGetMonotonic';
   static int clockGet(int clockId) native 'System_ClockGet';
 
   // TODO(edcoyne): Remove this, it is required to safely do an API transition across repos.
