@@ -942,10 +942,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   SetEntryPoint(&settings, entrypoint, libraryURI);
 
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
-      [self](flutter::Shell& shell) {
-        [self recreatePlatformViewController];
+      [result](flutter::Shell& shell) {
+        [result recreatePlatformViewController];
         return std::make_unique<flutter::PlatformViewIOS>(
-            shell, self->_renderingApi, self->_platformViewsController, shell.GetTaskRunners());
+            shell, result->_renderingApi, result->_platformViewsController, shell.GetTaskRunners());
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =

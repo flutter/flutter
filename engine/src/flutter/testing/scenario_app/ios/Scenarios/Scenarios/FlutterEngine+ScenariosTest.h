@@ -8,5 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface FlutterEngine (ScenariosTest)
 - (instancetype)initWithScenario:(NSString*)scenario
                   withCompletion:(nullable void (^)(void))engineRunCompletion;
+- (FlutterEngine*)spawnWithEntrypoint:(nullable NSString*)entrypoint
+                           libraryURI:(nullable NSString*)libraryURI;
 @end
 NS_ASSUME_NONNULL_END

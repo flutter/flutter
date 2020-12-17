@@ -46,6 +46,7 @@ Map<String, ScenarioFactory> _scenarios = <String, ScenarioFactory>{
   'initial_route_reply': () => InitialRouteReply(PlatformDispatcher.instance),
   'platform_view_with_continuous_texture': () => PlatformViewWithContinuousTexture(PlatformDispatcher.instance, 'Platform View', id: _viewId++),
   'bogus_font_text': () => BogusFontText(PlatformDispatcher.instance),
+  'spawn_engine_works' : () => BogusFontText(PlatformDispatcher.instance),
 };
 
 Map<String, dynamic> _currentScenarioParams = <String, dynamic>{};
