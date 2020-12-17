@@ -870,7 +870,6 @@ void main() {
         color: const Color(0x1a000000),
       ),
     );
-    
     await tester.tapAt(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
