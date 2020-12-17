@@ -22,7 +22,7 @@ transforms:
       - kind: 'rename'
         newName: 'fromMouseEvent'
 
-  # Changes made it https://github.com/flutter/flutter/pull/28602
+  # Changes made in https://github.com/flutter/flutter/pull/28602
   - title: 'Rename to fromMouseEvent'
     date: 2020-12-15
     element:
