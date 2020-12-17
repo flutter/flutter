@@ -446,6 +446,109 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// RawAutocomplete can listen for changes.
   final AutocompleteFieldViewBuilder fieldViewBuilder;
 
+  /// The FocusNode that is used for the text field.
+  ///
+  /// {@template flutter.widgets.RawAutocomplete.split}
+  /// The main purpose of this parameter is to allow the use of a separate text
+  /// field located in another part of the widget tree instead of the text
+  /// field built by [fieldViewBuilder]. For example, it may be desirable to
+  /// place the text field in the AppBar and the options below in the main body.
+  ///
+  /// When following this pattern, [fieldViewBuilder] can return
+  /// `SizedBox.shrink()` so that nothing is drawn where the text field would
+  /// normally be. A separate text field can be created elsewhere, and a
+  /// FocusNode and TextEditingController can be passed both to that text field
+  /// and to RawAutocomplete.
+  ///
+  /// {@tool dartpad --template=freeform}
+  /// This examples shows how to create an autocomplete widget with the text
+  /// field in the AppBar and the results in the main body of the app.
+  ///
+  /// ```dart imports
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:flutter/material.dart';
+  /// ```
+  ///
+  /// ```dart
+  /// static final List<String> _options = <String>[
+  ///   'aardvark',
+  ///   'bobcat',
+  ///   'chameleon',
+  /// ];
+  ///
+  /// class RawAutocompleteSplitPage extends StatefulWidget {
+  ///   RawAutocompleteSplitPage({Key? key}) : super(key: key);
+  ///
+  ///   RawAutocompleteSplitPageState createState() => RawAutocompleteSplitPageState();
+  /// }
+  ///
+  /// class RawAutocompleteSplitPageState extends State<RawAutocompleteSplitPage> {
+  ///   final TextEditingController _textEditingController = TextEditingController();
+  ///   final FocusNode _focusNode = FocusNode();
+  ///   late VoidCallback _onFieldSubmitted;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return MaterialApp(
+  ///       theme: ThemeData(
+  ///         primarySwatch: Colors.blue,
+  ///       ),
+  ///       title: 'Split RawAutocomplete App',
+  ///       home: Scaffold(
+  ///         appBar: AppBar(
+  ///           // This is where the real field is being built.
+  ///           title: TextFormField(
+  ///             controller: _textEditingController,
+  ///             focusNode: _focusNode,
+  ///             decoration: InputDecoration(
+  ///               hintText: 'Split RawAutocomplete App',
+  ///             ),
+  ///             onFieldSubmitted: (String value) {
+  ///               _onFieldSubmitted();
+  ///             },
+  ///           ),
+  ///         ),
+  ///         body: Align(
+  ///           alignment: Alignment.topLeft,
+  ///           child: RawAutocomplete<String>(
+  ///             focusNode: _focusNode,
+  ///             textEditingController: _textEditingController,
+  ///             optionsBuilder: (TextEditingValue textEditingValue) {
+  ///               return _options.where((String option) {
+  ///                 return option.contains(textEditingValue.text.toLowerCase());
+  ///               }).toList();
+  ///             },
+  ///             fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+  ///               _onFieldSubmitted = onFieldSubmitted;
+  ///               return SizedBox.shrink();
+  ///             },
+  ///             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+  ///               return Material(
+  ///                 elevation: 4.0,
+  ///                 child: ListView(
+  ///                   children: options.map((String option) => GestureDetector(
+  ///                     onTap: () {
+  ///                       onSelected(option);
+  ///                     },
+  ///                     child: ListTile(
+  ///                       title: Text(option),
+  ///                     ),
+  ///                   )).toList(),
+  ///                 ),
+  ///               );
+  ///             },
+  ///           ),
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  /// {@endtemplate}
+  ///
+  /// If this parameter is not null, then [textEditingController] must also be
+  /// not null.
   final FocusNode? focusNode;
 
   /// Builds the selectable options widgets from a list of options objects.
@@ -474,6 +577,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// current TextEditingValue.
   final AutocompleteOptionsBuilder<T> optionsBuilder;
 
+  /// The TextEditingController that is used for the text field.
+  ///
+  /// {@macro flutter.widgets.RawAutocomplete.split}
+  ///
+  /// If this parameter is not null, then [focusNode] must also be not null.
   final TextEditingController? textEditingController;
 
   // The default way to convert an option to a string.
