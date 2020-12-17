@@ -119,7 +119,7 @@ class ImageConfiguration {
     bool hasArguments = false;
     if (bundle != null) {
       if (hasArguments)
-        result.write(', ');
+        result.write(', '); // ignore: dead_code
       result.write('bundle: $bundle');
       hasArguments = true;
     }
