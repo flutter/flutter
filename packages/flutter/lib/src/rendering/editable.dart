@@ -2368,7 +2368,11 @@ class _RenderEditableCustomPaint extends RenderCustomPaint {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    painter?.paint(context.canvas, Size.zero);
+    final RenderEditablePainter? painter = this.painter;
+    if (painter != null) {
+      context.setWillChangeHint();
+      painter.paint(context.canvas, Size.zero);
+    }
   }
 }
 
