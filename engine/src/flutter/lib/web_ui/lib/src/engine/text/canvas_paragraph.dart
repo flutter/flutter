@@ -197,10 +197,7 @@ class CanvasParagraph implements EngineParagraph {
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    // TODO(mdebbar): After layout, each paragraph span should have info about
-    // its position and dimensions. Use that information to find which span the
-    // offset belongs to, then search within that span for the exact character.
-    return const ui.TextPosition(offset: 0);
+    return _layoutService.getPositionForOffset(offset);
   }
 
   @override
