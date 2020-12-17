@@ -192,15 +192,7 @@ class CanvasParagraph implements EngineParagraph {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    // TODO(mdebbar): After layout, each paragraph span should have info about
-    // its position and dimensions.
-    //
-    // 1. Find the spans where the `start` and `end` indices fall.
-    // 2. If it's the same span, find the sub-box from `start` to `end`.
-    // 3. Else, find the trailing box(es) of the `start` span, and the `leading`
-    //    box(es) of the `end` span.
-    // 4. Include the boxes of all the spans in between.
-    return <ui.TextBox>[];
+    return _layoutService.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
   }
 
   @override

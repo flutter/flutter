@@ -111,12 +111,14 @@ class TextLayoutService {
           // TODO(mdebbar):
           // (1) adjust the current line's height to fit the placeholder.
           // (2) update accumulated line width.
+          // (3) add placeholder box to line.
         } else {
           // The placeholder can't fit on the current line.
           // TODO(mdebbar):
           // (1) create a line.
           // (2) adjust the new line's height to fit the placeholder.
           // (3) update `lineStart`, etc.
+          // (4) add placeholder box to line.
         }
       } else if (span is FlatTextSpan) {
         spanometer.currentSpan = span;
@@ -171,6 +173,7 @@ class TextLayoutService {
 
       // Only go to the next span if we've reached the end of this span.
       if (currentLine.end.index >= span.end && spanIndex < spanCount - 1) {
+        currentLine.createBox();
         span = paragraph.spans[++spanIndex];
       }
     }
@@ -228,6 +231,121 @@ class TextLayoutService {
         }
       }
     }
+  }
+
+  List<ui.TextBox> getBoxesForRange(
+    int start,
+    int end,
+    ui.BoxHeightStyle boxHeightStyle,
+    ui.BoxWidthStyle boxWidthStyle,
+  ) {
+    // Zero-length ranges and invalid ranges return an empty list.
+    if (start >= end || start < 0 || end < 0) {
+      return <ui.TextBox>[];
+    }
+
+    final int length = paragraph.toPlainText().length;
+    // Ranges that are out of bounds should return an empty list.
+    if (start > length || end > length) {
+      return <ui.TextBox>[];
+    }
+
+    final List<ui.TextBox> boxes = <ui.TextBox>[];
+
+    for (final EngineLineMetrics line in lines) {
+      if (line.overlapsWith(start, end)) {
+        for (final RangeBox box in line.boxes!) {
+          if (box.overlapsWith(start, end)) {
+            boxes.add(box.intersect(line, start, end));
+          }
+        }
+      }
+    }
+    return boxes;
+  }
+}
+
+/// Represents a box inside [span] with the range of [start] to [end].
+///
+/// The box's coordinates are all relative to the line it belongs to. For
+/// example, [left] is the distance from the left edge of the line to the left
+/// edge of the box.
+class RangeBox {
+  RangeBox.fromSpanometer(
+    this.spanometer, {
+    required this.start,
+    required this.end,
+    required this.left,
+  })   : span = spanometer.currentSpan,
+        height = spanometer.height,
+        baseline = spanometer.alphabeticBaseline,
+        width = spanometer.measureIncludingSpace(start, end);
+
+  final Spanometer spanometer;
+  final ParagraphSpan span;
+  final LineBreakResult start;
+  final LineBreakResult end;
+
+  /// The distance from the left edge of the line to the left edge of the box.
+  final double left;
+
+  /// The distance from the left edge to the right edge of the box.
+  final double width;
+
+  /// The distance from the top edge to the bottom edge of the box.
+  final double height;
+
+  /// The distance from the top edge of the box to the alphabetic baseline of
+  /// the box.
+  final double baseline;
+
+  /// The direction in which text inside this box flows.
+  ui.TextDirection get direction =>
+      spanometer.paragraph.paragraphStyle._effectiveTextDirection;
+
+  /// The distance from the left edge of the line to the right edge of the box.
+  double get right => left + width;
+
+  /// Whether this box's range overlaps with the range from [startIndex] to
+  /// [endIndex].
+  bool overlapsWith(int startIndex, int endIndex) {
+    return startIndex < this.end.index && this.start.index < endIndex;
+  }
+
+  /// Performs the intersection of this box with the range given by [start] and
+  /// [end] indices, and returns a [ui.TextBox] representing that intersection.
+  ///
+  /// The coordinates of the resulting [ui.TextBox] are relative to the
+  /// paragraph, not to the line.
+  ui.TextBox intersect(EngineLineMetrics line, int start, int end) {
+    final double top = line.baseline - baseline;
+    final double left, right;
+
+    if (start <= this.start.index) {
+      left = this.left;
+    } else {
+      spanometer.currentSpan = span as FlatTextSpan;
+      left = this.left + spanometer._measure(this.start.index, start);
+    }
+
+    if (end >= this.end.indexWithoutTrailingNewlines) {
+      right = this.right;
+    } else {
+      spanometer.currentSpan = span as FlatTextSpan;
+      right = this.right -
+          spanometer._measure(end, this.end.indexWithoutTrailingNewlines);
+    }
+
+    // The [RangeBox]'s left and right edges are relative to the line. In order
+    // to make them relative to the paragraph, we need to add the left edge of
+    // the line.
+    return ui.TextBox.fromLTRBD(
+      left + line.left,
+      top,
+      right + line.left,
+      top + height,
+      direction,
+    );
   }
 }
 
@@ -310,6 +428,7 @@ class LineBuilder {
   }
 
   final List<LineSegment> _segments = <LineSegment>[];
+  final List<RangeBox> _boxes = <RangeBox>[];
 
   final double maxWidth;
   final CanvasParagraph paragraph;
@@ -398,7 +517,7 @@ class LineBuilder {
     // The segment starts at the end of the line.
     final LineBreakResult segmentStart = end;
     return LineSegment(
-      span: spanometer.currentSpan!,
+      span: spanometer.currentSpan,
       start: segmentStart,
       end: segmentEnd,
       width: spanometer.measure(segmentStart, segmentEnd),
@@ -542,8 +661,53 @@ class LineBuilder {
         LineBreakResult.sameIndex(breakingPoint, LineBreakType.prohibited));
   }
 
+  LineBreakResult get _boxStart {
+    if (_boxes.isEmpty) {
+      return start;
+    }
+    // The end of the last box is the start of the new box.
+    return _boxes.last.end;
+  }
+
+  double get _boxLeft {
+    if (_boxes.isEmpty) {
+      return 0.0;
+    }
+    return _boxes.last.right;
+  }
+
+  ui.TextDirection get direction =>
+      paragraph.paragraphStyle._effectiveTextDirection;
+
+  /// Cuts a new box in the line.
+  ///
+  /// If this is the first box in the line, it'll start at the beginning of the
+  /// line. Else, it'll start at the end of the last box.
+  ///
+  /// A box should be cut whenever the end of line is reached, or when switching
+  /// from one span to another.
+  void createBox() {
+    final LineBreakResult boxStart = _boxStart;
+    final LineBreakResult boxEnd = end;
+    // Avoid creating empty boxes. This could happen when the end of a span
+    // coincides with the end of a line. In this case, `createBox` is called twice.
+    if (boxStart == boxEnd) {
+      return;
+    }
+
+    _boxes.add(RangeBox.fromSpanometer(
+      spanometer,
+      start: boxStart,
+      end: boxEnd,
+      left: _boxLeft,
+    ));
+  }
+
   /// Builds the [EngineLineMetrics] instance that represents this line.
   EngineLineMetrics build({String? ellipsis}) {
+    // At the end of each line, we cut the last box of the line.
+    createBox();
+
     final double ellipsisWidth =
         ellipsis == null ? 0.0 : spanometer.measureText(ellipsis);
 
@@ -559,6 +723,7 @@ class LineBuilder {
       left: alignOffset,
       height: height,
       baseline: accumulatedHeight + alphabeticBaseline,
+      boxes: _boxes,
     );
   }
 
@@ -601,12 +766,12 @@ class Spanometer {
 
   String _cssFontString = '';
 
-  double? get letterSpacing => _currentSpan!.style._letterSpacing;
+  double? get letterSpacing => currentSpan.style._letterSpacing;
 
   TextHeightRuler? _currentRuler;
   FlatTextSpan? _currentSpan;
 
-  FlatTextSpan? get currentSpan => _currentSpan;
+  FlatTextSpan get currentSpan => _currentSpan!;
   set currentSpan(FlatTextSpan? span) {
     if (span == _currentSpan) {
       return;
@@ -681,7 +846,7 @@ class Spanometer {
   }) {
     assert(_currentSpan != null);
 
-    final FlatTextSpan span = _currentSpan!;
+    final FlatTextSpan span = currentSpan;
 
     // Make sure the range is within the current span.
     assert(start >= span.start && start <= span.end);
@@ -713,7 +878,7 @@ class Spanometer {
 
   double _measure(int start, int end) {
     assert(_currentSpan != null);
-    final FlatTextSpan span = _currentSpan!;
+    final FlatTextSpan span = currentSpan;
 
     // Make sure the range is within the current span.
     assert(start >= span.start && start <= span.end);

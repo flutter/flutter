@@ -25,7 +25,8 @@ class EngineLineMetrics implements ui.LineMetrics {
         startIndex = -1,
         endIndex = -1,
         endIndexWithoutNewlines = -1,
-        widthWithTrailingSpaces = width;
+        widthWithTrailingSpaces = width,
+        boxes = null;
 
   EngineLineMetrics.withText(
     String this.displayText, {
@@ -50,7 +51,8 @@ class EngineLineMetrics implements ui.LineMetrics {
         descent = double.infinity,
         unscaledAscent = double.infinity,
         height = double.infinity,
-        baseline = double.infinity;
+        baseline = double.infinity,
+        boxes = null;
 
   EngineLineMetrics.rich(
     this.lineNumber, {
@@ -64,10 +66,14 @@ class EngineLineMetrics implements ui.LineMetrics {
     required this.left,
     required this.height,
     required this.baseline,
+    // Didn't use `this.boxes` because we want it to be non-null in this
+    // constructor.
+    required List<RangeBox> boxes,
   })  : displayText = null,
         ascent = double.infinity,
         descent = double.infinity,
-        unscaledAscent = double.infinity;
+        unscaledAscent = double.infinity,
+        this.boxes = boxes;
 
   /// The text to be rendered on the screen representing this line.
   final String? displayText;
@@ -90,6 +96,10 @@ class EngineLineMetrics implements ui.LineMetrics {
   /// The index (exclusive) in the text where this line ends, ignoring newline
   /// characters.
   final int endIndexWithoutNewlines;
+
+  /// The list of boxes representing the entire line, possibly across multiple
+  /// spans.
+  final List<RangeBox>? boxes;
 
   @override
   final bool hardBreak;
@@ -129,6 +139,10 @@ class EngineLineMetrics implements ui.LineMetrics {
 
   @override
   final int lineNumber;
+
+  bool overlapsWith(int startIndex, int endIndex) {
+    return startIndex < this.endIndex && this.startIndex < endIndex;
+  }
 
   @override
   int get hashCode => ui.hashValues(
