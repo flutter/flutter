@@ -783,8 +783,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         if (_hovering && enabled)
           updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
         _updateFocusHighlights();
-        return;
       }
+      return;
     }
 
     if (enabled != _isWidgetEnabled(oldWidget)) {
