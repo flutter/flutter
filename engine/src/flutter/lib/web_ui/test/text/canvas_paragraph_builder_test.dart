@@ -8,6 +8,11 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+const String paragraphStyle = 'style="position: absolute; white-space: pre-wrap; overflow-wrap: break-word; overflow: hidden;"';
+const String defaultColor = 'color: rgb(255, 0, 0);';
+const String defaultFontFamily = 'font-family: sans-serif;';
+const String defaultFontSize = 'font-size: 14px;';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -16,9 +21,6 @@ void testMain() {
   setUpAll(() {
     WebExperiments.ensureInitialized();
   });
-
-  // TODO(mdebbar): Add checks for the output of `toDomElement()` in all the
-  //                tests below.
 
   test('Builds a text-only canvas paragraph', () {
     final EngineParagraphStyle style = EngineParagraphStyle(fontSize: 13.0);
@@ -29,6 +31,10 @@ void testMain() {
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.paragraphStyle, style);
     expect(paragraph.toPlainText(), 'Hello');
+    expect(
+      paragraph.toDomElement().outerHtml,
+      '<p $paragraphStyle><span style="$defaultColor font-size: 13px; $defaultFontFamily">Hello</span></p>',
+    );
     expect(paragraph.spans, hasLength(1));
 
     final ParagraphSpan span = paragraph.spans.single;
@@ -47,6 +53,10 @@ void testMain() {
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.paragraphStyle, style);
     expect(paragraph.toPlainText(), 'Hello');
+    expect(
+      paragraph.toDomElement().outerHtml,
+      '<p $paragraphStyle><span style="$defaultColor $defaultFontSize $defaultFontFamily">Hello</span></p>',
+    );
     expect(paragraph.spans, hasLength(1));
 
     final FlatTextSpan textSpan = paragraph.spans.single as FlatTextSpan;
@@ -68,6 +78,14 @@ void testMain() {
 
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.toPlainText(), 'Hello');
+    expect(
+      paragraph.toDomElement().outerHtml,
+      '<p $paragraphStyle>'
+      '<span style="$defaultColor line-height: 1.5; font-size: 9px; font-weight: bold; font-style: italic; $defaultFontFamily letter-spacing: 2px;">'
+      'Hello'
+      '</span>'
+      '</p>',
+    );
     expect(paragraph.spans, hasLength(1));
 
     final FlatTextSpan span = paragraph.spans.single as FlatTextSpan;
@@ -96,6 +114,17 @@ void testMain() {
 
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.toPlainText(), 'Hello world');
+    expect(
+      paragraph.toDomElement().outerHtml,
+      '<p $paragraphStyle>'
+      '<span style="$defaultColor font-size: 13px; font-weight: bold; $defaultFontFamily">'
+      'Hello'
+      '</span>'
+      '<span style="$defaultColor font-size: 13px; font-style: italic; $defaultFontFamily">'
+      ' world'
+      '</span>'
+      '</p>',
+    );
     expect(paragraph.spans, hasLength(2));
 
     final FlatTextSpan hello = paragraph.spans.first as FlatTextSpan;
@@ -134,6 +163,20 @@ void testMain() {
 
     final CanvasParagraph paragraph = builder.build();
     expect(paragraph.toPlainText(), 'Hello world!');
+    expect(
+      paragraph.toDomElement().outerHtml,
+      '<p $paragraphStyle>'
+      '<span style="$defaultColor line-height: 2; font-size: 13px; font-weight: bold; $defaultFontFamily">'
+      'Hello'
+      '</span>'
+      '<span style="$defaultColor font-size: 13px; font-weight: bold; font-style: italic; $defaultFontFamily">'
+      ' world'
+      '</span>'
+      '<span style="$defaultColor font-size: 13px; font-weight: normal; font-style: italic; $defaultFontFamily">'
+      '!'
+      '</span>'
+      '</p>',
+    );
     expect(paragraph.spans, hasLength(3));
 
     final FlatTextSpan hello = paragraph.spans[0] as FlatTextSpan;
