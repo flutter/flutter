@@ -36,13 +36,6 @@
 tasks:
   # Tests of compiling in a variety of modes
 
-  complex_layout_android__compile:
-    description: >
-      Collects various performance metrics of compiling the Complex
-      Layout sample app for Android from Linux.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   complex_layout_ios__compile:
     description: >
       Collects various performance metrics of compiling the Complex
@@ -56,13 +49,6 @@ tasks:
       Layout for Android from Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-
-  basic_material_app_android__compile:
-    description: >
-      Collects various performance metrics of compiling the default
-      app for Android from Linux.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
 
   basic_material_app_ios__compile:
     description: >
@@ -130,12 +116,6 @@ tasks:
   platform_views_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of platform views in the Complex Layout sample app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
-  android_view_scroll_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of Android views in the platform view layout sample app on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
@@ -236,12 +216,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  backdrop_filter_perf__e2e_summary:
-    description: >
-      Measures the runtime performance of backdrop filter blurs on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   textfield_perf__timeline_summary:
     description: >
       Measures the runtime performance of textfield on Android.
@@ -259,12 +233,6 @@ tasks:
       Measures the runtime performance of color filter with fade on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-
-  color_filter_and_fade_perf__e2e_summary:
-    description: >
-      Measures the runtime performance of color filter with fade on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
 
   fading_child_animation_perf__timeline_summary:
     description: >
@@ -421,19 +389,6 @@ tasks:
       Validates our service protocol extensions.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-
-  android_defines_test:
-    description: >
-      Builds an APK with a --dart-define and verifies it can be used as a constant
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    on_luci: true
-
-  android_obfuscate_test:
-    description: >
-      Builds an obfuscated APK and verifies a dart identifier cannot be found
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
 
   complex_layout_semantics_perf:
     description: >
@@ -843,28 +798,6 @@ tasks:
       Measures memory, cpu, and gpu usage when rotating through a series of large images.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-
-  animated_placeholder_perf:
-    description: >
-      Measures frame build and rasterizer times, as well as frame build counts
-      for a grid of images that uses FadeInImage with an animated gif as the
-      placeholder.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
-  animated_placeholder_perf__e2e_summary:
-    description: >
-      Measures frame build and rasterizer times, as well as frame build counts
-      for a grid of images that uses FadeInImage with an animated gif as the
-      placeholder.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
-  analyzer_benchmark:
-    description: >
-      Measures the speed of Dart analyzer.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
 
   # android_splash_screen_integration_test:
   #   description: >

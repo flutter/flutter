@@ -16,26 +16,17 @@ class IOSEmulators extends EmulatorDiscovery {
   bool get canListAnything => globals.iosWorkflow.canListEmulators;
 
   @override
-  Future<List<Emulator>> get emulators async {
-    final List<IOSSimulator> simulators = await globals.iosSimulatorUtils.getAvailableDevices();
-    return simulators.map<Emulator>((IOSSimulator device) {
-      return IOSEmulator(device);
-    }).toList();
-  }
+  Future<List<Emulator>> get emulators async => getEmulators();
 
   @override
   bool get canLaunchAnything => canListAnything;
 }
 
 class IOSEmulator extends Emulator {
-  IOSEmulator(IOSSimulator simulator)
-      : _simulator = simulator,
-        super(simulator.id, true);
-
-  final IOSSimulator _simulator;
+  const IOSEmulator(String id) : super(id, true);
 
   @override
-  String get name => _simulator.name;
+  String get name => 'iOS Simulator';
 
   @override
   String get manufacturer => 'Apple';
@@ -44,20 +35,43 @@ class IOSEmulator extends Emulator {
   Category get category => Category.mobile;
 
   @override
-  String get platformDisplay =>
-      // com.apple.CoreSimulator.SimRuntime.iOS-10-3 => iOS-10-3
-      _simulator.simulatorCategory?.split('.')?.last ?? 'ios';
+  PlatformType get platformType => PlatformType.ios;
 
   @override
   Future<void> launch() async {
-    final RunResult launchResult = await globals.processUtils.run(<String>[
-      'open',
-      '-a',
-      globals.xcode.getSimulatorPath(),
-    ]);
-    if (launchResult.exitCode != 0) {
-      globals.printError('$launchResult');
+    Future<bool> launchSimulator(List<String> additionalArgs) async {
+      final List<String> args = <String>[
+        'open',
+        ...additionalArgs,
+        '-a',
+        globals.xcode.getSimulatorPath(),
+      ];
+
+      final RunResult launchResult = await globals.processUtils.run(args);
+      if (launchResult.exitCode != 0) {
+        globals.printError('$launchResult');
+        return false;
+      }
+      return true;
     }
-    return _simulator.boot();
+
+    // First run with `-n` to force a device to boot if there isn't already one
+    if (!await launchSimulator(<String>['-n'])) {
+      return;
+    }
+
+    // Run again to force it to Foreground (using -n doesn't force existing
+    // devices to the foreground)
+    await launchSimulator(<String>[]);
   }
+}
+
+/// Return the list of iOS Simulators (there can only be zero or one).
+List<IOSEmulator> getEmulators() {
+  final String simulatorPath = globals.xcode.getSimulatorPath();
+  if (simulatorPath == null) {
+    return <IOSEmulator>[];
+  }
+
+  return <IOSEmulator>[const IOSEmulator(iosSimulatorId)];
 }
