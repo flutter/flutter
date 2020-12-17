@@ -86,7 +86,7 @@ void main() {
     expect(
       editable.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE DETACHED\n'
         ' │ parentData: MISSING\n'
         ' │ constraints: MISSING\n'
         ' │ size: MISSING\n'
@@ -132,10 +132,12 @@ void main() {
         offset: 0,
       ),
     );
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+    // Prepare for painting after layout.
+    pumpFrame(phase: EnginePhase.compositingBits);
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
+      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 500.0, 10.0)),
     );
   });
 
@@ -167,6 +169,9 @@ void main() {
     layout(editable);
 
     editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    // Prepare for painting after layout.
+    pumpFrame(phase: EnginePhase.compositingBits);
+
     expect(
       editable,
       // Draw no cursor by default.
@@ -174,7 +179,7 @@ void main() {
     );
 
     editable.showCursor = showCursor;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
@@ -185,7 +190,7 @@ void main() {
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
     editable.cursorWidth = 4;
     editable.cursorRadius = const Radius.circular(3);
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
@@ -196,7 +201,7 @@ void main() {
     ));
 
     editable.textScaleFactor = 2;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
     expect(editable, paints..rrect(
@@ -209,7 +214,7 @@ void main() {
 
     // Can turn off caret.
     showCursor.value = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   });
@@ -263,9 +268,8 @@ void main() {
       ),
     );
 
-    layout(editable);
-
-    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+    pumpFrame(phase: EnginePhase.compositingBits);
     expect(
       editable,
       // Draw no cursor by default.
@@ -273,7 +277,7 @@ void main() {
     );
 
     editable.showCursor = showCursor;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
@@ -284,7 +288,7 @@ void main() {
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
     editable.cursorWidth = 4;
     editable.cursorRadius = const Radius.circular(3);
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
@@ -295,7 +299,7 @@ void main() {
     ));
 
     editable.textScaleFactor = 2;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
     expect(editable, paints..rrect(
@@ -308,7 +312,7 @@ void main() {
 
     // Can turn off caret.
     showCursor.value = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61024
@@ -391,7 +395,7 @@ void main() {
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
 
     editable.paintCursorAboveText = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       editable,
@@ -499,7 +503,7 @@ void main() {
 
     viewportOffset.correctBy(10);
 
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       editable,
@@ -652,7 +656,9 @@ void main() {
       promptRectColor: promptRectColor,
       promptRectRange: const TextRange(start: 0, end: 1),
     );
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+
+    layout(editable, constraints: BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
@@ -662,9 +668,9 @@ void main() {
     editable.promptRectColor = null;
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable.promptRectColor, promptRectColor);
+    expect(editable.promptRectColor, null);
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
       isNot(paints..rect(color: promptRectColor)),
