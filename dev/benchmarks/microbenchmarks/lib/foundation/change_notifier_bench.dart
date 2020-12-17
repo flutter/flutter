@@ -16,6 +16,7 @@ void main() {
   // In the following benchmarks, we won't remove the listeners when we don't
   // want to measure removeListener because we know that everything will be
   // GC'ed in the end.
+  // Not removing listeners would cause memory leaks in a real application.
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
@@ -116,8 +117,7 @@ void main() {
     }
   }
 
-  void runRemoveListenerWhileNotifyingBenchmark(int iteration,
-      {bool addResult = true}) {
+  void runRemoveListenerWhileNotifyingBenchmark(int iteration, {bool addResult = true}) {
     const String name = 'removeListenerWhileNotifying';
 
     final List<VoidCallback> listeners = <VoidCallback>[
