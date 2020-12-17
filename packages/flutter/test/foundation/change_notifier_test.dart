@@ -435,4 +435,48 @@ void main() {
     expect(log, <String>['listener1', 'listener1']);
     log.clear();
   });
+
+  test('Remove Listeners while notifying on a list which will not resize', () {
+    final TestNotifier test = TestNotifier();
+    final List<String> log = <String>[];
+    final List<VoidCallback> listeners = <VoidCallback>[];
+
+    void autoRemove(){
+      // We remove 4 listeners.
+      // We will end up with (13-4 = 9) listeners.
+      test.removeListener(listeners[1]);
+      test.removeListener(listeners[3]);
+      test.removeListener(listeners[4]);
+      test.removeListener(autoRemove);
+    }
+
+    test.addListener(autoRemove);
+
+    // We add 12 more listeners.
+    for (int i = 0; i < 12; i++) {
+      final VoidCallback listener = () { log.add('listener$i'); };
+      listeners.add(listener);
+      test.addListener(listener);
+    }
+
+    final List<int> remainingListenerIndexes = [0,2,5,6,7,8,9,10,11];
+    final List<String> expectedLog = remainingListenerIndexes.map((int i) => 'listener$i').toList();
+
+    test.notify();
+    expect(log, expectedLog);
+
+    log.clear();
+    // We expect to have the same result after the removal of previous listeners.
+    test.notify();
+    expect(log, expectedLog);
+
+    // We remove all other listeners.
+    for (int i = 0; i < remainingListenerIndexes.length; i++) {
+      test.removeListener(listeners[remainingListenerIndexes[i]]);
+    }
+
+    log.clear();
+    test.notify();
+    expect(log, <String>[]);
+  });
 }

@@ -327,19 +327,37 @@ class ChangeNotifier implements Listenable {
     if (_notificationCallStackDepth == 0 && _reentrantlyRemovedListeners > 0) {
       // We really remove the listeners when all notifications are done.
       final int newLength = _count - _reentrantlyRemovedListeners;
-      final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(newLength, null);
+      if (newLength * 2 <= _listeners.length) {
+        // As in _removeAt, we only shrink the list when the real number of
+        // listeners is half the length of our list.
+        final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(newLength, null);
 
-      int newIndex = 0;
-      for (int i = 0; i < _count; i++) {
-        final VoidCallback? listener = _listeners[i];
-        if (listener != null) {
-          newListeners[newIndex++] = listener;
+        int newIndex = 0;
+        for (int i = 0; i < _count; i++) {
+          final VoidCallback? listener = _listeners[i];
+          if (listener != null) {
+            newListeners[newIndex++] = listener;
+          }
+        }
+
+        _listeners = newListeners;
+      } else {
+        // Otherwise we put all the null references at the end.
+        for (int i = 0; i < newLength; i += 1) {
+          if (_listeners[i] == null) {
+            // We swap this item with the next not null item.
+            int swapIndex = i + 1;
+            while(_listeners[swapIndex] == null){
+              swapIndex += 1;
+            }
+            _listeners[i] = _listeners[swapIndex];
+            _listeners[swapIndex] = null;
+          }
         }
       }
 
       _reentrantlyRemovedListeners = 0;
       _count = newLength;
-      _listeners = newListeners;
     }
   }
 }
