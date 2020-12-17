@@ -154,6 +154,7 @@ class CanvasParagraph implements EngineParagraph {
           style: span.style,
           isSpan: true,
         );
+        domRenderer.appendText(spanElement, span.textOf(this));
         domRenderer.append(element, spanElement);
       } else if (span is PlaceholderSpan) {
         domRenderer.append(

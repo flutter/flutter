@@ -1751,6 +1751,9 @@ void _applyTextStyleToElement({
   if (color != null) {
     cssStyle.color = colorToCssString(color);
   }
+  if (style._height != null) {
+    cssStyle.lineHeight = '${style._height}';
+  }
   if (style._fontSize != null) {
     cssStyle.fontSize = '${style._fontSize!.floor()}px';
   }
