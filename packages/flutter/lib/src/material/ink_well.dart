@@ -775,7 +775,16 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
+    for (final InkFeature? inkFeature in <InkFeature?>[...?_splashes, ..._highlights.values]) {
+      if (inkFeature == null)
+        continue;
+      if (inkFeature.controller != Material.of(context)!) {
+        _dispose();
+        break;
+      }
+    }
+
+    if (enabled != _isWidgetEnabled(oldWidget)) {
       if (enabled) {
         // Don't call wigdet.onHover because many wigets, including the button
         // widgets, apply setState to an ancestor context from onHover.
@@ -787,6 +796,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void dispose() {
+    _dispose();
+    FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
+    super.dispose();
+  }
+
+  void _dispose() {
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes!;
       _splashes = null;
@@ -800,8 +815,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       _highlights[highlight] = null;
     }
     widget.parentState?.markChildInkResponsePressed(this, false);
-    FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
-    super.dispose();
   }
 
   @override
