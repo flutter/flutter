@@ -412,6 +412,19 @@ void main() {
       expect(mockContext.offets, isEmpty);
     });
 
+    testWidgets('ColoredBox - size, no child, transparent color', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: Color(0x00000000)));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      expect(mockCanvas.rects, isEmpty);
+      expect(mockCanvas.paints, isEmpty);
+      expect(mockContext.children, isEmpty);
+      expect(mockContext.offets, isEmpty);
+    });
+
     testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
       const ValueKey<int> key = ValueKey<int>(0);
       const Widget child = SizedBox.expand(key: key);
