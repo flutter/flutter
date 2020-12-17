@@ -1,4 +1,6 @@
 name: verify_exported
+environment:
+  sdk: '>=2.11.0 <3.0.0'
 dependencies:
   path: 1.6.2
   collection: 1.14.11

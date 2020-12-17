@@ -4,3 +4,7 @@
 
 # The presence of this file is necessary in order to use the dart_library
 # template in BUILD.gn.
+
+environment:
+  sdk: '>=2.11.0 <3.0.0'
+
