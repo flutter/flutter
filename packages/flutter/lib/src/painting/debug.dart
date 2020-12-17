@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:io';
 import 'dart:ui' show Size, hashValues;
 
@@ -12,16 +13,6 @@ import 'package:flutter/foundation.dart';
 /// This is useful when writing golden file tests (see [matchesGoldenFile]) since
 /// the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
 /// version to version (or even from run to run).
-///
-/// It can be used within tests to enable shadows for a given test for screenshots.
-///
-/// The only way this property works is if it is set to false in a single
-/// test case then set it back to true before the end of the test case.
-///
-/// If it is tried to alter outside of an individual test, an exception is thrown.
-///
-/// If it is not set back to true at the end of a test, an exception is thrown.
-
 bool debugDisableShadows = false;
 
 /// Signature for a method that returns an [HttpClient].
@@ -78,7 +69,7 @@ class ImageSizeInfo {
   int _sizeToBytes(Size size) {
     // Assume 4 bytes per pixel and that mipmapping will be used, which adds
     // 4/3.
-    return (size.width * size.height * 4 * (4 / 3)).toInt();
+    return (size.width * size.height * 4 * (4/3)).toInt();
   }
 
   /// Returns a JSON encodable representation of this object.
@@ -104,18 +95,17 @@ class ImageSizeInfo {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ImageSizeInfo &&
-        other.source == source &&
-        other.imageSize == imageSize &&
-        other.displaySize == displaySize;
+    return other is ImageSizeInfo
+        && other.source == source
+        && other.imageSize == imageSize
+        && other.displaySize == displaySize;
   }
 
   @override
   int get hashCode => hashValues(source, displaySize, imageSize);
 
   @override
-  String toString() =>
-      'ImageSizeInfo($source, imageSize: $imageSize, displaySize: $displaySize)';
+  String toString() => 'ImageSizeInfo($source, imageSize: $imageSize, displaySize: $displaySize)';
 }
 
 /// If not null, called when the framework is about to paint an [Image] to a
@@ -184,8 +174,7 @@ int debugImageOverheadAllowance = 1024;
 /// The `debugDisableShadowsOverride` argument can be provided to override
 /// the expected value for [debugDisableShadows]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllPaintingVarsUnset(String reason,
-    {bool debugDisableShadowsOverride = false}) {
+bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
