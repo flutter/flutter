@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -1120,6 +1121,7 @@ void main() {
                             BottomNavigationBarItem(
                               label: label,
                               icon: Icon(Icons.ac_unit),
+                              tooltip: label,
                             ),
                             BottomNavigationBarItem(
                               label: 'B',
@@ -1148,6 +1150,45 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
+  });
+
+  testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                tooltip: 'A tooltip',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+              BottomNavigationBarItem(
+                label: 'C',
+                icon: Icon(Icons.cake),
+                tooltip: '',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('A'), findsOneWidget);
+    await tester.longPress(find.text('A'));
+    expect(find.byTooltip('A tooltip'), findsOneWidget);
+
+    expect(find.text('B'), findsOneWidget);
+    await tester.longPress(find.text('B'));
+    expect(find.byTooltip('B'), findsOneWidget);
+
+    expect(find.text('C'), findsOneWidget);
+    await tester.longPress(find.text('C'));
+    expect(find.byTooltip('C'), findsNothing);
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
@@ -1785,6 +1826,78 @@ void main() {
     );
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('BottomNavigationBar excludes semantics',
+      (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isSelected,
+                                SemanticsFlag.isFocusable
+                              ],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'A\nTab 1 of 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'B\nTab 2 of 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
   });
 }
 

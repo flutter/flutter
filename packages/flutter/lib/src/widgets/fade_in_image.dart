@@ -14,8 +14,7 @@ import 'implicit_animations.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// Uint8List bytes;
+// late Uint8List bytes;
 
 /// An image that shows a [placeholder] image while the target [image] is
 /// loading, then fades in the new image when it loads.
@@ -464,7 +463,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   void didUpdateTweens() {
-    _placeholderOpacityAnimation = animation!.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
+    _placeholderOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
         weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
@@ -480,7 +479,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       }
     });
 
-    _targetOpacityAnimation = animation!.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
+    _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: ConstantTween<double>(0),
         weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
@@ -493,7 +492,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
     if (!widget.isTargetLoaded && _isValid(_placeholderOpacity!) && _isValid(_targetOpacity!)) {
       // Jump (don't fade) back to the placeholder image, so as to be ready
       // for the full animation when the new target image becomes ready.
-      controller!.value = controller!.upperBound;
+      controller.value = controller.upperBound;
     }
   }
 

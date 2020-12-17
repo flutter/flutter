@@ -13,9 +13,6 @@ import 'colors.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// Applies a slider theme to descendant [Slider] widgets.
 ///
 /// A slider theme describes the colors and shape choices of the slider
@@ -93,7 +90,7 @@ class SliderTheme extends InheritedTheme {
   /// }
   ///
   /// class LaunchState extends State<Launch> {
-  ///   double _rocketThrust;
+  ///   double _rocketThrust = 0;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -253,7 +250,7 @@ class SliderThemeData with Diagnosticable {
   /// }
   ///
   /// class BlissfulState extends State<Blissful> {
-  ///   double _bliss;
+  ///   double _bliss = 0;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
