@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/web/bootstrap.dart';
+import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
 
@@ -69,5 +70,27 @@ void main() {
     final String result = generateTestBootstrapFileContents('foo.dart.js', 'require.js', 'mapper.js');
 
     expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
+  });
+
+  test('generateTestEntrypoint does not generate test config wrappers when testConfigPath is not passed', () {
+    final String result = generateTestEntrypoint(
+      relativeTestPath: 'relative_path.dart',
+      absolutePath: 'absolute_path.dart',
+      testConfigPath: null,
+      languageVersion: LanguageVersion(2, 8),
+    );
+
+    expect(result, isNot(contains('test_config.testExecutable')));
+  });
+
+  test('generateTestEntrypoint generates test config wrappers when testConfigPath is passed', () {
+    final String result = generateTestEntrypoint(
+      relativeTestPath: 'relative_path.dart',
+      absolutePath: 'absolute_path.dart',
+      testConfigPath: 'test_config_path.dart',
+      languageVersion: LanguageVersion(2, 8),
+    );
+
+    expect(result, contains('test_config.testExecutable'));
   });
 }
