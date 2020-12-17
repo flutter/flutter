@@ -12,9 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  test('ScrollbarTheme copyWith, ==, hashCode basics', () {
-    expect(const ScrollbarTheme(), const ScrollbarTheme().copyWith());
-    expect(const ScrollbarTheme().hashCode, const ScrollbarTheme().copyWith().hashCode);
+  test('ScrollbarThemeData copyWith, ==, hashCode basics', () {
+    expect(const ScrollbarThemeData(), const ScrollbarThemeData().copyWith());
+    expect(const ScrollbarThemeData().hashCode, const ScrollbarThemeData().copyWith().hashCode);
   });
 
   testWidgets('Passing no ScrollbarTheme returns defaults', (WidgetTester tester) async {
@@ -97,10 +97,16 @@ void main() {
           color: const Color(0x80000000),
         ),
     );
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+       TargetPlatform.linux,
+       TargetPlatform.macOS,
+       TargetPlatform.windows,
+       TargetPlatform.fuchsia,
+    }),
+  );
 
   testWidgets('Scrollbar uses values from ScrollbarTheme', (WidgetTester tester) async {
-    final ScrollbarTheme scrollbarTheme = _scrollbarTheme();
+    final ScrollbarThemeData scrollbarTheme = _scrollbarTheme();
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(scrollbarTheme: scrollbarTheme),
@@ -119,7 +125,7 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(787.0, 10.0, 795.0, 97.0),
+          const Rect.fromLTRB(785.0, 10.0, 795.0, 97.0),
           const Radius.circular(6.0),
         ),
         color: const Color(0xff4caf50),
@@ -135,7 +141,7 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(787.0, 10.0, 795.0, 97.0),
+          const Rect.fromLTRB(785.0, 10.0, 795.0, 97.0),
           const Radius.circular(6.0),
         ),
         // Drag color
@@ -178,7 +184,13 @@ void main() {
           color: const Color(0xff2196f3),
         ),
     );
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+       TargetPlatform.linux,
+       TargetPlatform.macOS,
+       TargetPlatform.windows,
+       TargetPlatform.fuchsia,
+    }),
+  );
 
   testWidgets('Scrollbar widget properties take priority over theme', (WidgetTester tester) async {
     const double thickness = 4.0;
@@ -270,7 +282,13 @@ void main() {
           color: const Color(0x80000000),
         ),
     );
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+       TargetPlatform.linux,
+       TargetPlatform.macOS,
+       TargetPlatform.windows,
+       TargetPlatform.fuchsia,
+    }),
+  );
 
   testWidgets('ThemeData colorScheme is used when no ScrollbarTheme is set', (WidgetTester tester) async {
     Widget buildFrame(ThemeData appTheme) {
@@ -425,11 +443,17 @@ void main() {
           color: const Color(0xa6ffffff),
         ),
     );
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+       TargetPlatform.linux,
+       TargetPlatform.macOS,
+       TargetPlatform.windows,
+       TargetPlatform.fuchsia,
+    }),
+  );
 
   testWidgets('Default ScrollbarTheme debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const ScrollbarTheme().debugFillProperties(builder);
+    const ScrollbarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -441,16 +465,14 @@ void main() {
 
   testWidgets('ScrollbarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const ScrollbarTheme(
-      thickness: 6.0,
-      hoverThickness: 12.0,
+    ScrollbarThemeData(
+      thickness: MaterialStateProperty.resolveWith(_getThickness),
       showTrackOnHover: true,
-      radius: Radius.circular(3.0),
-      thumbDragColor: Colors.red,
-      thumbHoverColor: Colors.orange,
-      thumbIdleColor: Colors.yellow,
-      trackColor: Colors.green,
-      trackBorderColor: Colors.blue,
+      isAlwaysShown: true,
+      radius: const Radius.circular(3.0),
+      thumbColor: MaterialStateProperty.resolveWith(_getThumbColor),
+      trackColor: MaterialStateProperty.resolveWith(_getTrackColor),
+      trackBorderColor: MaterialStateProperty.resolveWith(_getTrackBorderColor),
       crossAxisMargin: 3.0,
       mainAxisMargin: 6.0,
       minThumbLength: 120.0,
@@ -462,15 +484,13 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'thickness: 6.0',
-      'hoverThickness: 12.0',
+      'thickness: Instance of \'_MaterialStatePropertyWith<double?>\'',
       'showTrackOnHover: true',
+      'isAlwaysShown: true',
       'radius: Radius.circular(3.0)',
-      'thumbDragColor: MaterialColor(primary value: Color(0xfff44336))',
-      'thumbHoverColor: MaterialColor(primary value: Color(0xffff9800))',
-      'thumbIdleColor: MaterialColor(primary value: Color(0xffffeb3b))',
-      'trackColor: MaterialColor(primary value: Color(0xff4caf50))',
-      'trackBorderColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'thumbColor: Instance of \'_MaterialStatePropertyWith<Color?>\'',
+      'trackColor: Instance of \'_MaterialStatePropertyWith<Color?>\'',
+      'trackBorderColor: Instance of \'_MaterialStatePropertyWith<Color?>\'',
       'crossAxisMargin: 3.0',
       'mainAxisMargin: 6.0',
       'minThumbLength: 120.0'
@@ -484,32 +504,54 @@ void main() {
   }, skip: kIsWeb);
 }
 
-ScrollbarTheme _scrollbarTheme({
-  double thickness = 10.0,
-  double hoverThickness = 20.0,
+ScrollbarThemeData _scrollbarTheme({
+  MaterialStateProperty<double?>? thickness,
   bool showTrackOnHover = true,
+  bool isAlwaysShown = true,
   Radius radius = const Radius.circular(6.0),
-  Color thumbDragColor = Colors.red,
-  Color thumbHoverColor = Colors.blue,
-  Color thumbIdleColor = Colors.green,
-  Color trackColor = Colors.black,
-  Color trackBorderColor = Colors.yellow,
+  MaterialStateProperty<Color?>? thumbColor,
+  MaterialStateProperty<Color?>? trackColor,
+  MaterialStateProperty<Color?>? trackBorderColor,
   double crossAxisMargin = 5.0,
   double mainAxisMargin = 10.0,
   double minThumbLength = 50.0,
 }) {
-  return ScrollbarTheme(
-    thickness: thickness,
-    hoverThickness: hoverThickness,
+  return ScrollbarThemeData(
+    thickness: thickness ?? MaterialStateProperty.resolveWith(_getThickness),
     showTrackOnHover: showTrackOnHover,
+    isAlwaysShown: isAlwaysShown,
     radius: radius,
-    thumbDragColor: thumbDragColor,
-    thumbHoverColor: thumbHoverColor,
-    thumbIdleColor: thumbIdleColor,
-    trackColor: trackColor,
-    trackBorderColor: trackBorderColor,
+    thumbColor: thumbColor ?? MaterialStateProperty.resolveWith(_getThumbColor),
+    trackColor: trackColor ?? MaterialStateProperty.resolveWith(_getTrackColor),
+    trackBorderColor: trackBorderColor ?? MaterialStateProperty.resolveWith(_getTrackBorderColor),
     crossAxisMargin: crossAxisMargin,
     mainAxisMargin: mainAxisMargin,
     minThumbLength: minThumbLength,
   );
+}
+
+double? _getThickness(Set<MaterialState> states) {
+  if (states.contains(MaterialState.hovered))
+    return 20.0;
+  return 10.0;
+}
+
+Color? _getThumbColor(Set<MaterialState> states) {
+  if (states.contains(MaterialState.dragged))
+    return Colors.red;
+  if (states.contains(MaterialState.hovered))
+    return Colors.blue;
+  return Colors.green;
+}
+
+Color? _getTrackColor(Set<MaterialState> states) {
+  if (states.contains(MaterialState.hovered))
+    return Colors.black;
+  return null;
+}
+
+Color? _getTrackBorderColor(Set<MaterialState> states) {
+  if (states.contains(MaterialState.hovered))
+    return Colors.yellow;
+  return null;
 }

@@ -279,7 +279,7 @@ class ThemeData with Diagnosticable {
     bool? applyElevationOverlayColor,
     PageTransitionsTheme? pageTransitionsTheme,
     AppBarTheme? appBarTheme,
-    ScrollbarTheme? scrollbarTheme,
+    ScrollbarThemeData? scrollbarTheme,
     BottomAppBarTheme? bottomAppBarTheme,
     ColorScheme? colorScheme,
     DialogTheme? dialogTheme,
@@ -412,7 +412,7 @@ class ThemeData with Diagnosticable {
     tabBarTheme ??= const TabBarTheme();
     tooltipTheme ??= const TooltipThemeData();
     appBarTheme ??= const AppBarTheme();
-    scrollbarTheme ??= const ScrollbarTheme();
+    scrollbarTheme ??= const ScrollbarThemeData();
     bottomAppBarTheme ??= const BottomAppBarTheme();
     cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
@@ -1092,7 +1092,7 @@ class ThemeData with Diagnosticable {
   final AppBarTheme appBarTheme;
 
   /// A theme for customizing the colors, thickness, and shape of [Scrollbar]s.
-  final ScrollbarTheme scrollbarTheme;
+  final ScrollbarThemeData scrollbarTheme;
 
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
   final BottomAppBarTheme bottomAppBarTheme;
@@ -1279,7 +1279,7 @@ class ThemeData with Diagnosticable {
     bool? applyElevationOverlayColor,
     PageTransitionsTheme? pageTransitionsTheme,
     AppBarTheme? appBarTheme,
-    ScrollbarTheme? scrollbarTheme,
+    ScrollbarThemeData? scrollbarTheme,
     BottomAppBarTheme? bottomAppBarTheme,
     ColorScheme? colorScheme,
     DialogTheme? dialogTheme,
@@ -1521,7 +1521,7 @@ class ThemeData with Diagnosticable {
       applyElevationOverlayColor: t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
-      scrollbarTheme: ScrollbarTheme.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
+      scrollbarTheme: ScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
@@ -1774,7 +1774,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<ScrollbarTheme>('ScrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ScrollbarThemeData>('ScrollbarTheme', scrollbarTheme, defaultValue: defaultData.scrollbarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
