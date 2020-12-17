@@ -263,6 +263,64 @@ class TextLayoutService {
     }
     return boxes;
   }
+
+  ui.TextPosition getPositionForOffset(ui.Offset offset) {
+    // After layout, each line has boxes that contain enough information to make
+    // it possible to do hit testing. Once we find the box, we look inside that
+    // box to find where exactly the `offset` is located.
+
+    // [offset] is above all the lines.
+    if (offset.dy < 0) {
+      return ui.TextPosition(offset: 0, affinity: ui.TextAffinity.downstream);
+    }
+
+    // [offset] is below all the lines.
+    if (offset.dy >= paragraph.height) {
+      return ui.TextPosition(
+        offset: paragraph.toPlainText().length,
+        affinity: ui.TextAffinity.upstream,
+      );
+    }
+
+    final EngineLineMetrics line = _findLineForY(offset.dy);
+    // [offset] is to the left of the line.
+    if (offset.dx <= line.left) {
+      return ui.TextPosition(
+        offset: line.startIndex,
+        affinity: ui.TextAffinity.downstream,
+      );
+    }
+
+    // [offset] is to the right of the line.
+    if (offset.dx >= line.left + line.widthWithTrailingSpaces) {
+      return ui.TextPosition(
+        offset: line.endIndexWithoutNewlines,
+        affinity: ui.TextAffinity.upstream,
+      );
+    }
+
+    final double dx = offset.dx - line.left;
+    for (final RangeBox box in line.boxes!) {
+      if (box.left <= dx && dx <= box.right) {
+        return box.getPositionForX(dx);
+      }
+    }
+    // Is this ever reachable?
+    return ui.TextPosition(offset: line.startIndex);
+  }
+
+  EngineLineMetrics _findLineForY(double y) {
+    // We could do a binary search here but it's not worth it because the number
+    // of line is typically low, and each iteration is a cheap comparison of
+    // doubles.
+    for (EngineLineMetrics line in lines) {
+      if (y <= line.height) {
+        return line;
+      }
+      y -= line.height;
+    }
+    return lines.last;
+  }
 }
 
 /// Represents a box inside [span] with the range of [start] to [end].
@@ -346,6 +404,61 @@ class RangeBox {
       top + height,
       direction,
     );
+  }
+
+  /// Returns the text position within this box's range that's closest to the
+  /// given [x] offset.
+  ///
+  /// The [x] offset is expected to be relative to the left edge of the line,
+  /// just like the coordinates of this box.
+  ui.TextPosition getPositionForX(double x) {
+    spanometer.currentSpan = span as FlatTextSpan;
+
+    // Make `x` relative to this box.
+    x -= left;
+
+    final int startIndex = start.index;
+    final int endIndex = end.indexWithoutTrailingNewlines;
+    // The resulting `cutoff` is the index of the character where the `x` offset
+    // falls. We should return the text position of either `cutoff` or
+    // `cutoff + 1` depending on which one `x` is closer to.
+    //
+    //   offset x
+    //      ↓
+    // "A B C D E F"
+    //     ↑
+    //   cutoff
+    final int cutoff = spanometer.forceBreak(
+      startIndex,
+      endIndex,
+      availableWidth: x,
+      allowEmpty: true,
+    );
+
+    if (cutoff == endIndex) {
+      return ui.TextPosition(
+        offset: cutoff,
+        affinity: ui.TextAffinity.upstream,
+      );
+    }
+
+    final double lowWidth = spanometer._measure(startIndex, cutoff);
+    final double highWidth = spanometer._measure(startIndex, cutoff + 1);
+
+    // See if `x` is closer to `cutoff` or `cutoff + 1`.
+    if (x - lowWidth < highWidth - x) {
+      // The offset is closer to cutoff.
+      return ui.TextPosition(
+        offset: cutoff,
+        affinity: ui.TextAffinity.downstream,
+      );
+    } else {
+      // The offset is closer to cutoff + 1.
+      return ui.TextPosition(
+        offset: cutoff + 1,
+        affinity: ui.TextAffinity.upstream,
+      );
+    }
   }
 }
 

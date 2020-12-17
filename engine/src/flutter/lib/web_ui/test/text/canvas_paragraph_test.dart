@@ -307,6 +307,246 @@ void testMain() async {
       );
     });
   });
+
+  group('$CanvasParagraph.getPositionForOffset', () {
+    test('handles single-line multi-span paragraphs', () {
+      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+        builder.pushStyle(EngineTextStyle.only(color: blue));
+        builder.addText('Lorem ');
+        builder.pushStyle(EngineTextStyle.only(color: green));
+        builder.addText('ipsum ');
+        builder.pop();
+        builder.addText('.');
+      })
+        ..layout(constrain(double.infinity));
+
+      // Above the line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, -5)),
+        pos(0, ui.TextAffinity.downstream),
+      );
+      // At the top left corner of the line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 0)),
+        pos(0, ui.TextAffinity.downstream),
+      );
+      // At the beginning of the line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 5)),
+        pos(0, ui.TextAffinity.downstream),
+      );
+      // Below the line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 12)),
+        pos(13, ui.TextAffinity.upstream),
+      );
+      // At the end of the line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(130, 5)),
+        pos(13, ui.TextAffinity.upstream),
+      );
+      // On the left half of "p" in "ipsum".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(74, 5)),
+        pos(7, ui.TextAffinity.downstream),
+      );
+      // On the right half of "p" in "ipsum".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(76, 5)),
+        pos(8, ui.TextAffinity.upstream),
+      );
+      // At the top of the line, on the left half of "p" in "ipsum".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(74, 0)),
+        pos(7, ui.TextAffinity.downstream),
+      );
+      // At the top of the line, on the right half of "p" in "ipsum".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(76, 0)),
+        pos(8, ui.TextAffinity.upstream),
+      );
+    });
+
+    test('handles multi-line single-span paragraphs', () {
+      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+        builder.addText('Lorem ipsum dolor sit');
+      })
+        ..layout(constrain(90.0));
+
+      // Lines:
+      //   "Lorem "
+      //   "ipsum "
+      //   "dolor sit"
+
+      // Above the first line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, -5)),
+        pos(0, ui.TextAffinity.downstream),
+      );
+      // At the top left corner of the line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 0)),
+        pos(0, ui.TextAffinity.downstream),
+      );
+      // At the beginning of the first line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 5)),
+        pos(0, ui.TextAffinity.downstream),
+      );
+      // At the end of the first line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(60, 5)),
+        pos(6, ui.TextAffinity.upstream),
+      );
+      // After the end of the first line to the right.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(70, 5)),
+        pos(6, ui.TextAffinity.upstream),
+      );
+      // On the left half of " " in "Lorem ".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(54, 5)),
+        pos(5, ui.TextAffinity.downstream),
+      );
+      // On the right half of " " in "Lorem ".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(56, 5)),
+        pos(6, ui.TextAffinity.upstream),
+      );
+
+      // At the beginning of the second line "ipsum ".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 15)),
+        pos(6, ui.TextAffinity.downstream),
+      );
+      // At the end of the second line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(60, 15)),
+        pos(12, ui.TextAffinity.upstream),
+      );
+      // After the end of the second line to the right.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(70, 15)),
+        pos(12, ui.TextAffinity.upstream),
+      );
+
+      // Below the third line "dolor sit".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 40)),
+        pos(21, ui.TextAffinity.upstream),
+      );
+      // At the end of the third line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(90, 25)),
+        pos(21, ui.TextAffinity.upstream),
+      );
+      // After the end of the third line to the right.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(100, 25)),
+        pos(21, ui.TextAffinity.upstream),
+      );
+      // On the left half of " " in "dolor sit".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(54, 25)),
+        pos(17, ui.TextAffinity.downstream),
+      );
+      // On the right half of " " in "dolor sit".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(56, 25)),
+        pos(18, ui.TextAffinity.upstream),
+      );
+    });
+
+    test('handles multi-line multi-span paragraphs', () {
+      final CanvasParagraph paragraph = rich(ahemStyle, (builder) {
+        builder.pushStyle(EngineTextStyle.only(color: blue));
+        builder.addText('Lorem ipsum ');
+        builder.pushStyle(EngineTextStyle.only(color: green));
+        builder.addText('dolor ');
+        builder.pop();
+        builder.addText('sit');
+      })
+        ..layout(constrain(90.0));
+
+      // Lines:
+      //   "Lorem "
+      //   "ipsum "
+      //   "dolor sit"
+
+      // Above the first line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, -5)),
+        pos(0, ui.TextAffinity.downstream),
+      );
+      // At the beginning of the first line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 5)),
+        pos(0, ui.TextAffinity.downstream),
+      );
+      // At the end of the first line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(60, 5)),
+        pos(6, ui.TextAffinity.upstream),
+      );
+      // After the end of the first line to the right.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(70, 5)),
+        pos(6, ui.TextAffinity.upstream),
+      );
+      // On the left half of " " in "Lorem ".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(54, 5)),
+        pos(5, ui.TextAffinity.downstream),
+      );
+      // On the right half of " " in "Lorem ".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(56, 5)),
+        pos(6, ui.TextAffinity.upstream),
+      );
+
+      // At the beginning of the second line "ipsum ".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 15)),
+        pos(6, ui.TextAffinity.downstream),
+      );
+      // At the end of the second line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(60, 15)),
+        pos(12, ui.TextAffinity.upstream),
+      );
+      // After the end of the second line to the right.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(70, 15)),
+        pos(12, ui.TextAffinity.upstream),
+      );
+
+      // Below the third line "dolor sit".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(0, 40)),
+        pos(21, ui.TextAffinity.upstream),
+      );
+      // At the end of the third line.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(90, 25)),
+        pos(21, ui.TextAffinity.upstream),
+      );
+      // After the end of the third line to the right.
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(100, 25)),
+        pos(21, ui.TextAffinity.upstream),
+      );
+      // On the left half of " " in "dolor sit".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(54, 25)),
+        pos(17, ui.TextAffinity.downstream),
+      );
+      // On the right half of " " in "dolor sit".
+      expect(
+        paragraph.getPositionForOffset(ui.Offset(56, 25)),
+        pos(18, ui.TextAffinity.upstream),
+      );
+    });
+  });
 }
 
 /// Shortcut to create a [ui.TextBox] with an optional [ui.TextDirection].
@@ -318,4 +558,9 @@ ui.TextBox box(
   ui.TextDirection direction = ui.TextDirection.ltr,
 ]) {
   return ui.TextBox.fromLTRBD(left, top, right, bottom, direction);
+}
+
+/// Shortcut to create a [ui.TextPosition].
+ui.TextPosition pos(int offset, ui.TextAffinity affinity) {
+  return ui.TextPosition(offset: offset, affinity: affinity);
 }
