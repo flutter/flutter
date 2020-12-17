@@ -67,6 +67,7 @@ static const std::string gAllowedDartFlags[] = {
     "--trace-reload-verbose",
     "--write-service-info",
     "--null_assertions",
+    "--strict_null_safety_checks",
 };
 // clang-format on
 
