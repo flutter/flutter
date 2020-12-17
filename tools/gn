@@ -234,6 +234,10 @@ def to_gn_args(args):
       gn_args['use_goma'] = False
       gn_args['goma_dir'] = None
 
+    if gn_args['use_goma']:
+      if args.xcode_symlinks:
+        gn_args['create_xcode_symlinks'] = True
+
     # Enable Metal on iOS builds.
     if args.target_os == 'ios':
       gn_args['skia_use_metal'] = True
@@ -339,6 +343,10 @@ def parse_args(args):
 
   parser.add_argument('--goma', default=True, action='store_true')
   parser.add_argument('--no-goma', dest='goma', action='store_false')
+  parser.add_argument('--xcode-symlinks', action='store_true', help='Set to true for builds targetting macOS or iOS ' +
+      'when using goma. If set, symlinks to the Xcode provided sysroot and SDKs will be created in a generated ' +
+      'folder, which will avoid potential backend errors in Fuchsia RBE.')
+  parser.add_argument('--no-xcode-symlinks', dest='xcode_symlinks', default=False, action='store_false')
   parser.add_argument('--depot-tools', default='~/depot_tools', type=str,
                       help='Depot tools provides an alternative location for gomacc in ' +
                       '/path/to/depot_tools/.cipd_bin')
