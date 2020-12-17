@@ -322,6 +322,71 @@ class SkiaPerfGcsAdaptor {
   final Bucket _gcsBucket;
 }
 
+class SkiaPerfDestination extends MetricDestination {
+  SkiaPerfDestination(this._gcs);
+
+  static const String kBucketName = 'flutter-skia-perf';
+  static const String kTestBucketName = 'flutter-skia-perf-test';
+
+  static Future<SkiaPerfDestination> makeFromStorage(
+      Storage storage, bool isTesting) async {
+    final String bucketName = isTesting ? kTestBucketName : kBucketName;
+    if (!await storage.bucketExists(bucketName)) {
+      throw 'Bucket $kBucketName does not exist.';
+    }
+    return SkiaPerfDestination(SkiaPerfGcsAdaptor(storage.bucket(bucketName)));
+  }
+
+  static Future<SkiaPerfDestination> makeFromGcpCredentials(
+      Map<String, dynamic> credentialsJson,
+      {bool isTesting = false}) async {
+    final Storage storage = await storageFromCredentialsJson(credentialsJson);
+    return makeFromStorage(storage, isTesting);
+  }
+
+  static Future<SkiaPerfDestination> makeFromAccessToken(
+      String token, String projectId,
+      {bool isTesting = false}) async {
+    final Storage storage = storageFromAccessToken(token, projectId);
+    return makeFromStorage(storage, isTesting);
+  }
+
+  @override
+  Future<void> update(List<MetricPoint> points) async {
+    // 1st, create a map based on git repo, git revision, and point id. Git repo
+    // and git revision are the top level components of the Skia perf GCS object
+    // name.
+    final Map<String, Map<String, Map<String, SkiaPerfPoint>>> pointMap =
+        <String, Map<String, Map<String, SkiaPerfPoint>>>{};
+    for (final SkiaPerfPoint p
+        in points.map((MetricPoint x) => SkiaPerfPoint.fromPoint(x))) {
+      if (p != null) {
+        pointMap[p.githubRepo] ??= <String, Map<String, SkiaPerfPoint>>{};
+        pointMap[p.githubRepo][p.gitHash] ??= <String, SkiaPerfPoint>{};
+        pointMap[p.githubRepo][p.gitHash][p.id] = p;
+      }
+    }
+
+    // 2nd, read existing points from the gcs object and update with new ones.
+    for (final String repo in pointMap.keys) {
+      for (final String revision in pointMap[repo].keys) {
+        final String objectName =
+            await SkiaPerfGcsAdaptor.comptueObjectName(repo, revision);
+        final Map<String, SkiaPerfPoint> newPoints = pointMap[repo][revision];
+        final List<SkiaPerfPoint> oldPoints = await _gcs.readPoints(objectName);
+        for (final SkiaPerfPoint p in oldPoints) {
+          if (newPoints[p.id] == null) {
+            newPoints[p.id] = p;
+          }
+        }
+        await _gcs.writePoints(objectName, newPoints.values.toList());
+      }
+    }
+  }
+
+  final SkiaPerfGcsAdaptor _gcs;
+}
+
 const String kSkiaPerfGitHashKey = 'gitHash';
 const String kSkiaPerfResultsKey = 'results';
 const String kSkiaPerfValueKey = 'value';
