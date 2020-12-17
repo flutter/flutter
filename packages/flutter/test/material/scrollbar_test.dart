@@ -842,6 +842,60 @@ void main() {
     }),
   );
 
+  testWidgets('Hover animation is not triggered on mobile', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            isAlwaysShown: true,
+            showTrackOnHover: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0x1a000000),
+      ),
+    );
+
+    // final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    // await gesture.addPointer();
+    // addTearDown(gesture.removePointer);
+    // await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.tapAt(const Offset(794.0, 5.0));
+    await tester.pumpAndSettle();
+
+    // Tapping on mobile triggers a hover enter event. In this case, the
+    // Scrollbar should be unchanged since it ignores hover events on mobile.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0x1a000000),
+      ),
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+    }),
+  );
+
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
