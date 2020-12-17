@@ -51,7 +51,7 @@ enum BottomNavigationBarType {
 /// [BottomNavigationBarType.fixed] when there are less than four items, and
 /// [BottomNavigationBarType.shifting] otherwise.
 ///
-/// The length of [items] must be at least two and each item's icon and title
+/// The length of [items] must be at least two and each item's icon and title/label
 /// must not be null.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
