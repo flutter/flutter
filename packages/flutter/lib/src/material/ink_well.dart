@@ -780,7 +780,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         continue;
       if (inkFeature.controller != Material.of(context)!) {
         _dispose();
-        break;
+        if (_hovering && enabled)
+          updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
+        _updateFocusHighlights();
+        return;
       }
     }
 
