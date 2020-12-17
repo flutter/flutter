@@ -94,7 +94,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 }
 const String _defaultGradleVersion = '6.7';
 
-final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\(\d+\.\d+\.\d+\)');
+final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
 /// Returns the Gradle version that the current Android plugin depends on when found,
 /// otherwise it returns a default version.
@@ -104,14 +104,17 @@ final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\
 String getGradleVersionForAndroidPlugin(Directory directory) {
   final File buildFile = directory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
+    globals.printTrace('$buildFile doesn\'t exist, assuming AGP version: $_defaultGradleVersion');
     return _defaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
   final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
+    globals.printTrace('$buildFile doesn\'t provide an AGP version, assuming AGP version: $_defaultGradleVersion');
     return _defaultGradleVersion;
   }
   final String androidPluginVersion = pluginMatches.first.group(1);
+  globals.printTrace('$buildFile provides AGP version: $androidPluginVersion');
   return getGradleVersionFor(androidPluginVersion);
 }
 

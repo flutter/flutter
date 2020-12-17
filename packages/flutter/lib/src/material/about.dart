@@ -43,13 +43,13 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
-/// {@tool dartpad --template=stateless_widget_material}
+///
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
 /// ```dart
-///
 ///  Widget build(BuildContext context) {
 ///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
@@ -110,10 +110,9 @@ import 'theme.dart';
 ///        ),
 ///      ),
 ///    );
-///}
+/// }
 /// ```
 /// {@end-tool}
-///
 class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///

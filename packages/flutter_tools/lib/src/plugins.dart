@@ -779,8 +779,7 @@ const String _dartPluginRegistryTemplate = '''
 // Generated file. Do not edit.
 //
 
-// ignore: unused_import
-import 'dart:ui';
+// ignore_for_file: lines_longer_than_80_chars
 
 {{#plugins}}
 import 'package:{{name}}/{{file}}';
@@ -789,11 +788,11 @@ import 'package:{{name}}/{{file}}';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
-void registerPlugins(PluginRegistry registry) {
+void registerPlugins(Registrar registrar) {
 {{#plugins}}
-  {{class}}.registerWith(registry.registrarFor({{class}}));
+  {{class}}.registerWith(registrar);
 {{/plugins}}
-  registry.registerMessageHandler();
+  registrar.registerMessageHandler();
 }
 ''';
 

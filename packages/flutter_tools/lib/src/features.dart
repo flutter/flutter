@@ -49,6 +49,9 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
+  /// Whether the CFE experimental invalidation strategy is enabled.
+  bool get isExperimentalInvalidationStrategyEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -93,6 +96,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
+  bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
@@ -125,6 +131,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterAndroidFeature,
   flutterIOSFeature,
   flutterFuchsiaFeature,
+  experimentalInvalidationStrategy,
 ];
 
 /// The [Feature] for flutter web.
@@ -134,15 +141,19 @@ const Feature flutterWebFeature = Feature(
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: flutterNext,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: flutterNext,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: flutterNext,
   ),
 );
 
@@ -270,6 +281,29 @@ const Feature singleWidgetReload = Feature(
   ),
 );
 
+/// The CFE experimental invalidation strategy.
+const Feature experimentalInvalidationStrategy = Feature(
+  name: 'Hot reload optimization that reduces incremental artifact size',
+  configSetting: 'experimental-invalidation-strategy',
+  environmentOverride: 'FLUTTER_CFE_EXPERIMENTAL_INVALIDATION',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
 /// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
@@ -378,3 +412,5 @@ class FeatureChannelSetting {
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
 }
+
+const bool flutterNext = false;

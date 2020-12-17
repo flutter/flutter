@@ -648,29 +648,28 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           ephemeralDirectory,
         );
       }
-      copyEngineArtifactToProject(BuildMode.debug);
+      copyEngineArtifactToProject(BuildMode.debug, EnvironmentType.physical);
     }
   }
 
-  void copyEngineArtifactToProject(BuildMode mode) {
-    // Copy podspec and framework from engine cache. The actual build mode
+  void copyEngineArtifactToProject(BuildMode mode, EnvironmentType environmentType) {
+    // Copy framework from engine cache. The actual build mode
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something
     // to be in this location.
     final Directory framework = globals.fs.directory(
       globals.artifacts.getArtifactPath(
-        Artifact.flutterFramework,
+        Artifact.flutterXcframework,
         platform: TargetPlatform.ios,
         mode: mode,
+        environmentType: environmentType,
       )
     );
     if (framework.existsSync()) {
-      final File podspec = framework.parent.childFile('Flutter.podspec');
       globals.fsUtils.copyDirectorySync(
         framework,
-        engineCopyDirectory.childDirectory('Flutter.framework'),
+        engineCopyDirectory.childDirectory('Flutter.xcframework'),
       );
-      podspec.copySync(engineCopyDirectory.childFile('Flutter.podspec').path);
     }
   }
 
@@ -692,6 +691,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   Directory get deprecatedProjectFlutterFramework => _flutterLibRoot
       .childDirectory('Flutter')
       .childDirectory('Flutter.framework');
+
+  /// Used only for "flutter clean" to remove old references.
+  File get flutterPodspec => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childFile('Flutter.podspec');
 
   Directory get pluginRegistrantHost {
     return isModule

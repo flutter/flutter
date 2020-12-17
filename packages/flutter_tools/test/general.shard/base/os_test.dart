@@ -167,14 +167,22 @@ void main() {
     });
 
     testWithoutContext('macOS ARM', () async {
-      fakeProcessManager.addCommand(
-        const FakeCommand(
-          command: <String>[
-            'sysctl',
-            'hw.optional.arm64',
-          ],
-          stdout: 'hw.optional.arm64: 1',
-        ),
+      fakeProcessManager.addCommands(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'which',
+              'sysctl',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'sysctl',
+              'hw.optional.arm64',
+            ],
+            stdout: 'hw.optional.arm64: 1',
+          ),
+        ],
       );
 
       final OperatingSystemUtils utils =
@@ -183,7 +191,14 @@ void main() {
     });
 
     testWithoutContext('macOS 11 x86', () async {
-      fakeProcessManager.addCommand(
+      fakeProcessManager.addCommands(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'which',
+              'sysctl',
+            ],
+          ),
           const FakeCommand(
             command: <String>[
               'sysctl',
@@ -191,15 +206,41 @@ void main() {
             ],
             stdout: 'hw.optional.arm64: 0',
           ),
-          );
+        ],
+      );
 
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'macos'));
       expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
+    testWithoutContext('sysctl not found', () async {
+      fakeProcessManager.addCommands(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'which',
+              'sysctl',
+            ],
+            exitCode: 1,
+          ),
+        ],
+      );
+
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      expect(() => utils.hostPlatform, throwsToolExit(message: 'sysctl'));
+    });
+
     testWithoutContext('macOS 10 x86', () async {
-      fakeProcessManager.addCommand(
+      fakeProcessManager.addCommands(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'which',
+              'sysctl',
+            ],
+          ),
           const FakeCommand(
             command: <String>[
               'sysctl',
@@ -207,7 +248,8 @@ void main() {
             ],
             exitCode: 1,
           ),
-          );
+        ],
+      );
 
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'macos'));
@@ -236,6 +278,12 @@ void main() {
             '-buildVersion',
           ],
           stdout: 'build',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'which',
+            'sysctl',
+          ],
         ),
         const FakeCommand(
           command: <String>[
@@ -273,6 +321,12 @@ void main() {
             '-buildVersion',
           ],
           stdout: 'build',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'which',
+            'sysctl',
+          ],
         ),
         const FakeCommand(
           command: <String>[

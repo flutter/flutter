@@ -40,6 +40,7 @@ class BuildAarCommand extends BuildSubCommand {
     usesPubOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
+    usesDartDefineOption();
     usesTrackWidgetCreation(verboseHelp: false);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
@@ -61,6 +62,9 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   final String name = 'aar';
+
+  @override
+  bool get reportNullSafety => false;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{

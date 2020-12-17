@@ -10,6 +10,9 @@ import 'package:flutter/services.dart';
 import 'editable_text.dart';
 import 'restoration.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A [RestorableProperty] that makes the wrapped value accessible to the owning
 /// [State] object via the [value] getter and setter.
 ///
@@ -19,7 +22,7 @@ import 'restoration.dart';
 ///
 /// ## Using a RestorableValue
 ///
-/// {@tool dartpad --template=stateful_widget_restoration}
+/// {@tool dartpad --template=stateful_widget_restoration_no_null_safety}
 /// A [StatefulWidget] that has a restorable [int] property.
 ///
 /// ```dart
@@ -140,19 +143,11 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   void didUpdateValue(T? oldValue);
 }
 
-// _RestorablePrimitiveValue and its subclasses do not allow null values in
-// anticipation of NNBD (non-nullability by default).
-//
-// If necessary, we can in the future define a new subclass hierarchy that
-// does allow null values for primitive types. Borrowing from lisp where
-// functions that returned a bool ended in 'p', a suggested naming scheme for
-// these new subclasses could be to add 'N' (for nullable) to the end of a
-// class name (e.g. RestorableIntN, RestorableStringN, etc.) to distinguish them
-// from their non-nullable friends.
-class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
-  _RestorablePrimitiveValue(this._defaultValue)
-    : assert(_defaultValue != null),
-      assert(debugIsSerializableForRestoration(_defaultValue)),
+// _RestorablePrimitiveValueN and its subclasses allows for null values.
+// See [_RestorablePrimitiveValue] for the non-nullable version of this class.
+class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
+  _RestorablePrimitiveValueN(this._defaultValue)
+    : assert(debugIsSerializableForRestoration(_defaultValue)),
       super();
 
   final T _defaultValue;
@@ -161,27 +156,42 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
   T createDefaultValue() => _defaultValue;
 
   @override
-  set value(T value) {
-    assert(value != null);
-    super.value = value;
-  }
-
-  @override
   void didUpdateValue(T? oldValue) {
     assert(debugIsSerializableForRestoration(value));
     notifyListeners();
   }
 
   @override
+  T fromPrimitives(Object? serialized) => serialized as T;
+
+  @override
+  Object? toPrimitives() => value;
+}
+
+// _RestorablePrimitiveValue and its subclasses are non-nullable.
+// See [_RestorablePrimitiveValueN] for the nullable version of this class.
+class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
+  _RestorablePrimitiveValue(T _defaultValue)
+    : assert(_defaultValue != null),
+      assert(debugIsSerializableForRestoration(_defaultValue)),
+      super(_defaultValue);
+
+  @override
+  set value(T value) {
+    assert(value != null);
+    super.value = value;
+  }
+
+  @override
   T fromPrimitives(Object? serialized) {
     assert(serialized != null);
-    return serialized! as T;
+    return super.fromPrimitives(serialized);
   }
 
   @override
   Object toPrimitives() {
     assert(value != null);
-    return value;
+    return super.toPrimitives()!;
   }
 }
 
@@ -246,7 +256,26 @@ class RestorableBool extends _RestorablePrimitiveValue<bool> {
   /// Creates a [RestorableBool].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableBoolN] for the nullable version of this class.
   RestorableBool(bool defaultValue) : assert(defaultValue != null), super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore a [bool] that is
+/// nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
+  /// Creates a [RestorableBoolN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableBool] for the non-nullable version of this class.
+  RestorableBoolN(bool? defaultValue) : super(defaultValue);
 }
 
 /// A base class for creating a [RestorableProperty] that stores and restores a
@@ -310,17 +339,17 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
   @override
   void initWithValue(T value) {
-    _diposeOldValue();
+    _disposeOldValue();
     super.initWithValue(value);
   }
 
   @override
   void dispose() {
-    _diposeOldValue();
+    _disposeOldValue();
     super.dispose();
   }
 
-  void _diposeOldValue() {
+  void _disposeOldValue() {
     if (_value != null) {
       // Scheduling a microtask for dispose to give other entities a chance
       // to remove their listeners first.

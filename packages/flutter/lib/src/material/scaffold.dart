@@ -30,11 +30,11 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// TabController tabController;
+// late TabController tabController;
 // void setState(VoidCallback fn) { }
-// String appBarTitle;
-// int tabCount;
-// TickerProvider tickerProvider;
+// late String appBarTitle;
+// late int tabCount;
+// late TickerProvider tickerProvider;
 
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
@@ -165,7 +165,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///       _counter++;
   ///     });
   ///     if (_counter % 10 == 0) {
-  ///       _scaffoldMessengerKey.currentState.showSnackBar(const SnackBar(
+  ///       _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
   ///         content: Text('A multiple of ten!'),
   ///       ));
   ///     }
@@ -1443,7 +1443,9 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButtonAnimator,
     this.persistentFooterButtons,
     this.drawer,
+    this.onDrawerChanged,
     this.endDrawer,
+    this.onEndDrawerChanged,
     this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
@@ -1567,7 +1569,7 @@ class Scaffold extends StatefulWidget {
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openDrawer() {
-  ///   _scaffoldKey.currentState.openDrawer();
+  ///   _scaffoldKey.currentState!.openDrawer();
   /// }
   ///
   /// void _closeDrawer() {
@@ -1607,6 +1609,9 @@ class Scaffold extends StatefulWidget {
   /// {@end-tool}
   final Widget? drawer;
 
+  /// Optional callback that is called when the [Scaffold.drawer] is opened or closed.
+  final DrawerCallback? onDrawerChanged;
+
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
   /// left-to-right ([TextDirection.rtl])
@@ -1627,7 +1632,7 @@ class Scaffold extends StatefulWidget {
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openEndDrawer() {
-  ///   _scaffoldKey.currentState.openEndDrawer();
+  ///   _scaffoldKey.currentState!.openEndDrawer();
   /// }
   ///
   /// void _closeEndDrawer() {
@@ -1666,6 +1671,9 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final Widget? endDrawer;
+
+  /// Optional callback that is called when the [Scaffold.endDrawer] is opened or closed.
+  final DrawerCallback? onEndDrawerChanged;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
@@ -2091,12 +2099,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     setState(() {
       _drawerOpened = isOpened;
     });
+    widget.onDrawerChanged?.call(isOpened);
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
     setState(() {
       _endDrawerOpened = isOpened;
     });
+    widget.onEndDrawerChanged?.call(isOpened);
   }
 
   /// Opens the [Drawer] (if any).
