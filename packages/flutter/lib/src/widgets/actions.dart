@@ -1289,18 +1289,22 @@ class DismissIntent extends Intent {
 /// This is an abstract class that serves as a base class for dismiss actions.
 abstract class DismissAction extends Action<DismissIntent> {}
 
-///
+/// An [Intent] that evaluates a series of specified [orderedIntents] for
+/// execution.
 class PrioritizedIntents extends Intent {
-  ///
+  /// Creates a set of const [PrioritizedIntents].
   const PrioritizedIntents({
     required this.orderedIntents,
   })  : assert(orderedIntents != null);
 
-  ///
+  /// List of intents to be evaluated in order for execution. When an
+  /// [Intent.isEnabled] returns true, that intent will be invoked and
+  /// progression through the ordered intents stops.
   final List<Intent> orderedIntents;
 }
 
-///
+/// An [Action] that iterates through a list of [Intent]s, invoking the first
+/// that is enabled.
 class PrioritizedAction extends Action<PrioritizedIntents> {
   late Action<dynamic> _selectedAction;
   late Intent _selectedIntent;
@@ -1310,15 +1314,12 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
     final FocusNode? focus = primaryFocus;
     if  (focus == null || focus.context == null)
       return false;
-    print('primaryFocus $primaryFocus');
     for (final Intent candidateIntent in intent.orderedIntents) {
       final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
         focus.context!,
         intent: candidateIntent,
       );
-      print('candidate - Intent: $candidateIntent Action: $candidateAction');
       if (candidateAction != null && candidateAction.isEnabled(candidateIntent)) {
-        print('Accepted');
         _selectedAction = candidateAction;
         _selectedIntent = candidateIntent;
         return true;
@@ -1333,5 +1334,4 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
     assert(_selectedIntent != null);
     _selectedAction.invoke(_selectedIntent);
   }
-
 }
