@@ -1,4 +1,4 @@
-Signature: ceece42ba6733e04daa71eb6f1f82824
+Signature: 62d6622d6d4d8fba657500dfb0a86473
 
 UNUSED LICENSES:
 
@@ -4018,6 +4018,8 @@ FILE: ../../../third_party/skia/src/sksl/SkSLPool.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleUsage.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLVMGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLVMGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionPrototype.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLInlineMarker.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPrefixExpression.cpp
