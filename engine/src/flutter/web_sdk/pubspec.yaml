@@ -1,5 +1,7 @@
 name: web_sdk_tests
 author: Flutter Authors <flutter-dev@googlegroups.com>
+environment:
+  sdk: '>=2.11.0 <3.0.0'
 
 dev_dependencies:
   analyzer: ^0.40.6

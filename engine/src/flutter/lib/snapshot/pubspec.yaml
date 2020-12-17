@@ -3,3 +3,6 @@
 # found in the LICENSE file.
 
 # This file is needed by Fuchsia's dart_library template.
+
+environment:
+  sdk: '>=2.11.0 <3.0.0'

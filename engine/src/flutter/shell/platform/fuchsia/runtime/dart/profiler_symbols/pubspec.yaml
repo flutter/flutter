@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 name: profiler_symbols
+environment:
+  sdk: '>=2.11.0 <3.0.0'
 version: 0
 description: Extracts a minimal symbols table for the Dart VM profiler
 author: Dart Team <misc@dartlang.org>
