@@ -172,10 +172,10 @@ class BottomSheet extends StatefulWidget {
   /// This API available as a convenience for a Material compliant bottom sheet
   /// animation. If alternative animation durations are required, a different
   /// animation controller could be provided.
-  static AnimationController createAnimationController(TickerProvider vsync) {
+  static AnimationController createAnimationController(TickerProvider vsync, {Duration? enterDuration, Duration? exitDuration}) {
     return AnimationController(
-      duration: _bottomSheetEnterDuration,
-      reverseDuration: _bottomSheetExitDuration,
+      duration: enterDuration ?? _bottomSheetEnterDuration,
+      reverseDuration: exitDuration ?? _bottomSheetExitDuration,
       debugLabel: 'BottomSheet',
       vsync: vsync,
     );
@@ -428,6 +428,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.enableDrag = true,
     required this.isScrollControlled,
     RouteSettings? settings,
+    this.enterDuration,
+    this.exitDuration,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
        assert(enableDrag != null),
@@ -443,12 +445,14 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final Color? modalBarrierColor;
   final bool isDismissible;
   final bool enableDrag;
+  final Duration? enterDuration;
+  final Duration? exitDuration;
 
   @override
-  Duration get transitionDuration => _bottomSheetEnterDuration;
+  Duration get transitionDuration => enterDuration ?? _bottomSheetEnterDuration;
 
   @override
-  Duration get reverseTransitionDuration => _bottomSheetExitDuration;
+  Duration get reverseTransitionDuration => exitDuration ?? _bottomSheetExitDuration;
 
   @override
   bool get barrierDismissible => isDismissible;
@@ -464,7 +468,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   @override
   AnimationController createAnimationController() {
     assert(_animationController == null);
-    _animationController = BottomSheet.createAnimationController(navigator!.overlay!);
+    _animationController = BottomSheet.createAnimationController(navigator!.overlay!, enterDuration: transitionDuration, exitDuration: reverseTransitionDuration);
     return _animationController!;
   }
 
@@ -585,9 +589,15 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
-/// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior], [enterDuration] and [exitDuration]
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
+///
+/// The [enterDuration] and [exitDuration] are optional parameters.
+///
+/// [enterDuration] specifies the Duration that the [showModelBottomSheet] will
+/// take while opening, [exitDuration] specifies the Duration that the
+/// [showModelBottomSheet] will take to exit.
 ///
 /// The optional `routeSettings` parameter sets the [RouteSettings] of the modal bottom sheet
 /// sheet. This is particularly useful in the case that a user wants to observe
@@ -659,6 +669,8 @@ Future<T?> showModalBottomSheet<T>({
   bool isDismissible = true,
   bool enableDrag = true,
   RouteSettings? routeSettings,
+  Duration? enterDuration,
+  Duration? exitDuration,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -683,6 +695,8 @@ Future<T?> showModalBottomSheet<T>({
     modalBarrierColor: barrierColor,
     enableDrag: enableDrag,
     settings: routeSettings,
+    enterDuration: enterDuration,
+    exitDuration: exitDuration,
   ));
 }
 
@@ -692,7 +706,7 @@ Future<T?> showModalBottomSheet<T>({
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
 ///
-/// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior], [enterDuration] and [exitDuration]
 /// parameters can be passed in to customize the appearance and behavior of
 /// persistent bottom sheets.
 ///
@@ -732,6 +746,8 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   double? elevation,
   ShapeBorder? shape,
   Clip? clipBehavior,
+  Duration? enterDuration,
+  Duration? exitDuration,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -743,5 +759,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     elevation: elevation,
     shape: shape,
     clipBehavior: clipBehavior,
+    enterDuration: enterDuration,
+    exitDuration: exitDuration,
   );
 }
