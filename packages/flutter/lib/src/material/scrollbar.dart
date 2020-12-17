@@ -69,7 +69,7 @@ class Scrollbar extends RawScrollbar {
          child: child,
          controller: controller,
          isAlwaysShown: isAlwaysShown,
-         thickness: thickness ?? _kScrollbarThickness,
+         thickness: thickness,
          radius: radius,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
