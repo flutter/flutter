@@ -17,6 +17,7 @@ import 'bottom_sheet_theme.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
 import 'card_theme.dart';
+import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -32,8 +33,10 @@ import 'navigation_rail_theme.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
+import 'radio_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
+import 'switch_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_button_theme.dart';
 import 'text_selection_theme.dart';
@@ -295,6 +298,9 @@ class ThemeData with Diagnosticable {
     OutlinedButtonThemeData? outlinedButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     DataTableThemeData? dataTableTheme,
+    CheckboxThemeData? checkboxTheme,
+    RadioThemeData? radioTheme,
+    SwitchThemeData? switchTheme,
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -428,6 +434,9 @@ class ThemeData with Diagnosticable {
     outlinedButtonTheme ??= const OutlinedButtonThemeData();
     textSelectionTheme ??= const TextSelectionThemeData();
     dataTableTheme ??= const DataTableThemeData();
+    checkboxTheme ??= const CheckboxThemeData();
+    radioTheme ??= const RadioThemeData();
+    switchTheme ??= const SwitchThemeData();
 
     fixTextFieldOutlineLabel ??= false;
     useTextSelectionTheme ??= true;
@@ -504,6 +513,9 @@ class ThemeData with Diagnosticable {
       outlinedButtonTheme: outlinedButtonTheme,
       textSelectionTheme: textSelectionTheme,
       dataTableTheme: dataTableTheme,
+      checkboxTheme: checkboxTheme,
+      radioTheme: radioTheme,
+      switchTheme: switchTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme,
     );
@@ -591,6 +603,9 @@ class ThemeData with Diagnosticable {
     required this.outlinedButtonTheme,
     required this.textSelectionTheme,
     required this.dataTableTheme,
+    required this.checkboxTheme,
+    required this.radioTheme,
+    required this.switchTheme,
     required this.fixTextFieldOutlineLabel,
     required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
@@ -661,6 +676,9 @@ class ThemeData with Diagnosticable {
        assert(outlinedButtonTheme != null),
        assert(textSelectionTheme != null),
        assert(dataTableTheme != null),
+       assert(checkboxTheme != null),
+       assert(radioTheme != null),
+       assert(switchTheme != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(useTextSelectionTheme != null);
 
@@ -1153,6 +1171,15 @@ class ThemeData with Diagnosticable {
   /// widgets.
   final DataTableThemeData dataTableTheme;
 
+  /// A theme for customizing the appearance and layout of [Checkbox] widgets.
+  final CheckboxThemeData checkboxTheme;
+
+  /// A theme for customizing the appearance and layout of [Radio] widgets.
+  final RadioThemeData radioTheme;
+
+  /// A theme for customizing the appearance and layout of [Switch] widgets.
+  final SwitchThemeData switchTheme;
+
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1263,6 +1290,9 @@ class ThemeData with Diagnosticable {
     OutlinedButtonThemeData? outlinedButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     DataTableThemeData? dataTableTheme,
+    CheckboxThemeData? checkboxTheme,
+    RadioThemeData? radioTheme,
+    SwitchThemeData? switchTheme,
     bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -1343,6 +1373,9 @@ class ThemeData with Diagnosticable {
       outlinedButtonTheme: outlinedButtonTheme ?? this.outlinedButtonTheme,
       textSelectionTheme: textSelectionTheme ?? this.textSelectionTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
+      checkboxTheme: checkboxTheme ?? this.checkboxTheme,
+      radioTheme: radioTheme ?? this.radioTheme,
+      switchTheme: switchTheme ?? this.switchTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
       useTextSelectionTheme: useTextSelectionTheme ?? this.useTextSelectionTheme,
     );
@@ -1497,6 +1530,9 @@ class ThemeData with Diagnosticable {
       outlinedButtonTheme: OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t)!,
       textSelectionTheme: TextSelectionThemeData .lerp(a.textSelectionTheme, b.textSelectionTheme, t)!,
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
+      checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
+      radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
+      switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       useTextSelectionTheme: t < 0.5 ? a.useTextSelectionTheme : b.useTextSelectionTheme,
     );
@@ -1579,6 +1615,9 @@ class ThemeData with Diagnosticable {
         && other.outlinedButtonTheme == outlinedButtonTheme
         && other.textSelectionTheme == textSelectionTheme
         && other.dataTableTheme == dataTableTheme
+        && other.checkboxTheme == checkboxTheme
+        && other.radioTheme == radioTheme
+        && other.switchTheme == switchTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel
         && other.useTextSelectionTheme == useTextSelectionTheme;
   }
@@ -1660,6 +1699,9 @@ class ThemeData with Diagnosticable {
       outlinedButtonTheme,
       textSelectionTheme,
       dataTableTheme,
+      checkboxTheme,
+      radioTheme,
+      switchTheme,
       fixTextFieldOutlineLabel,
       useTextSelectionTheme,
     ];
@@ -1739,6 +1781,9 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<OutlinedButtonThemeData>('outlinedButtonTheme', outlinedButtonTheme, defaultValue: defaultData.outlinedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DataTableThemeData>('dataTableTheme', dataTableTheme, defaultValue: defaultData.dataTableTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<CheckboxThemeData>('checkboxTheme', checkboxTheme, defaultValue: defaultData.checkboxTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<SwitchThemeData>('switchTheme', switchTheme, defaultValue: defaultData.switchTheme, level: DiagnosticLevel.debug));
   }
 }
 

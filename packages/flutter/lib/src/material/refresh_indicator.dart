@@ -218,7 +218,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification))
       return false;
-    if (notification is ScrollStartNotification && notification.metrics.extentBefore == 0.0 &&
+    if ((notification is ScrollStartNotification || notification is ScrollUpdateNotification) &&
+        notification.metrics.extentBefore == 0.0 &&
         _mode == null && _start(notification.metrics.axisDirection)) {
       setState(() {
         _mode = _RefreshIndicatorMode.drag;
@@ -258,7 +259,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        _dragOffset = _dragOffset! - notification.overscroll / 2.0;
+        _dragOffset = _dragOffset! - notification.overscroll;
         _checkDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {

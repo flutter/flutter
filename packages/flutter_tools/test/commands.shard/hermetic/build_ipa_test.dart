@@ -34,6 +34,7 @@ final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
+    'HOME': '/',
   }
 );
 final Platform notMacosPlatform = FakePlatform(
@@ -76,14 +77,6 @@ void main() {
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/ios'
   ]);
-
-  const FakeCommand armCheckCommand = FakeCommand(
-    command: <String>[
-      'sysctl',
-      'hw.optional.arm64',
-    ],
-    exitCode: 1,
-  );
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
@@ -215,7 +208,6 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      armCheckCommand,
       setUpMockXcodeBuildHandler(),
       setUpMockXcodeBuildHandler(showBuildSettings: true),
     ]),
@@ -234,7 +226,6 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      armCheckCommand,
       setUpMockXcodeBuildHandler(verbose: true),
       setUpMockXcodeBuildHandler(verbose: true, showBuildSettings: true),
     ]),
@@ -258,12 +249,12 @@ void main() {
     );
 
     expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(buffer.toString(), contains('event {category: code-size-analysis, action: ios, label: null, value: null, cd33: '));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      armCheckCommand,
       setUpMockXcodeBuildHandler(onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
@@ -311,7 +302,6 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           xattrCommand,
-          armCheckCommand,
           setUpMockXcodeBuildHandler(),
           setUpMockXcodeBuildHandler(showBuildSettings: true),
           exportArchiveCommand,

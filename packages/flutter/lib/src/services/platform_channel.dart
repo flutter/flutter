@@ -12,6 +12,9 @@ import 'binding.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
 ///
@@ -156,7 +159,7 @@ class MethodChannel {
       }
       throw MissingPluginException('No implementation found for method $method on channel $name');
     }
-    return codec.decodeEnvelope(result) as T;
+    return codec.decodeEnvelope(result) as T?;
   }
 
   /// Invokes a [method] on this channel with the specified [arguments].

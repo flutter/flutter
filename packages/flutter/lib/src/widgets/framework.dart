@@ -30,13 +30,11 @@ export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 // void setState(VoidCallback fn) { }
-
-// Examples can assume:
 // abstract class RenderFrogJar extends RenderObject { }
 // abstract class FrogJar extends RenderObjectWidget { }
-// abstract class FrogJarParentData extends ParentData { Size size; }
+// abstract class FrogJarParentData extends ParentData { late Size size; }
 
 // KEYS
 
@@ -625,7 +623,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// ```dart
 /// class GreenFrog extends StatelessWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
+///   const GreenFrog({ Key? key }) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -643,13 +641,13 @@ abstract class Widget extends DiagnosticableTree {
 /// ```dart
 /// class Frog extends StatelessWidget {
 ///   const Frog({
-///     Key key,
+///     Key? key,
 ///     this.color = const Color(0xFF2DBD3A),
 ///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final Color color;
-///   final Widget child;
+///   final Widget? child;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -842,7 +840,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// ```dart
 /// class YellowBird extends StatefulWidget {
-///   const YellowBird({ Key key }) : super(key: key);
+///   const YellowBird({ Key? key }) : super(key: key);
 ///
 ///   @override
 ///   _YellowBirdState createState() => _YellowBirdState();
@@ -865,13 +863,13 @@ abstract class StatelessWidget extends Widget {
 /// ```dart
 /// class Bird extends StatefulWidget {
 ///   const Bird({
-///     Key key,
+///     Key? key,
 ///     this.color = const Color(0xFFFFE306),
 ///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final Color color;
-///   final Widget child;
+///   final Widget? child;
 ///
 ///   _BirdState createState() => _BirdState();
 /// }
@@ -936,7 +934,7 @@ abstract class StatefulWidget extends Widget {
   /// [State] objects.
   @protected
   @factory
-  State createState();
+  State createState(); // ignore: no_logic_in_create_state, this is the original sin
 }
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
@@ -1532,21 +1530,19 @@ abstract class ProxyWidget extends Widget {
 /// ```dart
 /// class FrogSize extends ParentDataWidget<FrogJarParentData> {
 ///   FrogSize({
-///     Key key,
-///     @required this.size,
-///     @required Widget child,
-///   }) : assert(child != null),
-///        assert(size != null),
-///        super(key: key, child: child);
+///     Key? key,
+///     required this.size,
+///     required Widget child,
+///   }) : super(key: key, child: child);
 ///
 ///   final Size size;
 ///
 ///   @override
 ///   void applyParentData(RenderObject renderObject) {
-///     final FrogJarParentData parentData = renderObject.parentData;
+///     final FrogJarParentData parentData = renderObject.parentData! as FrogJarParentData;
 ///     if (parentData.size != size) {
 ///       parentData.size = size;
-///       final RenderFrogJar targetParent = renderObject.parent;
+///       final RenderFrogJar targetParent = renderObject.parent! as RenderFrogJar;
 ///       targetParent.markNeedsLayout();
 ///     }
 ///   }
@@ -1685,17 +1681,17 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// ```dart
 /// class FrogColor extends InheritedWidget {
 ///   const FrogColor({
-///     Key key,
-///     @required this.color,
-///     @required Widget child,
-///   }) : assert(color != null),
-///        assert(child != null),
-///        super(key: key, child: child);
+///     Key? key,
+///     required this.color,
+///     required Widget child,
+///   }) : super(key: key, child: child);
 ///
 ///   final Color color;
 ///
 ///   static FrogColor of(BuildContext context) {
-///     return context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///     final FrogColor? result = context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///     assert(result != null, 'No FrogColor found in context');
+///     return result!;
 ///   }
 ///
 ///   @override
@@ -2421,7 +2417,7 @@ abstract class BuildContext {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// ScrollableState scrollable = context.findAncestorStateOfType<ScrollableState>();
+  /// ScrollableState? scrollable = context.findAncestorStateOfType<ScrollableState>();
   /// ```
   /// {@end-tool}
   T? findAncestorStateOfType<T extends State>();
@@ -2554,7 +2550,8 @@ abstract class BuildContext {
 /// widget tree.
 class BuildOwner {
   /// Creates an object that manages widgets.
-  BuildOwner({ this.onBuildScheduled });
+  BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
+      focusManager = focusManager ?? FocusManager();
 
   /// Called on each build pass when the first buildable element is marked
   /// dirty.
@@ -2585,7 +2582,7 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  FocusManager focusManager = FocusManager();
+  FocusManager focusManager;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
@@ -3326,6 +3323,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// | :-----------------: | :--------------------- | :---------------------- |
   /// |  **child == null**  |  Returns null.         |  Returns new [Element]. |
   /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
+  ///
+  /// The `newSlot` argument is used only if `newWidget` is not null. If `child`
+  /// is null (or if the old child cannot be updated), then the `newSlot` is
+  /// given to the new [Element] that is created for the child, via
+  /// [inflateWidget]. If `child` is not null (and the old child _can_ be
+  /// updated), then the `newSlot` is given to [updateSlotForChild] to update
+  /// its slot, in case it has moved around since it was last built.
+  ///
+  /// See the [RenderObjectElement] documentation for more information on slots.
   @protected
   Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
     if (newWidget == null) {
@@ -5336,10 +5342,10 @@ class InheritedElement extends ProxyElement {
 /// class FooElement extends RenderObjectElement {
 ///
 ///   @override
-///   Foo get widget => super.widget;
+///   Foo get widget => super.widget as Foo;
 ///
 ///   @override
-///   RenderFoo get renderObject => super.renderObject;
+///   RenderFoo get renderObject => super.renderObject as RenderFoo;
 ///
 ///   // ...
 /// }
@@ -5397,13 +5403,13 @@ class InheritedElement extends ProxyElement {
 ///
 /// #### Dynamically determining the children during layout
 ///
-/// If the widgets are to be generated at layout time, then generating them when
-/// the [update] method won't work: layout of this element's render object
-/// hasn't started yet at that point. Instead, the [update] method can mark the
-/// render object as needing layout (see [RenderObject.markNeedsLayout]), and
-/// then the render object's [RenderObject.performLayout] method can call back
-/// to the element to have it generate the widgets and call [updateChild]
-/// accordingly.
+/// If the widgets are to be generated at layout time, then generating them in
+/// the [mount] and [update] methods won't work: layout of this element's render
+/// object hasn't started yet at that point. Instead, the [update] method can
+/// mark the render object as needing layout (see
+/// [RenderObject.markNeedsLayout]), and then the render object's
+/// [RenderObject.performLayout] method can call back to the element to have it
+/// generate the widgets and call [updateChild] accordingly.
 ///
 /// For a render object to call an element during layout, it must use
 /// [RenderObject.invokeLayoutCallback]. For an element to call [updateChild]

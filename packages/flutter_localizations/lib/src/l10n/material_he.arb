@@ -59,7 +59,7 @@
   "remainingTextFieldCharacterCountOther": "נותרו $remainingCount תווים",
   "refreshIndicatorSemanticLabel": "רענון",
   "moreButtonTooltip": "עוד",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "dd/mm/yyyy",
   "selectYearSemanticsLabel": "בחירת שנה",
   "unspecifiedDate": "תאריך",

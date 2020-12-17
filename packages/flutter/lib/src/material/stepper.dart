@@ -122,6 +122,57 @@ class Step {
 /// to this widget based on some logic triggered by the three callbacks that it
 /// provides.
 ///
+/// {@tool sample --template=stateful_widget_scaffold_center_no_null_safety}
+///
+/// ```dart
+/// int _index = 0;
+/// Widget build(BuildContext context) {
+///   return Container(
+///     height: 300,
+///     width: 300,
+///     child: Stepper(
+///       currentStep: _index,
+///       onStepCancel: () {
+///         if (_index <= 0) {
+///          return;
+///         }
+///         setState(() {
+///           _index--;
+///         });
+///       },
+///       onStepContinue: () {
+///         if (_index >= 1) {
+///          return;
+///         }
+///         setState(() {
+///           _index++;
+///         });
+///       },
+///       onStepTapped: (index) {
+///         setState(() {
+///           _index = index;
+///         });
+///       },
+///       steps: [
+///         Step(
+///           title: Text("Step 1 title"),
+///           content: Container(
+///             alignment: Alignment.centerLeft,
+///             child: Text("Content for Step 1")
+///           ),
+///         ),
+///         Step(
+///           title: Text("Step 2 title"),
+///           content: Text("Content for Step 2"),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Step]
@@ -196,7 +247,7 @@ class Stepper extends StatefulWidget {
   /// For example, keeping track of the [currentStep] within the callback can
   /// change the text of the continue or cancel button depending on which step users are at.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart

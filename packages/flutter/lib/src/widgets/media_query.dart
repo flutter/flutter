@@ -86,7 +86,7 @@ class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
-  /// [Window].
+  /// [dart:ui.PlatformDispatcher].
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -124,8 +124,9 @@ class MediaQueryData {
   /// If you use this, you should ensure that you also register for
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
-  /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.Window window)
+  /// [WidgetsBindingObserver.didChangeMetrics] or
+  /// [dart:ui.PlatformDispatcher.onMetricsChanged].
+  MediaQueryData.fromWindow(ui.SingletonFlutterWindow window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
@@ -249,7 +250,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [systemGestureInsets] with [Padding]
@@ -308,7 +309,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.accessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting originates.
   final bool accessibleNavigation;
 
   /// Whether the device is inverting the colors of the platform.
@@ -317,7 +318,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.accessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool invertColors;
 
   /// Whether the user requested a high contrast between foreground and background
@@ -332,7 +334,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.accessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool disableAnimations;
 
   /// Whether the platform is requesting that text be drawn with a bold font
@@ -340,7 +343,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.accessibilityFeatures], where the setting originates.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool boldText;
 
   /// Describes the navigation mode requested by the platform.

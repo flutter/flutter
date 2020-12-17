@@ -179,7 +179,10 @@ abstract class FlutterTestDriver {
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
     await resume().timeout(defaultTimeout)
-        .catchError((Object e) => _debugPrint('Ignoring failure to resume during shutdown'));
+        .catchError((Object e) {
+          _debugPrint('Ignoring failure to resume during shutdown');
+          return null;
+        });
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     io.Process.killPid(_processPid, io.ProcessSignal.sigterm);
@@ -369,7 +372,7 @@ abstract class FlutterTestDriver {
       } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
         await subscription.cancel();
         final StringBuffer error = StringBuffer();
-        error.write('Received app.stop event while waiting for $interestingOccurrence\n\n');
+        error.write('Received app.stop event while waiting for $interestingOccurrence\n\n$_errorBuffer');
         if (json['params'] != null && json['params']['error'] != null) {
           error.write('${json['params']['error']}\n\n');
         }

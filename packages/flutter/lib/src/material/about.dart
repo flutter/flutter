@@ -43,13 +43,13 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
-/// {@tool dartpad --template=stateless_widget_material}
+///
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
 /// ```dart
-///
 ///  Widget build(BuildContext context) {
 ///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
@@ -110,10 +110,9 @@ import 'theme.dart';
 ///        ),
 ///      ),
 ///    );
-///}
+/// }
 /// ```
 /// {@end-tool}
-///
 class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///
@@ -292,7 +291,7 @@ void showLicensePage({
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
-  Navigator.of(context, rootNavigator: useRootNavigator)!.push(MaterialPageRoute<void>(
+  Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
@@ -1342,8 +1341,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
             ? widget.masterPageBuilder!(c, false)
             : _MasterPage(
                 leading: widget.leading ??
-                    (widget.automaticallyImplyLeading && Navigator.of(context)!.canPop()
-                        ? BackButton(onPressed: () => Navigator.of(context)!.pop())
+                    (widget.automaticallyImplyLeading && Navigator.of(context).canPop()
+                        ? BackButton(onPressed: () => Navigator.of(context).pop())
                         : null),
                 title: widget.title,
                 centerTitle: widget.centerTitle,
@@ -1364,7 +1363,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
         onWillPop: () async {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
-          Navigator.of(context)!.pop();
+          Navigator.of(context).pop();
           return false;
         },
         child: BlockSemantics(child: widget.detailPageBuilder(context, arguments, null)),

@@ -243,7 +243,7 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// in an [Align] widget. If the child might want to be bigger, consider
 /// wrapping it in a [SingleChildScrollView] or [OverflowBox].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 ///
 /// This example uses a [LayoutBuilder] to build a different widget depending on the available width. Resize the
 /// DartPad window to see [LayoutBuilder] in action!
@@ -343,6 +343,15 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   double computeMaxIntrinsicHeight(double width) {
     assert(_debugThrowIfNotCheckingIntrinsics());
     return 0.0;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(reason:
+      'Calculating the dry layout would require running the layout callback '
+      'speculatively, which might mutate the live render object tree.',
+    ));
+    return const Size(0, 0);
   }
 
   @override

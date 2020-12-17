@@ -18,13 +18,13 @@ import 'theme.dart';
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return MaterialBanner(
 ///     padding: const EdgeInsets.all(20),
-///     content: Text("Hey, I am an Material Banner"),
+///     content: Text("Hey, I am a Material Banner"),
 ///     leading: Icon(Icons.agriculture_outlined),
 ///     backgroundColor: Colors.grey[300],
 ///     actions: <Widget>[
