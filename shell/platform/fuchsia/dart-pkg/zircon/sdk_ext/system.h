@@ -61,6 +61,8 @@ class System : public fml::RefCountedThreadSafe<System>,
 
   static Dart_Handle VmoMap(fml::RefPtr<Handle> vmo);
 
+  static uint64_t ClockGetMonotonic();
+
   static uint64_t ClockGet(uint32_t clock_id);
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
