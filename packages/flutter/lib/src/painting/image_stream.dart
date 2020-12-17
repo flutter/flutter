@@ -9,9 +9,6 @@ import 'dart:ui' show hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
@@ -69,8 +66,8 @@ class ImageInfo {
   /// [ImageInfo] reference refers to new image data or not.
   ///
   /// ```dart
-  /// ImageInfo _imageInfo;
-  /// set imageInfo (ImageInfo value) {
+  /// ImageInfo? _imageInfo;
+  /// set imageInfo (ImageInfo? value) {
   ///   // If the image reference is exactly the same, do nothing.
   ///   if (value == _imageInfo) {
   ///     return;
@@ -78,7 +75,7 @@ class ImageInfo {
   ///   // If it is a clone of the current reference, we must dispose of it and
   ///   // can do so immediately. Since the underlying image has not changed,
   ///   // We don't have any additional work to do here.
-  ///   if (value != null && _imageInfo != null && value.isCloneOf(_imageInfo)) {
+  ///   if (value != null && _imageInfo != null && value.isCloneOf(_imageInfo!)) {
   ///     value.dispose();
   ///     return;
   ///   }
