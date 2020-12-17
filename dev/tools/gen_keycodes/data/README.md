@@ -4,9 +4,10 @@
 
 | File name | Explanation |
 | ---- | ---- |
-| `chromium_modifiers.json` | Maps Web's `key` of modifier keys to the names of the logical keys for these keys' left and right variations. This is used when generating the list of logical keys based on Chromium's list of `key`s, whose combination of left and right modifier keys is undesired in Flutter's key model.
-| `physical_key_data.json` | Contains the merged physical key data from all the other sources. This file will be regenerated if "--collect" is specified for the gen_keycodes script. |
-| `logicall_key_data.json` | Contains the merged logical key data from all the other sources. This file will be regenerated if "--collect" is specified for the gen_keycodes script. |
+| `chromium_modifiers.json` | Maps Web's `key` of modifier keys to the names of the logical keys for these keys' left and right variations. This is used supplement the list of logical keys based on Chromium's list of `key`s, whose indistinction of left and right modifier keys is undesired in Flutter's key model.|
+| `supplemental_hid_codes.inc` | A supplementary HID list on top of Chromium's list of HID codes for extra physical keys.|
+| `physical_key_data.json` | Contains the merged physical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
+| `logicall_key_data.json` | Contains the merged logical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
 
 ### Framework
 
@@ -53,3 +54,4 @@
 | File name | Explanation |
 | ---- | ---- |
 | `macos_key_code_map_cc.tmpl` | The template for `KeyCodeMap.cc`. |
+| `macos_logical_to_physical.json` | Maps a logical key name to the names of its corresponding physical keys. This is used to derive logical keys (from `keyCode`) that can't or shouldn't be derived from `characterIgnoringModifiers`. |

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
 import 'mask_constants.dart';
+import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
@@ -27,7 +30,9 @@ String _toConstantVariableName(String variableName) {
 /// Generates the key mapping of macOS, based on the information in the key
 /// data structure given to it.
 class MacOsCodeGenerator extends PlatformCodeGenerator {
-  MacOsCodeGenerator(PhysicalKeyData keyData, this.maskConstants) : super(keyData);
+  MacOsCodeGenerator(PhysicalKeyData keyData, this.logicalData, this.maskConstants) : super(keyData);
+
+  final LogicalKeyData logicalData;
 
   final List<MaskConstant> maskConstants;
 
@@ -42,26 +47,50 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     return scanCodeMap.toString().trimRight();
   }
 
-  /// This generates the map of macOS number pad key codes to logical keys.
-  String get _numpadMap {
-    final StringBuffer numPadMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in numpadKeyData) {
-      if (entry.macOsScanCode != null) {
-        numPadMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.flutterId, digits: 10)},    // ${entry.constantName}');
+  String get _keyCodeToLogicalMap {
+    final Map<String, List<String>> logicalToPhysical = parseMapOfListOfString(File(
+      path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'macos_logical_to_physical.json')
+    ).readAsStringSync());
+    final Map<String, String> physicalToLogical = reverseMapOfListOfString(logicalToPhysical,
+        (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for macOS'); });
+
+    final StringBuffer result = StringBuffer();
+    physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
+      final PhysicalKeyEntry physicalEntry = keyData.getEntryByName(physicalKeyName);
+      final int logicalValue = logicalData.data[logicalKeyName]?.value;
+      if (physicalEntry == null || physicalEntry.macOsScanCode == null) {
+        print('Unexpected physical key $physicalKeyName specified for macOS keyCodeToLogicalMap.');
+        return;
       }
-    }
-    return numPadMap.toString().trimRight();
+      if (logicalValue == null) {
+        print('Unexpected logical key $logicalKeyName specified for macOS keyCodeToLogicalMap.');
+        return;
+      }
+      result.writeln('  @${toHex(physicalEntry.macOsScanCode)} : @${toHex(logicalValue, digits: 10)},    // ${physicalEntry.name}');
+    });
+    return result.toString().trimRight();
   }
 
-  String get _functionKeyMap {
-    final StringBuffer functionKeyMap = StringBuffer();
-    for (final PhysicalKeyEntry entry in functionKeyData) {
-      if (entry.macOsScanCode != null) {
-        functionKeyMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.flutterId, digits: 10)},    // ${entry.constantName}');
-      }
-    }
-    return functionKeyMap.toString().trimRight();
-  }
+  /// This generates the map of macOS number pad key codes to logical keys.
+  // String get _numpadMap {
+  //   final StringBuffer numPadMap = StringBuffer();
+  //   for (final PhysicalKeyEntry entry in numpadKeyData) {
+  //     if (entry.macOsScanCode != null) {
+  //       numPadMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.flutterId, digits: 10)},    // ${entry.constantName}');
+  //     }
+  //   }
+  //   return numPadMap.toString().trimRight();
+  // }
+
+  // String get _functionKeyMap {
+  //   final StringBuffer functionKeyMap = StringBuffer();
+  //   for (final PhysicalKeyEntry entry in functionKeyData) {
+  //     if (entry.macOsScanCode != null) {
+  //       functionKeyMap.writeln('  @${toHex(entry.macOsScanCode)} : @${toHex(entry.flutterId, digits: 10)},    // ${entry.constantName}');
+  //     }
+  //   }
+  //   return functionKeyMap.toString().trimRight();
+  // }
 
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
@@ -78,35 +107,19 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     return buffer.toString().trimRight();
   }
 
-  // The map from names (as in `PhysicalKeyEntry.name`) to physical keys.
-  Map<String, int> get keyNameToPhysicalCodeMap {
-    if (_keyNameToPhysicalCodeMap == null) {
-      _keyNameToPhysicalCodeMap = <String, int>{};
-      for (final PhysicalKeyEntry entry in keyData.data) {
-        if (entry.macOsScanCode != null) {
-          _keyNameToPhysicalCodeMap[entry.name] = entry.usbHidCode;
-        }
-      }
-    }
-    return _keyNameToPhysicalCodeMap;
-  }
-  Map<String, int> _keyNameToPhysicalCodeMap;
-
-  // Return the physical key for a name (as in `PhysicalKeyEntry.name`).
-  int _nameToPhysicalKey(String name) {
-    final int result = keyNameToPhysicalCodeMap[name];
-    assert(result != null);
-    return result;
-  }
-
   /// This generates a map between the physical code of sibling keys, such as
   /// left and right shift, including both directions.
   String get _siblingKeyMap {
     final StringBuffer siblingKeyMap = StringBuffer();
     PhysicalKeyEntry.synonyms.forEach((String name, List<String> keyNames) {
       assert(keyNames.length == 2);
-      siblingKeyMap.writeln('  @${toHex(_nameToPhysicalKey(keyNames[0]))} : @${toHex(_nameToPhysicalKey(keyNames[1]))}, // $name');
-      siblingKeyMap.writeln('  @${toHex(_nameToPhysicalKey(keyNames[1]))} : @${toHex(_nameToPhysicalKey(keyNames[0]))}, // $name');
+      final int first = keyData.getEntryByName(keyNames[0]).macOsScanCode;
+      final int second = keyData.getEntryByName(keyNames[1]).macOsScanCode;
+      if (first == null || second == null) {
+        print('Invalid sibling key: $name, $keyNames');
+      }
+      siblingKeyMap.writeln('  @${toHex(first)} : @${toHex(second)}, // $name');
+      siblingKeyMap.writeln('  @${toHex(second)} : @${toHex(first)}, // $name');
     });
     return siblingKeyMap.toString().trimRight();
   }
@@ -118,8 +131,8 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     kSynonymToModifierFlag.forEach((String synonymName, String modifierFlag) {
       final List<String> keyNames = PhysicalKeyEntry.synonyms[synonymName];
       assert(keyNames.length == 2);
-      modifierKeyMap.writeln('  @${toHex(_nameToPhysicalKey(keyNames[0]))} : @($modifierFlag),');
-      modifierKeyMap.writeln('  @${toHex(_nameToPhysicalKey(keyNames[1]))} : @($modifierFlag),');
+      modifierKeyMap.writeln('  @${toHex(keyData.getEntryByName(keyNames[0]).usbHidCode)} : @($modifierFlag),');
+      modifierKeyMap.writeln('  @${toHex(keyData.getEntryByName(keyNames[1]).usbHidCode)} : @($modifierFlag),');
     });
     return modifierKeyMap.toString().trimRight();
   }
@@ -128,7 +141,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _specialKeyConstants {
     final StringBuffer specialKeyConstants = StringBuffer();
     for (final String keyName in kSpecialKeys) {
-      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(_nameToPhysicalKey(keyName))};');
+      specialKeyConstants.writeln('const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.getEntryByName(keyName).usbHidCode)};');
     }
     return specialKeyConstants.toString().trimRight();
   }
@@ -146,8 +159,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
     // from NSEvent.
     return <String, String>{
       'MACOS_SCAN_CODE_MAP': _scanCodeMap,
-      'MACOS_NUMPAD_MAP': _numpadMap,
-      'MACOS_FUNCTION_KEY_MAP': _functionKeyMap,
+      'MACOS_KEYCODE_LOGICAL_MAP': _keyCodeToLogicalMap,
       'MASK_CONSTANTS': _maskConstants,
       'SIBLING_KEY_MAP': _siblingKeyMap,
       'MODIFIER_FLAG_MAP': _keyToModifierFlagMap,

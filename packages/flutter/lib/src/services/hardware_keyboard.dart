@@ -57,24 +57,27 @@ abstract class KeyEvent with Diagnosticable {
 
   /// Returns an object representing the physical location of this key.
   ///
-  /// {@template flutter.services.KeyEvent.physicalKey}
-  /// The [KeyboardKey] ignores the key map, modifier keys (like SHIFT),
-  /// and the label on the key. It describes the location of the key as if it
-  /// were on a QWERTY keyboard regardless of the keyboard mapping in effect.
+  /// {@template flutter.services.KeyEvent.physicalKeyboardKey}
+  /// A [PhysicalKeyboardKey] represents a USB HID code sent from the keyboard,
+  /// ignoring the key map, modifier keys (like SHIFT), and the label on the key.
   ///
-  /// [KeyboardKey]s are used to describe and test for keys in a
-  /// particular location.
+  /// [PhysicalKeyboardKey]s are used to describe and test for keys in a
+  /// particular location. A [PhysicalKeyboardKey] may have a name, but the name
+  /// is for convenience only ("keyA" is easier to remember than 0x70004),
+  /// derived from the key's effect on a QWERTY keyboard. The name does not
+  /// represent the key's effect whatsoever (a physical "keyA" is actually the Q
+  /// key on an AZERTY keyboard.)
   ///
   /// For instance, if you wanted to make a game where the key to the right of
-  /// the CAPS LOCK key made the player move left, you would be comparing the
-  /// result of this `physicalKey` with [KeyboardKey.keyA], since that
-  /// is the key next to the CAPS LOCK key on a QWERTY keyboard. This would
-  /// return the same thing even on a French keyboard where the key next to the
-  /// CAPS LOCK produces a "Q" when pressed.
+  /// the CAPS LOCK key made the player move left, you would be comparing a
+  /// physical key with [PhysicalKeyboardKey.keyA], since that is the key next to
+  /// the CAPS LOCK key on a QWERTY keyboard. This would return the same thing
+  /// even on an AZERTY keyboard where the key next to the CAPS LOCK produces a
+  /// "Q" when pressed.
+  /// {@endtemplate}
   ///
   /// If you want to make your app respond to a key with a particular character
   /// on it regardless of location of the key, use [KeyEvent.logicalKey] instead.
-  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -105,6 +108,18 @@ abstract class KeyEvent with Diagnosticable {
   /// All events share the same timeStamp origin.
   final Duration timeStamp;
 
+  /// Whether this event is synthesized by Flutter to synchronize key states.
+  ///
+  /// An non-[synthesized] event is converted from a native event, and a native
+  /// event can only be converted to one non-[synthesized] event. Some properties
+  /// might be changed during the conversion (for example, a native repeat event
+  /// might be converted to a Flutter down event when necessary.)
+  ///
+  /// A [synthesized] event is created without a source native event in order to
+  /// synthronize key states. For example, if the native platform shows that a
+  /// Shift key that was previously held has been released somehow without the
+  /// key up event dispatched (probably due to loss of focus), a synthesized key
+  /// up event will be synthesized.
   final bool synthesized;
 
   @override
@@ -273,46 +288,70 @@ abstract class _ValueDispatcher<T> {
   }
 }
 
-class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
-  HardwareKeyboard();
+abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
 
-  KeyEvent _eventFromData(ui.KeyData keyData) {
-    final PhysicalKeyboardKey physicalKey = PhysicalKeyboardKey.findKeyByCode(keyData.physical)
-        ?? PhysicalKeyboardKey(keyData.physical);
-    final LogicalKeyboardKey logicalKey = LogicalKeyboardKey.findKeyByKeyId(keyData.logical)
-        ?? LogicalKeyboardKey(keyData.logical);
-    final Duration timeStamp = keyData.timeStamp;
-    switch (keyData.change) {
-      case ui.KeyChange.down:
-        return KeyDownEvent(
-          physical: physicalKey,
-          logical: logicalKey,
-          timeStamp: timeStamp,
-          character: keyData.character,
-          synthesized: keyData.synthesized,
-        );
-      case ui.KeyChange.up:
-        return KeyUpEvent(
-          physical: physicalKey,
-          logical: logicalKey,
-          timeStamp: timeStamp,
-          synthesized: keyData.synthesized,
-        );
-      case ui.KeyChange.repeat:
-        return KeyRepeatEvent(
-          physical: physicalKey,
-          logical: logicalKey,
-          timeStamp: timeStamp,
-          character: keyData.character,
-        );
+  @protected
+  bool receivingKeyData = false;
+
+  final Map<int, int> _physicalPressCount = <int, int>{};
+  bool physicalKeyPressed(PhysicalKeyboardKey physical) {
+    final int? count = _physicalPressCount[physical.usbHidUsage];
+    assert(count == null || count > 0);
+    return count != null && count > 0;
+  }
+
+  final Map<int, int> _logicalPressCount = <int, int>{};
+  bool logicalKeyPressed(LogicalKeyboardKey logical) {
+    final int? count = _logicalPressCount[logical.keyId];
+    assert(count == null || count > 0);
+    return count != null && count > 0;
+  }
+
+  late final Map<int, bool> _locked = Map<int, bool>.fromEntries(
+    lockKeys.map((int logicalKey) => MapEntry<int, bool>(logicalKey, true)),
+  );
+  bool locked(LogicalKeyboardKey logical) {
+    return _locked.update(logical.keyId, (bool isOn) => !isOn);
+  }
+
+  @protected
+  void dispatchKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      _physicalPressCount.update(event.physical.usbHidUsage,
+        (int count) => count + 1,
+        ifAbsent: () => 1,
+      );
+      _logicalPressCount.update(event.logical.keyId,
+        (int count) => count + 1,
+        ifAbsent: () => 1,
+      );
+    } else if (event is KeyUpEvent) {
+      final int physicalCount = _physicalPressCount.update(event.physical.usbHidUsage,
+        (int count) => count - 1,
+      );
+      if (physicalCount == 0) {
+        _physicalPressCount.remove(event.physical.usbHidUsage);
+      }
+      final int logicalCount = _logicalPressCount.update(event.logical.keyId,
+        (int count) => count - 1,
+      );
+      if (logicalCount == 0) {
+        _logicalPressCount.remove(event.logical.keyId);
+      }
+    } else if (event is KeyRepeatEvent) {
+      assert(!receivingKeyData || _physicalPressCount.containsKey(event.physical.usbHidUsage));
+      assert(!receivingKeyData || _logicalPressCount.containsKey(event.logical.keyId));
     }
-  }
-
-  void handleKeyData(ui.KeyData keyData) {
-    _dispatchKeyEvent(_eventFromData(keyData));
-  }
-
-  void _dispatchKeyEvent(KeyEvent event) {
     notifyListeners(event);
   }
+
+  /// A set of logical keys that is considered a lock key.
+  ///
+  /// Each lock key has an "on" state, queried through [locked], which is toggled
+  /// with every key down event.
+  static final Set<int> lockKeys = <int>{
+    LogicalKeyboardKey.numLock.keyId,
+    LogicalKeyboardKey.scrollLock.keyId,
+    LogicalKeyboardKey.capsLock.keyId,
+  };
 }

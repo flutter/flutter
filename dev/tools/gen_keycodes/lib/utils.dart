@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:path/path.dart' as path;
 
@@ -155,6 +156,29 @@ void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1,
     it2.moveNext();
     fn(it1.current, it2.current);
   }
+}
+
+/// Read a Map<String, List<String>> out of its string representation in JSON.
+Map<String, List<String>> parseMapOfListOfString(String jsonString) {
+  final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
+  return dynamicMap.map<String, List<String>>((String key, List<dynamic> value) {
+    return MapEntry<String, List<String>>(key, value.cast<String>());
+  });
+}
+
+/// Reverse the map of { fromValue -> list of toValue } to { toValue -> fromValue } and return.
+Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, void Function(String fromValue, String newToValue) onDuplicate) {
+  final Map<String, String> result = <String, String>{};
+  inMap.forEach((String fromValue, List<String> toValues) {
+    for (final String toValue in toValues) {
+      if (result.containsKey(toValue)) {
+        onDuplicate(fromValue, toValue);
+        continue;
+      }
+      result[toValue] = fromValue;
+    }
+  });
+  return result;
 }
 
 /// Remove entries whose value `isEmpty` or is null, and return the map.

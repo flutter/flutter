@@ -34,7 +34,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   String get _windowsLogicalKeyCodeMap {
     final StringBuffer result = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      for (final int windowsValue in entry.windowsValues) {
+      for (final int windowsValue in entry.windowsValues ?? <int>[]) {
         result.writeln('  { ${toHex(windowsValue)}, ${toHex(entry.value, digits: 11)} },    // ${entry.constantName}');
       }
     }

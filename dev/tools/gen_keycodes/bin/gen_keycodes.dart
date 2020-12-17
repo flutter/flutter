@@ -295,7 +295,7 @@ Future<void> main(List<String> rawArguments) async {
         codeGenerator = AndroidCodeGenerator(physicalData, logicalData);
         break;
       case 'macos':
-        codeGenerator = MacOsCodeGenerator(physicalData, maskConstants);
+        codeGenerator = MacOsCodeGenerator(physicalData, logicalData, maskConstants);
         break;
       case 'ios':
         codeGenerator = IosCodeGenerator(physicalData);

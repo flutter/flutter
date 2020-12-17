@@ -21,7 +21,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   String get _androidKeyCodeMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      for (final int code in entry.androidValues) {
+      for (final int code in entry.androidValues ?? <int>[]) {
         androidKeyCodeMap.writeln('      put(${toHex(code, digits: 10)}L, ${toHex(entry.value, digits: 10)}L);    // ${entry.constantName}');
       }
     }
