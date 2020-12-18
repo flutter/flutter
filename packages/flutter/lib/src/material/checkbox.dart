@@ -72,6 +72,7 @@ class Checkbox extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.shape,
+    this.side,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(autofocus != null),
@@ -271,6 +272,12 @@ class Checkbox extends StatefulWidget {
   /// with a circular corner radius of 1.0.
   final OutlinedBorder? shape;
 
+  /// The side of the checkbox's border.
+  ///
+  /// If this property is null then [CheckboxThemeData.side] of [ThemeData.checkboxTheme]
+  /// is used.If that's null then the side will be width 2.
+  final BorderSide? side;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -443,6 +450,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             vsync: this,
             hasFocus: _focused,
             hovering: _hovering,
+            side: widget.side ?? themeData.checkboxTheme.side,
             shape: widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(1.0)),
             ),
@@ -472,6 +480,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     required this.hasFocus,
     required this.hovering,
     required this.shape,
+    required this.side,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(activeColor != null),
@@ -495,6 +504,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
   final OutlinedBorder shape;
+  final BorderSide? side;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
@@ -514,6 +524,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     hasFocus: hasFocus,
     hovering: hovering,
     shape: shape,
+    side: side,
   );
 
   @override
@@ -536,7 +547,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..vsync = vsync
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..shape = shape;
+      ..shape = shape
+      ..side = side;
   }
 }
 
@@ -560,6 +572,7 @@ class _RenderCheckbox extends RenderToggleable {
     required bool hasFocus,
     required bool hovering,
     required this.shape,
+    required this.side,
     required TickerProvider vsync,
   }) : _oldValue = value,
        super(
@@ -582,6 +595,7 @@ class _RenderCheckbox extends RenderToggleable {
   bool? _oldValue;
   Color checkColor;
   OutlinedBorder shape;
+  BorderSide? side;
 
   @override
   set value(bool? newValue) {
@@ -625,10 +639,10 @@ class _RenderCheckbox extends RenderToggleable {
 
   void _drawBorder(Canvas canvas, Rect outer, double t, Paint paint) {
     assert(t >= 0.0 && t <= 0.5);
-    if (shape.side == BorderSide.none) {
+    if (side == null) {
       shape = shape.copyWith(side: BorderSide(width: 2, color: paint.color));
     }
-    shape.paint(canvas, outer);
+    shape.copyWith(side: side).paint(canvas, outer);
   }
 
   void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
@@ -687,7 +701,7 @@ class _RenderCheckbox extends RenderToggleable {
       if (t <= 0.5) {
         _drawBorder(canvas, outer, t, paint);
       } else {
-        canvas.drawPath(shape.getOuterPath(outer), paint);
+        canvas.drawPath(shape.copyWith(side: side).getOuterPath(outer), paint);
 
         final double tShrink = (t - 0.5) * 2.0;
         if (_oldValue == null || value == null)
@@ -698,7 +712,7 @@ class _RenderCheckbox extends RenderToggleable {
     } else { // Two cases: null to true, true to null
       final Rect outer = _outerRectAt(origin, 1.0);
       final Paint paint = Paint() ..color = _colorAt(1.0);
-      canvas.drawPath(shape.getOuterPath(outer), paint);
+      canvas.drawPath(shape.copyWith(side: side).getOuterPath(outer), paint);
 
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;

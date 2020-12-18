@@ -893,9 +893,13 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
   });
 
-  testWidgets('Checkbox respects borderRadius', (WidgetTester tester) async {
+  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.horizontal(right: Radius.circular(100))
+    );
+
+    const BorderSide side = BorderSide(
+      width: 4,
     );
 
     Widget buildApp() {
@@ -907,6 +911,7 @@ void main() {
                 value: false,
                 onChanged: (bool? newValue) {},
                 shape: roundedRectangleBorder,
+                side: side,
               );
             }),
           ),
@@ -917,6 +922,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape, roundedRectangleBorder);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side);
   });
 
   testWidgets('Checkbox overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
