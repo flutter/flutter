@@ -13,8 +13,6 @@ import 'package:gcloud/db.dart';
 // so we have to ignore implementation_imports here.
 // ignore: implementation_imports
 import 'package:gcloud/src/datastore_impl.dart';
-import 'package:gcloud/storage.dart';
-
 import 'package:googleapis_auth/auth.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart';
@@ -68,20 +66,6 @@ AuthClient authClientFromAccessToken(String token, List<String> scopes) {
   final AccessCredentials accessCredentials =
       AccessCredentials(accessToken, null, scopes);
   return authenticatedClient(Client(), accessCredentials);
-}
-
-/// Get a Google Cloud Storage from a full credentials json (of a service
-/// account).
-Future<Storage> storageFromCredentialsJson(Map<String, dynamic> json) async {
-  final AutoRefreshingAuthClient client = await clientViaServiceAccount(
-      ServiceAccountCredentials.fromJson(json), Storage.SCOPES);
-  return Storage(client, json[kProjectId] as String);
-}
-
-/// Get a Google Cloud Storage from just an access token and its project id.
-Storage storageFromAccessToken(String token, String projectId) {
-  final AuthClient client = authClientFromAccessToken(token, Storage.SCOPES);
-  return Storage(client, projectId);
 }
 
 // TODO(liyuqian): Remove `datastoreFromCredentialsJson` and

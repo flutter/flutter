@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:gcloud/storage.dart';
 import 'package:googleapis/storage/v1.dart' show DetailedApiRequestError;
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:metrics_center/src/gcs_lock.dart';
 import 'package:metrics_center/src/github_helper.dart';
 import 'package:mockito/mockito.dart';
 
@@ -24,6 +25,14 @@ class MockBucket extends Mock implements Bucket {}
 class MockObjectInfo extends Mock implements ObjectInfo {}
 
 class MockGithubHelper extends Mock implements GithubHelper {}
+
+class MockGcsLock implements GcsLock {
+  @override
+  Future<void> protectedRun(
+      String exclusiveObjectName, Future<void> Function() f) async {
+    await f();
+  }
+}
 
 class MockSkiaPerfGcsAdaptor implements SkiaPerfGcsAdaptor {
   @override
@@ -393,6 +402,7 @@ Future<void> main() async {
 
   // The following is for integration tests.
   Bucket testBucket;
+  GcsLock testLock;
   final Map<String, dynamic> credentialsJson = getTestGcpCredentialsJson();
   if (credentialsJson != null) {
     final ServiceAccountCredentials credentials =
@@ -407,6 +417,7 @@ Future<void> main() async {
 
     assert(await storage.bucketExists(kTestBucketName));
     testBucket = storage.bucket(kTestBucketName);
+    testLock = GcsLock(client, kTestBucketName);
   }
 
   Future<void> skiaPerfGcsAdapterIntegrationTest() async {
@@ -515,7 +526,8 @@ Future<void> main() async {
 
   test('SkiaPerfDestination correctly updates points', () async {
     final SkiaPerfGcsAdaptor mockGcs = MockSkiaPerfGcsAdaptor();
-    final SkiaPerfDestination dst = SkiaPerfDestination(mockGcs);
+    final GcsLock mockLock = MockGcsLock();
+    final SkiaPerfDestination dst = SkiaPerfDestination(mockGcs, mockLock);
     await dst.update(<MetricPoint>[cocoonPointRev1Metric1]);
     await dst.update(<MetricPoint>[cocoonPointRev1Metric2]);
     List<SkiaPerfPoint> points = await mockGcs.readPoints(
@@ -549,9 +561,8 @@ Future<void> main() async {
   });
 
   Future<void> skiaPerfDestinationIntegrationTest() async {
-    // Second, update the points
     final SkiaPerfDestination destination =
-        SkiaPerfDestination(SkiaPerfGcsAdaptor(testBucket));
+        SkiaPerfDestination(SkiaPerfGcsAdaptor(testBucket), testLock);
     await destination.update(<MetricPoint>[cocoonPointRev1Metric1]);
   }
 

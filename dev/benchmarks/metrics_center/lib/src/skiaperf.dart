@@ -6,8 +6,11 @@ import 'dart:convert';
 
 import 'package:gcloud/storage.dart';
 import 'package:googleapis/storage/v1.dart' show DetailedApiRequestError;
+import 'package:googleapis_auth/auth.dart';
+import 'package:googleapis_auth/auth_io.dart';
 
 import 'package:metrics_center/src/common.dart';
+import 'package:metrics_center/src/gcs_lock.dart';
 import 'package:metrics_center/src/github_helper.dart';
 
 // Skia Perf Format is a JSON file that looks like:
@@ -323,32 +326,39 @@ class SkiaPerfGcsAdaptor {
 }
 
 class SkiaPerfDestination extends MetricDestination {
-  SkiaPerfDestination(this._gcs);
+  SkiaPerfDestination(this._gcs, this._lock);
 
   static const String kBucketName = 'flutter-skia-perf';
   static const String kTestBucketName = 'flutter-skia-perf-test';
 
-  static Future<SkiaPerfDestination> makeFromStorage(
-      Storage storage, bool isTesting) async {
+  /// Create from a full credentials json (of a service account).
+  static Future<SkiaPerfDestination> makeFromGcpCredentials(
+      Map<String, dynamic> credentialsJson,
+      {bool isTesting = false}) async {
+    final AutoRefreshingAuthClient client = await clientViaServiceAccount(
+        ServiceAccountCredentials.fromJson(credentialsJson), Storage.SCOPES);
+    return _make(client, credentialsJson[kProjectId] as String, isTesting);
+  }
+
+  /// Create from an access token and its project id.
+  static Future<SkiaPerfDestination> makeFromAccessToken(
+      String token, String projectId,
+      {bool isTesting = false}) async {
+    final AuthClient client = authClientFromAccessToken(token, Storage.SCOPES);
+    return _make(client, projectId, isTesting);
+  }
+
+  static Future<SkiaPerfDestination> _make(
+      AuthClient client, String projectId, bool isTesting) async {
+    final Storage storage = Storage(client, projectId);
     final String bucketName = isTesting ? kTestBucketName : kBucketName;
     if (!await storage.bucketExists(bucketName)) {
       throw 'Bucket $kBucketName does not exist.';
     }
-    return SkiaPerfDestination(SkiaPerfGcsAdaptor(storage.bucket(bucketName)));
-  }
-
-  static Future<SkiaPerfDestination> makeFromGcpCredentials(
-      Map<String, dynamic> credentialsJson,
-      {bool isTesting = false}) async {
-    final Storage storage = await storageFromCredentialsJson(credentialsJson);
-    return makeFromStorage(storage, isTesting);
-  }
-
-  static Future<SkiaPerfDestination> makeFromAccessToken(
-      String token, String projectId,
-      {bool isTesting = false}) async {
-    final Storage storage = storageFromAccessToken(token, projectId);
-    return makeFromStorage(storage, isTesting);
+    final SkiaPerfGcsAdaptor adaptor =
+        SkiaPerfGcsAdaptor(storage.bucket(bucketName));
+    final GcsLock lock = GcsLock(client, bucketName);
+    return SkiaPerfDestination(adaptor, lock);
   }
 
   @override
@@ -373,18 +383,28 @@ class SkiaPerfDestination extends MetricDestination {
         final String objectName =
             await SkiaPerfGcsAdaptor.comptueObjectName(repo, revision);
         final Map<String, SkiaPerfPoint> newPoints = pointMap[repo][revision];
-        final List<SkiaPerfPoint> oldPoints = await _gcs.readPoints(objectName);
-        for (final SkiaPerfPoint p in oldPoints) {
-          if (newPoints[p.id] == null) {
-            newPoints[p.id] = p;
+        // If too many bots are writing the metrics of a git revision into this
+        // single json file (with name `objectName`), the contention on the lock
+        // might be too high. In that case, break the json file into multiple
+        // json files according to bot names or task names. Skia perf read all
+        // json files in the directory so one can use arbitrary names for those
+        // sharded json file names.
+        _lock.protectedRun('$objectName.lock', () async {
+          final List<SkiaPerfPoint> oldPoints =
+              await _gcs.readPoints(objectName);
+          for (final SkiaPerfPoint p in oldPoints) {
+            if (newPoints[p.id] == null) {
+              newPoints[p.id] = p;
+            }
           }
-        }
-        await _gcs.writePoints(objectName, newPoints.values.toList());
+          await _gcs.writePoints(objectName, newPoints.values.toList());
+        });
       }
     }
   }
 
   final SkiaPerfGcsAdaptor _gcs;
+  final GcsLock _lock;
 }
 
 const String kSkiaPerfGitHashKey = 'gitHash';
