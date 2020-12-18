@@ -653,7 +653,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
   final List<_DragAvatar<Object>> _candidateAvatars = <_DragAvatar<Object>>[];
   final List<_DragAvatar<Object>> _rejectedAvatars = <_DragAvatar<Object>>[];
 
-  bool _checkDataType(Object? data, Type type) {
+  bool checkDataType(Object? data, Type type) {
     if (!kIsWeb) {
       return data is T?;
     } else {
@@ -848,7 +848,7 @@ class _DragAvatar<T extends Object> extends Drag {
       final HitTestTarget target = entry.target;
       if (target is RenderMetaData) {
         final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState && metaData._checkDataType(data, T))
+        if (metaData is _DragTargetState && metaData.checkDataType(data, T))
           yield metaData;
       }
     }
