@@ -775,15 +775,25 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    for (final InkFeature? inkFeature in <InkFeature?>[...?_splashes, ..._highlights.values]) {
-      if (inkFeature == null)
-        continue;
-      if (inkFeature.controller != Material.of(context)!) {
-        _dispose();
-        if (_hovering && enabled)
-          updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
-        _updateFocusHighlights();
+    final List<InkFeature?> inkFeatures = <InkFeature?>[...?_splashes, ..._highlights.values];
+    assert(() {
+      MaterialInkController? lastController;
+      for (final InkFeature? inkFeature in inkFeatures) {
+        if (inkFeature == null)
+          continue;
+        final MaterialInkController controller = inkFeature.controller;
+        if (lastController != null && controller != lastController)
+          return false;
+        lastController = controller;
       }
+      return true;
+    }());
+    final InkFeature? validInkFeature = inkFeatures.firstWhere((InkFeature? inkFeature) => inkFeature != null, orElse: () => null);
+    if (validInkFeature != null && validInkFeature.controller != Material.of(context)!) {
+      _dispose();
+      if (_hovering && enabled)
+        updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
+      _updateFocusHighlights();
       return;
     }
 
