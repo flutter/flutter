@@ -567,6 +567,12 @@ class _AndroidMotionEventConverter {
       return null;
     }
 
+    // These array must have the same length, otherwise below android motion conver will throw exception.
+    if (pointers.length != pointerProperties.length ||
+        pointers.length != pointerPositions.length) {
+      return null;
+    }
+
     final int action;
     if (event is PointerDownEvent) {
       action = numPointers == 1
