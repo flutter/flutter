@@ -1184,6 +1184,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/layout_service.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/line_break_properties.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/line_breaker.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/measurement.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/paint_service.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/paragraph.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/ruler.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/unicode_range.dart
