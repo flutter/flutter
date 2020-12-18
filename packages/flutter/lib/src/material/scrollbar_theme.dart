@@ -5,9 +5,9 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/material/material_state.dart';
 import 'package:flutter/widgets.dart';
 
+import 'material_state.dart';
 import 'theme.dart';
 
 /// Defines default property values for descendant [Scrollbar] widgets.
