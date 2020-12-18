@@ -13,6 +13,43 @@ import 'package:vector_math/vector_math_64.dart' show Matrix3;
 import '../rendering/mock_canvas.dart';
 import 'data_table_test_utils.dart';
 
+
+// onSort must remain empty in this widget
+class TestStateWithoutSorting extends StatefulWidget {
+  @override
+  _TestStateWithoutSortingState createState() => _TestStateWithoutSortingState();
+}
+
+class _TestStateWithoutSortingState extends State<TestStateWithoutSorting> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Material(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              RaisedButton(
+                onPressed: () => setState(() => {}),
+                child: Text('Test'),
+              ),
+              DataTable(
+                  sortColumnIndex: 0,
+                  sortAscending: true,
+                  columns: [
+                    DataColumn(
+                      label: Text('Column 1'),
+                      onSort: (a, i) {},
+                    ),
+                  ],
+                  rows: []
+              )
+            ],
+          ),
+        )
+    );
+  }
+}
+
 void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -1495,5 +1532,25 @@ void main() {
       tester.getBottomRight(find.byType(Table)),
       const Offset(width - borderVertical, height - borderHorizontal),
     );
+  });
+
+  testWidgets('Check that arrow stays up when no sort action triggered.', (WidgetTester tester) async {
+    // Use stateful widget with data table in ascending order
+    await tester.pumpWidget(TestStateWithoutSorting());
+
+    // Capture upward arrow prior to button being pressed
+    Transform transformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+
+    // Press button with setState action (no sort action triggered)
+    await tester.tap(find.text('Test'));
+    await tester.pumpAndSettle();
+
+    // Verify arrow is still in upward direction
+    Transform newTransformOfArrow = tester.widget<Transform>(find.widgetWithIcon(Transform, Icons.arrow_upward));
+    expect(
+        transformOfArrow.transform.getRotation(),
+        equals(newTransformOfArrow.transform.getRotation())
+    );
+
   });
 }
