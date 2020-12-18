@@ -619,8 +619,6 @@ class TestCommand extends Command<bool> with ArgUtils {
       '--enable-experiment=non-nullable',
       '--no-sound-null-safety',
       if (input.forCanvasKit) '-DFLUTTER_WEB_USE_SKIA=true',
-      if (!input.forCanvasKit) '-DFLUTTER_WEB_AUTO_DETECT=false',
-      if (!input.forCanvasKit) '-DFLUTTER_WEB_USE_SKIA=false',
       '-O2',
       '-o',
       targetFileName, // target path.
