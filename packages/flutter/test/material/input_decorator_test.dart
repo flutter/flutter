@@ -759,6 +759,53 @@ void main() {
     expect(getBorderWeight(tester), 2.0);
   });
 
+  testWidgets('InputDecorator hint overflow', (WidgetTester tester) async {
+    final String longHint = 'hintText' * 10;
+
+    // Default Hint overflow is TextOverflow.ellipse
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: InputDecoration(
+          hintText: longHint,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    Text text = tester.firstWidget(find.text(longHint));
+    expect(text.overflow, TextOverflow.ellipsis);
+
+    // Customizable hintOverflow
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: InputDecoration(
+          hintText: longHint,
+          hintOverflow: TextOverflow.fade,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    text = tester.firstWidget(find.text(longHint));
+    expect(text.overflow, TextOverflow.fade);
+
+    // Customizable InputDecorationTheme hintOverflow
+    await tester.pumpWidget(
+      buildInputDecorator(
+        inputDecorationTheme: const InputDecorationTheme(
+          hintOverflow: TextOverflow.clip
+        ),
+        decoration: InputDecoration(
+          hintText: longHint,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    text = tester.firstWidget(find.text(longHint));
+    expect(text.overflow, TextOverflow.clip);
+  });
+
   testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(

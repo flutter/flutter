@@ -2164,7 +2164,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: Text(
         decoration!.hintText!,
         style: hintStyle,
-        overflow: TextOverflow.ellipsis,
+        overflow: decoration!.hintOverflow,
         textAlign: textAlign,
         maxLines: decoration!.hintMaxLines,
       ),
@@ -2509,6 +2509,7 @@ class InputDecoration {
     this.helperMaxLines,
     this.hintText,
     this.hintStyle,
+    this.hintOverflow,
     this.hintMaxLines,
     this.errorText,
     this.errorStyle,
@@ -2582,6 +2583,7 @@ class InputDecoration {
        helperStyle = null,
        helperMaxLines = null,
        hintMaxLines = null,
+       hintOverflow = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2686,6 +2688,12 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
+
+  /// Handles visual overflow for the [hintText].
+  ///
+  /// If null, then [InputDecorationTheme.hintOverflow] is used. If that's null
+  /// then [TextOverflow.ellipsis] is used as default.
+  final TextOverflow? hintOverflow;
 
   /// The maximum number of lines the [hintText] can occupy.
   ///
@@ -3307,6 +3315,7 @@ class InputDecoration {
     String? hintText,
     TextStyle? hintStyle,
     int? hintMaxLines,
+    TextOverflow? hintOverflow,
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
@@ -3352,6 +3361,7 @@ class InputDecoration {
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
+      hintOverflow: hintOverflow ?? this.hintOverflow,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -3400,6 +3410,7 @@ class InputDecoration {
       helperStyle: helperStyle ?? theme.helperStyle,
       helperMaxLines : helperMaxLines ?? theme.helperMaxLines,
       hintStyle: hintStyle ?? theme.hintStyle,
+      hintOverflow: hintOverflow ?? theme.hintOverflow,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       hasFloatingPlaceholder: hasFloatingPlaceholder,
@@ -3440,6 +3451,7 @@ class InputDecoration {
         && other.hintText == hintText
         && other.hintStyle == hintStyle
         && other.hintMaxLines == hintMaxLines
+        && other.hintOverflow == hintOverflow
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
@@ -3488,6 +3500,7 @@ class InputDecoration {
       hintText,
       hintStyle,
       hintMaxLines,
+      hintOverflow,
       errorText,
       errorStyle,
       errorMaxLines,
@@ -3537,6 +3550,7 @@ class InputDecoration {
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
+      if (hintOverflow != null) 'hintOverflow: "$hintOverflow"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
@@ -3597,6 +3611,7 @@ class InputDecorationTheme with Diagnosticable {
     this.helperStyle,
     this.helperMaxLines,
     this.hintStyle,
+    this.hintOverflow = TextOverflow.ellipsis,
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
@@ -3665,6 +3680,11 @@ class InputDecorationTheme with Diagnosticable {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
+
+  /// The visual overflow handler to use for the [InputDecoration.hintText].
+  ///
+  /// If null, defaults to [TextOverflow.ellipsis].
+  final TextOverflow? hintOverflow;
 
   /// The style to use for the [InputDecoration.errorText].
   ///
@@ -3948,6 +3968,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? helperStyle,
     int? helperMaxLines,
     TextStyle? hintStyle,
+    TextOverflow? hintOverflow,
     TextStyle? errorStyle,
     int? errorMaxLines,
     @Deprecated(
@@ -3979,6 +4000,7 @@ class InputDecorationTheme with Diagnosticable {
       helperStyle: helperStyle ?? this.helperStyle,
       helperMaxLines: helperMaxLines ?? this.helperMaxLines,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintOverflow: hintOverflow ?? this.hintOverflow,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
@@ -4010,6 +4032,7 @@ class InputDecorationTheme with Diagnosticable {
       helperStyle,
       helperMaxLines,
       hintStyle,
+      hintOverflow,
       errorStyle,
       errorMaxLines,
       hasFloatingPlaceholder,
@@ -4045,6 +4068,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.helperStyle == helperStyle
         && other.helperMaxLines == helperMaxLines
         && other.hintStyle == hintStyle
+        && other.hintOverflow == hintOverflow
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
         && other.isDense == isDense
@@ -4076,6 +4100,7 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
     properties.add(IntProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines));
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
+    properties.add(DiagnosticsProperty<TextOverflow>('hintOverflow', hintOverflow, defaultValue: defaultTheme.hintOverflow));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(DiagnosticsProperty<bool>('hasFloatingPlaceholder', hasFloatingPlaceholder, defaultValue: defaultTheme.hasFloatingPlaceholder));
