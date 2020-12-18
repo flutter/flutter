@@ -129,6 +129,7 @@ part 'engine/text/layout_service.dart';
 part 'engine/text/line_break_properties.dart';
 part 'engine/text/line_breaker.dart';
 part 'engine/text/measurement.dart';
+part 'engine/text/paint_service.dart';
 part 'engine/text/paragraph.dart';
 part 'engine/text/canvas_paragraph.dart';
 part 'engine/text/ruler.dart';

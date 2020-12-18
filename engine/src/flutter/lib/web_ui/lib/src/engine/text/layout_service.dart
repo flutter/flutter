@@ -370,6 +370,14 @@ class RangeBox {
     return startIndex < this.end.index && this.start.index < endIndex;
   }
 
+  /// Returns a [ui.TextBox] representing this range box in the given [line].
+  ///
+  /// The coordinates of the resulting [ui.TextBox] are relative to the
+  /// paragraph, not to the line.
+  ui.TextBox toTextBox(EngineLineMetrics line) {
+    return intersect(line, start.index, end.index);
+  }
+
   /// Performs the intersection of this box with the range given by [start] and
   /// [end] indices, and returns a [ui.TextBox] representing that intersection.
   ///
@@ -772,6 +780,12 @@ class LineBuilder {
     );
     extendTo(
         LineBreakResult.sameIndex(breakingPoint, LineBreakType.prohibited));
+
+    // There's a possibility that the end of line has moved backwards, so we
+    // need to remove some boxes in that case.
+    while (_boxes.length > 0 && _boxes.last.end.index > breakingPoint) {
+      _boxes.removeLast();
+    }
   }
 
   LineBreakResult get _boxStart {

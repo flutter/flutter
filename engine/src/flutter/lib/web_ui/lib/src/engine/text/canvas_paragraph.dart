@@ -58,9 +58,13 @@ class CanvasParagraph implements EngineParagraph {
   @override
   bool get didExceedMaxLines => _layoutService.didExceedMaxLines;
 
+  @override
+  bool isLaidOut = false;
+
   ui.ParagraphConstraints? _lastUsedConstraints;
 
   late final TextLayoutService _layoutService = TextLayoutService(this);
+  late final TextPaintService _paintService = TextPaintService(this);
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
@@ -90,6 +94,7 @@ class CanvasParagraph implements EngineParagraph {
           .benchmark('text_layout', stopwatch.elapsedMicroseconds.toDouble());
     }
 
+    isLaidOut = true;
     _lastUsedConstraints = constraints;
   }
 
@@ -100,10 +105,7 @@ class CanvasParagraph implements EngineParagraph {
 
   @override
   void paint(BitmapCanvas canvas, ui.Offset offset) {
-    // TODO(mdebbar): Loop through the spans and for each box in the span:
-    // 1. Paint the background rect.
-    // 2. Paint the text shadows?
-    // 3. Paint the text.
+    _paintService.paint(canvas, offset);
   }
 
   @override
@@ -183,9 +185,6 @@ class CanvasParagraph implements EngineParagraph {
   final bool drawOnCanvas = true;
 
   @override
-  bool isLaidOut = false;
-
-  @override
   List<ui.TextBox> getBoxesForRange(
     int start,
     int end, {
@@ -217,7 +216,7 @@ class CanvasParagraph implements EngineParagraph {
   }
 
   @override
-  List<ui.LineMetrics> computeLineMetrics() {
+  List<EngineLineMetrics> computeLineMetrics() {
     return _layoutService.lines;
   }
 }

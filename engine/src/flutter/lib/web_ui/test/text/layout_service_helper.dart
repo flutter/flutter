@@ -35,8 +35,7 @@ TestLine l(
 
 void expectLines(CanvasParagraph paragraph, List<TestLine> expectedLines) {
   final String text = paragraph.toPlainText();
-  final List<EngineLineMetrics> lines =
-      paragraph.computeLineMetrics() as List<EngineLineMetrics>;
+  final List<EngineLineMetrics> lines = paragraph.computeLineMetrics();
   expect(lines, hasLength(expectedLines.length));
   for (int i = 0; i < lines.length; i++) {
     final EngineLineMetrics line = lines[i];
