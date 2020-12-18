@@ -294,8 +294,9 @@ class CreateCommand extends CreateBase {
       if (!creatingNewProject && requestedPlatforms.isNotEmpty) {
         _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
       } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
-        globals.printError(_kNoPlatformsArgMessage);
+        _printNoPluginMessage();
       }
+      _printAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromPath(projectDirPath);
@@ -489,15 +490,22 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
 void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
   globals.printStatus('''
-
 You need to update $pluginPath/pubspec.yaml to support $platformsString.
-For more information, see https://flutter.dev/go/developing-plugins.
 
 ''', emphasis: true, color: TerminalColor.red);
 }
 
-const String _kNoPlatformsArgMessage = '''
+void _printNoPluginMessage() {
+    globals.printError('''
+You've created a plugin project that doesn't yet support any platforms.
 
-Must specify at least one platform using --platforms.
-For more information, see https://flutter.dev/go/developing-plugins.
-''';
+''');
+}
+
+void _printAddPlatformMessage(String pluginPath) {
+  globals.printStatus('''
+To add platforms, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
+For more information, see https://flutter.dev/go/plugin-platforms.
+
+''');
+}

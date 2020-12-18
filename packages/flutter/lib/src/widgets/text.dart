@@ -13,6 +13,7 @@ import 'inherited_theme.dart';
 import 'media_query.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // String _name;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
