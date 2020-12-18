@@ -1566,7 +1566,7 @@ void main() {
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
     // When replaced is true, InkWell point at the top left is 1.
-    await gesture.moveTo(tester.getTopLeft(find.byType(InkWell)));
+    await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
     RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, isNot(paints..rect(color: hoverColor)));
