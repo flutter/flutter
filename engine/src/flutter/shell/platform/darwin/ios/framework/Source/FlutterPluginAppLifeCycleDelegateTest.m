@@ -41,7 +41,7 @@ FLUTTER_ASSERT_ARC
   OCMVerify([plugin applicationWillEnterForeground:[UIApplication sharedApplication]]);
 }
 
-- (void)testWillResignActive {
+- (void)skip_testWillResignActive {
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
