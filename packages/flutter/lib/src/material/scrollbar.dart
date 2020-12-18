@@ -4,11 +4,11 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'material_state.dart';
+import 'scrollbar_theme.dart';
 import 'theme.dart';
 
 const double _kScrollbarThickness = 8.0;
@@ -61,7 +61,7 @@ class Scrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    bool isAlwaysShown = false,
+    bool? isAlwaysShown,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
