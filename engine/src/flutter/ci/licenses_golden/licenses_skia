@@ -1,4 +1,4 @@
-Signature: c22b97d5efe33c996adbac2857731cbb
+Signature: 615172743e31741f9a1723d0c4243330
 
 UNUSED LICENSES:
 
@@ -4162,6 +4162,7 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeFlood.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeTurbulence.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilter.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilterContext.cpp
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGTextPriv.h
 FILE: ../../../third_party/skia/modules/svg/utils/SvgTool.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAudio.cpp
