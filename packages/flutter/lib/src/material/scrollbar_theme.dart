@@ -33,7 +33,6 @@ class ScrollbarThemeData with Diagnosticable {
   const ScrollbarThemeData({
     this.thickness,
     this.showTrackOnHover,
-    this.isAlwaysShown,
     this.radius,
     this.thumbColor,
     this.trackColor,
@@ -58,10 +57,6 @@ class ScrollbarThemeData with Diagnosticable {
   /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
   /// descendant [Scrollbar] widgets.
   final bool? showTrackOnHover;
-
-  /// Overrides the default value of [Scrollbar.isAlwaysShown] in all
-  /// descendant [Scrollbar] widgets.
-  final bool? isAlwaysShown;
 
   /// Overrides the default value of [Scrollbar.radius] in all
   /// descendant widgets.
@@ -135,7 +130,6 @@ class ScrollbarThemeData with Diagnosticable {
     return ScrollbarThemeData(
       thickness: thickness ?? this.thickness,
       showTrackOnHover: showTrackOnHover ?? this.showTrackOnHover,
-      isAlwaysShown: isAlwaysShown ?? this.isAlwaysShown,
       radius: radius ?? this.radius,
       thumbColor: thumbColor ?? this.thumbColor,
       trackColor: trackColor ?? this.trackColor,
@@ -156,7 +150,6 @@ class ScrollbarThemeData with Diagnosticable {
     return ScrollbarThemeData(
       thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
       showTrackOnHover: t < 0.5 ? a?.showTrackOnHover : b?.showTrackOnHover,
-      isAlwaysShown: t < 0.5 ? a?.isAlwaysShown : b?.isAlwaysShown,
       radius: Radius.lerp(a?.radius, b?.radius, t),
       thumbColor: _lerpProperties<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
       trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
@@ -172,7 +165,6 @@ class ScrollbarThemeData with Diagnosticable {
     return hashValues(
       thickness,
       showTrackOnHover,
-      isAlwaysShown,
       radius,
       thumbColor,
       trackColor,
@@ -192,7 +184,6 @@ class ScrollbarThemeData with Diagnosticable {
     return other is ScrollbarThemeData
       && other.thickness == thickness
       && other.showTrackOnHover == showTrackOnHover
-      && other.isAlwaysShown == isAlwaysShown
       && other.radius == radius
       && other.thumbColor == thumbColor
       && other.trackColor == trackColor
@@ -207,7 +198,6 @@ class ScrollbarThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showTrackOnHover', showTrackOnHover, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('isAlwaysShown', isAlwaysShown, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('radius', radius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));

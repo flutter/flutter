@@ -61,7 +61,7 @@ class Scrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    bool? isAlwaysShown,
+    bool isAlwaysShown = false,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,

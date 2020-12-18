@@ -468,7 +468,6 @@ void main() {
     ScrollbarThemeData(
       thickness: MaterialStateProperty.resolveWith(_getThickness),
       showTrackOnHover: true,
-      isAlwaysShown: true,
       radius: const Radius.circular(3.0),
       thumbColor: MaterialStateProperty.resolveWith(_getThumbColor),
       trackColor: MaterialStateProperty.resolveWith(_getTrackColor),
@@ -486,7 +485,6 @@ void main() {
     expect(description, <String>[
       'thickness: Instance of \'_MaterialStatePropertyWith<double?>\'',
       'showTrackOnHover: true',
-      'isAlwaysShown: true',
       'radius: Radius.circular(3.0)',
       'thumbColor: Instance of \'_MaterialStatePropertyWith<Color?>\'',
       'trackColor: Instance of \'_MaterialStatePropertyWith<Color?>\'',
@@ -507,7 +505,6 @@ void main() {
 ScrollbarThemeData _scrollbarTheme({
   MaterialStateProperty<double?>? thickness,
   bool showTrackOnHover = true,
-  bool isAlwaysShown = true,
   Radius radius = const Radius.circular(6.0),
   MaterialStateProperty<Color?>? thumbColor,
   MaterialStateProperty<Color?>? trackColor,
@@ -519,7 +516,6 @@ ScrollbarThemeData _scrollbarTheme({
   return ScrollbarThemeData(
     thickness: thickness ?? MaterialStateProperty.resolveWith(_getThickness),
     showTrackOnHover: showTrackOnHover,
-    isAlwaysShown: isAlwaysShown,
     radius: radius,
     thumbColor: thumbColor ?? MaterialStateProperty.resolveWith(_getThumbColor),
     trackColor: trackColor ?? MaterialStateProperty.resolveWith(_getTrackColor),
