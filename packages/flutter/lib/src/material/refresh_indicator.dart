@@ -47,14 +47,14 @@ enum _RefreshIndicatorMode {
   canceled, // Animating the indicator's fade-out after not arming.
 }
 
-/// Used to configure the [RefreshIndicator] trigger mode.
+/// Used to configure how [RefreshIndicator] can be triggered.
 enum RefreshIndicatorTriggerMode {
-  /// The indicator can trigger when the child's [Scrollable] descendant overscrolls
-  /// by drag(not inertia), regardless of whether its initial scroll position is on the edge or not.
+  /// The indicator can be triggered regardless of the scroll position
+  /// of the [Scrollable] when the drag starts.
   loose,
 
-  /// The indicator can only trigger when the child's [Scrollable] descendant overscrolls
-  /// by drag and its initial scroll position is on the edge.
+  /// The indicator can only be triggered if the [Scrollable] is at the edge
+  /// when the drag starts.
   strict,
 }
 
@@ -175,9 +175,19 @@ class RefreshIndicator extends StatefulWidget {
   /// By default, the value of `strokeWidth` is 2.0 pixels.
   final double strokeWidth;
 
-  /// Defines `triggerMode` for `RefreshIndicator`.
+  /// Defines how this [RefreshIndicator] can be triggered when users overscroll.
   ///
-  /// By default, the value of `triggerMode` is [RefreshIndicatorTriggerMode.strict].
+  /// The [RefreshIndicator] can be pulled out in two cases,
+  /// 1, Keep dragging if the scrollable widget at the edge with zero scroll position
+  ///    when the drag starts.
+  /// 2, Keep dragging after overscroll occurs if the scrollable widget has
+  ///    a non-zero scroll position when the drag starts.
+  ///
+  /// If this is [RefreshIndicatorTriggerMode.loose], both of the cases above can be triggered.
+  ///
+  /// If this is [RefreshIndicatorTriggerMode.strict], only case 1 can be triggered.
+  ///
+  /// Defaults to [RefreshIndicatorTriggerMode.strict].
   final RefreshIndicatorTriggerMode triggerMode;
 
   @override
@@ -236,10 +246,6 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   bool _shouldStart(ScrollNotification notification) {
-    // The indicator will be pulled out in two cases depend on [widget.triggerMode],
-    // 1, Begin drag when the scrollable widget at the edge with zero scroll position.
-    // 2, Keep drag before overscroll occurs when the scrollable widget has
-    //    a non-zero scroll position(do not release finger before overscroll).
     return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.loose))
       && notification.metrics.extentBefore == 0.0
       && _mode == null
