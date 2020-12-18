@@ -504,7 +504,8 @@ static void CommonInit(FlutterViewController* controller) {
         return;
       }
     }
-    if ([self.nextResponder respondsToSelector:@selector(keyDown:)]) {
+    if ([self.nextResponder respondsToSelector:@selector(keyDown:)] &&
+        event.type == NSEventTypeKeyDown) {
       [self.nextResponder keyDown:event];
     }
   } else if ([type isEqual:@"keyup"]) {
@@ -513,13 +514,20 @@ static void CommonInit(FlutterViewController* controller) {
         return;
       }
     }
-    if ([self.nextResponder respondsToSelector:@selector(keyUp:)]) {
+    if ([self.nextResponder respondsToSelector:@selector(keyUp:)] &&
+        event.type == NSEventTypeKeyUp) {
       [self.nextResponder keyUp:event];
     }
+  }
+  if ([self.nextResponder respondsToSelector:@selector(flagsChanged:)] &&
+      event.type == NSEventTypeFlagsChanged) {
+    [self.nextResponder flagsChanged:event];
   }
 }
 
 - (void)dispatchKeyEvent:(NSEvent*)event ofType:(NSString*)type {
+  // Be sure to add a handler in propagateKeyEvent if you allow more event
+  // types here.
   if (event.type != NSEventTypeKeyDown && event.type != NSEventTypeKeyUp &&
       event.type != NSEventTypeFlagsChanged) {
     return;
