@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -652,11 +653,22 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
   final List<_DragAvatar<Object>> _candidateAvatars = <_DragAvatar<Object>>[];
   final List<_DragAvatar<Object>> _rejectedAvatars = <_DragAvatar<Object>>[];
 
+  bool _checkDataType(Object? data, Type type) {
+    if (!kIsWeb) {
+      return data is T?;
+    } else {
+      if ((type == int && T == double) || (type == double && T == int)) {
+        return false;
+      } else {
+        return data is T?;
+      }
+    }
+  }
+
   bool didEnter(_DragAvatar<Object> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    if ((avatar.data == null || avatar.data is T)
-        && (widget.onWillAccept == null || widget.onWillAccept!(avatar.data as T?))) {
+    if (widget.onWillAccept == null || widget.onWillAccept!(avatar.data as T?)) {
       setState(() {
         _candidateAvatars.add(avatar);
       });
@@ -836,7 +848,7 @@ class _DragAvatar<T extends Object> extends Drag {
       final HitTestTarget target = entry.target;
       if (target is RenderMetaData) {
         final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState)
+        if (metaData is _DragTargetState && metaData._checkDataType(data, T))
           yield metaData;
       }
     }
