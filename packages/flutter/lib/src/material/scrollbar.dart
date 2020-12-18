@@ -80,7 +80,7 @@ class Scrollbar extends RawScrollbar {
 
   /// Controls if the track will show on hover and remain, including during drag.
   ///
-  /// If this property is null, then [ScrollbarTheme.showTrackOnHover] of
+  /// If this property is null, then [ScrollbarThemeData.showTrackOnHover] of
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
   /// is false.
   final bool? showTrackOnHover;
@@ -88,9 +88,9 @@ class Scrollbar extends RawScrollbar {
   /// The thickness of the scrollbar when a hover state is active and
   /// [showTrackOnHover] is true.
   ///
-  /// If this property is null, then [ScrollbarTheme.hoverThickness] of
-  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
-  /// is 12.0 pixels.
+  /// If this property is null, then [ScrollbarThemeData.thickness] of
+  /// [ThemeData.scrollbarTheme] is used to resolve a thickness. If that is also
+  /// null, the default value is 12.0 pixels.
   final double? hoverThickness;
 
   @override

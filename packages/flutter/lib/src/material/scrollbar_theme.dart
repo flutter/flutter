@@ -47,11 +47,6 @@ class ScrollbarThemeData with Diagnosticable {
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.hovered] on web and desktop platforms.
-  ///
-  /// See also:
-  ///
-  ///  * [hoverThickness], which overrides the default value of
-  ///    [Scrollbar.hoverThickness] in all descendant [Scrollbar] widgets.
   final MaterialStateProperty<double?>? thickness;
 
   /// Overrides the default value of [Scrollbar.showTrackOnHover] in all
