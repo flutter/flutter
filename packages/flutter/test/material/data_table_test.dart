@@ -21,6 +21,9 @@ class TestStateWithoutSorting extends StatefulWidget {
 }
 
 class _TestStateWithoutSortingState extends State<TestStateWithoutSorting> {
+  static const String _buttonText = 'Test';
+  static const String _columnText = 'Column 1';
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,15 +32,15 @@ class _TestStateWithoutSortingState extends State<TestStateWithoutSorting> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               RaisedButton(
-                onPressed: () => setState(() => {}),
-                child: Text('Test'),
+                onPressed: () => setState((){}),
+                child: Text(_buttonText),
               ),
               DataTable(
                   sortColumnIndex: 0,
                   sortAscending: true,
                   columns: [
                     DataColumn(
-                      label: Text('Column 1'),
+                      label: Text(_columnText),
                       onSort: (a, i) {},
                     ),
                   ],
