@@ -412,4 +412,12 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// See [TestWidgetsFlutterBinding.defaultTestTimeout] for more details.
   set defaultTestTimeout(Timeout timeout) => _defaultTestTimeout = timeout;
   Timeout _defaultTestTimeout;
+
+  @override
+  void attachRootWidget(Widget rootWidget) {
+    // This is a workaround where screenshots of root widgets have incorrect
+    // bounds.
+    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
+    super.attachRootWidget(RepaintBoundary(child: rootWidget));
+  }
 }

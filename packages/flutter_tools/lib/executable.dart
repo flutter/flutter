@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/artifacts.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
@@ -44,16 +45,14 @@ import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
-import 'src/isolated/devtools_launcher.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/resident_web_runner.dart';
-import 'src/isolated/web_compilation_delegate.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
-import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
@@ -145,7 +144,6 @@ Future<void> main(List<String> args) async {
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp,
      overrides: <Type, Generator>{
-       WebCompilationProxy: () => BuildRunnerWebCompilationProxy(),
        // The web runner is not supported in google3 because it depends
        // on dwds.
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
@@ -153,7 +151,11 @@ Future<void> main(List<String> args) async {
        TemplateRenderer: () => const MustacheTemplateRenderer(),
        // The devtools launcher is not supported in google3 because it depends on
        // devtools source code.
-       DevtoolsLauncher: () => DevtoolsServerLauncher(logger: globals.logger),
+       DevtoolsLauncher: () => DevtoolsServerLauncher(
+         processManager: globals.processManager,
+         pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+         logger: globals.logger,
+       ),
        Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,

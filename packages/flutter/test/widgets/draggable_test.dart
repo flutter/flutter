@@ -840,6 +840,158 @@ void main() {
     });
   });
 
+  group('Drag and drop - onDragUpdate called if draggable moves along a set axis', () {
+    int updated = 0;
+    Offset dragDelta = Offset.zero;
+
+    setUp(() {
+      updated = 0;
+      dragDelta = Offset.zero;
+    });
+
+    Widget build() {
+      return MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Draggable<int>(
+              data: 1,
+              child: const Text('Source'),
+              feedback: const Text('Dragging'),
+              onDragUpdate: (DragUpdateDetails details) {
+                dragDelta += details.delta;
+                updated++;
+              },
+            ),
+            Draggable<int>(
+              data: 2,
+              child: const Text('Vertical Source'),
+              feedback: const Text('Vertical Dragging'),
+              onDragUpdate: (DragUpdateDetails details) {
+                dragDelta += details.delta;
+                updated++;
+              },
+              axis: Axis.vertical,
+            ),
+            Draggable<int>(
+              data: 3,
+              child: const Text('Horizontal Source'),
+              feedback: const Text('Horizontal Dragging'),
+              onDragUpdate: (DragUpdateDetails details) {
+                dragDelta += details.delta;
+                updated++;
+              },
+              axis: Axis.horizontal,
+            ),
+          ],
+        ),
+      );
+    }
+
+    testWidgets('Null axis onDragUpdate called only if draggable moves in any direction', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+
+      expect(updated, 0);
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+
+      final Offset firstLocation = tester.getCenter(find.text('Source'));
+      final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+
+      expect(updated, 0);
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsOneWidget);
+
+      await gesture.moveBy(const Offset(10, 10));
+      await tester.pump();
+
+      expect(updated, 1);
+
+      await gesture.moveBy(Offset.zero);
+      await tester.pump();
+
+      expect(updated, 1);
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(updated, 1);
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(dragDelta.dx, 10);
+      expect(dragDelta.dy, 10);
+    });
+
+    testWidgets('Vertical axis onDragUpdate only called if draggable moves vertical', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+
+      expect(updated, 0);
+      expect(find.text('Vertical Source'), findsOneWidget);
+      expect(find.text('Vertical Dragging'), findsNothing);
+
+      final Offset firstLocation = tester.getCenter(find.text('Vertical Source'));
+      final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+
+      expect(updated, 0);
+      expect(find.text('Vertical Source'), findsOneWidget);
+      expect(find.text('Vertical Dragging'), findsOneWidget);
+
+      await gesture.moveBy(const Offset(0, 10));
+      await tester.pump();
+
+      expect(updated, 1);
+
+      await gesture.moveBy(const Offset(10 , 0));
+      await tester.pump();
+
+      expect(updated, 1);
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(updated, 1);
+      expect(find.text('Vertical Source'), findsOneWidget);
+      expect(find.text('Vertical Dragging'), findsNothing);
+      expect(dragDelta.dx, 0);
+      expect(dragDelta.dy, 10);
+    });
+
+    testWidgets('Horizontal axis onDragUpdate only called if draggable moves horizontal', (WidgetTester tester) async {
+      await tester.pumpWidget(build());
+
+      expect(updated, 0);
+      expect(find.text('Horizontal Source'), findsOneWidget);
+      expect(find.text('Horizontal Dragging'), findsNothing);
+
+      final Offset firstLocation = tester.getCenter(find.text('Horizontal Source'));
+      final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+      await tester.pump();
+
+      expect(updated, 0);
+      expect(find.text('Horizontal Source'), findsOneWidget);
+      expect(find.text('Horizontal Dragging'), findsOneWidget);
+
+      await gesture.moveBy(const Offset(0, 10));
+      await tester.pump();
+
+      expect(updated, 0);
+
+      await gesture.moveBy(const Offset(10 , 0));
+      await tester.pump();
+
+      expect(updated, 1);
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(updated, 1);
+      expect(find.text('Horizontal Source'), findsOneWidget);
+      expect(find.text('Horizontal Dragging'), findsNothing);
+      expect(dragDelta.dx, 10);
+      expect(dragDelta.dy, 0);
+    });
+  });
 
   testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
