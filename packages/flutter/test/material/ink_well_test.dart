@@ -1403,11 +1403,11 @@ void main() {
 
                 Widget child = InkWell(
                   key: key,
-                  onTapDown: (_) async {
+                  onTapDown: (_) {
                     if (onTapDownChangeWrap)
                       changeWrap();
                   },
-                  onTap: () async {
+                  onTap: () {
                     if (onTapChangeWrap)
                       changeWrap();
                   },
@@ -1450,11 +1450,11 @@ void main() {
                 }
 
                 Widget child = InkWell(
-                  onTapDown: (_) async {
+                  onTapDown: (_) {
                     if (onTapDownChangeWrap)
                       changeWrap();
                   },
-                  onTap: () async {
+                  onTap: () {
                     if (onTapChangeWrap)
                       changeWrap();
                   },
@@ -1483,5 +1483,103 @@ void main() {
         ),
       );
     });
+  });
+
+  testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, splash should stop.', (WidgetTester tester)async {
+    final Key key = GlobalKey();
+
+    bool replaced = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
+          Future<void> changeReplace() async {
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+
+            setState(() {
+              replaced = !replaced;
+            });
+          }
+
+          return Material(
+            key: ValueKey<bool>(replaced),
+            child: InkWell(
+              key: key,
+              onTap: () {
+                changeReplace();
+              },
+            ),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell));
+    await tester.pump(const Duration(milliseconds: 60));
+
+    final PaintPattern paintPattern = paints..circle();
+    expect(
+      Material.of(tester.element(find.byType(InkWell)))! as RenderBox,
+      isNot(paintPattern),
+    );
+  });
+
+  testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, highlight should always be maintained.', (WidgetTester tester) async {
+    final Key key = GlobalKey();
+    const Color hoverColor = Color(0xff00ff00);
+
+    int onHoverCount = 0;
+    int callChangeReplaceCount = 0;
+    bool replaced = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
+          Future<void> changeReplace() async {
+            callChangeReplaceCount += 1;
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+
+            setState(() {
+              replaced = !replaced;
+            });
+          }
+
+          return Container(
+            margin: replaced ? const EdgeInsets.only(top: 1) : EdgeInsets.zero,
+            child: Material(
+              key: ValueKey<bool>(replaced),
+              child: InkWell(
+                key: key,
+                hoverColor: hoverColor,
+                onTap: () {},
+                onHover: (bool hovered) {
+                  onHoverCount += 1;
+                  if (hovered)
+                    changeReplace();
+                },
+              ),
+            ),
+          );
+        }),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    // When replaced is true, InkWell point at the top left is 1.
+    await gesture.moveTo(tester.getTopLeft(find.byType(InkWell)));
+    await tester.pumpAndSettle();
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, isNot(paints..rect(color: hoverColor)));
+    expect(onHoverCount, 2);
+    expect(callChangeReplaceCount, 1);
+    expect(replaced, true);
+
+    await gesture.moveTo(tester.getCenter(find.byType(InkWell)));
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: hoverColor));
+    expect(onHoverCount, 3);
+    expect(callChangeReplaceCount, 2);
+    expect(replaced, false);
   });
 }
