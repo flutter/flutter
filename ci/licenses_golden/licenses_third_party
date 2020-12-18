@@ -1,4 +1,4 @@
-Signature: a8cc0000d2c343f5ff41a0cd561da725
+Signature: 06b8dc046306f897ef36bb7219a8b583
 
 UNUSED LICENSES:
 
@@ -9124,6 +9124,7 @@ FILE: ../../../third_party/dart/runtime/bin/ffi_unit_test/run_ffi_unit_tests.cc
 FILE: ../../../third_party/dart/runtime/bin/file_win.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos.h
 FILE: ../../../third_party/dart/runtime/bin/platform_macos_test.cc
+FILE: ../../../third_party/dart/runtime/bin/priority_heap_test.cc
 FILE: ../../../third_party/dart/runtime/include/dart_api_dl.c
 FILE: ../../../third_party/dart/runtime/include/dart_api_dl.h
 FILE: ../../../third_party/dart/runtime/include/dart_version.h
@@ -9134,6 +9135,7 @@ FILE: ../../../third_party/dart/runtime/observatory_2/bin/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory_2/lib/src/elements/process_snapshot.dart
 FILE: ../../../third_party/dart/runtime/platform/allocation.cc
 FILE: ../../../third_party/dart/runtime/platform/leak_sanitizer.h
+FILE: ../../../third_party/dart/runtime/platform/priority_queue.h
 FILE: ../../../third_party/dart/runtime/platform/unaligned.h
 FILE: ../../../third_party/dart/runtime/platform/undefined_behavior_sanitizer.h
 FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/bin/main.dart
