@@ -92,7 +92,7 @@ Future<Null> testHttpAssetRequest(Uri uri) async {
   final HttpClientRequest request = await client.getUrl(uri);
   final HttpClientResponse response = await request.close();
   Expect.equals(response.statusCode, 200);
-  await response.drain<List<int>>();
+  await response.drain();
   client.close();
 }
 
@@ -176,8 +176,8 @@ Future<bool> runTests(ShellLauncher launcher, List<TestFunction> tests) async {
       print('Executing test ${i + 1}/${tests.length}');
       await tests[i](uri);
     }
-  } catch (e) {
-    print('Observatory test failure: $e');
+  } catch (e, st) {
+    print('Observatory test failure: $e\n$st');
     exitCode = -1;
   }
   await process.kill();
