@@ -12,16 +12,10 @@ import 'framework.dart';
 /// Applies a [ColorFilter] to its child.
 ///
 /// Use the [ColorFilter.mode] constructor to apply a [Color] using a [BlendMode].
-///
-/// Causes the child to be modified using a color to tint the resulting rendering.
-/// This widget allows to generate dynamic and vibrant shades depending on the chosen blend modes.
-/// Different blending modes can modify how the color is applied,
-/// and to which parts of the image.
-/// ColorFiltered widget is different from BackdropFilter and ImageFiltered as both
-/// is used to apply filter, e.g. blur,to the existing painted filter, i.e,
-/// it may or may not be used simultaneously with ColorFiltered Widget.
-/// ColorFiltered widget is more widely used than BackdropFilter and ImageFiltered
-/// as it allows more rendering choices.
+/// This widget applies a function independently to each pixel of [child]'s
+/// content, according to the [ColorFilter] specified. Use the [BackdropFilter]
+/// widget instead, if the [ColorFilter] needs to be applied onto the content
+/// beneath [child].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
 ///
