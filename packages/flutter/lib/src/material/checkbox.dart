@@ -265,17 +265,21 @@ class Checkbox extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// {@template flutter.material.checkbox.shape}
   /// The shape of the checkbox's [Material].
+  /// {@endtemplate}
   ///
   /// If this property is null then [CheckboxThemeData.shape] of [ThemeData.checkboxTheme]
   /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
   /// with a circular corner radius of 1.0.
   final OutlinedBorder? shape;
 
+  /// {@template flutter.material.checkbox.side}
   /// The side of the checkbox's border.
+  /// {@endtemplate}
   ///
   /// If this property is null then [CheckboxThemeData.side] of [ThemeData.checkboxTheme]
-  /// is used.If that's null then the side will be width 2.
+  /// is used. If that's null then the side will be width 2.
   final BorderSide? side;
 
   /// The width of a checkbox widget.
