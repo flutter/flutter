@@ -426,7 +426,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   @override
   void initState() {
     super.initState();
-    final int? initialIndex = (PageStorage.of(context)?.readState(context) as num?)?.toInt();
+    final int? initialIndex = PageStorage.of(context)?.readState(context) as int?;
     _controller = TabController(
       vsync: this,
       length: widget.length,

@@ -404,9 +404,9 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final num? value = PageStorage.of(context.storageContext)?.readState(context.storageContext) as num?;
+      final double? value = (PageStorage.of(context.storageContext)?.readState(context.storageContext) as num?)?.toDouble();
       if (value != null)
-        _pageToUseOnStartup = value.toDouble();
+        _pageToUseOnStartup = value;
     }
   }
 
