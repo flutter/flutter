@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:metrics_center/src/common.dart';
+import 'package:metrics_center/src/legacy_datastore.dart';
 import 'package:metrics_center/src/legacy_flutter.dart';
 
 /// Convenient class to capture the benchmarks in the Flutter engine repo.

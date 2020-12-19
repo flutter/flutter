@@ -7,12 +7,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
-import 'package:gcloud/db.dart';
 
-// The official pub.dev/packages/gcloud documentation uses datastore_impl
-// so we have to ignore implementation_imports here.
-// ignore: implementation_imports
-import 'package:gcloud/src/datastore_impl.dart';
 import 'package:googleapis_auth/auth.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart';
@@ -66,22 +61,6 @@ AuthClient authClientFromAccessToken(String token, List<String> scopes) {
   final AccessCredentials accessCredentials =
       AccessCredentials(accessToken, null, scopes);
   return authenticatedClient(Client(), accessCredentials);
-}
-
-// TODO(liyuqian): Remove `datastoreFromCredentialsJson` and
-// `datastoreFromAccessToken` once the migration is fully done and we no longer
-// need to fall back to the datastore.
-Future<DatastoreDB> datastoreFromCredentialsJson(
-    Map<String, dynamic> json) async {
-  final AutoRefreshingAuthClient client = await clientViaServiceAccount(
-      ServiceAccountCredentials.fromJson(json), DatastoreImpl.SCOPES);
-  return DatastoreDB(DatastoreImpl(client, json[kProjectId] as String));
-}
-
-DatastoreDB datastoreFromAccessToken(String token, String projectId) {
-  final AuthClient client =
-      authClientFromAccessToken(token, DatastoreImpl.SCOPES);
-  return DatastoreDB(DatastoreImpl(client, projectId));
 }
 
 /// Some common tag keys

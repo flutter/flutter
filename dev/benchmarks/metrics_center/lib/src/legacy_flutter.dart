@@ -10,6 +10,7 @@ import 'dart:math';
 import 'package:gcloud/db.dart';
 
 import 'common.dart';
+import 'legacy_datastore.dart';
 
 const String kSourceTimeMicrosName = 'sourceTimeMicros';
 
