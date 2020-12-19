@@ -440,6 +440,7 @@ void main() {
   testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme(
+      backwardsCompatibility: false,
       brightness: Brightness.dark,
       color: Color(0xff000001),
       elevation: 8.0,
@@ -460,6 +461,7 @@ void main() {
       'shadowColor: Color(0xff000002)',
       'centerTitle: true',
       'titleSpacing: 40.0',
+      'backwardsCompatibility: false',
     ]);
 
     // On the web, Dart doubles and ints are backed by the same kind of object because

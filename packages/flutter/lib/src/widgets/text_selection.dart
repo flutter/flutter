@@ -567,20 +567,27 @@ class TextSelectionOverlay {
       endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
-    return FadeTransition(
-      opacity: _toolbarOpacity,
-      child: CompositedTransformFollower(
-        link: toolbarLayerLink,
-        showWhenUnlinked: false,
-        offset: -editingRegion.topLeft,
-        child: selectionControls!.buildToolbar(
-          context,
-          editingRegion,
-          renderObject.preferredLineHeight,
-          midpoint,
-          endpoints,
-          selectionDelegate!,
-          clipboardStatus!,
+    return Directionality(
+      textDirection: Directionality.of(this.context),
+      child: FadeTransition(
+        opacity: _toolbarOpacity,
+        child: CompositedTransformFollower(
+          link: toolbarLayerLink,
+          showWhenUnlinked: false,
+          offset: -editingRegion.topLeft,
+          child: Builder(
+            builder: (BuildContext context) {
+              return selectionControls!.buildToolbar(
+                context,
+                editingRegion,
+                renderObject.preferredLineHeight,
+                midpoint,
+                endpoints,
+                selectionDelegate!,
+                clipboardStatus!,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1077,6 +1084,8 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onDragSelectionStart(DragStartDetails details) {
+    if (!delegate.selectionEnabled)
+      return;
     final PointerDeviceKind? kind = details.kind;
     _shouldShowSelectionToolbar = kind == null
       || kind == PointerDeviceKind.touch
@@ -1099,6 +1108,8 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback./lib/src/material/text_field.dart
   @protected
   void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails) {
+    if (!delegate.selectionEnabled)
+      return;
     renderEditable.selectPositionAt(
       from: startDetails.globalPosition,
       to: updateDetails.globalPosition,
@@ -1516,7 +1527,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   Future<void> update() async {
     // iOS 14 added a notification that appears when an app accesses the
     // clipboard. To avoid the notification, don't access the clipboard on iOS,
-    // and instead always shown the paste button, even when the clipboard is
+    // and instead always show the paste button, even when the clipboard is
     // empty.
     // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
     // won't trigger the notification.

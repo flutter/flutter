@@ -30,13 +30,11 @@ export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 // void setState(VoidCallback fn) { }
-
-// Examples can assume:
 // abstract class RenderFrogJar extends RenderObject { }
 // abstract class FrogJar extends RenderObjectWidget { }
-// abstract class FrogJarParentData extends ParentData { Size size; }
+// abstract class FrogJarParentData extends ParentData { late Size size; }
 
 // KEYS
 
@@ -625,7 +623,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// ```dart
 /// class GreenFrog extends StatelessWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
+///   const GreenFrog({ Key? key }) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -643,13 +641,13 @@ abstract class Widget extends DiagnosticableTree {
 /// ```dart
 /// class Frog extends StatelessWidget {
 ///   const Frog({
-///     Key key,
+///     Key? key,
 ///     this.color = const Color(0xFF2DBD3A),
 ///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final Color color;
-///   final Widget child;
+///   final Widget? child;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -842,7 +840,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// ```dart
 /// class YellowBird extends StatefulWidget {
-///   const YellowBird({ Key key }) : super(key: key);
+///   const YellowBird({ Key? key }) : super(key: key);
 ///
 ///   @override
 ///   _YellowBirdState createState() => _YellowBirdState();
@@ -865,13 +863,13 @@ abstract class StatelessWidget extends Widget {
 /// ```dart
 /// class Bird extends StatefulWidget {
 ///   const Bird({
-///     Key key,
+///     Key? key,
 ///     this.color = const Color(0xFFFFE306),
 ///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final Color color;
-///   final Widget child;
+///   final Widget? child;
 ///
 ///   _BirdState createState() => _BirdState();
 /// }
@@ -1532,21 +1530,19 @@ abstract class ProxyWidget extends Widget {
 /// ```dart
 /// class FrogSize extends ParentDataWidget<FrogJarParentData> {
 ///   FrogSize({
-///     Key key,
-///     @required this.size,
-///     @required Widget child,
-///   }) : assert(child != null),
-///        assert(size != null),
-///        super(key: key, child: child);
+///     Key? key,
+///     required this.size,
+///     required Widget child,
+///   }) : super(key: key, child: child);
 ///
 ///   final Size size;
 ///
 ///   @override
 ///   void applyParentData(RenderObject renderObject) {
-///     final FrogJarParentData parentData = renderObject.parentData;
+///     final FrogJarParentData parentData = renderObject.parentData! as FrogJarParentData;
 ///     if (parentData.size != size) {
 ///       parentData.size = size;
-///       final RenderFrogJar targetParent = renderObject.parent;
+///       final RenderFrogJar targetParent = renderObject.parent! as RenderFrogJar;
 ///       targetParent.markNeedsLayout();
 ///     }
 ///   }
@@ -1685,17 +1681,17 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// ```dart
 /// class FrogColor extends InheritedWidget {
 ///   const FrogColor({
-///     Key key,
-///     @required this.color,
-///     @required Widget child,
-///   }) : assert(color != null),
-///        assert(child != null),
-///        super(key: key, child: child);
+///     Key? key,
+///     required this.color,
+///     required Widget child,
+///   }) : super(key: key, child: child);
 ///
 ///   final Color color;
 ///
 ///   static FrogColor of(BuildContext context) {
-///     return context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///     final FrogColor? result = context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///     assert(result != null, 'No FrogColor found in context');
+///     return result!;
 ///   }
 ///
 ///   @override
@@ -2421,7 +2417,7 @@ abstract class BuildContext {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// ScrollableState scrollable = context.findAncestorStateOfType<ScrollableState>();
+  /// ScrollableState? scrollable = context.findAncestorStateOfType<ScrollableState>();
   /// ```
   /// {@end-tool}
   T? findAncestorStateOfType<T extends State>();
@@ -2651,26 +2647,6 @@ class BuildOwner {
   /// Only valid when asserts are enabled.
   bool get debugBuilding => _debugBuilding;
   bool _debugBuilding = false;
-
-  /// The element currently being built, or null if no element is actively
-  /// being built.
-  ///
-  /// This is valid in debug builds only. In release builds, this will throw an
-  /// [UnsupportedError].
-  @visibleForTesting
-  Element? get debugCurrentBuildTarget {
-    Element? result;
-    bool isSupportedOperation = false;
-    assert(() {
-      result = _debugCurrentBuildTarget;
-      isSupportedOperation = true;
-      return true;
-    }());
-    if (isSupportedOperation) {
-      return result;
-    }
-    throw UnsupportedError('debugCurrentBuildTarget is not supported in release builds');
-  }
   Element? _debugCurrentBuildTarget;
 
   /// Establishes a scope in which calls to [State.setState] are forbidden, and
@@ -2694,25 +2670,6 @@ class BuildOwner {
       }());
     }
     assert(_debugStateLockLevel >= 0);
-  }
-
-  void _runWithCurrentBuildTarget(Element element, VoidCallback callback) {
-    assert(_debugStateLocked);
-    Element? debugPreviousBuildTarget;
-    assert(() {
-      debugPreviousBuildTarget = _debugCurrentBuildTarget;
-      _debugCurrentBuildTarget = element;
-      return true;
-    }());
-    try {
-      callback();
-    } finally {
-      assert(() {
-        assert(_debugCurrentBuildTarget == element);
-        _debugCurrentBuildTarget = debugPreviousBuildTarget;
-        return true;
-      }());
-    }
   }
 
   /// Establishes a scope for updating the widget tree, and calls the given
@@ -2757,22 +2714,26 @@ class BuildOwner {
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
-        _runWithCurrentBuildTarget(context, () {
+        assert(_debugStateLocked);
+        Element? debugPreviousBuildTarget;
+        assert(() {
+          context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
+          debugPreviousBuildTarget = _debugCurrentBuildTarget;
+          _debugCurrentBuildTarget = context;
+          return true;
+        }());
+        _dirtyElementsNeedsResorting = false;
+        try {
+          callback();
+        } finally {
           assert(() {
-            context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
+            context._debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
+            assert(_debugCurrentBuildTarget == context);
+            _debugCurrentBuildTarget = debugPreviousBuildTarget;
+            _debugElementWasRebuilt(context);
             return true;
           }());
-          _dirtyElementsNeedsResorting = false;
-          try {
-            callback();
-          } finally {
-            assert(() {
-              context._debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
-              _debugElementWasRebuilt(context);
-              return true;
-            }());
-          }
-        });
+        }
       }
       _dirtyElements.sort(Element._sort);
       _dirtyElementsNeedsResorting = false;
@@ -4404,7 +4365,19 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return true;
     }());
     assert(_lifecycleState == _ElementLifecycle.active);
-    owner!._runWithCurrentBuildTarget(this, performRebuild);
+    assert(owner!._debugStateLocked);
+    Element? debugPreviousBuildTarget;
+    assert(() {
+      debugPreviousBuildTarget = owner!._debugCurrentBuildTarget;
+      owner!._debugCurrentBuildTarget = this;
+      return true;
+    }());
+    performRebuild();
+    assert(() {
+      assert(owner!._debugCurrentBuildTarget == this);
+      owner!._debugCurrentBuildTarget = debugPreviousBuildTarget;
+      return true;
+    }());
     assert(!_dirty);
   }
 
@@ -5609,7 +5582,6 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
-  @mustCallSuper
   void performRebuild() {
     assert(() {
       _debugDoingBuild = true;
@@ -6251,6 +6223,11 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   MultiChildRenderObjectWidget get widget => super.widget as MultiChildRenderObjectWidget;
 
+  @override
+  ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> get renderObject {
+    return super.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+  }
+
   /// The current list of children of this element.
   ///
   /// This list is filtered to hide elements that have been forgotten (using
@@ -6266,8 +6243,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
-    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child, after: slot.value?.renderObject);
     assert(renderObject == this.renderObject);
@@ -6275,8 +6251,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void moveRenderObjectChild(RenderObject child, IndexedSlot<Element?> oldSlot, IndexedSlot<Element?> newSlot) {
-    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     assert(child.parent == renderObject);
     renderObject.move(child, after: newSlot.value?.renderObject);
     assert(renderObject == this.renderObject);
@@ -6284,8 +6259,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void removeRenderObjectChild(RenderObject child, dynamic slot) {
-    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     assert(child.parent == renderObject);
     renderObject.remove(child);
     assert(renderObject == this.renderObject);
