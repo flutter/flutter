@@ -3407,7 +3407,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/10969.
-  testWidgets('Correct restore with PageStorageKey', (WidgetTester tester) async {
+  testWidgets('TabBar and TabBarView should be restored correctly', (WidgetTester tester) async {
     final GlobalKey<State<StatefulWidget>> globalKey = GlobalKey();
     final PageController pageController = PageController();
     await tester.pumpWidget(
@@ -3474,8 +3474,8 @@ void main() {
     expect(find.text('D'), findsOneWidget);
 
     final Element pageViewElement = find.byType(PageView).evaluate().firstWhere((Element element) => element != globalKey.currentContext);
-    final PageController internalPageController = (pageViewElement.widget as PageView).controller;
-    expect(internalPageController.page, tabController.index.toDouble());
+    final PageController innerPageController = (pageViewElement.widget as PageView).controller;
+    expect(innerPageController.page, tabController.index.toDouble());
   });
 }
 
