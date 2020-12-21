@@ -2711,30 +2711,24 @@ void main() {
     ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
       throw FakeDartDevelopmentServiceException(message: 'No URI');
     };
-
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
       observatoryUris: Stream<Uri>.value(testUri),
     );
     bool caught = false;
-    final Completer<void>done = Completer<void>();
-    runZonedGuarded(() {
-      flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
-    }, (Object e, StackTrace st) {
-      expect(e is dds.DartDevelopmentServiceException, true);
+    try {
+      await flutterDevice.connect(allowExistingDdsInstance: true);
+    } on dds.DartDevelopmentServiceException catch(e) {
+      expect(e.message.contains('No URI'), true);
       expect(testLogger.errorText, contains(
         'DDS has failed to start and there is not an existing DDS instance',
       ));
-      done.complete();
       caught = true;
-    });
-    await done.future;
+    }
     if (!caught) {
       fail('Expected a DartDevelopmentServiceException to be thrown.');
     }
   }));
-
-
 
   testUsingContext('nextPlatform moves through expected platforms', () {
     expect(nextPlatform('android', TestFeatureFlags()), 'iOS');

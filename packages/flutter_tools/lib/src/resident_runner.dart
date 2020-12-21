@@ -252,14 +252,15 @@ class FlutterDevice {
             ipv6,
             disableServiceAuthCodes,
           );
-        } on dds.DartDevelopmentServiceException catch (e) {
+        } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
               (e.errorCode != dds.DartDevelopmentServiceException.existingDdsInstanceError)) {
             handleError(e);
             return;
           } else {
             if (device.dds.uri == null) {
-              rethrow;
+              completer.completeError(e, st);
+              return;
             }
             existingDds = true;
           }
