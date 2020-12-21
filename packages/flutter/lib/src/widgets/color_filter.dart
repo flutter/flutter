@@ -11,11 +11,11 @@ import 'framework.dart';
 
 /// Applies a [ColorFilter] to its child.
 ///
-/// Use the [ColorFilter.mode] constructor to apply a [Color] using a [BlendMode].
 /// This widget applies a function independently to each pixel of [child]'s
-/// content, according to the [ColorFilter] specified. Use the [BackdropFilter]
-/// widget instead, if the [ColorFilter] needs to be applied onto the content
-/// beneath [child].
+/// content, according to the [ColorFilter] specified.
+/// Use the [ColorFilter.mode] constructor to apply a [Color] using a [BlendMode].
+/// Use the [BackdropFilter] widget instead, if the [ColorFilter]
+/// needs to be applied onto the content beneath [child].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
 ///
@@ -55,7 +55,7 @@ import 'framework.dart';
 /// See Also:
 ///
 ///  * [BlendMode], describes how to blend a source image with the destination image.
-///  * [ColorFilter], describing which constructor to apply when compositing a layer with a particular color.
+///  * [ColorFilter], which describes a function that modify a color to a different color.
 
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
