@@ -767,8 +767,8 @@ void main() {
       length: tabs.length,
     ));
 
-    tabController.animation!.addListener(() {
-      if (tabController.animation!.status == AnimationStatus.forward)
+    tabController.animation!.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.forward)
         tabController.index = 2;
       expect(tabController.indexIsChanging, true);
     });
