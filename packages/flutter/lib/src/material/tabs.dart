@@ -1538,12 +1538,9 @@ class TabPageSelector extends StatelessWidget {
       }
       return true;
     }());
-    final Animation<double> animation = CurvedAnimation(
-      parent: tabController!.animation!,
-      curve: Curves.fastOutSlowIn,
-    );
+
     return AnimatedBuilder(
-      animation: animation,
+      animation: tabController!.animation!,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
           label: 'Page ${tabController.index + 1} of ${tabController.length}',
