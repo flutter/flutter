@@ -62,7 +62,7 @@ void main() {
     expect(find.text('Dinesh'), findsOneWidget);
   });
 
-  testWidgets('Widget does not rebuilds if value is the same', (WidgetTester tester) async {
+  testWidgets('Widget does not rebuilds if value is the same (using Animatable)', (WidgetTester tester) async {
     const Duration duration = Duration(milliseconds: 100);
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
@@ -77,6 +77,59 @@ void main() {
     final Finder finder2 = find.text('Dinesh');
 
     await tester.pumpWidget(builderForValueListenable(animation));
+
+    await tester.pump();
+    expect(finder1, findsOneWidget);
+    expect(finder2, findsNothing);
+    expect(rebuildCount, equals(1));
+
+    controller.value = 0.3;
+    await tester.pump();
+    expect(finder1, findsOneWidget);
+    expect(finder2, findsNothing);
+    expect(rebuildCount, equals(1));
+
+    controller.animateTo(0.6);
+    await tester.pumpAndSettle(duration);
+    expect(finder1, findsNothing);
+    expect(finder2, findsOneWidget);
+    expect(rebuildCount, equals(2));
+
+    controller.forward();
+    await tester.pumpAndSettle(duration);
+    expect(finder1, findsNothing);
+    expect(finder2, findsOneWidget);
+    expect(rebuildCount, equals(2));
+  });
+
+  testWidgets('Widget does not rebuilds if value is the same (using CurvedAnimation)', (WidgetTester tester) async {
+    const Duration duration = Duration(milliseconds: 100);
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: duration,
+    )..value = 0;
+
+    final Animation<double> animation = CurvedAnimation(
+      parent: controller,
+      curve: const Threshold(0.5),
+    );
+
+    final Finder finder1 = find.text('0');
+    final Finder finder2 = find.text('1');
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ValueListenableBuilder<double?>(
+        valueListenable: animation,
+        builder: (BuildContext context, double? value, Widget? child) {
+          ++rebuildCount;
+
+          if (value == null)
+            return const Placeholder();
+          return Text(value.toInt().toString());
+        },
+      ),
+    ));
 
     await tester.pump();
     expect(finder1, findsOneWidget);
