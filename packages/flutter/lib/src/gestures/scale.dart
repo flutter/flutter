@@ -493,7 +493,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _ScaleState.started;
       _dispatchOnStartCallbackIfNeeded();
       if (dragStartBehavior == DragStartBehavior.start) {
+        _initialFocalPoint = _currentFocalPoint;
         _initialSpan = _currentSpan;
+        _initialLine = _currentLine;
+        _initialHorizontalSpan = _currentHorizontalSpan;
+        _initialVerticalSpan = _currentVerticalSpan;
       }
     }
   }
