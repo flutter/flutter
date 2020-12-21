@@ -423,7 +423,8 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// Create an instance of RawAutocomplete.
   ///
-  /// [fieldViewBuilder] and [optionsViewBuilder] must not be null.
+  /// [displayStringForOption], [optionsBuilder] and [optionsViewBuilder] must
+  /// not be null.
   const RawAutocomplete({
     Key? key,
     required this.optionsViewBuilder,
@@ -437,7 +438,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
        assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
-         "Pass in a fieldViewBuilder, or otherwise create your own field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.",
+         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
         ),
        assert(optionsBuilder != null),
        assert(optionsViewBuilder != null),
@@ -776,7 +777,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       child: CompositedTransformTarget(
         link: _optionsLayerLink,
         child: widget.fieldViewBuilder == null
-            ? SizedBox.shrink()
+            ? const SizedBox.shrink()
             : widget.fieldViewBuilder!(
                 context,
                 _textEditingController,
