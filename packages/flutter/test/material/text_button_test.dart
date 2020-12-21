@@ -1009,6 +1009,46 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
+  testWidgets('TextButton.icon is configurable when iconAlignment set to ButtonIconAlignment.start', (WidgetTester tester) async {
+    const IconData iconData = Icons.add;
+    const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.start;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: TextButton.icon(
+            onPressed: () { },
+            icon: const Icon(iconData),
+            iconAlignment: buttonIconAlignment,
+            label: const Text('text button'),
+          ),
+        ),
+      ),
+    );
+    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild'));
+    expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
+  });
+
+  testWidgets('TextButton.icon is configurable when iconAlignment set to ButtonIconAlignment.end', (WidgetTester tester) async {
+    const IconData iconData = Icons.add;
+    const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.end;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: TextButton.icon(
+            onPressed: () { },
+            icon: const Icon(iconData),
+            iconAlignment: buttonIconAlignment,
+            label: const Text('text button'),
+          ),
+        ),
+      ),
+    );
+    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild'));
+    expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
+  });
+  
 }
 
 
