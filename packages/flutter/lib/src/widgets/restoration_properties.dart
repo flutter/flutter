@@ -216,6 +216,11 @@ class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
   /// If no restoration data is available to restore the value in this property
   /// from, the property will be initialized with the provided `defaultValue`.
   /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableNumN] for the nullable version of this class.
+
   RestorableNum(T defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
@@ -226,6 +231,10 @@ class RestorableDouble extends RestorableNum<double> {
   /// Creates a [RestorableDouble].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableDoubleN] for the nullable version of this class.
   RestorableDouble(double defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
@@ -236,6 +245,10 @@ class RestorableInt extends RestorableNum<int> {
   /// Creates a [RestorableInt].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableIntN] for the nullable version of this class.
   RestorableInt(int defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
@@ -246,6 +259,11 @@ class RestorableString extends _RestorablePrimitiveValue<String> {
   /// Creates a [RestorableString].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableStringN] for the nullable version of this class.
+
   RestorableString(String defaultValue) : assert(defaultValue != null), super(defaultValue);
 }
 
