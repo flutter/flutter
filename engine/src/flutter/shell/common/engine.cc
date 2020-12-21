@@ -66,8 +66,7 @@ Engine::Engine(Delegate& delegate,
                std::unique_ptr<Animator> animator,
                fml::WeakPtr<IOManager> io_manager,
                fml::RefPtr<SkiaUnrefQueue> unref_queue,
-               fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-               std::shared_ptr<VolatilePathTracker> volatile_path_tracker)
+               fml::WeakPtr<SnapshotDelegate> snapshot_delegate)
     : Engine(delegate,
              dispatcher_maker,
              vm.GetConcurrentWorkerTaskRunner(),
@@ -92,8 +91,7 @@ Engine::Engine(Delegate& delegate,
       platform_data,                         // platform data
       settings_.isolate_create_callback,     // isolate create callback
       settings_.isolate_shutdown_callback,   // isolate shutdown callback
-      settings_.persistent_isolate_data,     // persistent isolate data
-      std::move(volatile_path_tracker)       // volatile path tracker
+      settings_.persistent_isolate_data      // persistent isolate data
   );
 }
 
