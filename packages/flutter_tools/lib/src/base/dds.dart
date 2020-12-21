@@ -59,9 +59,19 @@ class DartDevelopmentService {
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
       if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
-        _existingDdsUri = Uri.parse(
-          e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
-        );
+        try {
+          _existingDdsUri = Uri.parse(
+            e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
+          );
+        } on StateError {
+          logger.printError(
+            'DDS has failed to start and there is not an existing DDS instance '
+            'available to connect to. Please comment on '
+            'https://github.com/flutter/flutter/issues/72385 with output from '
+            '"flutter doctor -v" and the following error message:\n\n ${e.message}.'
+          );
+          throw e;
+        }
       }
       if (!_completer.isCompleted) {
         _completer.complete();
