@@ -32,6 +32,9 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
     _dartBundle = [NSBundle bundleWithURL:[NSBundle.mainBundle.privateFrameworksURL
                                               URLByAppendingPathComponent:@"App.framework"]];
   }
+  if (!_dartBundle.isLoaded) {
+    [_dartBundle load];
+  }
   _dartEntrypointArguments = [[NSProcessInfo processInfo] arguments];
   // Remove the first element as it's the binary name
   _dartEntrypointArguments = [_dartEntrypointArguments
