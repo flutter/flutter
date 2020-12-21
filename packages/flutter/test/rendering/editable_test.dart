@@ -1595,4 +1595,130 @@ void main() {
       expect(RenderEditable.previousCharacter(4, '0123👨‍👩‍👦2345'), 3);
     });
   });
+
+  group('custom painters', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+
+    final RenderEditable editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
+        ),
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    setUp(() { EditableText.debugDeterministicCursor = true; });
+    tearDown(() {
+      EditableText.debugDeterministicCursor = false;
+      editable.setForegroundPainter(null);
+      editable.setPainter(null);
+      renderer.renderView.child = null;
+    });
+
+    test('paints in the correct order', () {
+      layout(editable);
+      editable.layout(BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      // Foreground painter.
+      editable.setForegroundPainter(_TestRenderEditablePainter());
+      pumpFrame(phase: EnginePhase.compositingBits);
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
+
+      // Background painter.
+      editable.setForegroundPainter(null);
+      editable.setPainter(_TestRenderEditablePainter());
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph(),
+      );
+
+      editable.setForegroundPainter(_TestRenderEditablePainter());
+      editable.setPainter(_TestRenderEditablePainter());
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
+    });
+
+    test('changing foreground painter', () {
+      layout(editable);
+      editable.layout(BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
+      // Foreground painter.
+      editable.setForegroundPainter(currentPainter);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+
+      editable.setForegroundPainter(currentPainter = _TestRenderEditablePainter()..repaint = false);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 0);
+
+      editable.setForegroundPainter(currentPainter = _TestRenderEditablePainter()..repaint = true);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+    });
+
+    test('changing background painter', () {
+      layout(editable);
+      editable.layout(BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
+      // Foreground painter.
+      editable.setPainter(currentPainter);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+
+      editable.setPainter(currentPainter = _TestRenderEditablePainter()..repaint = false);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 0);
+
+      editable.setPainter(currentPainter = _TestRenderEditablePainter()..repaint = true);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+    });
+
+  });
+}
+
+class _TestRenderEditablePainter extends RenderEditablePainter {
+  bool repaint = true;
+  int paintCount = 0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    paintCount += 1;
+    canvas.drawRect(const Rect.fromLTRB(1, 1, 1, 1), Paint()..color = const Color(0x12345678));
+  }
+
+  @override
+  bool shouldRepaint(RenderEditablePainter oldDelegate) => repaint;
 }
