@@ -23,4 +23,3 @@ Vector2d ToRoundedVector2d(const Vector2dF& vector2d) {
 }
 
 }  // namespace gfx
-

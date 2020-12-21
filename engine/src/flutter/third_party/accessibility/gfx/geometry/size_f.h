@@ -50,9 +50,7 @@ class GEOMETRY_EXPORT SizeF {
 
   bool IsEmpty() const { return !width() || !height(); }
 
-  void Scale(float scale) {
-    Scale(scale, scale);
-  }
+  void Scale(float scale) { Scale(scale, scale); }
 
   void Scale(float x_scale, float y_scale) {
     SetSize(width() * x_scale, height() * y_scale);

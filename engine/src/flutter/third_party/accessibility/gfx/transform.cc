@@ -98,14 +98,10 @@ void Transform::RotateAboutXAxis(double degrees) {
   SkScalar cosTheta = SkDoubleToScalar(std::cos(radians));
   SkScalar sinTheta = SkDoubleToScalar(std::sin(radians));
   if (matrix_.isIdentity()) {
-      matrix_.set3x3(1, 0, 0,
-                     0, cosTheta, sinTheta,
-                     0, -sinTheta, cosTheta);
+    matrix_.set3x3(1, 0, 0, 0, cosTheta, sinTheta, 0, -sinTheta, cosTheta);
   } else {
     SkMatrix44 rot(SkMatrix44::kUninitialized_Constructor);
-    rot.set3x3(1, 0, 0,
-               0, cosTheta, sinTheta,
-               0, -sinTheta, cosTheta);
+    rot.set3x3(1, 0, 0, 0, cosTheta, sinTheta, 0, -sinTheta, cosTheta);
     matrix_.preConcat(rot);
   }
 }
@@ -115,16 +111,12 @@ void Transform::RotateAboutYAxis(double degrees) {
   SkScalar cosTheta = SkDoubleToScalar(std::cos(radians));
   SkScalar sinTheta = SkDoubleToScalar(std::sin(radians));
   if (matrix_.isIdentity()) {
-      // Note carefully the placement of the -sinTheta for rotation about
-      // y-axis is different than rotation about x-axis or z-axis.
-      matrix_.set3x3(cosTheta, 0, -sinTheta,
-                     0, 1, 0,
-                     sinTheta, 0, cosTheta);
+    // Note carefully the placement of the -sinTheta for rotation about
+    // y-axis is different than rotation about x-axis or z-axis.
+    matrix_.set3x3(cosTheta, 0, -sinTheta, 0, 1, 0, sinTheta, 0, cosTheta);
   } else {
     SkMatrix44 rot(SkMatrix44::kUninitialized_Constructor);
-    rot.set3x3(cosTheta, 0, -sinTheta,
-               0, 1, 0,
-               sinTheta, 0, cosTheta);
+    rot.set3x3(cosTheta, 0, -sinTheta, 0, 1, 0, sinTheta, 0, cosTheta);
     matrix_.preConcat(rot);
   }
 }
@@ -134,14 +126,10 @@ void Transform::RotateAboutZAxis(double degrees) {
   SkScalar cosTheta = SkDoubleToScalar(std::cos(radians));
   SkScalar sinTheta = SkDoubleToScalar(std::sin(radians));
   if (matrix_.isIdentity()) {
-      matrix_.set3x3(cosTheta, sinTheta, 0,
-                     -sinTheta, cosTheta, 0,
-                     0, 0, 1);
+    matrix_.set3x3(cosTheta, sinTheta, 0, -sinTheta, cosTheta, 0, 0, 0, 1);
   } else {
     SkMatrix44 rot(SkMatrix44::kUninitialized_Constructor);
-    rot.set3x3(cosTheta, sinTheta, 0,
-               -sinTheta, cosTheta, 0,
-               0, 0, 1);
+    rot.set3x3(cosTheta, sinTheta, 0, -sinTheta, cosTheta, 0, 0, 0, 1);
     matrix_.preConcat(rot);
   }
 }
@@ -228,20 +216,18 @@ void Transform::ConcatTransform(const Transform& transform) {
 
 bool Transform::IsApproximatelyIdentityOrTranslation(SkScalar tolerance) const {
   DCHECK_GE(tolerance, 0);
-  return
-      ApproximatelyOne(matrix_.get(0, 0), tolerance) &&
-      ApproximatelyZero(matrix_.get(1, 0), tolerance) &&
-      ApproximatelyZero(matrix_.get(2, 0), tolerance) &&
-      matrix_.get(3, 0) == 0 &&
-      ApproximatelyZero(matrix_.get(0, 1), tolerance) &&
-      ApproximatelyOne(matrix_.get(1, 1), tolerance) &&
-      ApproximatelyZero(matrix_.get(2, 1), tolerance) &&
-      matrix_.get(3, 1) == 0 &&
-      ApproximatelyZero(matrix_.get(0, 2), tolerance) &&
-      ApproximatelyZero(matrix_.get(1, 2), tolerance) &&
-      ApproximatelyOne(matrix_.get(2, 2), tolerance) &&
-      matrix_.get(3, 2) == 0 &&
-      matrix_.get(3, 3) == 1;
+  return ApproximatelyOne(matrix_.get(0, 0), tolerance) &&
+         ApproximatelyZero(matrix_.get(1, 0), tolerance) &&
+         ApproximatelyZero(matrix_.get(2, 0), tolerance) &&
+         matrix_.get(3, 0) == 0 &&
+         ApproximatelyZero(matrix_.get(0, 1), tolerance) &&
+         ApproximatelyOne(matrix_.get(1, 1), tolerance) &&
+         ApproximatelyZero(matrix_.get(2, 1), tolerance) &&
+         matrix_.get(3, 1) == 0 &&
+         ApproximatelyZero(matrix_.get(0, 2), tolerance) &&
+         ApproximatelyZero(matrix_.get(1, 2), tolerance) &&
+         ApproximatelyOne(matrix_.get(2, 2), tolerance) &&
+         matrix_.get(3, 2) == 0 && matrix_.get(3, 3) == 1;
 }
 
 bool Transform::IsApproximatelyIdentityOrIntegerTranslation(
@@ -313,13 +299,8 @@ bool Transform::IsBackFaceVisible() const {
   double cofactor_part_6 =
       matrix_.get(0, 3) * matrix_.get(1, 1) * matrix_.get(3, 0);
 
-  double cofactor33 =
-      cofactor_part_1 +
-      cofactor_part_2 +
-      cofactor_part_3 -
-      cofactor_part_4 -
-      cofactor_part_5 -
-      cofactor_part_6;
+  double cofactor33 = cofactor_part_1 + cofactor_part_2 + cofactor_part_3 -
+                      cofactor_part_4 - cofactor_part_5 - cofactor_part_6;
 
   // Technically the transformed z component is cofactor33 / determinant.  But
   // we can avoid the costly division because we only care about the resulting
@@ -385,12 +366,9 @@ bool Transform::Preserves2dAxisAlignment() const {
     num_non_zero_in_col_1++;
   }
 
-  return
-      num_non_zero_in_row_0 <= 1 &&
-      num_non_zero_in_row_1 <= 1 &&
-      num_non_zero_in_col_0 <= 1 &&
-      num_non_zero_in_col_1 <= 1 &&
-      !has_x_or_y_perspective;
+  return num_non_zero_in_row_0 <= 1 && num_non_zero_in_row_1 <= 1 &&
+         num_non_zero_in_col_0 <= 1 && num_non_zero_in_col_1 <= 1 &&
+         !has_x_or_y_perspective;
 }
 
 void Transform::Transpose() {
@@ -619,21 +597,11 @@ std::string Transform::ToString() const {
       "  %+0.4f %+0.4f %+0.4f %+0.4f  \n"
       "  %+0.4f %+0.4f %+0.4f %+0.4f  \n"
       "  %+0.4f %+0.4f %+0.4f %+0.4f ]\n",
-      matrix_.get(0, 0),
-      matrix_.get(0, 1),
-      matrix_.get(0, 2),
-      matrix_.get(0, 3),
-      matrix_.get(1, 0),
-      matrix_.get(1, 1),
-      matrix_.get(1, 2),
-      matrix_.get(1, 3),
-      matrix_.get(2, 0),
-      matrix_.get(2, 1),
-      matrix_.get(2, 2),
-      matrix_.get(2, 3),
-      matrix_.get(3, 0),
-      matrix_.get(3, 1),
-      matrix_.get(3, 2),
+      matrix_.get(0, 0), matrix_.get(0, 1), matrix_.get(0, 2),
+      matrix_.get(0, 3), matrix_.get(1, 0), matrix_.get(1, 1),
+      matrix_.get(1, 2), matrix_.get(1, 3), matrix_.get(2, 0),
+      matrix_.get(2, 1), matrix_.get(2, 2), matrix_.get(2, 3),
+      matrix_.get(3, 0), matrix_.get(3, 1), matrix_.get(3, 2),
       matrix_.get(3, 3));
 }
 

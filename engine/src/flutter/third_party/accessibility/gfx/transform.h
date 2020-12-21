@@ -28,10 +28,7 @@ class Vector3dF;
 // copy/assign.
 class GEOMETRY_SKIA_EXPORT Transform {
  public:
-
-  enum SkipInitialization {
-    kSkipInitialization
-  };
+  enum SkipInitialization { kSkipInitialization };
 
   constexpr Transform() : matrix_(SkMatrix44::kIdentity_Constructor) {}
 
@@ -291,13 +288,11 @@ class GEOMETRY_SKIA_EXPORT Transform {
   std::string ToString() const;
 
  private:
-  void TransformPointInternal(const SkMatrix44& xform,
-                              Point* point) const;
+  void TransformPointInternal(const SkMatrix44& xform, Point* point) const;
 
   void TransformPointInternal(const SkMatrix44& xform, PointF* point) const;
 
-  void TransformPointInternal(const SkMatrix44& xform,
-                              Point3F* point) const;
+  void TransformPointInternal(const SkMatrix44& xform, Point3F* point) const;
 
   void TransformVectorInternal(const SkMatrix44& xform,
                                Vector3dF* vector) const;

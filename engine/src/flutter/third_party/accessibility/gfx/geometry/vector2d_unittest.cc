@@ -39,15 +39,12 @@ TEST(Vector2dTest, Add) {
   const struct {
     Vector2d expected;
     Vector2d actual;
-  } int_tests[] = {
-    { Vector2d(3, 5), i1 + Vector2d() },
-    { Vector2d(3 + 4, 5 - 1), i1 + i2 },
-    { Vector2d(3 - 4, 5 + 1), i1 - i2 }
-  };
+  } int_tests[] = {{Vector2d(3, 5), i1 + Vector2d()},
+                   {Vector2d(3 + 4, 5 - 1), i1 + i2},
+                   {Vector2d(3 - 4, 5 + 1), i1 - i2}};
 
   for (size_t i = 0; i < base::size(int_tests); ++i)
-    EXPECT_EQ(int_tests[i].expected.ToString(),
-              int_tests[i].actual.ToString());
+    EXPECT_EQ(int_tests[i].expected.ToString(), int_tests[i].actual.ToString());
 
   Vector2dF f1(3.1f, 5.1f);
   Vector2dF f2(4.3f, -1.3f);
@@ -55,12 +52,10 @@ TEST(Vector2dTest, Add) {
   const struct {
     Vector2dF expected;
     Vector2dF actual;
-  } float_tests[] = {
-    { Vector2dF(3.1F, 5.1F), f1 + Vector2d() },
-    { Vector2dF(3.1F, 5.1F), f1 + Vector2dF() },
-    { Vector2dF(3.1f + 4.3f, 5.1f - 1.3f), f1 + f2 },
-    { Vector2dF(3.1f - 4.3f, 5.1f + 1.3f), f1 - f2 }
-  };
+  } float_tests[] = {{Vector2dF(3.1F, 5.1F), f1 + Vector2d()},
+                     {Vector2dF(3.1F, 5.1F), f1 + Vector2dF()},
+                     {Vector2dF(3.1f + 4.3f, 5.1f - 1.3f), f1 + f2},
+                     {Vector2dF(3.1f - 4.3f, 5.1f + 1.3f), f1 - f2}};
 
   for (size_t i = 0; i < base::size(float_tests); ++i)
     EXPECT_EQ(float_tests[i].expected.ToString(),
@@ -71,28 +66,23 @@ TEST(Vector2dTest, Negative) {
   const struct {
     Vector2d expected;
     Vector2d actual;
-  } int_tests[] = {
-    { Vector2d(0, 0), -Vector2d(0, 0) },
-    { Vector2d(-3, -3), -Vector2d(3, 3) },
-    { Vector2d(3, 3), -Vector2d(-3, -3) },
-    { Vector2d(-3, 3), -Vector2d(3, -3) },
-    { Vector2d(3, -3), -Vector2d(-3, 3) }
-  };
+  } int_tests[] = {{Vector2d(0, 0), -Vector2d(0, 0)},
+                   {Vector2d(-3, -3), -Vector2d(3, 3)},
+                   {Vector2d(3, 3), -Vector2d(-3, -3)},
+                   {Vector2d(-3, 3), -Vector2d(3, -3)},
+                   {Vector2d(3, -3), -Vector2d(-3, 3)}};
 
   for (size_t i = 0; i < base::size(int_tests); ++i)
-    EXPECT_EQ(int_tests[i].expected.ToString(),
-              int_tests[i].actual.ToString());
+    EXPECT_EQ(int_tests[i].expected.ToString(), int_tests[i].actual.ToString());
 
   const struct {
     Vector2dF expected;
     Vector2dF actual;
-  } float_tests[] = {
-    { Vector2dF(0, 0), -Vector2d(0, 0) },
-    { Vector2dF(-0.3f, -0.3f), -Vector2dF(0.3f, 0.3f) },
-    { Vector2dF(0.3f, 0.3f), -Vector2dF(-0.3f, -0.3f) },
-    { Vector2dF(-0.3f, 0.3f), -Vector2dF(0.3f, -0.3f) },
-    { Vector2dF(0.3f, -0.3f), -Vector2dF(-0.3f, 0.3f) }
-  };
+  } float_tests[] = {{Vector2dF(0, 0), -Vector2d(0, 0)},
+                     {Vector2dF(-0.3f, -0.3f), -Vector2dF(0.3f, 0.3f)},
+                     {Vector2dF(0.3f, 0.3f), -Vector2dF(-0.3f, -0.3f)},
+                     {Vector2dF(-0.3f, 0.3f), -Vector2dF(0.3f, -0.3f)},
+                     {Vector2dF(0.3f, -0.3f), -Vector2dF(-0.3f, 0.3f)}};
 
   for (size_t i = 0; i < base::size(float_tests); ++i)
     EXPECT_EQ(float_tests[i].expected.ToString(),
@@ -101,16 +91,11 @@ TEST(Vector2dTest, Negative) {
 
 TEST(Vector2dTest, Scale) {
   float double_values[][4] = {
-    { 4.5f, 1.2f, 3.3f, 5.6f },
-    { 4.5f, -1.2f, 3.3f, 5.6f },
-    { 4.5f, 1.2f, 3.3f, -5.6f },
-    { 4.5f, 1.2f, -3.3f, -5.6f },
-    { -4.5f, 1.2f, 3.3f, 5.6f },
-    { -4.5f, 1.2f, 0, 5.6f },
-    { -4.5f, 1.2f, 3.3f, 0 },
-    { 4.5f, 0, 3.3f, 5.6f },
-    { 0, 1.2f, 3.3f, 5.6f }
-  };
+      {4.5f, 1.2f, 3.3f, 5.6f},  {4.5f, -1.2f, 3.3f, 5.6f},
+      {4.5f, 1.2f, 3.3f, -5.6f}, {4.5f, 1.2f, -3.3f, -5.6f},
+      {-4.5f, 1.2f, 3.3f, 5.6f}, {-4.5f, 1.2f, 0, 5.6f},
+      {-4.5f, 1.2f, 3.3f, 0},    {4.5f, 0, 3.3f, 5.6f},
+      {0, 1.2f, 3.3f, 5.6f}};
 
   for (size_t i = 0; i < base::size(double_values); ++i) {
     Vector2dF v(double_values[i][0], double_values[i][1]);
@@ -118,24 +103,17 @@ TEST(Vector2dTest, Scale) {
     EXPECT_EQ(v.x(), double_values[i][0] * double_values[i][2]);
     EXPECT_EQ(v.y(), double_values[i][1] * double_values[i][3]);
 
-    Vector2dF v2 = ScaleVector2d(
-        gfx::Vector2dF(double_values[i][0], double_values[i][1]),
-        double_values[i][2], double_values[i][3]);
+    Vector2dF v2 =
+        ScaleVector2d(gfx::Vector2dF(double_values[i][0], double_values[i][1]),
+                      double_values[i][2], double_values[i][3]);
     EXPECT_EQ(double_values[i][0] * double_values[i][2], v2.x());
     EXPECT_EQ(double_values[i][1] * double_values[i][3], v2.y());
   }
 
   float single_values[][3] = {
-    { 4.5f, 1.2f, 3.3f },
-    { 4.5f, -1.2f, 3.3f },
-    { 4.5f, 1.2f, 3.3f },
-    { 4.5f, 1.2f, -3.3f },
-    { -4.5f, 1.2f, 3.3f },
-    { -4.5f, 1.2f, 0 },
-    { -4.5f, 1.2f, 3.3f },
-    { 4.5f, 0, 3.3f },
-    { 0, 1.2f, 3.3f }
-  };
+      {4.5f, 1.2f, 3.3f},  {4.5f, -1.2f, 3.3f}, {4.5f, 1.2f, 3.3f},
+      {4.5f, 1.2f, -3.3f}, {-4.5f, 1.2f, 3.3f}, {-4.5f, 1.2f, 0},
+      {-4.5f, 1.2f, 3.3f}, {4.5f, 0, 3.3f},     {0, 1.2f, 3.3f}};
 
   for (size_t i = 0; i < base::size(single_values); ++i) {
     Vector2dF v(single_values[i][0], single_values[i][1]);
@@ -143,9 +121,9 @@ TEST(Vector2dTest, Scale) {
     EXPECT_EQ(v.x(), single_values[i][0] * single_values[i][2]);
     EXPECT_EQ(v.y(), single_values[i][1] * single_values[i][2]);
 
-    Vector2dF v2 = ScaleVector2d(
-        gfx::Vector2dF(double_values[i][0], double_values[i][1]),
-        double_values[i][2]);
+    Vector2dF v2 =
+        ScaleVector2d(gfx::Vector2dF(double_values[i][0], double_values[i][1]),
+                      double_values[i][2]);
     EXPECT_EQ(single_values[i][0] * single_values[i][2], v2.x());
     EXPECT_EQ(single_values[i][1] * single_values[i][2], v2.y());
   }
@@ -153,12 +131,7 @@ TEST(Vector2dTest, Scale) {
 
 TEST(Vector2dTest, Length) {
   int int_values[][2] = {
-    { 0, 0 },
-    { 10, 20 },
-    { 20, 10 },
-    { -10, -20 },
-    { -20, 10 },
-    { 10, -20 },
+      {0, 0}, {10, 20}, {20, 10}, {-10, -20}, {-20, 10}, {10, -20},
   };
 
   for (size_t i = 0; i < base::size(int_values); ++i) {
@@ -173,16 +146,16 @@ TEST(Vector2dTest, Length) {
   }
 
   float float_values[][2] = {
-    { 0, 0 },
-    { 10.5f, 20.5f },
-    { 20.5f, 10.5f },
-    { -10.5f, -20.5f },
-    { -20.5f, 10.5f },
-    { 10.5f, -20.5f },
-    // A large vector that fails if the Length function doesn't use
-    // double precision internally.
-    { 1236278317862780234892374893213178027.12122348904204230f,
-      335890352589839028212313231225425134332.38123f },
+      {0, 0},
+      {10.5f, 20.5f},
+      {20.5f, 10.5f},
+      {-10.5f, -20.5f},
+      {-20.5f, 10.5f},
+      {10.5f, -20.5f},
+      // A large vector that fails if the Length function doesn't use
+      // double precision internally.
+      {1236278317862780234892374893213178027.12122348904204230f,
+       335890352589839028212313231225425134332.38123f},
   };
 
   for (size_t i = 0; i < base::size(float_values); ++i) {

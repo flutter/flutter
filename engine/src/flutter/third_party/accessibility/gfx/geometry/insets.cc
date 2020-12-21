@@ -11,7 +11,7 @@ namespace gfx {
 
 std::string Insets::ToString() const {
   // Print members in the same order of the constructor parameters.
-  return base::StringPrintf("%d,%d,%d,%d", top(),  left(), bottom(), right());
+  return base::StringPrintf("%d,%d,%d,%d", top(), left(), bottom(), right());
 }
 
 Insets Insets::Offset(const gfx::Vector2d& vector) const {

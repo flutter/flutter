@@ -25,12 +25,10 @@ namespace gfx {
 #if defined(OS_WIN)
 Rect::Rect(const RECT& r)
     : origin_(r.left, r.top),
-      size_(std::abs(r.right - r.left), std::abs(r.bottom - r.top)) {
-}
+      size_(std::abs(r.right - r.left), std::abs(r.bottom - r.top)) {}
 #elif defined(OS_APPLE)
 Rect::Rect(const CGRect& r)
-    : origin_(r.origin.x, r.origin.y), size_(r.size.width, r.size.height) {
-}
+    : origin_(r.origin.x, r.origin.y), size_(r.size.width, r.size.height) {}
 #endif
 
 #if defined(OS_WIN)
@@ -56,7 +54,7 @@ void AdjustAlongAxis(int dst_origin, int dst_size, int* origin, int* size) {
     *origin = std::min(dst_origin + dst_size, *origin + *size) - *size;
 }
 
-}  // namespace
+}  // namespace gfx
 
 namespace gfx {
 
@@ -139,9 +137,7 @@ void Rect::operator-=(const Vector2d& offset) {
 }
 
 Insets Rect::InsetsFrom(const Rect& inner) const {
-  return Insets(inner.y() - y(),
-                inner.x() - x(),
-                bottom() - inner.bottom(),
+  return Insets(inner.y() - y(), inner.x() - x(), bottom() - inner.bottom(),
                 right() - inner.right());
 }
 
@@ -266,8 +262,8 @@ void Rect::SplitVertically(Rect* left_half, Rect* right_half) const {
   DCHECK(right_half);
 
   left_half->SetRect(x(), y(), width() / 2, height());
-  right_half->SetRect(
-      left_half->right(), y(), width() - left_half->width(), height());
+  right_half->SetRect(left_half->right(), y(), width() - left_half->width(),
+                      height());
 }
 
 bool Rect::SharesEdgeWith(const Rect& rect) const {
@@ -296,8 +292,7 @@ int Rect::ManhattanInternalDistance(const Rect& rect) const {
 }
 
 std::string Rect::ToString() const {
-  return base::StringPrintf("%s %s",
-                            origin().ToString().c_str(),
+  return base::StringPrintf("%s %s", origin().ToString().c_str(),
                             size().ToString().c_str());
 }
 

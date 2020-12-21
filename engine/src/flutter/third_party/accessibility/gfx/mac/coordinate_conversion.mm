@@ -22,15 +22,12 @@ CGFloat PrimaryDisplayHeight() {
 }  // namespace
 
 NSRect ScreenRectToNSRect(const Rect& rect) {
-  return NSMakeRect(rect.x(),
-                    PrimaryDisplayHeight() - rect.y() - rect.height(),
-                    rect.width(),
+  return NSMakeRect(rect.x(), PrimaryDisplayHeight() - rect.y() - rect.height(), rect.width(),
                     rect.height());
 }
 
 Rect ScreenRectFromNSRect(const NSRect& rect) {
-  return Rect(rect.origin.x,
-              PrimaryDisplayHeight() - rect.origin.y - rect.size.height,
+  return Rect(rect.origin.x, PrimaryDisplayHeight() - rect.origin.y - rect.size.height,
               rect.size.width, rect.size.height);
 }
 

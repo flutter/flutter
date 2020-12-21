@@ -27,7 +27,7 @@ TEST(InsetsTest, Insets) {
   EXPECT_EQ(2, insets.left());
   EXPECT_EQ(3, insets.bottom());
   EXPECT_EQ(4, insets.right());
-  EXPECT_EQ(6, insets.width());  // Left + right.
+  EXPECT_EQ(6, insets.width());   // Left + right.
   EXPECT_EQ(4, insets.height());  // Top + bottom.
   EXPECT_FALSE(insets.IsEmpty());
 }

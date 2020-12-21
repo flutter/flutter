@@ -47,15 +47,13 @@ TEST(PointTest, VectorArithmetic) {
   static const struct {
     Point expected;
     Point actual;
-  } tests[] = {
-    { Point(4, 2), a + v1 },
-    { Point(-2, 8), a - v1 },
-    { a, a - v1 + v1 },
-    { a, a + v1 - v1 },
-    { a, a + Vector2d() },
-    { Point(12, 1), a + v1 - v2 },
-    { Point(-10, 9), a - v1 + v2 }
-  };
+  } tests[] = {{Point(4, 2), a + v1},
+               {Point(-2, 8), a - v1},
+               {a, a - v1 + v1},
+               {a, a + v1 - v1},
+               {a, a + Vector2d()},
+               {Point(12, 1), a + v1 - v2},
+               {Point(-10, 9), a - v1 + v2}};
 
   for (size_t i = 0; i < base::size(tests); ++i)
     EXPECT_EQ(tests[i].expected.ToString(), tests[i].actual.ToString());

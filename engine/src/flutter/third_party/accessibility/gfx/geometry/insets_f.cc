@@ -10,7 +10,7 @@ namespace gfx {
 
 std::string InsetsF::ToString() const {
   // Print members in the same order of the constructor parameters.
-  return base::StringPrintf("%f,%f,%f,%f", top(),  left(), bottom(), right());
+  return base::StringPrintf("%f,%f,%f,%f", top(), left(), bottom(), right());
 }
 
 }  // namespace gfx

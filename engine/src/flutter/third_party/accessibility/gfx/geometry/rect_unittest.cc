@@ -36,9 +36,9 @@ TEST(RectTest, Contains) {
     {0, 0, 10, 10, 10, 5, false},
     {0, 0, 10, 10, -1, -1, false},
     {0, 0, 10, 10, 50, 50, false},
-  #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
+#if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
     {0, 0, -10, -10, 0, 0, false},
-  #endif
+#endif
   };
   for (size_t i = 0; i < base::size(contains_cases); ++i) {
     const ContainsCase& value = contains_cases[i];
@@ -58,18 +58,16 @@ TEST(RectTest, Intersects) {
     int w2;
     int h2;
     bool intersects;
-  } tests[] = {
-    { 0, 0, 0, 0, 0, 0, 0, 0, false },
-    { 0, 0, 0, 0, -10, -10, 20, 20, false },
-    { -10, 0, 0, 20, 0, -10, 20, 0, false },
-    { 0, 0, 10, 10, 0, 0, 10, 10, true },
-    { 0, 0, 10, 10, 10, 10, 10, 10, false },
-    { 10, 10, 10, 10, 0, 0, 10, 10, false },
-    { 10, 10, 10, 10, 5, 5, 10, 10, true },
-    { 10, 10, 10, 10, 15, 15, 10, 10, true },
-    { 10, 10, 10, 10, 20, 15, 10, 10, false },
-    { 10, 10, 10, 10, 21, 15, 10, 10, false }
-  };
+  } tests[] = {{0, 0, 0, 0, 0, 0, 0, 0, false},
+               {0, 0, 0, 0, -10, -10, 20, 20, false},
+               {-10, 0, 0, 20, 0, -10, 20, 0, false},
+               {0, 0, 10, 10, 0, 0, 10, 10, true},
+               {0, 0, 10, 10, 10, 10, 10, 10, false},
+               {10, 10, 10, 10, 0, 0, 10, 10, false},
+               {10, 10, 10, 10, 5, 5, 10, 10, true},
+               {10, 10, 10, 10, 15, 15, 10, 10, true},
+               {10, 10, 10, 10, 20, 15, 10, 10, false},
+               {10, 10, 10, 10, 21, 15, 10, 10, false}};
   for (size_t i = 0; i < base::size(tests); ++i) {
     Rect r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
@@ -92,26 +90,18 @@ TEST(RectTest, Intersect) {
     int y3;
     int w3;
     int h3;
-  } tests[] = {
-    { 0, 0, 0, 0,   // zeros
-      0, 0, 0, 0,
-      0, 0, 0, 0 },
-    { 0, 0, 4, 4,   // equal
-      0, 0, 4, 4,
-      0, 0, 4, 4 },
-    { 0, 0, 4, 4,   // neighboring
-      4, 4, 4, 4,
-      0, 0, 0, 0 },
-    { 0, 0, 4, 4,   // overlapping corners
-      2, 2, 4, 4,
-      2, 2, 2, 2 },
-    { 0, 0, 4, 4,   // T junction
-      3, 1, 4, 2,
-      3, 1, 1, 2 },
-    { 3, 0, 2, 2,   // gap
-      0, 0, 2, 2,
-      0, 0, 0, 0 }
-  };
+  } tests[] = {{0, 0, 0, 0,  // zeros
+                0, 0, 0, 0, 0, 0, 0, 0},
+               {0, 0, 4, 4,  // equal
+                0, 0, 4, 4, 0, 0, 4, 4},
+               {0, 0, 4, 4,  // neighboring
+                4, 4, 4, 4, 0, 0, 0, 0},
+               {0, 0, 4, 4,  // overlapping corners
+                2, 2, 4, 4, 2, 2, 2, 2},
+               {0, 0, 4, 4,  // T junction
+                3, 1, 4, 2, 3, 1, 1, 2},
+               {3, 0, 2, 2,  // gap
+                0, 0, 2, 2, 0, 0, 0, 0}};
   for (size_t i = 0; i < base::size(tests); ++i) {
     Rect r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
@@ -138,29 +128,15 @@ TEST(RectTest, Union) {
     int y3;
     int w3;
     int h3;
-  } tests[] = {
-    { 0, 0, 0, 0,
-      0, 0, 0, 0,
-      0, 0, 0, 0 },
-    { 0, 0, 4, 4,
-      0, 0, 4, 4,
-      0, 0, 4, 4 },
-    { 0, 0, 4, 4,
-      4, 4, 4, 4,
-      0, 0, 8, 8 },
-    { 0, 0, 4, 4,
-      0, 5, 4, 4,
-      0, 0, 4, 9 },
-    { 0, 0, 2, 2,
-      3, 3, 2, 2,
-      0, 0, 5, 5 },
-    { 3, 3, 2, 2,   // reverse r1 and r2 from previous test
-      0, 0, 2, 2,
-      0, 0, 5, 5 },
-    { 0, 0, 0, 0,   // union with empty rect
-      2, 2, 2, 2,
-      2, 2, 2, 2 }
-  };
+  } tests[] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+               {0, 0, 4, 4, 0, 0, 4, 4, 0, 0, 4, 4},
+               {0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 8, 8},
+               {0, 0, 4, 4, 0, 5, 4, 4, 0, 0, 4, 9},
+               {0, 0, 2, 2, 3, 3, 2, 2, 0, 0, 5, 5},
+               {3, 3, 2, 2,  // reverse r1 and r2 from previous test
+                0, 0, 2, 2, 0, 0, 5, 5},
+               {0, 0, 0, 0,  // union with empty rect
+                2, 2, 2, 2, 2, 2, 2, 2}};
   for (size_t i = 0; i < base::size(tests); ++i) {
     Rect r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
@@ -196,23 +172,11 @@ TEST(RectTest, AdjustToFit) {
     int y3;
     int w3;
     int h3;
-  } tests[] = {
-    { 0, 0, 2, 2,
-      0, 0, 2, 2,
-      0, 0, 2, 2 },
-    { 2, 2, 3, 3,
-      0, 0, 4, 4,
-      1, 1, 3, 3 },
-    { -1, -1, 5, 5,
-      0, 0, 4, 4,
-      0, 0, 4, 4 },
-    { 2, 2, 4, 4,
-      0, 0, 3, 3,
-      0, 0, 3, 3 },
-    { 2, 2, 1, 1,
-      0, 0, 3, 3,
-      2, 2, 1, 1 }
-  };
+  } tests[] = {{0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 2, 2},
+               {2, 2, 3, 3, 0, 0, 4, 4, 1, 1, 3, 3},
+               {-1, -1, 5, 5, 0, 0, 4, 4, 0, 0, 4, 4},
+               {2, 2, 4, 4, 0, 0, 3, 3, 0, 0, 3, 3},
+               {2, 2, 1, 1, 0, 0, 3, 3, 2, 2, 1, 1}};
   for (size_t i = 0; i < base::size(tests); ++i) {
     Rect r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
@@ -423,7 +387,11 @@ TEST(RectTest, SharesEdgeWith) {
 
 // Similar to EXPECT_FLOAT_EQ, but lets NaN equal NaN
 #define EXPECT_FLOAT_AND_NAN_EQ(a, b) \
-  { if (a == a || b == b) { EXPECT_FLOAT_EQ(a, b); } }
+  {                                   \
+    if (a == a || b == b) {           \
+      EXPECT_FLOAT_EQ(a, b);          \
+    }                                 \
+  }
 
 TEST(RectTest, ScaleRect) {
   static const struct Test {
@@ -437,25 +405,16 @@ TEST(RectTest, ScaleRect) {
     float w2;
     float h2;
   } tests[] = {
-    { 3, 3, 3, 3,
-      1.5f,
-      4.5f, 4.5f, 4.5f, 4.5f },
-    { 3, 3, 3, 3,
-      0.0f,
-      0.0f, 0.0f, 0.0f, 0.0f },
-    { 3, 3, 3, 3,
-      std::numeric_limits<float>::quiet_NaN(),
-      std::numeric_limits<float>::quiet_NaN(),
-      std::numeric_limits<float>::quiet_NaN(),
-      std::numeric_limits<float>::quiet_NaN(),
-      std::numeric_limits<float>::quiet_NaN() },
-    { 3, 3, 3, 3,
-      std::numeric_limits<float>::max(),
-      std::numeric_limits<float>::max(),
-      std::numeric_limits<float>::max(),
-      std::numeric_limits<float>::max(),
-      std::numeric_limits<float>::max() }
-  };
+      {3, 3, 3, 3, 1.5f, 4.5f, 4.5f, 4.5f, 4.5f},
+      {3, 3, 3, 3, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+      {3, 3, 3, 3, std::numeric_limits<float>::quiet_NaN(),
+       std::numeric_limits<float>::quiet_NaN(),
+       std::numeric_limits<float>::quiet_NaN(),
+       std::numeric_limits<float>::quiet_NaN(),
+       std::numeric_limits<float>::quiet_NaN()},
+      {3, 3, 3, 3, std::numeric_limits<float>::max(),
+       std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+       std::numeric_limits<float>::max(), std::numeric_limits<float>::max()}};
 
   for (size_t i = 0; i < base::size(tests); ++i) {
     RectF r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
@@ -651,23 +610,19 @@ TEST(RectTest, ToNearestRect) {
 
 TEST(RectTest, ToFlooredRect) {
   static const struct Test {
-    float x1; // source
+    float x1;  // source
     float y1;
     float w1;
     float h1;
-    int x2; // target
+    int x2;  // target
     int y2;
     int w2;
     int h2;
-  } tests [] = {
-    { 0.0f, 0.0f, 0.0f, 0.0f,
-      0, 0, 0, 0 },
-    { -1.5f, -1.5f, 3.0f, 3.0f,
-      -2, -2, 3, 3 },
-    { -1.5f, -1.5f, 3.5f, 3.5f,
-      -2, -2, 3, 3 },
-    { 20000.5f, 20000.5f, 0.5f, 0.5f,
-      20000, 20000, 0, 0 },
+  } tests[] = {
+      {0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0},
+      {-1.5f, -1.5f, 3.0f, 3.0f, -2, -2, 3, 3},
+      {-1.5f, -1.5f, 3.5f, 3.5f, -2, -2, 3, 3},
+      {20000.5f, 20000.5f, 0.5f, 0.5f, 20000, 20000, 0, 0},
   };
 
   for (size_t i = 0; i < base::size(tests); ++i) {
@@ -687,41 +642,45 @@ TEST(RectTest, ScaleToEnclosedRect) {
     Rect input_rect;
     float input_scale;
     Rect expected_rect;
-  } tests[] = {
-    {
-      Rect(),
-      5.f,
-      Rect(),
-    }, {
-      Rect(1, 1, 1, 1),
-      5.f,
-      Rect(5, 5, 5, 5),
-    }, {
-      Rect(-1, -1, 0, 0),
-      5.f,
-      Rect(-5, -5, 0, 0),
-    }, {
-      Rect(1, -1, 0, 1),
-      5.f,
-      Rect(5, -5, 0, 5),
-    }, {
-      Rect(-1, 1, 1, 0),
-      5.f,
-      Rect(-5, 5, 5, 0),
-    }, {
-      Rect(1, 2, 3, 4),
-      1.5f,
-      Rect(2, 3, 4, 6),
-    }, {
-      Rect(-1, -2, 0, 0),
-      1.5f,
-      Rect(-1, -3, 0, 0),
-    }
-  };
+  } tests[] = {{
+                   Rect(),
+                   5.f,
+                   Rect(),
+               },
+               {
+                   Rect(1, 1, 1, 1),
+                   5.f,
+                   Rect(5, 5, 5, 5),
+               },
+               {
+                   Rect(-1, -1, 0, 0),
+                   5.f,
+                   Rect(-5, -5, 0, 0),
+               },
+               {
+                   Rect(1, -1, 0, 1),
+                   5.f,
+                   Rect(5, -5, 0, 5),
+               },
+               {
+                   Rect(-1, 1, 1, 0),
+                   5.f,
+                   Rect(-5, 5, 5, 0),
+               },
+               {
+                   Rect(1, 2, 3, 4),
+                   1.5f,
+                   Rect(2, 3, 4, 6),
+               },
+               {
+                   Rect(-1, -2, 0, 0),
+                   1.5f,
+                   Rect(-1, -3, 0, 0),
+               }};
 
   for (size_t i = 0; i < base::size(tests); ++i) {
-    Rect result = ScaleToEnclosedRect(tests[i].input_rect,
-                                      tests[i].input_scale);
+    Rect result =
+        ScaleToEnclosedRect(tests[i].input_rect, tests[i].input_scale);
     EXPECT_EQ(tests[i].expected_rect, result);
   }
 }
@@ -731,37 +690,41 @@ TEST(RectTest, ScaleToEnclosingRect) {
     Rect input_rect;
     float input_scale;
     Rect expected_rect;
-  } tests[] = {
-    {
-      Rect(),
-      5.f,
-      Rect(),
-    }, {
-      Rect(1, 1, 1, 1),
-      5.f,
-      Rect(5, 5, 5, 5),
-    }, {
-      Rect(-1, -1, 0, 0),
-      5.f,
-      Rect(-5, -5, 0, 0),
-    }, {
-      Rect(1, -1, 0, 1),
-      5.f,
-      Rect(5, -5, 0, 5),
-    }, {
-      Rect(-1, 1, 1, 0),
-      5.f,
-      Rect(-5, 5, 5, 0),
-    }, {
-      Rect(1, 2, 3, 4),
-      1.5f,
-      Rect(1, 3, 5, 6),
-    }, {
-      Rect(-1, -2, 0, 0),
-      1.5f,
-      Rect(-2, -3, 0, 0),
-    }
-  };
+  } tests[] = {{
+                   Rect(),
+                   5.f,
+                   Rect(),
+               },
+               {
+                   Rect(1, 1, 1, 1),
+                   5.f,
+                   Rect(5, 5, 5, 5),
+               },
+               {
+                   Rect(-1, -1, 0, 0),
+                   5.f,
+                   Rect(-5, -5, 0, 0),
+               },
+               {
+                   Rect(1, -1, 0, 1),
+                   5.f,
+                   Rect(5, -5, 0, 5),
+               },
+               {
+                   Rect(-1, 1, 1, 0),
+                   5.f,
+                   Rect(-5, 5, 5, 0),
+               },
+               {
+                   Rect(1, 2, 3, 4),
+                   1.5f,
+                   Rect(1, 3, 5, 6),
+               },
+               {
+                   Rect(-1, -2, 0, 0),
+                   1.5f,
+                   Rect(-2, -3, 0, 0),
+               }};
 
   for (size_t i = 0; i < base::size(tests); ++i) {
     Rect result =
@@ -775,8 +738,8 @@ TEST(RectTest, ScaleToEnclosingRect) {
 
 #if defined(OS_WIN)
 TEST(RectTest, ConstructAndAssign) {
-  const RECT rect_1 = { 0, 0, 10, 10 };
-  const RECT rect_2 = { 0, 0, -10, -10 };
+  const RECT rect_1 = {0, 0, 10, 10};
+  const RECT rect_2 = {0, 0, -10, -10};
   Rect test1(rect_1);
   Rect test2(rect_2);
 }
@@ -797,20 +760,21 @@ TEST(RectTest, BoundingRect) {
     Point b;
     Rect expected;
   } int_tests[] = {
-    // If point B dominates A, then A should be the origin.
-    { Point(4, 6), Point(4, 6), Rect(4, 6, 0, 0) },
-    { Point(4, 6), Point(8, 6), Rect(4, 6, 4, 0) },
-    { Point(4, 6), Point(4, 9), Rect(4, 6, 0, 3) },
-    { Point(4, 6), Point(8, 9), Rect(4, 6, 4, 3) },
-    // If point A dominates B, then B should be the origin.
-    { Point(4, 6), Point(4, 6), Rect(4, 6, 0, 0) },
-    { Point(8, 6), Point(4, 6), Rect(4, 6, 4, 0) },
-    { Point(4, 9), Point(4, 6), Rect(4, 6, 0, 3) },
-    { Point(8, 9), Point(4, 6), Rect(4, 6, 4, 3) },
-    // If neither point dominates, then the origin is a combination of the two.
-    { Point(4, 6), Point(6, 4), Rect(4, 4, 2, 2) },
-    { Point(-4, -6), Point(-6, -4), Rect(-6, -6, 2, 2) },
-    { Point(-4, 6), Point(6, -4), Rect(-4, -4, 10, 10) },
+      // If point B dominates A, then A should be the origin.
+      {Point(4, 6), Point(4, 6), Rect(4, 6, 0, 0)},
+      {Point(4, 6), Point(8, 6), Rect(4, 6, 4, 0)},
+      {Point(4, 6), Point(4, 9), Rect(4, 6, 0, 3)},
+      {Point(4, 6), Point(8, 9), Rect(4, 6, 4, 3)},
+      // If point A dominates B, then B should be the origin.
+      {Point(4, 6), Point(4, 6), Rect(4, 6, 0, 0)},
+      {Point(8, 6), Point(4, 6), Rect(4, 6, 4, 0)},
+      {Point(4, 9), Point(4, 6), Rect(4, 6, 0, 3)},
+      {Point(8, 9), Point(4, 6), Rect(4, 6, 4, 3)},
+      // If neither point dominates, then the origin is a combination of the
+      // two.
+      {Point(4, 6), Point(6, 4), Rect(4, 4, 2, 2)},
+      {Point(-4, -6), Point(-6, -4), Rect(-6, -6, 2, 2)},
+      {Point(-4, 6), Point(6, -4), Rect(-4, -4, 10, 10)},
   };
 
   for (size_t i = 0; i < base::size(int_tests); ++i) {
@@ -823,32 +787,23 @@ TEST(RectTest, BoundingRect) {
     PointF b;
     RectF expected;
   } float_tests[] = {
-    // If point B dominates A, then A should be the origin.
-    { PointF(4.2f, 6.8f), PointF(4.2f, 6.8f),
-      RectF(4.2f, 6.8f, 0, 0) },
-    { PointF(4.2f, 6.8f), PointF(8.5f, 6.8f),
-      RectF(4.2f, 6.8f, 4.3f, 0) },
-    { PointF(4.2f, 6.8f), PointF(4.2f, 9.3f),
-      RectF(4.2f, 6.8f, 0, 2.5f) },
-    { PointF(4.2f, 6.8f), PointF(8.5f, 9.3f),
-      RectF(4.2f, 6.8f, 4.3f, 2.5f) },
-    // If point A dominates B, then B should be the origin.
-    { PointF(4.2f, 6.8f), PointF(4.2f, 6.8f),
-      RectF(4.2f, 6.8f, 0, 0) },
-    { PointF(8.5f, 6.8f), PointF(4.2f, 6.8f),
-      RectF(4.2f, 6.8f, 4.3f, 0) },
-    { PointF(4.2f, 9.3f), PointF(4.2f, 6.8f),
-      RectF(4.2f, 6.8f, 0, 2.5f) },
-    { PointF(8.5f, 9.3f), PointF(4.2f, 6.8f),
-      RectF(4.2f, 6.8f, 4.3f, 2.5f) },
-    // If neither point dominates, then the origin is a combination of the two.
-    { PointF(4.2f, 6.8f), PointF(6.8f, 4.2f),
-      RectF(4.2f, 4.2f, 2.6f, 2.6f) },
-    { PointF(-4.2f, -6.8f), PointF(-6.8f, -4.2f),
-      RectF(-6.8f, -6.8f, 2.6f, 2.6f) },
-    { PointF(-4.2f, 6.8f), PointF(6.8f, -4.2f),
-      RectF(-4.2f, -4.2f, 11.0f, 11.0f) }
-  };
+      // If point B dominates A, then A should be the origin.
+      {PointF(4.2f, 6.8f), PointF(4.2f, 6.8f), RectF(4.2f, 6.8f, 0, 0)},
+      {PointF(4.2f, 6.8f), PointF(8.5f, 6.8f), RectF(4.2f, 6.8f, 4.3f, 0)},
+      {PointF(4.2f, 6.8f), PointF(4.2f, 9.3f), RectF(4.2f, 6.8f, 0, 2.5f)},
+      {PointF(4.2f, 6.8f), PointF(8.5f, 9.3f), RectF(4.2f, 6.8f, 4.3f, 2.5f)},
+      // If point A dominates B, then B should be the origin.
+      {PointF(4.2f, 6.8f), PointF(4.2f, 6.8f), RectF(4.2f, 6.8f, 0, 0)},
+      {PointF(8.5f, 6.8f), PointF(4.2f, 6.8f), RectF(4.2f, 6.8f, 4.3f, 0)},
+      {PointF(4.2f, 9.3f), PointF(4.2f, 6.8f), RectF(4.2f, 6.8f, 0, 2.5f)},
+      {PointF(8.5f, 9.3f), PointF(4.2f, 6.8f), RectF(4.2f, 6.8f, 4.3f, 2.5f)},
+      // If neither point dominates, then the origin is a combination of the
+      // two.
+      {PointF(4.2f, 6.8f), PointF(6.8f, 4.2f), RectF(4.2f, 4.2f, 2.6f, 2.6f)},
+      {PointF(-4.2f, -6.8f), PointF(-6.8f, -4.2f),
+       RectF(-6.8f, -6.8f, 2.6f, 2.6f)},
+      {PointF(-4.2f, 6.8f), PointF(6.8f, -4.2f),
+       RectF(-4.2f, -4.2f, 11.0f, 11.0f)}};
 
   for (size_t i = 0; i < base::size(float_tests); ++i) {
     RectF actual = BoundingRect(float_tests[i].a, float_tests[i].b);
@@ -863,16 +818,16 @@ TEST(RectTest, IsExpressibleAsRect) {
   float max = std::numeric_limits<int>::max();
   float infinity = std::numeric_limits<float>::infinity();
 
-  EXPECT_TRUE(RectF(
-      min + 200, min + 200, max - 200, max - 200).IsExpressibleAsRect());
-  EXPECT_FALSE(RectF(
-      min - 200, min + 200, max + 200, max + 200).IsExpressibleAsRect());
-  EXPECT_FALSE(RectF(
-      min + 200 , min - 200, max + 200, max + 200).IsExpressibleAsRect());
-  EXPECT_FALSE(RectF(
-      min + 200, min + 200, max + 200, max - 200).IsExpressibleAsRect());
-  EXPECT_FALSE(RectF(
-      min + 200, min + 200, max - 200, max + 200).IsExpressibleAsRect());
+  EXPECT_TRUE(
+      RectF(min + 200, min + 200, max - 200, max - 200).IsExpressibleAsRect());
+  EXPECT_FALSE(
+      RectF(min - 200, min + 200, max + 200, max + 200).IsExpressibleAsRect());
+  EXPECT_FALSE(
+      RectF(min + 200, min - 200, max + 200, max + 200).IsExpressibleAsRect());
+  EXPECT_FALSE(
+      RectF(min + 200, min + 200, max + 200, max - 200).IsExpressibleAsRect());
+  EXPECT_FALSE(
+      RectF(min + 200, min + 200, max - 200, max + 200).IsExpressibleAsRect());
 
   EXPECT_TRUE(RectF(0, 0, max - 200, max - 200).IsExpressibleAsRect());
   EXPECT_FALSE(RectF(200, 0, max + 200, max - 200).IsExpressibleAsRect());
@@ -989,15 +944,12 @@ TEST(RectTest, ManhattanInternalDistance) {
 
   EXPECT_FLOAT_EQ(
       0.0f, f.ManhattanInternalDistance(gfx::RectF(-1.0f, 0.0f, 2.0f, 1.0f)));
-  EXPECT_FLOAT_EQ(
-      kEpsilon,
-      f.ManhattanInternalDistance(gfx::RectF(400.0f, 0.0f, 1.0f, 400.0f)));
-  EXPECT_FLOAT_EQ(2.0f * kEpsilon,
-                  f.ManhattanInternalDistance(
-                      gfx::RectF(-100.0f, -100.0f, 100.0f, 100.0f)));
-  EXPECT_FLOAT_EQ(
-      1.0f + kEpsilon,
-      f.ManhattanInternalDistance(gfx::RectF(-101.0f, 100.0f, 100.0f, 100.0f)));
+  EXPECT_FLOAT_EQ(kEpsilon, f.ManhattanInternalDistance(
+                                gfx::RectF(400.0f, 0.0f, 1.0f, 400.0f)));
+  EXPECT_FLOAT_EQ(2.0f * kEpsilon, f.ManhattanInternalDistance(gfx::RectF(
+                                       -100.0f, -100.0f, 100.0f, 100.0f)));
+  EXPECT_FLOAT_EQ(1.0f + kEpsilon, f.ManhattanInternalDistance(gfx::RectF(
+                                       -101.0f, 100.0f, 100.0f, 100.0f)));
   EXPECT_FLOAT_EQ(2.0f + 2.0f * kEpsilon,
                   f.ManhattanInternalDistance(
                       gfx::RectF(-101.0f, -101.0f, 100.0f, 100.0f)));
@@ -1007,12 +959,10 @@ TEST(RectTest, ManhattanInternalDistance) {
 
   EXPECT_FLOAT_EQ(
       0.0f, f.ManhattanInternalDistance(gfx::RectF(-1.0f, 0.0f, 1.1f, 1.0f)));
-  EXPECT_FLOAT_EQ(
-      0.1f + kEpsilon,
-      f.ManhattanInternalDistance(gfx::RectF(-1.5f, 0.0f, 1.4f, 1.0f)));
-  EXPECT_FLOAT_EQ(
-      kEpsilon,
-      f.ManhattanInternalDistance(gfx::RectF(-1.5f, 0.0f, 1.5f, 1.0f)));
+  EXPECT_FLOAT_EQ(0.1f + kEpsilon, f.ManhattanInternalDistance(
+                                       gfx::RectF(-1.5f, 0.0f, 1.4f, 1.0f)));
+  EXPECT_FLOAT_EQ(kEpsilon, f.ManhattanInternalDistance(
+                                gfx::RectF(-1.5f, 0.0f, 1.5f, 1.0f)));
 }
 
 TEST(RectTest, IntegerOverflow) {

@@ -26,8 +26,7 @@ Point::Point(DWORD point) {
   y_ = points.y;
 }
 
-Point::Point(const POINT& point) : x_(point.x), y_(point.y) {
-}
+Point::Point(const POINT& point) : x_(point.x), y_(point.y) {}
 
 Point& Point::operator=(const POINT& point) {
   x_ = point.x;
@@ -35,8 +34,7 @@ Point& Point::operator=(const POINT& point) {
   return *this;
 }
 #elif defined(OS_APPLE)
-Point::Point(const CGPoint& point) : x_(point.x), y_(point.y) {
-}
+Point::Point(const CGPoint& point) : x_(point.x), y_(point.y) {}
 #endif
 
 #if defined(OS_WIN)

@@ -38,8 +38,7 @@ class GEOMETRY_EXPORT Rect {
   constexpr Rect() = default;
   constexpr Rect(int width, int height) : size_(width, height) {}
   constexpr Rect(int x, int y, int width, int height)
-      : origin_(x, y),
-        size_(GetClampedValue(x, width), GetClampedValue(y, height)) {}
+      : origin_(x, y), size_(GetClampedValue(x, width), GetClampedValue(y, height)) {}
   constexpr explicit Rect(const Size& size) : size_(size) {}
   constexpr Rect(const Point& origin, const Size& size)
       : origin_(origin),
@@ -78,9 +77,7 @@ class GEOMETRY_EXPORT Rect {
   void set_width(int width) { size_.set_width(GetClampedValue(x(), width)); }
 
   constexpr int height() const { return size_.height(); }
-  void set_height(int height) {
-    size_.set_height(GetClampedValue(y(), height));
-  }
+  void set_height(int height) { size_.set_height(GetClampedValue(y(), height)); }
 
   constexpr const Point& origin() const { return origin_; }
   void set_origin(const Point& origin) {
@@ -105,12 +102,8 @@ class GEOMETRY_EXPORT Rect {
 
   constexpr Point left_center() const { return Point(x(), y() + height() / 2); }
   constexpr Point top_center() const { return Point(x() + width() / 2, y()); }
-  constexpr Point right_center() const {
-    return Point(right(), y() + height() / 2);
-  }
-  constexpr Point bottom_center() const {
-    return Point(x() + width() / 2, bottom());
-  }
+  constexpr Point right_center() const { return Point(right(), y() + height() / 2); }
+  constexpr Point bottom_center() const { return Point(x() + width() / 2, bottom()); }
 
   Vector2d OffsetFromOrigin() const { return Vector2d(x(), y()); }
 
@@ -127,9 +120,7 @@ class GEOMETRY_EXPORT Rect {
   void SetByBounds(int left, int top, int right, int bottom);
 
   // Shrink the rectangle by a horizontal and vertical distance on all sides.
-  void Inset(int horizontal, int vertical) {
-    Inset(horizontal, vertical, horizontal, vertical);
-  }
+  void Inset(int horizontal, int vertical) { Inset(horizontal, vertical, horizontal, vertical); }
 
   // Shrink the rectangle by the given insets.
   void Inset(const Insets& insets);
@@ -162,9 +153,7 @@ class GEOMETRY_EXPORT Rect {
   bool Contains(int point_x, int point_y) const;
 
   // Returns true if the specified point is contained by this rectangle.
-  bool Contains(const Point& point) const {
-    return Contains(point.x(), point.y());
-  }
+  bool Contains(const Point& point) const { return Contains(point.x(), point.y()); }
 
   // Returns true if this rectangle contains the specified rectangle.
   bool Contains(const Rect& rect) const;
@@ -235,8 +224,7 @@ class GEOMETRY_EXPORT Rect {
     //
     // This is intended to be: a > 0 && max - a < b
     return a > 0 && b > 0 &&
-           static_cast<unsigned>(std::numeric_limits<int>::max() - a) <
-               static_cast<unsigned>(b);
+           static_cast<unsigned>(std::numeric_limits<int>::max() - a) < static_cast<unsigned>(b);
   }
 
   // Clamp the size to avoid integer overflow in bottom() and right().
@@ -244,9 +232,7 @@ class GEOMETRY_EXPORT Rect {
   // TODO(enne): this should probably use base::ClampAdd, but that
   // function is not a constexpr.
   static constexpr int GetClampedValue(int origin, int size) {
-    return AddWouldOverflow(origin, size)
-               ? std::numeric_limits<int>::max() - origin
-               : size;
+    return AddWouldOverflow(origin, size) ? std::numeric_limits<int>::max() - origin : size;
   }
 };
 
@@ -280,29 +266,21 @@ GEOMETRY_EXPORT Rect BoundingRect(const Point& p1, const Point& p2);
 // Scales the rect and returns the enclosing rect.  Use this only the inputs are
 // known to not overflow.  Use ScaleToEnclosingRectSafe if the inputs are
 // unknown and need to use saturated math.
-inline Rect ScaleToEnclosingRect(const Rect& rect,
-                                 float x_scale,
-                                 float y_scale) {
+inline Rect ScaleToEnclosingRect(const Rect& rect, float x_scale, float y_scale) {
   if (x_scale == 1.f && y_scale == 1.f)
     return rect;
   // These next functions cast instead of using e.g. base::ClampFloor() because
   // we haven't checked to ensure that the clamping behavior of the helper
   // functions doesn't degrade performance, and callers shouldn't be passing
   // values that cause overflow anyway.
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::floor(rect.x() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::floor(rect.y() * y_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::ceil(rect.right() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::ceil(rect.bottom() * y_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.x() * x_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.y() * y_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.right() * x_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.bottom() * y_scale)));
   int x = static_cast<int>(std::floor(rect.x() * x_scale));
   int y = static_cast<int>(std::floor(rect.y() * y_scale));
-  int r = rect.width() == 0 ?
-      x : static_cast<int>(std::ceil(rect.right() * x_scale));
-  int b = rect.height() == 0 ?
-      y : static_cast<int>(std::ceil(rect.bottom() * y_scale));
+  int r = rect.width() == 0 ? x : static_cast<int>(std::ceil(rect.right() * x_scale));
+  int b = rect.height() == 0 ? y : static_cast<int>(std::ceil(rect.bottom() * y_scale));
   return Rect(x, y, r - x, b - y);
 }
 
@@ -314,9 +292,7 @@ inline Rect ScaleToEnclosingRect(const Rect& rect, float scale) {
 // would overflow.
 // TODO(pkasting): Attempt to switch ScaleTo...Rect() to this construction and
 // check performance.
-inline Rect ScaleToEnclosingRectSafe(const Rect& rect,
-                                     float x_scale,
-                                     float y_scale) {
+inline Rect ScaleToEnclosingRectSafe(const Rect& rect, float x_scale, float y_scale) {
   if (x_scale == 1.f && y_scale == 1.f)
     return rect;
   int x = base::ClampFloor(rect.x() * x_scale);
@@ -330,25 +306,17 @@ inline Rect ScaleToEnclosingRectSafe(const Rect& rect, float scale) {
   return ScaleToEnclosingRectSafe(rect, scale, scale);
 }
 
-inline Rect ScaleToEnclosedRect(const Rect& rect,
-                                float x_scale,
-                                float y_scale) {
+inline Rect ScaleToEnclosedRect(const Rect& rect, float x_scale, float y_scale) {
   if (x_scale == 1.f && y_scale == 1.f)
     return rect;
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::ceil(rect.x() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::ceil(rect.y() * y_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::floor(rect.right() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::floor(rect.bottom() * y_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.x() * x_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.y() * y_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.right() * x_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.bottom() * y_scale)));
   int x = static_cast<int>(std::ceil(rect.x() * x_scale));
   int y = static_cast<int>(std::ceil(rect.y() * y_scale));
-  int r = rect.width() == 0 ?
-      x : static_cast<int>(std::floor(rect.right() * x_scale));
-  int b = rect.height() == 0 ?
-      y : static_cast<int>(std::floor(rect.bottom() * y_scale));
+  int r = rect.width() == 0 ? x : static_cast<int>(std::floor(rect.right() * x_scale));
+  int b = rect.height() == 0 ? y : static_cast<int>(std::floor(rect.bottom() * y_scale));
   return Rect(x, y, r - x, b - y);
 }
 
@@ -366,23 +334,15 @@ inline Rect ScaleToRoundedRect(const Rect& rect, float x_scale, float y_scale) {
   if (x_scale == 1.f && y_scale == 1.f)
     return rect;
 
-  DCHECK(
-      base::IsValueInRangeForNumericType<int>(std::round(rect.x() * x_scale)));
-  DCHECK(
-      base::IsValueInRangeForNumericType<int>(std::round(rect.y() * y_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::round(rect.right() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(
-      std::round(rect.bottom() * y_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.x() * x_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.y() * y_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.right() * x_scale)));
+  DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.bottom() * y_scale)));
 
   int x = static_cast<int>(std::round(rect.x() * x_scale));
   int y = static_cast<int>(std::round(rect.y() * y_scale));
-  int r = rect.width() == 0
-              ? x
-              : static_cast<int>(std::round(rect.right() * x_scale));
-  int b = rect.height() == 0
-              ? y
-              : static_cast<int>(std::round(rect.bottom() * y_scale));
+  int r = rect.width() == 0 ? x : static_cast<int>(std::round(rect.right() * x_scale));
+  int b = rect.height() == 0 ? y : static_cast<int>(std::round(rect.bottom() * y_scale));
 
   return Rect(x, y, r - x, b - y);
 }

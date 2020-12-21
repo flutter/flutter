@@ -53,9 +53,7 @@ class GEOMETRY_EXPORT InsetsF {
            bottom_ == insets.bottom_ && right_ == insets.right_;
   }
 
-  bool operator!=(const InsetsF& insets) const {
-    return !(*this == insets);
-  }
+  bool operator!=(const InsetsF& insets) const { return !(*this == insets); }
 
   void operator+=(const InsetsF& insets) {
     top_ += insets.top_;

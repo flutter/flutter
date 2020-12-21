@@ -370,23 +370,23 @@ L* operator-(L* lhs, const StrictNumeric<R> rhs) {
 
 }  // namespace internal
 
+using internal::CheckAdd;
+using internal::CheckAnd;
+using internal::CheckDiv;
 using internal::CheckedNumeric;
-using internal::IsValidForType;
-using internal::ValueOrDieForType;
-using internal::ValueOrDefaultForType;
-using internal::MakeCheckedNum;
+using internal::CheckLsh;
 using internal::CheckMax;
 using internal::CheckMin;
-using internal::CheckAdd;
-using internal::CheckSub;
-using internal::CheckMul;
-using internal::CheckDiv;
 using internal::CheckMod;
-using internal::CheckLsh;
-using internal::CheckRsh;
-using internal::CheckAnd;
+using internal::CheckMul;
 using internal::CheckOr;
+using internal::CheckRsh;
+using internal::CheckSub;
 using internal::CheckXor;
+using internal::IsValidForType;
+using internal::MakeCheckedNum;
+using internal::ValueOrDefaultForType;
+using internal::ValueOrDieForType;
 
 }  // namespace base
 

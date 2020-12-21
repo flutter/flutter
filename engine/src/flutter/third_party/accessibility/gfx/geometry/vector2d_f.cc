@@ -43,12 +43,12 @@ void Vector2dF::Scale(float x_scale, float y_scale) {
 
 double CrossProduct(const Vector2dF& lhs, const Vector2dF& rhs) {
   return static_cast<double>(lhs.x()) * rhs.y() -
-      static_cast<double>(lhs.y()) * rhs.x();
+         static_cast<double>(lhs.y()) * rhs.x();
 }
 
 double DotProduct(const Vector2dF& lhs, const Vector2dF& rhs) {
   return static_cast<double>(lhs.x()) * rhs.x() +
-      static_cast<double>(lhs.y()) * rhs.y();
+         static_cast<double>(lhs.y()) * rhs.y();
 }
 
 Vector2dF ScaleVector2d(const Vector2dF& v, float x_scale, float y_scale) {

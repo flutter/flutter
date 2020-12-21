@@ -22,9 +22,7 @@ namespace gfx {
 
 #if defined(OS_APPLE)
 Size::Size(const CGSize& s)
-    : width_(s.width < 0 ? 0 : s.width),
-      height_(s.height < 0 ? 0 : s.height) {
-}
+    : width_(s.width < 0 ? 0 : s.width), height_(s.height < 0 ? 0 : s.height) {}
 
 Size& Size::operator=(const CGSize& s) {
   set_width(s.width);

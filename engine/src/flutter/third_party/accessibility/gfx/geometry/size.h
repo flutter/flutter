@@ -100,17 +100,11 @@ inline Size operator-(Size lhs, const Size& rhs) {
 void PrintTo(const Size& size, ::std::ostream* os);
 
 // Helper methods to scale a gfx::Size to a new gfx::Size.
-GEOMETRY_EXPORT Size ScaleToCeiledSize(const Size& size,
-                                       float x_scale,
-                                       float y_scale);
+GEOMETRY_EXPORT Size ScaleToCeiledSize(const Size& size, float x_scale, float y_scale);
 GEOMETRY_EXPORT Size ScaleToCeiledSize(const Size& size, float scale);
-GEOMETRY_EXPORT Size ScaleToFlooredSize(const Size& size,
-                                        float x_scale,
-                                        float y_scale);
+GEOMETRY_EXPORT Size ScaleToFlooredSize(const Size& size, float x_scale, float y_scale);
 GEOMETRY_EXPORT Size ScaleToFlooredSize(const Size& size, float scale);
-GEOMETRY_EXPORT Size ScaleToRoundedSize(const Size& size,
-                                        float x_scale,
-                                        float y_scale);
+GEOMETRY_EXPORT Size ScaleToRoundedSize(const Size& size, float x_scale, float y_scale);
 GEOMETRY_EXPORT Size ScaleToRoundedSize(const Size& size, float scale);
 
 }  // namespace gfx
