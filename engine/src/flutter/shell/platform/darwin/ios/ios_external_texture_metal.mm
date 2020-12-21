@@ -5,9 +5,10 @@
 #import "flutter/shell/platform/darwin/ios/ios_external_texture_metal.h"
 
 #include "flutter/fml/logging.h"
-#include "third_party/skia/include/core/SkYUVAIndex.h"
+#include "third_party/skia/include/core/SkYUVAInfo.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/GrYUVABackendTextures.h"
 #include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
 
 namespace flutter {
@@ -132,10 +133,11 @@ sk_sp<SkImage> IOSExternalTextureMetal::WrapNV12ExternalPixelBuffer(
   y_skia_texture_info.fTexture = sk_cf_obj<const void*>{
       [reinterpret_cast<NSObject*>(CVMetalTextureGetTexture(y_metal_texture)) retain]};
 
-  GrBackendTexture y_skia_backend_texture(/*width=*/texture_size.width(),
-                                          /*height=*/texture_size.height(),
-                                          /*mipMapped=*/GrMipMapped ::kNo,
-                                          /*textureInfo=*/y_skia_texture_info);
+  GrBackendTexture skia_backend_textures[2];
+  skia_backend_textures[0] = GrBackendTexture(/*width=*/texture_size.width(),
+                                              /*height=*/texture_size.height(),
+                                              /*mipMapped=*/GrMipMapped ::kNo,
+                                              /*textureInfo=*/y_skia_texture_info);
 
   fml::CFRef<CVMetalTextureRef> uv_metal_texture(uv_metal_texture_raw);
 
@@ -143,17 +145,14 @@ sk_sp<SkImage> IOSExternalTextureMetal::WrapNV12ExternalPixelBuffer(
   uv_skia_texture_info.fTexture = sk_cf_obj<const void*>{
       [reinterpret_cast<NSObject*>(CVMetalTextureGetTexture(uv_metal_texture)) retain]};
 
-  GrBackendTexture uv_skia_backend_texture(/*width=*/texture_size.width(),
-                                           /*height=*/texture_size.height(),
-                                           /*mipMapped=*/GrMipMapped ::kNo,
-                                           /*textureInfo=*/uv_skia_texture_info);
-  GrBackendTexture nv12TextureHandles[] = {y_skia_backend_texture, uv_skia_backend_texture};
-  SkYUVAIndex yuvaIndices[4] = {
-      SkYUVAIndex{0, SkColorChannel::kR},  // Read Y data from the red channel of the first texture
-      SkYUVAIndex{1, SkColorChannel::kR},  // Read U data from the red channel of the second texture
-      SkYUVAIndex{1,
-                  SkColorChannel::kG},  // Read V data from the green channel of the second texture
-      SkYUVAIndex{-1, SkColorChannel::kA}};  //-1 means to omit the alpha data of YUVA
+  skia_backend_textures[1] = GrBackendTexture(/*width=*/texture_size.width(),
+                                              /*height=*/texture_size.height(),
+                                              /*mipMapped=*/GrMipMapped ::kNo,
+                                              /*textureInfo=*/uv_skia_texture_info);
+  SkYUVAInfo yuva_info(skia_backend_textures[0].dimensions(), SkYUVAInfo::PlaneConfig::kY_UV,
+                       SkYUVAInfo::Subsampling::k444, kRec601_SkYUVColorSpace);
+  GrYUVABackendTextures yuva_backend_textures(yuva_info, skia_backend_textures,
+                                              kTopLeft_GrSurfaceOrigin);
 
   struct ImageCaptures {
     fml::CFRef<CVPixelBufferRef> buffer;
@@ -170,9 +169,9 @@ sk_sp<SkImage> IOSExternalTextureMetal::WrapNV12ExternalPixelBuffer(
     auto captures = reinterpret_cast<ImageCaptures*>(release_context);
     delete captures;
   };
-  sk_sp<SkImage> image = SkImage::MakeFromYUVATextures(
-      context, kRec601_SkYUVColorSpace, nv12TextureHandles, yuvaIndices, texture_size,
-      kTopLeft_GrSurfaceOrigin, /*imageColorSpace=*/nullptr, release_proc, captures.release());
+  sk_sp<SkImage> image =
+      SkImage::MakeFromYUVATextures(context, yuva_backend_textures, /*imageColorSpace=*/nullptr,
+                                    release_proc, captures.release());
   return image;
 }
 

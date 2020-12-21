@@ -10,10 +10,10 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/core/SkYUVAIndex.h"
+#include "third_party/skia/include/core/SkYUVAInfo.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
-#include "third_party/skia/src/gpu/gl/GrGLDefines.h"
+#include "third_party/skia/include/gpu/GrYUVABackendTextures.h"
 
 namespace flutter {
 
@@ -108,27 +108,20 @@ sk_sp<SkImage> IOSExternalTextureGL::CreateImageFromRGBATexture(GrDirectContext*
 
 sk_sp<SkImage> IOSExternalTextureGL::CreateImageFromYUVTextures(GrDirectContext* context,
                                                                 const SkRect& bounds) {
+  GrBackendTexture textures[2];
   GrGLTextureInfo yTextureInfo = {CVOpenGLESTextureGetTarget(y_texture_ref_),
-                                  CVOpenGLESTextureGetName(y_texture_ref_), GR_GL_LUMINANCE8};
-  GrBackendTexture yBackendTexture(bounds.width(), bounds.height(), GrMipMapped::kNo, yTextureInfo);
+                                  CVOpenGLESTextureGetName(y_texture_ref_), GL_LUMINANCE8_EXT};
+  textures[0] = GrBackendTexture(bounds.width(), bounds.height(), GrMipMapped::kNo, yTextureInfo);
   GrGLTextureInfo uvTextureInfo = {CVOpenGLESTextureGetTarget(uv_texture_ref_),
-                                   CVOpenGLESTextureGetName(uv_texture_ref_), GR_GL_RGBA8};
-  GrBackendTexture uvBackendTexture(bounds.width(), bounds.height(), GrMipMapped::kNo,
-                                    uvTextureInfo);
-  GrBackendTexture nv12TextureHandles[] = {yBackendTexture, uvBackendTexture};
-  SkYUVAIndex yuvaIndices[4] = {
-      SkYUVAIndex{0, SkColorChannel::kR},  // Read Y data from the red channel of the first texture
-      SkYUVAIndex{1, SkColorChannel::kR},  // Read U data from the red channel of the second texture
-      SkYUVAIndex{
-          1, SkColorChannel::kA},  // Read V data from the alpha channel of the second texture,
-                                   // normal NV12 data V should be taken from the green channel, but
-                                   // currently only the uv texture created by GL_LUMINANCE_ALPHA
-                                   // can be used, so the V value is taken from the alpha channel
-      SkYUVAIndex{-1, SkColorChannel::kA}};  //-1 means to omit the alpha data of YUVA
-  SkISize size{yBackendTexture.width(), yBackendTexture.height()};
-  sk_sp<SkImage> image = SkImage::MakeFromYUVATextures(
-      context, kRec601_SkYUVColorSpace, nv12TextureHandles, yuvaIndices, size,
-      kTopLeft_GrSurfaceOrigin, /*imageColorSpace=*/nullptr);
+                                   CVOpenGLESTextureGetName(uv_texture_ref_),
+                                   GL_LUMINANCE8_ALPHA8_EXT};
+  textures[1] = GrBackendTexture(bounds.width(), bounds.height(), GrMipMapped::kNo, uvTextureInfo);
+
+  SkYUVAInfo yuvaInfo(textures[0].dimensions(), SkYUVAInfo::PlaneConfig::kY_UV,
+                      SkYUVAInfo::Subsampling::k444, kRec601_SkYUVColorSpace);
+  GrYUVABackendTextures yuvaBackendTextures(yuvaInfo, textures, kTopLeft_GrSurfaceOrigin);
+  sk_sp<SkImage> image = SkImage::MakeFromYUVATextures(context, yuvaBackendTextures,
+                                                       /*imageColorSpace=*/nullptr);
   return image;
 }
 
