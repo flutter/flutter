@@ -61,7 +61,7 @@ class Scrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    bool isAlwaysShown = false,
+    this.isAlwaysShown = false,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
@@ -84,6 +84,9 @@ class Scrollbar extends RawScrollbar {
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
   /// is false.
   final bool? showTrackOnHover;
+
+  @override
+  final bool? isAlwaysShown;
 
   /// The thickness of the scrollbar when a hover state is active and
   /// [showTrackOnHover] is true.
@@ -108,6 +111,9 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   // Hover events should be ignored on mobile, the exit event cannot be
   // triggered, but the enter event can on tap.
   late bool _isMobile;
+
+  @override
+  bool get showScrollbar => widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
 
   bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
 
