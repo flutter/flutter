@@ -56,14 +56,14 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
     final StructureErrorTestWidgetInspectorService service = StructureErrorTestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
-    test('ext.flutter.inspector.structuredErrors still report error to original on error', () async {
+    test('ext.flutter.inspector.structuredErrors reports error to _structuredExceptionHandler on error', () async {
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
-      late FlutterErrorDetails actualError;
+      bool usingNewHandler = false;
       // Creates a spy onError. This spy needs to be set before widgets binding
       // initializes.
       FlutterError.onError = (FlutterErrorDetails details) {
-        actualError = details;
+        usingNewHandler = true;
       };
 
       WidgetsFlutterBinding.ensureInitialized();
@@ -81,8 +81,11 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
         );
         FlutterError.reportError(expectedError);
 
-        // Validates the spy still received an error.
-        expect(actualError, expectedError);
+        // Validates the new handler did not receive an error because the
+        // `FlutterError.onError` was set to
+        // `WidgetInspectorService._structuredExceptionHandler` when service
+        // extensions were initialized.
+        expect(usingNewHandler, isFalse);
       } finally {
         FlutterError.onError = oldHandler;
       }
