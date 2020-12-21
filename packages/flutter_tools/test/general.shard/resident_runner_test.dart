@@ -2683,6 +2683,7 @@ void main() {
     when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
     when(mockDevice.dds).thenReturn(mockDds);
     when(mockDds.startDartDevelopmentService(any, any, any, any)).thenThrow(FakeDartDevelopmentServiceException());
+    when(mockDds.uri).thenReturn(Uri.parse('http://localhost:1234'));
     when(mockDds.done).thenAnswer((_) => noopCompleter.future);
 
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
