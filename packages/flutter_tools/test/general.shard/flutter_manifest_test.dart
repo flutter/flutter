@@ -972,6 +972,49 @@ flutter:
     expect(flutterManifest.supportedPlatforms, null);
   });
 
+  testWithoutContext('FlutterManifest validSupportedPlatforms return null if the platform keys are not valid', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    platforms:
+      some_platform:
+        pluginClass: SomeClass
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.isPlugin, true);
+    expect(flutterManifest.validSupportedPlatforms, null);
+  });
+
+  testWithoutContext('FlutterManifest validSupportedPlatforms only returns valid platforms', () {
+    const String manifest = '''
+name: test
+flutter:
+  plugin:
+    platforms:
+      some_platform:
+        pluginClass: SomeClass
+      ios:
+        pluginClass: SomeClass
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.isPlugin, true);
+    expect(flutterManifest.validSupportedPlatforms['ios'],
+                              <String, dynamic>{'pluginClass': 'SomeClass'});
+    expect(flutterManifest.validSupportedPlatforms['some_platform'],
+                              isNull);
+  });
+
   testWithoutContext('FlutterManifest getSupportedPlatforms returns valid platforms.', () {
     const String manifest = '''
 name: test

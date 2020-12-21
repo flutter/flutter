@@ -20,6 +20,7 @@ export 'package:meta/meta.dart' show
   visibleForTesting;
 
 // Examples can assume:
+// // @dart = 2.9
 // String _name;
 // bool _first;
 // bool _lights;

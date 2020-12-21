@@ -212,8 +212,11 @@ Future<void> main() async {
 /// response.
 ///
 /// The returned map has keys:
-/// `average_abs_jerk`: average for the overall smoothness.
-/// `janky_count`: number of frames with `abs_jerk` larger than 0.5.
+/// `average_abs_jerk`: average for the overall smoothness. The smaller this
+/// number the more smooth the scrolling is.
+/// `janky_count`: number of frames with `abs_jerk` larger than 0.5. The frames
+/// that take longer than the frame budget to build are ignored, so increase of
+/// this number itself may not represent a regression.
 /// `dropped_frame_count`: number of frames that are built longer than 40ms and
 ///  are not used for smoothness measurement.
 /// `frame_timestamp`: the list of the timestamp for each frame, in the time

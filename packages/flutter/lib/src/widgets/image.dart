@@ -649,7 +649,15 @@ class Image extends StatefulWidget {
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
-  /// The [bytes], [scale], and [repeat] arguments must not be null.
+  /// The `bytes` argument specifies encoded image bytes, which can be encoded
+  /// in any of the following supported image formats:
+  /// {@macro flutter.dart:ui.imageFormats}
+  ///
+  /// The `scale` argument specifies the linear scale factor for drawing this
+  /// image at its intended size and applies to both the width and the height.
+  /// {@macro flutter.painting.imageInfo.scale}
+  ///
+  /// The `bytes`, `scale`, and [repeat] arguments must not be null.
   ///
   /// This only accepts compressed image formats (e.g. PNG). Uncompressed
   /// formats like rawRgba (the default format of [dart:ui.Image.toByteData])
@@ -754,7 +762,7 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
   ///
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
@@ -820,7 +828,7 @@ class Image extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Image.frameBuilder.chainedBuildersExample}
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
   ///
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
@@ -865,7 +873,7 @@ class Image extends StatefulWidget {
   /// [FlutterError.onError]. If it is provided, the caller should either handle
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
   ///
   /// The following sample uses [errorBuilder] to show a '😢' in place of the
   /// image that fails to load, and prints the error to the console.

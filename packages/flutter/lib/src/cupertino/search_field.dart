@@ -12,6 +12,9 @@ import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
 ///
