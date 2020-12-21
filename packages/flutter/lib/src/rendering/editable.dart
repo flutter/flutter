@@ -313,14 +313,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderEditableCustomPaint? _backgroundRenderObject;
 
   RenderEditablePainter? _foregroundPainter;
-  void setForegroundPainter(RenderEditablePainter? newValue, { bool force = false }) {
-    if (!force && newValue == _foregroundPainter)
+  /// Sets the [RenderEditablePainter] to use for painting above this
+  /// [RenderEditable]'s text content.
+  ///
+  /// The new [RenderEditablePainter] will replace the previously specified
+  /// foreground painter, and schedule a repaint. If the previous foreground
+  /// painter is the same as [newPainter], this method does nothing, unless
+  /// [force] is set to true.
+  void setForegroundPainter(RenderEditablePainter? newPainter, { bool force = false }) {
+    if (!force && newPainter == _foregroundPainter)
       return;
-    final _CompositeRenderEditablePainter effectivePainter = newValue == null
+    final _CompositeRenderEditablePainter effectivePainter = newPainter == null
       ? _builtinForegounrdPainters
       : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[
          _builtinForegounrdPainters,
-         newValue,
+         newPainter,
       ]);
 
     if (_foregroundRenderObject == null) {
@@ -331,10 +338,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _foregroundRenderObject?.painter = effectivePainter;
     }
     effectivePainter.renderEditable = this;
-    _foregroundPainter = newValue;
+    _foregroundPainter = newPainter;
   }
 
   RenderEditablePainter? _painter;
+  /// Sets the [RenderEditablePainter] to use for painting beneath this
+  /// [RenderEditable]'s text content.
+  ///
+  /// The new [RenderEditablePainter] will replace the previously specified
+  /// painter, and schedule a repaint. If the previous painter is the same as
+  /// [newPainter], this method does nothing, unless [force] is set to true.
   void setPainter(RenderEditablePainter? newValue, { bool force = false }) {
     if (!force && newValue == _painter)
       return;
@@ -2376,7 +2389,30 @@ class _RenderEditableCustomPaint extends RenderCustomPaint {
   }
 }
 
+/// A [CustomPainter] subclass that paints within the associated [RenderEditable]'s
+/// bounds, above or beneath its text content.
+///
+/// This painter is designed to paint auxiliary contents that depends on the
+/// text layout metrics (for instance, carets and text highlights), within an
+/// editable text field. The [renderEditable] property is guaranteed to be
+/// non-null when the [paint] method or the [hitTest] method is called, or when
+/// the [semanticsBuilder] property is accessed. The painter will repaint when
+/// the associated [renderEditable] repaints, so the layout metrics of the
+/// associated [RenderEditable] is guaranteed to be up-to-date within [paint]
+/// and [semanticsBuilder].
+///
+/// See also:
+///  * [RenderEditable.setForegroundPainter], which takes a [RenderEditablePainter]
+///    and sets it as the foreground painter of the [RenderEditable].
+///  * [RenderEditable.setPainter], which takes a [RenderEditablePainter]
+///    and sets it as the foreground painter of the [RenderEditable].
 abstract class RenderEditablePainter extends ChangeNotifier implements CustomPainter {
+  /// The[RenderEditable] this painter will paint on top of (or beneath).
+  ///
+  /// This property is guaranteed to be non-null at the time the [paint] method
+  /// or the [hitTest] method is called by the painter's render object, or when
+  /// the [semanticsBuilder] property is accessed by the render object.
+  @protected
   RenderEditable? renderEditable;
 
   @override

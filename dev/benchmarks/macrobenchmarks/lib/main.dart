@@ -21,6 +21,7 @@ import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
 import 'src/text.dart';
+import 'src/fullscreenTextField.dart';
 
 const String kMacrobenchmarks = 'Macrobenchmarks';
 
@@ -45,6 +46,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kLargeImageChangerRouteName: (BuildContext context) => LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
         kTextRouteName: (BuildContext context) => TextPage(),
+        kFullscreenTextRouteName: (BuildContext context) => TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => AnimatedPlaceholderPage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
@@ -121,6 +123,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Text'),
             onPressed: () {
               Navigator.pushNamed(context, kTextRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kFullscreenTextRouteName),
+            child: const Text('Fullscreen Text'),
+            onPressed: () {
+              Navigator.pushNamed(context, kFullscreenTextRouteName);
             },
           ),
           ElevatedButton(
