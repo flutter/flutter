@@ -362,8 +362,11 @@ class AnimationController extends Animation<double>
   set value(double newValue) {
     assert(newValue != null);
     stop();
+    final double oldValue = value;
     _internalSetValue(newValue);
-    notifyListeners();
+    if (oldValue != newValue) {
+      notifyListeners();
+    }
     _checkStatusChanged();
   }
 
@@ -817,6 +820,7 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
+    final double oldValue = _value;
     _value = _simulation!.x(elapsedInSeconds).clamp(lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
       _status = (_direction == _AnimationDirection.forward) ?
@@ -824,7 +828,9 @@ class AnimationController extends Animation<double>
         AnimationStatus.dismissed;
       stop(canceled: false);
     }
-    notifyListeners();
+    if (oldValue != _value) {
+      notifyListeners();
+    }
     _checkStatusChanged();
   }
 
