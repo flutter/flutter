@@ -1048,7 +1048,7 @@ void main() {
     final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild'));
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
   });
-  
+
 }
 
 
