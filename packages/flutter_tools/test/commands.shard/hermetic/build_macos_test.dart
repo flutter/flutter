@@ -97,7 +97,6 @@ void main() {
         else
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
-        'EXCLUDED_ARCHS=arm64',
       ],
       stdout: 'STDOUT STUFF',
       onRun: () {
@@ -265,6 +264,7 @@ void main() {
       'TREE_SHAKE_ICONS=true',
       'FLUTTER_TARGET=lib/other.dart',
       'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
+      'EXCLUDED_ARCHS=arm64',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

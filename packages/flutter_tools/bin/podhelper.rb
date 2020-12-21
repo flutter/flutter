@@ -86,6 +86,9 @@ def flutter_additional_macos_build_settings(target)
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"
+
+    # ARM not yet supported https://github.com/flutter/flutter/issues/69221
+    build_configuration.build_settings['EXCLUDED_ARCHS'] = 'arm64'
   end
 end
 
