@@ -21,4 +21,3 @@ Point ToRoundedPoint(const PointF& point) {
 }
 
 }  // namespace gfx
-

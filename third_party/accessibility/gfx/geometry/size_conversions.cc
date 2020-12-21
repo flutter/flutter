@@ -21,4 +21,3 @@ Size ToRoundedSize(const SizeF& size) {
 }
 
 }  // namespace gfx
-

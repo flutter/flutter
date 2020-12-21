@@ -96,4 +96,4 @@ void PrintTo(const Vector2d& vector, ::std::ostream* os);
 
 }  // namespace gfx
 
-#endif // UI_GFX_GEOMETRY_VECTOR2D_H_
+#endif  // UI_GFX_GEOMETRY_VECTOR2D_H_

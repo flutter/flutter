@@ -28,5 +28,4 @@ PointF ScalePoint(const PointF& p, float x_scale, float y_scale) {
   return scaled_p;
 }
 
-
 }  // namespace gfx

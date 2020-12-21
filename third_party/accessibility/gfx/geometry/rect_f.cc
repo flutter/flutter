@@ -34,8 +34,7 @@ static void AdjustAlongAxis(float dst_origin,
 
 #if defined(OS_APPLE)
 RectF::RectF(const CGRect& r)
-    : origin_(r.origin.x, r.origin.y), size_(r.size.width, r.size.height) {
-}
+    : origin_(r.origin.x, r.origin.y), size_(r.size.width, r.size.height) {}
 
 CGRect RectF::ToCGRect() const {
   return CGRectMake(x(), y(), width(), height());
@@ -65,9 +64,7 @@ void RectF::operator-=(const Vector2dF& offset) {
 }
 
 InsetsF RectF::InsetsFrom(const RectF& inner) const {
-  return InsetsF(inner.y() - y(),
-                 inner.x() - x(),
-                 bottom() - inner.bottom(),
+  return InsetsF(inner.y() - y(), inner.x() - x(), bottom() - inner.bottom(),
                  right() - inner.right());
 }
 
@@ -192,8 +189,8 @@ void RectF::SplitVertically(RectF* left_half, RectF* right_half) const {
   DCHECK(right_half);
 
   left_half->SetRect(x(), y(), width() / 2, height());
-  right_half->SetRect(
-      left_half->right(), y(), width() - left_half->width(), height());
+  right_half->SetRect(left_half->right(), y(), width() - left_half->width(),
+                      height());
 }
 
 bool RectF::SharesEdgeWith(const RectF& rect) const {
@@ -232,8 +229,7 @@ bool RectF::IsExpressibleAsRect() const {
 }
 
 std::string RectF::ToString() const {
-  return base::StringPrintf("%s %s",
-                            origin().ToString().c_str(),
+  return base::StringPrintf("%s %s", origin().ToString().c_str(),
                             size().ToString().c_str());
 }
 
