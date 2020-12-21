@@ -305,11 +305,11 @@ abstract class DeviceManager {
     if (userInput.toLowerCase() == 'q') {
       throwToolExit('');
     }
-    return devices[int.parse(userInput)];
+    return devices[int.parse(userInput) - 1];
   }
 
   void _displayDeviceOptions(List<Device> devices) {
-    int count = 0;
+    int count = 1;
     for (final Device device in devices) {
       _logger.printStatus(_userMessages.flutterChooseDevice(count, device.name, device.id));
       count++;
@@ -319,7 +319,7 @@ abstract class DeviceManager {
   Future<String> _readUserInput(int deviceCount) async {
     _terminal.usesTerminalUi = true;
     final String result = await _terminal.promptForCharInput(
-      <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
+      <String>[ for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
       displayAcceptedCharacters: false,
       logger: _logger,
       prompt: _userMessages.flutterChooseOne,
