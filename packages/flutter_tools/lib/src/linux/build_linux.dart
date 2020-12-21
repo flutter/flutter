@@ -17,10 +17,10 @@ import '../plugins.dart';
 import '../project.dart';
 
 // Matches the following error and warning patterns:
-// - <file path>:<line>:<column>: error: <error...>
+// - <file path>:<line>:<column>: (fatal) error: <error...>
 // - <file path>:<line>:<column>: warning: <warning...>
 // - clang: error: <link error...>
-final RegExp errorMatcher = RegExp(r'(?:.*:\d+:\d+|clang):\s?(?:error|warning):\s.*', caseSensitive: false);
+final RegExp errorMatcher = RegExp(r'(?:.*:\d+:\d+|clang):\s?(fatal\s)?(?:error|warning):\s.*', caseSensitive: false);
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(

@@ -224,6 +224,7 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
 /foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
 /foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+/foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
 [3/6] Building CXX object CMakeFiles/foo_bar.dir/flutter/generated_plugin_registrant.cc.o
 [4/6] Building CXX object CMakeFiles/foo_bar.dir/my_application.cc.o
 [5/6] Linking CXX executable intermediates_do_not_run/foo_bar
@@ -249,6 +250,7 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
 /foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
 /foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+/foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ''');
   }, overrides: <Type, Generator>{

@@ -71,6 +71,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'global',
         'run',
         'devtools',
+        if (!openInBrowser) '--no-launch-browser',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
       ]);
       final Completer<Uri> completer = Completer<Uri>();
