@@ -157,6 +157,83 @@ mixin AnimationWithParentMixin<T> {
   AnimationStatus get status => parent.status;
 }
 
+/// Implements most of the [Animation] interface by **lazily** deferring its behavior to a
+/// given [parent] Animation.
+///
+/// Notifies only if actual [value] or [status] changes.
+///
+/// To implement an [Animation] that is lazily driven by a parent, it is only necessary
+/// to mix in this class, implement [parent], [value], [notifyListeners],
+/// [notifyStatusListeners] and mix in [AnimationLazyListenerMixin].
+///
+/// see also:
+/// [AnimationWithParentMixin] - as a way to directly deffer its behavior to parent.
+/// [AnimationLocalListenersMixin] - contains implementation of [notifyListeners]
+/// [AnimationLocalStatusListenersMixin] - contains implementation of [notifyStatusListeners]
+mixin AnimationLazyWithParentMixin<T, P> on AnimationLazyListenerMixin {
+  /// The animation whose value this animation will proxy.
+  ///
+  /// This animation must remain the same for the lifetime of this object. If
+  /// you wish to proxy a different animation at different times, consider using
+  /// [ProxyAnimation].
+  Animation<P> get parent;
+
+  /// The current value of the animation.
+  T get value;
+
+  /// Calls all the listeners.
+  ///
+  /// If listeners are added or removed during this function, the modifications
+  /// will not change which listeners are called during this iteration.
+  void notifyListeners();
+
+  /// Calls all the status listeners.
+  ///
+  /// If listeners are added or removed during this function, the modifications
+  /// will not change which listeners are called during this iteration.
+  void notifyStatusListeners(AnimationStatus status);
+
+  /// The current status of this animation.
+  AnimationStatus get status => parent.status;
+
+  @override
+  void didStartListening() {
+      _lastValue = value;
+      _lastStatus = status;
+      parent.addListener(maybeNotifyListeners);
+      parent.addStatusListener(maybeNotifyStatusListeners);
+  }
+
+  @override
+  void didStopListening() {
+      parent.removeListener(maybeNotifyListeners);
+      parent.removeStatusListener(maybeNotifyStatusListeners);
+  }
+
+  AnimationStatus? _lastStatus;
+
+  /// call notifyStatusListeners if status changed
+  @protected
+  @visibleForTesting
+  void maybeNotifyStatusListeners(AnimationStatus _) {
+    if (status != _lastStatus) {
+      _lastStatus = status;
+      notifyStatusListeners(status);
+    }
+  }
+
+  T? _lastValue;
+  /// call notifyListeners if value changed
+  @protected
+  @visibleForTesting
+  void maybeNotifyListeners() {
+    if (value != _lastValue) {
+      _lastValue = value;
+      notifyListeners();
+    }
+  }
+}
+
 /// An animation that is a proxy for another animation.
 ///
 /// A proxy animation is useful because the parent animation can be mutated. For
