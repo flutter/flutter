@@ -653,16 +653,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
   final List<_DragAvatar<Object>> _candidateAvatars = <_DragAvatar<Object>>[];
   final List<_DragAvatar<Object>> _rejectedAvatars = <_DragAvatar<Object>>[];
 
-  bool checkDataType(Object? data, Type type) {
-    if (!kIsWeb) {
-      return data is T?;
-    } else {
-      if ((type == int && T == double) || (type == double && T == int)) {
-        return false;
-      } else {
-        return data is T?;
-      }
-    }
+  // On non-web platforms, checks if data Object is equal to type[T] or subtype of [T].
+  // On web, it does the same, but requires a check for ints and doubles
+  // because dart doubles and ints are backed by the same kind of object on web.
+  // JavaScript does not support integers.
+  bool isExpectedDataType(Object? data, Type type) {
+    if (kIsWeb && ((type == int && T == double) || (type == double && T == int)))
+      return false;
+    return data is T?;
   }
 
   bool didEnter(_DragAvatar<Object> avatar) {
@@ -848,7 +846,7 @@ class _DragAvatar<T extends Object> extends Drag {
       final HitTestTarget target = entry.target;
       if (target is RenderMetaData) {
         final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState && metaData.checkDataType(data, T))
+        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T))
           yield metaData;
       }
     }
