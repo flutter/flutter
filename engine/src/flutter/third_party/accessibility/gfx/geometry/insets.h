@@ -85,9 +85,7 @@ class GEOMETRY_EXPORT Insets {
            bottom_ == insets.bottom_ && right_ == insets.right_;
   }
 
-  bool operator!=(const Insets& insets) const {
-    return !(*this == insets);
-  }
+  bool operator!=(const Insets& insets) const { return !(*this == insets); }
 
   void operator+=(const Insets& insets) {
     top_ = base::ClampAdd(top_, insets.top_);

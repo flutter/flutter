@@ -66,9 +66,7 @@ class GEOMETRY_EXPORT PointF {
     return std::tie(y_, x_) < std::tie(rhs.y_, rhs.x_);
   }
 
-  void Scale(float scale) {
-    Scale(scale, scale);
-  }
+  void Scale(float scale) { Scale(scale, scale); }
 
   void Scale(float x_scale, float y_scale) {
     SetPoint(x() * x_scale, y() * y_scale);

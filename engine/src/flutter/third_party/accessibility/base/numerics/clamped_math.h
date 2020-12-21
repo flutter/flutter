@@ -244,20 +244,20 @@ BASE_NUMERIC_COMPARISON_OPERATORS(Clamped, IsNotEqual, !=)
 
 }  // namespace internal
 
+using internal::ClampAdd;
+using internal::ClampAnd;
+using internal::ClampDiv;
 using internal::ClampedNumeric;
-using internal::MakeClampedNum;
+using internal::ClampLsh;
 using internal::ClampMax;
 using internal::ClampMin;
-using internal::ClampAdd;
-using internal::ClampSub;
-using internal::ClampMul;
-using internal::ClampDiv;
 using internal::ClampMod;
-using internal::ClampLsh;
-using internal::ClampRsh;
-using internal::ClampAnd;
+using internal::ClampMul;
 using internal::ClampOr;
+using internal::ClampRsh;
+using internal::ClampSub;
 using internal::ClampXor;
+using internal::MakeClampedNum;
 
 }  // namespace base
 
