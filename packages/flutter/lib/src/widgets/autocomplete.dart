@@ -504,7 +504,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///               hintText: 'Split RawAutocomplete App',
   ///             ),
   ///             onFieldSubmitted: (String value) {
-  ///               RawAutocomplete.getOnFieldSubmitted(_autocompleteKey)();
+  ///               RawAutocomplete.onFieldSubmitted(_autocompleteKey);
   ///             },
   ///           ),
   ///         ),
@@ -584,21 +584,22 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// If this parameter is not null, then [focusNode] must also be not null.
   final TextEditingController? textEditingController;
 
-  /// Returns the [VoidCallback] to call when a custom field has been submitted.
+  /// Calls the [AutocompleteFieldViewBuilder.onFieldSubmitted] callback for the
+  /// RawAutocomplete widget indicated by the given [GlobalKey].
   ///
   /// This is not typically used unless a custom field is implemented instead of
-  /// using [fieldViewBuilder]. In fieldViewBuilder, the
-  /// [AutocompleteFieldViewBuilder.onFieldSubmitted] is passed in the
-  /// [AutocompleteFieldViewBuilder] signature. When not using fieldViewBuilder,
-  /// the same callback can be obtained using this static method.
+  /// using [fieldViewBuilder]. In the typical case, the onFieldSubmitted
+  /// callback is passed via the [AutocompleteFieldViewBuilder] signature. When
+  /// not using fieldViewBuilder, the same callback can be called by using this
+  /// static method.
   ///
   /// See also:
   ///
   ///  * [focusNode] and [textEditingController], which contain a code example
   ///    showing how to create a separate field outside of fieldViewBuilder.
-  static VoidCallback getOnFieldSubmitted(GlobalKey key) {
+  static void onFieldSubmitted(GlobalKey key) {
     final _RawAutocompleteState rawAutocomplete = key.currentState as _RawAutocompleteState;
-    return rawAutocomplete._onFieldSubmitted;
+    rawAutocomplete._onFieldSubmitted();
   }
 
   // The default way to convert an option to a string.
