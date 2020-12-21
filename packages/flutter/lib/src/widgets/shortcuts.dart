@@ -386,7 +386,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
 ///
 /// Here, we will use a [Shortcuts] and [Actions] widget to add and remove from a counter.
 /// This can be done by creating a child widget that is focused and pressing the logical key
@@ -424,10 +424,18 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///       child: Focus(
 ///         autofocus:true,
 ///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text('Add to the counter by pressing keyboard Shift and keyboard "K"'),
-///             Text('Subtract from the counter by pressing keyboard Shift and keyboard "L"'),
-///             Text('count: $count'),
+///             Text('Add: keyboard Shift + "k"'),
+///             Text('Subtract: keyboard Shift + "l"'),
+///             SizedBox(height: 10.0),
+///             ColoredBox(
+///               color: Colors.yellow,
+///               child: Padding(
+///                 padding: EdgeInsets.all(4.0),
+///                 child: Text('count: $count'),
+///               ),
+///             ),
 ///           ],
 ///         ),
 ///       ),

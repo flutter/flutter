@@ -63,57 +63,75 @@ const double kMiniButtonOffsetAdjustment = 4.0;
 /// The following diagrams show the available placement locations for the FloatingActionButton.
 ///
 /// * [FloatingActionButtonLocation.centerDocked]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_center_docked.png)
 ///
 /// * [FloatingActionButtonLocation.centerFloat]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_center_float.png)
 ///
 /// * [FloatingActionButtonLocation.centerTop]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_center_top.png)
 ///
 /// * [FloatingActionButtonLocation.endDocked]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_end_docked.png)
 ///
 /// * [FloatingActionButtonLocation.endFloat]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_end_float.png)
 ///
 /// * [FloatingActionButtonLocation.endTop]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_end_top.png)
 ///
 /// * [FloatingActionButtonLocation.startDocked]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_start_docked.png)
 ///
 /// * [FloatingActionButtonLocation.startFloat]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_start_float.png)
 ///
 /// * [FloatingActionButtonLocation.startTop]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_start_top.png)
 ///
 /// * [FloatingActionButtonLocation.miniCenterDocked]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_center_docked.png)
 ///
 /// * [FloatingActionButtonLocation.miniCenterFloat]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_center_float.png)
 ///
 /// * [FloatingActionButtonLocation.miniCenterTop]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_center_top.png)
 ///
 /// * [FloatingActionButtonLocation.miniEndDocked]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_end_docked.png)
 ///
 /// * [FloatingActionButtonLocation.miniEndFloat]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_end_float.png)
 ///
 /// * [FloatingActionButtonLocation.miniEndTop]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_end_top.png)
 ///
 /// * [FloatingActionButtonLocation.miniStartDocked]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_start_docked.png)
 ///
 /// * [FloatingActionButtonLocation.miniStartFloat]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_start_float.png)
 ///
 /// * [FloatingActionButtonLocation.miniStartTop]:
+///
 ///   ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_start_top.png)
 ///
 /// See also:
@@ -413,7 +431,7 @@ abstract class FloatingActionButtonLocation {
 /// You can create your own subclass of [StandardFabLocation]
 /// to implement a custom [FloatingActionButtonLocation].
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 ///
 /// This is an example of a user-defined [FloatingActionButtonLocation].
 ///

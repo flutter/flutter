@@ -49,4 +49,7 @@ abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand() {
     requiresPubspecYaml();
   }
+
+  @override
+  bool get reportNullSafety => true;
 }

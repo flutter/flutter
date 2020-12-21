@@ -24,6 +24,7 @@ import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // dynamic routeObserver;
 // NavigatorState navigator;
 

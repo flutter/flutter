@@ -91,8 +91,6 @@ Future<void> _genSnapshot(
 
   final List<String> command = <String>[
     genSnapshot,
-    '--no-causal-async-stacks',
-    '--lazy-async-stacks',
     '--deterministic',
     '--snapshot_kind=app-aot-elf',
     '--elf=$elf',

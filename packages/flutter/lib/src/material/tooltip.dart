@@ -30,23 +30,24 @@ import 'tooltip_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
 ///
 /// This example show a basic [Tooltip] which has a [Text] as child.
 /// [message] contains your label to be shown by the tooltip when
-/// the child that Tooltip wraps is long pressed.
+/// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
+/// the tooltip is shown when the widget is long pressed.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Tooltip(
 ///     message: "I am a Tooltip",
-///     child: Text("Tap this text and hold down to show a tooltip."),
+///     child: Text("Hover over the text to show a tooltip."),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
 ///
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.

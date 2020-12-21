@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // Regenerates the material icons file.
-// See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts
+// See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
 
 import 'dart:convert' show LineSplitter;
 import 'dart:io';
@@ -383,8 +383,7 @@ class _Icon {
   // e.g. e547
   String hexCodepoint;
 
-  // TODO(guidezpl): will be fixed in a future PR to be shortId instead of id
-  String get mirroredInRTL => _iconsMirroredWhenRTL.contains(id) ? ', matchTextDirection: true' : '';
+  String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
 
   String get name => id.replaceAll('_', ' ');
 

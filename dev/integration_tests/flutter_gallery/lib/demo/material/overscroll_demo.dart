@@ -27,8 +27,10 @@ class OverscrollDemoState extends State<OverscrollDemo> {
 
   Future<void> _handleRefresh() {
     final Completer<void> completer = Completer<void>();
-    Timer(const Duration(seconds: 3), () { completer.complete(); });
+    Timer(const Duration(seconds: 3), () => completer.complete());
     return completer.future.then((_) {
+      if (!mounted)
+        return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Refresh complete'),
         action: SnackBarAction(

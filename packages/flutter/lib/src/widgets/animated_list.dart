@@ -48,7 +48,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad --template=freeform_no_null_safety}
 /// This sample application uses an [AnimatedList] to create an effect when
 /// items are removed or added to the list.
 ///
@@ -517,7 +517,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
 /// input callback.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad --template=freeform_no_null_safety}
 /// This sample application uses a [SliverAnimatedList] to create an animated
 /// effect when items are removed or added to the list.
 ///

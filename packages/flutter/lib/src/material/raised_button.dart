@@ -43,7 +43,7 @@ import 'theme_data.dart';
 /// Raised buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
 ///
 /// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
 /// and lastly a RaisedButton with gradient background.
@@ -196,31 +196,31 @@ class RaisedButton extends MaterialButton {
   /// The [elevation], [highlightElevation], [disabledElevation], [icon],
   /// [label], and [clipBehavior] arguments must not be null.
   factory RaisedButton.icon({
-    Key key,
-    required VoidCallback onPressed,
-    VoidCallback onLongPress,
-    ValueChanged<bool> onHighlightChanged,
-    MouseCursor mouseCursor,
-    ButtonTextTheme textTheme,
-    Color textColor,
-    Color disabledTextColor,
-    Color color,
-    Color disabledColor,
-    Color focusColor,
-    Color hoverColor,
-    Color highlightColor,
-    Color splashColor,
-    Brightness colorBrightness,
-    double elevation,
-    double highlightElevation,
-    double disabledElevation,
-    ShapeBorder shape,
+    Key? key,
+    required VoidCallback? onPressed,
+    VoidCallback? onLongPress,
+    ValueChanged<bool>? onHighlightChanged,
+    MouseCursor? mouseCursor,
+    ButtonTextTheme? textTheme,
+    Color? textColor,
+    Color? disabledTextColor,
+    Color? color,
+    Color? disabledColor,
+    Color? focusColor,
+    Color? hoverColor,
+    Color? highlightColor,
+    Color? splashColor,
+    Brightness? colorBrightness,
+    double? elevation,
+    double? highlightElevation,
+    double? disabledElevation,
+    ShapeBorder? shape,
     Clip clipBehavior,
-    FocusNode focusNode,
+    FocusNode? focusNode,
     bool autofocus,
-    EdgeInsetsGeometry padding,
-    MaterialTapTargetSize materialTapTargetSize,
-    Duration animationDuration,
+    EdgeInsetsGeometry? padding,
+    MaterialTapTargetSize? materialTapTargetSize,
+    Duration? animationDuration,
     required Widget icon,
     required Widget label,
   }) = _RaisedButtonWithIcon;
@@ -276,7 +276,7 @@ class RaisedButton extends MaterialButton {
 class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixin {
   _RaisedButtonWithIcon({
     Key? key,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     VoidCallback? onLongPress,
     ValueChanged<bool>? onHighlightChanged,
     MouseCursor? mouseCursor,

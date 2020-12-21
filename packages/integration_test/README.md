@@ -180,33 +180,40 @@ devices you want to test on. See
 
 ## iOS Device Testing
 
-You need to change `iOS/Podfile` to avoid test target statically linking to the plugins. One way is to
-link all of the plugins dynamically:
+Open `ios/Runner.xcworkspace` in Xcode. Create a test target if you
+do not already have one via `File > New > Target...` and select `Unit Testing Bundle`.
+Change the `Product Name` to `RunnerTests`. Make sure `Target to be Tested` is set to `Runner`.
+Select `Finish`.
+
+Add the new test target to `ios/Podfile` by embedding in the existing `Runner` target.
 
 ```
 target 'Runner' do
-  use_frameworks!
+  # Do not change existing lines.
   ...
+
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
 end
 ```
+Run `flutter build ios` from your project file to hook up the new settings.
 
-To run `integration_test/foo_test.dart` on your iOS device, rebuild your iOS
-targets with Flutter tool.
+In Xcode, add a test file called `RunnerTests.m` (or any name of your choice) to the new target and
+replace the file:
+
+```objective-c
+@import XCTest;
+@import integration_test;
+
+INTEGRATION_TEST_IOS_RUNNER(RunnerTests)
+```
+
+Run `Product > Tests` to run the integration tests on your selected device.
+
+To build `integration_test/foo_test.dart` from the command line, run:
 
 ```sh
 # Pass --simulator if building for the simulator.
 flutter build ios integration_test/foo_test.dart
 ```
-
-Open Xcode project (by default, it's `ios/Runner.xcodeproj`). Create a test target
-(navigating `File > New > Target...` and set up the values) and a test file `RunnerTests.m` and
-change the code. You can change `RunnerTests.m` to the name of your choice.
-
-```objective-c
-#import <XCTest/XCTest.h>
-#import <integration_test/IntegrationTestIosTest.h>
-
-INTEGRATION_TEST_IOS_RUNNER(RunnerTests)
-```
-
-Now you can start RunnerTests to kick-off integration tests!

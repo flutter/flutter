@@ -24,6 +24,7 @@ void main() {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
       nullAssertions: false,
+      nativeNullAssertions: false,
     );
     // bootstrap main module has correct defined module.
     expect(result, contains('define("main_module.bootstrap", ["foo/bar/main.js", "dart_sdk"], '
@@ -34,6 +35,7 @@ void main() {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
       nullAssertions: false,
+      nativeNullAssertions: false,
       bootstrapModule: 'foo_module.bootstrap',
     );
     // bootstrap main module has correct defined module.
@@ -45,11 +47,22 @@ void main() {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
       nullAssertions: true,
+      nativeNullAssertions: true,
     );
 
-    expect(result, contains('''
-  if (true) {
-    dart_sdk.dart.nonNullAsserts(true);'''));
+    expect(result, contains('''dart_sdk.dart.nonNullAsserts(true);'''));
+    expect(result, contains('''dart_sdk.dart.nativeNonNullAsserts(true);'''));
+  });
+
+  test('generateMainModule can disable null safety switches', () {
+    final String result = generateMainModule(
+      entrypoint: 'foo/bar/main.js',
+      nullAssertions: false,
+      nativeNullAssertions: false,
+    );
+
+    expect(result, contains('''dart_sdk.dart.nonNullAsserts(false);'''));
+    expect(result, contains('''dart_sdk.dart.nativeNonNullAsserts(false);'''));
   });
 
   test('generateTestBootstrapFileContents embeds urls correctly', () {

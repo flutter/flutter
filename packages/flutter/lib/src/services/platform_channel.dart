@@ -12,6 +12,9 @@ import 'binding.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
 ///

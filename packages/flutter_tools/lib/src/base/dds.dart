@@ -19,7 +19,8 @@ class DartDevelopmentService {
   final Logger logger;
   dds.DartDevelopmentService _ddsInstance;
 
-  Uri get uri => _ddsInstance.uri;
+  Uri get uri => _ddsInstance?.uri ?? _existingDdsUri;
+  Uri _existingDdsUri;
 
   Future<void> get done => _completer.future;
   final Completer<void> _completer = Completer<void>();
@@ -57,6 +58,11 @@ class DartDevelopmentService {
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
+      if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
+        _existingDdsUri = Uri.parse(
+          e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
+        );
+      }
       if (!_completer.isCompleted) {
         _completer.complete();
       }

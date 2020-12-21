@@ -78,6 +78,7 @@ class ExpansionPanel {
     required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.backgroundColor,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -101,6 +102,10 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool canTapOnHeader;
 
+  /// Defines the background color of the panel.
+  ///
+  /// Defaults to [ThemeData.cardColor].
+  final Color? backgroundColor;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -123,11 +128,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required ExpansionPanelHeaderBuilder headerBuilder,
     required Widget body,
     bool canTapOnHeader = false,
+    Color? backgroundColor,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
+        backgroundColor: backgroundColor,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -141,7 +148,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// Note that [expansionCallback] behaves differently for [ExpansionPanelList]
 /// and [ExpansionPanelList.radio].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// Here is a simple example of how to implement ExpansionPanelList.
 ///
@@ -245,7 +252,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold}
+  /// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
   ///
   /// Here is a simple example of how to implement ExpansionPanelList.radio.
   ///
@@ -530,6 +537,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       items.add(
         MaterialSlice(
           key: _SaltedKey<BuildContext, int>(context, index * 2),
+          color: child.backgroundColor,
           child: Column(
             children: <Widget>[
               header,

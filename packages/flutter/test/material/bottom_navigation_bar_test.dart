@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -70,13 +71,13 @@ void main() {
 
   testWidgets('Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF000001);
-    const Color captionColor = Color(0xFF000002);
+    const Color unselectedWidgetColor = Color(0xFF000002);
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+          unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
@@ -106,7 +107,7 @@ void main() {
     expect(selectedFontStyle.fontSize, selectedFontSize);
     expect(selectedFontStyle.fontWeight, equals(FontWeight.w400));
     expect(selectedFontStyle.height, isNull);
-    expect(unselectedFontStyle.color, equals(captionColor));
+    expect(unselectedFontStyle.color, equals(unselectedWidgetColor));
     expect(unselectedFontStyle.fontWeight, equals(FontWeight.w400));
     expect(unselectedFontStyle.height, isNull);
     // Unselected label has a font size of 14 but is scaled down to be font size 12.
@@ -116,7 +117,7 @@ void main() {
     );
     expect(selectedIcon.color, equals(primaryColor));
     expect(selectedIcon.fontSize, equals(24.0));
-    expect(unselectedIcon.color, equals(captionColor));
+    expect(unselectedIcon.color, equals(unselectedWidgetColor));
     expect(unselectedIcon.fontSize, equals(24.0));
     // There should not be any [Opacity] or [FadeTransition] widgets
     // since showUnselectedLabels and showSelectedLabels are true.
@@ -439,7 +440,7 @@ void main() {
 
   testWidgets('Fixed BottomNavigationBar custom font size, color', (WidgetTester tester) async {
     const Color primaryColor = Colors.black;
-    const Color captionColor = Colors.purple;
+    const Color unselectedWidgetColor = Colors.purple;
     const Color selectedColor = Colors.blue;
     const Color unselectedColor = Colors.yellow;
     const double selectedFontSize = 18.0;
@@ -449,7 +450,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+          unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
@@ -499,7 +500,7 @@ void main() {
 
   testWidgets('Shifting BottomNavigationBar custom font size, color', (WidgetTester tester) async {
     const Color primaryColor = Colors.black;
-    const Color captionColor = Colors.purple;
+    const Color unselectedWidgetColor = Colors.purple;
     const Color selectedColor = Colors.blue;
     const Color unselectedColor = Colors.yellow;
     const double selectedFontSize = 18.0;
@@ -509,7 +510,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(
           primaryColor: primaryColor,
-          textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
+          unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
@@ -1120,6 +1121,7 @@ void main() {
                             BottomNavigationBarItem(
                               label: label,
                               icon: Icon(Icons.ac_unit),
+                              tooltip: label,
                             ),
                             BottomNavigationBarItem(
                               label: 'B',
@@ -1148,6 +1150,45 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
+  });
+
+  testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                tooltip: 'A tooltip',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+              BottomNavigationBarItem(
+                label: 'C',
+                icon: Icon(Icons.cake),
+                tooltip: '',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('A'), findsOneWidget);
+    await tester.longPress(find.text('A'));
+    expect(find.byTooltip('A tooltip'), findsOneWidget);
+
+    expect(find.text('B'), findsOneWidget);
+    await tester.longPress(find.text('B'));
+    expect(find.byTooltip('B'), findsOneWidget);
+
+    expect(find.text('C'), findsOneWidget);
+    await tester.longPress(find.text('C'));
+    expect(find.byTooltip('C'), findsNothing);
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
@@ -1785,6 +1826,78 @@ void main() {
     );
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('BottomNavigationBar excludes semantics',
+      (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isSelected,
+                                SemanticsFlag.isFocusable
+                              ],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'A\nTab 1 of 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              label: 'B\nTab 2 of 2',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
   });
 }
 

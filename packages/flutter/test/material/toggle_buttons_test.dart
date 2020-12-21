@@ -1398,6 +1398,156 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Properly draws borders based on state when direction is vertical and verticalDirection is down.',
+        (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              direction: Axis.vertical,
+              verticalDirection: VerticalDirection.down,
+              isSelected: const <bool>[false, true, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+                Text('Third child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // The children should be laid out along vertical and the first child at top.
+      // The item height is icon height + default border width (48.0 + 1.0) pixels.
+      expect(tester.getCenter(find.text('First child')), const Offset(400.0, 251.0));
+      expect(tester.getCenter(find.text('Second child')), const Offset(400.0, 300.0));
+      expect(tester.getCenter(find.text('Third child')), const Offset(400.0, 349.0));
+
+      final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      }).toSet().toList();
+
+      // The first button paints the left, top and right sides with a path.
+      expect(
+        toggleButtonRenderObject[0],
+        paints
+        // left side, top and right - enabled.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          ),
+      );
+
+      // The middle buttons paint a top side path first, followed by a
+      // left and right side path.
+      expect(
+        toggleButtonRenderObject[1],
+        paints
+        // top side - selected.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          )
+        // left and right - selected.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          ),
+      );
+
+      // The last button paints a top side path first, followed by
+      // a left, bottom and right side path
+      expect(
+        toggleButtonRenderObject[2],
+        paints
+        // top side - selected, since previous button is selected.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          )
+        // left side, bottom and right - enabled.
+          ..path(
+            style: PaintingStyle.stroke,
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            strokeWidth: _defaultBorderWidth,
+          ),
+      );
+    },
+  );
+
+  testWidgets(
+    'VerticalDirection test when direction is vertical.',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              direction: Axis.vertical,
+              verticalDirection: VerticalDirection.up,
+              isSelected: const <bool>[false, true, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+                Text('Third child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // The children should be laid out along vertical and the last child at top.
+      expect(tester.getCenter(find.text('Third child')), const Offset(400.0, 251.0));
+      expect(tester.getCenter(find.text('Second child')), const Offset(400.0, 300.0));
+      expect(tester.getCenter(find.text('First child')), const Offset(400.0, 349.0));
+    },
+  );
+
+  testWidgets('ToggleButtons implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    ToggleButtons(
+      direction: Axis.vertical,
+      verticalDirection: VerticalDirection.up,
+      borderWidth: 3.0,
+      color: Colors.green,
+      selectedBorderColor: Colors.pink,
+      disabledColor: Colors.blue,
+      disabledBorderColor: Colors.yellow,
+      borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+      isSelected: const <bool>[false, true, false],
+      onPressed: (int index) {},
+      children: const <Widget>[
+        Text('First child'),
+        Text('Second child'),
+        Text('Third child'),
+      ],
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      'Buttons are enabled',
+      'color: MaterialColor(primary value: Color(0xff4caf50))',
+      'disabledColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'selectedBorderColor: MaterialColor(primary value: Color(0xffe91e63))',
+      'disabledBorderColor: MaterialColor(primary value: Color(0xffffeb3b))',
+      'borderRadius: BorderRadius.circular(7.0)',
+      'borderWidth: 3.0',
+      'direction: Axis.vertical',
+      'verticalDirection: VerticalDirection.up'
+    ]);
+  });
+
   testWidgets('ToggleButtons changes mouse cursor when the button is hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(

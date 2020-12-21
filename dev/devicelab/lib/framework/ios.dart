@@ -22,6 +22,8 @@ Future<bool> containsBitcode(String pathToBinary) async {
   // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
   final String loadCommands = await eval('otool', <String>[
     '-l',
+    '-arch',
+    'arm64',
     pathToBinary,
   ]);
   if (!loadCommands.contains('__LLVM')) {

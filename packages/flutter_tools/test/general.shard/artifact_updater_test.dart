@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:file_testing/file_testing.dart';
@@ -314,7 +313,7 @@ void main() {
       'test message',
       Uri.parse('http:///test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsA(isA<ProcessException>()));
+    ), throwsA(isA<Exception>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
@@ -338,7 +337,7 @@ void main() {
       'test message',
       Uri.parse('http:///test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsA(isA<ArchiveException>()));
+    ), throwsA(isA<Exception>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
@@ -401,10 +400,7 @@ class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
   void unzip(File file, Directory targetDirectory) {
     if (failures > 0) {
       failures -= 1;
-      if (windows) {
-        throw ArchiveException('zip');
-      }
-      throw const ProcessException('zip', <String>[], 'Failed to unzip');
+      throw Exception();
     }
     targetDirectory.childFile(file.fileSystem.path.basenameWithoutExtension(file.path))
       .createSync();
@@ -414,10 +410,7 @@ class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     if (failures > 0) {
       failures -= 1;
-      if (windows) {
-        throw ArchiveException('zip');
-      }
-      throw const ProcessException('zip', <String>[], 'Failed to unzip');
+      throw Exception();
     }
     targetDirectory.childFile(gzippedTarFile.fileSystem.path.basenameWithoutExtension(gzippedTarFile.path))
       .createSync();

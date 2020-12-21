@@ -35,6 +35,7 @@ void main() {
       deferredLoading: true,
       outputClass: 'Foo',
       outputLocalizationsFile: Uri.file('bar'),
+      outputDirectory: Uri.directory(fileSystem.path.join('lib', 'l10n')),
       preferredSupportedLocales: <String>['en_US'],
       templateArbFile: Uri.file('example.arb'),
       untranslatedMessagesFile: Uri.file('untranslated'),
@@ -50,11 +51,10 @@ void main() {
       projectDir: fileSystem.currentDirectory,
       dependenciesDir: fileSystem.currentDirectory,
     );
-
     verify(
       mockLocalizationsGenerator.initialize(
         inputPathString: 'arb',
-        outputPathString: null,
+        outputPathString: fileSystem.path.join('lib', 'l10n/'),
         templateArbFileName: 'example.arb',
         outputFileString: 'bar',
         classNameString: 'Foo',

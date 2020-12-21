@@ -103,6 +103,7 @@ class FileSystemUtils {
       final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
       final File file = fs.file(_fileSystem.path.join(dir.path, name));
       if (!file.existsSync()) {
+        file.createSync(recursive: true);
         return file;
       }
       i += 1;

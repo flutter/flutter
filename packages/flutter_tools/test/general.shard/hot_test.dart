@@ -598,6 +598,7 @@ class TestFlutterDevice extends FlutterDevice {
     bool ipv6 = false,
     int hostVmServicePort,
     int ddsPort,
+    bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
   }

@@ -12,6 +12,9 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
+// Examples can assume:
+// // @dart = 2.9
+
 // Extracted from https://developer.apple.com/design/resources/.
 
 // Minimum padding from edges of the segmented control to edges of

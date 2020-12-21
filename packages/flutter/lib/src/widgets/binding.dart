@@ -21,6 +21,9 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
+// Examples can assume:
+// // @dart = 2.9
+
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// When used as a mixin, provides no-op method implementations.

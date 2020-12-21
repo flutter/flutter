@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -671,6 +673,37 @@ void main() {
       // the scene is at the center of the viewport.
       final Offset scenePoint = transformationController.toScene(localFocalPoint);
       expect(scenePoint, const Offset(100, 100));
+    });
+
+     testWidgets('Scaling amount is equal forth and back with a mouse scroll', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+              body: Center(
+            child: InteractiveViewer(
+              constrained: false,
+              maxScale: 100000,
+              minScale: 0.01,
+              transformationController: transformationController,
+              child: Container(width: 1000.0, height: 1000.0),
+            ),
+          )),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester, const Offset(0.0, -200.0));
+      await tester.pumpAndSettle();
+      expect(transformationController.value.getMaxScaleOnAxis(), math.exp(200 / 200));
+      await scrollAt(center, tester, const Offset(0.0, -200.0));
+      await tester.pumpAndSettle();
+      // math.exp round the number too short compared to the one in transformationController.
+      expect(transformationController.value.getMaxScaleOnAxis(), closeTo(math.exp(400 / 200), 0.000000000000001));
+      await scrollAt(center, tester, const Offset(0.0, 200.0));
+      await scrollAt(center, tester, const Offset(0.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
     });
 
     testWidgets('onInteraction can be used to get scene point', (WidgetTester tester) async{

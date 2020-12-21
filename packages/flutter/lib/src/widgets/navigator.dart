@@ -26,6 +26,7 @@ import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // class MyPage extends Placeholder { MyPage({String title}); }
 // class MyHomePage extends Placeholder { }
 // NavigatorState navigator;
@@ -733,7 +734,7 @@ abstract class RouteTransitionRecord {
 ///
 /// To make route transition decisions, subclass must implement [resolve].
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=freeform_no_null_safety}
 /// The following example demonstrates how to implement a subclass that always
 /// removes or adds routes without animated transitions and puts the removed
 /// routes at the top of the list.
@@ -1266,7 +1267,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// [WidgetsApp] and [CupertinoTabView] widgets and do not need to be explicitly
 /// created or managed.
 ///
-/// {@tool sample --template=freeform}
+/// {@tool sample --template=freeform_no_null_safety}
 /// The following example demonstrates how a nested [Navigator] can be used to
 /// present a standalone user registration journey.
 ///
@@ -2119,7 +2120,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   ///
   /// Typical usage is as follows:
   ///
@@ -2214,7 +2215,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   ///
   /// Typical usage is as follows:
   ///
@@ -2319,7 +2320,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   ///
   /// Typical usage is as follows:
   ///
@@ -4363,7 +4364,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   ///
   /// Typical usage is as follows:
   ///
@@ -4501,7 +4502,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   ///
   /// Typical usage is as follows:
   ///
@@ -4607,7 +4608,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
   ///
   /// Typical usage is as follows:
   ///
@@ -5527,7 +5528,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// When [present] has been called to add a route, it may only be called again
 /// after the previously added route has completed.
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad --template=freeform_no_null_safety}
 /// This example uses a [RestorableRouteFuture] in the `_MyHomeState` to push a
 /// new `MyCounter` route and to retrieve its return value.
 ///

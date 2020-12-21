@@ -795,7 +795,7 @@ class _ActionsMarker extends InheritedWidget {
 /// widget, and the new control should be enabled for keyboard traversal and
 /// activation.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This example shows how keyboard interaction can be added to a custom control
 /// that changes color when hovered and focused, and can toggle a light when
 /// activated, either by touch or by hitting the `X` key on the keyboard when
@@ -1248,10 +1248,39 @@ class DoNothingAction extends Action<Intent> {
   void invoke(Intent intent) {}
 }
 
-/// An intent that activates the currently focused control.
+/// An [Intent] that activates the currently focused control.
+///
+/// This intent is bound by default to the [LogicalKeyboardKey.space] key on all
+/// platforms, and also to the [LogicalKeyboardKey.enter] key on all platforms
+/// except the web, where ENTER doesn't toggle selection. On the web, ENTER is
+/// bound to [ButtonActivateIntent] instead.
+///
+/// See also:
+///
+///  * [WidgetsApp.defaultShortcuts], which contains the default shortcuts used
+///    in apps.
+///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
+///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ActivateIntent extends Intent {
   /// Creates a const [ActivateIntent] so subclasses can be const.
   const ActivateIntent();
+}
+
+/// An [Intent] that activates the currently focused button.
+///
+/// This intent is bound by default to the [LogicalKeyboardKey.enter] key on the
+/// web, where ENTER can be used to activate buttons, but not toggle selection.
+/// All other platforms bind [LogicalKeyboardKey.enter] to [ActivateIntent].
+///
+/// See also:
+///
+///  * [WidgetsApp.defaultShortcuts], which contains the default shortcuts used
+///    in apps.
+///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
+///    application (and defaults to [WidgetsApp.defaultShortcuts]).
+class ButtonActivateIntent extends Intent {
+  /// Creates a const [ButtonActivateIntent] so subclasses can be const.
+  const ButtonActivateIntent();
 }
 
 /// An action that activates the currently focused control.

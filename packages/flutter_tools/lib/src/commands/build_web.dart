@@ -26,6 +26,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesWebRendererOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    addNativeNullAssertions(hide: false);
     argParser.addFlag('csp',
       defaultsTo: false,
       negatable: false,
@@ -90,6 +91,7 @@ class BuildWebCommand extends BuildSubCommand {
       boolArg('csp'),
       stringArg('pwa-strategy'),
       boolArg('source-maps'),
+      boolArg('native-null-assertions'),
     );
     return FlutterCommandResult.success();
   }

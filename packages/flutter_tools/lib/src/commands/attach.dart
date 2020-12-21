@@ -318,7 +318,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         try {
           app = await daemon.appDomain.launch(
             runner,
-            runner.attach,
+            ({Completer<DebugConnectionInfo> connectionInfoCompleter,
+              Completer<void> appStartedCompleter}) {
+              return runner.attach(
+                connectionInfoCompleter: connectionInfoCompleter,
+                appStartedCompleter: appStartedCompleter,
+                allowExistingDdsInstance: true,
+              );
+            },
             device,
             null,
             true,
@@ -354,6 +361,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         }));
         result = await runner.attach(
           appStartedCompleter: onAppStart,
+          allowExistingDdsInstance: true,
         );
         if (result != 0) {
           throwToolExit(null, exitCode: result);

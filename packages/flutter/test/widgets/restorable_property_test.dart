@@ -13,6 +13,7 @@ void main() {
     expect(() => RestorableInt(1).value, throwsAssertionError);
     expect(() => RestorableString('hello').value, throwsAssertionError);
     expect(() => RestorableBool(true).value, throwsAssertionError);
+    expect(() => RestorableBoolN(true).value, throwsAssertionError);
     expect(() => RestorableTextEditingController().value, throwsAssertionError);
     expect(() => _TestRestorableValue().value, throwsAssertionError);
   });
@@ -125,6 +126,7 @@ void main() {
       state.intValue.value = 10;
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
+      state.nullableBoolValue.value = false;
       state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
@@ -140,6 +142,7 @@ void main() {
       state.intValue.value = 20;
       state.stringValue.value = 'ciao';
       state.boolValue.value = false;
+      state.nullableBoolValue.value = null;
       state.controllerValue.value.text = 'blub';
       state.objectValue.value = 20;
     });
@@ -154,6 +157,7 @@ void main() {
     expect(state.intValue.value, 10);
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
+    expect(state.nullableBoolValue.value, false);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -166,6 +170,7 @@ void main() {
     expect(state.intValue.value, 42);
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
+    expect(state.nullableBoolValue.value, null);
     expect(state.controllerValue.value.text, 'FooBar');
     expect(state.objectValue.value, 55);
     expect(find.text('hello world'), findsOneWidget);
@@ -323,6 +328,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final RestorableInt intValue = RestorableInt(42);
   final RestorableString stringValue = RestorableString('hello world');
   final RestorableBool boolValue = RestorableBool(false);
+  final RestorableBoolN nullableBoolValue = RestorableBoolN(null);
   final RestorableTextEditingController controllerValue = RestorableTextEditingController(text: 'FooBar');
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
@@ -332,7 +338,8 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
     registerForRestoration(doubleValue, 'double');
     registerForRestoration(intValue, 'int');
     registerForRestoration(stringValue, 'string');
-    registerForRestoration(boolValue,'bool');
+    registerForRestoration(boolValue, 'bool');
+    registerForRestoration(nullableBoolValue, 'nullableBool');
     registerForRestoration(controllerValue, 'controller');
     registerForRestoration(objectValue, 'object');
   }

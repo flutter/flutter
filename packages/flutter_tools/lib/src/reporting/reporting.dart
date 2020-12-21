@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:usage/usage_io.dart';
 
 import '../base/async_guard.dart';
@@ -21,8 +22,10 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/time.dart';
+import '../build_info.dart';
 import '../build_system/exceptions.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../doctor.dart';
 import '../features.dart';

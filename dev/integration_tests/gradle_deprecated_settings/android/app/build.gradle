@@ -19,11 +19,8 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    // This test cannot use 30 due to https://github.com/flutter/flutter/issues/70897
     compileSdkVersion 29
-
-    lintOptions {
-        disable 'InvalidPackage'
-    }
 
     defaultConfig {
         applicationId "com.yourcompany.flavors"

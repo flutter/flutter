@@ -65,10 +65,11 @@ enum DismissDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=iEMgjrfuc58}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
 ///
 /// This sample shows how you can use the [Dismissible] widget to
-/// remove list items using swipe gestures.
+/// remove list items using swipe gestures. Swipe any of the list
+/// tiles to the left or right to dismiss them from the [ListView].
 ///
 /// ```dart
 /// List<int> items = List<int>.generate(100, (index) => index);

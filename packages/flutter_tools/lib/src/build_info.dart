@@ -222,7 +222,6 @@ class AndroidBuildInfo {
       AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
-    this.shrink = false,
     this.fastStart = false,
   });
 
@@ -235,9 +234,6 @@ class AndroidBuildInfo {
   /// build artifact. When this is true, multiple build artifacts (one per ABI)
   /// will be produced.
   final bool splitPerAbi;
-
-  /// Whether to enable code shrinking on release mode.
-  final bool shrink;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;

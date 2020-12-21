@@ -115,7 +115,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
   local flutter_engine_flag=""
   local local_engine_flag=""
-  local flutter_framework="${framework_path}/Flutter.framework"
+  local flutter_framework="${framework_path}/Flutter.xcframework"
 
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -135,7 +135,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
       exit -1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
+    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.xcframework"
   fi
 
   local bitcode_flag=""
@@ -275,11 +275,6 @@ ThinAppFrameworks() {
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
-  local project_path="${SOURCE_ROOT}/.."
-  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
-    project_path="${FLUTTER_APPLICATION_PATH}"
-  fi
-
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
