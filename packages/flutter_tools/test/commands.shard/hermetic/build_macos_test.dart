@@ -260,7 +260,6 @@ void main() {
       'DART_OBFUSCATION=true',
       'EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable',
       'EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable',
-      'FLUTTER_FRAMEWORK_DIR=.',
       'SPLIT_DEBUG_INFO=foo/',
       'TRACK_WIDGET_CREATION=true',
       'TREE_SHAKE_ICONS=true',

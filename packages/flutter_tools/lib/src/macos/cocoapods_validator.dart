@@ -30,12 +30,7 @@ class CocoaPodsValidator extends DoctorValidator {
 
     ValidationType status = ValidationType.installed;
     if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
-      if (await _cocoaPods.isCocoaPodsInitialized) {
-        messages.add(ValidationMessage(_userMessages.cocoaPodsVersion(await _cocoaPods.cocoaPodsVersionText)));
-      } else {
-        status = ValidationType.partial;
-        messages.add(ValidationMessage.error(_userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
-      }
+      messages.add(ValidationMessage(_userMessages.cocoaPodsVersion(await _cocoaPods.cocoaPodsVersionText)));
     } else {
       if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
         status = ValidationType.missing;
