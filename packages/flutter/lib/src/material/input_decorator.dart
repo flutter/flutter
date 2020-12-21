@@ -330,6 +330,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       _helper = _buildHelper();
     }
     _controller.addListener(_handleChange);
+    _controller.addStatusListener(_handleChange);
   }
 
   @override
@@ -338,7 +339,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     super.dispose();
   }
 
-  void _handleChange() {
+  void _handleChange([AnimationStatus? _]) {
     setState(() {
       // The _controller's value has changed.
     });
@@ -1935,6 +1936,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       value: labelIsInitiallyFloating ? 1.0 : 0.0
     );
     _floatingLabelController.addListener(_handleChange);
+    _floatingLabelController.addStatusListener(_handleChange);
 
     _shakingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -1955,7 +1957,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     super.dispose();
   }
 
-  void _handleChange() {
+  void _handleChange([AnimationStatus? _]) {
     setState(() {
       // The _floatingLabelController's value has changed.
     });
