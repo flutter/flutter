@@ -426,15 +426,19 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// [fieldViewBuilder] and [optionsViewBuilder] must not be null.
   const RawAutocomplete({
     Key? key,
-    required this.fieldViewBuilder,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
     this.displayStringForOption = _defaultStringForOption,
+    this.fieldViewBuilder,
     this.focusNode,
     this.onSelected,
     this.textEditingController,
   }) : assert(displayStringForOption != null),
-       assert(fieldViewBuilder != null),
+       assert(
+         fieldViewBuilder != null
+            || (key != null && focusNode != null && textEditingController != null),
+         "Pass in a fieldViewBuilder, or otherwise create your own field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.",
+        ),
        assert(optionsBuilder != null),
        assert(optionsViewBuilder != null),
        assert((focusNode == null) == (textEditingController == null)),
@@ -444,7 +448,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// Pass the provided [TextEditingController] to the field built here so that
   /// RawAutocomplete can listen for changes.
-  final AutocompleteFieldViewBuilder fieldViewBuilder;
+  final AutocompleteFieldViewBuilder? fieldViewBuilder;
 
   /// The FocusNode that is used for the text field.
   ///
@@ -518,9 +522,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///               return _options.where((String option) {
   ///                 return option.contains(textEditingValue.text.toLowerCase());
   ///               }).toList();
-  ///             },
-  ///             fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-  ///               return SizedBox.shrink();
   ///             },
   ///             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
   ///               return Material(
@@ -774,12 +775,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       key: _fieldKey,
       child: CompositedTransformTarget(
         link: _optionsLayerLink,
-        child: widget.fieldViewBuilder(
-          context,
-          _textEditingController,
-          _focusNode,
-          _onFieldSubmitted,
-        ),
+        child: widget.fieldViewBuilder == null
+            ? SizedBox.shrink()
+            : widget.fieldViewBuilder!(
+                context,
+                _textEditingController,
+                _focusNode,
+                _onFieldSubmitted,
+              ),
       ),
     );
   }
