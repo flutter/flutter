@@ -335,33 +335,32 @@ void main() {
 
     final List<Offset> expectedLog = <Offset>[
       const Offset(24.0, 300.0),
-      const Offset(24.0, 300.0),
       const Offset(400.0, 300.0),
     ];
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(value, equals(0.5));
-    expect(log.length, 3);
+    expect(log.length, 2);
     expect(log, orderedEquals(expectedLog));
     await gesture.moveBy(const Offset(-500.0, 0.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
-    expect(log.length, 5);
+    expect(log.length, 3);
     expect(log.last.dx, moreOrLessEquals(386.6, epsilon: 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
-    expect(log.length, 7);
+    expect(log.length, 4);
     expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
     expectedLog.add(const Offset(24.0, 300.0));
     expect(value, equals(0.0));
-    expect(log.length, 8);
+    expect(log.length, 5);
     expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
     await gesture.up();
   });
@@ -450,33 +449,32 @@ void main() {
 
     final List<Offset> expectedLog = <Offset>[
       const Offset(24.0, 300.0),
-      const Offset(24.0, 300.0),
       const Offset(400.0, 300.0),
     ];
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(value, equals(0.5));
-    expect(log.length, 3);
+    expect(log.length, 2);
     expect(log, orderedEquals(expectedLog));
     await gesture.moveBy(const Offset(-500.0, 0.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
-    expect(log.length, 5);
+    expect(log.length, 3);
     expect(log.last.dx, moreOrLessEquals(386.6, epsilon: 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
-    expect(log.length, 7);
+    expect(log.length, 4);
     expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
     expectedLog.add(const Offset(24.0, 300.0));
     expect(value, equals(0.0));
-    expect(log.length, 8);
+    expect(log.length, 5);
     expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
     await gesture.up();
   });

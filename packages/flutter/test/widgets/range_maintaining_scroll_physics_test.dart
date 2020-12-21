@@ -222,8 +222,7 @@ void main() {
   testWidgets('expanding page views', (WidgetTester tester) async {
     await tester.pumpWidget(Padding(padding: const EdgeInsets.only(right: 200.0), child: TabBarDemo()));
     await tester.tap(find.text('bike'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     final Rect bike1 = tester.getRect(find.byIcon(Icons.directions_bike));
     await tester.pumpWidget(Padding(padding: EdgeInsets.zero, child: TabBarDemo()));
     final Rect bike2 = tester.getRect(find.byIcon(Icons.directions_bike));

@@ -110,7 +110,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.tapAt(const Offset(0.0, 0.0));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(cancels, equals(0));
 
     // Make sure callback is called when a non-selection tap occurs
@@ -118,7 +118,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.tapAt(const Offset(0.0, 0.0));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(cancels, equals(1));
 
     // Make sure callback is called when back navigation occurs

@@ -1931,6 +1931,7 @@ void main() {
           '   showBottomSheet() to close the old bottom sheet before creating a\n'
           '   Scaffold with a (non null) bottomSheet.\n'
         );
+        await tester.pumpAndSettle();
     });
 
     testWidgets('Call to Scaffold.of() without context', (WidgetTester tester) async {
