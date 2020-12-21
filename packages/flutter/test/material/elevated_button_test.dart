@@ -1036,6 +1036,46 @@ void main() {
 
     expect(find.byType(ElevatedButton), paints ..path(strokeWidth: 4) ..drrect(color: borderColor));
   });
+
+  testWidgets('ElevatedButton.icon is configurable when iconAlignment set to ButtonIconAlignment.start', (WidgetTester tester) async {
+    const IconData iconData = Icons.add;
+    const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.start;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: ElevatedButton.icon(
+            onPressed: () { },
+            icon: const Icon(iconData),
+            iconAlignment: buttonIconAlignment,
+            label: const Text('text button'),
+          ),
+        ),
+      ),
+    );
+    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'));
+    expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
+  });
+
+  testWidgets('ElevatedButton.icon is configurable when iconAlignment set to ButtonIconAlignment.end', (WidgetTester tester) async {
+    const IconData iconData = Icons.add;
+    const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.end;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: ElevatedButton.icon(
+            onPressed: () { },
+            icon: const Icon(iconData),
+            iconAlignment: buttonIconAlignment,
+            label: const Text('text button'),
+          ),
+        ),
+      ),
+    );
+    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'));
+    expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
