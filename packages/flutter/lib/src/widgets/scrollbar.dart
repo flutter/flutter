@@ -21,7 +21,6 @@ import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_position.dart';
-import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'ticker_provider.dart';
 
