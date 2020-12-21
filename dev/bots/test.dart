@@ -1150,6 +1150,7 @@ Future<void> _runWebDebugTest(String target, {
       '-d',
       'chrome',
       '--web-run-headless',
+      '--dart-define=FLUTTER_WEB_USE_SKIA=false',
       ...additionalArguments,
       '-t',
       target,
