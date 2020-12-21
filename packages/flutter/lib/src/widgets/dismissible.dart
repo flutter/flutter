@@ -521,7 +521,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       }
     } else {
       _resizeController = AnimationController(duration: widget.resizeDuration, vsync: this)
-        ..addListener(_handleResizeProgressChanged)
+        ..addStatusListener(_handleResizeProgressChanged)
         ..addStatusListener((AnimationStatus status) => updateKeepAlive());
       _resizeController!.forward();
       setState(() {
@@ -540,8 +540,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
   }
 
-  void _handleResizeProgressChanged() {
-    if (_resizeController!.isCompleted) {
+  void _handleResizeProgressChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
       if (widget.onDismissed != null) {
         final DismissDirection direction = _dismissDirection;
         widget.onDismissed!(direction);
