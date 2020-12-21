@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'animation.dart';
 import 'animations.dart';
 import 'curves.dart';
+import 'listener_helpers.dart';
 
 // Examples can assume:
 // late Animation<Offset> _animation;
@@ -75,7 +76,9 @@ abstract class Animatable<T> {
   }
 }
 
-class _AnimatedEvaluation<T> extends Animation<T> with AnimationWithParentMixin<double> {
+class _AnimatedEvaluation<T> extends Animation<T>
+    with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin, AnimationLocalListenersMixin,
+         AnimationLazyWithParentMixin<T, double> {
   _AnimatedEvaluation(this.parent, this._evaluatable);
 
   @override

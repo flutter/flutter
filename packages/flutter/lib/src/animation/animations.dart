@@ -442,7 +442,9 @@ class ReverseAnimation extends Animation<double>
 ///    [AnimationController].
 ///  * [Curve.flipped] and [FlippedCurve], which provide the reverse of a
 ///    [Curve].
-class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
+class CurvedAnimation extends Animation<double>
+    with AnimationLocalStatusListenersMixin, AnimationLocalListenersMixin,
+        AnimationLazyListenerMixin, AnimationLazyWithParentMixin<double, double> {
   /// Creates a curved animation.
   ///
   /// The parent and curve arguments must not be null.
