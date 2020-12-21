@@ -61,7 +61,7 @@ class Scrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    this.isAlwaysShown = false,
+    bool? isAlwaysShown,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
@@ -84,9 +84,6 @@ class Scrollbar extends RawScrollbar {
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
   /// is false.
   final bool? showTrackOnHover;
-
-  @override
-  final bool? isAlwaysShown;
 
   /// The thickness of the scrollbar when a hover state is active and
   /// [showTrackOnHover] is true.
