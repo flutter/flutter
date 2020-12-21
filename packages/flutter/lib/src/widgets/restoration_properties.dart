@@ -278,6 +278,68 @@ class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
   RestorableBoolN(bool? defaultValue) : super(defaultValue);
 }
 
+/// A [RestorableProperty] that knows how to store and restore a [num]
+/// that is nullable.
+///
+/// {@macro flutter.widgets.RestorableNumN}
+///
+/// Instead of using the more generic [RestorableNumN] directly, consider using
+/// one of the more specific subclasses (e.g. [RestorableDoubleN] to store a
+/// [double] and [RestorableIntN] to store an [int]).
+class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<num?> {
+  /// Creates a [RestorableNumN].
+  ///
+  /// {@macro flutter.widgets.RestorableNumN.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableNum] for the non-nullable version of this class.
+  RestorableNumN(num? defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore a [double]
+/// that is nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+class RestorableDoubleN extends RestorableNumN<double> {
+  /// Creates a [RestorableDoubleN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableDouble] for the non-nullable version of this class.
+  RestorableDoubleN(double? defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore an [int]
+/// that is nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+class RestorableIntN extends RestorableNumN<int> {
+  /// Creates a [RestorableIntN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  /// See also:
+  ///
+  ///  * [RestorableInt] for the non-nullable version of this class.
+  RestorableIntN(int? defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore a [String]
+/// that is nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+class RestorableStringN extends _RestorablePrimitiveValueN<String?> {
+  /// Creates a [RestorableString].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  ///
+  ///  * [RestorableString] for the non-nullable version of this class.
+  RestorableStringN(String? defaultValue) : super(defaultValue);
+}
+
 /// A base class for creating a [RestorableProperty] that stores and restores a
 /// [Listenable].
 ///
