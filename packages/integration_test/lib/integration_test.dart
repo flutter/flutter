@@ -126,12 +126,13 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
   /// execute their tests instead.
   IntegrationTestWidgetsFlutterBinding() {
     if (!_isUsingLegacyReporting) {
-      // TODO(jiahaog): Point users to use the CLI https://github.com/flutter/flutter/issues/66264.
-      print('Using the legacy test result reporter, which will not catch all '
-          'errors thrown in declared tests. Consider wrapping tests with '
-          'https://api.flutter.dev/flutter/integration_test/run.html instead.');
       return;
     }
+
+    // TODO(jiahaog): Point users to use the CLI https://github.com/flutter/flutter/issues/66264.
+    print('Using the legacy test result reporter, which will not catch all '
+        'errors thrown in declared tests. Consider wrapping tests with '
+        'https://api.flutter.dev/flutter/integration_test/run.html instead.');
 
     tearDownAll(() async {
       _updateTestResultState(results);
