@@ -485,7 +485,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// class RawAutocompleteSplitPageState extends State<RawAutocompleteSplitPage> {
   ///   final TextEditingController _textEditingController = TextEditingController();
   ///   final FocusNode _focusNode = FocusNode();
-  ///   late VoidCallback _onFieldSubmitted;
+  ///   final GlobalKey _autocompleteKey = GlobalKey();
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -504,13 +504,14 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///               hintText: 'Split RawAutocomplete App',
   ///             ),
   ///             onFieldSubmitted: (String value) {
-  ///               _onFieldSubmitted();
+  ///               RawAutocomplete.getOnFieldSubmitted(_autocompleteKey)();
   ///             },
   ///           ),
   ///         ),
   ///         body: Align(
   ///           alignment: Alignment.topLeft,
   ///           child: RawAutocomplete<String>(
+  ///             key: _autocompleteKey,
   ///             focusNode: _focusNode,
   ///             textEditingController: _textEditingController,
   ///             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -519,7 +520,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///               }).toList();
   ///             },
   ///             fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-  ///               _onFieldSubmitted = onFieldSubmitted;
   ///               return SizedBox.shrink();
   ///             },
   ///             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
@@ -583,6 +583,23 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// If this parameter is not null, then [focusNode] must also be not null.
   final TextEditingController? textEditingController;
+
+  /// Returns the [VoidCallback] to call when a custom field has been submitted.
+  ///
+  /// This is not typically used unless a custom field is implemented instead of
+  /// using [fieldViewBuilder]. In fieldViewBuilder, the
+  /// [AutocompleteFieldViewBuilder.onFieldSubmitted] is passed in the
+  /// [AutocompleteFieldViewBuilder] signature. When not using fieldViewBuilder,
+  /// the same callback can be obtained using this static method.
+  ///
+  /// See also:
+  ///
+  ///  * [focusNode] and [textEditingController], which contain a code example
+  ///    showing how to create a separate field outside of fieldViewBuilder.
+  static VoidCallback getOnFieldSubmitted(GlobalKey key) {
+    final _RawAutocompleteState rawAutocomplete = key.currentState as _RawAutocompleteState;
+    return rawAutocomplete._onFieldSubmitted;
+  }
 
   // The default way to convert an option to a string.
   static String _defaultStringForOption(dynamic option) {
