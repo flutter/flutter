@@ -22,6 +22,10 @@ FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_ma
 FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac.mm
 FILE: ../../../flutter/third_party/accessibility/ax/tree_generator.cc
 FILE: ../../../flutter/third_party/accessibility/ax/tree_generator.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions_impl.h
+FILE: ../../../flutter/third_party/accessibility/gfx/mac/coordinate_conversion.h
+FILE: ../../../flutter/third_party/accessibility/gfx/mac/coordinate_conversion.mm
 ----------------------------------------------------------------------------------------------------
 Copyright 2014 The Chromium Authors. All rights reserved.
 
@@ -152,6 +156,17 @@ FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_system_caret_win
 FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_system_caret_win.h
 FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_unique_id.cc
 FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_unique_id.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/checked_math.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/checked_math_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/clamped_math.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/clamped_math_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/math_constants.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/ranges.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions_arm_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_arm_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_clang_gcc_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_shared_impl.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 The Chromium Authors. All rights reserved.
 
@@ -283,6 +298,7 @@ LIBRARY: accessibility
 ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_text_utils.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/accessibility/ax/ax_text_utils.cc
+FILE: ../../../flutter/third_party/accessibility/base/auto_reset.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 The Chromium Authors. All rights reserved.
 
@@ -319,6 +335,40 @@ ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_text_utils.h + ../../..
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/accessibility/ax/ax_text_utils.h
 FILE: ../../../flutter/third_party/accessibility/ax_build/build_config.h
+FILE: ../../../flutter/third_party/accessibility/base/compiler_specific.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_conversions.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_conversions.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_conversions.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_conversions.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_conversions.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_conversions.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_conversions.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_conversions.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/native_widget_types.h
+FILE: ../../../flutter/third_party/accessibility/gfx/transform.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/transform.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2012 The Chromium Authors. All rights reserved.
 
@@ -411,6 +461,7 @@ FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_te
 FILE: ../../../flutter/third_party/accessibility/ax/platform/compute_attributes.cc
 FILE: ../../../flutter/third_party/accessibility/ax/platform/compute_attributes.h
 FILE: ../../../flutter/third_party/accessibility/ax/run_all_unittests.cc
+FILE: ../../../flutter/third_party/accessibility/base/no_destructor.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Chromium Authors. All rights reserved.
 
@@ -578,6 +629,78 @@ FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_atk_hyp
 FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_atk_hyperlink.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2017 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/gfx/geometry/insets.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/gfx/geometry/rect_unittest.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/gfx_export.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2013 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -2549,4 +2672,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ====================================================================================================
-Total license count: 15
+Total license count: 17
