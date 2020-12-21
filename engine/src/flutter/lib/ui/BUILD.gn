@@ -91,8 +91,6 @@ source_set("ui") {
     "text/text_box.h",
     "ui_dart_state.cc",
     "ui_dart_state.h",
-    "volatile_path_tracker.cc",
-    "volatile_path_tracker.h",
     "window/platform_configuration.cc",
     "window/platform_configuration.h",
     "window/platform_message.cc",
@@ -190,7 +188,6 @@ if (enable_unittests) {
     sources = [
       "painting/image_dispose_unittests.cc",
       "painting/image_encoding_unittests.cc",
-      "painting/path_unittests.cc",
       "painting/vertices_unittests.cc",
       "window/platform_configuration_unittests.cc",
       "window/pointer_data_packet_converter_unittests.cc",

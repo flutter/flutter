@@ -35,19 +35,8 @@ void createVertices() {
   );
   _validateVertices(vertices);
 }
-void _validateVertices(Vertices vertices) native 'ValidateVertices';
 
-@pragma('vm:entry-point')
-void createPath() {
-  final Path path = Path()..lineTo(10, 10);
-  _validatePath(path);
-  // Arbitrarily hold a reference to the path to make sure it does not get
-  // garbage collected.
-  Future<void>.delayed(const Duration(days: 100)).then((_) {
-    path.lineTo(100, 100);
-  });
-}
-void _validatePath(Path path) native 'ValidatePath';
+void _validateVertices(Vertices vertices) native 'ValidateVertices';
 
 @pragma('vm:entry-point')
 void frameCallback(FrameInfo info) {

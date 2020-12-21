@@ -67,69 +67,43 @@ void CanvasPath::RegisterNatives(tonic::DartLibraryNatives* natives) {
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-CanvasPath::CanvasPath()
-    : path_tracker_(UIDartState::Current()->GetVolatilePathTracker()),
-      tracked_path_(std::make_shared<VolatilePathTracker::TrackedPath>()) {
-  FML_DCHECK(path_tracker_);
-  resetVolatility();
-}
+CanvasPath::CanvasPath() {}
 
-CanvasPath::~CanvasPath() = default;
-
-void CanvasPath::resetVolatility() {
-  if (!tracked_path_->tracking_volatility) {
-    mutable_path().setIsVolatile(true);
-    tracked_path_->frame_count = 0;
-    tracked_path_->tracking_volatility = true;
-    path_tracker_->Insert(tracked_path_);
-  }
-}
-
-void CanvasPath::ReleaseDartWrappableReference() const {
-  FML_DCHECK(path_tracker_);
-  path_tracker_->Erase(tracked_path_);
-}
+CanvasPath::~CanvasPath() {}
 
 int CanvasPath::getFillType() {
-  return static_cast<int>(path().getFillType());
+  return static_cast<int>(path_.getFillType());
 }
 
 void CanvasPath::setFillType(int fill_type) {
-  mutable_path().setFillType(static_cast<SkPathFillType>(fill_type));
-  resetVolatility();
+  path_.setFillType(static_cast<SkPathFillType>(fill_type));
 }
 
 void CanvasPath::moveTo(float x, float y) {
-  mutable_path().moveTo(x, y);
-  resetVolatility();
+  path_.moveTo(x, y);
 }
 
 void CanvasPath::relativeMoveTo(float x, float y) {
-  mutable_path().rMoveTo(x, y);
-  resetVolatility();
+  path_.rMoveTo(x, y);
 }
 
 void CanvasPath::lineTo(float x, float y) {
-  mutable_path().lineTo(x, y);
-  resetVolatility();
+  path_.lineTo(x, y);
 }
 
 void CanvasPath::relativeLineTo(float x, float y) {
-  mutable_path().rLineTo(x, y);
-  resetVolatility();
+  path_.rLineTo(x, y);
 }
 
 void CanvasPath::quadraticBezierTo(float x1, float y1, float x2, float y2) {
-  mutable_path().quadTo(x1, y1, x2, y2);
-  resetVolatility();
+  path_.quadTo(x1, y1, x2, y2);
 }
 
 void CanvasPath::relativeQuadraticBezierTo(float x1,
                                            float y1,
                                            float x2,
                                            float y2) {
-  mutable_path().rQuadTo(x1, y1, x2, y2);
-  resetVolatility();
+  path_.rQuadTo(x1, y1, x2, y2);
 }
 
 void CanvasPath::cubicTo(float x1,
@@ -138,8 +112,7 @@ void CanvasPath::cubicTo(float x1,
                          float y2,
                          float x3,
                          float y3) {
-  mutable_path().cubicTo(x1, y1, x2, y2, x3, y3);
-  resetVolatility();
+  path_.cubicTo(x1, y1, x2, y2, x3, y3);
 }
 
 void CanvasPath::relativeCubicTo(float x1,
@@ -148,13 +121,11 @@ void CanvasPath::relativeCubicTo(float x1,
                                  float y2,
                                  float x3,
                                  float y3) {
-  mutable_path().rCubicTo(x1, y1, x2, y2, x3, y3);
-  resetVolatility();
+  path_.rCubicTo(x1, y1, x2, y2, x3, y3);
 }
 
 void CanvasPath::conicTo(float x1, float y1, float x2, float y2, float w) {
-  mutable_path().conicTo(x1, y1, x2, y2, w);
-  resetVolatility();
+  path_.conicTo(x1, y1, x2, y2, w);
 }
 
 void CanvasPath::relativeConicTo(float x1,
@@ -162,8 +133,7 @@ void CanvasPath::relativeConicTo(float x1,
                                  float x2,
                                  float y2,
                                  float w) {
-  mutable_path().rConicTo(x1, y1, x2, y2, w);
-  resetVolatility();
+  path_.rConicTo(x1, y1, x2, y2, w);
 }
 
 void CanvasPath::arcTo(float left,
@@ -173,10 +143,9 @@ void CanvasPath::arcTo(float left,
                        float startAngle,
                        float sweepAngle,
                        bool forceMoveTo) {
-  mutable_path().arcTo(SkRect::MakeLTRB(left, top, right, bottom),
-                       startAngle * 180.0 / M_PI, sweepAngle * 180.0 / M_PI,
-                       forceMoveTo);
-  resetVolatility();
+  path_.arcTo(SkRect::MakeLTRB(left, top, right, bottom),
+              startAngle * 180.0 / M_PI, sweepAngle * 180.0 / M_PI,
+              forceMoveTo);
 }
 
 void CanvasPath::arcToPoint(float arcEndX,
@@ -191,9 +160,8 @@ void CanvasPath::arcToPoint(float arcEndX,
   const auto direction =
       isClockwiseDirection ? SkPathDirection::kCW : SkPathDirection::kCCW;
 
-  mutable_path().arcTo(radiusX, radiusY, xAxisRotation, arcSize, direction,
-                       arcEndX, arcEndY);
-  resetVolatility();
+  path_.arcTo(radiusX, radiusY, xAxisRotation, arcSize, direction, arcEndX,
+              arcEndY);
 }
 
 void CanvasPath::relativeArcToPoint(float arcEndDeltaX,
@@ -207,19 +175,16 @@ void CanvasPath::relativeArcToPoint(float arcEndDeltaX,
                                   : SkPath::ArcSize::kSmall_ArcSize;
   const auto direction =
       isClockwiseDirection ? SkPathDirection::kCW : SkPathDirection::kCCW;
-  mutable_path().rArcTo(radiusX, radiusY, xAxisRotation, arcSize, direction,
-                        arcEndDeltaX, arcEndDeltaY);
-  resetVolatility();
+  path_.rArcTo(radiusX, radiusY, xAxisRotation, arcSize, direction,
+               arcEndDeltaX, arcEndDeltaY);
 }
 
 void CanvasPath::addRect(float left, float top, float right, float bottom) {
-  mutable_path().addRect(SkRect::MakeLTRB(left, top, right, bottom));
-  resetVolatility();
+  path_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
 void CanvasPath::addOval(float left, float top, float right, float bottom) {
-  mutable_path().addOval(SkRect::MakeLTRB(left, top, right, bottom));
-  resetVolatility();
+  path_.addOval(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
 void CanvasPath::addArc(float left,
@@ -228,20 +193,17 @@ void CanvasPath::addArc(float left,
                         float bottom,
                         float startAngle,
                         float sweepAngle) {
-  mutable_path().addArc(SkRect::MakeLTRB(left, top, right, bottom),
-                        startAngle * 180.0 / M_PI, sweepAngle * 180.0 / M_PI);
-  resetVolatility();
+  path_.addArc(SkRect::MakeLTRB(left, top, right, bottom),
+               startAngle * 180.0 / M_PI, sweepAngle * 180.0 / M_PI);
 }
 
 void CanvasPath::addPolygon(const tonic::Float32List& points, bool close) {
-  mutable_path().addPoly(reinterpret_cast<const SkPoint*>(points.data()),
-                         points.num_elements() / 2, close);
-  resetVolatility();
+  path_.addPoly(reinterpret_cast<const SkPoint*>(points.data()),
+                points.num_elements() / 2, close);
 }
 
 void CanvasPath::addRRect(const RRect& rrect) {
-  mutable_path().addRRect(rrect.sk_rrect);
-  resetVolatility();
+  path_.addRRect(rrect.sk_rrect);
 }
 
 void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
@@ -249,8 +211,7 @@ void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
     Dart_ThrowException(ToDart("Path.addPath called with non-genuine Path."));
     return;
   }
-  mutable_path().addPath(path->path(), dx, dy, SkPath::kAppend_AddPathMode);
-  resetVolatility();
+  path_.addPath(path->path(), dx, dy, SkPath::kAppend_AddPathMode);
 }
 
 void CanvasPath::addPathWithMatrix(CanvasPath* path,
@@ -266,9 +227,8 @@ void CanvasPath::addPathWithMatrix(CanvasPath* path,
   SkMatrix matrix = ToSkMatrix(matrix4);
   matrix.setTranslateX(matrix.getTranslateX() + dx);
   matrix.setTranslateY(matrix.getTranslateY() + dy);
-  mutable_path().addPath(path->path(), matrix, SkPath::kAppend_AddPathMode);
+  path_.addPath(path->path(), matrix, SkPath::kAppend_AddPathMode);
   matrix4.Release();
-  resetVolatility();
 }
 
 void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
@@ -277,8 +237,7 @@ void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
         ToDart("Path.extendWithPath called with non-genuine Path."));
     return;
   }
-  mutable_path().addPath(path->path(), dx, dy, SkPath::kExtend_AddPathMode);
-  resetVolatility();
+  path_.addPath(path->path(), dx, dy, SkPath::kExtend_AddPathMode);
 }
 
 void CanvasPath::extendWithPathAndMatrix(CanvasPath* path,
@@ -294,43 +253,37 @@ void CanvasPath::extendWithPathAndMatrix(CanvasPath* path,
   SkMatrix matrix = ToSkMatrix(matrix4);
   matrix.setTranslateX(matrix.getTranslateX() + dx);
   matrix.setTranslateY(matrix.getTranslateY() + dy);
-  mutable_path().addPath(path->path(), matrix, SkPath::kExtend_AddPathMode);
+  path_.addPath(path->path(), matrix, SkPath::kExtend_AddPathMode);
   matrix4.Release();
-  resetVolatility();
 }
 
 void CanvasPath::close() {
-  mutable_path().close();
-  resetVolatility();
+  path_.close();
 }
 
 void CanvasPath::reset() {
-  mutable_path().reset();
-  resetVolatility();
+  path_.reset();
 }
 
 bool CanvasPath::contains(double x, double y) {
-  return path().contains(x, y);
+  return path_.contains(x, y);
 }
 
 void CanvasPath::shift(Dart_Handle path_handle, double dx, double dy) {
   fml::RefPtr<CanvasPath> path = CanvasPath::Create(path_handle);
-  auto& other_mutable_path = path->mutable_path();
-  mutable_path().offset(dx, dy, &other_mutable_path);
-  resetVolatility();
+  path_.offset(dx, dy, &path->path_);
 }
 
 void CanvasPath::transform(Dart_Handle path_handle,
                            tonic::Float64List& matrix4) {
   fml::RefPtr<CanvasPath> path = CanvasPath::Create(path_handle);
-  auto& other_mutable_path = path->mutable_path();
-  mutable_path().transform(ToSkMatrix(matrix4), &other_mutable_path);
+  path_.transform(ToSkMatrix(matrix4), &path->path_);
   matrix4.Release();
 }
 
 tonic::Float32List CanvasPath::getBounds() {
   tonic::Float32List rect(Dart_NewTypedData(Dart_TypedData_kFloat32, 4));
-  const SkRect& bounds = path().getBounds();
+  const SkRect& bounds = path_.getBounds();
   rect[0] = bounds.left();
   rect[1] = bounds.top();
   rect[2] = bounds.right();
@@ -340,22 +293,21 @@ tonic::Float32List CanvasPath::getBounds() {
 
 bool CanvasPath::op(CanvasPath* path1, CanvasPath* path2, int operation) {
   return Op(path1->path(), path2->path(), static_cast<SkPathOp>(operation),
-            &tracked_path_->path);
-  resetVolatility();
+            &path_);
 }
 
 void CanvasPath::clone(Dart_Handle path_handle) {
   fml::RefPtr<CanvasPath> path = CanvasPath::Create(path_handle);
   // per Skia docs, this will create a fast copy
   // data is shared until the source path or dest path are mutated
-  path->mutable_path() = this->path();
+  path->path_ = path_;
 }
 
 // This is doomed to be called too early, since Paths are mutable.
 // However, it can help for some of the clone/shift/transform type methods
 // where the resultant path will initially have a meaningful size.
 size_t CanvasPath::GetAllocationSize() const {
-  return sizeof(CanvasPath) + path().approximateBytesUsed();
+  return sizeof(CanvasPath) + path_.approximateBytesUsed();
 }
 
 }  // namespace flutter
