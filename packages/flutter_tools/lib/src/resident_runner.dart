@@ -258,6 +258,9 @@ class FlutterDevice {
             handleError(e);
             return;
           } else {
+            if (device.dds.uri == null) {
+              rethrow;
+            }
             existingDds = true;
           }
         } on Exception catch (e) {

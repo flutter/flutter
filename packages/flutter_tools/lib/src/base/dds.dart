@@ -11,6 +11,14 @@ import 'common.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 
+@visibleForTesting
+Future<dds.DartDevelopmentService> Function(
+  Uri,
+  {bool enableAuthCodes,
+  bool ipv6,
+  Uri serviceUri,
+}) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
+
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService {
@@ -44,7 +52,7 @@ class DartDevelopmentService {
       'connecting to VM service at $observatoryUri.',
     );
     try {
-      _ddsInstance = await dds.DartDevelopmentService.startDartDevelopmentService(
+      _ddsInstance = await ddsLauncherCallback(
           observatoryUri,
           serviceUri: ddsUri,
           enableAuthCodes: !disableServiceAuthCodes,
@@ -58,6 +66,7 @@ class DartDevelopmentService {
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
+      bool shouldRethrow = false;
       if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
         try {
           _existingDdsUri = Uri.parse(
@@ -70,7 +79,10 @@ class DartDevelopmentService {
             'https://github.com/flutter/flutter/issues/72385 with output from '
             '"flutter doctor -v" and the following error message:\n\n ${e.message}.'
           );
-          throw e;
+          shouldRethrow = true;
+        }
+        if (shouldRethrow) {
+          rethrow;
         }
       }
       if (!_completer.isCompleted) {
