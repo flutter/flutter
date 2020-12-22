@@ -33,17 +33,6 @@ const Radius _kFloatingCaretRadius = Radius.circular(1.0);
 /// Used by [RenderEditable.onSelectionChanged].
 typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
-/// Signature of the function returned by [CustomPainter.semanticsBuilder].
-///
-/// Builds semantics information describing the picture drawn by a
-/// [CustomPainter]. Each [CustomPainterSemantics] in the returned list is
-/// converted into a [SemanticsNode] by copying its properties.
-///
-/// The returned list must not be mutated after this function completes. To
-/// change the semantic information, the function must return a new list
-/// instead.
-typedef RenderEditablePainterSemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size size, RenderEditable renderEditable);
-
 /// Indicates what triggered the change in selected text (including changes to
 /// the cursor location).
 enum SelectionChangedCause {
@@ -377,8 +366,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Caret Painters:
-  // The floating painter. This painter controls the painting of _caretPainter's
-  // as well.
+  // The floating painter. This painter controls _caretPainter's painting as well.
   late final _FloatingCursorPainter _caretPainter = _FloatingCursorPainter(_onCaretChanged);
 
   // Text Highlight painters:
@@ -1773,7 +1761,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // This rect is the same as _caretPrototype but without the vertical padding.
     final Rect rect = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight).shift(caretOffset + _paintOffset + cursorOffset);
     // Add additional cursor offset (generally only if on iOS).
-    return rect.shift(integralOffset(rect.topLeft));
+    return rect.shift(_snapToPhysicalPixel(rect.topLeft));
   }
 
   @override
@@ -2157,9 +2145,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  /// Computes the offset to apply to the given [floatingCursorRect] so it
-  /// perfectly snaps to physical pixels.
-  Offset integralOffset(Offset sourceOffset) {
+  /// Computes the offset to apply to the given [sourceOffset] so it perfectly
+  /// snaps to physical pixels.
+  Offset _snapToPhysicalPixel(Offset sourceOffset) {
     final Offset globalOffset = localToGlobal(sourceOffset);
     final double pixelMultiple = 1.0 / _devicePixelRatio;
     return Offset(
@@ -2310,13 +2298,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final RenderBox? foregroundChild = _foregroundRenderObject;
     final RenderBox? backgroundChild = _backgroundRenderObject;
 
+    // The painters paint in the viewport's coordinate space, since the
+    // textPainter's coordinate space is not known to high level widgets.
     if (backgroundChild != null)
-      context.paintChild(backgroundChild, effectiveOffset);
+      context.paintChild(backgroundChild, offset);
 
     _textPainter.paint(context.canvas, effectiveOffset);
 
     if (foregroundChild != null)
-      context.paintChild(foregroundChild, effectiveOffset);
+      context.paintChild(foregroundChild, offset);
   }
 
   void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
@@ -2448,17 +2438,20 @@ class _RenderEditableCustomPaint extends RenderBox {
   Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 }
 
-/// An interface that paints within the associated [RenderEditable]'s bounds,
-/// above or beneath its text content.
+/// An interface that paints within a [RenderEditable]'s bounds, above or
+/// beneath its text content.
 ///
-/// This painter is designed to paint auxiliary content that depends on the text
-/// layout metrics (for instance, carets and text highlights), within an
-/// editable text field. The painter will repaint when the associated
-/// [RenderEditable] repaints, ensuring that the `renderEditable` argument of
-/// the [paint] method is always up-to-date.
-///
-/// The [semanticsBuilder] can be used to add additional semantics configuration
-/// to the associated [RenderEditable](s).
+/// This painter is typically used for painting auxiliary content that depends
+/// on text layout metrics (for instance, for painting carets and text highlight
+/// blocks). It can paint independently from its [RenderEditable], allowing it
+/// to repaint without triggering a repaint on the entire [RenderEditable] stack
+/// when only auxiliary content changes (e.g. a blinking cursor) are present. It
+/// will be scheduled to repaint when:
+///   * It's assigned to a new [RenderEditable] and the [shouldRepaint] method
+///     returns true.
+///   * Any of the [RenderEditable]s it is attched to repaints.
+///   * The [notifyListeners] method is called, which typically happens when the
+///     painter's attributes change.
 ///
 /// See also:
 ///  * [RenderEditable.setForegroundPainter], which takes a [RenderEditablePainter]
@@ -2468,65 +2461,29 @@ class _RenderEditableCustomPaint extends RenderBox {
 ///  * [CustomPainter] a similar class which paints within a [RenderCustomPaint].
 abstract class RenderEditablePainter extends ChangeNotifier {
 
-  /// Called whenever a new instance of the custom painter delegate class is
-  /// provided to the [RenderCustomPaint] object, or any time that a new
-  /// [CustomPaint] object is created with a new instance of the custom painter
-  /// delegate class (which amounts to the same thing, because the latter is
-  /// implemented in terms of the former).
+  /// Determines whether repaint is needed when a new [RenderEditablePainter]
+  /// is provided to a [RenderEditable].
   ///
   /// If the new instance represents different information than the old
   /// instance, then the method should return true, otherwise it should return
-  /// false.
+  /// false. When [oldDelegate] is null, this method should always return true
+  /// unless the new painter initially does not paint anything.
   ///
   /// If the method returns false, then the [paint] call might be optimized
-  /// away.
-  ///
-  /// It's possible that the [paint] method will get called even if
-  /// [shouldRepaint] returns false (e.g. if an ancestor or descendant needed to
-  /// be repainted). It's also possible that the [paint] method will get called
-  /// without [shouldRepaint] being called at all (e.g. if the box changes
-  /// size).
-  ///
-  /// If a custom delegate has a particularly expensive paint function such that
-  /// repaints should be avoided as much as possible, a [RepaintBoundary] or
-  /// [RenderRepaintBoundary] (or other render object with
-  /// [RenderObject.isRepaintBoundary] set to true) might be helpful.
-  ///
-  /// The `oldDelegate` argument will never be null.
+  /// away. However, the [paint] method will get called whenever the
+  /// [RenderEditable]s it attaches to repaint, even if [shouldRepaint] returns
+  /// false.
   bool shouldRepaint(RenderEditablePainter? oldDelegate);
 
-  /// Called whenever the object needs to paint. The given [Canvas] has its
-  /// coordinate space configured such that the origin is at the top left of the
-  /// box. The area of the box is the size of the [size] argument.
+  /// Paints within the bounds of a [RenderEditable].
   ///
-  /// Paint operations should remain inside the given area. Graphical
-  /// operations outside the bounds may be silently ignored, clipped, or not
-  /// clipped. It may sometimes be difficult to guarantee that a certain
-  /// operation is inside the bounds (e.g., drawing a rectangle whose size is
-  /// determined by user inputs). In that case, consider calling
-  /// [Canvas.clipRect] at the beginning of [paint] so everything that follows
-  /// will be guaranteed to only draw within the clipped area.
+  /// The given [Canvas] has the same coordinate space as the [RenderEditable],
+  /// which may be different from the coordinate space the [RenderEditable]'s
+  /// [TextPainter] uses, when the text moves inside the [RenderEditable].
   ///
-  /// Implementations should be wary of correctly pairing any calls to
-  /// [Canvas.save]/[Canvas.saveLayer] and [Canvas.restore], otherwise all
-  /// subsequent painting on this canvas may be affected, with potentially
-  /// hilarious but confusing results.
-  ///
-  /// To paint text on a [Canvas], use a [TextPainter].
-  ///
-  /// To paint an image on a [Canvas]:
-  ///
-  /// 1. Obtain an [ImageStream], for example by calling [ImageProvider.resolve]
-  ///    on an [AssetImage] or [NetworkImage] object.
-  ///
-  /// 2. Whenever the [ImageStream]'s underlying [ImageInfo] object changes
-  ///    (see [ImageStream.addListener]), create a new instance of your custom
-  ///    paint delegate, giving it the new [ImageInfo] object.
-  ///
-  /// 3. In your delegate's [paint] method, call the [Canvas.drawImage],
-  ///    [Canvas.drawImageRect], or [Canvas.drawImageNine] methods to paint the
-  ///    [ImageInfo.image] object, applying the [ImageInfo.scale] value to
-  ///    obtain the correct rendering size.
+  /// Paint operations performed outside of the region defined by the [canvas]'s
+  /// origin and the [size] parameter may get clipped, when [RenderEditable]'s
+  /// [RenderEditable.clipBehavior] is not [Clip.none].
   void paint(Canvas canvas, Size size, RenderEditable renderEditable);
 }
 
@@ -2599,7 +2556,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
     );
 
     for (final TextBox box in boxes)
-      canvas.drawRect(box.toRect(), highlightPaint);
+      canvas.drawRect(box.toRect().shift(renderEditable._paintOffset), highlightPaint);
   }
 
   @override
@@ -2719,7 +2676,8 @@ class _FloatingCursorPainter extends RenderEditablePainter {
       }
     }
 
-    final Rect integralRect = caretRect.shift(renderEditable.integralOffset(caretRect.topLeft));
+    caretRect = caretRect.shift(renderEditable._paintOffset);
+    final Rect integralRect = caretRect.shift(renderEditable._snapToPhysicalPixel(caretRect.topLeft));
     final Radius? radius = cursorRadius;
     caretPaint.color = caretColor;
     if (radius == null) {
@@ -2760,6 +2718,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     if (floatingCursorRect == null || floatingCursorColor == null)
       return;
 
+    floatingCursorRect.shift(renderEditable._paintOffset);
     canvas.drawRRect(
       RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCaretRadius),
       floatingCursorPaint..color = floatingCursorColor,

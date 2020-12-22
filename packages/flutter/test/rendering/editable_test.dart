@@ -1599,7 +1599,7 @@ void main() {
   group('custom painters', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
 
-    final RenderEditable editable = RenderEditable(
+    final _TestRenderEditable editable = _TestRenderEditable(
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
@@ -1625,6 +1625,7 @@ void main() {
       _TestRenderEditablePainter.paintHistory.clear();
       editable.setForegroundPainter(null);
       editable.setPainter(null);
+      editable.paintCount = 0;
 
       final AbstractNode? parent = editable.parent;
       if (parent is RenderConstrainedBox)
@@ -1750,12 +1751,55 @@ void main() {
       expect(
         (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
-          ..rect(rect: const Rect.fromLTRB(1, 1, 2, 2), color: const Color(0x12345678))
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
           ..paragraph()
-          ..rect(rect: const Rect.fromLTRB(1, 1, 2, 2), color: const Color(0x12345678)),
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
       );
     });
+    test('does not repaint the render editable when custom painters need repaint', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.setPainter(painter);
+      pumpFrame(phase: EnginePhase.paint);
+      editable.paintCount = 0;
+      painter.paintCount = 0;
+
+      painter.markNeedsPaint();
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(editable.paintCount, 0);
+      expect(painter.paintCount, 1);
+    });
   });
+}
+
+class _TestRenderEditable extends RenderEditable {
+  _TestRenderEditable({
+    required TextDirection textDirection,
+    required ViewportOffset offset,
+    required TextSelectionDelegate textSelectionDelegate,
+    TextSpan? text,
+    required LayerLink startHandleLayerLink,
+    required LayerLink endHandleLayerLink,
+    TextSelection? selection,
+  }) : super(
+      textDirection: textDirection,
+      offset: offset,
+      textSelectionDelegate: textSelectionDelegate,
+      text: text,
+      startHandleLayerLink: startHandleLayerLink,
+      endHandleLayerLink: endHandleLayerLink,
+      selection: selection,
+    );
+
+  int paintCount = 0;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    paintCount += 1;
+  }
 }
 
 class _TestRenderEditablePainter extends RenderEditablePainter {
@@ -1772,4 +1816,8 @@ class _TestRenderEditablePainter extends RenderEditablePainter {
 
   @override
   bool shouldRepaint(RenderEditablePainter? oldDelegate) => repaint;
+
+  void markNeedsPaint() {
+    notifyListeners();
+  }
 }
