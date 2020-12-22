@@ -17,7 +17,7 @@ import 'framework.dart';
 
 typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
 
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This example shows a [NotificationListener] widget
 /// that listens for [ScrollNotification] notifications. When a scroll
