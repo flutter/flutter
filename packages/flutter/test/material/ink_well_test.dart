@@ -1393,9 +1393,10 @@ void main() {
     await test((Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
       bool wrap = false;
 
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
             child: StatefulBuilder(
               builder: (BuildContext context, void Function(void Function()) setState) {
                 Future<void> changeWrap() async {
@@ -1441,9 +1442,10 @@ void main() {
     await test((Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
       bool wrap = false;
 
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
             child: StatefulBuilder(
               builder: (BuildContext context, void Function(void Function()) setState) {
                 Future<void> changeWrap() async {
@@ -1494,28 +1496,27 @@ void main() {
     final Key key = GlobalKey();
 
     bool replaced = false;
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
-          Future<void> changeReplace() async {
-            await Future<void>.delayed(const Duration(milliseconds: 50));
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
+        Future<void> changeReplace() async {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
 
-            setState(() {
-              replaced = !replaced;
-            });
-          }
+          setState(() {
+            replaced = !replaced;
+          });
+        }
 
-          return Material(
-            key: ValueKey<bool>(replaced),
-            child: InkWell(
-              key: key,
-              onTap: () {
-                changeReplace();
-              },
-            ),
-          );
-        }),
-      ),
+        return Material(
+          key: ValueKey<bool>(replaced),
+          child: InkWell(
+            key: key,
+            onTap: () {
+              changeReplace();
+            },
+          ),
+        );
+      }),
     ));
 
     await tester.tap(find.byType(InkWell));
@@ -1536,36 +1537,35 @@ void main() {
     int onHoverCount = 0;
     int callChangeReplaceCount = 0;
     bool replaced = false;
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
-          Future<void> changeReplace() async {
-            callChangeReplaceCount += 1;
-            await Future<void>.delayed(const Duration(milliseconds: 50));
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
+        Future<void> changeReplace() async {
+          callChangeReplaceCount += 1;
+          await Future<void>.delayed(const Duration(milliseconds: 50));
 
-            setState(() {
-              replaced = !replaced;
-            });
-          }
+          setState(() {
+            replaced = !replaced;
+          });
+        }
 
-          return Container(
-            margin: replaced ? const EdgeInsets.only(top: 1) : EdgeInsets.zero,
-            child: Material(
-              key: ValueKey<bool>(replaced),
-              child: InkWell(
-                key: key,
-                hoverColor: hoverColor,
-                onTap: () {},
-                onHover: (bool hovered) {
-                  onHoverCount += 1;
-                  if (hovered)
-                    changeReplace();
-                },
-              ),
+        return Container(
+          margin: replaced ? const EdgeInsets.only(top: 1) : EdgeInsets.zero,
+          child: Material(
+            key: ValueKey<bool>(replaced),
+            child: InkWell(
+              key: key,
+              hoverColor: hoverColor,
+              onTap: () {},
+              onHover: (bool hovered) {
+                onHoverCount += 1;
+                if (hovered)
+                  changeReplace();
+              },
             ),
-          );
-        }),
-      ),
+          ),
+        );
+      }),
     ));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
