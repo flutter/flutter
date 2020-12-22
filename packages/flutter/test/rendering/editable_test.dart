@@ -1750,9 +1750,9 @@ void main() {
       expect(
         (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
-          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..rect(rect: const Rect.fromLTRB(1, 1, 2, 2), color: const Color(0x12345678))
           ..paragraph()
-          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+          ..rect(rect: const Rect.fromLTRB(1, 1, 2, 2), color: const Color(0x12345678)),
       );
     });
   });

@@ -1845,6 +1845,27 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    assert(hasSize);
+    if (!size.contains(position)) {
+      return false;
+    }
+
+    final RenderBox? foregroundChild = _foregroundRenderObject;
+    final RenderBox? backgroundChild = _backgroundRenderObject;
+
+    if (foregroundChild?.hitTest(result, position: position) ?? false)
+      return true;
+
+    if (hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+
+    return backgroundChild?.hitTest(result, position: position) ?? false;
+  }
+
+  @override
   bool hitTestSelf(Offset position) => true;
 
   late TapGestureRecognizer _tap;
@@ -2322,6 +2343,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       );
     }
   }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
@@ -2398,9 +2420,6 @@ class _RenderEditableCustomPaint extends RenderBox {
       oldPainter?.removeListener(markNeedsPaint);
       newValue?.addListener(markNeedsPaint);
     }
-
-    if (newValue?.shouldRebuildSemantics(oldPainter) ?? attached)
-      markNeedsSemanticsUpdate();
   }
 
   @override
@@ -2409,7 +2428,6 @@ class _RenderEditableCustomPaint extends RenderBox {
     assert(parent != null);
     final RenderEditablePainter? painter = this.painter;
     if (painter != null && parent != null) {
-      context.setWillChangeHint();
       painter.paint(context.canvas, Size.zero, parent);
     }
   }
@@ -2427,126 +2445,28 @@ class _RenderEditableCustomPaint extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final RenderEditable? parent = this.parent;
-    assert(parent != null);
-    if (parent == null)
-      return false;
-    return _painter?.hitTest(parent, position)
-        ?? super.hitTestChildren(result, position: position);
-  }
-
-  @override
   Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
-
-  @override
-  void performResize() {
-    super.performResize();
-    markNeedsSemanticsUpdate();
-  }
-
-  /// Builds semantics for the picture drawn by [painter].
-  RenderEditablePainterSemanticsBuilderCallback? _backgroundSemanticsBuilder;
-  /// Describe the semantics of the picture painted by the [painter].
-  List<SemanticsNode>? _backgroundSemanticsNodes;
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    _backgroundSemanticsBuilder = painter?.semanticsBuilder;
-    config.isSemanticBoundary = _backgroundSemanticsBuilder != null;
-  }
-
-  @override
-  void assembleSemanticsNode(
-    SemanticsNode node,
-    SemanticsConfiguration config,
-    Iterable<SemanticsNode> children,
-  ) {
-    assert(children.isEmpty);
-    final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder?.call(size, parent!)
-      ?? const <CustomPainterSemantics>[];
-    _backgroundSemanticsNodes = RenderCustomPaint.updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
-    super.assembleSemanticsNode(node, config, _backgroundSemanticsNodes ?? <SemanticsNode>[]);
-  }
-
-  @override
-  void clearSemantics() {
-    super.clearSemantics();
-    _backgroundSemanticsNodes = null;
-  }
 }
 
 /// An interface that paints within the associated [RenderEditable]'s bounds,
 /// above or beneath its text content.
 ///
-/// This painter is designed to paint auxiliary contents that depends on the
-/// text layout metrics (for instance, carets and text highlights), within an
-/// editable text field. The [renderEditable] property is guaranteed to be
-/// non-null when the [paint] method or the [hitTest] method is called, or when
-/// the [semanticsBuilder] property is accessed. The painter will repaint when
-/// the associated [renderEditable] repaints, so the layout metrics of the
-/// associated [RenderEditable] is guaranteed to be up-to-date within [paint]
-/// and [semanticsBuilder].
+/// This painter is designed to paint auxiliary content that depends on the text
+/// layout metrics (for instance, carets and text highlights), within an
+/// editable text field. The painter will repaint when the associated
+/// [RenderEditable] repaints, ensuring that the `renderEditable` argument of
+/// the [paint] method is always up-to-date.
+///
+/// The [semanticsBuilder] can be used to add additional semantics configuration
+/// to the associated [RenderEditable](s).
 ///
 /// See also:
 ///  * [RenderEditable.setForegroundPainter], which takes a [RenderEditablePainter]
 ///    and sets it as the foreground painter of the [RenderEditable].
 ///  * [RenderEditable.setPainter], which takes a [RenderEditablePainter]
 ///    and sets it as the foreground painter of the [RenderEditable].
+///  * [CustomPainter] a similar class which paints within a [RenderCustomPaint].
 abstract class RenderEditablePainter extends ChangeNotifier {
-  /// Called whenever a hit test is being performed on an object that is using
-  /// this custom paint delegate.
-  ///
-  /// The given point is relative to the same coordinate space as the last
-  /// [paint] call.
-  ///
-  /// The default behavior is to consider all points to be hits for
-  /// background painters, and no points to be hits for foreground painters.
-  ///
-  /// Return true if the given position corresponds to a point on the drawn
-  /// image that should be considered a "hit", false if it corresponds to a
-  /// point that should be considered outside the painted image, and null to use
-  /// the default behavior.
-  bool? hitTest(RenderEditable renderEditable, Offset position) => null;
-
-  /// Returns a function that builds semantic information for the picture drawn
-  /// by this painter.
-  ///
-  /// If the returned function is null, this painter will not contribute new
-  /// [SemanticsNode]s to the semantics tree and the [CustomPaint] corresponding
-  /// to this painter will not create a semantics boundary. However, if the
-  /// child of a [CustomPaint] is not null, the child may contribute
-  /// [SemanticsNode]s to the tree.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.isSemanticBoundary], which causes new
-  ///    [SemanticsNode]s to be added to the semantics tree.
-  ///  * [RenderCustomPaint], which uses this getter to build semantics.
-  RenderEditablePainterSemanticsBuilderCallback? get semanticsBuilder => null;
-
-  /// Called whenever a new instance of the custom painter delegate class is
-  /// provided to the [RenderCustomPaint] object, or any time that a new
-  /// [CustomPaint] object is created with a new instance of the custom painter
-  /// delegate class (which amounts to the same thing, because the latter is
-  /// implemented in terms of the former).
-  ///
-  /// If the new instance would cause [semanticsBuilder] to create different
-  /// semantics information, then this method should return true, otherwise it
-  /// should return false.
-  ///
-  /// If the method returns false, then the [semanticsBuilder] call might be
-  /// optimized away.
-  ///
-  /// It's possible that the [semanticsBuilder] will get called even if
-  /// [shouldRebuildSemantics] would return false. For example, it is called
-  /// when the [CustomPaint] is rendered for the very first time, or when the
-  /// box changes its size.
-  ///
-  /// By default this method delegates to [shouldRepaint] under the assumption
-  /// that in most cases semantics change when something new is drawn.
-  bool shouldRebuildSemantics(RenderEditablePainter? oldDelegate) => shouldRepaint(oldDelegate);
 
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderCustomPaint] object, or any time that a new
@@ -2885,17 +2805,6 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
   void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
     for (final RenderEditablePainter painter in painters)
       painter.paint(canvas, size, renderEditable);
-  }
-
-  late final List<RenderEditablePainterSemanticsBuilderCallback> _cachedBuilders = <RenderEditablePainterSemanticsBuilderCallback>[
-    for (final RenderEditablePainter painter in painters) if(painter.semanticsBuilder != null) painter.semanticsBuilder!,
-  ];
-
-  @override
-  RenderEditablePainterSemanticsBuilderCallback? get semanticsBuilder {
-    return _cachedBuilders.isEmpty
-      ? null
-      : (Size size, RenderEditable renderEditable) => <CustomPainterSemantics>[for (RenderEditablePainterSemanticsBuilderCallback callback in _cachedBuilders) ...callback(size, renderEditable)];
   }
 
   @override

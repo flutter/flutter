@@ -632,12 +632,12 @@ class RenderCustomPaint extends RenderProxyBox {
     final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder != null
       ? _backgroundSemanticsBuilder!(size)
       : const <CustomPainterSemantics>[];
-    _backgroundSemanticsNodes = updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
+    _backgroundSemanticsNodes = _updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
 
     final List<CustomPainterSemantics> foregroundSemantics = _foregroundSemanticsBuilder != null
       ? _foregroundSemanticsBuilder!(size)
       : const <CustomPainterSemantics>[];
-    _foregroundSemanticsNodes = updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics);
+    _foregroundSemanticsNodes = _updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics);
 
     final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes!.isNotEmpty;
     final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes!.isNotEmpty;
@@ -678,7 +678,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// considered because there is only one type of [SemanticsNode]. There is no
   /// concept of a "forgotten" node in semantics, deactivated nodes, or global
   /// keys.
-  static List<SemanticsNode> updateSemanticsChildren(
+  static List<SemanticsNode> _updateSemanticsChildren(
     List<SemanticsNode>? oldSemantics,
     List<CustomPainterSemantics>? newChildSemantics,
   ) {
