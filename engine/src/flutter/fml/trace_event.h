@@ -68,6 +68,19 @@
   ::fml::tracing::TraceCounter((category_group), (name), (counter_id), (arg1), \
                                __VA_ARGS__);
 
+// Avoid using the same `name` and `argX_name` for nested traces, which can
+// lead to double free errors. E.g. the following code should be avoided:
+//
+// ```cpp
+// {
+//    TRACE_EVENT1("flutter", "Foo::Bar", "count", "initial_count_value");
+//    ...
+//    TRACE_EVENT_INSTANT1("flutter", "Foo::Bar",
+//                         "count", "updated_count_value");
+// }
+// ```
+//
+// Instead, either use different `name` or `arg1` parameter names.
 #define FML_TRACE_EVENT(category_group, name, ...)                   \
   ::fml::tracing::TraceEvent((category_group), (name), __VA_ARGS__); \
   __FML__AUTO_TRACE_END(name)
