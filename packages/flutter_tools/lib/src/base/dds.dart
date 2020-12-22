@@ -66,7 +66,6 @@ class DartDevelopmentService {
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
-      bool shouldRethrow = false;
       if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
         try {
           _existingDdsUri = Uri.parse(
@@ -79,10 +78,9 @@ class DartDevelopmentService {
             'https://github.com/flutter/flutter/issues/72385 with output from '
             '"flutter doctor -v" and the following error message:\n\n ${e.message}.'
           );
-          shouldRethrow = true;
-        }
-        if (shouldRethrow) {
-          rethrow;
+          // Wrap the DDS error message in a StateError so it can be collected
+          // by the crash handler.
+          throw StateError(e.message);
         }
       }
       if (!_completer.isCompleted) {

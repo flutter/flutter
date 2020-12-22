@@ -2705,7 +2705,7 @@ void main() {
   }));
 
   testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
-    // See https://github.com/flutter/flutter/pull/72736 for context.
+    // See https://github.com/flutter/flutter/issues/72385 for context.
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockDevice mockDevice = MockDevice();
     when(mockDevice.dds).thenReturn(DartDevelopmentService(logger: testLogger));
@@ -2717,17 +2717,21 @@ void main() {
       observatoryUris: Stream<Uri>.value(testUri),
     );
     bool caught = false;
-    try {
-      await flutterDevice.connect(allowExistingDdsInstance: true);
-    } on dds.DartDevelopmentServiceException catch(e) {
-      expect(e.message.contains('No URI'), true);
+    final Completer<void>done = Completer<void>();
+    runZonedGuarded(() {
+      flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
+    }, (Object e, StackTrace st) {
+      expect(e is StateError, true);
+      expect((e as StateError).message, contains('No URI'));
       expect(testLogger.errorText, contains(
         'DDS has failed to start and there is not an existing DDS instance',
       ));
+      done.complete();
       caught = true;
-    }
+    });
+    await done.future;
     if (!caught) {
-      fail('Expected a DartDevelopmentServiceException to be thrown.');
+      fail('Expected a StateError to be thrown.');
     }
   }));
 

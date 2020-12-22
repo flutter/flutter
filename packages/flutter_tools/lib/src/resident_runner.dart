@@ -258,10 +258,6 @@ class FlutterDevice {
             handleError(e, st);
             return;
           } else {
-            if (device.dds.uri == null) {
-              completer.completeError(e, st);
-              return;
-            }
             existingDds = true;
           }
         } on Exception catch (e, st) {
