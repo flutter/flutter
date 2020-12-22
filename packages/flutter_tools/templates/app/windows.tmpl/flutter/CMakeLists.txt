@@ -91,6 +91,7 @@ add_custom_command(
     ${FLUTTER_TOOL_ENVIRONMENT}
     "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.bat"
       windows-x64 $<CONFIG>
+  VERBATIM
 )
 add_custom_target(flutter_assemble DEPENDS
   "${FLUTTER_LIBRARY}"

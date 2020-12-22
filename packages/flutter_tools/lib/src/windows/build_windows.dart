@@ -7,12 +7,14 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../migrations/cmake_custom_command_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'visual_studio.dart';
@@ -33,6 +35,15 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       'No Windows desktop project configured. See '
       'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
       'to learn about adding Windows support to a project.');
+  }
+
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+    CmakeCustomCommandMigration(windowsProject, globals.logger),
+  ];
+
+  final ProjectMigration migration = ProjectMigration(migrators);
+  if (!migration.run()) {
+    throwToolExit('Unable to migrate project files');
   }
 
   // Ensure that necessary ephemeral files are generated and up to date.
