@@ -1408,7 +1408,6 @@ void main() {
               builder: (BuildContext context, void Function(void Function()) setState) {
                 Future<void> changeWrap() async {
                   await Future<void>.delayed(const Duration(milliseconds: 50));
-
                   setState(() {
                     wrap = !wrap;
                   });
