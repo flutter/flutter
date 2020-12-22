@@ -308,7 +308,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updatePainter(painter);
   }
 
-  /// Child model
+  /// Child render objects
   _RenderEditableCustomPaint? _foregroundRenderObject;
   _RenderEditableCustomPaint? _backgroundRenderObject;
 
@@ -370,7 +370,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Caret Painters:
-  // The floating painter. This painter controls _caretPainter's painting as well.
+  // The floating painter. This painter paints the regular caret as well.
   late final _FloatingCursorPainter _caretPainter = _FloatingCursorPainter(_onCaretChanged);
 
   // Text Highlight painters:
