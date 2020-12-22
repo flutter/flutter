@@ -1336,7 +1336,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/6751
   testWidgets('When InkWell/Ancestor has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
-    void expectTest(bool painted) {
+    void expectPaintedCircle(bool painted) {
       final PaintPattern paintPattern = paints..circle();
 
       expect(
@@ -1351,49 +1351,64 @@ void main() {
       await tester.pumpWidget(buildApp(null, tapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(false);
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 10));
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 40));
+      expectPaintedCircle(false);
       frames = await tester.pumpAndSettle();
       expect(frames, 1);
-      expectTest(false);
+      expectPaintedCircle(false);
 
       await tester.pumpWidget(buildApp(const Key('foo'), tapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(false);
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 10));
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 40));
+      expectPaintedCircle(false);
       frames = await tester.pumpAndSettle();
       expect(frames, 1);
-      expectTest(false);
+      expectPaintedCircle(false);
 
       // Does not call setState.
       await tester.pumpWidget(buildApp(GlobalKey()));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(true);
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 10));
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 40));
+      expectPaintedCircle(true);
       frames = await tester.pumpAndSettle();
       expect(frames > 1, isTrue);
-      expectTest(false);
+      expectPaintedCircle(false);
 
       await tester.pumpWidget(buildApp(GlobalKey(), tapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(true);
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 10));
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 40));
+      expectPaintedCircle(true);
       frames = await tester.pumpAndSettle();
       expect(frames > 1, isTrue);
-      expectTest(false);
+      expectPaintedCircle(false);
 
       await tester.pumpWidget(buildApp(GlobalKey(), tapDownChangeWrap: true));
       final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 60));
-      expectTest(true);
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 10));
+      expectPaintedCircle(true);
+      await tester.pump(const Duration(milliseconds: 40));
+      expectPaintedCircle(true);
       await testGesture.up();
       frames = await tester.pumpAndSettle();
       expect(frames > 1, isTrue);
-      expectTest(false);
+      expectPaintedCircle(false);
     }
 
     // InkWell have a key
