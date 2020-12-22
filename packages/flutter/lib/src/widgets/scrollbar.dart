@@ -20,6 +20,7 @@ import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'ticker_provider.dart';
 
@@ -561,10 +562,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// visible.
 ///
 /// By default, the thumb will fade in and out as the child scroll view
-/// scrolls. When [isAlwaysShown] is true, and a [controller] is specified, the
-/// scrollbar thumb will remain visible without the fade animation.
+/// scrolls. When [isAlwaysShown] is true, the scrollbar thumb will remain
+/// visible without the fade animation. This requires that a [ScrollController]
+/// is provided to [controller], or that the [PrimaryScrollController] is available.
 ///
-/// Scrollbars are interactive and will use the [PrimaryScrollController] if
+/// Scrollbars are interactive and will also use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
 /// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
 /// exclusive of the thumb will trigger a [ScrollIncrementType.page] based on
@@ -606,10 +608,7 @@ class RawScrollbar extends StatefulWidget {
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
-  }) : assert(
-         !isAlwaysShown || controller != null,
-         'When isAlwaysShown is true, a ScrollController must be provided.',
-       ),
+  }) : assert(isAlwaysShown != null),
        assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
@@ -681,8 +680,9 @@ class RawScrollbar extends StatefulWidget {
   /// When false, the scrollbar will be shown during scrolling
   /// and will fade out otherwise.
   ///
-  /// When true, the scrollbar will always be visible and never fade out. The
-  /// [controller] property must be set in this case.
+  /// When true, the scrollbar will always be visible and never fade out. If the
+  /// [controller] property has not been set, the [PrimaryScrollController] will
+  /// be used.
   ///
   /// Defaults to false.
   ///
@@ -782,6 +782,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   late Animation<double> _fadeoutOpacityAnimation;
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
+  late bool _isMobile;
 
 
   /// Used to paint the scrollbar.
@@ -812,6 +813,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        _isMobile = true;
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        _isMobile = false;
+        break;
+    }
     _maybeTriggerScrollbar();
   }
 
@@ -826,7 +839,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
-        widget.controller!.position.didUpdateScrollPositionBy(0);
+        final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+        assert(
+          scrollController != null,
+          'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
+          'Either Scrollbar.controller was not provided, or a PrimaryScrollController could not be found.',
+        );
+        scrollController!.position.didUpdateScrollPositionBy(0);
       }
     });
   }
@@ -861,13 +880,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   void _updateScrollPosition(double primaryDelta) {
     assert(_currentController != null);
+    final ScrollPosition position = _currentController!.position;
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
-    // time _dragScrollbar was called, into the coordinate space of the scroll
+    // time _updateScrollPosition was called, into the coordinate space of the scroll
     // position, and jump to that position.
     final double scrollOffsetLocal = scrollbarPainter.getTrackToScroll(primaryDelta);
-    final double scrollOffsetGlobal = scrollOffsetLocal + _currentController!.position.pixels;
-    _currentController!.position.jumpTo(scrollOffsetGlobal);
+    final double scrollOffsetGlobal = scrollOffsetLocal + position.pixels;
+    if (scrollOffsetGlobal != position.pixels) {
+      // Ensure we don't drag into overscroll if the physics do not allow it.
+      final double physicsAdjustment = position.physics.applyBoundaryConditions(position, scrollOffsetGlobal);
+      position.jumpTo(scrollOffsetGlobal - physicsAdjustment);
+    }
   }
 
   void _maybeStartFadeoutTimer() {
@@ -1140,20 +1164,28 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   Widget build(BuildContext context) {
     updateScrollbarPainter();
+
+    Widget child = CustomPaint(
+      key: _scrollbarPainterKey,
+      foregroundPainter: scrollbarPainter,
+      child: RepaintBoundary(child: widget.child),
+    );
+
+    if (!_isMobile) {
+      // Hover events not supported on mobile.
+      child = MouseRegion(
+        onExit: handleHoverExit,
+        onHover: handleHover,
+        child: child
+      );
+    }
+
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
           gestures: _gestures,
-          child: MouseRegion(
-            onExit: handleHoverExit,
-            onHover: handleHover,
-            child: CustomPaint(
-              key: _scrollbarPainterKey,
-              foregroundPainter: scrollbarPainter,
-              child: RepaintBoundary(child: widget.child),
-            ),
-          ),
+          child: child,
         ),
       ),
     );

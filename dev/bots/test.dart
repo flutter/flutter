@@ -644,6 +644,18 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
+  Future<void> runFixTests() async {
+    final List<String> args = <String>[
+      'fix',
+      '--compare-to-golden',
+    ];
+    await runCommand(
+      dart,
+      args,
+      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_fixes'),
+    );
+  }
+
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
       'run',
@@ -702,6 +714,7 @@ Future<void> _runFrameworkTests() async {
       options: <String>['--enable-vmservice'],
       tableData: bigqueryApi?.tabledata,
     );
+    await runFixTests();
     await runPrivateTests();
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
@@ -982,6 +995,8 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
       'drive',
       if (canvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+      if (!canvasKit)
+        '--dart-define=FLUTTER_WEB_USE_SKIA=false',
       '--driver=test_driver/transitions_perf_e2e_test.dart',
       '--target=test_driver/transitions_perf_e2e.dart',
       '--browser-name=chrome',
@@ -1135,6 +1150,7 @@ Future<void> _runWebDebugTest(String target, {
       '-d',
       'chrome',
       '--web-run-headless',
+      '--dart-define=FLUTTER_WEB_USE_SKIA=false',
       ...additionalArguments,
       '-t',
       target,

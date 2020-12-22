@@ -21,7 +21,6 @@ import 'slider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // int _dollars = 0;
 // int _duelCommandment = 1;
 // void setState(VoidCallback fn) { }
@@ -40,7 +39,7 @@ enum _SliderType { material, adaptive }
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ![A slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)

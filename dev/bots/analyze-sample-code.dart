@@ -8,7 +8,6 @@
 //   bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
@@ -203,6 +202,8 @@ class SampleChecker {
     return _headers ??= <String>[
       '// generated code',
       '// ignore_for_file: unused_import',
+      '// ignore_for_file: unused_element',
+      '// ignore_for_file: unused_local_variable',
       "import 'dart:async';",
       "import 'dart:convert';",
       "import 'dart:math' as math;",
@@ -547,8 +548,9 @@ linter:
   }
 
   /// Invokes the analyzer on the given [directory] and returns the stdout.
-  List<String> _runAnalyzer(Directory directory) {
-    print('Starting analysis of code samples.');
+  List<String> _runAnalyzer(Directory directory, {bool silent}) {
+    if (!silent)
+      print('Starting analysis of code samples.');
     _createConfigurationFiles(directory);
     final ProcessResult result = Process.runSync(
       _flutter,
@@ -570,7 +572,7 @@ linter:
         stderr.removeLast();
       }
     }
-    if (stderr.isNotEmpty) {
+    if (stderr.isNotEmpty && stderr.any((String line) => line.isNotEmpty)) {
       throw 'Cannot analyze dartdocs; unexpected error output:\n$stderr';
     }
     if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
@@ -588,9 +590,10 @@ linter:
   Map<String, List<AnalysisError>> _analyze(
     Directory directory,
     Map<String, Section> sections,
-    Map<String, Sample> samples,
-  ) {
-    final List<String> errors = _runAnalyzer(directory);
+    Map<String, Sample> samples, {
+    bool silent = false,
+  }) {
+    final List<String> errors = _runAnalyzer(directory, silent: silent);
     final Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
     void addAnalysisError(File file, AnalysisError error) {
       if (analysisErrors.containsKey(file.path)) {
@@ -621,10 +624,6 @@ linter:
         final String errorCode = parts[6];
         final int lineNumber = int.parse(line, radix: 10) - (isSnippet ? headerLength : 0);
         final int columnNumber = int.parse(column, radix: 10);
-        if (lineNumber < 0 && errorCode == 'unused_import') {
-          // We don't care about unused imports.
-          continue;
-        }
 
         // For when errors occur outside of the things we're trying to analyze.
         if (!isSnippet && !isSample) {
@@ -649,10 +648,6 @@ linter:
           );
         }
 
-        if (errorCode == 'unused_element' || errorCode == 'unused_local_variable') {
-          // We don't really care if sample code isn't used!
-          continue;
-        }
         if (isSample) {
           addAnalysisError(
             file,
@@ -739,7 +734,8 @@ linter:
       _exitCode = 0;
     }
     if (_exitCode == 0) {
-      print('No analysis errors in samples!');
+      if (!silent)
+        print('No analysis errors in samples!');
       assert(analysisErrors.isEmpty);
     }
     return analysisErrors;
@@ -960,24 +956,28 @@ Future<void> _runInteractive(Directory tempDir, Directory flutterPackage, String
     print('Using temp dir ${tempDir.path}');
   }
 
+  void analyze(SampleChecker checker, File file) {
+    final Map<String, Section> sections = <String, Section>{};
+    final Map<String, Sample> snippets = <String, Sample>{};
+    checker._extractSamples(<File>[file], silent: true, sectionMap: sections, sampleMap: snippets);
+    final Map<String, List<AnalysisError>> errors = checker._analyze(checker._tempDirectory, sections, snippets, silent: true);
+    stderr.writeln('\u001B[2J\u001B[H'); // Clears the old results from the terminal.
+    if (errors.isNotEmpty) {
+      for (final String filePath in errors.keys) {
+        errors[filePath].forEach(stderr.writeln);
+      }
+      stderr.writeln('\nFound ${errors.length} errors.');
+    } else {
+      stderr.writeln('\nNo issues found.');
+    }
+  }
+
   final SampleChecker checker = SampleChecker(flutterPackage, tempDirectory: tempDir)
-    .._createConfigurationFiles(tempDir)
-    .._extractSamples(<File>[file], silent: true);
+    .._createConfigurationFiles(tempDir);
+  analyze(checker, file);
 
-  await Isolate.spawn(_watcher, <dynamic>[checker, file]);
-
-  await Process.start(
-    _flutter,
-    <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', '--watch', '.'],
-    workingDirectory: tempDir.absolute.path,
-    mode: ProcessStartMode.inheritStdio
-  );
-}
-
-void _watcher(List<dynamic> args) {
-  final File file = args.last as File;
-  final SampleChecker checker = args.first as SampleChecker;
   Watcher(file.absolute.path).events.listen((_) {
-    checker._extractSamples(<File>[file], silent: true);
+    print('\n\nRerunning...');
+    analyze(checker, file);
   });
 }

@@ -118,16 +118,12 @@ class _FakeProcess implements Process {
   _FakeProcess(
     this._exitCode,
     Duration duration,
-    VoidCallback onRun,
     this.pid,
     this._stderr,
     this.stdin,
     this._stdout,
     this._completer,
   ) : exitCode = Future<void>.delayed(duration).then((void value) {
-        if (onRun != null) {
-          onRun();
-        }
         if (_completer != null) {
           return _completer.future.then((void _) => _exitCode);
         }
@@ -231,10 +227,12 @@ abstract class FakeProcessManager implements ProcessManager {
   ) {
     _pid += 1;
     final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
+    if (fakeCommand.onRun != null) {
+      fakeCommand.onRun();
+    }
     return _FakeProcess(
       fakeCommand.exitCode,
       fakeCommand.duration,
-      fakeCommand.onRun,
       _pid,
       fakeCommand.stderr,
       fakeCommand.stdin,
