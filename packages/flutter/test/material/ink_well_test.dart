@@ -1346,12 +1346,15 @@ void main() {
     }
 
     Future<void> test(Widget Function(Key? key, {bool onTapDownChangeWrap, bool onTapChangeWrap}) buildApp) async {
+      int frames;
+
       await tester.pumpWidget(buildApp(null, onTapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(false);
-      await tester.pumpAndSettle();
+      frames = await tester.pumpAndSettle();
+      expect(frames, 1);
       expectTest(false);
 
       await tester.pumpWidget(buildApp(const Key('foo'), onTapChangeWrap: true));
@@ -1359,7 +1362,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(false);
-      await tester.pumpAndSettle();
+      frames = await tester.pumpAndSettle();
+      expect(frames, 1);
       expectTest(false);
 
       // Does not call setState.
@@ -1368,7 +1372,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(true);
-      await tester.pumpAndSettle();
+      frames = await tester.pumpAndSettle();
+      expect(frames > 1, isTrue);
       expectTest(false);
 
       await tester.pumpWidget(buildApp(GlobalKey(), onTapChangeWrap: true));
@@ -1376,7 +1381,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(true);
-      await tester.pumpAndSettle();
+      frames = await tester.pumpAndSettle();
+      expect(frames > 1, isTrue);
       expectTest(false);
 
       await tester.pumpWidget(buildApp(GlobalKey(), onTapDownChangeWrap: true));
@@ -1385,7 +1391,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(true);
       await testGesture.up();
-      await tester.pumpAndSettle();
+      frames = await tester.pumpAndSettle();
+      expect(frames > 1, isTrue);
       expectTest(false);
     }
 
@@ -1521,12 +1528,13 @@ void main() {
   });
 
   testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, highlight should always be maintained.', (WidgetTester tester) async {
-    final Key key = GlobalKey();
     const Color hoverColor = Color(0xff00ff00);
-
+    final Key key = GlobalKey();
     int onHoverCount = 0;
     int callChangeReplaceCount = 0;
     bool replaced = false;
+    int frames;
+
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
@@ -1561,7 +1569,8 @@ void main() {
     addTearDown(gesture.removePointer);
     // When replaced is true, InkWell point at the top left is 1.
     await gesture.moveTo(Offset.zero);
-    await tester.pumpAndSettle();
+    frames = await tester.pumpAndSettle();
+    expect(frames > 1, isTrue);
     RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, isNot(paints..rect(color: hoverColor)));
     expect(onHoverCount, 2);
@@ -1569,7 +1578,8 @@ void main() {
     expect(replaced, true);
 
     await gesture.moveTo(tester.getCenter(find.byType(InkWell)));
-    await tester.pumpAndSettle();
+    frames = await tester.pumpAndSettle();
+    expect(frames > 1, isTrue);
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
     expect(onHoverCount, 3);
