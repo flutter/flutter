@@ -1348,6 +1348,7 @@ void main() {
     Future<void> test(Widget Function(Key? key, {bool onTapDownChangeWrap, bool onTapChangeWrap}) buildApp) async {
       await tester.pumpWidget(buildApp(null, onTapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(false);
       await tester.pumpAndSettle();
@@ -1355,6 +1356,7 @@ void main() {
 
       await tester.pumpWidget(buildApp(const Key('foo'), onTapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(false);
       await tester.pumpAndSettle();
@@ -1363,6 +1365,7 @@ void main() {
       // Does not call setState.
       await tester.pumpWidget(buildApp(GlobalKey()));
       await tester.tap(find.byType(InkWell));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(true);
       await tester.pumpAndSettle();
@@ -1370,6 +1373,7 @@ void main() {
 
       await tester.pumpWidget(buildApp(GlobalKey(), onTapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(true);
       await tester.pumpAndSettle();
@@ -1377,6 +1381,7 @@ void main() {
 
       await tester.pumpWidget(buildApp(GlobalKey(), onTapDownChangeWrap: true));
       final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
       expectTest(true);
       await testGesture.up();
@@ -1514,6 +1519,7 @@ void main() {
     ));
 
     await tester.tap(find.byType(InkWell));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
 
     final PaintPattern paintPattern = paints..circle();
