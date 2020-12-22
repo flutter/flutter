@@ -437,6 +437,7 @@ class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
 }
 
 /// How the icon in any `button.icon` should be placed, where `button` could be:
+/// 
 /// * [TextButton]
 /// * [ElevatedButton]
 /// * [OutlinedButton]
