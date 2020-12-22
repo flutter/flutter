@@ -330,7 +330,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
-    _restorableAnimationValue.setAnimationController(_controller, setState);
+    _restorableAnimationValue.setAnimationController(_controller);
   }
 
   @override
@@ -344,8 +344,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void dispose() {
     _historyEntry?.remove();
-    _controller.dispose();
     _restorableAnimationValue.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -637,30 +637,30 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 class _RestorableAnimationValue extends RestorableDouble {
   _RestorableAnimationValue(double defaultValue) : super(defaultValue);
 
-  AnimationController? _animationController;
-  AnimationController? get animationController => _animationController;
-  void setAnimationController(
-      AnimationController controller, StateSetter setState) {
+  void _updateAnimationValue(AnimationStatus status) {
+    // Only modify the value after the property has been registered with a
+    // RestorationMixin.
+    if (isRegistered && (status == AnimationStatus.completed || status == AnimationStatus.dismissed)) {
+      value = _animationController.value;
+    }
+  }
+
+  late AnimationController _animationController;
+  /// Sets the animation controller for the [RestorableDouble].
+  ///
+  /// This adds a listener to the [AnimationController] to update the
+  /// restorable animation value whenever an animation completes or
+  /// is dismissed.
+  void setAnimationController(AnimationController controller) {
     _animationController = controller;
-    // After setting the animation controller, add a listener that
-    // sets the animation controller value whenever an animation completes or
-    // is dismisses. This saves the latest animation state and serializes
-    // it on the device.
-    _animationController!.addStatusListener((AnimationStatus status) {
-      // Only modify the value after the property has been registered with a
-      // RestorationMixin.
-      if (isRegistered) {
-        if (status == AnimationStatus.completed) {
-          setState(() {
-            value = _animationController!.value;
-          });
-        } else if (status == AnimationStatus.dismissed) {
-          setState(() {
-            value = _animationController!.value;
-          });
-        }
-      }
-    });
+    _animationController.addStatusListener(_updateAnimationValue);
+  }
+  AnimationController get animationController => _animationController;
+
+  @override
+  void dispose() {
+    _animationController.removeStatusListener(_updateAnimationValue);
+    super.dispose();
   }
 
   @override
@@ -671,8 +671,8 @@ class _RestorableAnimationValue extends RestorableDouble {
     final double? savedAnimationValue = data as double?;
     if (_animationController != null &&
         savedAnimationValue != null &&
-        _animationController!.value != savedAnimationValue) {
-      _animationController!.value = savedAnimationValue;
+        _animationController.value != savedAnimationValue) {
+      _animationController.value = savedAnimationValue;
     }
     return super.fromPrimitives(data);
   }
