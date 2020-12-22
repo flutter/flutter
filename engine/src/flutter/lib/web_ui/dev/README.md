@@ -49,8 +49,6 @@ To run unit tests only:
 felt test --unit-tests-only
 ```
 
-Most of the unit tests are run using the html rendering backends. The unit tests under `test/cancaskit` directory use `canvaskit` backend.
-
 To run integration tests only. For now these tests are only available on Chrome Desktop browsers. These tests will fetch the flutter repository for using `flutter drive` and `flutter pub get` commands. The repository will be synced to the youngest commit older than the engine commit.
 
 ```
@@ -61,12 +59,6 @@ To skip cloning the flutter repository use the following flag. This flag can sav
 
 ```
 felt test --integration-tests-only --use-system-flutter
-```
-
-We can use different rendering backends for running the integrations tests. If one wants to use html backend use the following command. `web-renderer` flag accepts 3 different options: `html`, `canvaskit`, `auto`.
-
-```
-felt test --integration-tests-only --web-renderer=html
 ```
 
 To run tests on Firefox (this will work only on a Linux device):
