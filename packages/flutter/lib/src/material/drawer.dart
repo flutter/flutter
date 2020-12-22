@@ -236,6 +236,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
+    this.restorationId,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -298,6 +299,8 @@ class DrawerController extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double? edgeDragWidth;
 
+  final String? restorationId;
+
   @override
   DrawerControllerState createState() => DrawerControllerState();
 }
@@ -305,7 +308,9 @@ class DrawerController extends StatefulWidget {
 /// State for a [DrawerController].
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
-class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin {
+class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin, RestorationMixin {
+  final _RestorableAnimationValue _restorableAnimationValue = _RestorableAnimationValue(0.0);
+
   @override
   void initState() {
     super.initState();
@@ -313,12 +318,22 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
+    _restorableAnimationValue.setAnimationController(_controller, setState);
+  }
+
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_restorableAnimationValue, 'animation_value');
   }
 
   @override
   void dispose() {
     _historyEntry?.remove();
     _controller.dispose();
+    _restorableAnimationValue.dispose();
     super.dispose();
   }
 
@@ -604,5 +619,49 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       style: ListTileStyle.drawer,
       child: _buildDrawer(context),
     );
+  }
+}
+
+class _RestorableAnimationValue extends RestorableDouble {
+  _RestorableAnimationValue(double defaultValue) : super(defaultValue);
+
+  AnimationController? _animationController;
+  AnimationController? get animationController => _animationController;
+  void setAnimationController(
+      AnimationController controller, StateSetter setState) {
+    _animationController = controller;
+    // After setting the animation controller, add a listener that
+    // sets the animation controller value whenever an animation completes or
+    // is dismisses. This saves the latest animation state and serializes
+    // it on the device.
+    _animationController!.addStatusListener((AnimationStatus status) {
+      // Only modify the value after the property has been registered with a
+      // RestorationMixin.
+      if (isRegistered) {
+        if (status == AnimationStatus.completed) {
+          setState(() {
+            value = _animationController!.value;
+          });
+        } else if (status == AnimationStatus.dismissed) {
+          setState(() {
+            value = _animationController!.value;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  double fromPrimitives(Object? data) {
+    assert(data != null);
+    // When retrieving serialized data, set the animation controller value to
+    // the saved value.
+    final double? savedAnimationValue = data as double?;
+    if (_animationController != null &&
+        savedAnimationValue != null &&
+        _animationController!.value != savedAnimationValue) {
+      _animationController!.value = savedAnimationValue;
+    }
+    return super.fromPrimitives(data);
   }
 }

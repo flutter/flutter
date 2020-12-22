@@ -2859,6 +2859,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
+          restorationId: 'end_drawer',
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2884,6 +2885,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
+          restorationId: 'drawer',
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
