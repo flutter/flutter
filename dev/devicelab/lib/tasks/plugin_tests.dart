@@ -117,27 +117,31 @@ class _FlutterProject {
     });
 
     final _FlutterProject project = _FlutterProject(directory, name);
-    if (template == 'plugin' && target == 'ios') {
-      project._reduceIOSPluginMinimumVersion(name);
+    if (template == 'plugin' && (target == 'ios' || target == 'macos')) {
+      project._reduceDarwinPluginMinimumVersion(name, target);
     }
     return project;
   }
 
   // Make the platform version artificially low to test that the "deployment
   // version too low" warning is never emitted.
-  void _reduceIOSPluginMinimumVersion(String plugin) {
-    final File podspec = File(path.join(rootPath, 'ios', '$plugin.podspec'));
+  void _reduceDarwinPluginMinimumVersion(String plugin, String target) {
+    final File podspec = File(path.join(rootPath, target, '$plugin.podspec'));
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
-    const String versionString = "s.platform = :ios, '8.0'";
+    final String versionString = target == 'ios'
+        ? "s.platform = :ios, '8.0'"
+        : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
-      throw TaskResult.failure('Update this test to match plugin minimum iOS deployment version');
+      throw TaskResult.failure('Update this test to match plugin minimum $target deployment version');
     }
     podspecContent = podspecContent.replaceFirst(
       versionString,
-      "s.platform = :ios, '7.0'",
+      target == 'ios'
+          ? "s.platform = :ios, '7.0'"
+          : "s.platform = :osx, '10.8'"
     );
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
@@ -146,11 +150,13 @@ class _FlutterProject {
     await inDirectory(Directory(rootPath), () async {
       final String buildOutput =  await evalFlutter('build', options: <String>[target, '-v']);
 
-      if (target == 'ios') {
+      if (target == 'ios' || target == 'macos') {
         // This warning is confusing and shouldn't be emitted. Plugins often support lower versions than the
         // Flutter app, but as long as they support the minimum it will work.
         // warning: The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0,
         // but the range of supported deployment target versions is 9.0 to 14.0.99.
+        //
+        // (or "The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET'"...)
         if (buildOutput.contains('the range of supported deployment target versions')) {
           throw TaskResult.failure('Minimum plugin version warning present');
         }
