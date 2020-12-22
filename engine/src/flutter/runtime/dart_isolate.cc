@@ -90,7 +90,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     const fml::closure& isolate_shutdown_callback,
     std::optional<std::string> dart_entrypoint,
     std::optional<std::string> dart_entrypoint_library,
-    std::unique_ptr<IsolateConfiguration> isolate_configration) {
+    std::unique_ptr<IsolateConfiguration> isolate_configration,
+    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
   if (!isolate_snapshot) {
     FML_LOG(ERROR) << "Invalid isolate snapshot.";
     return {};
@@ -117,7 +118,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
                                    advisory_script_entrypoint,         //
                                    isolate_flags,                      //
                                    isolate_create_callback,            //
-                                   isolate_shutdown_callback           //
+                                   isolate_shutdown_callback,          //
+                                   std::move(volatile_path_tracker)    //
                                    )
                      .lock();
 
@@ -187,7 +189,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     std::string advisory_script_entrypoint,
     Flags flags,
     const fml::closure& isolate_create_callback,
-    const fml::closure& isolate_shutdown_callback) {
+    const fml::closure& isolate_shutdown_callback,
+    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
   TRACE_EVENT0("flutter", "DartIsolate::CreateRootIsolate");
 
   // The child isolate preparer is null but will be set when the isolate is
@@ -206,16 +209,17 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
 
   auto isolate_data = std::make_unique<std::shared_ptr<DartIsolate>>(
       std::shared_ptr<DartIsolate>(new DartIsolate(
-          settings,                        // settings
-          task_runners,                    // task runners
-          std::move(snapshot_delegate),    // snapshot delegate
-          std::move(hint_freed_delegate),  // hint freed delegate
-          std::move(io_manager),           // IO manager
-          std::move(unref_queue),          // Skia unref queue
-          std::move(image_decoder),        // Image Decoder
-          advisory_script_uri,             // advisory URI
-          advisory_script_entrypoint,      // advisory entrypoint
-          true                             // is_root_isolate
+          settings,                         // settings
+          task_runners,                     // task runners
+          std::move(snapshot_delegate),     // snapshot delegate
+          std::move(hint_freed_delegate),   // hint freed delegate
+          std::move(io_manager),            // IO manager
+          std::move(unref_queue),           // Skia unref queue
+          std::move(image_decoder),         // Image Decoder
+          advisory_script_uri,              // advisory URI
+          advisory_script_entrypoint,       // advisory entrypoint
+          true,                             // is_root_isolate
+          std::move(volatile_path_tracker)  // volatile path tracker
           )));
 
   DartErrorString error;
@@ -241,16 +245,18 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
   return (*root_isolate_data)->GetWeakIsolatePtr();
 }
 
-DartIsolate::DartIsolate(const Settings& settings,
-                         TaskRunners task_runners,
-                         fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-                         fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
-                         fml::WeakPtr<IOManager> io_manager,
-                         fml::RefPtr<SkiaUnrefQueue> unref_queue,
-                         fml::WeakPtr<ImageDecoder> image_decoder,
-                         std::string advisory_script_uri,
-                         std::string advisory_script_entrypoint,
-                         bool is_root_isolate)
+DartIsolate::DartIsolate(
+    const Settings& settings,
+    TaskRunners task_runners,
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
+    fml::WeakPtr<IOManager> io_manager,
+    fml::RefPtr<SkiaUnrefQueue> unref_queue,
+    fml::WeakPtr<ImageDecoder> image_decoder,
+    std::string advisory_script_uri,
+    std::string advisory_script_entrypoint,
+    bool is_root_isolate,
+    std::shared_ptr<VolatilePathTracker> volatile_path_tracker)
     : UIDartState(std::move(task_runners),
                   settings.task_observer_add,
                   settings.task_observer_remove,
@@ -264,7 +270,8 @@ DartIsolate::DartIsolate(const Settings& settings,
                   settings.log_tag,
                   settings.unhandled_exception_callback,
                   DartVMRef::GetIsolateNameServer(),
-                  is_root_isolate),
+                  is_root_isolate,
+                  std::move(volatile_path_tracker)),
       may_insecurely_connect_to_all_domains_(
           settings.may_insecurely_connect_to_all_domains),
       domain_network_policy_(settings.domain_network_policy) {
@@ -752,7 +759,8 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           DART_VM_SERVICE_ISOLATE_NAME,   // script entrypoint
           DartIsolate::Flags{flags},      // flags
           nullptr,                        // isolate create callback
-          nullptr                         // isolate shutdown callback
+          nullptr,                        // isolate shutdown callback
+          nullptr                         // volatile path tracker
       );
 
   std::shared_ptr<DartIsolate> service_isolate = weak_service_isolate.lock();
@@ -858,7 +866,8 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
           fml::WeakPtr<ImageDecoder>{},          // image_decoder
           advisory_script_uri,                   // advisory_script_uri
           advisory_script_entrypoint,            // advisory_script_entrypoint
-          false)));                              // is_root_isolate
+          false,                                 // is_root_isolate
+          nullptr)));                            // volatile path tracker
 
   Dart_Isolate vm_isolate = CreateDartIsolateGroup(
       std::move(isolate_group_data), std::move(isolate_data), flags, error);
@@ -903,7 +912,8 @@ bool DartIsolate::DartIsolateInitializeCallback(void** child_callback_data,
           (*isolate_group_data)->GetAdvisoryScriptURI(),  // advisory_script_uri
           (*isolate_group_data)
               ->GetAdvisoryScriptEntrypoint(),  // advisory_script_entrypoint
-          false)));                             // is_root_isolate
+          false,                                // is_root_isolate
+          nullptr)));                           // volatile path tracker
 
   // root isolate should have been created via CreateRootIsolate
   if (!InitializeIsolate(*embedder_isolate, isolate, error)) {
