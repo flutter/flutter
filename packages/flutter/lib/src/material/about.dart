@@ -51,7 +51,7 @@ import 'theme.dart';
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
-///    final TextStyle textStyle = Theme.of(context).textTheme!.bodyText2!;
+///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2!;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
 ///      SizedBox(height: 24),
 ///      RichText(
