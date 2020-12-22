@@ -1786,9 +1786,8 @@ class Scaffold extends StatefulWidget {
 
   /// Restoration ID to save and restore the state of the [Scaffold].
   ///
-  /// If it is non-null (and no [controller] has been provided), the scaffold
-  /// will persist and restore whether the [drawer] and [endDrawer] was open
-  /// or closed.
+  /// If it is non-null, the scaffold will persist and restore whether the
+  /// [drawer] and [endDrawer] was open or closed.
   ///
   /// The state of this widget is persisted in a [RestorationBucket] claimed
   /// from the surrounding [RestorationScope] using the provided restoration ID.

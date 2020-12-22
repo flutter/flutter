@@ -299,6 +299,18 @@ class DrawerController extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double? edgeDragWidth;
 
+  /// Restoration ID to save and restore the state of the [DrawerController].
+  ///
+  /// If it is non-null, the drawer's state will persist and restore
+  /// whether the drawer was open or closed.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
   final String? restorationId;
 
   @override
