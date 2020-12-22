@@ -442,9 +442,9 @@ class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
 /// * [ElevatedButton]
 /// * [OutlinedButton]
 enum ButtonIconAlignment {
-  /// Places the icon to the start of the button
+  /// Places the icon to the start of the button.
   start,
 
-  /// Places the icon to the end of the button
+  /// Places the icon to the end of the button.
   end,
 }
