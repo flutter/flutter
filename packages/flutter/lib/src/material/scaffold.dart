@@ -1459,6 +1459,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
+    this.restorationId,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1782,6 +1783,21 @@ class Scaffold extends StatefulWidget {
   ///
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
+
+  /// Restoration ID to save and restore the state of the [Scaffold].
+  ///
+  /// If it is non-null (and no [controller] has been provided), the scaffold
+  /// will persist and restore whether the [drawer] and [endDrawer] was open
+  /// or closed.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -2859,7 +2875,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
-          restorationId: 'end_drawer',
+          restorationId: widget.restorationId != null ? '${widget.restorationId}_end_drawer' : null,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2885,7 +2901,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
-          restorationId: 'drawer',
+          restorationId: widget.restorationId != null ? '${widget.restorationId}_drawer' : null,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching

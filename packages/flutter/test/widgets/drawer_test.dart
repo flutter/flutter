@@ -393,6 +393,52 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Scaffold.drawer - null restorationId ', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Text('drawer'),
+          body: Container(),
+        ),
+      ),
+    );
+    await tester.pump(); // no effect
+    expect(find.text('drawer'), findsNothing);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    await tester.restartAndRestore();
+    // Drawer state should not have been saved.
+    expect(find.text('drawer'), findsNothing);
+  });
+
+  testWidgets('Scaffold.endDrawer - null restorationId ', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Text('endDrawer'),
+          body: Container(),
+        ),
+      ),
+    );
+    await tester.pump(); // no effect
+    expect(find.text('endDrawer'), findsNothing);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    await tester.restartAndRestore();
+    // Drawer state should not have been saved.
+    expect(find.text('endDrawer'), findsNothing);
+  });
+
   testWidgets('Scaffold.drawer state restoration test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
@@ -400,6 +446,7 @@ void main() {
         restorationScopeId: 'app',
         home: Scaffold(
           key: scaffoldKey,
+          restorationId: 'scaffold',
           drawer: const Text('drawer'),
           body: Container(),
         ),
@@ -430,6 +477,7 @@ void main() {
         restorationScopeId: 'app',
         home: Scaffold(
           key: scaffoldKey,
+          restorationId: 'scaffold',
           endDrawer: const Text('endDrawer'),
           body: Container(),
         ),
@@ -459,6 +507,7 @@ void main() {
       MaterialApp(
         restorationScopeId: 'app',
         home: Scaffold(
+          restorationId: 'scaffold',
           key: scaffoldKey,
           drawer: const Text('drawer'),
           endDrawer: const Text('endDrawer'),
