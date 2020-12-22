@@ -960,16 +960,14 @@ mixin WidgetInspectorService {
   /// Structured errors provide semantic information that can be used by IDEs
   /// to enhance the display of errors with rich formatting.
   bool isStructuredErrorsEnabled() {
-    const String extension = 'flutter.inspector.structuredErrors';
+    // This is a debug mode only feature and will default to false for
+    // profile mode.
     bool enabled = false;
     assert(() {
-      enabled = const bool.fromEnvironment(extension, defaultValue: true);
+      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: true);
       return true;
     }());
-    if (enabled) {
-      return true;
-    }
-    return const bool.fromEnvironment(extension);
+    return enabled;
   }
 
   /// Called to register service extensions.
