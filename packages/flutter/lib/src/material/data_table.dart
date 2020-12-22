@@ -356,11 +356,9 @@ class DataCell {
 ///           cells: [DataCell(Text('Row $index'))],
 ///           selected: selected[index],
 ///           onSelectChanged: (bool? value) {
-///             if (value != null) {
-///               setState(() {
-///                 selected[index] = value;
-///               });
-///             }
+///             setState(() {
+///               selected[index] = value!;
+///             });
 ///           },
 ///         ),
 ///       ),
