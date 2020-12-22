@@ -48,11 +48,10 @@ export 'package:flutter/gestures.dart' show
 export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 
 // Examples can assume:
-// // @dart = 2.9
-// bool _lights;
+// late bool _lights;
 // void setState(VoidCallback fn) { }
-// String _last;
-// Color _color;
+// late String _last;
+// late Color _color;
 
 /// Factory for creating gesture recognizers.
 ///
@@ -1045,8 +1044,8 @@ class RawGestureDetector extends StatefulWidget {
   /// ```dart
   /// class ForcePressGestureDetectorWithSemantics extends StatelessWidget {
   ///   const ForcePressGestureDetectorWithSemantics({
-  ///     this.child,
-  ///     this.onForcePress,
+  ///     required this.child,
+  ///     required this.onForcePress,
   ///   });
   ///
   ///   final Widget child;

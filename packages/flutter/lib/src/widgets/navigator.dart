@@ -26,11 +26,10 @@ import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// class MyPage extends Placeholder { MyPage({String title}); }
+// class MyPage extends Placeholder { MyPage({String? title}); }
 // class MyHomePage extends Placeholder { }
-// NavigatorState navigator;
-// BuildContext context;
+// late NavigatorState navigator;
+// late BuildContext context;
 
 /// Creates a route for the given route settings.
 ///
@@ -734,7 +733,7 @@ abstract class RouteTransitionRecord {
 ///
 /// To make route transition decisions, subclass must implement [resolve].
 ///
-/// {@tool sample --template=freeform_no_null_safety}
+/// {@tool sample --template=freeform}
 /// The following example demonstrates how to implement a subclass that always
 /// removes or adds routes without animated transitions and puts the removed
 /// routes at the top of the list.
@@ -747,9 +746,9 @@ abstract class RouteTransitionRecord {
 /// class NoAnimationTransitionDelegate extends TransitionDelegate<void> {
 ///   @override
 ///   Iterable<RouteTransitionRecord> resolve({
-///     List<RouteTransitionRecord> newPageRouteHistory,
-///     Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
-///     Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
+///     required List<RouteTransitionRecord> newPageRouteHistory,
+///     required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
+///     required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
 ///   }) {
 ///     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
 ///
@@ -763,7 +762,7 @@ abstract class RouteTransitionRecord {
 ///     for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
 ///       if (exitingPageRoute.isWaitingForExitingDecision) {
 ///        exitingPageRoute.markForRemove();
-///        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+///        final List<RouteTransitionRecord>? pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
 ///        if (pagelessRoutes != null) {
 ///          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
 ///             pagelessRoute.markForRemove();
@@ -1267,7 +1266,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// [WidgetsApp] and [CupertinoTabView] widgets and do not need to be explicitly
 /// created or managed.
 ///
-/// {@tool sample --template=freeform_no_null_safety}
+/// {@tool sample --template=freeform}
 /// The following example demonstrates how a nested [Navigator] can be used to
 /// present a standalone user registration journey.
 ///
@@ -1305,7 +1304,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.headline4,
+///       style: Theme.of(context).textTheme.headline4!,
 ///       child: Container(
 ///         color: Colors.white,
 ///         alignment: Alignment.center,
@@ -1319,7 +1318,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.headline4,
+///       style: Theme.of(context).textTheme.headline4!,
 ///       child: GestureDetector(
 ///         onTap: () {
 ///           // This moves from the personal info page to the credentials page,
@@ -1339,7 +1338,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///
 /// class ChooseCredentialsPage extends StatelessWidget {
 ///   const ChooseCredentialsPage({
-///     this.onSignupComplete,
+///     required this.onSignupComplete,
 ///   });
 ///
 ///   final VoidCallback onSignupComplete;
@@ -1349,7 +1348,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///     return GestureDetector(
 ///       onTap: onSignupComplete,
 ///       child: DefaultTextStyle(
-///         style: Theme.of(context).textTheme.headline4,
+///         style: Theme.of(context).textTheme.headline4!,
 ///         child: Container(
 ///           color: Colors.pinkAccent,
 ///           alignment: Alignment.center,
@@ -1674,7 +1673,7 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// class WeatherRouteArguments {
-  ///   WeatherRouteArguments({ this.city, this.country });
+  ///   WeatherRouteArguments({ required this.city, required this.country });
   ///   final String city;
   ///   final String country;
   ///
@@ -2120,12 +2119,12 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -2215,12 +2214,12 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -2320,12 +2319,12 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -4364,12 +4363,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -4502,12 +4501,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -4608,12 +4607,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -5528,7 +5527,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// When [present] has been called to add a route, it may only be called again
 /// after the previously added route has completed.
 ///
-/// {@tool dartpad --template=freeform_no_null_safety}
+/// {@tool dartpad --template=freeform}
 /// This example uses a [RestorableRouteFuture] in the `_MyHomeState` to push a
 /// new `MyCounter` route and to retrieve its return value.
 ///
@@ -5557,7 +5556,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///
 /// ```dart
 /// class MyHome extends StatefulWidget {
-///   const MyHome({Key key}) : super(key: key);
+///   const MyHome({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   State<MyHome> createState() => _MyHomeState();
@@ -5565,7 +5564,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///
 /// class _MyHomeState extends State<MyHome> with RestorationMixin {
 ///   final RestorableInt _lastCount = RestorableInt(0);
-///   RestorableRouteFuture<int> _counterRoute;
+///   late RestorableRouteFuture<int> _counterRoute;
 ///
 ///   @override
 ///   String get restorationId => 'home';
@@ -5573,7 +5572,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   void initState() {
 ///     super.initState();
 ///     _counterRoute = RestorableRouteFuture<int>(
-///       onPresent: (NavigatorState navigator, Object arguments) {
+///       onPresent: (NavigatorState navigator, Object? arguments) {
 ///         // Defines what route should be shown (and how it should be added
 ///         // to the navigator) when `RestorableRouteFuture.present` is called.
 ///         return navigator.restorablePush(
@@ -5592,7 +5591,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   }
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     // Register the `RestorableRouteFuture` with the state restoration framework.
 ///     registerForRestoration(_counterRoute, 'route');
 ///     registerForRestoration(_lastCount, 'count');
@@ -5602,12 +5601,12 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   void dispose() {
 ///     super.dispose();
 ///     _lastCount.dispose();
-///     _counterRoute?.dispose();
+///     _counterRoute.dispose();
 ///   }
 ///
 ///   // A static `RestorableRouteBuilder` that can re-create the route during
 ///   // state restoration.
-///   static Route<int> _counterRouteBuilder(BuildContext context, Object arguments) {
+///   static Route<int> _counterRouteBuilder(BuildContext context, Object? arguments) {
 ///     return MaterialPageRoute(
 ///       builder: (BuildContext context) => MyCounter(
 ///         title: arguments as String,
@@ -5637,7 +5636,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///
 /// // Widget for the route pushed by the `RestorableRouteFuture`.
 /// class MyCounter extends StatefulWidget {
-///   const MyCounter({Key key, this.title}) : super(key: key);
+///   const MyCounter({Key? key, required this.title}) : super(key: key);
 ///
 ///   final String title;
 ///
@@ -5652,7 +5651,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   String get restorationId => 'counter';
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     registerForRestoration(_count, 'count');
 ///   }
 ///
