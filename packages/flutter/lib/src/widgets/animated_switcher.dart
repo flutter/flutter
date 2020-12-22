@@ -90,7 +90,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 /// The type of transition can be changed from a cross-fade to a custom
 /// transition by setting the [transitionBuilder].
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
 /// This sample shows a counter that animates the scale of a text widget
 /// whenever the value changes.
 ///

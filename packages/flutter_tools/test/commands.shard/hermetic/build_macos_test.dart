@@ -97,7 +97,6 @@ void main() {
         else
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
-        'EXCLUDED_ARCHS=arm64',
       ],
       stdout: 'STDOUT STUFF',
       onRun: () {
@@ -260,12 +259,12 @@ void main() {
       'DART_OBFUSCATION=true',
       'EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable',
       'EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable',
-      'FLUTTER_FRAMEWORK_DIR=.',
       'SPLIT_DEBUG_INFO=foo/',
       'TRACK_WIDGET_CREATION=true',
       'TREE_SHAKE_ICONS=true',
       'FLUTTER_TARGET=lib/other.dart',
       'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
+      'EXCLUDED_ARCHS=arm64',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -345,6 +344,7 @@ void main() {
     );
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(buffer.toString(), contains('event {category: code-size-analysis, action: macos, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

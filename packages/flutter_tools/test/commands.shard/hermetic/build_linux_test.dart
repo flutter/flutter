@@ -224,6 +224,7 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
 /foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
 /foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+/foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
 [3/6] Building CXX object CMakeFiles/foo_bar.dir/flutter/generated_plugin_registrant.cc.o
 [4/6] Building CXX object CMakeFiles/foo_bar.dir/my_application.cc.o
 [5/6] Linking CXX executable intermediates_do_not_run/foo_bar
@@ -249,6 +250,7 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
 /foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
 /foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+/foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ''');
   }, overrides: <Type, Generator>{
@@ -362,17 +364,17 @@ clang: error: linker command failed with exit code 1 (use -v to see invocation)
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-      r'  "DART_DEFINES=\"foo.bar%3D2,fizz.far%3D3\""',
-      r'  "DART_OBFUSCATION=\"true\""',
-      r'  "EXTRA_FRONT_END_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "SPLIT_DEBUG_INFO=\"foo/\""',
-      r'  "TRACK_WIDGET_CREATION=\"true\""',
-      r'  "TREE_SHAKE_ICONS=\"true\""',
-      '  "FLUTTER_ROOT=\\"$_kTestFlutterRoot\\""',
-      '  "PROJECT_DIR=\\"${fileSystem.currentDirectory.path}\\""',
-      r'  "FLUTTER_TARGET=\"lib/other.dart\""',
-      r'  "BUNDLE_SKSL_PATH=\"foo/bar.sksl.json\""',
+      '  "DART_DEFINES=foo.bar%3D2,fizz.far%3D3"',
+      '  "DART_OBFUSCATION=true"',
+      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "SPLIT_DEBUG_INFO=foo/"',
+      '  "TRACK_WIDGET_CREATION=true"',
+      '  "TREE_SHAKE_ICONS=true"',
+      '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
+      '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
+      '  "FLUTTER_TARGET=lib/other.dart"',
+      '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -459,6 +461,7 @@ set(BINARY_NAME "fizz_bar")
     );
 
     expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(buffer.toString(), contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

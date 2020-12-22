@@ -20,6 +20,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.util.VersionNumber
 
 buildscript {
     repositories {
@@ -304,7 +305,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.dependencies {
             implementation pluginProject
         }
-        Closure addEmbeddingCompileOnlyDependency = { buildType ->
+        Closure addEmbeddingDependencyToPlugin = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // In AGP 3.5, the embedding must be added as an API implementation,
             // so java8 features are desugared against the runtime classpath.
@@ -317,15 +318,37 @@ class FlutterPlugin implements Plugin<Project> {
             pluginProject.android.buildTypes {
                 "${buildType.name}" {}
             }
-            pluginProject.dependencies.add(
-                "${buildType.name}CompileOnly",
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
+            // The embedding is a compileOnly dependency of a Flutter plugin,
+            // however prior to Gradle 6.0.0, it must be an API dependency.
+            //
+            // Not doing so, causes transitive dependency resolution conflicts.
+            // That is, the embedding dependencies resolved in the plugin are
+            // different than the ones resolved in the app.
+            if (isGradleVersionGraterOrEqualThan('6.0.0')) {
+              addCompileOnlyDependency(
+                pluginProject,
+                buildType.name,
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
+              )
+            } else {
+              addApiDependencies(
+                pluginProject,
+                buildType.name,
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
+              )
+            }
         }
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
-            project.android.buildTypes.each addEmbeddingCompileOnlyDependency
-            project.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
+            project.android.buildTypes.each addEmbeddingDependencyToPlugin
+            project.android.buildTypes.whenObjectAdded addEmbeddingDependencyToPlugin
         }
+    }
+
+    // Returns `true` if the current Gradle version is greater or equal to the given version.
+    private isGradleVersionGraterOrEqualThan(String version) {
+      return VersionNumber.parse(project.gradle.gradleVersion)
+          .compareTo(VersionNumber.parse(version)) >= 0
     }
 
     // Returns `true` if the given path contains an `android/build.gradle` file.

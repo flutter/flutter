@@ -138,7 +138,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   ///     1: Text('Child 2'),
   ///   };
   ///
-  ///   int currentValue;
+  ///   late int currentValue;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
