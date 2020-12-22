@@ -330,7 +330,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
-    _restorableAnimationValue.setAnimationController(_controller);
+    _restorableAnimationValue.registerAnimationController(_controller);
   }
 
   @override
@@ -651,7 +651,7 @@ class _RestorableAnimationValue extends RestorableDouble {
   /// This adds a listener to the [AnimationController] to update the
   /// restorable animation value whenever an animation completes or
   /// is dismissed.
-  void setAnimationController(AnimationController controller) {
+  void registerAnimationController(AnimationController controller) {
     _animationController = controller;
     _animationController.addStatusListener(_updateAnimationValue);
   }
