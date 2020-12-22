@@ -1771,6 +1771,38 @@ void main() {
       expect(editable.paintCount, 0);
       expect(painter.paintCount, 1);
     });
+
+    test('repaints when its RenderEditable repaints', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.setPainter(painter);
+      pumpFrame(phase: EnginePhase.paint);
+      editable.paintCount = 0;
+      painter.paintCount = 0;
+
+      editable.markNeedsPaint();
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(editable.paintCount, 1);
+      expect(painter.paintCount, 1);
+    });
+
+    test('correct coordinate space', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.setPainter(painter);
+      editable.offset = ViewportOffset.fixed(1000);
+
+      pumpFrame(phase: EnginePhase.compositingBits);
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph()
+      );
+    });
   });
 }
 

@@ -975,6 +975,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
+  @override
+  void markNeedsPaint() {
+    super.markNeedsPaint();
+    // Tell the painers to repaint since text layout may have changed.
+    _foregroundRenderObject?.markNeedsPaint();
+    _backgroundRenderObject?.markNeedsPaint();
+  }
+
   /// Marks the render object as needing to be laid out again and have its text
   /// metrics recomputed.
   ///
