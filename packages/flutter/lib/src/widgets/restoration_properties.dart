@@ -297,7 +297,7 @@ class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
 /// A [RestorableProperty] that knows how to store and restore a [num]
 /// that is nullable.
 ///
-/// {@macro flutter.widgets.RestorableNumN}
+/// {@macro flutter.widgets.RestorableNum}
 ///
 /// Instead of using the more generic [RestorableNumN] directly, consider using
 /// one of the more specific subclasses (e.g. [RestorableDoubleN] to store a
@@ -309,7 +309,7 @@ class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
 class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<num?> {
   /// Creates a [RestorableNumN].
   ///
-  /// {@macro flutter.widgets.RestorableNumN.constructor}
+  /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableNumN(num? defaultValue) : super(defaultValue);
 }
 
