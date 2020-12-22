@@ -20,6 +20,7 @@ import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'ticker_provider.dart';
 
@@ -879,13 +880,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   void _updateScrollPosition(double primaryDelta) {
     assert(_currentController != null);
+    final ScrollPosition position = _currentController!.position;
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
-    // time _dragScrollbar was called, into the coordinate space of the scroll
+    // time _updateScrollPosition was called, into the coordinate space of the scroll
     // position, and jump to that position.
     final double scrollOffsetLocal = scrollbarPainter.getTrackToScroll(primaryDelta);
-    final double scrollOffsetGlobal = scrollOffsetLocal + _currentController!.position.pixels;
-    _currentController!.position.jumpTo(scrollOffsetGlobal);
+    final double scrollOffsetGlobal = scrollOffsetLocal + position.pixels;
+    if (scrollOffsetGlobal != position.pixels) {
+      // Ensure we don't drag into overscroll if the physics do not allow it.
+      final double physicsAdjustment = position.physics.applyBoundaryConditions(position, scrollOffsetGlobal);
+      position.jumpTo(scrollOffsetGlobal - physicsAdjustment);
+    }
   }
 
   void _maybeStartFadeoutTimer() {
