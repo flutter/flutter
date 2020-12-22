@@ -378,7 +378,7 @@ final ArgParser _argParser = ArgParser()
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
   )
   ..addOption(
-    'results-path',
+    'results-file',
     help: '[Flutter infrastructure] File path for test results. If passed with\n'
           'task, will write test results to the file.'
   )
