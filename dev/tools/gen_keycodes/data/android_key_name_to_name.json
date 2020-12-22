@@ -239,7 +239,6 @@
   "slash": ["SLASH"],
   "sleep": ["SLEEP"],
   "space": ["SPACE"],
-  "standby": ["SLEEP"],
   "stbInput": ["STB_INPUT"],
   "stbPower": ["STB_POWER"],
   "suspend": ["SUSPEND"],

@@ -135,7 +135,7 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'windows-domkey',
-    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_windows_name.json'),
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'windows_logical_to_window_vk.json'),
     help: 'The path to where the Windows keycode to DomKey mapping is.',
   );
   argParser.addOption(
@@ -274,13 +274,6 @@ Future<void> main(List<String> rawArguments) async {
   }
   print('Writing ${'key codes'.padRight(15)}${codeFile.absolute}');
   await codeFile.writeAsString(KeyboardKeysCodeGenerator(physicalData, logicalData).generate());
-
-  final File mapsFile = File(parsedArguments['maps'] as String);
-  if (!mapsFile.existsSync()) {
-    mapsFile.createSync(recursive: true);
-  }
-  print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
-  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData).generate());
 
   for (final String platform in <String>['android', 'macos', 'ios', 'glfw', 'fuchsia', 'linux', 'windows', 'web']) {
     PlatformCodeGenerator codeGenerator;

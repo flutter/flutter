@@ -1,4 +1,25 @@
 {
+  "none": {
+    "constant": "none",
+    "english": "None",
+    "value": 0,
+    "names": {
+      "web": [
+        "None"
+      ],
+      "android": [
+        "UNKNOWN"
+      ]
+    },
+    "values": {
+      "web": [
+        0
+      ],
+      "android": [
+        0
+      ]
+    }
+  },
   "unidentified": {
     "constant": "unidentified",
     "english": "Unidentified",
@@ -159,6 +180,9 @@
     "english": "Space",
     "value": 32,
     "names": {
+      "web": [
+        "Space"
+      ],
       "gtk": [
         "KP_Space"
       ],
@@ -170,6 +194,9 @@
       ]
     },
     "values": {
+      "web": [
+        32
+      ],
       "gtk": [
         65408
       ],
@@ -185,84 +212,172 @@
     "constant": "exclamation",
     "english": "Exclamation",
     "value": 33,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Exclamation"
+      ]
+    },
+    "values": {
+      "web": [
+        33
+      ]
+    }
   },
-  "quoteDouble": {
-    "constant": "quoteDouble",
-    "english": "Quote Double",
+  "quote": {
+    "constant": "quote",
+    "english": "Quote",
     "value": 34,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Quote"
+      ],
+      "windows": [
+        "OEM_7"
+      ],
+      "android": [
+        "APOSTROPHE"
+      ]
+    },
+    "values": {
+      "web": [
+        34
+      ],
+      "windows": [
+        222
+      ],
+      "android": [
+        75
+      ]
+    }
   },
   "numberSign": {
     "constant": "numberSign",
     "english": "Number Sign",
     "value": 35,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "NumberSign"
+      ]
+    },
+    "values": {
+      "web": [
+        35
+      ]
+    }
   },
   "dollar": {
     "constant": "dollar",
     "english": "Dollar",
     "value": 36,
-    "names": {},
-    "values": {}
-  },
-  "percent": {
-    "constant": "percent",
-    "english": "Percent",
-    "value": 37,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Dollar"
+      ]
+    },
+    "values": {
+      "web": [
+        36
+      ]
+    }
   },
   "ampersand": {
     "constant": "ampersand",
     "english": "Ampersand",
     "value": 38,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Ampersand"
+      ]
+    },
+    "values": {
+      "web": [
+        38
+      ]
+    }
   },
   "quoteSingle": {
     "constant": "quoteSingle",
     "english": "Quote Single",
     "value": 39,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "QuoteSingle"
+      ]
+    },
+    "values": {
+      "web": [
+        39
+      ]
+    }
   },
   "parenthesisLeft": {
     "constant": "parenthesisLeft",
     "english": "Parenthesis Left",
     "value": 40,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "ParenthesisLeft"
+      ]
+    },
+    "values": {
+      "web": [
+        40
+      ]
+    }
   },
   "parenthesisRight": {
     "constant": "parenthesisRight",
     "english": "Parenthesis Right",
     "value": 41,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "ParenthesisRight"
+      ]
+    },
+    "values": {
+      "web": [
+        41
+      ]
+    }
   },
   "asterisk": {
     "constant": "asterisk",
     "english": "Asterisk",
     "value": 42,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Asterisk"
+      ]
+    },
+    "values": {
+      "web": [
+        42
+      ]
+    }
   },
   "add": {
     "constant": "add",
     "english": "Add",
     "value": 43,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Add"
+      ]
+    },
+    "values": {
+      "web": [
+        43
+      ]
+    }
   },
   "comma": {
     "constant": "comma",
     "english": "Comma",
     "value": 44,
     "names": {
+      "web": [
+        "Comma"
+      ],
       "windows": [
         "OEM_COMMA"
       ],
@@ -271,6 +386,9 @@
       ]
     },
     "values": {
+      "web": [
+        44
+      ],
       "windows": [
         188
       ],
@@ -284,6 +402,9 @@
     "english": "Minus",
     "value": 45,
     "names": {
+      "web": [
+        "Minus"
+      ],
       "windows": [
         "OEM_MINUS"
       ],
@@ -292,6 +413,9 @@
       ]
     },
     "values": {
+      "web": [
+        45
+      ],
       "windows": [
         189
       ],
@@ -305,6 +429,9 @@
     "english": "Period",
     "value": 46,
     "names": {
+      "web": [
+        "Period"
+      ],
       "gtk": [
         "KP_Decimal"
       ],
@@ -316,6 +443,9 @@
       ]
     },
     "values": {
+      "web": [
+        46
+      ],
       "gtk": [
         65454
       ],
@@ -332,6 +462,9 @@
     "english": "Slash",
     "value": 47,
     "names": {
+      "web": [
+        "Slash"
+      ],
       "windows": [
         "OEM_2"
       ],
@@ -340,6 +473,9 @@
       ]
     },
     "values": {
+      "web": [
+        47
+      ],
       "windows": [
         191
       ],
@@ -353,11 +489,17 @@
     "english": "Digit 0",
     "value": 48,
     "names": {
+      "web": [
+        "Digit0"
+      ],
       "android": [
         "0"
       ]
     },
     "values": {
+      "web": [
+        48
+      ],
       "android": [
         7
       ]
@@ -368,11 +510,17 @@
     "english": "Digit 1",
     "value": 49,
     "names": {
+      "web": [
+        "Digit1"
+      ],
       "android": [
         "1"
       ]
     },
     "values": {
+      "web": [
+        49
+      ],
       "android": [
         8
       ]
@@ -383,11 +531,17 @@
     "english": "Digit 2",
     "value": 50,
     "names": {
+      "web": [
+        "Digit2"
+      ],
       "android": [
         "2"
       ]
     },
     "values": {
+      "web": [
+        50
+      ],
       "android": [
         9
       ]
@@ -398,11 +552,17 @@
     "english": "Digit 3",
     "value": 51,
     "names": {
+      "web": [
+        "Digit3"
+      ],
       "android": [
         "3"
       ]
     },
     "values": {
+      "web": [
+        51
+      ],
       "android": [
         10
       ]
@@ -413,11 +573,17 @@
     "english": "Digit 4",
     "value": 52,
     "names": {
+      "web": [
+        "Digit4"
+      ],
       "android": [
         "4"
       ]
     },
     "values": {
+      "web": [
+        52
+      ],
       "android": [
         11
       ]
@@ -428,11 +594,17 @@
     "english": "Digit 5",
     "value": 53,
     "names": {
+      "web": [
+        "Digit5"
+      ],
       "android": [
         "5"
       ]
     },
     "values": {
+      "web": [
+        53
+      ],
       "android": [
         12
       ]
@@ -443,11 +615,17 @@
     "english": "Digit 6",
     "value": 54,
     "names": {
+      "web": [
+        "Digit6"
+      ],
       "android": [
         "6"
       ]
     },
     "values": {
+      "web": [
+        54
+      ],
       "android": [
         13
       ]
@@ -458,11 +636,17 @@
     "english": "Digit 7",
     "value": 55,
     "names": {
+      "web": [
+        "Digit7"
+      ],
       "android": [
         "7"
       ]
     },
     "values": {
+      "web": [
+        55
+      ],
       "android": [
         14
       ]
@@ -473,11 +657,17 @@
     "english": "Digit 8",
     "value": 56,
     "names": {
+      "web": [
+        "Digit8"
+      ],
       "android": [
         "8"
       ]
     },
     "values": {
+      "web": [
+        56
+      ],
       "android": [
         15
       ]
@@ -488,11 +678,17 @@
     "english": "Digit 9",
     "value": 57,
     "names": {
+      "web": [
+        "Digit9"
+      ],
       "android": [
         "9"
       ]
     },
     "values": {
+      "web": [
+        57
+      ],
       "android": [
         16
       ]
@@ -502,14 +698,25 @@
     "constant": "colon",
     "english": "Colon",
     "value": 58,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Colon"
+      ]
+    },
+    "values": {
+      "web": [
+        58
+      ]
+    }
   },
   "semicolon": {
     "constant": "semicolon",
     "english": "Semicolon",
     "value": 59,
     "names": {
+      "web": [
+        "Semicolon"
+      ],
       "windows": [
         "OEM_1"
       ],
@@ -518,6 +725,9 @@
       ]
     },
     "values": {
+      "web": [
+        59
+      ],
       "windows": [
         186
       ],
@@ -530,14 +740,25 @@
     "constant": "less",
     "english": "Less",
     "value": 60,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Less"
+      ]
+    },
+    "values": {
+      "web": [
+        60
+      ]
+    }
   },
   "equal": {
     "constant": "equal",
     "english": "Equal",
     "value": 61,
     "names": {
+      "web": [
+        "Equal"
+      ],
       "windows": [
         "OEM_PLUS"
       ],
@@ -546,6 +767,9 @@
       ]
     },
     "values": {
+      "web": [
+        61
+      ],
       "windows": [
         187
       ],
@@ -558,28 +782,55 @@
     "constant": "greater",
     "english": "Greater",
     "value": 62,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Greater"
+      ]
+    },
+    "values": {
+      "web": [
+        62
+      ]
+    }
   },
   "question": {
     "constant": "question",
     "english": "Question",
     "value": 63,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Question"
+      ]
+    },
+    "values": {
+      "web": [
+        63
+      ]
+    }
   },
   "at": {
     "constant": "at",
     "english": "At",
     "value": 64,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "At"
+      ]
+    },
+    "values": {
+      "web": [
+        64
+      ]
+    }
   },
   "bracketLeft": {
     "constant": "bracketLeft",
     "english": "Bracket Left",
     "value": 91,
     "names": {
+      "web": [
+        "BracketLeft"
+      ],
       "windows": [
         "OEM_4"
       ],
@@ -588,6 +839,9 @@
       ]
     },
     "values": {
+      "web": [
+        91
+      ],
       "windows": [
         219
       ],
@@ -601,6 +855,9 @@
     "english": "Backslash",
     "value": 92,
     "names": {
+      "web": [
+        "Backslash"
+      ],
       "windows": [
         "OEM_5"
       ],
@@ -609,6 +866,9 @@
       ]
     },
     "values": {
+      "web": [
+        92
+      ],
       "windows": [
         220
       ],
@@ -622,6 +882,9 @@
     "english": "Bracket Right",
     "value": 93,
     "names": {
+      "web": [
+        "BracketRight"
+      ],
       "windows": [
         "OEM_6"
       ],
@@ -630,6 +893,9 @@
       ]
     },
     "values": {
+      "web": [
+        93
+      ],
       "windows": [
         221
       ],
@@ -642,21 +908,40 @@
     "constant": "caret",
     "english": "Caret",
     "value": 94,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Caret"
+      ]
+    },
+    "values": {
+      "web": [
+        94
+      ]
+    }
   },
   "underscore": {
     "constant": "underscore",
     "english": "Underscore",
     "value": 95,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Underscore"
+      ]
+    },
+    "values": {
+      "web": [
+        95
+      ]
+    }
   },
   "backquote": {
     "constant": "backquote",
     "english": "Backquote",
     "value": 96,
     "names": {
+      "web": [
+        "Backquote"
+      ],
       "windows": [
         "OEM_3"
       ],
@@ -665,6 +950,9 @@
       ]
     },
     "values": {
+      "web": [
+        96
+      ],
       "windows": [
         192
       ],
@@ -678,11 +966,17 @@
     "english": "Key A",
     "value": 97,
     "names": {
+      "web": [
+        "KeyA"
+      ],
       "android": [
         "A"
       ]
     },
     "values": {
+      "web": [
+        97
+      ],
       "android": [
         29
       ]
@@ -693,11 +987,17 @@
     "english": "Key B",
     "value": 98,
     "names": {
+      "web": [
+        "KeyB"
+      ],
       "android": [
         "B"
       ]
     },
     "values": {
+      "web": [
+        98
+      ],
       "android": [
         30
       ]
@@ -708,11 +1008,17 @@
     "english": "Key C",
     "value": 99,
     "names": {
+      "web": [
+        "KeyC"
+      ],
       "android": [
         "C"
       ]
     },
     "values": {
+      "web": [
+        99
+      ],
       "android": [
         31
       ]
@@ -723,11 +1029,17 @@
     "english": "Key D",
     "value": 100,
     "names": {
+      "web": [
+        "KeyD"
+      ],
       "android": [
         "D"
       ]
     },
     "values": {
+      "web": [
+        100
+      ],
       "android": [
         32
       ]
@@ -738,11 +1050,17 @@
     "english": "Key E",
     "value": 101,
     "names": {
+      "web": [
+        "KeyE"
+      ],
       "android": [
         "E"
       ]
     },
     "values": {
+      "web": [
+        101
+      ],
       "android": [
         33
       ]
@@ -753,11 +1071,17 @@
     "english": "Key F",
     "value": 102,
     "names": {
+      "web": [
+        "KeyF"
+      ],
       "android": [
         "F"
       ]
     },
     "values": {
+      "web": [
+        102
+      ],
       "android": [
         34
       ]
@@ -768,11 +1092,17 @@
     "english": "Key G",
     "value": 103,
     "names": {
+      "web": [
+        "KeyG"
+      ],
       "android": [
         "G"
       ]
     },
     "values": {
+      "web": [
+        103
+      ],
       "android": [
         35
       ]
@@ -783,11 +1113,17 @@
     "english": "Key H",
     "value": 104,
     "names": {
+      "web": [
+        "KeyH"
+      ],
       "android": [
         "H"
       ]
     },
     "values": {
+      "web": [
+        104
+      ],
       "android": [
         36
       ]
@@ -798,11 +1134,17 @@
     "english": "Key I",
     "value": 105,
     "names": {
+      "web": [
+        "KeyI"
+      ],
       "android": [
         "I"
       ]
     },
     "values": {
+      "web": [
+        105
+      ],
       "android": [
         37
       ]
@@ -813,11 +1155,17 @@
     "english": "Key J",
     "value": 106,
     "names": {
+      "web": [
+        "KeyJ"
+      ],
       "android": [
         "J"
       ]
     },
     "values": {
+      "web": [
+        106
+      ],
       "android": [
         38
       ]
@@ -828,11 +1176,17 @@
     "english": "Key K",
     "value": 107,
     "names": {
+      "web": [
+        "KeyK"
+      ],
       "android": [
         "K"
       ]
     },
     "values": {
+      "web": [
+        107
+      ],
       "android": [
         39
       ]
@@ -843,11 +1197,17 @@
     "english": "Key L",
     "value": 108,
     "names": {
+      "web": [
+        "KeyL"
+      ],
       "android": [
         "L"
       ]
     },
     "values": {
+      "web": [
+        108
+      ],
       "android": [
         40
       ]
@@ -858,11 +1218,17 @@
     "english": "Key M",
     "value": 109,
     "names": {
+      "web": [
+        "KeyM"
+      ],
       "android": [
         "M"
       ]
     },
     "values": {
+      "web": [
+        109
+      ],
       "android": [
         41
       ]
@@ -873,11 +1239,17 @@
     "english": "Key N",
     "value": 110,
     "names": {
+      "web": [
+        "KeyN"
+      ],
       "android": [
         "N"
       ]
     },
     "values": {
+      "web": [
+        110
+      ],
       "android": [
         42
       ]
@@ -888,11 +1260,17 @@
     "english": "Key O",
     "value": 111,
     "names": {
+      "web": [
+        "KeyO"
+      ],
       "android": [
         "O"
       ]
     },
     "values": {
+      "web": [
+        111
+      ],
       "android": [
         43
       ]
@@ -903,11 +1281,17 @@
     "english": "Key P",
     "value": 112,
     "names": {
+      "web": [
+        "KeyP"
+      ],
       "android": [
         "P"
       ]
     },
     "values": {
+      "web": [
+        112
+      ],
       "android": [
         44
       ]
@@ -918,11 +1302,17 @@
     "english": "Key Q",
     "value": 113,
     "names": {
+      "web": [
+        "KeyQ"
+      ],
       "android": [
         "Q"
       ]
     },
     "values": {
+      "web": [
+        113
+      ],
       "android": [
         45
       ]
@@ -933,11 +1323,17 @@
     "english": "Key R",
     "value": 114,
     "names": {
+      "web": [
+        "KeyR"
+      ],
       "android": [
         "R"
       ]
     },
     "values": {
+      "web": [
+        114
+      ],
       "android": [
         46
       ]
@@ -948,11 +1344,17 @@
     "english": "Key S",
     "value": 115,
     "names": {
+      "web": [
+        "KeyS"
+      ],
       "android": [
         "S"
       ]
     },
     "values": {
+      "web": [
+        115
+      ],
       "android": [
         47
       ]
@@ -963,11 +1365,17 @@
     "english": "Key T",
     "value": 116,
     "names": {
+      "web": [
+        "KeyT"
+      ],
       "android": [
         "T"
       ]
     },
     "values": {
+      "web": [
+        116
+      ],
       "android": [
         48
       ]
@@ -978,11 +1386,17 @@
     "english": "Key U",
     "value": 117,
     "names": {
+      "web": [
+        "KeyU"
+      ],
       "android": [
         "U"
       ]
     },
     "values": {
+      "web": [
+        117
+      ],
       "android": [
         49
       ]
@@ -993,11 +1407,17 @@
     "english": "Key V",
     "value": 118,
     "names": {
+      "web": [
+        "KeyV"
+      ],
       "android": [
         "V"
       ]
     },
     "values": {
+      "web": [
+        118
+      ],
       "android": [
         50
       ]
@@ -1008,11 +1428,17 @@
     "english": "Key W",
     "value": 119,
     "names": {
+      "web": [
+        "KeyW"
+      ],
       "android": [
         "W"
       ]
     },
     "values": {
+      "web": [
+        119
+      ],
       "android": [
         51
       ]
@@ -1023,11 +1449,17 @@
     "english": "Key X",
     "value": 120,
     "names": {
+      "web": [
+        "KeyX"
+      ],
       "android": [
         "X"
       ]
     },
     "values": {
+      "web": [
+        120
+      ],
       "android": [
         52
       ]
@@ -1038,11 +1470,17 @@
     "english": "Key Y",
     "value": 121,
     "names": {
+      "web": [
+        "KeyY"
+      ],
       "android": [
         "Y"
       ]
     },
     "values": {
+      "web": [
+        121
+      ],
       "android": [
         53
       ]
@@ -1053,11 +1491,17 @@
     "english": "Key Z",
     "value": 122,
     "names": {
+      "web": [
+        "KeyZ"
+      ],
       "android": [
         "Z"
       ]
     },
     "values": {
+      "web": [
+        122
+      ],
       "android": [
         54
       ]
@@ -1067,29 +1511,61 @@
     "constant": "braceLeft",
     "english": "Brace Left",
     "value": 123,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "BraceLeft"
+      ]
+    },
+    "values": {
+      "web": [
+        123
+      ]
+    }
   },
   "bar": {
     "constant": "bar",
     "english": "Bar",
     "value": 124,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Bar"
+      ]
+    },
+    "values": {
+      "web": [
+        124
+      ]
+    }
   },
   "braceRight": {
     "constant": "braceRight",
     "english": "Brace Right",
     "value": 125,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "BraceRight"
+      ]
+    },
+    "values": {
+      "web": [
+        125
+      ]
+    }
   },
   "tilde": {
     "constant": "tilde",
     "english": "Tilde",
     "value": 126,
-    "names": {},
-    "values": {}
+    "names": {
+      "web": [
+        "Tilde"
+      ]
+    },
+    "values": {
+      "web": [
+        126
+      ]
+    }
   },
   "delete": {
     "constant": "delete",
@@ -7422,6 +7898,780 @@
     "values": {
       "web": [
         4610
+      ]
+    }
+  },
+  "gameButton1": {
+    "constant": "gameButton1",
+    "english": "Game Button 1",
+    "value": 392961,
+    "names": {
+      "web": [
+        "GameButton1"
+      ],
+      "android": [
+        "BUTTON_1"
+      ]
+    },
+    "values": {
+      "web": [
+        392961
+      ],
+      "android": [
+        188
+      ]
+    }
+  },
+  "gameButton2": {
+    "constant": "gameButton2",
+    "english": "Game Button 2",
+    "value": 392962,
+    "names": {
+      "web": [
+        "GameButton2"
+      ],
+      "android": [
+        "BUTTON_2"
+      ]
+    },
+    "values": {
+      "web": [
+        392962
+      ],
+      "android": [
+        189
+      ]
+    }
+  },
+  "gameButton3": {
+    "constant": "gameButton3",
+    "english": "Game Button 3",
+    "value": 392963,
+    "names": {
+      "web": [
+        "GameButton3"
+      ],
+      "android": [
+        "BUTTON_3"
+      ]
+    },
+    "values": {
+      "web": [
+        392963
+      ],
+      "android": [
+        190
+      ]
+    }
+  },
+  "gameButton4": {
+    "constant": "gameButton4",
+    "english": "Game Button 4",
+    "value": 392964,
+    "names": {
+      "web": [
+        "GameButton4"
+      ],
+      "android": [
+        "BUTTON_4"
+      ]
+    },
+    "values": {
+      "web": [
+        392964
+      ],
+      "android": [
+        191
+      ]
+    }
+  },
+  "gameButton5": {
+    "constant": "gameButton5",
+    "english": "Game Button 5",
+    "value": 392965,
+    "names": {
+      "web": [
+        "GameButton5"
+      ],
+      "android": [
+        "BUTTON_5"
+      ]
+    },
+    "values": {
+      "web": [
+        392965
+      ],
+      "android": [
+        192
+      ]
+    }
+  },
+  "gameButton6": {
+    "constant": "gameButton6",
+    "english": "Game Button 6",
+    "value": 392966,
+    "names": {
+      "web": [
+        "GameButton6"
+      ],
+      "android": [
+        "BUTTON_6"
+      ]
+    },
+    "values": {
+      "web": [
+        392966
+      ],
+      "android": [
+        193
+      ]
+    }
+  },
+  "gameButton7": {
+    "constant": "gameButton7",
+    "english": "Game Button 7",
+    "value": 392967,
+    "names": {
+      "web": [
+        "GameButton7"
+      ],
+      "android": [
+        "BUTTON_7"
+      ]
+    },
+    "values": {
+      "web": [
+        392967
+      ],
+      "android": [
+        194
+      ]
+    }
+  },
+  "gameButton8": {
+    "constant": "gameButton8",
+    "english": "Game Button 8",
+    "value": 392968,
+    "names": {
+      "web": [
+        "GameButton8"
+      ],
+      "windows": [
+        "GAMEPAD_A"
+      ],
+      "android": [
+        "BUTTON_8"
+      ]
+    },
+    "values": {
+      "web": [
+        392968
+      ],
+      "windows": [
+        195
+      ],
+      "android": [
+        195
+      ]
+    }
+  },
+  "gameButton9": {
+    "constant": "gameButton9",
+    "english": "Game Button 9",
+    "value": 392969,
+    "names": {
+      "web": [
+        "GameButton9"
+      ],
+      "windows": [
+        "GAMEPAD_B"
+      ],
+      "android": [
+        "BUTTON_9"
+      ]
+    },
+    "values": {
+      "web": [
+        392969
+      ],
+      "windows": [
+        196
+      ],
+      "android": [
+        196
+      ]
+    }
+  },
+  "gameButton10": {
+    "constant": "gameButton10",
+    "english": "Game Button 10",
+    "value": 392970,
+    "names": {
+      "web": [
+        "GameButton10"
+      ],
+      "windows": [
+        "GAMEPAD_X"
+      ],
+      "android": [
+        "BUTTON_10"
+      ]
+    },
+    "values": {
+      "web": [
+        392970
+      ],
+      "windows": [
+        197
+      ],
+      "android": [
+        197
+      ]
+    }
+  },
+  "gameButton11": {
+    "constant": "gameButton11",
+    "english": "Game Button 11",
+    "value": 392971,
+    "names": {
+      "web": [
+        "GameButton11"
+      ],
+      "windows": [
+        "GAMEPAD_Y"
+      ],
+      "android": [
+        "BUTTON_11"
+      ]
+    },
+    "values": {
+      "web": [
+        392971
+      ],
+      "windows": [
+        198
+      ],
+      "android": [
+        198
+      ]
+    }
+  },
+  "gameButton12": {
+    "constant": "gameButton12",
+    "english": "Game Button 12",
+    "value": 392972,
+    "names": {
+      "web": [
+        "GameButton12"
+      ],
+      "windows": [
+        "GAMEPAD_RIGHT_SHOULDER"
+      ],
+      "android": [
+        "BUTTON_12"
+      ]
+    },
+    "values": {
+      "web": [
+        392972
+      ],
+      "windows": [
+        199
+      ],
+      "android": [
+        199
+      ]
+    }
+  },
+  "gameButton13": {
+    "constant": "gameButton13",
+    "english": "Game Button 13",
+    "value": 392973,
+    "names": {
+      "web": [
+        "GameButton13"
+      ],
+      "windows": [
+        "GAMEPAD_LEFT_SHOULDER"
+      ],
+      "android": [
+        "BUTTON_13"
+      ]
+    },
+    "values": {
+      "web": [
+        392973
+      ],
+      "windows": [
+        200
+      ],
+      "android": [
+        200
+      ]
+    }
+  },
+  "gameButton14": {
+    "constant": "gameButton14",
+    "english": "Game Button 14",
+    "value": 392974,
+    "names": {
+      "web": [
+        "GameButton14"
+      ],
+      "windows": [
+        "GAMEPAD_LEFT_TRIGGER"
+      ],
+      "android": [
+        "BUTTON_14"
+      ]
+    },
+    "values": {
+      "web": [
+        392974
+      ],
+      "windows": [
+        201
+      ],
+      "android": [
+        201
+      ]
+    }
+  },
+  "gameButton15": {
+    "constant": "gameButton15",
+    "english": "Game Button 15",
+    "value": 392975,
+    "names": {
+      "web": [
+        "GameButton15"
+      ],
+      "windows": [
+        "GAMEPAD_RIGHT_TRIGGER"
+      ],
+      "android": [
+        "BUTTON_15"
+      ]
+    },
+    "values": {
+      "web": [
+        392975
+      ],
+      "windows": [
+        202
+      ],
+      "android": [
+        202
+      ]
+    }
+  },
+  "gameButton16": {
+    "constant": "gameButton16",
+    "english": "Game Button 16",
+    "value": 392976,
+    "names": {
+      "web": [
+        "GameButton16"
+      ],
+      "windows": [
+        "GAMEPAD_DPAD_UP"
+      ],
+      "android": [
+        "BUTTON_16"
+      ]
+    },
+    "values": {
+      "web": [
+        392976
+      ],
+      "windows": [
+        203
+      ],
+      "android": [
+        203
+      ]
+    }
+  },
+  "gameButtonA": {
+    "constant": "gameButtonA",
+    "english": "Game Button A",
+    "value": 392977,
+    "names": {
+      "web": [
+        "GameButtonA"
+      ],
+      "android": [
+        "BUTTON_A"
+      ]
+    },
+    "values": {
+      "web": [
+        392977
+      ],
+      "android": [
+        96
+      ]
+    }
+  },
+  "gameButtonB": {
+    "constant": "gameButtonB",
+    "english": "Game Button B",
+    "value": 392978,
+    "names": {
+      "web": [
+        "GameButtonB"
+      ],
+      "android": [
+        "BUTTON_B"
+      ]
+    },
+    "values": {
+      "web": [
+        392978
+      ],
+      "android": [
+        97
+      ]
+    }
+  },
+  "gameButtonC": {
+    "constant": "gameButtonC",
+    "english": "Game Button C",
+    "value": 392979,
+    "names": {
+      "web": [
+        "GameButtonC"
+      ],
+      "android": [
+        "BUTTON_C"
+      ]
+    },
+    "values": {
+      "web": [
+        392979
+      ],
+      "android": [
+        98
+      ]
+    }
+  },
+  "gameButtonLeft1": {
+    "constant": "gameButtonLeft1",
+    "english": "Game Button Left 1",
+    "value": 392980,
+    "names": {
+      "web": [
+        "GameButtonLeft1"
+      ],
+      "android": [
+        "BUTTON_L1"
+      ]
+    },
+    "values": {
+      "web": [
+        392980
+      ],
+      "android": [
+        102
+      ]
+    }
+  },
+  "gameButtonLeft2": {
+    "constant": "gameButtonLeft2",
+    "english": "Game Button Left 2",
+    "value": 392981,
+    "names": {
+      "web": [
+        "GameButtonLeft2"
+      ],
+      "android": [
+        "BUTTON_L2"
+      ]
+    },
+    "values": {
+      "web": [
+        392981
+      ],
+      "android": [
+        104
+      ]
+    }
+  },
+  "gameButtonMode": {
+    "constant": "gameButtonMode",
+    "english": "Game Button Mode",
+    "value": 392982,
+    "names": {
+      "web": [
+        "GameButtonMode"
+      ],
+      "android": [
+        "BUTTON_MODE"
+      ]
+    },
+    "values": {
+      "web": [
+        392982
+      ],
+      "android": [
+        110
+      ]
+    }
+  },
+  "gameButtonRight1": {
+    "constant": "gameButtonRight1",
+    "english": "Game Button Right 1",
+    "value": 392983,
+    "names": {
+      "web": [
+        "GameButtonRight1"
+      ],
+      "android": [
+        "BUTTON_R1"
+      ]
+    },
+    "values": {
+      "web": [
+        392983
+      ],
+      "android": [
+        103
+      ]
+    }
+  },
+  "gameButtonRight2": {
+    "constant": "gameButtonRight2",
+    "english": "Game Button Right 2",
+    "value": 392984,
+    "names": {
+      "web": [
+        "GameButtonRight2"
+      ],
+      "android": [
+        "BUTTON_R2"
+      ]
+    },
+    "values": {
+      "web": [
+        392984
+      ],
+      "android": [
+        105
+      ]
+    }
+  },
+  "gameButtonSelect": {
+    "constant": "gameButtonSelect",
+    "english": "Game Button Select",
+    "value": 392985,
+    "names": {
+      "web": [
+        "GameButtonSelect"
+      ],
+      "android": [
+        "BUTTON_SELECT"
+      ]
+    },
+    "values": {
+      "web": [
+        392985
+      ],
+      "android": [
+        109
+      ]
+    }
+  },
+  "gameButtonStart": {
+    "constant": "gameButtonStart",
+    "english": "Game Button Start",
+    "value": 392986,
+    "names": {
+      "web": [
+        "GameButtonStart"
+      ],
+      "android": [
+        "BUTTON_START"
+      ]
+    },
+    "values": {
+      "web": [
+        392986
+      ],
+      "android": [
+        108
+      ]
+    }
+  },
+  "gameButtonThumbLeft": {
+    "constant": "gameButtonThumbLeft",
+    "english": "Game Button Thumb Left",
+    "value": 392987,
+    "names": {
+      "web": [
+        "GameButtonThumbLeft"
+      ],
+      "android": [
+        "BUTTON_THUMBL"
+      ]
+    },
+    "values": {
+      "web": [
+        392987
+      ],
+      "android": [
+        106
+      ]
+    }
+  },
+  "gameButtonThumbRight": {
+    "constant": "gameButtonThumbRight",
+    "english": "Game Button Thumb Right",
+    "value": 392988,
+    "names": {
+      "web": [
+        "GameButtonThumbRight"
+      ],
+      "android": [
+        "BUTTON_THUMBR"
+      ]
+    },
+    "values": {
+      "web": [
+        392988
+      ],
+      "android": [
+        107
+      ]
+    }
+  },
+  "gameButtonX": {
+    "constant": "gameButtonX",
+    "english": "Game Button X",
+    "value": 392989,
+    "names": {
+      "web": [
+        "GameButtonX"
+      ],
+      "android": [
+        "BUTTON_X"
+      ]
+    },
+    "values": {
+      "web": [
+        392989
+      ],
+      "android": [
+        99
+      ]
+    }
+  },
+  "gameButtonY": {
+    "constant": "gameButtonY",
+    "english": "Game Button Y",
+    "value": 392990,
+    "names": {
+      "web": [
+        "GameButtonY"
+      ],
+      "android": [
+        "BUTTON_Y"
+      ]
+    },
+    "values": {
+      "web": [
+        392990
+      ],
+      "android": [
+        100
+      ]
+    }
+  },
+  "gameButtonZ": {
+    "constant": "gameButtonZ",
+    "english": "Game Button Z",
+    "value": 392991,
+    "names": {
+      "web": [
+        "GameButtonZ"
+      ],
+      "android": [
+        "BUTTON_Z"
+      ]
+    },
+    "values": {
+      "web": [
+        392991
+      ],
+      "android": [
+        101
+      ]
+    }
+  },
+  "suspend": {
+    "constant": "suspend",
+    "english": "Suspend",
+    "value": 4294967316,
+    "names": {
+      "web": [
+        "Suspend"
+      ],
+      "gtk": [
+        "Suspend"
+      ]
+    },
+    "values": {
+      "web": [
+        4294967316
+      ],
+      "gtk": [
+        269025191
+      ]
+    }
+  },
+  "resume": {
+    "constant": "resume",
+    "english": "Resume",
+    "value": 4294967317,
+    "names": {
+      "web": [
+        "Resume"
+      ]
+    },
+    "values": {
+      "web": [
+        4294967317
+      ]
+    }
+  },
+  "sleep": {
+    "constant": "sleep",
+    "english": "Sleep",
+    "value": 4295032962,
+    "names": {
+      "web": [
+        "Sleep"
+      ],
+      "gtk": [
+        "Sleep"
+      ],
+      "windows": [
+        "SLEEP"
+      ],
+      "android": [
+        "SLEEP"
+      ]
+    },
+    "values": {
+      "web": [
+        4295032962
+      ],
+      "gtk": [
+        269025071
+      ],
+      "windows": [
+        95
+      ],
+      "android": [
+        223
       ]
     }
   },

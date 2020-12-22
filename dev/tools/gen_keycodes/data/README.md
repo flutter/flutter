@@ -39,6 +39,7 @@
 | File name | Explanation |
 | ---- | ---- |
 | `windows_flutter_key_map_cc.tmpl` | The template for `flutter_key_map.cc`. |
+| `windows_logical_to_window_vk.json` | Maps a logical key name to the names of its corresponding virtual keys in Win32. |
 | `windows_scancode_logical_map.json` | Maps a physical key name to a logical key name. This is used to when a `keycode` maps to multiple keys (including when the `keycode` is 0), therefore can only be told apart by the scan code. |
 
 ### Linux (GTK)

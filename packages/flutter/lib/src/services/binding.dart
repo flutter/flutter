@@ -67,7 +67,7 @@ class _ServiceHardwareKeyboard extends HardwareKeyboard {
   static KeyEvent _eventFromRawEvent(RawKeyEvent rawEvent) {
     final LogicalKeyboardKey logical = rawEvent.logicalKey;
     final PhysicalKeyboardKey physical = rawEvent.physicalKey;
-    final Duration timeStamp = SchedulerBinding.instance!.currentFrameTimeStamp;
+    final Duration timeStamp = SchedulerBinding.instance!.currentSystemFrameTimeStamp;
     final String character = rawEvent.data.keyLabel;
     if (rawEvent is RawKeyDownEvent) {
       return KeyDownEvent(
@@ -106,8 +106,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _restorationManager = createRestorationManager();
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     _hardwareKeyboard = _ServiceHardwareKeyboard();
-    window.onKeyData =
-        (_hardwareKeyboard as _ServiceHardwareKeyboard).handleKeyData;
+    window.onKeyData = _hardwareKeyboard.handleKeyData;
+    RawKeyboard.instance.addListener(_hardwareKeyboard.handleRawEvent);
     initLicenses();
     SystemChannels.system.setMessageHandler(
         (dynamic message) => handleSystemMessage(message as Object));
@@ -120,7 +120,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   static ServicesBinding? _instance;
 
   HardwareKeyboard get hardwareKeyboard => _hardwareKeyboard;
-  late HardwareKeyboard _hardwareKeyboard;
+  late _ServiceHardwareKeyboard _hardwareKeyboard;
 
   /// The default instance of [BinaryMessenger].
   ///

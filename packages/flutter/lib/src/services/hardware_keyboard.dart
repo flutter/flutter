@@ -290,6 +290,14 @@ abstract class _ValueDispatcher<T> {
 
 abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
 
+  /// Whether [HardwareKeyboard] receives data from [ui.KeyData], or
+  /// [RawKeyEvent] otherwise.
+  ///
+  /// While [HardwareKeyboard] is designed around the new API [ui.KeyData], it is
+  /// compatible with the legacy API [RawKeyEvent] during the deprecation
+  /// process. The flag [receivingKeyData] is recorded to ensure that one
+  /// platform only uses either of the two APIs, and to disable certain sanity
+  /// assertions for the old API.
   @protected
   bool receivingKeyData = false;
 
@@ -326,6 +334,7 @@ abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
         ifAbsent: () => 1,
       );
     } else if (event is KeyUpEvent) {
+      final int Function(int) ifAbsent =
       final int physicalCount = _physicalPressCount.update(event.physical.usbHidUsage,
         (int count) => count - 1,
       );

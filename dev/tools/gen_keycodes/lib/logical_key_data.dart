@@ -43,8 +43,8 @@ class LogicalKeyData {
   )   : assert(chromiumKeys != null),
         assert(gtkKeyCodeHeader != null),
         assert(gtkNameMap != null) {
-    _readPrintables(data);
-    _readHidEntries(data, chromiumKeys);
+    final String supplementalChromiumKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'supplemental_key_data.inc',)).readAsStringSync();
+    _readKeyEntries(data, chromiumKeys + '\n' + supplementalChromiumKeys);
     _readWindowsKeyCodes(data, windowsKeyCodeHeader, parseMapOfListOfString(windowsNameMap));
     _readGtkKeyCodes(data, gtkKeyCodeHeader, parseMapOfListOfString(gtkNameMap));
     _readAndroidKeyCodes(data, androidKeyCodeHeader, parseMapOfListOfString(androidNameMap));
@@ -78,32 +78,6 @@ class LogicalKeyData {
   /// Keys mapped from their constant names.
   final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
 
-  void _readPrintables(Map<String, LogicalKeyEntry> data) {
-    final Map<String, String> unusedNumpad = Map<String, String>.from(printableToNumpads);
-
-    printable.forEach((String name, String char) {
-
-      // If it has a numpad counterpart, also add the numpad key.
-      if (printableToNumpads.containsKey(char)) {
-        final String numpadName = printableToNumpads[char];
-        data[LogicalKeyEntry.computeConstantName(numpadName)] = LogicalKeyEntry.fromName(
-          value: char.codeUnitAt(0) + kNumpadPlane,
-          name: numpadName,
-        );
-        unusedNumpad.remove(char);
-      }
-
-      data[LogicalKeyEntry.computeConstantName(name)] = LogicalKeyEntry.fromName(
-        value: char.codeUnitAt(0),
-        name: name,
-      );
-    });
-
-    unusedNumpad.forEach((String key, String value) {
-      print('Unuadded numpad key $value');
-    });
-  }
-
   /// Parses entries from Chromium's key mapping header file.
   ///
   /// Lines in this file look like either of these (without the ///):
@@ -114,9 +88,12 @@ class LogicalKeyData {
   ///
   /// The UNI lines are ignored. Their entries have been included in the
   /// printable file.
-  void _readHidEntries(Map<String, LogicalKeyEntry> data, String input) {
+  void _readKeyEntries(Map<String, LogicalKeyEntry> data, String input) {
+    final Map<String, String> unusedNumpad = Map<String, String>.from(printableToNumpads);
+
     final RegExp domKeyRegExp = RegExp(
-        r'DOM_KEY_(?:UNI|MAP)\s*\(\s*"([^\s]+?)",\s*([^\s]+?),\s*0x([a-fA-F0-9]+)\s*\)',
+        r'DOM_KEY_(?:UNI|MAP)\s*\(\s*"([^\s]+?)",\s*'
+        r"([^\s]+?),\s*(?:0x([a-fA-F0-9]+)|'(.)')\s*\)",
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
@@ -125,7 +102,7 @@ class LogicalKeyData {
         return match.group(0);
       }
       final String name = match.group(1).replaceAll(RegExp('[^A-Za-z0-9]'), '');
-      final int value = getHex(match.group(3));
+      final int value = match.group(3) != null ? getHex(match.group(3)) : match.group(4).codeUnitAt(0);
       // If it's a modifier key, add left and right keys instead.
       // Don't add web names and values; they're solved with locations.
       if (chromeModifiers.containsKey(name)) {
@@ -141,6 +118,17 @@ class LogicalKeyData {
         return match.group(0);
       }
 
+      // If it has a numpad counterpart, also add the numpad key.
+      final String char = value < 256 ? String.fromCharCode(value) : null;
+      if (char != null && printableToNumpads.containsKey(char)) {
+        final String numpadName = printableToNumpads[char];
+        data[LogicalKeyEntry.computeConstantName(numpadName)] = LogicalKeyEntry.fromName(
+          value: char.codeUnitAt(0) + kNumpadPlane,
+          name: numpadName,
+        );
+        unusedNumpad.remove(char);
+      }
+
       final LogicalKeyEntry entry = data.putIfAbsent(LogicalKeyEntry.computeConstantName(name), () => LogicalKeyEntry.fromName(
         value: value,
         name: name,
@@ -149,6 +137,11 @@ class LogicalKeyData {
         ..webNames.add(name)
         ..webValues.add(value);
       return match.group(0);
+    });
+
+    // Make sure every Numpad keys that we care have been defined.
+    unusedNumpad.forEach((String key, String value) {
+      print('Unuadded numpad key $value');
     });
   }
 
@@ -240,17 +233,6 @@ class LogicalKeyData {
         ..androidValues.add(value);
     }
   }
-
-  /// Returns the static map of printable representations.
-  static Map<String, String> get printable {
-    if (_printable == null) {
-      final String printableKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'printable_logical.json',)).readAsStringSync();
-      final Map<String, dynamic> printable = json.decode(printableKeys) as Map<String, dynamic>;
-      _printable = printable.cast<String, String>();
-    }
-    return _printable;
-  }
-  static Map<String, String> _printable;
 
   // Map Web key to the pair of key names
   static Map<String, _ModifierPair> get chromeModifiers {
