@@ -328,6 +328,8 @@ class SkiaPerfGcsAdaptor {
 class SkiaPerfDestination extends MetricDestination {
   SkiaPerfDestination(this._gcs, this._lock);
 
+  // TODO(liyuqian): create a new bucket so the migration will not interfere
+  // with the old bucket.
   static const String kBucketName = 'flutter-skia-perf';
   static const String kTestBucketName = 'flutter-skia-perf-test';
 
@@ -337,7 +339,11 @@ class SkiaPerfDestination extends MetricDestination {
       {bool isTesting = false}) async {
     final AutoRefreshingAuthClient client = await clientViaServiceAccount(
         ServiceAccountCredentials.fromJson(credentialsJson), Storage.SCOPES);
-    return _make(client, credentialsJson[kProjectId] as String, isTesting);
+    return make(
+      client,
+      credentialsJson[kProjectId] as String,
+      isTesting: isTesting,
+    );
   }
 
   /// Create from an access token and its project id.
@@ -345,11 +351,14 @@ class SkiaPerfDestination extends MetricDestination {
       String token, String projectId,
       {bool isTesting = false}) async {
     final AuthClient client = authClientFromAccessToken(token, Storage.SCOPES);
-    return _make(client, projectId, isTesting);
+    return make(client, projectId, isTesting: isTesting);
   }
 
-  static Future<SkiaPerfDestination> _make(
-      AuthClient client, String projectId, bool isTesting) async {
+  /// Create from an [AuthClient] and a GCP project id.
+  ///
+  /// [AuthClient] can be obtained from functions like `clientViaUserConsent`.
+  static Future<SkiaPerfDestination> make(AuthClient client, String projectId,
+      {bool isTesting = false}) async {
     final Storage storage = Storage(client, projectId);
     final String bucketName = isTesting ? kTestBucketName : kBucketName;
     if (!await storage.bucketExists(bucketName)) {

@@ -1,5 +1,5 @@
 name: metrics_center
-version: 0.0.2
+version: 0.0.3
 description:
   Support multiple performance metrics sources/formats and destinations.
 homepage:
