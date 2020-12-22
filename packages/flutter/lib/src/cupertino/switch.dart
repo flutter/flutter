@@ -14,8 +14,7 @@ import 'colors.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// bool _lights;
+// bool _lights = false;
 // void setState(VoidCallback fn) { }
 
 /// An iOS-style switch.

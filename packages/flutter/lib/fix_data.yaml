@@ -11,6 +11,29 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/28602
+  - title: 'Rename to fromMouseEvent'
+    date: 2020-12-15
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: 'fromHoverEvent'
+      inClass: 'PointerEnterEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'fromMouseEvent'
+
+  # Changes made in https://github.com/flutter/flutter/pull/28602
+  - title: 'Rename to fromMouseEvent'
+    date: 2020-12-15
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: 'fromHoverEvent'
+      inClass: 'PointerExitEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'fromMouseEvent'
+
+
   # Changes made in https://github.com/flutter/flutter/pull/41859
   - title: 'Remove brightness'
     date: 2020-12-10

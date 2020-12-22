@@ -192,7 +192,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.bottomOpacity = 1.0,
     this.toolbarHeight,
     this.leadingWidth,
-    this.backwardsCompatibility = true,
+    this.backwardsCompatibility,
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
@@ -201,7 +201,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
-       assert(backwardsCompatibility != null),
        preferredSize = Size.fromHeight(toolbarHeight ?? kToolbarHeight + (bottom?.preferredSize.height ?? 0.0)),
        super(key: key);
 
@@ -609,16 +608,18 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [iconTheme], [actionsIconTheme] properties, and the original use of
   /// the [textTheme] and [brightness] properties.
   ///
-  /// This property is true by default.
+  /// If this property is null, then [AppBarTheme.backwardsCompatibility] of
+  /// [ThemeData.appBarTheme] is used. If that is also null, the default
+  /// value is true.
   ///
   /// This is a temporary property. When setting it to false is no
-  /// longer considereed a breaking change, it will be depreacted and
+  /// longer considered a breaking change, it will be depreacted and
   /// its default value will be changed to false. App developers are
   /// encouraged to opt into the new features by setting it to false
   /// and using the [foregroundColor] and [systemOverlayStyle]
   /// properties as needed.
   /// {@endtemplate}
-  final bool backwardsCompatibility;
+  final bool? backwardsCompatibility;
 
   /// {@template flutter.material.appbar.toolbarTextStyle}
   /// The default text style for the AppBar's [leading], and
@@ -724,8 +725,9 @@ class _AppBarState extends State<AppBar> {
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     final double toolbarHeight = widget.toolbarHeight ?? kToolbarHeight;
+    final bool backwardsCompatibility = widget.backwardsCompatibility ?? appBarTheme.backwardsCompatibility ?? true;
 
-    final Color backgroundColor = widget.backwardsCompatibility
+    final Color backgroundColor = backwardsCompatibility
       ? widget.backgroundColor
         ?? appBarTheme.color
         ?? theme.primaryColor
@@ -737,7 +739,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.foregroundColor
       ?? (colorScheme.brightness == Brightness.dark ? colorScheme.onSurface : colorScheme.onPrimary);
 
-    IconThemeData overallIconTheme = widget.backwardsCompatibility
+    IconThemeData overallIconTheme = backwardsCompatibility
       ? widget.iconTheme
         ?? appBarTheme.iconTheme
         ?? theme.primaryIconTheme
@@ -749,7 +751,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
 
-    TextStyle? toolbarTextStyle = widget.backwardsCompatibility
+    TextStyle? toolbarTextStyle = backwardsCompatibility
       ? widget.textTheme?.bodyText2
         ?? appBarTheme.textTheme?.bodyText2
         ?? theme.primaryTextTheme.bodyText2
@@ -757,7 +759,7 @@ class _AppBarState extends State<AppBar> {
         ?? appBarTheme.toolbarTextStyle
         ?? theme.textTheme.bodyText2?.copyWith(color: foregroundColor);
 
-    TextStyle? titleTextStyle = widget.backwardsCompatibility
+    TextStyle? titleTextStyle = backwardsCompatibility
       ? widget.textTheme?.headline6
         ?? appBarTheme.textTheme?.headline6
         ?? theme.primaryTextTheme.headline6
@@ -951,7 +953,7 @@ class _AppBarState extends State<AppBar> {
     }
 
     final Brightness overlayStyleBrightness = widget.brightness ?? appBarTheme.brightness ?? colorScheme.brightness;
-    final SystemUiOverlayStyle overlayStyle = widget.backwardsCompatibility
+    final SystemUiOverlayStyle overlayStyle = backwardsCompatibility
       ? (overlayStyleBrightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
       : widget.systemOverlayStyle
         ?? appBarTheme.systemOverlayStyle

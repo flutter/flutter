@@ -18,25 +18,29 @@ import 'theme.dart';
 /// They are persistent and non-modal, allowing the user to either ignore them or
 /// interact with them at any time.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
-///
+/// {@tool dartpad --template=stateless_widget_material}
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return MaterialBanner(
-///     padding: const EdgeInsets.all(20),
-///     content: Text("Hey, I am a Material Banner"),
-///     leading: Icon(Icons.agriculture_outlined),
-///     backgroundColor: Colors.grey[300],
-///     actions: <Widget>[
-///       FlatButton(
-///         child: Text("OPEN"),
-///         onPressed: () {},
-///       ),
-///       FlatButton(
-///         child: Text("DISMISS"),
-///         onPressed: () {},
-///       ),
-///     ],
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('The MaterialBanner is below'),
+///     ),
+///     body: const MaterialBanner(
+///       padding: EdgeInsets.all(20),
+///       content: Text('Hello, I am a Material Banner'),
+///       leading: Icon(Icons.agriculture_outlined),
+///       backgroundColor: Color(0xFFE0E0E0),
+///       actions: <Widget>[
+///         TextButton(
+///           child: Text('OPEN'),
+///           onPressed: null,
+///         ),
+///         TextButton(
+///           child: Text('DISMISS'),
+///           onPressed: null,
+///         ),
+///       ],
+///     ),
 ///   );
 /// }
 /// ```

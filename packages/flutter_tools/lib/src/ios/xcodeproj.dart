@@ -181,17 +181,6 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
   }
 
-  if (!project.isModule && useMacOSConfig) {
-    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
-    // explicitly. Rather we rely on the xcode backend script and the Podfile
-    // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
-    // However, this is necessary for regular macOS projects using Cocoapods.
-    final String frameworkDir =
-        flutterMacOSFrameworkDir(buildInfo.mode, globals.fs, globals.artifacts);
-    xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
-  }
-
-
   final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
 
@@ -216,6 +205,10 @@ List<String> _xcodeBuildSettingsLines({
       final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
       xcodeBuildSettings.add('ARCHS=$arch');
     }
+  }
+  if (useMacOSConfig) {
+    // ARM not yet supported https://github.com/flutter/flutter/issues/69221
+    xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {

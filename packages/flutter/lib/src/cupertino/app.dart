@@ -13,9 +13,6 @@ import 'localizations.dart';
 import 'route.dart';
 import 'theme.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// An application that uses Cupertino design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
@@ -277,7 +274,7 @@ class CupertinoApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -310,7 +307,7 @@ class CupertinoApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );

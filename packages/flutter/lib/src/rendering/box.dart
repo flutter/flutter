@@ -13,9 +13,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'debug.dart';
 import 'object.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 // This class should only be used in debug builds.
 class _DebugSize extends Size {
   _DebugSize(Size source, this._owner, this._canBeUsedByParent) : super.copy(source);
@@ -718,7 +715,7 @@ class BoxHitTestResult extends HitTestResult {
   ///   }
   ///
   ///   @override
-  ///   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  ///   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
   ///     return result.addWithPaintTransform(
   ///       transform: _effectiveTransform,
   ///       position: position,

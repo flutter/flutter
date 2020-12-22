@@ -12,9 +12,6 @@ import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
 ///
@@ -35,7 +32,7 @@ import 'text_field.dart';
 /// }
 ///
 /// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   TextEditingController _textController;
+///   late TextEditingController _textController;
 ///
 ///   @override
 ///   void initState() {
