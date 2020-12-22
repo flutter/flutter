@@ -53,7 +53,7 @@ class TextFieldPage extends StatelessWidget {
         child: TextField(
           maxLines: null,
           controller: TextEditingController(text: textLotsOfText),
-          key: Key('fullscreen-textfield'),
+          key: const Key('fullscreen-textfield'),
         ),
       ),
     );

@@ -361,8 +361,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// [RenderEditable]'s text content.
   ///
   /// The new [RenderEditablePainter] will replace the previously specified
-  /// painter, and schedule a repaint. If the previous painter is the same as
-  /// [newPainter], this method does nothing, unless [force] is set to true.
+  /// painter, and schedule a repaint if the new painter's `shouldRepaint`
+  /// method returns true.
   void setPainter(RenderEditablePainter? newPainter) {
     if (newPainter == _painter)
       return;
