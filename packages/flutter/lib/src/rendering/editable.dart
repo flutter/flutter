@@ -304,8 +304,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (onCaretChanged == null)
       _lastCaretRect = null;
 
-    setForegroundPainter(foregroundPainter, force: true);
-    setPainter(painter, force: true);
+    _updateForgroundPainter(foregroundPainter);
+    _updatePainter(painter);
   }
 
   /// Child model
@@ -313,16 +313,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderEditableCustomPaint? _backgroundRenderObject;
 
   RenderEditablePainter? _foregroundPainter;
-  /// Sets the [RenderEditablePainter] to use for painting above this
-  /// [RenderEditable]'s text content.
-  ///
-  /// The new [RenderEditablePainter] will replace the previously specified
-  /// foreground painter, and schedule a repaint. If the previous foreground
-  /// painter is the same as [newPainter], this method does nothing, unless
-  /// [force] is set to true.
-  void setForegroundPainter(RenderEditablePainter? newPainter, { bool force = false }) {
-    if (!force && newPainter == _foregroundPainter)
-      return;
+  void _updateForgroundPainter(RenderEditablePainter? newPainter) {
     final _CompositeRenderEditablePainter effectivePainter = newPainter == null
       ? _builtinForegounrdPainters
       : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[
@@ -339,21 +330,23 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     _foregroundPainter = newPainter;
   }
-
-  RenderEditablePainter? _painter;
-  /// Sets the [RenderEditablePainter] to use for painting beneath this
+  /// Sets the [RenderEditablePainter] to use for painting above this
   /// [RenderEditable]'s text content.
   ///
   /// The new [RenderEditablePainter] will replace the previously specified
-  /// painter, and schedule a repaint. If the previous painter is the same as
-  /// [newPainter], this method does nothing, unless [force] is set to true.
-  void setPainter(RenderEditablePainter? newValue, { bool force = false }) {
-    if (!force && newValue == _painter)
+  /// foreground painter, and schedule a repaint if the new painter's
+  /// `shouldRepaint` method returns true.
+  void setForegroundPainter(RenderEditablePainter? newPainter) {
+    if (newPainter == _foregroundPainter)
       return;
+    _updateForgroundPainter(newPainter);
+  }
 
-    final _CompositeRenderEditablePainter effectivePainter = newValue == null
+  RenderEditablePainter? _painter;
+  void _updatePainter(RenderEditablePainter? newPainter) {
+    final _CompositeRenderEditablePainter effectivePainter = newPainter == null
       ? _builtinPainters
-      : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[_builtinPainters, newValue]);
+      : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[_builtinPainters, newPainter]);
 
     if (_backgroundRenderObject == null) {
       final _RenderEditableCustomPaint backgroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
@@ -362,7 +355,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     } else {
       _backgroundRenderObject?.painter = effectivePainter;
     }
-    _painter = newValue;
+    _painter = newPainter;
+  }
+  /// Sets the [RenderEditablePainter] to use for painting beneath this
+  /// [RenderEditable]'s text content.
+  ///
+  /// The new [RenderEditablePainter] will replace the previously specified
+  /// painter, and schedule a repaint. If the previous painter is the same as
+  /// [newPainter], this method does nothing, unless [force] is set to true.
+  void setPainter(RenderEditablePainter? newPainter) {
+    if (newPainter == _painter)
+      return;
+    _updatePainter(newPainter);
   }
 
   // Caret Painters:
@@ -1308,8 +1312,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // Clear cached builtin painters and reconfigure painters.
     _cachedBuiltinForegroundPainters = null;
     _cachedBuiltinPainters = null;
-    setForegroundPainter(_foregroundPainter, force: true);
-    setPainter(_painter, force: true);
+    // Call update methods to rebuild and set the effective painters.
+    _updateForgroundPainter(_foregroundPainter);
+    _updatePainter(_painter);
   }
 
   /// {@template flutter.rendering.RenderEditable.cursorOffset}
