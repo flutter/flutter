@@ -397,7 +397,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no background custom painter.
-  set painter(covariant CustomPainter? value) {
+  set painter(CustomPainter? value) {
     if (_painter == value)
       return;
     final CustomPainter? oldPainter = _painter;
@@ -422,7 +422,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no foreground custom painter.
-  set foregroundPainter(covariant CustomPainter? value) {
+  set foregroundPainter(CustomPainter? value) {
     if (_foregroundPainter == value)
       return;
     final CustomPainter? oldPainter = _foregroundPainter;
@@ -632,12 +632,12 @@ class RenderCustomPaint extends RenderProxyBox {
     final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder != null
       ? _backgroundSemanticsBuilder!(size)
       : const <CustomPainterSemantics>[];
-    _backgroundSemanticsNodes = _updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
+    _backgroundSemanticsNodes = updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
 
     final List<CustomPainterSemantics> foregroundSemantics = _foregroundSemanticsBuilder != null
       ? _foregroundSemanticsBuilder!(size)
       : const <CustomPainterSemantics>[];
-    _foregroundSemanticsNodes = _updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics);
+    _foregroundSemanticsNodes = updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics);
 
     final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes!.isNotEmpty;
     final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes!.isNotEmpty;
@@ -678,7 +678,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// considered because there is only one type of [SemanticsNode]. There is no
   /// concept of a "forgotten" node in semantics, deactivated nodes, or global
   /// keys.
-  static List<SemanticsNode> _updateSemanticsChildren(
+  static List<SemanticsNode> updateSemanticsChildren(
     List<SemanticsNode>? oldSemantics,
     List<CustomPainterSemantics>? newChildSemantics,
   ) {

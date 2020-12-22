@@ -33,6 +33,17 @@ const Radius _kFloatingCaretRadius = Radius.circular(1.0);
 /// Used by [RenderEditable.onSelectionChanged].
 typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
+/// Signature of the function returned by [CustomPainter.semanticsBuilder].
+///
+/// Builds semantics information describing the picture drawn by a
+/// [CustomPainter]. Each [CustomPainterSemantics] in the returned list is
+/// converted into a [SemanticsNode] by copying its properties.
+///
+/// The returned list must not be mutated after this function completes. To
+/// change the semantic information, the function must return a new list
+/// instead.
+typedef RenderEditablePainterSemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size size, RenderEditable renderEditable);
+
 /// Indicates what triggered the change in selected text (including changes to
 /// the cursor location).
 enum SelectionChangedCause {
@@ -337,7 +348,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     } else {
       _foregroundRenderObject?.painter = effectivePainter;
     }
-    effectivePainter.renderEditable = this;
     _foregroundPainter = newPainter;
   }
 
@@ -363,7 +373,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     } else {
       _backgroundRenderObject?.painter = effectivePainter;
     }
-    effectivePainter.renderEditable = this;
     _painter = newValue;
   }
 
@@ -2358,10 +2367,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 }
 
-class _RenderEditableCustomPaint extends RenderCustomPaint {
+class _RenderEditableCustomPaint extends RenderBox {
   _RenderEditableCustomPaint({
     RenderEditablePainter? painter,
-  }) : super(painter: painter);
+  }) : _painter = painter,
+       super();
 
   @override
   RenderEditable? get parent => super.parent as RenderEditable?;
@@ -2370,27 +2380,105 @@ class _RenderEditableCustomPaint extends RenderCustomPaint {
   bool get isRepaintBoundary => true;
 
   @override
-  RenderEditablePainter? get painter => super.painter as RenderEditablePainter?;
-  @override
+  bool get sizedByParent => true;
+
+  RenderEditablePainter? get painter => _painter;
+  RenderEditablePainter? _painter;
   set painter(RenderEditablePainter? newValue) {
     if (newValue == painter)
       return;
-    newValue?.renderEditable = parent;
-    super.painter = newValue;
+
+    final RenderEditablePainter? oldPainter = painter;
+    _painter = newValue;
+
+    if (newValue?.shouldRepaint(oldPainter) ?? true)
+      markNeedsPaint();
+
+    if (attached) {
+      oldPainter?.removeListener(markNeedsPaint);
+      newValue?.addListener(markNeedsPaint);
+    }
+
+    if (newValue?.shouldRebuildSemantics(oldPainter) ?? attached)
+      markNeedsSemanticsUpdate();
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    final RenderEditable? parent = this.parent;
+    assert(parent != null);
     final RenderEditablePainter? painter = this.painter;
-    if (painter != null) {
+    if (painter != null && parent != null) {
       context.setWillChangeHint();
-      painter.paint(context.canvas, Size.zero);
+      painter.paint(context.canvas, Size.zero, parent);
     }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _painter?.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _painter?.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    final RenderEditable? parent = this.parent;
+    assert(parent != null);
+    if (parent == null)
+      return false;
+    return _painter?.hitTest(parent, position)
+        ?? super.hitTestChildren(result, position: position);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+
+  @override
+  void performResize() {
+    super.performResize();
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Builds semantics for the picture drawn by [painter].
+  RenderEditablePainterSemanticsBuilderCallback? _backgroundSemanticsBuilder;
+  /// Describe the semantics of the picture painted by the [painter].
+  List<SemanticsNode>? _backgroundSemanticsNodes;
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    _backgroundSemanticsBuilder = painter?.semanticsBuilder;
+    config.isSemanticBoundary = _backgroundSemanticsBuilder != null;
+  }
+
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    assert(children.isEmpty);
+    final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder?.call(size, parent!)
+      ?? const <CustomPainterSemantics>[];
+    _backgroundSemanticsNodes = RenderCustomPaint.updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
+    super.assembleSemanticsNode(node, config, _backgroundSemanticsNodes ?? <SemanticsNode>[]);
+  }
+
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _backgroundSemanticsNodes = null;
   }
 }
 
-/// A [CustomPainter] subclass that paints within the associated [RenderEditable]'s
-/// bounds, above or beneath its text content.
+/// An interface that paints within the associated [RenderEditable]'s bounds,
+/// above or beneath its text content.
 ///
 /// This painter is designed to paint auxiliary contents that depends on the
 /// text layout metrics (for instance, carets and text highlights), within an
@@ -2406,23 +2494,120 @@ class _RenderEditableCustomPaint extends RenderCustomPaint {
 ///    and sets it as the foreground painter of the [RenderEditable].
 ///  * [RenderEditable.setPainter], which takes a [RenderEditablePainter]
 ///    and sets it as the foreground painter of the [RenderEditable].
-abstract class RenderEditablePainter extends ChangeNotifier implements CustomPainter {
-  /// The[RenderEditable] this painter will paint on top of (or beneath).
+abstract class RenderEditablePainter extends ChangeNotifier {
+  /// Called whenever a hit test is being performed on an object that is using
+  /// this custom paint delegate.
   ///
-  /// This property is guaranteed to be non-null at the time the [paint] method
-  /// or the [hitTest] method is called by the painter's render object, or when
-  /// the [semanticsBuilder] property is accessed by the render object.
-  @protected
-  RenderEditable? renderEditable;
+  /// The given point is relative to the same coordinate space as the last
+  /// [paint] call.
+  ///
+  /// The default behavior is to consider all points to be hits for
+  /// background painters, and no points to be hits for foreground painters.
+  ///
+  /// Return true if the given position corresponds to a point on the drawn
+  /// image that should be considered a "hit", false if it corresponds to a
+  /// point that should be considered outside the painted image, and null to use
+  /// the default behavior.
+  bool? hitTest(RenderEditable renderEditable, Offset position) => null;
 
-  @override
-  bool? hitTest(Offset position) => null;
+  /// Returns a function that builds semantic information for the picture drawn
+  /// by this painter.
+  ///
+  /// If the returned function is null, this painter will not contribute new
+  /// [SemanticsNode]s to the semantics tree and the [CustomPaint] corresponding
+  /// to this painter will not create a semantics boundary. However, if the
+  /// child of a [CustomPaint] is not null, the child may contribute
+  /// [SemanticsNode]s to the tree.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.isSemanticBoundary], which causes new
+  ///    [SemanticsNode]s to be added to the semantics tree.
+  ///  * [RenderCustomPaint], which uses this getter to build semantics.
+  RenderEditablePainterSemanticsBuilderCallback? get semanticsBuilder => null;
 
-  @override
-  SemanticsBuilderCallback? get semanticsBuilder => null;
+  /// Called whenever a new instance of the custom painter delegate class is
+  /// provided to the [RenderCustomPaint] object, or any time that a new
+  /// [CustomPaint] object is created with a new instance of the custom painter
+  /// delegate class (which amounts to the same thing, because the latter is
+  /// implemented in terms of the former).
+  ///
+  /// If the new instance would cause [semanticsBuilder] to create different
+  /// semantics information, then this method should return true, otherwise it
+  /// should return false.
+  ///
+  /// If the method returns false, then the [semanticsBuilder] call might be
+  /// optimized away.
+  ///
+  /// It's possible that the [semanticsBuilder] will get called even if
+  /// [shouldRebuildSemantics] would return false. For example, it is called
+  /// when the [CustomPaint] is rendered for the very first time, or when the
+  /// box changes its size.
+  ///
+  /// By default this method delegates to [shouldRepaint] under the assumption
+  /// that in most cases semantics change when something new is drawn.
+  bool shouldRebuildSemantics(RenderEditablePainter? oldDelegate) => shouldRepaint(oldDelegate);
 
-  @override
-  bool shouldRebuildSemantics(covariant RenderEditablePainter oldDelegate) => shouldRepaint(oldDelegate);
+  /// Called whenever a new instance of the custom painter delegate class is
+  /// provided to the [RenderCustomPaint] object, or any time that a new
+  /// [CustomPaint] object is created with a new instance of the custom painter
+  /// delegate class (which amounts to the same thing, because the latter is
+  /// implemented in terms of the former).
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If the method returns false, then the [paint] call might be optimized
+  /// away.
+  ///
+  /// It's possible that the [paint] method will get called even if
+  /// [shouldRepaint] returns false (e.g. if an ancestor or descendant needed to
+  /// be repainted). It's also possible that the [paint] method will get called
+  /// without [shouldRepaint] being called at all (e.g. if the box changes
+  /// size).
+  ///
+  /// If a custom delegate has a particularly expensive paint function such that
+  /// repaints should be avoided as much as possible, a [RepaintBoundary] or
+  /// [RenderRepaintBoundary] (or other render object with
+  /// [RenderObject.isRepaintBoundary] set to true) might be helpful.
+  ///
+  /// The `oldDelegate` argument will never be null.
+  bool shouldRepaint(RenderEditablePainter? oldDelegate);
+
+  /// Called whenever the object needs to paint. The given [Canvas] has its
+  /// coordinate space configured such that the origin is at the top left of the
+  /// box. The area of the box is the size of the [size] argument.
+  ///
+  /// Paint operations should remain inside the given area. Graphical
+  /// operations outside the bounds may be silently ignored, clipped, or not
+  /// clipped. It may sometimes be difficult to guarantee that a certain
+  /// operation is inside the bounds (e.g., drawing a rectangle whose size is
+  /// determined by user inputs). In that case, consider calling
+  /// [Canvas.clipRect] at the beginning of [paint] so everything that follows
+  /// will be guaranteed to only draw within the clipped area.
+  ///
+  /// Implementations should be wary of correctly pairing any calls to
+  /// [Canvas.save]/[Canvas.saveLayer] and [Canvas.restore], otherwise all
+  /// subsequent painting on this canvas may be affected, with potentially
+  /// hilarious but confusing results.
+  ///
+  /// To paint text on a [Canvas], use a [TextPainter].
+  ///
+  /// To paint an image on a [Canvas]:
+  ///
+  /// 1. Obtain an [ImageStream], for example by calling [ImageProvider.resolve]
+  ///    on an [AssetImage] or [NetworkImage] object.
+  ///
+  /// 2. Whenever the [ImageStream]'s underlying [ImageInfo] object changes
+  ///    (see [ImageStream.addListener]), create a new instance of your custom
+  ///    paint delegate, giving it the new [ImageInfo] object.
+  ///
+  /// 3. In your delegate's [paint] method, call the [Canvas.drawImage],
+  ///    [Canvas.drawImageRect], or [Canvas.drawImageNine] methods to paint the
+  ///    [ImageInfo.image] object, applying the [ImageInfo.scale] value to
+  ///    obtain the correct rendering size.
+  void paint(Canvas canvas, Size size, RenderEditable renderEditable);
 }
 
 class _TextHighlightPainter extends RenderEditablePainter {
@@ -2479,17 +2664,12 @@ class _TextHighlightPainter extends RenderEditablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
     final TextRange? range = highlightedRange;
     final Color? color = highlightColor;
     if (range == null || color == null || range.isCollapsed) {
       return;
     }
-
-    final RenderEditable? renderEditable = this.renderEditable;
-    assert(renderEditable != null);
-    if (renderEditable == null)
-      return;
 
     highlightPaint.color = color;
     final List<TextBox> boxes = renderEditable._textPainter.getBoxesForSelection(
@@ -2503,9 +2683,11 @@ class _TextHighlightPainter extends RenderEditablePainter {
   }
 
   @override
-  bool shouldRepaint(RenderEditablePainter oldDelegate) {
+  bool shouldRepaint(RenderEditablePainter? oldDelegate) {
     if (identical(oldDelegate, this))
       return false;
+    if (oldDelegate == null)
+      return highlightColor != null && highlightedRange != null;
     return oldDelegate is! _TextHighlightPainter
         || oldDelegate.highlightColor != highlightColor
         || oldDelegate.highlightedRange != highlightedRange
@@ -2581,14 +2763,12 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     notifyListeners();
   }
 
-  void paintRegularCursor(Canvas canvas, Color caretColor, TextPosition textPosition) {
-    assert(renderEditable != null);
-
-    final Rect caretPrototype = renderEditable!._caretPrototype;
-    final Offset caretOffset = renderEditable!._textPainter.getOffsetForCaret(textPosition, caretPrototype);
+  void paintRegularCursor(Canvas canvas, RenderEditable renderEditable, Color caretColor, TextPosition textPosition) {
+    final Rect caretPrototype = renderEditable._caretPrototype;
+    final Offset caretOffset = renderEditable._textPainter.getOffsetForCaret(textPosition, caretPrototype);
     Rect caretRect = caretPrototype.shift(caretOffset + cursorOffset);
 
-    final double? caretHeight = renderEditable!._textPainter.getFullHeightForCaret(textPosition, caretPrototype);
+    final double? caretHeight = renderEditable._textPainter.getFullHeightForCaret(textPosition, caretPrototype);
     if (caretHeight != null) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -2619,7 +2799,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
       }
     }
 
-    final Rect integralRect = caretRect.shift(renderEditable!.integralOffset(caretRect.topLeft));
+    final Rect integralRect = caretRect.shift(renderEditable.integralOffset(caretRect.topLeft));
     final Radius? radius = cursorRadius;
     caretPaint.color = caretColor;
     if (radius == null) {
@@ -2632,12 +2812,12 @@ class _FloatingCursorPainter extends RenderEditablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
     if (!shouldPaint)
       return;
 
     assert(renderEditable != null);
-    final TextSelection? selection = renderEditable!.selection;
+    final TextSelection? selection = renderEditable.selection;
 
     if (selection == null || !selection.isCollapsed /* || !selection.isValid*/)
       return;
@@ -2649,10 +2829,10 @@ class _FloatingCursorPainter extends RenderEditablePainter {
       : showRegularCaret ? backgroundCursorColor : null;
     final TextPosition caretTextPosition = floatingCursorRect == null
       ? selection.extent
-      : renderEditable!._floatingCursorTextPosition;
+      : renderEditable._floatingCursorTextPosition;
 
     if (caretColor != null) {
-      paintRegularCursor(canvas, caretColor, caretTextPosition);
+      paintRegularCursor(canvas, renderEditable, caretColor, caretTextPosition);
     }
 
     final Color? floatingCursorColor = this.caretColor?.withOpacity(0.75);
@@ -2667,9 +2847,12 @@ class _FloatingCursorPainter extends RenderEditablePainter {
   }
 
   @override
-  bool shouldRepaint(RenderEditablePainter oldDelegate) {
+  bool shouldRepaint(RenderEditablePainter? oldDelegate) {
     if (identical(this, oldDelegate))
       return false;
+
+    if (oldDelegate == null)
+      return shouldPaint;
     return oldDelegate is! _FloatingCursorPainter
         || oldDelegate.shouldPaint != shouldPaint
         || oldDelegate.showRegularCaret != showRegularCaret
@@ -2684,25 +2867,10 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 class _CompositeRenderEditablePainter extends RenderEditablePainter {
   _CompositeRenderEditablePainter({ required this.painters });
 
-  @override
-  RenderEditable? get renderEditable => _renderEditable;
-  RenderEditable? _renderEditable;
-  @override
-  set renderEditable(RenderEditable? newValue) {
-    if (newValue == _renderEditable)
-      return;
-
-    _renderEditable = newValue;
-    for (final RenderEditablePainter painter in painters)
-      painter.renderEditable = newValue;
-  }
-
   final List<RenderEditablePainter> painters;
 
   @override
   void addListener(VoidCallback listener) {
-    // This painter is completely stateless.
-    //super.addListener(listener);
     for (final RenderEditablePainter painter in painters)
       painter.addListener(listener);
   }
@@ -2714,30 +2882,24 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
-    assert(renderEditable != null);
-    for (final RenderEditablePainter painter in painters) {
-      assert(
-        painter.renderEditable == renderEditable,
-        '$painter has a different RenderEditable ${painter.renderEditable}',
-      );
-      painter.paint(canvas, size);
-    }
+  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
+    for (final RenderEditablePainter painter in painters)
+      painter.paint(canvas, size, renderEditable);
   }
 
-  late final List<SemanticsBuilderCallback> _cachedBuilders = <SemanticsBuilderCallback>[
+  late final List<RenderEditablePainterSemanticsBuilderCallback> _cachedBuilders = <RenderEditablePainterSemanticsBuilderCallback>[
     for (final RenderEditablePainter painter in painters) if(painter.semanticsBuilder != null) painter.semanticsBuilder!,
   ];
 
   @override
-  SemanticsBuilderCallback? get semanticsBuilder {
+  RenderEditablePainterSemanticsBuilderCallback? get semanticsBuilder {
     return _cachedBuilders.isEmpty
       ? null
-      : (Size size) => <CustomPainterSemantics>[for (SemanticsBuilderCallback callback in _cachedBuilders) ...callback(size)];
+      : (Size size, RenderEditable renderEditable) => <CustomPainterSemantics>[for (RenderEditablePainterSemanticsBuilderCallback callback in _cachedBuilders) ...callback(size, renderEditable)];
   }
 
   @override
-  bool shouldRepaint(RenderEditablePainter oldDelegate) {
+  bool shouldRepaint(RenderEditablePainter? oldDelegate) {
     if (identical(oldDelegate, this))
       return false;
     if (oldDelegate is! _CompositeRenderEditablePainter || oldDelegate.painters.length != painters.length)

@@ -1622,14 +1622,17 @@ void main() {
     setUp(() { EditableText.debugDeterministicCursor = true; });
     tearDown(() {
       EditableText.debugDeterministicCursor = false;
+      _TestRenderEditablePainter.paintHistory.clear();
       editable.setForegroundPainter(null);
       editable.setPainter(null);
-      renderer.renderView.child = null;
+
+      final AbstractNode? parent = editable.parent;
+      if (parent is RenderConstrainedBox)
+        parent.child = null;
     });
 
     test('paints in the correct order', () {
-      layout(editable);
-      editable.layout(BoxConstraints.loose(const Size(100, 100)));
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
       // Prepare for painting after layout.
 
       // Foreground painter.
@@ -1667,8 +1670,7 @@ void main() {
     });
 
     test('changing foreground painter', () {
-      layout(editable);
-      editable.layout(BoxConstraints.loose(const Size(100, 100)));
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
       // Prepare for painting after layout.
 
       _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
@@ -1687,8 +1689,7 @@ void main() {
     });
 
     test('changing background painter', () {
-      layout(editable);
-      editable.layout(BoxConstraints.loose(const Size(100, 100)));
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
       // Prepare for painting after layout.
 
       _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
@@ -1706,19 +1707,69 @@ void main() {
       expect(currentPainter.paintCount, 1);
     });
 
+    test('swapping painters', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter1 = _TestRenderEditablePainter();
+      final _TestRenderEditablePainter painter2 = _TestRenderEditablePainter();
+
+      editable.setPainter(painter1);
+      editable.setForegroundPainter(painter2);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter1, painter2],
+      );
+
+      _TestRenderEditablePainter.paintHistory.clear();
+      editable.setPainter(painter2);
+      editable.setForegroundPainter(painter1);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter2, painter1],
+      );
+    });
+
+    test('reusing the same painter', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      FlutterErrorDetails? errorDetails;
+      editable.setPainter(painter);
+      editable.setForegroundPainter(painter);
+      pumpFrame(phase: EnginePhase.paint, onErrors: () {
+        errorDetails = renderer.takeFlutterErrorDetails();
+      });
+      expect(errorDetails, isNull);
+
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter, painter],
+      );
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
+    });
   });
 }
 
 class _TestRenderEditablePainter extends RenderEditablePainter {
   bool repaint = true;
   int paintCount = 0;
+  static final List<_TestRenderEditablePainter> paintHistory = <_TestRenderEditablePainter>[];
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
     paintCount += 1;
     canvas.drawRect(const Rect.fromLTRB(1, 1, 1, 1), Paint()..color = const Color(0x12345678));
+    paintHistory.add(this);
   }
 
   @override
-  bool shouldRepaint(RenderEditablePainter oldDelegate) => repaint;
+  bool shouldRepaint(RenderEditablePainter? oldDelegate) => repaint;
 }
