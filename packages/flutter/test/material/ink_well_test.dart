@@ -1345,10 +1345,10 @@ void main() {
       );
     }
 
-    Future<void> test(Widget Function(Key? key, {bool onTapDownChangeWrap, bool onTapChangeWrap}) buildApp) async {
+    Future<void> test(Widget Function(Key? key, {bool tapDownChangeWrap, bool tapChangeWrap}) buildApp) async {
       int frames;
 
-      await tester.pumpWidget(buildApp(null, onTapChangeWrap: true));
+      await tester.pumpWidget(buildApp(null, tapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
@@ -1357,7 +1357,7 @@ void main() {
       expect(frames, 1);
       expectTest(false);
 
-      await tester.pumpWidget(buildApp(const Key('foo'), onTapChangeWrap: true));
+      await tester.pumpWidget(buildApp(const Key('foo'), tapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
@@ -1376,7 +1376,7 @@ void main() {
       expect(frames > 1, isTrue);
       expectTest(false);
 
-      await tester.pumpWidget(buildApp(GlobalKey(), onTapChangeWrap: true));
+      await tester.pumpWidget(buildApp(GlobalKey(), tapChangeWrap: true));
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
@@ -1385,7 +1385,7 @@ void main() {
       expect(frames > 1, isTrue);
       expectTest(false);
 
-      await tester.pumpWidget(buildApp(GlobalKey(), onTapDownChangeWrap: true));
+      await tester.pumpWidget(buildApp(GlobalKey(), tapDownChangeWrap: true));
       final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 60));
@@ -1397,7 +1397,7 @@ void main() {
     }
 
     // InkWell have a key
-    await test((Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
+    await test((Key? key, {bool tapDownChangeWrap = false, bool tapChangeWrap = false}) {
       bool wrap = false;
 
       return Directionality(
@@ -1416,11 +1416,11 @@ void main() {
                 Widget child = InkWell(
                   key: key,
                   onTapDown: (_) {
-                    if (onTapDownChangeWrap)
+                    if (tapDownChangeWrap)
                       changeWrap();
                   },
                   onTap: () {
-                    if (onTapChangeWrap)
+                    if (tapChangeWrap)
                       changeWrap();
                   },
                   child: Container(
@@ -1443,7 +1443,7 @@ void main() {
     });
 
     // Ancestor widget have Key
-    await test((Key? key, {bool onTapDownChangeWrap = false, bool onTapChangeWrap = false}) {
+    await test((Key? key, {bool tapDownChangeWrap = false, bool tapChangeWrap = false}) {
       bool wrap = false;
 
       return Directionality(
@@ -1460,11 +1460,11 @@ void main() {
                 }
                 Widget child = InkWell(
                   onTapDown: (_) {
-                    if (onTapDownChangeWrap)
+                    if (tapDownChangeWrap)
                       changeWrap();
                   },
                   onTap: () {
-                    if (onTapChangeWrap)
+                    if (tapChangeWrap)
                       changeWrap();
                   },
                   child: Container(
