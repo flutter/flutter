@@ -75,7 +75,7 @@ enum _ContextMenuLocation {
 /// child's corners and allowing its aspect ratio to expand, similar to the
 /// Photos app on iOS.
 ///
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.

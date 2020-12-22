@@ -386,7 +386,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// Here, we will use a [Shortcuts] and [Actions] widget to add and remove from a counter.
 /// This can be done by creating a child widget that is focused and pressing the logical key

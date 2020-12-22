@@ -743,8 +743,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     // Just place the collapsed selection at the end or beginning of the region
-    // if shift isn't down.
-    if (!shift) {
+    // if shift isn't down or selection isn't enabled.
+    if (!shift || !selectionEnabled) {
       // We want to put the cursor at the correct location depending on which
       // arrow is used while there is a selection.
       int newOffset = newSelection.extentOffset;

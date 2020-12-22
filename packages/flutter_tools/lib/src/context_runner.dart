@@ -136,7 +136,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-        artifacts: globals.artifacts,
         usage: globals.flutterUsage,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(

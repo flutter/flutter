@@ -105,11 +105,13 @@ class ImageInfo {
   ///
   /// The scale factor applies to the width and the height.
   ///
-  /// For example, if this is 2.0 it means that there are four image pixels for
+  /// {@template flutter.painting.imageInfo.scale}
+  /// For example, if this is 2.0, it means that there are four image pixels for
   /// every one logical pixel, and the image's actual width and height (as given
   /// by the [dart:ui.Image.width] and [dart:ui.Image.height] properties) are
   /// double the height and width that should be used when painting the image
   /// (e.g. in the arguments given to [Canvas.drawImage]).
+  /// {@endtemplate}
   final double scale;
 
   /// A string used for debugging purposes to identify the source of this image.
