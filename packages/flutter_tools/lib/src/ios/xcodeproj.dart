@@ -206,6 +206,10 @@ List<String> _xcodeBuildSettingsLines({
       xcodeBuildSettings.add('ARCHS=$arch');
     }
   }
+  if (useMacOSConfig) {
+    // ARM not yet supported https://github.com/flutter/flutter/issues/69221
+    xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
+  }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
     xcodeBuildSettings.add('${config.key}=${config.value}');
