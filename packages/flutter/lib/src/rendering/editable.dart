@@ -1846,27 +1846,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    assert(hasSize);
-    if (!size.contains(position)) {
-      return false;
-    }
-
-    final RenderBox? foregroundChild = _foregroundRenderObject;
-    final RenderBox? backgroundChild = _backgroundRenderObject;
-
-    if (foregroundChild?.hitTest(result, position: position) ?? false)
-      return true;
-
-    if (hitTestSelf(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-
-    return backgroundChild?.hitTest(result, position: position) ?? false;
-  }
-
-  @override
   bool hitTestSelf(Offset position) => true;
 
   late TapGestureRecognizer _tap;
