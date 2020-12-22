@@ -1406,7 +1406,6 @@ void main() {
                     wrap = !wrap;
                   });
                 }
-
                 Widget child = InkWell(
                   key: key,
                   onTapDown: (_) {
@@ -1422,14 +1421,12 @@ void main() {
                     alignment: Alignment.center,
                   ),
                 );
-
                 if (wrap) {
                   child = Container(
                     margin: const EdgeInsets.only(top: 320),
                     child: child,
                   );
                 }
-
                 return child;
               },
             ),
@@ -1450,12 +1447,10 @@ void main() {
               builder: (BuildContext context, void Function(void Function()) setState) {
                 Future<void> changeWrap() async {
                   await Future<void>.delayed(const Duration(milliseconds: 50));
-
                   setState(() {
                     wrap = !wrap;
                   });
                 }
-
                 Widget child = InkWell(
                   onTapDown: (_) {
                     if (onTapDownChangeWrap)
@@ -1470,19 +1465,16 @@ void main() {
                     alignment: Alignment.center,
                   ),
                 );
-
                 child = Container(
                   key: key,
                   child: child,
                 );
-
                 if (wrap) {
                   child = Container(
                     margin: const EdgeInsets.only(top: 320),
                     child: child,
                   );
                 }
-
                 return child;
               },
             ),
@@ -1494,19 +1486,17 @@ void main() {
 
   testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, splash should stop.', (WidgetTester tester)async {
     final Key key = GlobalKey();
-
     bool replaced = false;
+
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
         Future<void> changeReplace() async {
           await Future<void>.delayed(const Duration(milliseconds: 50));
-
           setState(() {
             replaced = !replaced;
           });
         }
-
         return Material(
           key: ValueKey<bool>(replaced),
           child: InkWell(
@@ -1543,12 +1533,10 @@ void main() {
         Future<void> changeReplace() async {
           callChangeReplaceCount += 1;
           await Future<void>.delayed(const Duration(milliseconds: 50));
-
           setState(() {
             replaced = !replaced;
           });
         }
-
         return Container(
           margin: replaced ? const EdgeInsets.only(top: 1) : EdgeInsets.zero,
           child: Material(
