@@ -31,7 +31,7 @@ bool _detectRenderer() {
 /// Using flutter tools option "--web-render=auto" would set the value to true.
 /// Otherwise, it would be false.
 const bool _autoDetect =
-    bool.fromEnvironment('FLUTTER_WEB_AUTO_DETECT', defaultValue: true);
+    bool.fromEnvironment('FLUTTER_WEB_AUTO_DETECT', defaultValue: false);
 
 /// Enable the Skia-based rendering backend.
 ///
