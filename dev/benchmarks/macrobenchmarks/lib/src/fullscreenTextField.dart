@@ -4,8 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-// Make the text relatively expensive to paint so if the text repaints with the
-// blinking cursor it explodes.
 const String textLotsOfText = 'Lorem ipsum dolor sit amet, consectetur '
   'adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna '
   'aliqua. Odio facilisis mauris sit amet massa. Tellus pellentesque eu '

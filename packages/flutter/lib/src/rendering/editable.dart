@@ -2410,7 +2410,7 @@ class _RenderEditableCustomPaint extends RenderBox {
     assert(parent != null);
     final RenderEditablePainter? painter = this.painter;
     if (painter != null && parent != null) {
-      painter.paint(context.canvas, Size.zero, parent);
+      painter.paint(context.canvas, size, parent);
     }
   }
 
