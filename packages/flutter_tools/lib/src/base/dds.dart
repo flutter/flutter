@@ -11,6 +11,14 @@ import 'common.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 
+@visibleForTesting
+Future<dds.DartDevelopmentService> Function(
+  Uri,
+  {bool enableAuthCodes,
+  bool ipv6,
+  Uri serviceUri,
+}) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
+
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService {
@@ -44,7 +52,7 @@ class DartDevelopmentService {
       'connecting to VM service at $observatoryUri.',
     );
     try {
-      _ddsInstance = await dds.DartDevelopmentService.startDartDevelopmentService(
+      _ddsInstance = await ddsLauncherCallback(
           observatoryUri,
           serviceUri: ddsUri,
           enableAuthCodes: !disableServiceAuthCodes,
@@ -59,9 +67,21 @@ class DartDevelopmentService {
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
       if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
-        _existingDdsUri = Uri.parse(
-          e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
-        );
+        try {
+          _existingDdsUri = Uri.parse(
+            e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
+          );
+        } on StateError {
+          logger.printError(
+            'DDS has failed to start and there is not an existing DDS instance '
+            'available to connect to. Please comment on '
+            'https://github.com/flutter/flutter/issues/72385 with output from '
+            '"flutter doctor -v" and the following error message:\n\n ${e.message}.'
+          );
+          // Wrap the DDS error message in a StateError so it can be collected
+          // by the crash handler.
+          throw StateError(e.message);
+        }
       }
       if (!_completer.isCompleted) {
         _completer.complete();

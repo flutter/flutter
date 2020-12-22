@@ -11,9 +11,6 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 // Minimum padding from edges of the segmented control to edges of
 // encompassing widget.
 const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
@@ -141,7 +138,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   ///     1: Text('Child 2'),
   ///   };
   ///
-  ///   int currentValue;
+  ///   late int currentValue;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
