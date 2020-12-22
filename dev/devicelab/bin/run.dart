@@ -42,6 +42,12 @@ String luciBuilder;
 /// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
 
+/// Path for test results.
+///
+/// If passed along with a task name, the Cocoon test results will be stored in this file.
+/// If passed without a task name, the file contents will be uploaded to Cocoon.
+String resultsPath;
+
 /// File containing a service account token.
 ///
 /// If passed, the test run results will be uploaded to Flutter infrastructure.
@@ -65,6 +71,16 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
+  deviceId = args['device-id'] as String;
+  exitOnFirstTestFailure = args['exit'] as bool;
+  gitBranch = args['git-branch'] as String;
+  localEngine = args['local-engine'] as String;
+  localEngineSrcPath = args['local-engine-src-path'] as String;
+  luciBuilder = args['luci-builder'] as String;
+  resultsPath = args['results-path'] as String;
+  serviceAccountTokenFile = args['service-account-token-file'] as String;
+  silent = args['silent'] as bool;
+
   if (!args.wasParsed('task')) {
     if (args.wasParsed('stage') || args.wasParsed('all')) {
       addTasks(
@@ -83,20 +99,18 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
+  // Do not run any test. Instead, upload results from a test run.
+  if (resultsPath != null && serviceAccountTokenFile != null) {
+    final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
+    cocoon.sendResultsPath(resultsPath);
+    return;
+  }
+
   if (_taskNames.isEmpty) {
     stderr.writeln('Failed to find tasks to run based on supplied options.');
     exitCode = 1;
     return;
   }
-
-  deviceId = args['device-id'] as String;
-  exitOnFirstTestFailure = args['exit'] as bool;
-  gitBranch = args['git-branch'] as String;
-  localEngine = args['local-engine'] as String;
-  localEngineSrcPath = args['local-engine-src-path'] as String;
-  luciBuilder = args['luci-builder'] as String;
-  serviceAccountTokenFile = args['service-account-token-file'] as String;
-  silent = args['silent'] as bool;
 
   if (args.wasParsed('ab')) {
     await _runABTest();
@@ -120,7 +134,15 @@ Future<void> _runTasks() async {
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (serviceAccountTokenFile != null) {
+    if (resultsPath != null) {
+      final Cocoon cocoon = Cocoon();
+      await cocoon.writeTaskResultToFile(
+        builderName: luciBuilder,
+        gitBranch: gitBranch,
+        result: result,
+        resultsPath: resultsPath,
+      );
+    } else if (serviceAccountTokenFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
       /// Cocoon references LUCI tasks by the [luciBuilder] instead of [taskName].
       await cocoon.sendTaskResult(builderName: luciBuilder, result: result, gitBranch: gitBranch);
@@ -366,6 +388,12 @@ final ArgParser _argParser = ArgParser()
           'test with a `required_agent_capabilities` value of "mac/android"\n'
           'on a windows host). Each test publishes its '
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
+  )
+  ..addOption(
+    'results-path',
+    help: '[Flutter infrastructure] File path for test results. If passed with\n'
+          'task, will write test results to the file. Otherwise, will upload\n'
+          'JSON in file to Cocoon as POST request.'
   )
   ..addOption(
     'service-account-token-file',
