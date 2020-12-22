@@ -73,14 +73,7 @@ class Cocoon {
   Future<void> sendResultsPath(String resultsPath) async {
     final File resultFile = fs.file(resultsPath);
     final Map<String, dynamic> resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
-
-    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', resultsJson);
-    if (response['Name'] != null) {
-      logger.info('Updated Cocoon with results from this task');
-    } else {
-      logger.info(response);
-      logger.severe('Failed to updated Cocoon with results from this task');
-    }
+    await _sendUpdateTaskRequest(resultsJson);
   }
 
   /// Send [TaskResult] to Cocoon.
@@ -105,13 +98,7 @@ class Cocoon {
       builderName: builderName,
       result: result,
     );
-    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', updateRequest);
-    if (response['Name'] != null) {
-      logger.info('Updated Cocoon with results from this task');
-    } else {
-      logger.info(response);
-      logger.severe('Failed to updated Cocoon with results from this task');
-    }
+    await _sendUpdateTaskRequest(updateRequest);
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
@@ -133,9 +120,9 @@ class Cocoon {
     );
     final File resultFile = fs.file(resultsPath);
     if (resultFile.existsSync()) {
-      throw CocoonException('Results file already exists');
+      resultFile.deleteSync();
     }
-
+    resultFile.createSync();
     resultFile.writeAsStringSync(json.encode(updateRequest));
   }
 
@@ -169,6 +156,16 @@ class Cocoon {
     updateRequest['BenchmarkScoreKeys'] = validScoreKeys;
 
     return updateRequest;
+  }
+
+  Future<void> _sendUpdateTaskRequest(Map<String, dynamic> postBody) async {
+    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', postBody);
+    if (response['Name'] != null) {
+      logger.info('Updated Cocoon with results from this task');
+    } else {
+      logger.info(response);
+      logger.severe('Failed to updated Cocoon with results from this task');
+    }
   }
 
   /// Make an API request to Cocoon.

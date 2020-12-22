@@ -42,10 +42,7 @@ String luciBuilder;
 /// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
 
-/// Path for test results.
-///
-/// If passed along with a task name, the Cocoon test results will be stored in this file.
-/// If passed without a task name, the file contents will be uploaded to Cocoon.
+/// Path to write test results to.
 String resultsPath;
 
 /// File containing a service account token.
@@ -77,7 +74,7 @@ Future<void> main(List<String> rawArgs) async {
   localEngine = args['local-engine'] as String;
   localEngineSrcPath = args['local-engine-src-path'] as String;
   luciBuilder = args['luci-builder'] as String;
-  resultsPath = args['results-path'] as String;
+  resultsPath = args['results-file'] as String;
   serviceAccountTokenFile = args['service-account-token-file'] as String;
   silent = args['silent'] as bool;
 
@@ -96,13 +93,6 @@ Future<void> main(List<String> rawArgs) async {
       print('${(i + 1).toString().padLeft(3)} - ${_taskNames[i]}');
     }
     exitCode = 0;
-    return;
-  }
-
-  // Do not run any test. Instead, upload results from a test run.
-  if (resultsPath != null && serviceAccountTokenFile != null) {
-    final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-    cocoon.sendResultsPath(resultsPath);
     return;
   }
 
@@ -144,6 +134,7 @@ Future<void> _runTasks() async {
       );
     } else if (serviceAccountTokenFile != null) {
       final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
+
       /// Cocoon references LUCI tasks by the [luciBuilder] instead of [taskName].
       await cocoon.sendTaskResult(builderName: luciBuilder, result: result, gitBranch: gitBranch);
     }
@@ -246,7 +237,7 @@ File _uniqueFile(String filenameTemplate) {
   File file = File(parts[0] + parts[1]);
   int i = 1;
   while (file.existsSync()) {
-    file = File(parts[0]+i.toString()+parts[1]);
+    file = File(parts[0] + i.toString() + parts[1]);
     i++;
   }
   return file;
@@ -377,10 +368,7 @@ final ArgParser _argParser = ArgParser()
           'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
           'the location based on the value of the --flutter-root option.',
   )
-  ..addOption(
-    'luci-builder',
-    help: '[Flutter infrastructure] Name of the LUCI builder being run on.'
-  )
+  ..addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.')
   ..addFlag(
     'match-host-platform',
     defaultsTo: true,
@@ -392,8 +380,7 @@ final ArgParser _argParser = ArgParser()
   ..addOption(
     'results-path',
     help: '[Flutter infrastructure] File path for test results. If passed with\n'
-          'task, will write test results to the file. Otherwise, will upload\n'
-          'JSON in file to Cocoon as POST request.'
+          'task, will write test results to the file.'
   )
   ..addOption(
     'service-account-token-file',
