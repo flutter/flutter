@@ -568,11 +568,108 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Uses values from [TabBarTheme] if it is set in the current context.
 ///
-/// To see a sample implementation, visit the [TabController] documentation.
+/// {@tool dartpad --template=stateless_widget_material}
+/// This sample shows the implementation of [TabBar] and [TabBarView] using a [DefaultTabController].
+/// Each [Tab] corresponds to a child of the [TabBarView] in the order they are written.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///    return DefaultTabController(
+///      initialIndex: 1,
+///      length: 3,
+///      child: Scaffold(
+///        appBar: AppBar(
+///          title: Text('TabBar Widget'),
+///          bottom: TabBar(
+///            tabs: <Widget>[
+///              Tab(
+///                icon: Icon(Icons.cloud_outlined),
+///              ),
+///              Tab(
+///                icon: Icon(Icons.beach_access_sharp),
+///              ),
+///              Tab(
+///                icon: Icon(Icons.brightness_5_sharp),
+///              ),
+///            ],
+///          ),
+///        ),
+///        body: TabBarView(
+///          children: <Widget>[
+///            Center(
+///              child: Text('It\'s cloudy here'),
+///            ),
+///            Center(
+///              child: Text('It\'s rainy here'),
+///            ),
+///            Center(
+///              child: Text('It\'s sunny here'),
+///            ),
+///          ],
+///        ),
+///      ),
+///    );
+///  }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+/// [TabBar] can also be implmented by using a [TabController] which provides more options
+/// to control the behavior of the [TabBar] and [TabBarView]. This can be used instead of
+/// a [DefaultTabController], demonstrated below.
+///
+/// ```dart
+///
+/// late TabController _tabController;
+///
+///  @override
+///  void initState() {
+///    super.initState();
+///    _tabController = TabController(length: 3, vsync: this);
+///  }
+///
+///  Widget build(BuildContext context) {
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: Text('TabBar Widget'),
+///        bottom: TabBar(
+///          controller: _tabController,
+///          tabs: <Widget>[
+///            Tab(
+///              icon: Icon(Icons.cloud_outlined),
+///            ),
+///            Tab(
+///             icon: Icon(Icons.beach_access_sharp),
+///            ),
+///            Tab(
+///              icon: Icon(Icons.brightness_5_sharp),
+///            ),
+///          ],
+///        ),
+///      ),
+///      body: TabBarView(
+///        controller: _tabController,
+///        children: <Widget>[
+///          Center(
+///            child: Text('It\'s cloudy here'),
+///          ),
+///          Center(
+///            child: Text('It\'s rainy here'),
+///          ),
+///          Center(
+///             child: Text('It\'s sunny here'),
+///          ),
+///        ],
+///      ),
+///    );
+///  }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
+///  * [TabBar], which is used to display the [Tab] that corresponds to each page of the [TabBarView].
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design tab bar.
   ///
