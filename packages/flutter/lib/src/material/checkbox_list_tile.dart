@@ -10,7 +10,6 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
@@ -40,7 +39,7 @@ import 'theme_data.dart';
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![CheckboxListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile.png)
 ///
@@ -59,8 +58,8 @@ import 'theme_data.dart';
 ///   return CheckboxListTile(
 ///     title: const Text('Animate Slowly'),
 ///     value: timeDilation != 1.0,
-///     onChanged: (bool value) {
-///       setState(() { timeDilation = value ? 10.0 : 1.0; });
+///     onChanged: (bool? value) {
+///       setState(() { timeDilation = value! ? 10.0 : 1.0; });
 ///     },
 ///     secondary: const Icon(Icons.hourglass_empty),
 ///   );
@@ -85,7 +84,7 @@ import 'theme_data.dart';
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool sample --template=stateful_widget_scaffold_center}
 ///
 /// ![Checkbox list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_semantics.png)
 ///
@@ -99,10 +98,10 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LinkedLabelCheckbox extends StatelessWidget {
 ///   const LinkedLabelCheckbox({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
 ///   });
 ///
 ///   final String label;
@@ -133,7 +132,7 @@ import 'theme_data.dart';
 ///           ),
 ///           Checkbox(
 ///             value: value,
-///             onChanged: (bool newValue) {
+///             onChanged: (bool? newValue) {
 ///               onChanged(newValue);
 ///             },
 ///           ),
@@ -169,7 +168,7 @@ import 'theme_data.dart';
 /// combining [Checkbox] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![Custom checkbox list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_custom.png)
 ///
@@ -179,10 +178,10 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LabeledCheckbox extends StatelessWidget {
 ///   const LabeledCheckbox({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
 ///   });
 ///
 ///   final String label;
@@ -203,7 +202,7 @@ import 'theme_data.dart';
 ///             Expanded(child: Text(label)),
 ///             Checkbox(
 ///               value: value,
-///               onChanged: (bool newValue) {
+///               onChanged: (bool? newValue) {
 ///                 onChanged(newValue);
 ///               },
 ///             ),
