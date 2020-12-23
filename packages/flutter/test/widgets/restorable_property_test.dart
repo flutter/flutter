@@ -348,7 +348,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final RestorableInt intValue = RestorableInt(42);
   final RestorableString stringValue = RestorableString('hello world');
   final RestorableBool boolValue = RestorableBool(false);
-  final RestorableNumN<num> nullableNumValue = RestorableNumN<num>(null);
+  final RestorableNumN<num?> nullableNumValue = RestorableNumN<num?>(null);
   final RestorableDoubleN nullableDoubleValue = RestorableDoubleN(null);
   final RestorableIntN nullableIntValue = RestorableIntN(null);
   final RestorableStringN nullableStringValue = RestorableStringN(null);
