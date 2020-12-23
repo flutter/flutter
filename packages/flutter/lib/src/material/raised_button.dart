@@ -43,7 +43,7 @@ import 'theme_data.dart';
 /// Raised buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
 /// and lastly a RaisedButton with gradient background.
