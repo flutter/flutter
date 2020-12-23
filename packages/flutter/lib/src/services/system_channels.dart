@@ -340,6 +340,13 @@ class SystemChannels {
   ///    the implementation, this string may vary, but the default Google Play
   ///    Store implementation beings in the "Requested" state before transitioning
   ///    into the "Downloading" and finally the "Installed" state.
+  ///  * `uninstallDynamicFeature`:  Requests that a dynamic feature identified by
+  ///    the provided loadingUnitId or moduleName be uninstalled. Since
+  ///    uninstallation typically requires significant disk i/o, this method only
+  ///    signals the intent to uninstall. Actual uninstallation (eg, removal of
+  ///    assets and files) may occur at a later time. However, once uninstallation
+  ///    is requested, the dynamic feature should not be used anymore until
+  ///    `installDynamicFeature` is called again.
   static const MethodChannel dynamicfeature = OptionalMethodChannel(
     'flutter/dynamicfeature',
     StandardMethodCodec(),
