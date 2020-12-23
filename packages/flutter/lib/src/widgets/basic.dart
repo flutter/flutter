@@ -7241,7 +7241,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///
 /// here is the sample code to use[MergeSemantics] to merge the semantics of  a [checkbox] and [Text] widget.
 ///
-/// ...dart
+///'''dart
 /// MergeSemantics{
 ///  child: ROW{
 ///    children:{
@@ -7252,12 +7252,9 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///    ],
 ///  ),
 /// ),
-/// ...
+/// '''
 ///
 /// {@end-tool}
-///
-///
-///
 ///
 /// Be aware that if two nodes in the subtree have conflicting
 /// semantics, the result may be nonsensical. For example, a subtree
