@@ -509,7 +509,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///               hintText: 'Split RawAutocomplete App',
   ///             ),
   ///             onFieldSubmitted: (String value) {
-  ///               RawAutocomplete.onFieldSubmitted(_autocompleteKey);
+  ///               RawAutocomplete.onFieldSubmitted<String>(_autocompleteKey);
   ///             },
   ///           ),
   ///         ),
@@ -599,8 +599,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   ///  * [focusNode] and [textEditingController], which contain a code example
   ///    showing how to create a separate field outside of fieldViewBuilder.
-  static void onFieldSubmitted(GlobalKey key) {
-    final _RawAutocompleteState rawAutocomplete = key.currentState as _RawAutocompleteState;
+  static void onFieldSubmitted<T extends Object>(GlobalKey key) {
+    final _RawAutocompleteState<T> rawAutocomplete = key.currentState! as _RawAutocompleteState<T>;
     rawAutocomplete._onFieldSubmitted();
   }
 
