@@ -75,7 +75,7 @@ abstract class KeyboardKey with Diagnosticable {
 ///       _message = 'Pressed the "Q" key!';
 ///     } else {
 ///       if (kReleaseMode) {
-///         _message = 'Not a Q: Key label is "${event.logicalKey.keyLabel ?? '<none>'}"';
+///         _message = 'Not a Q: Key label is "${event.logicalKey.keyLabel}"';
 ///       } else {
 ///         // This will only print useful information in debug mode.
 ///         _message = 'Not a Q: Pressed ${event.logicalKey.debugName}';
