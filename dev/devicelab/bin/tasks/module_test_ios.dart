@@ -175,10 +175,10 @@ Future<void> main() async {
 
       final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
       final String podfileLockOutput = podfileLockFile.readAsStringSync();
-      if (!podfileLockOutput.contains(':path: Flutter/engine')
+      if (!podfileLockOutput.contains(':path: Flutter')
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
-        || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
-        || !podfileLockOutput.contains(':path: Flutter/.symlinks/google_sign_in/ios')
+        || !podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
+        || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
         || podfileLockOutput.contains('android_alarm_manager')) {
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
@@ -220,6 +220,17 @@ Future<void> main() async {
             'LANG': 'en_US.UTF-8',
           },
         );
+
+        final File hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
+        final String hostPodfileLockOutput = hostPodfileLockFile.readAsStringSync();
+        if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/engine"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/device_info/ios"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
+            || hostPodfileLockOutput.contains('android_alarm_manager')) {
+          throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
+        }
+
         await exec(
           'xcodebuild',
           <String>[
