@@ -11,6 +11,29 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: 'Rename to resizeToAvoidBottomInset'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      field: 'resizeToAvoidBottomPadding'
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'rename'
+        newName: 'resizeToAvoidBottomInset'
+
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: 'Rename to resizeToAvoidBottomInset'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'resizeToAvoidBottomPadding'
+        newName: 'resizeToAvoidBottomInset'
+
   # Changes made in https://github.com/flutter/flutter/pull/28602
   - title: 'Rename to fromMouseEvent'
     date: 2020-12-15
