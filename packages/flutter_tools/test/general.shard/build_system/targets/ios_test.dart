@@ -189,7 +189,7 @@ void main() {
         kTargetPlatform: 'ios',
         kSdkRoot: 'path/to/iPhoneSimulator.sdk',
         kBuildMode: 'release',
-        kIosArchs: 'arm64'
+        kIosArchs: 'x86_64',
       },
       processManager: processManager,
       artifacts: artifacts,
