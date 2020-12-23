@@ -13,7 +13,7 @@ void main() {
     expect(() => RestorableInt(1).value, throwsAssertionError);
     expect(() => RestorableString('hello').value, throwsAssertionError);
     expect(() => RestorableBool(true).value, throwsAssertionError);
-    expect(() => RestorableNumN<num>(0).value, throwsAssertionError);
+    expect(() => RestorableNumN<num?>(0).value, throwsAssertionError);
     expect(() => RestorableDoubleN(1.0).value, throwsAssertionError);
     expect(() => RestorableIntN(1).value, throwsAssertionError);
     expect(() => RestorableStringN('hello').value, throwsAssertionError);
