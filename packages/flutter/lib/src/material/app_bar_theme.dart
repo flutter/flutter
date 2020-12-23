@@ -42,6 +42,7 @@ class AppBarTheme with Diagnosticable {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
+    this.backwardsCompatibility,
   });
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
@@ -161,6 +162,10 @@ class AppBarTheme with Diagnosticable {
   /// property in all descendant [AppBar] widgets.
   final SystemUiOverlayStyle? systemOverlayStyle;
 
+  /// Overrides the default value of [AppBar.backwardsCompatibility]
+  /// property in all descendant [AppBar] widgets.
+  final bool? backwardsCompatibility;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
@@ -178,6 +183,7 @@ class AppBarTheme with Diagnosticable {
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
+    bool? backwardsCompatibility,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
@@ -194,6 +200,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       systemOverlayStyle: systemOverlayStyle ?? this.systemOverlayStyle,
+      backwardsCompatibility: backwardsCompatibility ?? this.backwardsCompatibility,
     );
   }
 
@@ -224,6 +231,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       systemOverlayStyle: t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
+      backwardsCompatibility: t < 0.5 ? a?.backwardsCompatibility : b?.backwardsCompatibility,
     );
   }
 
@@ -244,6 +252,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle,
       titleTextStyle,
       systemOverlayStyle,
+      backwardsCompatibility,
     );
   }
 
@@ -267,7 +276,8 @@ class AppBarTheme with Diagnosticable {
         && other.titleSpacing == titleSpacing
         && other.toolbarTextStyle == toolbarTextStyle
         && other.titleTextStyle == titleTextStyle
-        && other.systemOverlayStyle == systemOverlayStyle;
+        && other.systemOverlayStyle == systemOverlayStyle
+        && other.backwardsCompatibility == backwardsCompatibility;
   }
 
   @override
@@ -286,5 +296,6 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('backwardsCompatibility', backwardsCompatibility, defaultValue: null));
   }
 }

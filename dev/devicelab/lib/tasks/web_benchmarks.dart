@@ -29,6 +29,8 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     await evalFlutter('build', options: <String>[
       'web',
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
+      if (!useCanvasKit)
+        '--dart-define=FLUTTER_WEB_USE_SKIA=false',
       if (useCanvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       '--profile',

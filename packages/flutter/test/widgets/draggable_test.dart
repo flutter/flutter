@@ -2533,6 +2533,121 @@ void main() {
           findsNothing);
     });
 
+  // Regression test for https://github.com/flutter/flutter/issues/72483
+  testWidgets('Drag and drop - DragTarget<Object> can accept Draggable<int> data', (WidgetTester tester) async {
+    final List<Object> accepted = <Object>[];
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            data: 1,
+            child: Text('Source'),
+            feedback: Text('Dragging'),
+          ),
+          DragTarget<Object>(
+            builder: (BuildContext context, List<Object?> data, List<dynamic> rejects) {
+              return Container(height: 100.0, child: const Text('Target'));
+            },
+            onAccept: accepted.add,
+          ),
+        ],
+      ),
+    ));
+
+    expect(accepted, isEmpty);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(accepted, equals(<int>[1]));
+  });
+
+  testWidgets('Drag and drop - DragTarget<int> can accept Draggable<Object> data when runtime type is int', (WidgetTester tester) async {
+    final List<int> accepted = <int>[];
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<Object>(
+            data: 1,
+            child: Text('Source'),
+            feedback: Text('Dragging'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return Container(height: 100.0, child: const Text('Target'));
+            },
+            onAccept: accepted.add,
+          ),
+        ],
+      ),
+    ));
+
+    expect(accepted, isEmpty);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(accepted, equals(<int>[1]));
+  });
+
+  testWidgets('Drag and drop - DragTarget<int> should not accept Draggable<Object> data when runtime type null', (WidgetTester tester) async {
+    final List<int> accepted = <int>[];
+    bool isReceiveNullDataForCheck = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<Object>(
+            child: Text('Source'),
+            feedback: Text('Dragging'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return Container(height: 100.0, child: const Text('Target'));
+            },
+            onAccept: accepted.add,
+            onWillAccept: (int? data) {
+              if (data == null)
+                isReceiveNullDataForCheck = true;
+              return data != null;
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(accepted, isEmpty);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(isReceiveNullDataForCheck, true);
+  });
+
   testWidgets('Drag and drop can contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(MaterialApp(

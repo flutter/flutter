@@ -18,18 +18,18 @@ const Radius _kScrollbarRadius = Radius.circular(8.0);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
-/// A material design scrollbar.
+/// A Material Design scrollbar.
 ///
-/// To add a scrollbar thumb to a [ScrollView], simply wrap the scroll view
+/// To add a scrollbar to a [ScrollView], wrap the scroll view
 /// widget in a [Scrollbar] widget.
 ///
 /// {@macro flutter.widgets.Scrollbar}
 ///
-/// The color of the Scrollbar will change when dragged, as well as when
-/// hovered over. A scrollbar track can also been drawn when triggered by a
-/// hover event, which is controlled by [showTrackOnHover]. The thickness of the
-/// track and scrollbar thumb will become larger when hovering, unless
-/// overridden by [hoverThickness].
+/// The color of the Scrollbar will change when dragged. A hover animation is
+/// also triggered when used on web and desktop platforms. A scrollbar track
+/// can also been drawn when triggered by a hover event, which is controlled by
+/// [showTrackOnHover]. The thickness of the track and scrollbar thumb will
+/// become larger when hovering, unless overridden by [hoverThickness].
 ///
 // TODO(Piinks): Add code sample
 ///
@@ -50,8 +50,11 @@ class Scrollbar extends RawScrollbar {
   /// If the [controller] is null, the default behavior is to
   /// enable scrollbar dragging using the [PrimaryScrollController].
   ///
-  /// When null, [thickness] and [radius] defaults will result in a rounded
-  /// rectangular thumb that is 8.0 dp wide with a radius of 8.0 pixels.
+  /// When null, [thickness] defaults to 8.0 pixels on desktop and web, and 4.0
+  /// pixels when on mobile platforms. A null [radius] will result in a default
+  /// of an 8.0 pixel circular radius about the corners of the scrollbar thumb,
+  /// except for when executing on [TargetPlatform.android], which will render the
+  /// thumb without a radius.
   const Scrollbar({
     Key? key,
     required Widget child,
@@ -66,7 +69,7 @@ class Scrollbar extends RawScrollbar {
          child: child,
          controller: controller,
          isAlwaysShown: isAlwaysShown,
-         thickness: thickness ?? _kScrollbarThickness,
+         thickness: thickness,
          radius: radius,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
@@ -93,6 +96,11 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
   late ColorScheme _colorScheme;
+  // On Android, scrollbars should match native appearance.
+  late bool _useAndroidScrollbar;
+  // Hover events should be ignored on mobile, the exit event cannot be
+  // triggered, but the enter event can on tap.
+  late bool _isMobile;
 
   Set<MaterialState> get _states => <MaterialState>{
     if (_dragIsActive) MaterialState.dragged,
@@ -165,7 +173,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
         return widget.hoverThickness ?? _kScrollbarThicknessWithTrack;
-      return widget.thickness ?? _kScrollbarThickness;
+      // The default scrollbar thickness is smaller on mobile.
+      return widget.thickness ?? (_kScrollbarThickness / (_isMobile ? 2 : 1));
     });
   }
 
@@ -182,6 +191,29 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   }
 
   @override
+  void didChangeDependencies() {
+    final ThemeData theme = Theme.of(context);
+    switch (theme.platform) {
+      case TargetPlatform.android:
+        _useAndroidScrollbar = true;
+        _isMobile = true;
+        break;
+      case TargetPlatform.iOS:
+        _useAndroidScrollbar = false;
+        _isMobile = true;
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        _useAndroidScrollbar = false;
+        _isMobile = false;
+        break;
+    }
+    super.didChangeDependencies();
+  }
+
+  @override
   void updateScrollbarPainter() {
     _colorScheme = Theme.of(context).colorScheme;
     scrollbarPainter
@@ -190,8 +222,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness.resolve(_states)
-      ..radius = widget.radius ?? _kScrollbarRadius
-      ..crossAxisMargin = _kScrollbarMargin
+      ..radius = widget.radius ?? (_useAndroidScrollbar ? null : _kScrollbarRadius)
+      ..crossAxisMargin = (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..minLength = _kScrollbarMinLength
       ..padding = MediaQuery.of(context).padding;
   }
@@ -210,6 +242,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void handleHover(PointerHoverEvent event) {
+    // Hover events should not be triggered on mobile.
+    assert(!_isMobile);
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position)) {
@@ -225,6 +259,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void handleHoverExit(PointerExitEvent event) {
+    // Hover events should not be triggered on mobile.
+    assert(!_isMobile);
     super.handleHoverExit(event);
     setState(() { _hoverIsActive = false; });
     _hoverAnimationController.reverse();

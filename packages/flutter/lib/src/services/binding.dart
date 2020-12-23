@@ -104,19 +104,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     // TODO(ianh): Remove this complexity once these bugs are fixed.
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
-      rawLicenses.complete(
-        await rootBundle.loadString(
-          // NOTICES for web isn't compressed since we don't have access to
-          // dart:io on the client side and it's already compressed between
-          // the server and client.
-          //
-          // The compressed version doesn't have a more common .gz extension
-          // because gradle for Android non-transparently manipulates .gz files.
-          kIsWeb ? 'NOTICES' : 'NOTICES.Z',
-          cache: false,
-          unzip: !kIsWeb,
-        )
-      );
+      rawLicenses.complete(await rootBundle.loadString('NOTICES', cache: false));
     }, Priority.animation);
     await rawLicenses.future;
     final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();

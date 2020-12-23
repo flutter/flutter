@@ -68,7 +68,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @protected
   ImageCache createImageCache() => ImageCache();
 
-  /// Calls through to [dart:ui] from [ImageCache].
+  /// Calls through to [dart:ui.instantiateImageCodec] from [ImageCache].
   ///
   /// The `cacheWidth` and `cacheHeight` parameters, when specified, indicate
   /// the size to decode the image to.

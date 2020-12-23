@@ -666,7 +666,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         await observer.didPushRouteInformation(
           RouteInformation(
             location: routeArguments['location'] as String,
-            state: routeArguments['state'] as Object,
+            state: routeArguments['state'] as Object?,
           )
         )
       )

@@ -50,6 +50,9 @@ enum BottomNavigationBarType {
 /// [BottomNavigationBarType.fixed] when there are less than four items, and
 /// [BottomNavigationBarType.shifting] otherwise.
 ///
+/// The length of [items] must be at least two and each item's icon and title/label
+/// must not be null.
+///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the
 ///    [selectedItemColor] if it's non-null, otherwise the theme's
@@ -397,6 +400,9 @@ class _BottomNavigationTile extends StatelessWidget {
     // (or zero if the unselected icons are not any bigger than the selected icon).
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
 
+    // The effective tool tip message to be shown on the BottomNavigationBarItem.
+    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
+
     // Defines the padding for the animating icons + labels.
     //
     // The animations go from "Unselected":
@@ -487,11 +493,12 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
 
-    if (item.label != null) {
+    if (effectiveTooltip != null) {
       result = Tooltip(
-        message: item.label!,
+        message: effectiveTooltip,
         preferBelow: false,
         verticalOffset: selectedIconSize + selectedFontSize,
+        excludeFromSemantics: true,
         child: result,
       );
     }

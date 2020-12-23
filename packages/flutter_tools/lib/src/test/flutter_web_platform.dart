@@ -618,7 +618,7 @@ class BrowserManager {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
     }).catchError((dynamic error, StackTrace stackTrace) {
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     }));
@@ -630,7 +630,7 @@ class BrowserManager {
     }).catchError((dynamic error, StackTrace stackTrace) {
       chrome.close();
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     }));
