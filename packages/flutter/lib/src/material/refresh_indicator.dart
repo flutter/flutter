@@ -51,11 +51,11 @@ enum _RefreshIndicatorMode {
 enum RefreshIndicatorTriggerMode {
   /// The indicator can be triggered regardless of the scroll position
   /// of the [Scrollable] when the drag starts.
-  loose,
+  anywhere,
 
   /// The indicator can only be triggered if the [Scrollable] is at the edge
   /// when the drag starts.
-  strict,
+  onEdge,
 }
 
 /// A widget that supports the Material "swipe to refresh" idiom.
@@ -120,7 +120,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
     this.strokeWidth = 2.0,
-    this.triggerMode = RefreshIndicatorTriggerMode.strict,
+    this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
@@ -183,11 +183,11 @@ class RefreshIndicator extends StatefulWidget {
   /// 2, Keep dragging after overscroll occurs if the scrollable widget has
   ///    a non-zero scroll position when the drag starts.
   ///
-  /// If this is [RefreshIndicatorTriggerMode.loose], both of the cases above can be triggered.
+  /// If this is [RefreshIndicatorTriggerMode.anywhere], both of the cases above can be triggered.
   ///
-  /// If this is [RefreshIndicatorTriggerMode.strict], only case 1 can be triggered.
+  /// If this is [RefreshIndicatorTriggerMode.onEdge], only case 1 can be triggered.
   ///
-  /// Defaults to [RefreshIndicatorTriggerMode.strict].
+  /// Defaults to [RefreshIndicatorTriggerMode.onEdge].
   final RefreshIndicatorTriggerMode triggerMode;
 
   @override
@@ -246,7 +246,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   bool _shouldStart(ScrollNotification notification) {
-    return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.loose))
+    return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
       && notification.metrics.extentBefore == 0.0
       && _mode == null
       && _start(notification.metrics.axisDirection);

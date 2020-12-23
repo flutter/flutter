@@ -507,7 +507,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
-          triggerMode: RefreshIndicatorTriggerMode.loose,
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
           onRefresh: holdRefresh,
           child: ListView(
             controller: scrollController,
@@ -542,7 +542,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
-          triggerMode: RefreshIndicatorTriggerMode.loose,
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
           onRefresh: holdRefresh,
           child: ListView(
             reverse: true,
@@ -579,7 +579,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
-          triggerMode: RefreshIndicatorTriggerMode.loose,
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
           onRefresh: holdRefresh,
           child: ListView(
             controller: scrollController,
