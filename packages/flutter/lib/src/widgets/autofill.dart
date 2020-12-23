@@ -51,7 +51,7 @@ enum AutofillContextAction {
 /// autofillable input fields in an [AutofillGroup], so the user input of the
 /// [Form] can be saved for future autofill by the platform.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// An example form with autofillable fields grouped into different
 /// `AutofillGroup`s.
@@ -92,8 +92,10 @@ enum AutofillContextAction {
 ///        const Text('Billing address'),
 ///        Checkbox(
 ///          value: isSameAddress,
-///          onChanged: (bool newValue) {
-///            setState(() { isSameAddress = newValue; });
+///          onChanged: (bool? newValue) {
+///            if (newValue != null) {
+///              setState(() { isSameAddress = newValue; });
+///            }
 ///          },
 ///        ),
 ///        // Again the address fields are grouped together for the same reason.
