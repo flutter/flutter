@@ -932,12 +932,7 @@ class EditableText extends StatefulWidget {
   /// current value each time the user inserts or deletes a character.
   ///
   /// ```dart
-  /// late TextEditingController _controller;
-  ///
-  /// void initState() {
-  ///   super.initState();
-  ///   _controller = TextEditingController();
-  /// }
+  /// final TextEditingController _controller = TextEditingController();
   ///
   /// void dispose() {
   ///   _controller.dispose();
@@ -961,7 +956,7 @@ class EditableText extends StatefulWidget {
   ///               context: context,
   ///               builder: (BuildContext context) {
   ///                 return AlertDialog(
-  ///                   title: const Text('Thats correct!'),
+  ///                   title: const Text('That is correct!'),
   ///                   content: Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
   ///                     TextButton(

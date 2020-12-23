@@ -1266,7 +1266,7 @@ class _OrderedFocusInfo {
 ///   const DemoButton({
 ///     required this.name,
 ///     this.autofocus = false,
-///     required this.order
+///     required this.order,
 ///   });
 ///
 ///   final String name;
