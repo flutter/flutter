@@ -728,7 +728,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// This sample shows a `DropdownButton` with a large arrow icon,
 /// purple text style, and bold purple underline, whose value is one of "One",
@@ -753,9 +753,9 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///       height: 2,
 ///       color: Colors.deepPurpleAccent,
 ///     ),
-///     onChanged: (String newValue) {
+///     onChanged: (String? newValue) {
 ///       setState(() {
-///         dropdownValue = newValue;
+///         dropdownValue = newValue!;
 ///       });
 ///     },
 ///     items: <String>['One', 'Two', 'Free', 'Four']
@@ -912,7 +912,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// from the list corresponds to the [DropdownMenuItem] of the same index
   /// in [items].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_scaffold}
   ///
   /// This sample shows a `DropdownButton` with a button with [Text] that
   /// corresponds to but is unique from [DropdownMenuItem].
@@ -927,7 +927,7 @@ class DropdownButton<T> extends StatefulWidget {
   ///     padding: const EdgeInsets.symmetric(horizontal: 12.0),
   ///     child: DropdownButton<String>(
   ///       value: selectedItem,
-  ///       onChanged: (String string) => setState(() => selectedItem = string),
+  ///       onChanged: (String? string) => setState(() => selectedItem = string!),
   ///       selectedItemBuilder: (BuildContext context) {
   ///         return items.map<Widget>((String item) {
   ///           return Text(item);
@@ -963,7 +963,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// To use a separate text style for selected item when it's displayed within
   /// the dropdown button, consider using [selectedItemBuilder].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_scaffold}
   ///
   /// This sample shows a `DropdownButton` with a dropdown button text style
   /// that is different than its menu items.
@@ -979,9 +979,9 @@ class DropdownButton<T> extends StatefulWidget {
   ///     color: Colors.blue,
   ///     child: DropdownButton<String>(
   ///       value: dropdownValue,
-  ///       onChanged: (String newValue) {
+  ///       onChanged: (String? newValue) {
   ///         setState(() {
-  ///           dropdownValue = newValue;
+  ///           dropdownValue = newValue!;
   ///         });
   ///       },
   ///       style: TextStyle(color: Colors.blue),
