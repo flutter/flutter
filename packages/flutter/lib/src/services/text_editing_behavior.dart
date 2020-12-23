@@ -2,22 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart';
+
+import 'keyboard_key.dart';
 
 // TODO(justinmc): Remove from widgets/text_selection.dart.
 /// A duration that controls how often the drag selection update callback is
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
-// TODO(justinmc): Rename to ArrowLeftKeyUpTextIntent.
 class ArrowLeftTextIntent extends Intent {
   const ArrowLeftTextIntent({
-    required this.renderEditable,
-  });
+    required GlobalKey editableKey,
+  }) : _editableKey = editableKey;
 
-  final RenderEditable renderEditable;
+  final GlobalKey _editableKey;
+
+  RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 }
 
 class DoubleTapDownTextIntent extends Intent {
@@ -92,6 +95,7 @@ class TextEditingActionsMap {
   // TODO(justinmc): Can I just import foundation here to get this?
   final TargetPlatform platform;
 
+  /// The top level actions map to be registered at the root of the app.
   Map<Type, Action<Intent>>? _map;
   Map<Type, Action<Intent>> get map {
     _map ??= <Type, Action<Intent>>{

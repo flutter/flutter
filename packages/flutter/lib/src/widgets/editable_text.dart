@@ -12,6 +12,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'actions.dart';
 import 'autofill.dart';
@@ -1494,7 +1495,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final LayerLink _endHandleLayerLink = LayerLink();
 
   bool _didAutoFocus = false;
-  FocusAttachment? _focusAttachment;
 
   AutofillGroupState? _currentAutofillScope;
   @override
@@ -1565,11 +1565,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
+    /*
     Actions.invoke<ArrowLeftTextIntent>(
       context,
       ArrowLeftTextIntent(renderEditable: renderEditable),
       nullOk: true,
     );
+    */
   }
 
   // State lifecycle:
@@ -1580,7 +1582,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     RawKeyboard.instance.addListener(_rawKeyboardListener);
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
-    _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController = widget.scrollController ?? ScrollController();
     _scrollController!.addListener(() { _selectionOverlay?.updateForScroll(); });
@@ -1629,8 +1630,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
-      _focusAttachment?.detach();
-      _focusAttachment = widget.focusNode.attach(context);
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
@@ -1680,7 +1679,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(_cursorTimer == null);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
-    _focusAttachment!.detach();
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance!.removeObserver(this);
     _clipboardStatus?.removeListener(_onChangedClipboardStatus);
@@ -2600,81 +2598,90 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    _focusAttachment!.reparent();
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
 
-    // TODO(justinmc): Are there any actions that TEB should respond to that are
-    // not coming from this gesture detector? What are they?
-    return MouseRegion(
-      cursor: widget.mouseCursor ?? SystemMouseCursors.text,
-      child: Scrollable(
-        excludeFromSemantics: true,
-        axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-        controller: _scrollController,
-        physics: widget.scrollPhysics,
-        dragStartBehavior: widget.dragStartBehavior,
-        restorationId: widget.restorationId,
-        viewportBuilder: (BuildContext context, ViewportOffset offset) {
-          return CompositedTransformTarget(
-            link: _toolbarLayerLink,
-            child: Semantics(
-              onCopy: _semanticsOnCopy(controls),
-              onCut: _semanticsOnCut(controls),
-              onPaste: _semanticsOnPaste(controls),
-              child: _Editable(
-                key: _editableKey,
-                startHandleLayerLink: _startHandleLayerLink,
-                endHandleLayerLink: _endHandleLayerLink,
-                textSpan: buildTextSpan(),
-                value: _value,
-                cursorColor: _cursorColor,
-                backgroundCursorColor: widget.backgroundCursorColor,
-                showCursor: EditableText.debugDeterministicCursor
-                    ? ValueNotifier<bool>(widget.showCursor)
-                    : _cursorVisibilityNotifier,
-                forceLine: widget.forceLine,
-                readOnly: widget.readOnly,
-                hasFocus: _hasFocus,
-                maxLines: widget.maxLines,
-                minLines: widget.minLines,
-                expands: widget.expands,
-                strutStyle: widget.strutStyle,
-                selectionColor: widget.selectionColor,
-                textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                textAlign: widget.textAlign,
-                textDirection: _textDirection,
-                locale: widget.locale,
-                textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-                textWidthBasis: widget.textWidthBasis,
-                obscuringCharacter: widget.obscuringCharacter,
-                obscureText: widget.obscureText,
-                autocorrect: widget.autocorrect,
-                smartDashesType: widget.smartDashesType,
-                smartQuotesType: widget.smartQuotesType,
-                enableSuggestions: widget.enableSuggestions,
-                offset: offset,
-                onSelectionChanged: _handleSelectionChanged,
-                onCaretChanged: _handleCaretChanged,
-                rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                cursorWidth: widget.cursorWidth,
-                cursorHeight: widget.cursorHeight,
-                cursorRadius: widget.cursorRadius,
-                cursorOffset: widget.cursorOffset,
-                selectionHeightStyle: widget.selectionHeightStyle,
-                selectionWidthStyle: widget.selectionWidthStyle,
-                paintCursorAboveText: widget.paintCursorAboveText,
-                enableInteractiveSelection: widget.enableInteractiveSelection,
-                textSelectionDelegate: this,
-                devicePixelRatio: _devicePixelRatio,
-                promptRectRange: _currentPromptRectRange,
-                promptRectColor: widget.autocorrectionTextRectColor,
-                clipBehavior: widget.clipBehavior,
-              ),
-            ),
-          );
-        },
+    // TODO(justinmc): How would the user override these shortcuts given that
+    // the Shortcuts widget is placed here? Should it be somewhere else?
+    return Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntent(
+          editableKey: _editableKey,
+        ),
+      },
+      child: Focus(
+        focusNode: widget.focusNode,
+        child: MouseRegion(
+          cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+          child: Scrollable(
+            excludeFromSemantics: true,
+            axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+            controller: _scrollController,
+            physics: widget.scrollPhysics,
+            dragStartBehavior: widget.dragStartBehavior,
+            restorationId: widget.restorationId,
+            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              return CompositedTransformTarget(
+                link: _toolbarLayerLink,
+                child: Semantics(
+                  onCopy: _semanticsOnCopy(controls),
+                  onCut: _semanticsOnCut(controls),
+                  onPaste: _semanticsOnPaste(controls),
+                  child: _Editable(
+                    key: _editableKey,
+                    startHandleLayerLink: _startHandleLayerLink,
+                    endHandleLayerLink: _endHandleLayerLink,
+                    textSpan: buildTextSpan(),
+                    value: _value,
+                    cursorColor: _cursorColor,
+                    backgroundCursorColor: widget.backgroundCursorColor,
+                    showCursor: EditableText.debugDeterministicCursor
+                        ? ValueNotifier<bool>(widget.showCursor)
+                        : _cursorVisibilityNotifier,
+                    forceLine: widget.forceLine,
+                    readOnly: widget.readOnly,
+                    hasFocus: _hasFocus,
+                    maxLines: widget.maxLines,
+                    minLines: widget.minLines,
+                    expands: widget.expands,
+                    strutStyle: widget.strutStyle,
+                    selectionColor: widget.selectionColor,
+                    textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                    textAlign: widget.textAlign,
+                    textDirection: _textDirection,
+                    locale: widget.locale,
+                    textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+                    textWidthBasis: widget.textWidthBasis,
+                    obscuringCharacter: widget.obscuringCharacter,
+                    obscureText: widget.obscureText,
+                    autocorrect: widget.autocorrect,
+                    smartDashesType: widget.smartDashesType,
+                    smartQuotesType: widget.smartQuotesType,
+                    enableSuggestions: widget.enableSuggestions,
+                    offset: offset,
+                    onSelectionChanged: _handleSelectionChanged,
+                    onCaretChanged: _handleCaretChanged,
+                    rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                    cursorWidth: widget.cursorWidth,
+                    cursorHeight: widget.cursorHeight,
+                    cursorRadius: widget.cursorRadius,
+                    cursorOffset: widget.cursorOffset,
+                    selectionHeightStyle: widget.selectionHeightStyle,
+                    selectionWidthStyle: widget.selectionWidthStyle,
+                    paintCursorAboveText: widget.paintCursorAboveText,
+                    enableInteractiveSelection: widget.enableInteractiveSelection,
+                    textSelectionDelegate: this,
+                    devicePixelRatio: _devicePixelRatio,
+                    promptRectRange: _currentPromptRectRange,
+                    promptRectColor: widget.autocorrectionTextRectColor,
+                    clipBehavior: widget.clipBehavior,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

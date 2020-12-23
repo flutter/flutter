@@ -729,6 +729,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           // TODO(justinmc): This has been moved to _moveselectionleft above.
           // How can I handle all of this movement key stuff nicely? Currently I might have some modifier key stuff messed up and removed.
           // How can I write _moveselectionleft so that it makese sense independent of being what the left key does?
+          // Move all of this stuff to TEB.
           print('justin old left arrow handler');
           // TODO(justinmc): This should be invoked regardless of extentOffset.
           // Actually, do it in editable text if you can?
@@ -1053,10 +1054,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _hasFocus = value;
     if (_hasFocus) {
       assert(!_listenerAttached);
+      // TODO(justinmc): Get rid of this key listener altogether.
       RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
     } else {
       assert(_listenerAttached);
+      // TODO(justinmc): Get rid of this key listener altogether.
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
@@ -1588,6 +1591,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _longPress.dispose();
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(markNeedsPaint);
+    // TODO(justinmc): Get rid of this key listener altogether.
     if (_listenerAttached)
       RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
