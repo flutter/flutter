@@ -23,6 +23,14 @@ class ArrowLeftTextIntent extends Intent {
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 }
 
+class ArrowLeftTextIntentRoot extends Intent {
+  const ArrowLeftTextIntentRoot({
+    required this.context,
+  });
+
+  final BuildContext context;
+}
+
 class DoubleTapDownTextIntent extends Intent {
   const DoubleTapDownTextIntent();
 }

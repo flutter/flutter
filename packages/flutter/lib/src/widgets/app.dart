@@ -12,6 +12,8 @@ import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'editable_text.dart';
+import 'focus_manager.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -1059,7 +1061,8 @@ class WidgetsApp extends StatefulWidget {
     // Keyboard traversal
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    // TODO(justinmc): What to do about two arrowLefts?
+    //LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
     LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
     LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
@@ -1103,6 +1106,25 @@ class WidgetsApp extends StatefulWidget {
     PreviousFocusIntent: PreviousFocusAction(),
     DirectionalFocusIntent: DirectionalFocusAction(),
     ScrollIntent: ScrollAction(),
+    ArrowLeftTextIntentRoot: CallbackAction<ArrowLeftTextIntentRoot>(
+        // TODO(justinmc): Abstract this to a new Action type.
+      onInvoke: (ArrowLeftTextIntentRoot intent) {
+        // If an EditableText is not focused, then ignore this action.
+        if (primaryFocus?.context?.widget is! EditableText) {
+          return;
+        }
+        final EditableText editableText = primaryFocus!.context!.widget as EditableText;
+        // TODO(justinmc): I seem to need the EditableText to have a key for
+        // this. Is there another way to get EditableTextState, or should I
+        // force EditableText to have a key?
+        if (editableText.key == null
+            || (editableText.key! as GlobalKey).currentState == null) {
+          return;
+        }
+        final EditableTextState editableTextState = (editableText.key! as GlobalKey).currentState! as EditableTextState;
+        editableTextState.renderEditable.moveSelectionLeft();
+      }
+    ),
   };
 
   @override
@@ -1621,7 +1643,13 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: Shortcuts(
-        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+        shortcuts: widget.shortcuts ?? <LogicalKeySet, Intent>{
+          // TODO(justinmc): Maybe a defaultTextEditingShortcuts or something.
+          ...WidgetsApp.defaultShortcuts,
+          LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntentRoot(
+            context: context,
+          ),
+        },
         debugLabel: '<Default WidgetsApp Shortcuts>',
         child: Actions(
           actions: widget.actions ?? WidgetsApp.defaultActions,
