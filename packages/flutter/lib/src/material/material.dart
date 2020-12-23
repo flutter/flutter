@@ -555,7 +555,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   void dispose() {
     // [InkFeature.dispose] will eventually call [_inkFeatures!.remove].
-    while (_inkFeatures?.isNotEmpty ?? false)
+    while (_inkFeatures?.isNotEmpty == true)
       _inkFeatures!.first.dispose();
   }
 }
