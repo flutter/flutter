@@ -783,14 +783,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         if (inkFeature == null)
           continue;
         final MaterialInkController controller = inkFeature.controller;
-        if (lastController != null && controller != lastController)
+        if (lastController != null && !identical(controller, lastController))
           return false;
         lastController = controller;
       }
       return true;
     }());
     final InkFeature? validInkFeature = inkFeatures.firstWhere((InkFeature? inkFeature) => inkFeature != null, orElse: () => null);
-    if (validInkFeature != null && validInkFeature.controller != Material.of(context)!) {
+    if (validInkFeature != null && !identical(validInkFeature.controller, Material.of(context)!)) {
       _dispose();
       if (_hovering && enabled)
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
