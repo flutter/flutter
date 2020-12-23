@@ -8675,6 +8675,169 @@
       ]
     }
   },
+  "intlBackslash": {
+    "constant": "intlBackslash",
+    "english": "Intl Backslash",
+    "value": 4295426148,
+    "names": {
+      "web": [
+        "IntlBackslash"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426148
+      ]
+    }
+  },
+  "intlRo": {
+    "constant": "intlRo",
+    "english": "Intl Ro",
+    "value": 4295426183,
+    "names": {
+      "web": [
+        "IntlRo"
+      ],
+      "android": [
+        "RO"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426183
+      ],
+      "android": [
+        217
+      ]
+    }
+  },
+  "intlYen": {
+    "constant": "intlYen",
+    "english": "Intl Yen",
+    "value": 4295426185,
+    "names": {
+      "web": [
+        "IntlYen"
+      ],
+      "gtk": [
+        "yen"
+      ],
+      "android": [
+        "YEN"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426185
+      ],
+      "gtk": [
+        165
+      ],
+      "android": [
+        216
+      ]
+    }
+  },
+  "lang1": {
+    "constant": "lang1",
+    "english": "Lang 1",
+    "value": 4295426192,
+    "names": {
+      "web": [
+        "Lang1"
+      ],
+      "windows": [
+        "KANA",
+        "HANGEUL",
+        "HANGUL"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426192
+      ],
+      "windows": [
+        21,
+        21,
+        21
+      ]
+    }
+  },
+  "lang2": {
+    "constant": "lang2",
+    "english": "Lang 2",
+    "value": 4295426193,
+    "names": {
+      "web": [
+        "Lang2"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426193
+      ]
+    }
+  },
+  "lang3": {
+    "constant": "lang3",
+    "english": "Lang 3",
+    "value": 4295426194,
+    "names": {
+      "web": [
+        "Lang3"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426194
+      ]
+    }
+  },
+  "lang4": {
+    "constant": "lang4",
+    "english": "Lang 4",
+    "value": 4295426195,
+    "names": {
+      "web": [
+        "Lang4"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426195
+      ]
+    }
+  },
+  "lang5": {
+    "constant": "lang5",
+    "english": "Lang 5",
+    "value": 4295426196,
+    "names": {
+      "web": [
+        "Lang5"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426196
+      ]
+    }
+  },
+  "abort": {
+    "constant": "abort",
+    "english": "Abort",
+    "value": 4295426203,
+    "names": {
+      "web": [
+        "Abort"
+      ]
+    },
+    "values": {
+      "web": [
+        4295426203
+      ]
+    }
+  },
   "numpadEnter": {
     "constant": "numpadEnter",
     "english": "Numpad Enter",

@@ -334,16 +334,21 @@ abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
         ifAbsent: () => 1,
       );
     } else if (event is KeyUpEvent) {
-      final int Function(int) ifAbsent =
+      int Function() alertMissingKey(Object info) {
+        return () {
+          // Only throw assertion for KeyData. RawKeyEvent does not guarantee this.
+          assert(!receivingKeyData,
+              'KeyUpEvent refers to key ${info.toString()}, which has not been pressed.');
+          return 0;
+        };
+      }
       final int physicalCount = _physicalPressCount.update(event.physical.usbHidUsage,
-        (int count) => count - 1,
-      );
+        (int count) => count - 1, ifAbsent: alertMissingKey(event.physical));
       if (physicalCount == 0) {
         _physicalPressCount.remove(event.physical.usbHidUsage);
       }
       final int logicalCount = _logicalPressCount.update(event.logical.keyId,
-        (int count) => count - 1,
-      );
+        (int count) => count - 1, ifAbsent: alertMissingKey(event.logical));
       if (logicalCount == 0) {
         _logicalPressCount.remove(event.logical.keyId);
       }

@@ -2324,6 +2324,51 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey sleep = LogicalKeyboardKey(0x00100010082, debugName: kReleaseMode ? null : 'Sleep');
 
+  /// Represents the logical "Intl Backslash" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey intlBackslash = LogicalKeyboardKey(0x00100070064, debugName: kReleaseMode ? null : 'Intl Backslash');
+
+  /// Represents the logical "Intl Ro" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey intlRo = LogicalKeyboardKey(0x00100070087, debugName: kReleaseMode ? null : 'Intl Ro');
+
+  /// Represents the logical "Intl Yen" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey intlYen = LogicalKeyboardKey(0x00100070089, debugName: kReleaseMode ? null : 'Intl Yen');
+
+  /// Represents the logical "Lang 1" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang1 = LogicalKeyboardKey(0x00100070090, debugName: kReleaseMode ? null : 'Lang 1');
+
+  /// Represents the logical "Lang 2" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang2 = LogicalKeyboardKey(0x00100070091, debugName: kReleaseMode ? null : 'Lang 2');
+
+  /// Represents the logical "Lang 3" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang3 = LogicalKeyboardKey(0x00100070092, debugName: kReleaseMode ? null : 'Lang 3');
+
+  /// Represents the logical "Lang 4" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang4 = LogicalKeyboardKey(0x00100070093, debugName: kReleaseMode ? null : 'Lang 4');
+
+  /// Represents the logical "Lang 5" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey lang5 = LogicalKeyboardKey(0x00100070094, debugName: kReleaseMode ? null : 'Lang 5');
+
+  /// Represents the logical "Abort" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey abort = LogicalKeyboardKey(0x0010007009b, debugName: kReleaseMode ? null : 'Abort');
+
   /// Represents the logical "Numpad Enter" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -2899,6 +2944,15 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0100000014: suspend,
     0x0100000015: resume,
     0x0100010082: sleep,
+    0x0100070064: intlBackslash,
+    0x0100070087: intlRo,
+    0x0100070089: intlYen,
+    0x0100070090: lang1,
+    0x0100070091: lang2,
+    0x0100070092: lang3,
+    0x0100070093: lang4,
+    0x0100070094: lang5,
+    0x010007009b: abort,
     0x020000000d: numpadEnter,
     0x0200000028: numpadParenLeft,
     0x0200000029: numpadParenRight,
@@ -2966,7 +3020,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// looking for "the key next next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the physical key
 /// to the right of the CAPS LOCK key.
 ///

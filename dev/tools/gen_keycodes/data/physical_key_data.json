@@ -3653,10 +3653,16 @@
   "intlRo": {
     "names": {
       "domkey": "IntlRo",
+      "android": [
+        "RO"
+      ],
       "english": "Intl Ro",
       "chromium": "intlRo"
     },
     "scanCodes": {
+      "android": [
+        89
+      ],
       "usb": 458887,
       "linux": 89,
       "xkb": 97,
@@ -3684,10 +3690,16 @@
   "intlYen": {
     "names": {
       "domkey": "IntlYen",
+      "android": [
+        "YEN"
+      ],
       "english": "Intl Yen",
       "chromium": "intlYen"
     },
     "scanCodes": {
+      "android": [
+        124
+      ],
       "usb": 458889,
       "linux": 124,
       "xkb": 132,
