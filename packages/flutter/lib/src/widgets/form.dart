@@ -16,7 +16,7 @@ import 'will_pop_scope.dart';
 /// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
 /// [Form] constructor and call [GlobalKey.currentState].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows a [Form] with one [TextFormField] to enter an email
 /// address and an [ElevatedButton] to submit the form. A [GlobalKey] is used here
 /// to identify the [Form] and validate input.
@@ -38,7 +38,7 @@ import 'will_pop_scope.dart';
 ///             hintText: 'Enter your email',
 ///           ),
 ///           validator: (value) {
-///             if (value.isEmpty) {
+///             if (value!.isEmpty) {
 ///               return 'Please enter some text';
 ///             }
 ///             return null;
@@ -50,7 +50,7 @@ import 'will_pop_scope.dart';
 ///             onPressed: () {
 ///               // Validate will return true if the form is valid, or false if
 ///               // the form is invalid.
-///               if (_formKey.currentState.validate()) {
+///               if (_formKey.currentState!.validate()) {
 ///                 // Process data.
 ///               }
 ///             },
