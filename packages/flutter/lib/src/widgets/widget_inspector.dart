@@ -964,7 +964,8 @@ mixin WidgetInspectorService {
     // profile mode.
     bool enabled = false;
     assert(() {
-      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: true);
+      // TODO(kenz): add support for structured errors on the web.
+      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb);
       return true;
     }());
     return enabled;
