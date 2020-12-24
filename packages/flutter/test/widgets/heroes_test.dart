@@ -2780,4 +2780,60 @@ Future<void> main() async {
     expect(find.byKey(secondKey), isInCard);
     expect(find.byKey(secondKey), isOnstage);
   });
+
+  testWidgets('kept alive Hero does not throw when the transition begins', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(
+          body: ListView(
+            children: <Widget>[
+              Hero(
+                tag: 'a',
+                child: Material(
+                  child: MediaQuery(
+                    data: const MediaQueryData(),
+                    child: TextField(focusNode: focusNode)
+                  ),
+                ),
+              ),
+              Container(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    FocusScope.of(tester.element(find.byType(TextField))).requestFocus(focusNode);
+    await tester.pump();
+
+    // Scroll to make the Hero invisible.
+    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
+    await tester.pump();
+
+    navigatorKey.currentState?.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: Center(
+              child: Hero(
+                tag: 'a',
+                child: Material(
+                  child: MediaQuery(
+                    data: const MediaQueryData(),
+                    child: TextField(focusNode: focusNode)
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }
