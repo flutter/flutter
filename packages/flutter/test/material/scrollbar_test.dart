@@ -842,7 +842,7 @@ void main() {
     }),
   );
 
-  testWidgets('Hover animation is not triggered on mobile', (WidgetTester tester) async {
+  testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -864,7 +864,7 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
           const Radius.circular(8.0),
         ),
         color: const Color(0x1a000000),
@@ -873,18 +873,50 @@ void main() {
     await tester.tapAt(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
-    // Tapping on mobile triggers a hover enter event. In this case, the
-    // Scrollbar should be unchanged since it ignores hover events on mobile.
+    // Tapping triggers a hover enter event. In this case, the Scrollbar should
+    // be unchanged since it ignores hover events that aren't from a mouse.
     expect(
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
           const Radius.circular(8.0),
         ),
         color: const Color(0x1a000000),
       ),
     );
+
+    // Now trigger hover with a mouse.
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pump();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x1a000000),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
+            const Radius.circular(8.0),
+          ),
+          // Hover color
+          color: const Color(0x80000000),
+        ),
+    );
+
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.iOS,
