@@ -3425,8 +3425,28 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             ServicesBinding.instance!.addPostFrameCallback((Duration timestamp) {
               // We only check if this navigator still owns the hero controller.
               if (_heroControllerFromScope == newHeroController) {
-                assert(_heroControllerFromScope!._navigator == this);
-                assert(previousOwner._heroControllerFromScope != newHeroController);
+                final bool hasHeroControllerOwnerShip = _heroControllerFromScope!._navigator == this;
+                if (!hasHeroControllerOwnerShip ||
+                    previousOwner._heroControllerFromScope == newHeroController) {
+                  final NavigatorState otherOwner = hasHeroControllerOwnerShip
+                    ? previousOwner
+                    : _heroControllerFromScope!._navigator!;
+                  FlutterError.reportError(
+                    FlutterErrorDetails(
+                      exception: FlutterError(
+                        'A HeroController can not be shared by multiple Navigators. '
+                        'The Navigators that share the same HeroController are:\n'
+                        '- $this\n'
+                        '- $otherOwner\n'
+                        'Please create a HeroControllerScope for each Navigator or '
+                        'use a HeroControllerScope.none to prevent subtree from '
+                        'receiving a HeroController.'
+                      ),
+                      library: 'widget library',
+                      stack: StackTrace.current,
+                    ),
+                  );
+                }
               }
             });
           }
