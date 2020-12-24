@@ -114,8 +114,9 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
                                     const std::string error_message,
                                     bool transient) {}
   // |flutter::PlatformView::Delegate|
-  void UpdateAssetManager(
-      std::shared_ptr<flutter::AssetManager> asset_manager) {}
+  void UpdateAssetResolverByType(
+      std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
+      flutter::AssetResolver::AssetResolverType type) {}
 
   flutter::Surface* surface() const { return surface_.get(); }
   flutter::PlatformMessage* message() const { return message_.get(); }

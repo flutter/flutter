@@ -41,7 +41,8 @@ class MockDelegate : public PlatformView::Delegate {
   void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
                                     const std::string error_message,
                                     bool transient) override {}
-  void UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager) override {}
+  void UpdateAssetResolverByType(std::unique_ptr<AssetResolver> updated_asset_resolver,
+                                 AssetResolver::AssetResolverType type) override {}
 };
 
 }  // namespace
