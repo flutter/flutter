@@ -1171,7 +1171,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 ///
 /// An example of this situation is as follows:
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// Tap the container to cause it to grow. Then, tap it again and hold before
 /// the widget reaches its maximum size to observe the clipped ink splash.

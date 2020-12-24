@@ -113,7 +113,7 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
-class TweenAnimationBuilder<T extends Object> extends ImplicitlyAnimatedWidget {
+class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///
   /// The properties [tween], [duration], and [builder] are required. The values
@@ -194,7 +194,7 @@ class TweenAnimationBuilder<T extends Object> extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _TweenAnimationBuilderState<T extends Object> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
+class _TweenAnimationBuilderState<T extends Object?> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
   Tween<T>? _currentTween;
 
   @override
