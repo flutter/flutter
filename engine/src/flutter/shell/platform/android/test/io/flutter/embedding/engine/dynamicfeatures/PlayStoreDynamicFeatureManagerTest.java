@@ -44,7 +44,7 @@ public class PlayStoreDynamicFeatureManagerTest {
     }
 
     @Override
-    public void updateAssetManager(
+    public void updateJavaAssetManager(
         @NonNull AssetManager assetManager, @NonNull String assetBundlePath) {
       updateAssetManagerCalled++;
       this.loadingUnitId = loadingUnitId;

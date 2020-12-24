@@ -1056,14 +1056,14 @@ public class FlutterJNI {
    *     value is `flutter_assets`.
    */
   @UiThread
-  public void updateAssetManager(
+  public void updateJavaAssetManager(
       @NonNull AssetManager assetManager, @NonNull String assetBundlePath) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    nativeUpdateAssetManager(nativePlatformViewId, assetManager, assetBundlePath);
+    nativeUpdateJavaAssetManager(nativePlatformViewId, assetManager, assetBundlePath);
   }
 
-  private native void nativeUpdateAssetManager(
+  private native void nativeUpdateJavaAssetManager(
       long nativePlatformViewId,
       @NonNull AssetManager assetManager,
       @NonNull String assetBundlePath);

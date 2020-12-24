@@ -104,7 +104,9 @@ class PlatformViewAndroid final : public PlatformView {
                                     bool transient) override;
 
   // |PlatformView|
-  void UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager) override;
+  void UpdateAssetResolverByType(
+      std::unique_ptr<AssetResolver> updated_asset_resolver,
+      AssetResolver::AssetResolverType type) override;
 
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

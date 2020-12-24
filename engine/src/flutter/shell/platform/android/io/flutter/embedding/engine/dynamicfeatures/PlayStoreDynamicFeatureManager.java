@@ -317,7 +317,7 @@ public class PlayStoreDynamicFeatureManager implements DynamicFeatureManager {
       context = context.createPackageContext(context.getPackageName(), 0);
 
       AssetManager assetManager = context.getAssets();
-      flutterJNI.updateAssetManager(
+      flutterJNI.updateJavaAssetManager(
           assetManager,
           // TODO(garyq): Made the "flutter_assets" directory dynamic based off of DartEntryPoint.
           "flutter_assets");

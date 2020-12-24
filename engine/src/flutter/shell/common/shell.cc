@@ -1225,8 +1225,11 @@ void Shell::LoadDartDeferredLibraryError(intptr_t loading_unit_id,
                                         transient);
 }
 
-void Shell::UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager) {
-  engine_->UpdateAssetManager(std::move(asset_manager));
+void Shell::UpdateAssetResolverByType(
+    std::unique_ptr<AssetResolver> updated_asset_resolver,
+    AssetResolver::AssetResolverType type) {
+  engine_->GetAssetManager()->UpdateResolverByType(
+      std::move(updated_asset_resolver), type);
 }
 
 // |Engine::Delegate|
