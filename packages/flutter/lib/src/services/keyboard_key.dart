@@ -45,7 +45,7 @@ abstract class KeyboardKey with Diagnosticable {
 /// look at the physical key to make sure that regardless of the character the
 /// key produces, you got the key that is in that location on the keyboard.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the logical "Q"
 /// key.
 ///
@@ -58,7 +58,7 @@ abstract class KeyboardKey with Diagnosticable {
 /// // The node used to request the keyboard focus.
 /// final FocusNode _focusNode = FocusNode();
 /// // The message to display.
-/// String _message;
+/// String? _message;
 ///
 /// // Focus nodes need to be disposed.
 /// @override
@@ -75,7 +75,7 @@ abstract class KeyboardKey with Diagnosticable {
 ///       _message = 'Pressed the "Q" key!';
 ///     } else {
 ///       if (kReleaseMode) {
-///         _message = 'Not a Q: Key label is "${event.logicalKey.keyLabel ?? '<none>'}"';
+///         _message = 'Not a Q: Key label is "${event.logicalKey.keyLabel}"';
 ///       } else {
 ///         // This will only print useful information in debug mode.
 ///         _message = 'Not a Q: Pressed ${event.logicalKey.debugName}';
@@ -91,13 +91,13 @@ abstract class KeyboardKey with Diagnosticable {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.headline4,
+///       style: textTheme.headline4!,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
 ///         child: AnimatedBuilder(
 ///           animation: _focusNode,
-///           builder: (BuildContext context, Widget child) {
+///           builder: (BuildContext context, Widget? child) {
 ///             if (!_focusNode.hasFocus) {
 ///               return GestureDetector(
 ///                 onTap: () {
@@ -1987,7 +1987,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// looking for "the key next next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the physical key
 /// to the right of the CAPS LOCK key.
 ///
@@ -1999,7 +1999,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// // The node used to request the keyboard focus.
 /// final FocusNode _focusNode = FocusNode();
 /// // The message to display.
-/// String _message;
+/// String? _message;
 ///
 /// // Focus nodes need to be disposed.
 /// @override
@@ -2027,13 +2027,13 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.headline4,
+///       style: textTheme.headline4!,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
 ///         child: AnimatedBuilder(
 ///           animation: _focusNode,
-///           builder: (BuildContext context, Widget child) {
+///           builder: (BuildContext context, Widget? child) {
 ///             if (!_focusNode.hasFocus) {
 ///               return GestureDetector(
 ///                 onTap: () {
