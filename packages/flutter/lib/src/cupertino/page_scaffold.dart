@@ -18,6 +18,71 @@ import 'theme.dart';
 /// encloses the [ScrollView]. The [ScrollView.primary] flag is used to connect
 /// a [ScrollView] to the enclosing [PrimaryScrollController].
 ///
+/// {@tool dartpad --template=stateful_widget_cupertino}
+/// This example shows a [CupertinoPageScaffold] with a [ListView] as a [child].
+/// The [CupertinoButton] is connected to a callback that increments a counter.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/scaffold.png)
+///
+/// ```dart
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     navigationBar: CupertinoNavigationBar(
+///       middle: const Text('Sample Code'),
+///     ),
+///     child: ListView(
+///       children: [
+///         CupertinoButton(
+///           onPressed: () => setState(() => _count++),
+///           child: const Icon(Icons.add),
+///         ),
+///         Center(
+///           child: Text('You have pressed the button $_count times.'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_cupertino}
+/// This example shows a [CupertinoPageScaffold] with a black [backgroundColor],
+/// and a [ListView] as a [child]. The [CupertinoButton] is connected to a
+/// callback that increments a counter.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/scaffold_background.png)
+///
+/// ```dart
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     backgroundColor: CupertinoColors.black,
+///     navigationBar: CupertinoNavigationBar(
+///       middle: const Text('Sample Code'),
+///     ),
+///     child: ListView(
+///       children: [
+///         CupertinoButton(
+///           onPressed: () => setState(() => _count++),
+///           child: const Icon(Icons.add),
+///         ),
+///         Center(
+///           child: Text(
+///             'You have pressed the button $_count times.',
+///             style: TextStyle(color: CupertinoColors.white),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], a similar widget for tabbed applications.
