@@ -213,10 +213,10 @@ bool _isTransitionable(BuildContext context) {
 ///     ),
 ///     child: Column(
 ///         children: [
-///           Container(height: 50, color: Colors.red),
-///           Container(height: 50, color: Colors.green),
-///           Container(height: 50, color: Colors.yellow),
-///           Container(height: 50, color: Colors.blue),
+///           Container(height: 50, color: CupertinoColors.red),
+///           Container(height: 50, color: CupertinoColors.green),
+///           Container(height: 50, color: CupertinoColors.yellow),
+///           Container(height: 50, color: CupertinoColors.blue),
 ///         ]
 ///     ),
 ///   );

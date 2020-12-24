@@ -37,7 +37,7 @@ import 'theme.dart';
 ///       children: [
 ///         CupertinoButton(
 ///           onPressed: () => setState(() => _count++),
-///           child: const Icon(Icons.add),
+///           child: const Icon(CupertinoIcons.add),
 ///         ),
 ///         Center(
 ///           child: Text('You have pressed the button $_count times.'),
