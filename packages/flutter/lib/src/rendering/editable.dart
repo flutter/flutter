@@ -1943,6 +1943,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
            _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
     final TextRange word = _textPainter.getWordBoundary(position);
+    final String originalText = textSelectionDelegate.textEditingValue.text;
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
       return TextSelection.fromPosition(position);
@@ -1950,33 +1951,25 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     // If the word is a space, on iOS try to select the previous word instead.
-    } else if (text?.text != null
+    // If the word is a space, on Android and the text is read only, then select
+    // the previous word instead.
+    } else if ((text?.text != null
         && _isWhitespace(text!.text!.codeUnitAt(position.offset))
-        && position.offset > 0) {
+        && position.offset > 0) || (readOnly && originalText != null
+        && _isWhitespace(originalText.codeUnitAt(position.offset))
+        && position.offset > 0)) {
       assert(defaultTargetPlatform != null);
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
-          int startIndex = position.offset - 1;
-          while (startIndex > 0
-              && (_isWhitespace(text!.text!.codeUnitAt(startIndex))
-              || text!.text! == '\u200e' || text!.text! == '\u200f')) {
-            startIndex--;
-          }
-          if (startIndex > 0) {
-            final TextPosition positionBeforeSpace = TextPosition(
-              offset: startIndex,
-              affinity: position.affinity,
-            );
-            final TextRange wordBeforeSpace = _textPainter.getWordBoundary(
-              positionBeforeSpace,
-            );
-            startIndex = wordBeforeSpace.start;
-          }
           return TextSelection(
-            baseOffset: startIndex,
+            baseOffset: _getStartIndexOfPreviousWord(text!.text!, position),
             extentOffset: position.offset,
           );
         case TargetPlatform.android:
+          return TextSelection(
+            baseOffset: _getStartIndexOfPreviousWord(originalText, position),
+            extentOffset: position.offset,
+          );
         case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
@@ -1984,7 +1977,47 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           break;
       }
     }
+
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
+  }
+
+  int _getStartIndexOfPreviousWord(String word, TextPosition position){
+    assert(defaultTargetPlatform != null);
+    int startIndex = position.offset - 1;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        while (startIndex > 0
+            && (_isWhitespace(word.codeUnitAt(startIndex))
+                || word == '\u200e' || word == '\u200f')) {
+          startIndex--;
+        }
+        break;
+      case TargetPlatform.android:
+        while (startIndex > 0
+            && (_isWhitespace(word.codeUnitAt(startIndex))
+                || word[startIndex] == '\u200e' || word[startIndex] == '\u200f')) {
+          startIndex--;
+        }
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    if (startIndex > 0) {
+      final TextPosition positionBeforeSpace = TextPosition(
+        offset: startIndex,
+        affinity: position.affinity,
+      );
+      final TextRange wordBeforeSpace = _textPainter.getWordBoundary(
+        positionBeforeSpace,
+      );
+      startIndex = wordBeforeSpace.start;
+    }
+
+    return startIndex;
   }
 
   TextSelection _selectLineAtOffset(TextPosition position) {
