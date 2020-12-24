@@ -3439,8 +3439,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                         'The Navigators that share the same HeroController are:\n'
                         '- $this\n'
                         '- $otherOwner\n'
-                        'Please create HeroControllerScope for each Navigator or '
-                        'use HeroControllerScope.none to prevent subtree from '
+                        'Please create a HeroControllerScope for each Navigator or '
+                        'use a HeroControllerScope.none to prevent subtree from '
                         'receiving a HeroController.'
                       ),
                       library: 'widget library',

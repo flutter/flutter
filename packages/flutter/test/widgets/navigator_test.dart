@@ -2537,7 +2537,7 @@ void main() {
         '   Navigators that share the same HeroController are:\n'
         '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
         '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
-        '   Please create HeroControllerScope for each Navigator or use\n'
+        '   Please create a HeroControllerScope for each Navigator or use a\n'
         '   HeroControllerScope.none to prevent subtree from receiving a\n'
         '   HeroController.\n'
         ''
