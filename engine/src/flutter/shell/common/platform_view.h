@@ -273,15 +273,34 @@ class PlatformView {
                                               const std::string error_message,
                                               bool transient) = 0;
 
-    // TODO(garyq): Implement a proper asset_resolver replacement instead of
-    // overwriting the entire asset manager.
     //--------------------------------------------------------------------------
-    /// @brief      Sets the asset manager of the engine to asset_manager
+    /// @brief      Replaces the asset resolver handled by the engine's
+    ///             AssetManager of the specified `type` with
+    ///             `updated_asset_resolver`. The matching AssetResolver is
+    ///             removed and replaced with `updated_asset_resolvers`.
     ///
-    /// @param[in]  asset_manager  The asset manager to use.
+    ///             AssetResolvers should be updated when the existing resolver
+    ///             becomes obsolete and a newer one becomes available that
+    ///             provides updated access to the same type of assets as the
+    ///             existing one. This update process is meant to be performed
+    ///             at runtime.
     ///
-    virtual void UpdateAssetManager(
-        std::shared_ptr<AssetManager> asset_manager) = 0;
+    ///             If a null resolver is provided, nothing will be done. If no
+    ///             matching resolver is found, the provided resolver will be
+    ///             added to the end of the AssetManager resolvers queue. The
+    ///             replacement only occurs with the first matching resolver.
+    ///             Any additional matching resolvers are untouched.
+    ///
+    /// @param[in]  updated_asset_resolver  The asset resolver to replace the
+    ///             resolver of matching type with.
+    ///
+    /// @param[in]  type  The type of AssetResolver to update. Only resolvers of
+    ///                   the specified type will be replaced by the updated
+    ///                   resolver.
+    ///
+    virtual void UpdateAssetResolverByType(
+        std::unique_ptr<AssetResolver> updated_asset_resolver,
+        AssetResolver::AssetResolverType type) = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -720,14 +739,34 @@ class PlatformView {
                                             const std::string error_message,
                                             bool transient);
 
-  // TODO(garyq): Implement a proper asset_resolver replacement instead of
-  // overwriting the entire asset manager.
   //--------------------------------------------------------------------------
-  /// @brief      Sets the asset manager of the engine to asset_manager
+  /// @brief      Replaces the asset resolver handled by the engine's
+  ///             AssetManager of the specified `type` with
+  ///             `updated_asset_resolver`. The matching AssetResolver is
+  ///             removed and replaced with `updated_asset_resolvers`.
   ///
-  /// @param[in]  asset_manager  The asset manager to use.
+  ///             AssetResolvers should be updated when the existing resolver
+  ///             becomes obsolete and a newer one becomes available that
+  ///             provides updated access to the same type of assets as the
+  ///             existing one. This update process is meant to be performed
+  ///             at runtime.
   ///
-  virtual void UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager);
+  ///             If a null resolver is provided, nothing will be done. If no
+  ///             matching resolver is found, the provided resolver will be
+  ///             added to the end of the AssetManager resolvers queue. The
+  ///             replacement only occurs with the first matching resolver.
+  ///             Any additional matching resolvers are untouched.
+  ///
+  /// @param[in]  updated_asset_resolver  The asset resolver to replace the
+  ///             resolver of matching type with.
+  ///
+  /// @param[in]  type  The type of AssetResolver to update. Only resolvers of
+  ///                   the specified type will be replaced by the updated
+  ///                   resolver.
+  ///
+  virtual void UpdateAssetResolverByType(
+      std::unique_ptr<AssetResolver> updated_asset_resolver,
+      AssetResolver::AssetResolverType type);
 
  protected:
   PlatformView::Delegate& delegate_;

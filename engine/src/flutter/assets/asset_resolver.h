@@ -19,6 +19,15 @@ class AssetResolver {
 
   virtual ~AssetResolver() = default;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Identifies the type of AssetResolver an instance is.
+  ///
+  enum AssetResolverType {
+    kAssetManager,
+    kApkAssetProvider,
+    kDirectoryAssetBundle
+  };
+
   virtual bool IsValid() const = 0;
 
   //----------------------------------------------------------------------------
@@ -38,6 +47,14 @@ class AssetResolver {
   ///             or run configuration is updated.
   ///
   virtual bool IsValidAfterAssetManagerChange() const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Gets the type of AssetResolver this is. Types are defined in
+  ///             AssetResolverType.
+  ///
+  /// @return     Returns the AssetResolverType that this resolver is.
+  ///
+  virtual AssetResolverType GetType() const = 0;
 
   [[nodiscard]] virtual std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const = 0;

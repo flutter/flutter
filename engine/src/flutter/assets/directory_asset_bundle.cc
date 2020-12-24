@@ -37,6 +37,11 @@ bool DirectoryAssetBundle::IsValidAfterAssetManagerChange() const {
 }
 
 // |AssetResolver|
+AssetResolver::AssetResolverType DirectoryAssetBundle::GetType() const {
+  return AssetResolver::AssetResolverType::kDirectoryAssetBundle;
+}
+
+// |AssetResolver|
 std::unique_ptr<fml::Mapping> DirectoryAssetBundle::GetAsMapping(
     const std::string& asset_name) const {
   if (!is_valid_) {
