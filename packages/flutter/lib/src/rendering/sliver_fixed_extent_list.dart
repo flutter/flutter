@@ -160,10 +160,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     return leadingGarbage;
   }
 
-  int _calculateTrailingGarbage(int targetLastIndex) {
+  int _calculateTrailingGarbage(int? targetLastIndex) {
     RenderBox? walker = lastChild;
     int trailingGarbage = 0;
-    while(walker != null && indexOf(walker) > targetLastIndex){
+    while(walker != null && targetLastIndex != null && indexOf(walker) > targetLastIndex){
       trailingGarbage += 1;
       walker = childBefore(walker);
     }
@@ -195,7 +195,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     if (firstChild != null) {
       final int leadingGarbage = _calculateLeadingGarbage(firstIndex);
-      final int trailingGarbage = _calculateTrailingGarbage(targetLastIndex!);
+      final int trailingGarbage = _calculateTrailingGarbage(targetLastIndex);
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
