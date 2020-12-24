@@ -501,7 +501,7 @@ void main() {
     );
   });
 
-  testWidgets('Top RefreshIndicator(loose mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Top RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -536,7 +536,7 @@ void main() {
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
-  testWidgets('Bottom RefreshIndicator(loose mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Bottom RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -573,7 +573,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71936
-  testWidgets('RefreshIndicator(loose mode) should not be shown when overscroll occurs due to inertia', (WidgetTester tester) async {
+  testWidgets('RefreshIndicator(anywhere mode) should not be shown when overscroll occurs due to inertia', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -609,7 +609,7 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), findsNothing);
   });
 
-  testWidgets('Top RefreshIndicator(strict mode) should not be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Top RefreshIndicator(onEdge mode) should not be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -643,7 +643,7 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), findsNothing);
   });
 
-  testWidgets('Bottom RefreshIndicator(strict mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+  testWidgets('Bottom RefreshIndicator(onEdge mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
