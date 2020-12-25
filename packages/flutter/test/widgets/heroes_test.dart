@@ -2933,9 +2933,9 @@ Future<void> main() async {
     navigatorKey.currentState?.pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
-
-    // The Placeholder should start fading out.
     expect(find.byType(Placeholder), findsOneWidget);
+
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 }

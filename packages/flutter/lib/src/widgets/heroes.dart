@@ -317,12 +317,11 @@ class Hero extends StatefulWidget {
 
 /// The [Hero] widget displays different content based on whether it is in an
 /// animated transition ("flight"), from/to another [Hero] with the same tag:
-///
 ///   * When [startFlight] is called, the real content of this [Hero] will be
 ///     replaced by a "placeholder" widget.
-///   * When the flight ends, the "toHero"'s [endFlight] method must be called,
-///     signaling the widget that the flight has ended and its real content,
-///     instead of the placeholder, must be shown.
+///   * When the flight ends, the "toHero"'s [endFlight] method must be called
+///     by the hero controller, so the real content of that [Hero] becomes
+///     visible again when the animation completes.
 class _HeroState extends State<Hero> {
   final GlobalKey _key = GlobalKey();
   Size? _placeholderSize;
@@ -450,8 +449,6 @@ class _HeroFlightManifest {
 
   // The bounding box for `context` in `ancestorContext` coordinate system.
   static Rect _boundingBoxFor(BuildContext context, BuildContext? ancestorContext) {
-    // If ancestorContext is null that means the corresponding route is not
-    // activated.
     assert(ancestorContext != null);
     final RenderBox box = context.findRenderObject()! as RenderBox;
     assert(box != null && box.hasSize && box.size.isFinite);
@@ -541,7 +538,7 @@ class _HeroFlight {
           // supposed to end up then recreate the heroRect tween.
           final RenderBox? finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?;
           final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
-          if (toHeroOrigin != heroRectTween.end!.topLeft) {
+          if (toHeroOrigin != heroRectTween.end!.topLeft && toHeroOrigin.isFinite) {
             final Rect heroRectEnd = toHeroOrigin & heroRectTween.end!.size;
             heroRectTween = manifest.createHeroRectTween(begin: heroRectTween.begin, end: heroRectEnd);
           }
@@ -884,9 +881,11 @@ class HeroController extends NavigatorObserver {
 
     final NavigatorState? navigator = this.navigator;
     final OverlayState? overlay = navigator?.overlay;
-    // If the navigator or one of the routes subtrees was removed before this
-    // end-of-frame callback was called, then don't actually start a transition.
-    if (navigator == null || from.subtreeContext == null || to.subtreeContext == null || overlay == null)
+    // If the navigator or the overlay was removed before this end-of-frame
+    // callback was called, then don't actually start a transition, and we don'
+    // t have to worry about any Hero widget we might have hidden in a previous
+    // flight, or onging flights.
+    if (navigator == null || overlay == null)
       return;
 
     final RenderObject? navigatorRenderObject = navigator.context.findRenderObject();
@@ -898,8 +897,17 @@ class HeroController extends NavigatorObserver {
     assert(navigatorRenderObject.hasSize);
 
     // At this point the toHeroes may have been built and laid out for the first time.
-    final Map<Object, _HeroState> fromHeroes = Hero._allHeroesFor(from.subtreeContext!, isUserGestureTransition, navigator);
-    final Map<Object, _HeroState> toHeroes = Hero._allHeroesFor(to.subtreeContext!, isUserGestureTransition, navigator);
+    //
+    // If `fromSubtreeContext` is null, call endFlight on all toHeroes, for good measure.
+    // If `toSubtreeContext` is null abort existingFlights.
+    final BuildContext? fromSubtreeContext = from.subtreeContext;
+    final Map<Object, _HeroState> fromHeroes = fromSubtreeContext != null
+      ? Hero._allHeroesFor(fromSubtreeContext, isUserGestureTransition, navigator)
+      : const <Object, _HeroState>{};
+    final BuildContext? toSubtreeContext = to.subtreeContext;
+    final Map<Object, _HeroState> toHeroes = toSubtreeContext != null
+      ? Hero._allHeroesFor(toSubtreeContext, isUserGestureTransition, navigator)
+      : const <Object, _HeroState>{};
 
     for (final MapEntry<Object, _HeroState> fromHeroEntry in fromHeroes.entries) {
       final Object tag = fromHeroEntry.key;
@@ -942,7 +950,8 @@ class HeroController extends NavigatorObserver {
     // new flight (for not having a valid manifest).
     //
     // This can happen in a route pop transition when a fromHero is no longer
-    // mounted, or kept alive by the [KeepAlive] mechanism.
+    // mounted, or kept alive by the [KeepAlive] mechanism but no longer visible.
+    // TODO(LongCatIsLooong): resume aborted flights: https://github.com/flutter/flutter/issues/72947
     for (final _HeroState toHero in toHeroes.values)
       toHero.endFlight();
   }
