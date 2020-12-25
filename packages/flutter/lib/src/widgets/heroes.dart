@@ -443,7 +443,7 @@ class _HeroFlightManifest {
     );
   }
 
-  Tween<Rect?> rectTween({ required Rect? begin, required Rect? end }) {
+  Tween<Rect?> createHeroRectTween({ required Rect? begin, required Rect? end }) {
     final CreateRectTween? createRectTween = toHero.widget.createRectTween ?? this.createRectTween;
     return createRectTween?.call(begin, end) ?? RectTween(begin: begin, end: end);
   }
@@ -461,12 +461,15 @@ class _HeroFlightManifest {
     );
   }
 
-  /// The coordinates of [fromHero], in [fromRoute]'s coordinate space.
+  /// The bounding box of [fromHero], in [fromRoute]'s coordinate space.
   ///
-  /// It will only be used when starting a hero flight.
+  /// This property should only be accessed in [_HeroFlight.start].
   late final Rect fromHeroLocation = _boundingBoxFor(fromHero.context, fromRoute.subtreeContext);
 
-  /// The coordinates of [toHero], in [toRoute]'s coordinate space.
+  /// The bounding box of [toHero], in [toRoute]'s coordinate space.
+  ///
+  /// This property should only be accessed in [_HeroFlight.start] or
+  /// [_HeroFlight.divert].
   late final Rect toHeroLocation = _boundingBoxFor(toHero.context, toRoute.subtreeContext);
 
   /// Whether this [_HeroFlightManifest] is valid and can be used to start or
@@ -474,8 +477,8 @@ class _HeroFlightManifest {
   ///
   /// When starting or diverting a [_HeroFlight] with a brand new
   /// [_HeroFlightManifest], this flag must be checked to ensure the [RectTween]
-  /// the [_HeroFlightManifest] produces does not contain invalid coordinates
-  /// such as [double.infinity] or [double.nan].
+  /// the [_HeroFlightManifest] produces does not contain coordinates that have
+  /// [double.infinity] or [double.nan].
   late final bool isValid = toHeroLocation.isFinite && (isDiverted || fromHeroLocation.isFinite);
 
   @override
@@ -540,7 +543,7 @@ class _HeroFlight {
           final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
           if (toHeroOrigin != heroRectTween.end!.topLeft) {
             final Rect heroRectEnd = toHeroOrigin & heroRectTween.end!.size;
-            heroRectTween = manifest.rectTween(begin: heroRectTween.begin, end: heroRectEnd);
+            heroRectTween = manifest.createHeroRectTween(begin: heroRectTween.begin, end: heroRectEnd);
           }
         }
 
@@ -647,12 +650,7 @@ class _HeroFlight {
         break;
     }
 
-    final Tween<Rect?> rectTween = manifest.rectTween(
-      begin: manifest.fromHeroLocation,
-      end: manifest.toHeroLocation,
-    );
-
-    heroRectTween = rectTween;
+    heroRectTween = manifest.createHeroRectTween(begin: manifest.fromHeroLocation, end: manifest.toHeroLocation);
     manifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: shouldIncludeChildInPlacehold);
     manifest.toHero.startFlight();
     manifest.overlay.insert(overlayEntry = OverlayEntry(builder: _buildOverlay));
@@ -692,10 +690,10 @@ class _HeroFlight {
       if (manifest.fromHero != newManifest.toHero) {
         manifest.fromHero.endFlight(keepPlaceholder: true);
         newManifest.toHero.startFlight();
-        heroRectTween = manifest.rectTween(begin: heroRectTween.end, end: newManifest.toHeroLocation);
+        heroRectTween = manifest.createHeroRectTween(begin: heroRectTween.end, end: newManifest.toHeroLocation);
       } else {
         // TODO(hansmuller): Use ReverseTween here per github.com/flutter/flutter/pull/12203.
-        heroRectTween = manifest.rectTween(begin: heroRectTween.end, end: heroRectTween.begin);
+        heroRectTween = manifest.createHeroRectTween(begin: heroRectTween.end, end: heroRectTween.begin);
       }
     } else {
       // A push or a pop flight is heading to a new route, i.e.
@@ -704,7 +702,7 @@ class _HeroFlight {
       assert(manifest.fromHero != newManifest.fromHero);
       assert(manifest.toHero != newManifest.toHero);
 
-      heroRectTween = manifest.rectTween(
+      heroRectTween = manifest.createHeroRectTween(
         begin: heroRectTween.evaluate(_proxyAnimation),
         end: newManifest.toHeroLocation,
       );
@@ -727,7 +725,6 @@ class _HeroFlight {
       overlayEntry!.markNeedsBuild();
     }
 
-    _aborted = false;
     manifest = newManifest;
   }
 
@@ -908,67 +905,44 @@ class HeroController extends NavigatorObserver {
       final Object tag = fromHeroEntry.key;
       final _HeroState fromHero = fromHeroEntry.value;
       final _HeroState? toHero = toHeroes[tag];
-
       final _HeroFlight? existingFlight = _flights[tag];
+      final _HeroFlightManifest? manifest = toHero == null
+        ? null
+        : _HeroFlightManifest(
+            type: flightType,
+            overlay: overlay,
+            navigatorSize: navigatorRenderObject.size,
+            fromRoute: from,
+            toRoute: to,
+            fromHero: fromHero,
+            toHero: toHero,
+            createRectTween: createRectTween,
+            shuttleBuilder: fromHero.widget.flightShuttleBuilder
+                          ?? toHero.widget.flightShuttleBuilder
+                          ?? _defaultHeroFlightShuttleBuilder,
+            isUserGestureTransition: isUserGestureTransition,
+            isDiverted: existingFlight != null,
+          );
 
-      /// True when an eixsting flight's toHero is no longer valid. Continues
-      /// flying while fading out (see _buildOverlay).
-      final bool shouldAbort;
-      /// True when a new flight has an invalid toHero or an invalid fromHero.
-      /// No transition if this is the case. `endFlight()` will be called on the
-      /// toHero.
-      final bool shouldEndFlight;
-
-      if (toHero != null) {
-        final HeroFlightShuttleBuilder? fromShuttleBuilder = fromHero.widget.flightShuttleBuilder;
-        final HeroFlightShuttleBuilder? toShuttleBuilder = toHero.widget.flightShuttleBuilder;
-        final bool isDiverted = existingFlight != null;
-
-        final _HeroFlightManifest manifest = _HeroFlightManifest(
-          type: flightType,
-          overlay: overlay,
-          navigatorSize: navigatorRenderObject.size,
-          fromRoute: from,
-          toRoute: to,
-          fromHero: fromHero,
-          toHero: toHero,
-          createRectTween: createRectTween,
-          shuttleBuilder:
-              toShuttleBuilder ?? fromShuttleBuilder ?? _defaultHeroFlightShuttleBuilder,
-          isUserGestureTransition: isUserGestureTransition,
-          isDiverted: isDiverted,
-        );
-
-        // When the manifest is not valid, abort existing flights and stop new
-        // flights.
-        shouldAbort = !manifest.isValid && manifest.isDiverted;
-        shouldEndFlight = !manifest.isValid && !manifest.isDiverted;
-
-        // Divert if there's an existing flight.
+      // Only proceed with a valid manifest. Otherwise abort the existing
+      // flight, and call endFlight when this for loop finishes.
+      if (manifest != null && manifest.isValid) {
+        toHeroes.remove(tag);
         if (existingFlight != null) {
           existingFlight.divert(manifest);
-        } else if (!shouldEndFlight) {
+        } else {
           _flights[tag] = _HeroFlight(_handleFlightEnded)..start(manifest);
         }
-
-        if (!shouldEndFlight)
-          toHeroes.remove(tag);
       } else {
-        shouldAbort = true;
-      }
-
-      if (shouldAbort)
         existingFlight?.abort();
+      }
     }
 
     // The remaining entries in toHeroes are those failed to participate in a
-    // new flight (shouldEndFlight is true).
+    // new flight (for not having a valid manifest).
     //
     // This can happen in a route pop transition when a fromHero is no longer
     // mounted, or kept alive by the [KeepAlive] mechanism.
-    //
-    // For these toHeroes, we can't build a manifest since the starting position
-    // is unknown. Simply put the toHeroes back on stage again.
     for (final _HeroState toHero in toHeroes.values)
       toHero.endFlight();
   }

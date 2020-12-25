@@ -2782,7 +2782,6 @@ Future<void> main() async {
   });
 
   testWidgets('kept alive Hero does not throw when the transition begins', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
     await tester.pumpWidget(
@@ -2790,13 +2789,19 @@ Future<void> main() async {
         navigatorKey: navigatorKey,
         home: Scaffold(
           body: ListView(
+            addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
+            addSemanticIndexes: false,
             children: <Widget>[
-              Hero(
-                tag: 'a',
-                child: Material(
-                  child: MediaQuery(
-                    data: const MediaQueryData(),
-                    child: TextField(focusNode: focusNode)
+              const KeepAlive(
+                keepAlive: true,
+                child: Hero(
+                  tag: 'a',
+                  child: Material(
+                    child: MediaQuery(
+                      data: MediaQueryData(),
+                      child: Placeholder()
+                    ),
                   ),
                 ),
               ),
@@ -2807,24 +2812,23 @@ Future<void> main() async {
       ),
     );
 
-    FocusScope.of(tester.element(find.byType(TextField))).requestFocus(focusNode);
-    await tester.pump();
-
     // Scroll to make the Hero invisible.
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
 
+    expect(find.byType(TextField), findsNothing);
+
     navigatorKey.currentState?.push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) {
-          return Scaffold(
+          return const Scaffold(
             body: Center(
               child: Hero(
                 tag: 'a',
                 child: Material(
                   child: MediaQuery(
-                    data: const MediaQueryData(),
-                    child: TextField(focusNode: focusNode)
+                    data: MediaQueryData(),
+                    child: Placeholder(),
                   ),
                 ),
               ),
@@ -2834,6 +2838,104 @@ Future<void> main() async {
       ),
     );
     await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    // The text field on the new route should be visible .
+    expect(find.byType(Placeholder), findsOneWidget);
+  });
+
+  testWidgets('diverting to a keepalive but unpaintable hero', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: CupertinoPageScaffold(
+          child: ListView(
+            addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
+            addSemanticIndexes: false,
+            children: <Widget>[
+              const KeepAlive(
+                keepAlive: true,
+                child: Hero(
+                  tag: 'a',
+                  child: Material(
+                    child: MediaQuery(
+                      data: MediaQueryData(),
+                      child: Placeholder(),
+                    ),
+                  ),
+                ),
+              ),
+              Container(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Scroll to make the Hero invisible.
+    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
+    await tester.pump();
+
+    expect(find.byType(Placeholder), findsNothing);
+    expect(find.byType(Placeholder, skipOffstage: false), findsOneWidget);
+
+    navigatorKey.currentState?.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Scaffold(
+            body: Center(
+              child: Hero(
+                tag: 'a',
+                child: Material(
+                  child: MediaQuery(
+                    data: MediaQueryData(),
+                    child: Placeholder(),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Yet another route that contains Hero 'a'.
+    navigatorKey.currentState?.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Scaffold(
+            body: Center(
+              child: Hero(
+                tag: 'a',
+                child: Material(
+                  child: MediaQuery(
+                    data: MediaQueryData(),
+                    child: Placeholder(),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Pop both routes.
+    navigatorKey.currentState?.pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    navigatorKey.currentState?.pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    // The Placeholder should start fading out.
+    expect(find.byType(Placeholder), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
