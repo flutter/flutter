@@ -10,7 +10,7 @@ void main() {
   test('analyze-sample-code', () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
-      <String>['analyze-sample-code.dart', 'test/analyze-sample-code-test-null-safe-input'],
+      <String>['analyze-sample-code.dart', 'test/analyze-sample-code-test-input'],
     );
     final List<String> stdoutLines = process.stdout.toString().split('\n');
     final List<String> stderrLines = process.stderr.toString().split('\n')
