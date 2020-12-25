@@ -588,7 +588,7 @@ void main() {
 
   test(
     'untranslated messages suggestion is printed when translation is missing: '
-    'synthetic package message',
+    'l10n.yaml message',
     () {
       final BufferLogger testLogger = BufferLogger.test();
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -605,10 +605,9 @@ void main() {
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
-            useSyntheticPackage: true,
           )
           ..loadResources()
-          ..writeOutputFiles(testLogger);
+          ..writeOutputFiles(testLogger, isFromYaml: true);
       } on L10nException catch (e) {
         fail('Generating output should not fail: \n${e.message}');
       }

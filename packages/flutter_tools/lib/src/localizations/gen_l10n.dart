@@ -1033,7 +1033,7 @@ class LocalizationsGenerator {
       .replaceAll('@(delegateClass)', delegateClass);
   }
 
-  void writeOutputFiles(Logger logger) {
+  void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
     _generateCode();
 
@@ -1077,7 +1077,7 @@ class LocalizationsGenerator {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
         logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
       });
-      if (_useSyntheticPackage) {
+      if (isFromYaml) {
         logger.printStatus(
           'To see a detailed report, use the untranslated-messages-file \n'
           'option in the l10n.yaml file:\n'
