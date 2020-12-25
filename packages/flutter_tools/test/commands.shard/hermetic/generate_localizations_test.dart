@@ -102,7 +102,7 @@ void main() {
     );
   });
 
-  testUsingContext('l10n.yaml file takes precedence', () async {
+  testUsingContext('l10n yaml file takes precedence over command line arguments', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))

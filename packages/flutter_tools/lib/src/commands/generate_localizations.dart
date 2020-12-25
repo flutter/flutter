@@ -179,18 +179,18 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         file: _fileSystem.file('l10n.yaml'),
         logger: _logger,
       );
-      generateLocalizations(
-        logger: _logger,
-        options: options,
-        projectDir: _fileSystem.directory(''),
-        dependenciesDir: null,
-        localizationsGenerator: LocalizationsGenerator(_fileSystem),
-      );
       _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '
         'instead.\n'
         'To use the command line arguments, delete the l10n.yaml file in the '
-        'Flutter project.'
+        'Flutter project.\n\n'
+      );
+      generateLocalizations(
+        logger: _logger,
+        options: options,
+        projectDir: _fileSystem.currentDirectory,
+        dependenciesDir: null,
+        localizationsGenerator: LocalizationsGenerator(_fileSystem),
       );
       return FlutterCommandResult.success();
     }
