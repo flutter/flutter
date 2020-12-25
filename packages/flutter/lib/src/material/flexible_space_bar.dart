@@ -72,13 +72,13 @@ enum StretchMode {
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: CustomScrollView(
-///         physics: const BouncingScrollPhysics(),
+///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///         slivers: <Widget>[
 ///           SliverAppBar(
 ///             stretch: true,
 ///             onStretchTrigger: () {
 ///               // Function callback for stretch
-///               return;
+///               return Future.value();
 ///             },
 ///             expandedHeight: 300.0,
 ///             flexibleSpace: FlexibleSpaceBar(
@@ -339,7 +339,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // title
         if (widget.title != null) {
-          final ThemeData theme = Theme.of(context)!;
+          final ThemeData theme = Theme.of(context);
 
           Widget? title;
           switch (theme.platform) {

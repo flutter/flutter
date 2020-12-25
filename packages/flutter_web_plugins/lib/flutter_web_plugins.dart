@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 /// The platform channels and plugin registry implementations for
 /// the web implementations of Flutter plugins.
 ///
@@ -17,6 +15,8 @@
 ///    describing how the `url_launcher` package was created using [flutter_web_plugins].
 library flutter_web_plugins;
 
+export 'src/navigation/js_url_strategy.dart';
 export 'src/navigation/url_strategy.dart';
+export 'src/navigation/utils.dart';
 export 'src/plugin_event_channel.dart';
 export 'src/plugin_registry.dart';

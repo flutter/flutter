@@ -11,7 +11,7 @@ import 'framework.dart';
 import 'image.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 /// A widget that paints a [Decoration] either before or after its child paints.
 ///
@@ -218,7 +218,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// ```dart
 /// Container(
 ///   constraints: BoxConstraints.expand(
-///     height: Theme.of(context).textTheme.headline4.fontSize * 1.1 + 200.0,
+///     height: Theme.of(context).textTheme.headline4!.fontSize! * 1.1 + 200.0,
 ///   ),
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.blue[600],
@@ -226,7 +226,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   child: Text('Hello World',
 ///     style: Theme.of(context)
 ///         .textTheme
-///         .headline4
+///         .headline4!
 ///         .copyWith(color: Colors.white)),
 ///   transform: Matrix4.rotationZ(0.1),
 /// )
@@ -290,7 +290,7 @@ class Container extends StatelessWidget {
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Align the [child] within the container.

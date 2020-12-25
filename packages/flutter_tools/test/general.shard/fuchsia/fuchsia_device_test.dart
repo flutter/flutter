@@ -56,6 +56,7 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 void main() {

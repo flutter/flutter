@@ -71,7 +71,10 @@ class TestBindingBase implements BindingBase {
   void unlocked() {}
 
   @override
-  ui.Window get window => TestWindow(window: ui.window);
+  ui.SingletonFlutterWindow get window => TestWindow(window: ui.window);
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher => TestWindow(window: ui.window).platformDispatcher;
 }
 
 class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {}

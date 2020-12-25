@@ -288,9 +288,14 @@ class Doctor {
   }
 
   /// Print information about the state of installed tooling.
-  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async {
-    if (androidLicenses) {
-      return AndroidLicenseValidator.runLicenseManager();
+  Future<bool> diagnose({
+    bool androidLicenses = false,
+    bool verbose = true,
+    bool showColor = true,
+    AndroidLicenseValidator androidLicenseValidator,
+  }) async {
+    if (androidLicenses && androidLicenseValidator != null) {
+      return androidLicenseValidator.runLicenseManager();
     }
 
     if (!verbose) {

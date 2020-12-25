@@ -55,10 +55,11 @@ class MouseTrackerAnnotation with Diagnosticable {
     this.onEnter,
     this.onExit,
     this.cursor = MouseCursor.defer,
+    this.validForMouseTracker = true,
   }) : assert(cursor != null);
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// entered the region.
+  /// entered the region and [validForMouseTracker] is true.
   ///
   /// This callback is triggered when the pointer has started to be contained by
   /// the region, either due to a pointer event, or due to the movement or
@@ -72,7 +73,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   final PointerEnterEventListener? onEnter;
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// exited the region.
+  /// exited the region and [validForMouseTracker] is true.
   ///
   /// This callback is triggered when the pointer has stopped being contained
   /// by the region, either due to a pointer event, or due to the movement or
@@ -99,6 +100,15 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///
   ///  * [MouseRegion.cursor], which provide values to this field.
   final MouseCursor cursor;
+
+  /// Whether this is included when [MouseTracker] collects the list of annotations.
+  ///
+  /// If [validForMouseTracker] is false, this object is excluded from the current annotation list
+  /// even if it's included in the hit test, affecting mouse-related behavior such as enter events,
+  /// exit events, and mouse cursors. The [validForMouseTracker] does not affect hit testing.
+  ///
+  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]s built by the constructor.
+  final bool validForMouseTracker;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -487,7 +497,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
       if (!nextAnnotations.containsKey(annotation))
-        if (annotation.onExit != null)
+        if (annotation.validForMouseTracker && annotation.onExit != null)
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
     });
 
@@ -498,7 +508,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     ).toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
-      if (annotation.onEnter != null)
+      if (annotation.validForMouseTracker && annotation.onEnter != null)
         annotation.onEnter!(baseEnterEvent.transformed(nextAnnotations[annotation]));
     }
   }

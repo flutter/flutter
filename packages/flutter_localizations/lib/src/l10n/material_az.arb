@@ -52,7 +52,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount simvol qalır",
   "refreshIndicatorSemanticLabel": "Yeniləyin",
   "moreButtonTooltip": "Daha çox",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "aa/gg/iiii",
   "selectYearSemanticsLabel": "İl seçin",
   "unspecifiedDate": "Tarix",

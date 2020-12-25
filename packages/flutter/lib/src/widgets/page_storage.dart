@@ -212,7 +212,7 @@ class PageStorageBucket {
 ///
 /// class ColorBoxPage extends StatelessWidget {
 ///   ColorBoxPage({
-///     Key key,
+///     Key? key,
 ///   }) : super(key: key);
 ///
 ///   @override
@@ -250,7 +250,7 @@ class PageStorage extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The page storage bucket to use for this subtree.

@@ -222,7 +222,7 @@ enum UnfocusDisposition {
 /// To see the focus tree in the debug console, call [debugDumpFocusTree]. To
 /// get the focus tree as a string, call [debugDescribeFocusTree].
 ///
-/// {@template flutter.widgets.focus_manager.focus.lifecycle}
+/// {@template flutter.widgets.FocusNode.lifecycle}
 /// ## Lifecycle
 ///
 /// There are several actors involved in the lifecycle of a
@@ -265,7 +265,7 @@ enum UnfocusDisposition {
 /// call [dispose] when the node is done being used.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.focus_manager.focus.keyEvents}
+/// {@template flutter.widgets.FocusNode.keyEvents}
 /// ## Key Event Propagation
 ///
 /// The [FocusManager] receives key events from [RawKeyboard] and will pass them
@@ -303,10 +303,10 @@ enum UnfocusDisposition {
 /// [DirectionalFocusTraversalPolicyMixin], but custom policies can be built
 /// based upon these policies. See [FocusTraversalPolicy] for more information.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold} This example shows how
-/// a FocusNode should be managed if not using the [Focus] or [FocusScope]
-/// widgets. See the [Focus] widget for a similar example using [Focus] and
-/// [FocusScope] widgets.
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This example shows how a FocusNode should be managed if not using the
+/// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
+/// example using [Focus] and [FocusScope] widgets.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';
@@ -314,16 +314,16 @@ enum UnfocusDisposition {
 ///
 /// ```dart preamble
 /// class ColorfulButton extends StatefulWidget {
-///   ColorfulButton({Key key}) : super(key: key);
+///   ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _ColorfulButtonState createState() => _ColorfulButtonState();
 /// }
 ///
 /// class _ColorfulButtonState extends State<ColorfulButton> {
-///   FocusNode _node;
+///   late FocusNode _node;
 ///   bool _focused = false;
-///   FocusAttachment _nodeAttachment;
+///   late FocusAttachment _nodeAttachment;
 ///   Color _color = Colors.white;
 ///
 ///   @override
@@ -406,7 +406,7 @@ enum UnfocusDisposition {
 /// Widget build(BuildContext context) {
 ///   final TextTheme textTheme = Theme.of(context).textTheme;
 ///   return DefaultTextStyle(
-///     style: textTheme.headline4,
+///     style: textTheme.headline4!,
 ///     child: ColorfulButton(),
 ///   );
 /// }
@@ -572,7 +572,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
   ///
-  /// {@macro flutter.widgets.focus_manager.focus.keyEvents}
+  /// {@macro flutter.widgets.FocusNode.keyEvents}
   FocusOnKeyCallback? get onKey => _onKey;
   FocusOnKeyCallback? _onKey;
 
@@ -835,9 +835,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                   children: <Widget>[
   ///                     Radio<UnfocusDisposition>(
   ///                       groupValue: disposition,
-  ///                       onChanged: (UnfocusDisposition value) {
+  ///                       onChanged: (UnfocusDisposition? value) {
   ///                         setState(() {
-  ///                           disposition = value;
+  ///                           if (value != null) {
+  ///                             disposition = value;
+  ///                           }
   ///                         });
   ///                       },
   ///                       value: UnfocusDisposition.values[index],
@@ -850,7 +852,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                 child: const Text('UNFOCUS'),
   ///                 onPressed: () {
   ///                   setState(() {
-  ///                     primaryFocus.unfocus(disposition: disposition);
+  ///                     primaryFocus!.unfocus(disposition: disposition);
   ///                   });
   ///                 },
   ///               ),
@@ -1205,8 +1207,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 /// as the [focusedChild] of this node, adopting if it isn't already part of the
 /// focus tree.
 ///
-/// {@macro flutter.widgets.focus_manager.focus.lifecycle}
-/// {@macro flutter.widgets.focus_manager.focus.keyEvents}
+/// {@macro flutter.widgets.FocusNode.lifecycle}
+/// {@macro flutter.widgets.FocusNode.keyEvents}
 ///
 /// See also:
 ///

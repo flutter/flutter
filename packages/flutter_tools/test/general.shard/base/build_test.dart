@@ -16,21 +16,19 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+const FakeCommand kWhichSysctlCommand = FakeCommand(
+  command: <String>[
+    'which',
+    'sysctl',
+  ],
+);
+
 const FakeCommand kARMCheckCommand = FakeCommand(
   command: <String>[
     'sysctl',
     'hw.optional.arm64',
   ],
   exitCode: 1,
-);
-
-const FakeCommand kSdkPathCommand = FakeCommand(
-  command: <String>[
-    'xcrun',
-    '--sdk',
-    'iphoneos',
-    '--show-sdk-path'
-  ]
 );
 
 const List<String> kDefaultClang = <String>[
@@ -47,7 +45,7 @@ const List<String> kDefaultClang = <String>[
   '-install_name',
   '@rpath/App.framework/App',
   '-isysroot',
-  '',
+  'path/to/sdk',
   '-o',
   'build/foo/App.framework/App',
   'build/foo/snapshot_assembly.o',
@@ -68,7 +66,7 @@ const List<String> kBitcodeClang = <String>[
   '@rpath/App.framework/App',
   '-fembed-bitcode',
   '-isysroot',
-  '',
+  'path/to/sdk',
   '-o',
   'build/foo/App.framework/App',
   'build/foo/snapshot_assembly.o',
@@ -223,6 +221,7 @@ void main() {
       expect(await snapshotter.build(
         platform: TargetPlatform.ios,
         darwinArch: DarwinArch.arm64,
+        sdkRoot: 'path/to/sdk',
         buildMode: BuildMode.debug,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -263,46 +262,42 @@ void main() {
     testWithoutContext('builds iOS with bitcode', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.profile) +'_armv7',
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: <String>[
+          artifacts.getArtifactPath(Artifact.genSnapshot,
+                  platform: TargetPlatform.ios, mode: BuildMode.profile) +
+              '_armv7',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
           '--strip',
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           'main.dill',
-        ]
-      ));
-      processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
+        const FakeCommand(command: <String>[
           'xcrun',
           'cc',
           '-arch',
           'armv7',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-fembed-bitcode',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
           'build/foo/snapshot_assembly.o',
-        ]
-      ));
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        const FakeCommand(command: <String>[
           'xcrun',
           'clang',
           '-arch',
           'armv7',
           ...kBitcodeClang,
-        ]
-      ));
+        ]),
+      ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -310,6 +305,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
+        sdkRoot: 'path/to/sdk',
         bitcode: true,
         splitDebugInfo: null,
         dartObfuscation: false,
@@ -323,47 +319,43 @@ void main() {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
       final String debugPath = fileSystem.path.join('foo', 'app.ios-armv7.symbols');
-        processManager.addCommand(FakeCommand(
-        command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.profile) +'_armv7',
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: <String>[
+          artifacts.getArtifactPath(Artifact.genSnapshot,
+                  platform: TargetPlatform.ios, mode: BuildMode.profile) +
+              '_armv7',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
           '--strip',
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           '--dwarf-stack-traces',
           '--save-debugging-info=$debugPath',
           'main.dill',
-        ]
-      ));
-      processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
+        const FakeCommand(command: <String>[
           'xcrun',
           'cc',
           '-arch',
           'armv7',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
           'build/foo/snapshot_assembly.o',
-        ]
-      ));
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        const FakeCommand(command: <String>[
           'xcrun',
           'clang',
           '-arch',
           'armv7',
           ...kDefaultClang,
-        ]
-      ));
+        ]),
+      ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -371,6 +363,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
+        sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: 'foo',
         dartObfuscation: false,
@@ -383,46 +376,42 @@ void main() {
     testWithoutContext('builds iOS armv7 snapshot with obfuscate', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.profile) +'_armv7',
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: <String>[
+          artifacts.getArtifactPath(Artifact.genSnapshot,
+                  platform: TargetPlatform.ios, mode: BuildMode.profile) +
+              '_armv7',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=$assembly',
           '--strip',
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           '--obfuscate',
           'main.dill',
-        ]
-      ));
-      processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
+        const FakeCommand(command: <String>[
           'xcrun',
           'cc',
           '-arch',
           'armv7',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
           'build/foo/snapshot_assembly.o',
-        ]
-      ));
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        const FakeCommand(command: <String>[
           'xcrun',
           'clang',
           '-arch',
           'armv7',
           ...kDefaultClang,
-        ]
-      ));
+        ]),
+      ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -430,6 +419,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
+        sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: null,
         dartObfuscation: true,
@@ -442,45 +432,41 @@ void main() {
 
     testWithoutContext('builds iOS armv7 snapshot', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.release) +'_armv7',
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: <String>[
+          artifacts.getArtifactPath(Artifact.genSnapshot,
+                  platform: TargetPlatform.ios, mode: BuildMode.release) +
+              '_armv7',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',
           '--strip',
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           'main.dill',
-        ]
-      ));
-      processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
+        const FakeCommand(command: <String>[
           'xcrun',
           'cc',
           '-arch',
           'armv7',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
           'build/foo/snapshot_assembly.o',
-        ]
-      ));
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        const FakeCommand(command: <String>[
           'xcrun',
           'clang',
           '-arch',
           'armv7',
           ...kDefaultClang,
-        ]
-      ));
+        ]),
+      ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -488,6 +474,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
+        sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: null,
         dartObfuscation: false,
@@ -499,43 +486,39 @@ void main() {
 
     testWithoutContext('builds iOS arm64 snapshot', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.ios, mode: BuildMode.release) +'_arm64',
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: <String>[
+          artifacts.getArtifactPath(Artifact.genSnapshot,
+                  platform: TargetPlatform.ios, mode: BuildMode.release) +
+              '_arm64',
           '--deterministic',
           '--snapshot_kind=app-aot-assembly',
           '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',
           '--strip',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           'main.dill',
-        ]
-      ));
-      processManager.addCommand(kARMCheckCommand);
-      processManager.addCommand(kSdkPathCommand);
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
+        const FakeCommand(command: <String>[
           'xcrun',
           'cc',
           '-arch',
           'arm64',
           '-isysroot',
-          '',
+          'path/to/sdk',
           '-c',
           'build/foo/snapshot_assembly.S',
           '-o',
           'build/foo/snapshot_assembly.o',
-        ]
-      ));
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
+        ]),
+        const FakeCommand(command: <String>[
           'xcrun',
           'clang',
           '-arch',
           'arm64',
           ...kDefaultClang,
-        ]
-      ));
+        ]),
+      ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -543,6 +526,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
+        sdkRoot: 'path/to/sdk',
         bitcode: false,
         splitDebugInfo: null,
         dartObfuscation: false,
@@ -563,8 +547,6 @@ void main() {
           '--strip',
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           'main.dill',
         ]
       ));
@@ -595,8 +577,6 @@ void main() {
           '--strip',
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           '--dwarf-stack-traces',
           '--save-debugging-info=$debugPath',
           'main.dill',
@@ -628,8 +608,6 @@ void main() {
           '--strip',
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           '--obfuscate',
           'main.dill',
         ]
@@ -660,8 +638,6 @@ void main() {
           '--strip',
           '--no-sim-use-hardfp',
           '--no-use-integer-division',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           'main.dill',
         ]
       ));
@@ -689,8 +665,6 @@ void main() {
           '--snapshot_kind=app-aot-elf',
           '--elf=build/foo/app.so',
           '--strip',
-          '--no-causal-async-stacks',
-          '--lazy-async-stacks',
           'main.dill',
         ]
       ));

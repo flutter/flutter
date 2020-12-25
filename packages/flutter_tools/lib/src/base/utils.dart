@@ -153,19 +153,6 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
   return map?.cast<String, dynamic>();
 }
 
-typedef AsyncCallback = Future<void> Function();
-
-/// Returns a [Future] that completes when all given [Future]s complete.
-///
-/// Uses [Future.wait] but removes null elements from the provided
-/// `futures` iterable first.
-///
-/// The returned [Future<List>] will be shorter than the given `futures` if
-/// it contains nulls.
-Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
-  return Future.wait<T>(futures.where((Future<T> future) => future != null));
-}
-
 /// Smallest column that will be used for text wrapping. If the requested column
 /// width is smaller than this, then this is what will be used.
 const int kMinColumnWidth = 10;

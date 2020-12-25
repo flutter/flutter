@@ -772,7 +772,7 @@ class _BuildInstance {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
       final bool canSkip = !node.missingDepfile &&
-        await node.computeChanges(environment, fileCache, fileSystem, logger);
+        node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
@@ -802,11 +802,11 @@ class _BuildInstance {
       // If we were missing the depfile, resolve input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        await fileCache.diffFileList(node.inputs);
+        fileCache.diffFileList(node.inputs);
       }
 
       // Always update hashes for output files.
-      await fileCache.diffFileList(node.outputs);
+      fileCache.diffFileList(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
 
@@ -1001,12 +1001,12 @@ class Node {
   /// Collect hashes for all inputs to determine if any have changed.
   ///
   /// Returns whether this target can be skipped.
-  Future<bool> computeChanges(
+  bool computeChanges(
     Environment environment,
     FileStore fileStore,
     FileSystem fileSystem,
     Logger logger,
-  ) async {
+  ) {
     final Set<String> currentOutputPaths = <String>{
       for (final File file in outputs) file.path,
     };
@@ -1075,7 +1075,7 @@ class Node {
     // If we have files to diff, compute them asynchronously and then
     // update the result.
     if (sourcesToDiff.isNotEmpty) {
-      final List<File> dirty = await fileStore.diffFileList(sourcesToDiff);
+      final List<File> dirty = fileStore.diffFileList(sourcesToDiff);
       if (dirty.isNotEmpty) {
         invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;

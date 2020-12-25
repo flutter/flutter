@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
@@ -848,7 +849,7 @@ void main() {
     expect(() => builder(), throwsAssertionError);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/65374.
+  // Regression test for https://github.com/flutter/flutter/issues/63753.
   testWidgets('Validate form should return correct validation if the value is composing', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? fieldValue;
@@ -864,6 +865,7 @@ void main() {
                 key: formKey,
                 child: TextFormField(
                   maxLength: 5,
+                  maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
                   onSaved: (String? value) { fieldValue = value; },
                   validator: (String? value) => (value != null && value.length > 5) ? 'Exceeded' : null,
                 ),

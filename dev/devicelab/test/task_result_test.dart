@@ -17,6 +17,7 @@ void main() {
           'not_a_metric': 'something',
         },
         'benchmarkScoreKeys': <String>['i', 'j'],
+        'detailFiles': <String>[],
       };
       final TaskResult result = TaskResult.fromJson(expectedJson);
       expect(result.toJson(), expectedJson);
@@ -30,6 +31,7 @@ void main() {
         'success': true,
         'data': null,
         'benchmarkScoreKeys': <String>[],
+        'detailFiles': <String>[],
       };
       expect(result.toJson(), expectedJson);
     });

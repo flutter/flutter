@@ -11,6 +11,44 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
+    bool isDrawerOpen = false;
+    bool isEndDrawerOpen = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+          drawer: Container(
+            color: Colors.blue,
+          ),
+          onDrawerChanged: (bool isOpen) {
+            isDrawerOpen = isOpen;
+          },
+          endDrawer: Container(
+            color: Colors.green,
+          ),
+          onEndDrawerChanged: (bool isOpen) {
+            isEndDrawerOpen = isOpen;
+          },
+          body: Container()),
+    ));
+
+    final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+
+    scaffoldState.openDrawer();
+    await tester.pumpAndSettle();
+    expect(true, isDrawerOpen);
+    scaffoldState.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(false, isDrawerOpen);
+
+    scaffoldState.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(true, isEndDrawerOpen);
+    scaffoldState.openDrawer();
+    await tester.pumpAndSettle();
+    expect(false, isEndDrawerOpen);
+  });
+
   testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = UniqueKey();
     Widget boilerplate(Widget child) {
@@ -1811,7 +1849,7 @@ void main() {
         late FlutterError error;
         try {
           key.currentState!.showBottomSheet<void>((BuildContext context) {
-            final ThemeData themeData = Theme.of(context)!;
+            final ThemeData themeData = Theme.of(context);
             return Container(
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: themeData.disabledColor))
@@ -2031,6 +2069,36 @@ void main() {
       );
       await tester.pumpAndSettle();
     });
+
+    testWidgets('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          extendBodyBehindAppBar: false,
+        ),
+      ));
+      final Offset defaultOffset = tester.getCenter(find.byType(FloatingActionButton));
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          extendBodyBehindAppBar: true,
+        ),
+      ));
+      final Offset extendedBodyOffset = tester.getCenter(find.byType(FloatingActionButton));
+
+      expect(defaultOffset.dy, extendedBodyOffset.dy);
+    });
   });
 
   testWidgets('ScaffoldMessenger.maybeOf can return null if not found', (WidgetTester tester) async {
@@ -2128,12 +2196,11 @@ void main() {
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'
       '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#342d0 ink renderer]\n'
+      '     _InkFeatures-[GlobalKey#00000 ink renderer]\n'
       '     NotificationListener<LayoutChangedNotification>\n'
       '     PhysicalModel\n'
       '     AnimatedPhysicalModel\n'
       '     Material\n'
-      '     PrimaryScrollController\n'
       '     _ScaffoldScope\n'
       '     Scaffold\n'
       '     MediaQuery\n'

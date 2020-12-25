@@ -281,7 +281,7 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
 Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools');
-  final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
+  final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,

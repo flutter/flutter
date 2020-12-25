@@ -29,6 +29,8 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     await evalFlutter('build', options: <String>[
       'web',
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
+      if (!useCanvasKit)
+        '--dart-define=FLUTTER_WEB_USE_SKIA=false',
       if (useCanvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       '--profile',
@@ -104,7 +106,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
           // `dev/benchmarks/macrobenchmarks/lib/web_benchmarks.dart`
           // to print information.
           final String message = await request.readAsString();
-          print('[Gallery] $message');
+          print('[APP] $message');
           return Response.ok('Reported.');
         } else {
           return Response.notFound(

@@ -30,25 +30,24 @@ import 'tooltip_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example show a basic [Tooltip] which has a [Text] as child.
 /// [message] contains your label to be shown by the tooltip when
-/// the child that Tooltip wraps is long pressed.
+/// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
+/// the tooltip is shown when the widget is long pressed.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: Tooltip(
-///       message: "I am a Tooltip",
-///       child: Text("Tap this text and hold down to show a tooltip."),
-///     ),
+///   return Tooltip(
+///     message: "I am a Tooltip",
+///     child: Text("Hover over the text to show a tooltip."),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
@@ -64,23 +63,21 @@ import 'tooltip_theme.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: Tooltip(
-///       message: "I am a Tooltip",
-///       child: Text("Tap this text and hold down to show a tooltip."),
-///       decoration: BoxDecoration(
-///         borderRadius: BorderRadius.circular(25),
-///         gradient: LinearGradient(colors: [Colors.amber, Colors.red]),
-///       ),
-///       height: 50,
-///       padding: EdgeInsets.all(8.0),
-///       preferBelow: false,
-///       textStyle: TextStyle(
-///         fontSize: 24,
-///       ),
-///       showDuration: Duration(seconds: 2),
-///       waitDuration: Duration(seconds: 1),
+///   return Tooltip(
+///     message: "I am a Tooltip",
+///     child: Text("Tap this text and hold down to show a tooltip."),
+///     decoration: BoxDecoration(
+///       borderRadius: BorderRadius.circular(25),
+///       gradient: LinearGradient(colors: [Colors.amber, Colors.red]),
 ///     ),
+///     height: 50,
+///     padding: EdgeInsets.all(8.0),
+///     preferBelow: false,
+///     textStyle: TextStyle(
+///       fontSize: 24,
+///     ),
+///     showDuration: Duration(seconds: 2),
+///     waitDuration: Duration(seconds: 1),
 ///   );
 /// }
 /// ```
@@ -170,7 +167,7 @@ class Tooltip extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Specifies the tooltip's shape and background color.
@@ -270,7 +267,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   // https://material.io/components/tooltips#specs
   double _getDefaultTooltipHeight() {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
@@ -282,7 +279,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   EdgeInsets _getDefaultPadding() {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
@@ -294,7 +291,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   double _getDefaultFontSize() {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
@@ -458,7 +455,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
     final TextStyle defaultTextStyle;
     final BoxDecoration defaultDecoration;
@@ -607,7 +604,7 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: DefaultTextStyle(
-                style: Theme.of(context)!.textTheme.bodyText2!,
+                style: Theme.of(context).textTheme.bodyText2!,
                 child: Container(
                   decoration: decoration,
                   padding: padding,

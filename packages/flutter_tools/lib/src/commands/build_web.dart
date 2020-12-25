@@ -26,6 +26,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesWebRendererOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
+    addNativeNullAssertions(hide: false);
     argParser.addFlag('csp',
       defaultsTo: false,
       negatable: false,
@@ -79,7 +80,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = stringArg('target');
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
@@ -90,6 +91,7 @@ class BuildWebCommand extends BuildSubCommand {
       boolArg('csp'),
       stringArg('pwa-strategy'),
       boolArg('source-maps'),
+      boolArg('native-null-assertions'),
     );
     return FlutterCommandResult.success();
   }

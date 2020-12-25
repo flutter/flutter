@@ -5,7 +5,7 @@
 import 'simulation.dart';
 
 // Examples can assume:
-// AnimationController _controller;
+// late AnimationController _controller;
 
 /// A simulation that applies a constant accelerating force.
 ///

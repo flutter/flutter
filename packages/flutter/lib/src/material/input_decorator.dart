@@ -1280,6 +1280,14 @@ class _RenderDecoration extends RenderBox {
   Matrix4? _labelTransform;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(
+      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
+    ));
+    return const Size(0, 0);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _labelTransform = null;
@@ -1812,7 +1820,7 @@ class InputDecorator extends StatefulWidget {
   /// How the text in the decoration should be aligned horizontally.
   final TextAlign? textAlign;
 
-  /// {@template flutter.widgets.inputDecorator.textAlignVertical}
+  /// {@template flutter.material.InputDecorator.textAlignVertical}
   /// How the text should be aligned vertically.
   ///
   /// Determines the alignment of the baseline within the available space of
@@ -1956,7 +1964,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   InputDecoration? _effectiveDecoration;
   InputDecoration? get decoration {
     _effectiveDecoration ??= widget.decoration.applyDefaults(
-      Theme.of(context)!.inputDecorationTheme,
+      Theme.of(context).inputDecorationTheme,
     );
     return _effectiveDecoration;
   }
@@ -2143,7 +2151,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context)!;
+    final ThemeData themeData = Theme.of(context);
     final TextStyle inlineStyle = _getInlineStyle(themeData);
     final TextBaseline textBaseline = inlineStyle.textBaseline!;
 
@@ -2512,7 +2520,7 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
@@ -2558,7 +2566,7 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.hintStyle,
     this.hintTextDirection,
     this.filled = false,
@@ -2753,9 +2761,9 @@ class InputDecoration {
   ///
   /// When [FloatingLabelBehavior.never] the label will always appear in an empty
   /// field in place of the content.
-  ///
-  /// Defaults to [FloatingLabelBehavior.auto].
   /// {@endtemplate}
+  ///
+  /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
@@ -2838,6 +2846,7 @@ class InputDecoration {
   /// 48px.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
+  ///
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
@@ -3005,7 +3014,7 @@ class InputDecoration {
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
   /// This example shows the differences between two `TextField` widgets when
   /// [suffixIconConstraints] is set to the default value and when one is not.
   ///
@@ -3705,6 +3714,8 @@ class InputDecorationTheme with Diagnosticable {
   final bool hasFloatingPlaceholder;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
+  ///
+  /// Defaults to [FloatingLabelBehavior.auto].
   final FloatingLabelBehavior floatingLabelBehavior;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses

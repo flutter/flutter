@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('chrome')
-
+@TestOn('!chrome')
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -26,7 +25,7 @@ class OnTapPage extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Container(
           child: Center(
-            child: Text(id, style: Theme.of(context)!.textTheme.headline3),
+            child: Text(id, style: Theme.of(context).textTheme.headline3),
           ),
         ),
       ),

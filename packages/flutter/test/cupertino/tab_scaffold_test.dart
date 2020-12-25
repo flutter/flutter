@@ -45,7 +45,7 @@ void main() {
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
       icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-      title: Text('Tab ${index + 1}'),
+      label: 'Tab ${index + 1}',
     );
   }
 
@@ -1079,7 +1079,7 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), title: Text('$i')),
+                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),
@@ -1221,11 +1221,11 @@ CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
     items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        title: const Text('Tab 1'),
+        label: 'Tab 1',
       ),
       BottomNavigationBarItem(
         icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        title: const Text('Tab 2'),
+        label: 'Tab 2',
       ),
     ],
     currentIndex: selectedTab,

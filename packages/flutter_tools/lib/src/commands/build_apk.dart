@@ -27,7 +27,7 @@ class BuildApkCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesDartDefineOption();
-    usesExtraFrontendOptions();
+    usesExtraDartFlagOptions();
     addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
@@ -90,12 +90,11 @@ class BuildApkCommand extends BuildSubCommand {
     if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
     }
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      shrink: boolArg('shrink'),
     );
     validateBuild(androidBuildInfo);
 

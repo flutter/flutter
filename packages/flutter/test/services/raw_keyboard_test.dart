@@ -1594,7 +1594,7 @@ void main() {
         case GtkKeyHelper.modifierControl:
           return isLeft ? 65507 : 65508;
         case GtkKeyHelper.modifierMeta:
-          return isLeft ? 65511 : 65512;
+          return isLeft ? 65515 : 65516;
         case GtkKeyHelper.modifierMod2:
           return 65407;
         case GtkKeyHelper.modifierCapsLock:

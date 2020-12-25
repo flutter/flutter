@@ -119,15 +119,14 @@ class GalleryTransitionTest {
       summary['transitions'] = transitions;
       summary['missed_transition_count'] = _countMissedTransitions(transitions);
     }
-    final List<String> detailFiles = <String>[
-      if (transitionDurationFile != null)
-        '${galleryDirectory.path}/build/$transitionDurationFile.json',
-      if (timelineTraceFile != null)
-        '${galleryDirectory.path}/build/$timelineTraceFile.json'
-    ];
 
     return TaskResult.success(summary,
-      detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
+      detailFiles: <String>[
+        if (transitionDurationFile != null)
+          '${galleryDirectory.path}/build/$transitionDurationFile.json',
+        if (timelineTraceFile != null)
+          '${galleryDirectory.path}/build/$timelineTraceFile.json'
+      ],
       benchmarkScoreKeys: <String>[
         if (transitionDurationFile != null)
           'missed_transition_count',

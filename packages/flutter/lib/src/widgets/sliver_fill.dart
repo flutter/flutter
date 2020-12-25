@@ -56,7 +56,7 @@ class SliverFillViewport extends StatelessWidget {
   /// effect. Defaults to true.
   final bool padEnds;
 
-  /// {@macro flutter.widgets.sliverMultiBoxAdaptor.delegate}
+  /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   final SliverChildDelegate delegate;
 
   @override

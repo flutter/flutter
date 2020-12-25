@@ -1000,6 +1000,44 @@ class RenderTable extends RenderBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (rows * columns == 0) {
+      return constraints.constrain(const Size(0.0, 0.0));
+    }
+    final List<double> widths = _computeColumnWidths(constraints);
+    final double tableWidth = widths.fold(0.0, (double a, double b) => a + b);
+    double rowTop = 0.0;
+    for (int y = 0; y < rows; y += 1) {
+      double rowHeight = 0.0;
+      for (int x = 0; x < columns; x += 1) {
+        final int xy = x + y * columns;
+        final RenderBox? child = _children[xy];
+        if (child != null) {
+          final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+          assert(childParentData != null);
+          switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
+            case TableCellVerticalAlignment.baseline:
+              assert(debugCannotComputeDryLayout(
+                reason: 'TableCellVerticalAlignment.baseline requires a full layout for baseline metrics to be available.'
+              ));
+              return const Size(0 ,0);
+            case TableCellVerticalAlignment.top:
+            case TableCellVerticalAlignment.middle:
+            case TableCellVerticalAlignment.bottom:
+              final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: widths[x]));
+              rowHeight = math.max(rowHeight, childSize.height);
+              break;
+            case TableCellVerticalAlignment.fill:
+              break;
+          }
+        }
+      }
+      rowTop += rowHeight;
+    }
+    return constraints.constrain(Size(tableWidth, rowTop));
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     final int rows = this.rows;

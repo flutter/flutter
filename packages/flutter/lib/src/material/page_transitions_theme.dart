@@ -589,7 +589,7 @@ class PageTransitionsTheme with Diagnosticable {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    TargetPlatform platform = Theme.of(context)!.platform;
+    TargetPlatform platform = Theme.of(context).platform;
 
     if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route))
       platform = TargetPlatform.iOS;

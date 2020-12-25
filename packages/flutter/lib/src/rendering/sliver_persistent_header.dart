@@ -48,7 +48,7 @@ class OverScrollHeaderStretchConfiguration {
   final AsyncCallback? onStretchTrigger;
 }
 
-/// {@template flutter.rendering.persistentHeader.showOnScreenConfiguration}
+/// {@template flutter.rendering.PersistentHeaderShowOnScreenConfiguration}
 /// Specifies how a pinned header or a floating header should react to
 /// [RenderObject.showOnScreen] calls.
 /// {@endtemplate}
@@ -593,7 +593,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   ///    and snapped into view via the corresponding parameters.
   FloatingHeaderSnapConfiguration? snapConfiguration;
 
-  /// {@macro flutter.rendering.persistentHeader.showOnScreenConfiguration}
+  /// {@macro flutter.rendering.PersistentHeaderShowOnScreenConfiguration}
   ///
   /// If set to null, the persistent header will delegate the `showOnScreen` call
   /// to it's parent [RenderObject].

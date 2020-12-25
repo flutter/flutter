@@ -243,7 +243,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction.
   ///
-  /// {@template flutter.widgets.interactiveViewer.onInteraction}
+  /// {@template flutter.widgets.InteractiveViewer.onInteractionEnd}
   /// Will be called even if the interaction is disabled with
   /// [panEnabled] or [scaleEnabled].
   ///
@@ -265,7 +265,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will not have
   /// changed due to this interaction.
   ///
-  /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
   /// The coordinates provided in the details' `focalPoint` and
   /// `localFocalPoint` are normal Flutter event coordinates, not
@@ -284,7 +284,7 @@ class InteractiveViewer extends StatefulWidget {
   /// At the time this is called, the [TransformationController] will have
   /// already been updated to reflect the change caused by the interaction.
   ///
-  /// {@macro flutter.widgets.interactiveViewer.onInteraction}
+  /// {@macro flutter.widgets.InteractiveViewer.onInteractionEnd}
   ///
   /// The coordinates provided in the details' `focalPoint` and
   /// `localFocalPoint` are normal Flutter event coordinates, not
@@ -311,13 +311,13 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// ```dart
   /// final TransformationController _transformationController = TransformationController();
-  /// Animation<Matrix4> _animationReset;
-  /// AnimationController _controllerReset;
+  /// Animation<Matrix4>? _animationReset;
+  /// late final AnimationController _controllerReset;
   ///
   /// void _onAnimateReset() {
-  ///   _transformationController.value = _animationReset.value;
+  ///   _transformationController.value = _animationReset!.value;
   ///   if (!_controllerReset.isAnimating) {
-  ///     _animationReset?.removeListener(_onAnimateReset);
+  ///     _animationReset!.removeListener(_onAnimateReset);
   ///     _animationReset = null;
   ///     _controllerReset.reset();
   ///   }
@@ -329,7 +329,7 @@ class InteractiveViewer extends StatefulWidget {
   ///     begin: _transformationController.value,
   ///     end: Matrix4.identity(),
   ///   ).animate(_controllerReset);
-  ///   _animationReset.addListener(_onAnimateReset);
+  ///   _animationReset!.addListener(_onAnimateReset);
   ///   _controllerReset.forward();
   /// }
   ///
@@ -930,12 +930,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
       }
-      final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
-      final Size childSize = childRenderBox.size;
-      final double scaleChange = 1.0 - event.scrollDelta.dy / childSize.height;
-      if (scaleChange == 0.0) {
+
+      // Ignore left and right scroll.
+      if (event.scrollDelta.dy == 0.0) {
         return;
       }
+
+      // In the Flutter engine, the mousewheel scrollDelta is hardcoded to 20 per scroll, while a trackpad scroll can be any amount.
+      // The calculation for scaleChange here was arbitrarily chosen to feel natural for both trackpads and mousewheels on all platforms.
+      final double scaleChange = math.exp(-event.scrollDelta.dy / 200);
       final Offset focalPointScene = _transformationController!.toScene(
         event.localPosition,
       );
@@ -1075,6 +1078,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       onPointerSignal: _receivedPointerSignal,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
+        dragStartBehavior: DragStartBehavior.start,
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,

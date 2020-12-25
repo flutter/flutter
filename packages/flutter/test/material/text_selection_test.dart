@@ -556,7 +556,6 @@ void main() {
               selectionHandleColor: Color(0x550000AA),
             ),
           ),
-          isMaterialAppTheme: true,
           child: Builder(
             builder: (BuildContext context) {
               return Container(

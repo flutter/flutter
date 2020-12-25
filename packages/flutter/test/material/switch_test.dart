@@ -1088,4 +1088,554 @@ void main() {
     expect(updatedSwitchRenderObject.position.isCompleted, false);
     expect(updatedSwitchRenderObject.position.isDismissed, false);
   });
+
+  testWidgets('Switch thumb color resolves in active/enabled states', (WidgetTester tester) async {
+    const Color activeEnabledThumbColor = Color(0xFF000001);
+    const Color activeDisabledThumbColor = Color(0xFF000002);
+    const Color inactiveEnabledThumbColor = Color(0xFF000003);
+    const Color inactiveDisabledThumbColor = Color(0xFF000004);
+
+    Color getThumbColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledThumbColor;
+        }
+        return inactiveDisabledThumbColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledThumbColor;
+      }
+      return inactiveEnabledThumbColor;
+    }
+
+    final MaterialStateProperty<Color> thumbColor =
+      MaterialStateColor.resolveWith(getThumbColor);
+
+    Widget buildSwitch({required bool enabled, required bool active}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                  thumbColor: thumbColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.black12,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: inactiveDisabledThumbColor),
+      reason: 'Inactive disabled switch should default track and custom thumb color',
+    );
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.black12,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: activeDisabledThumbColor),
+      reason: 'Active disabled switch should match these colors',
+    );
+
+    await tester.pumpWidget(buildSwitch(enabled: true, active: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x52000000), // Black with 32% opacity,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: inactiveEnabledThumbColor),
+      reason: 'Inactive enabled switch should match these colors',
+    );
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.black12,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: inactiveDisabledThumbColor),
+      reason: 'Inactive disabled switch should match these colors',
+    );
+  });
+
+  testWidgets('Switch thumb color resolves in hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredThumbColor = Color(0xFF000001);
+    const Color focusedThumbColor = Color(0xFF000002);
+
+    Color getThumbColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredThumbColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusedThumbColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> thumbColor =
+      MaterialStateColor.resolveWith(getThumbColor);
+
+    Widget buildSwitch() {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  value: true,
+                  thumbColor: thumbColor,
+                  onChanged: (_) { },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch());
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x801e88e5),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: focusedThumbColor),
+      reason: 'Inactive disabled switch should default track and custom thumb color',
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: const Color(0x801e88e5),
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: hoveredThumbColor),
+      reason: 'Inactive disabled switch should default track and custom thumb color',
+    );
+  });
+
+  testWidgets('Track color resolves in active/enabled states', (WidgetTester tester) async {
+    const Color activeEnabledTrackColor = Color(0xFF000001);
+    const Color activeDisabledTrackColor = Color(0xFF000002);
+    const Color inactiveEnabledTrackColor = Color(0xFF000003);
+    const Color inactiveDisabledTrackColor = Color(0xFF000004);
+
+    Color getTrackColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledTrackColor;
+        }
+        return inactiveDisabledTrackColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledTrackColor;
+      }
+      return inactiveEnabledTrackColor;
+    }
+
+    final MaterialStateProperty<Color> trackColor =
+      MaterialStateColor.resolveWith(getTrackColor);
+
+    Widget buildSwitch({required bool enabled, required bool active}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                  trackColor: trackColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: inactiveDisabledTrackColor,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+      reason: 'Inactive disabled switch track should use this value',
+    );
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: activeDisabledTrackColor,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+      reason: 'Active disabled switch should match these colors',
+    );
+
+    await tester.pumpWidget(buildSwitch(enabled: true, active: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: inactiveEnabledTrackColor,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+      reason: 'Inactive enabled switch should match these colors',
+    );
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: inactiveDisabledTrackColor,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+      reason: 'Inactive disabled switch should match these colors',
+    );
+  });
+
+  testWidgets('Switch track color resolves in hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredTrackColor = Color(0xFF000001);
+    const Color focusedTrackColor = Color(0xFF000002);
+
+    Color getTrackColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredTrackColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusedTrackColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> trackColor =
+      MaterialStateColor.resolveWith(getTrackColor);
+
+    Widget buildSwitch() {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  value: true,
+                  trackColor: trackColor,
+                  onChanged: (_) { },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch());
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: focusedTrackColor,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+      reason: 'Inactive enabled switch should match these colors',
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: hoveredTrackColor,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0))),
+      reason: 'Inactive enabled switch should match these colors',
+    );
+  });
+
+  testWidgets('Switch thumb color is blended against surface color', (WidgetTester tester) async {
+    final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
+    final ThemeData theme = ThemeData.light();
+
+    Color getThumbColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return activeDisabledThumbColor;
+      }
+      return Colors.black;
+    }
+
+    final MaterialStateProperty<Color> thumbColor =
+      MaterialStateColor.resolveWith(getThumbColor);
+
+    Widget buildSwitch({required bool enabled, required bool active}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Theme(
+              data: theme,
+              child: Material(
+                child: Center(
+                  child: Switch(
+                    thumbColor: thumbColor,
+                    value: active,
+                    onChanged: enabled ? (_) { } : null,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(enabled: false, active: true));
+
+    final Color expectedThumbColor = Color.alphaBlend(activeDisabledThumbColor, theme.colorScheme.surface);
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.black12,
+            rrect: RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: expectedThumbColor),
+      reason: 'Active disabled thumb color should be blended on top of surface color',
+    );
+  });
+
+  testWidgets('Switch overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color thumbColor = Color(0xFF000000);
+    const Color activePressedOverlayColor = Color(0xFF000001);
+    const Color inactivePressedOverlayColor = Color(0xFF000002);
+    const Color hoverOverlayColor = Color(0xFF000003);
+    const Color focusOverlayColor = Color(0xFF000004);
+    const Color hoverColor = Color(0xFF000005);
+    const Color focusColor = Color(0xFF000006);
+
+    Color? getOverlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.selected)) {
+          return activePressedOverlayColor;
+        }
+        return inactivePressedOverlayColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverOverlayColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusOverlayColor;
+      }
+      return null;
+    }
+    const double splashRadius = 24.0;
+
+    Widget buildSwitch({bool active = false, bool focused = false, bool useOverlay = true}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Switch(
+            focusNode: focusNode,
+            autofocus: focused,
+            value: active,
+            onChanged: (_) { },
+            thumbColor: MaterialStateProperty.all(thumbColor),
+            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            hoverColor: hoverColor,
+            focusColor: focusColor,
+            splashRadius: splashRadius,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(active: false, useOverlay: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: thumbColor.withAlpha(kRadialReactionAlpha),
+          radius: splashRadius,
+        ),
+      reason: 'Default inactive pressed Switch should have overlay color from thumbColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(active: true, useOverlay: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: thumbColor.withAlpha(kRadialReactionAlpha),
+          radius: splashRadius,
+        ),
+      reason: 'Default active pressed Switch should have overlay color from thumbColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(active: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(active: true));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Active pressed Switch should have overlay color: $activePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(focused: true));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: focusOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Focused Switch should use overlay color $focusOverlayColor over $focusColor',
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: hoverOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Hovered Switch should use overlay color $hoverOverlayColor over $hoverColor',
+    );
+  });
 }

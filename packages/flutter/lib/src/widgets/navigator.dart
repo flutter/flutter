@@ -26,10 +26,10 @@ import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
-// class MyPage extends Placeholder { MyPage({String title}); }
+// class MyPage extends Placeholder { MyPage({String? title}); }
 // class MyHomePage extends Placeholder { }
-// NavigatorState navigator;
-// BuildContext context;
+// late NavigatorState navigator;
+// late BuildContext context;
 
 /// Creates a route for the given route settings.
 ///
@@ -746,9 +746,9 @@ abstract class RouteTransitionRecord {
 /// class NoAnimationTransitionDelegate extends TransitionDelegate<void> {
 ///   @override
 ///   Iterable<RouteTransitionRecord> resolve({
-///     List<RouteTransitionRecord> newPageRouteHistory,
-///     Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
-///     Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
+///     required List<RouteTransitionRecord> newPageRouteHistory,
+///     required Map<RouteTransitionRecord?, RouteTransitionRecord> locationToExitingPageRoute,
+///     required Map<RouteTransitionRecord?, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
 ///   }) {
 ///     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
 ///
@@ -762,7 +762,7 @@ abstract class RouteTransitionRecord {
 ///     for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
 ///       if (exitingPageRoute.isWaitingForExitingDecision) {
 ///        exitingPageRoute.markForRemove();
-///        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+///        final List<RouteTransitionRecord>? pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
 ///        if (pagelessRoutes != null) {
 ///          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
 ///             pagelessRoute.markForRemove();
@@ -1304,7 +1304,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.headline4,
+///       style: Theme.of(context).textTheme.headline4!,
 ///       child: Container(
 ///         color: Colors.white,
 ///         alignment: Alignment.center,
@@ -1318,7 +1318,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.headline4,
+///       style: Theme.of(context).textTheme.headline4!,
 ///       child: GestureDetector(
 ///         onTap: () {
 ///           // This moves from the personal info page to the credentials page,
@@ -1338,7 +1338,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///
 /// class ChooseCredentialsPage extends StatelessWidget {
 ///   const ChooseCredentialsPage({
-///     this.onSignupComplete,
+///     required this.onSignupComplete,
 ///   });
 ///
 ///   final VoidCallback onSignupComplete;
@@ -1348,7 +1348,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///     return GestureDetector(
 ///       onTap: onSignupComplete,
 ///       child: DefaultTextStyle(
-///         style: Theme.of(context).textTheme.headline4,
+///         style: Theme.of(context).textTheme.headline4!,
 ///         child: Container(
 ///           color: Colors.pinkAccent,
 ///           alignment: Alignment.center,
@@ -1563,7 +1563,7 @@ class Navigator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [dart:ui.Window.defaultRouteName], which reflects the route that the
+  ///  * [dart:ui.PlatformDispatcher.defaultRouteName], which reflects the route that the
   ///    application was started with.
   static const String defaultRouteName = '/';
 
@@ -1627,7 +1627,7 @@ class Navigator extends StatefulWidget {
   /// provided,
   /// {@endtemplate}
   ///
-  /// {@template flutter.widgets.navigator.pushNamed.arguments}
+  /// {@template flutter.widgets.Navigator.pushNamed}
   /// The provided `arguments` are passed to the pushed route via
   /// [RouteSettings.arguments]. Any object can be passed as `arguments` (e.g. a
   /// [String], [int], or an instance of a custom `MyRouteArguments` class).
@@ -1673,7 +1673,7 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// class WeatherRouteArguments {
-  ///   WeatherRouteArguments({ this.city, this.country });
+  ///   WeatherRouteArguments({ required this.city, required this.country });
   ///   final String city;
   ///   final String country;
   ///
@@ -1702,7 +1702,7 @@ class Navigator extends StatefulWidget {
     String routeName, {
     Object? arguments,
    }) {
-    return Navigator.of(context)!.pushNamed<T>(routeName, arguments: arguments);
+    return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
   /// Push a named route onto the navigator that most tightly encloses the given
@@ -1716,7 +1716,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
-  /// {@template flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@template flutter.widgets.Navigator.restorablePushNamed.arguments}
   /// The provided `arguments` are passed to the pushed route via
   /// [RouteSettings.arguments]. Any object that is serializable via the
   /// [StandardMessageCodec] can be passed as `arguments`. Often, a Map is used
@@ -1726,7 +1726,7 @@ class Navigator extends StatefulWidget {
   /// [Navigator.onUnknownRoute] to construct the route.
   /// {@endtemplate}
   ///
-  /// {@template flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@template flutter.widgets.Navigator.restorablePushNamed.returnValue}
   /// The method returns an opaque ID for the pushed route that can be used by
   /// the [RestorableRouteFuture] to gain access to the actual [Route] object
   /// added to the navigator and its return value. You can ignore the return
@@ -1757,7 +1757,7 @@ class Navigator extends StatefulWidget {
     String routeName, {
     Object? arguments,
   }) {
-    return Navigator.of(context)!.restorablePushNamed<T>(routeName, arguments: arguments);
+    return Navigator.of(context).restorablePushNamed<T>(routeName, arguments: arguments);
   }
 
   /// Replace the current route of the navigator that most tightly encloses the
@@ -1796,7 +1796,7 @@ class Navigator extends StatefulWidget {
   /// be provided.
   /// {@endtemplate}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -1820,7 +1820,7 @@ class Navigator extends StatefulWidget {
     TO? result,
     Object? arguments,
   }) {
-    return Navigator.of(context)!.pushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
+    return Navigator.of(context).pushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Replace the current route of the navigator that most tightly encloses the
@@ -1835,9 +1835,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -1856,7 +1856,7 @@ class Navigator extends StatefulWidget {
     TO? result,
     Object? arguments,
   }) {
-    return Navigator.of(context)!.restorablePushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
+    return Navigator.of(context).restorablePushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Pop the current route off the navigator that most tightly encloses the
@@ -1890,7 +1890,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@endtemplate}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -1914,7 +1914,7 @@ class Navigator extends StatefulWidget {
     TO? result,
     Object? arguments,
    }) {
-    return Navigator.of(context)!.popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
+    return Navigator.of(context).popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Pop the current route off the navigator that most tightly encloses the
@@ -1928,9 +1928,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -1949,7 +1949,7 @@ class Navigator extends StatefulWidget {
       TO? result,
       Object? arguments,
     }) {
-    return Navigator.of(context)!.restorablePopAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
+    return Navigator.of(context).restorablePopAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Push the route with the given name onto the navigator that most tightly
@@ -1994,7 +1994,7 @@ class Navigator extends StatefulWidget {
   /// must be provided.
   /// {@endtemplate}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -2018,7 +2018,7 @@ class Navigator extends StatefulWidget {
     RoutePredicate predicate, {
     Object? arguments,
   }) {
-    return Navigator.of(context)!.pushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
+    return Navigator.of(context).pushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
   /// Push the route with the given name onto the navigator that most tightly
@@ -2033,9 +2033,9 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -2054,7 +2054,7 @@ class Navigator extends StatefulWidget {
       RoutePredicate predicate, {
       Object? arguments,
     }) {
-    return Navigator.of(context)!.restorablePushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
+    return Navigator.of(context).restorablePushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
   /// Push the given route onto the navigator that most tightly encloses the
@@ -2092,7 +2092,7 @@ class Navigator extends StatefulWidget {
   ///    state restoration.
   @optionalTypeArgs
   static Future<T?> push<T extends Object?>(BuildContext context, Route<T> route) {
-    return Navigator.of(context)!.push(route);
+    return Navigator.of(context).push(route);
   }
 
   /// Push a new route onto the navigator that most tightly encloses the
@@ -2106,7 +2106,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.push}
   ///
-  /// {@template flutter.widgets.navigator.restorablePush.arguments}
+  /// {@template flutter.widgets.Navigator.restorablePush}
   /// The method takes a _static_ [RestorableRouteBuilder] as argument, which
   /// must instantiate and return a new [Route] object that will be added to
   /// the navigator. The provided `arguments` object is passed to the
@@ -2117,14 +2117,14 @@ class Navigator extends StatefulWidget {
   /// passed as `arguments`. Often, a Map is used to pass key-value pairs.
   /// {@endtemplate}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -2146,7 +2146,7 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePush<T extends Object?>(BuildContext context, RestorableRouteBuilder<T> routeBuilder, {Object? arguments}) {
-    return Navigator.of(context)!.restorablePush(routeBuilder, arguments: arguments);
+    return Navigator.of(context).restorablePush(routeBuilder, arguments: arguments);
   }
 
   /// Replace the current route of the navigator that most tightly encloses the
@@ -2195,7 +2195,7 @@ class Navigator extends StatefulWidget {
   ///    be restored during state restoration.
   @optionalTypeArgs
   static Future<T?> pushReplacement<T extends Object?, TO extends Object?>(BuildContext context, Route<T> newRoute, { TO? result }) {
-    return Navigator.of(context)!.pushReplacement<T, TO>(newRoute, result: result);
+    return Navigator.of(context).pushReplacement<T, TO>(newRoute, result: result);
   }
 
   /// Replace the current route of the navigator that most tightly encloses the
@@ -2210,16 +2210,16 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -2241,7 +2241,7 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePushReplacement<T extends Object?, TO extends Object?>(BuildContext context, RestorableRouteBuilder<T> routeBuilder, { TO? result, Object? arguments }) {
-    return Navigator.of(context)!.restorablePushReplacement<T, TO>(routeBuilder, result: result, arguments: arguments);
+    return Navigator.of(context).restorablePushReplacement<T, TO>(routeBuilder, result: result, arguments: arguments);
   }
 
   /// Push the given route onto the navigator that most tightly encloses the
@@ -2300,7 +2300,7 @@ class Navigator extends StatefulWidget {
   ///    restored during state restoration.
   @optionalTypeArgs
   static Future<T?> pushAndRemoveUntil<T extends Object?>(BuildContext context, Route<T> newRoute, RoutePredicate predicate) {
-    return Navigator.of(context)!.pushAndRemoveUntil<T>(newRoute, predicate);
+    return Navigator.of(context).pushAndRemoveUntil<T>(newRoute, predicate);
   }
 
   /// Push a new route onto the navigator that most tightly encloses the
@@ -2315,16 +2315,16 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -2350,7 +2350,7 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static String restorablePushAndRemoveUntil<T extends Object?>(BuildContext context, RestorableRouteBuilder<T> newRouteBuilder, RoutePredicate predicate, {Object? arguments}) {
-    return Navigator.of(context)!.restorablePushAndRemoveUntil<T>(newRouteBuilder, predicate, arguments: arguments);
+    return Navigator.of(context).restorablePushAndRemoveUntil<T>(newRouteBuilder, predicate, arguments: arguments);
   }
 
   /// Replaces a route on the navigator that most tightly encloses the given
@@ -2388,7 +2388,7 @@ class Navigator extends StatefulWidget {
   ///    restored during state restoration.
   @optionalTypeArgs
   static void replace<T extends Object?>(BuildContext context, { required Route<dynamic> oldRoute, required Route<T> newRoute }) {
-    return Navigator.of(context)!.replace<T>(oldRoute: oldRoute, newRoute: newRoute);
+    return Navigator.of(context).replace<T>(oldRoute: oldRoute, newRoute: newRoute);
   }
 
   /// Replaces a route on the navigator that most tightly encloses the given
@@ -2402,12 +2402,12 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.replace}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorableReplace<T extends Object?>(BuildContext context, { required Route<dynamic> oldRoute, required RestorableRouteBuilder<T> newRouteBuilder, Object? arguments }) {
-    return Navigator.of(context)!.restorableReplace<T>(oldRoute: oldRoute, newRouteBuilder: newRouteBuilder, arguments: arguments);
+    return Navigator.of(context).restorableReplace<T>(oldRoute: oldRoute, newRouteBuilder: newRouteBuilder, arguments: arguments);
   }
 
   /// Replaces a route on the navigator that most tightly encloses the given
@@ -2443,7 +2443,7 @@ class Navigator extends StatefulWidget {
   ///    be restored during state restoration.
   @optionalTypeArgs
   static void replaceRouteBelow<T extends Object?>(BuildContext context, { required Route<dynamic> anchorRoute, required Route<T> newRoute }) {
-    return Navigator.of(context)!.replaceRouteBelow<T>(anchorRoute: anchorRoute, newRoute: newRoute);
+    return Navigator.of(context).replaceRouteBelow<T>(anchorRoute: anchorRoute, newRoute: newRoute);
   }
 
   /// Replaces a route on the navigator that most tightly encloses the given
@@ -2458,12 +2458,12 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.replaceRouteBelow}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   static String restorableReplaceRouteBelow<T extends Object?>(BuildContext context, { required Route<dynamic> anchorRoute, required RestorableRouteBuilder<T> newRouteBuilder, Object? arguments }) {
-    return Navigator.of(context)!.restorableReplaceRouteBelow<T>(anchorRoute: anchorRoute, newRouteBuilder: newRouteBuilder, arguments: arguments);
+    return Navigator.of(context).restorableReplaceRouteBelow<T>(anchorRoute: anchorRoute, newRouteBuilder: newRouteBuilder, arguments: arguments);
   }
 
   /// Whether the navigator that most tightly encloses the given context can be
@@ -2482,7 +2482,7 @@ class Navigator extends StatefulWidget {
   ///  * [Route.isFirst], which returns true for routes for which [canPop]
   ///    returns false.
   static bool canPop(BuildContext context) {
-    final NavigatorState? navigator = Navigator.of(context, nullOk: true);
+    final NavigatorState? navigator = Navigator.maybeOf(context);
     return navigator != null && navigator.canPop();
   }
 
@@ -2518,7 +2518,7 @@ class Navigator extends StatefulWidget {
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   static Future<bool> maybePop<T extends Object?>(BuildContext context, [ T? result ]) {
-    return Navigator.of(context)!.maybePop<T>(result);
+    return Navigator.of(context).maybePop<T>(result);
   }
 
   /// Pop the top-most route off the navigator that most tightly encloses the
@@ -2568,7 +2568,7 @@ class Navigator extends StatefulWidget {
   /// ```
   @optionalTypeArgs
   static void pop<T extends Object?>(BuildContext context, [ T? result ]) {
-    Navigator.of(context)!.pop<T>(result);
+    Navigator.of(context).pop<T>(result);
   }
 
   /// Calls [pop] repeatedly on the navigator that most tightly encloses the
@@ -2597,7 +2597,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   static void popUntil(BuildContext context, RoutePredicate predicate) {
-    Navigator.of(context)!.popUntil(predicate);
+    Navigator.of(context).popUntil(predicate);
   }
 
   /// Immediately remove `route` from the navigator that most tightly encloses
@@ -2624,7 +2624,7 @@ class Navigator extends StatefulWidget {
   /// This method is used, for example, to instantly dismiss dropdown menus that
   /// are up when the screen's orientation changes.
   static void removeRoute(BuildContext context, Route<dynamic> route) {
-    return Navigator.of(context)!.removeRoute(route);
+    return Navigator.of(context).removeRoute(route);
   }
 
   /// Immediately remove a route from the navigator that most tightly encloses
@@ -2649,10 +2649,11 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled.
   /// {@endtemplate}
   static void removeRouteBelow(BuildContext context, Route<dynamic> anchorRoute) {
-    return Navigator.of(context)!.removeRouteBelow(anchorRoute);
+    return Navigator.of(context).removeRouteBelow(anchorRoute);
   }
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
   ///
   /// Typical usage is as follows:
   ///
@@ -2664,12 +2665,14 @@ class Navigator extends StatefulWidget {
   /// ```
   ///
   /// If `rootNavigator` is set to true, the state from the furthest instance of
-  /// this class is given instead. Useful for pushing contents above all subsequent
-  /// instances of [Navigator].
-  static NavigatorState? of(
+  /// this class is given instead. Useful for pushing contents above all
+  /// subsequent instances of [Navigator].
+  ///
+  /// If there is no [Navigator] in the give `context`, this function will throw
+  /// a [FlutterError] in debug mode, and an exception in release mode.
+  static NavigatorState of(
     BuildContext context, {
     bool rootNavigator = false,
-    bool nullOk = false,
   }) {
     // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
@@ -2683,7 +2686,7 @@ class Navigator extends StatefulWidget {
     }
 
     assert(() {
-      if (navigator == null && !nullOk) {
+      if (navigator == null) {
         throw FlutterError(
           'Navigator operation requested with a context that does not include a Navigator.\n'
           'The context used to push or pop routes from the Navigator must be that of a '
@@ -2692,6 +2695,43 @@ class Navigator extends StatefulWidget {
       }
       return true;
     }());
+    return navigator!;
+  }
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context, if any.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// NavigatorState? navigatorState = Navigator.maybeOf(context);
+  /// if (navigatorState != null) {
+  ///   navigatorState
+  ///     ..pop()
+  ///     ..pop()
+  ///     ..pushNamed('/settings');
+  /// }
+  /// ```
+  ///
+  /// If `rootNavigator` is set to true, the state from the furthest instance of
+  /// this class is given instead. Useful for pushing contents above all
+  /// subsequent instances of [Navigator].
+  ///
+  /// Will return null if there is no ancestor [Navigator] in the `context`.
+  static NavigatorState? maybeOf(
+      BuildContext context, {
+        bool rootNavigator = false,
+      }) {
+    // Handles the case where the input context is a navigator element.
+    NavigatorState? navigator;
+    if (context is StatefulElement && context.state is NavigatorState) {
+      navigator = context.state as NavigatorState;
+    }
+    if (rootNavigator) {
+      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
+    } else {
+      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
+    }
     return navigator;
   }
 
@@ -3385,8 +3425,28 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             ServicesBinding.instance!.addPostFrameCallback((Duration timestamp) {
               // We only check if this navigator still owns the hero controller.
               if (_heroControllerFromScope == newHeroController) {
-                assert(_heroControllerFromScope!._navigator == this);
-                assert(previousOwner._heroControllerFromScope != newHeroController);
+                final bool hasHeroControllerOwnerShip = _heroControllerFromScope!._navigator == this;
+                if (!hasHeroControllerOwnerShip ||
+                    previousOwner._heroControllerFromScope == newHeroController) {
+                  final NavigatorState otherOwner = hasHeroControllerOwnerShip
+                    ? previousOwner
+                    : _heroControllerFromScope!._navigator!;
+                  FlutterError.reportError(
+                    FlutterErrorDetails(
+                      exception: FlutterError(
+                        'A HeroController can not be shared by multiple Navigators. '
+                        'The Navigators that share the same HeroController are:\n'
+                        '- $this\n'
+                        '- $otherOwner\n'
+                        'Please create a HeroControllerScope for each Navigator or '
+                        'use a HeroControllerScope.none to prevent subtree from '
+                        'receiving a HeroController.'
+                      ),
+                      library: 'widget library',
+                      stack: StackTrace.current,
+                    ),
+                  );
+                }
               }
             });
           }
@@ -4014,7 +4074,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -4045,9 +4105,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4081,7 +4141,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -4115,9 +4175,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushReplacementNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4151,7 +4211,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -4185,9 +4245,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.popAndPushNamed}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4214,7 +4274,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.pushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.pushNamed}
   ///
   /// {@tool snippet}
   ///
@@ -4247,9 +4307,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushNamedAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.arguments}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool snippet}
   ///
@@ -4319,16 +4379,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.push}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -4457,16 +4517,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -4563,16 +4623,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   ///
   /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// static Route _myRouteBuilder(BuildContext context, Object arguments) {
+  /// static Route _myRouteBuilder(BuildContext context, Object? arguments) {
   ///   return MaterialPageRoute(
   ///     builder: (BuildContext context) => MyStatefulWidget(),
   ///   );
@@ -4661,9 +4721,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.replace}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorableReplace<T extends Object?>({ required Route<dynamic> oldRoute, required RestorableRouteBuilder<T> newRouteBuilder, Object? arguments }) {
     assert(oldRoute != null);
@@ -4733,9 +4793,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.replaceRouteBelow}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePush.arguments}
+  /// {@macro flutter.widgets.Navigator.restorablePush}
   ///
-  /// {@macro flutter.widgets.navigator.restorablePushNamed.returnValue}
+  /// {@macro flutter.widgets.Navigator.restorablePushNamed.returnValue}
   @optionalTypeArgs
   String restorableReplaceRouteBelow<T extends Object?>({ required Route<dynamic> anchorRoute, required RestorableRouteBuilder<T> newRouteBuilder, Object? arguments }) {
     assert(anchorRoute != null);
@@ -5516,7 +5576,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///
 /// ```dart
 /// class MyHome extends StatefulWidget {
-///   const MyHome({Key key}) : super(key: key);
+///   const MyHome({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   State<MyHome> createState() => _MyHomeState();
@@ -5524,7 +5584,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///
 /// class _MyHomeState extends State<MyHome> with RestorationMixin {
 ///   final RestorableInt _lastCount = RestorableInt(0);
-///   RestorableRouteFuture<int> _counterRoute;
+///   late RestorableRouteFuture<int> _counterRoute;
 ///
 ///   @override
 ///   String get restorationId => 'home';
@@ -5532,7 +5592,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   void initState() {
 ///     super.initState();
 ///     _counterRoute = RestorableRouteFuture<int>(
-///       onPresent: (NavigatorState navigator, Object arguments) {
+///       onPresent: (NavigatorState navigator, Object? arguments) {
 ///         // Defines what route should be shown (and how it should be added
 ///         // to the navigator) when `RestorableRouteFuture.present` is called.
 ///         return navigator.restorablePush(
@@ -5551,7 +5611,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   }
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     // Register the `RestorableRouteFuture` with the state restoration framework.
 ///     registerForRestoration(_counterRoute, 'route');
 ///     registerForRestoration(_lastCount, 'count');
@@ -5561,12 +5621,12 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   void dispose() {
 ///     super.dispose();
 ///     _lastCount.dispose();
-///     _counterRoute?.dispose();
+///     _counterRoute.dispose();
 ///   }
 ///
 ///   // A static `RestorableRouteBuilder` that can re-create the route during
 ///   // state restoration.
-///   static Route<int> _counterRouteBuilder(BuildContext context, Object arguments) {
+///   static Route<int> _counterRouteBuilder(BuildContext context, Object? arguments) {
 ///     return MaterialPageRoute(
 ///       builder: (BuildContext context) => MyCounter(
 ///         title: arguments as String,
@@ -5596,7 +5656,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///
 /// // Widget for the route pushed by the `RestorableRouteFuture`.
 /// class MyCounter extends StatefulWidget {
-///   const MyCounter({Key key, this.title}) : super(key: key);
+///   const MyCounter({Key? key, required this.title}) : super(key: key);
 ///
 ///   final String title;
 ///
@@ -5611,7 +5671,7 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 ///   String get restorationId => 'counter';
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     registerForRestoration(_count, 'count');
 ///   }
 ///
@@ -5767,5 +5827,5 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
     });
   }
 
-  static NavigatorState _defaultNavigatorFinder(BuildContext context) => Navigator.of(context, nullOk: false)!;
+  static NavigatorState _defaultNavigatorFinder(BuildContext context) => Navigator.of(context);
 }

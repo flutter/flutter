@@ -74,6 +74,25 @@ void main() {
           throwsA(predicate((PlatformException e) =>
               e is PlatformException && e.stacktrace == 'errorStacktrace')));
     });
+
+    test('should allow null error message,', () {
+      final ByteData errorData = method.encodeErrorEnvelope(
+        code: 'errorCode',
+        message: null,
+        details: 'errorDetails',
+      );
+      expect(
+        () => method.decodeEnvelope(errorData),
+        throwsA(
+          predicate((PlatformException e) {
+            return e is PlatformException &&
+              e.code == 'errorCode' &&
+              e.message == null &&
+              e.details == 'errorDetails';
+          }),
+        ),
+      );
+    });
   });
   group('Json method codec', () {
     const JsonCodec json = JsonCodec();

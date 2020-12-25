@@ -30,13 +30,11 @@ export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 // void setState(VoidCallback fn) { }
-
-// Examples can assume:
 // abstract class RenderFrogJar extends RenderObject { }
 // abstract class FrogJar extends RenderObjectWidget { }
-// abstract class FrogJarParentData extends ParentData { Size size; }
+// abstract class FrogJarParentData extends ParentData { late Size size; }
 
 // KEYS
 
@@ -625,7 +623,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// ```dart
 /// class GreenFrog extends StatelessWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
+///   const GreenFrog({ Key? key }) : super(key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -643,13 +641,13 @@ abstract class Widget extends DiagnosticableTree {
 /// ```dart
 /// class Frog extends StatelessWidget {
 ///   const Frog({
-///     Key key,
+///     Key? key,
 ///     this.color = const Color(0xFF2DBD3A),
 ///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final Color color;
-///   final Widget child;
+///   final Widget? child;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -842,7 +840,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// ```dart
 /// class YellowBird extends StatefulWidget {
-///   const YellowBird({ Key key }) : super(key: key);
+///   const YellowBird({ Key? key }) : super(key: key);
 ///
 ///   @override
 ///   _YellowBirdState createState() => _YellowBirdState();
@@ -865,13 +863,13 @@ abstract class StatelessWidget extends Widget {
 /// ```dart
 /// class Bird extends StatefulWidget {
 ///   const Bird({
-///     Key key,
+///     Key? key,
 ///     this.color = const Color(0xFFFFE306),
 ///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final Color color;
-///   final Widget child;
+///   final Widget? child;
 ///
 ///   _BirdState createState() => _BirdState();
 /// }
@@ -936,7 +934,7 @@ abstract class StatefulWidget extends Widget {
   /// [State] objects.
   @protected
   @factory
-  State createState();
+  State createState(); // ignore: no_logic_in_create_state, this is the original sin
 }
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
@@ -1118,7 +1116,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// location at which this object was inserted into the tree (i.e., [context])
   /// or on the widget used to configure this object (i.e., [widget]).
   ///
-  /// {@template flutter.widgets.subscriptions}
+  /// {@template flutter.widgets.State.initState}
   /// If a [State]'s [build] method depends on an object that can itself
   /// change state, for example a [ChangeNotifier] or [Stream], or some
   /// other object to which one can subscribe to receive notifications, then
@@ -1160,7 +1158,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// The framework always calls [build] after calling [didUpdateWidget], which
   /// means any calls to [setState] in [didUpdateWidget] are redundant.
   ///
-  /// {@macro flutter.widgets.subscriptions}
+  /// {@macro flutter.widgets.State.initState}
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.didUpdateWidget(oldWidget).
@@ -1168,7 +1166,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
 
-  /// {@macro flutter.widgets.reassemble}
+  /// {@macro flutter.widgets.Element.reassemble}
   ///
   /// In addition to this method being invoked, it is guaranteed that the
   /// [build] method will be invoked when a reassemble is signaled. Most
@@ -1328,7 +1326,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Subclasses should override this method to release any resources retained
   /// by this object (e.g., stop any active animations).
   ///
-  /// {@macro flutter.widgets.subscriptions}
+  /// {@macro flutter.widgets.State.initState}
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
@@ -1506,7 +1504,7 @@ abstract class ProxyWidget extends Widget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@template flutter.widgets.child}
+  /// {@template flutter.widgets.ProxyWidget.child}
   /// This widget can only have one child. To lay out multiple children, let this
   /// widget's child be a widget such as [Row], [Column], or [Stack], which have a
   /// `children` property, and then provide the children to that widget.
@@ -1532,21 +1530,19 @@ abstract class ProxyWidget extends Widget {
 /// ```dart
 /// class FrogSize extends ParentDataWidget<FrogJarParentData> {
 ///   FrogSize({
-///     Key key,
-///     @required this.size,
-///     @required Widget child,
-///   }) : assert(child != null),
-///        assert(size != null),
-///        super(key: key, child: child);
+///     Key? key,
+///     required this.size,
+///     required Widget child,
+///   }) : super(key: key, child: child);
 ///
 ///   final Size size;
 ///
 ///   @override
 ///   void applyParentData(RenderObject renderObject) {
-///     final FrogJarParentData parentData = renderObject.parentData;
+///     final FrogJarParentData parentData = renderObject.parentData! as FrogJarParentData;
 ///     if (parentData.size != size) {
 ///       parentData.size = size;
-///       final RenderFrogJar targetParent = renderObject.parent;
+///       final RenderFrogJar targetParent = renderObject.parent! as RenderFrogJar;
 ///       targetParent.markNeedsLayout();
 ///     }
 ///   }
@@ -1685,17 +1681,17 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// ```dart
 /// class FrogColor extends InheritedWidget {
 ///   const FrogColor({
-///     Key key,
-///     @required this.color,
-///     @required Widget child,
-///   }) : assert(color != null),
-///        assert(child != null),
-///        super(key: key, child: child);
+///     Key? key,
+///     required this.color,
+///     required Widget child,
+///   }) : super(key: key, child: child);
 ///
 ///   final Color color;
 ///
 ///   static FrogColor of(BuildContext context) {
-///     return context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///     final FrogColor? result = context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///     assert(result != null, 'No FrogColor found in context');
+///     return result!;
 ///   }
 ///
 ///   @override
@@ -1888,7 +1884,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -2421,7 +2417,7 @@ abstract class BuildContext {
   /// {@tool snippet}
   ///
   /// ```dart
-  /// ScrollableState scrollable = context.findAncestorStateOfType<ScrollableState>();
+  /// ScrollableState? scrollable = context.findAncestorStateOfType<ScrollableState>();
   /// ```
   /// {@end-tool}
   T? findAncestorStateOfType<T extends State>();
@@ -2554,7 +2550,8 @@ abstract class BuildContext {
 /// widget tree.
 class BuildOwner {
   /// Creates an object that manages widgets.
-  BuildOwner({ this.onBuildScheduled });
+  BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
+      focusManager = focusManager ?? FocusManager();
 
   /// Called on each build pass when the first buildable element is marked
   /// dirty.
@@ -2585,7 +2582,7 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  FocusManager focusManager = FocusManager();
+  FocusManager focusManager;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
@@ -3120,7 +3117,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   BuildOwner? get owner => _owner;
   BuildOwner? _owner;
 
-  /// {@template flutter.widgets.reassemble}
+  /// {@template flutter.widgets.Element.reassemble}
   /// Called whenever the application is reassembled during debugging, for
   /// example during hot reload.
   ///
@@ -3326,6 +3323,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// | :-----------------: | :--------------------- | :---------------------- |
   /// |  **child == null**  |  Returns null.         |  Returns new [Element]. |
   /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
+  ///
+  /// The `newSlot` argument is used only if `newWidget` is not null. If `child`
+  /// is null (or if the old child cannot be updated), then the `newSlot` is
+  /// given to the new [Element] that is created for the child, via
+  /// [inflateWidget]. If `child` is not null (and the old child _can_ be
+  /// updated), then the `newSlot` is given to [updateSlotForChild] to update
+  /// its slot, in case it has moved around since it was last built.
+  ///
+  /// See the [RenderObjectElement] documentation for more information on slots.
   @protected
   Element? updateChild(Element? child, Widget? newWidget, dynamic newSlot) {
     if (newWidget == null) {
@@ -5336,10 +5342,10 @@ class InheritedElement extends ProxyElement {
 /// class FooElement extends RenderObjectElement {
 ///
 ///   @override
-///   Foo get widget => super.widget;
+///   Foo get widget => super.widget as Foo;
 ///
 ///   @override
-///   RenderFoo get renderObject => super.renderObject;
+///   RenderFoo get renderObject => super.renderObject as RenderFoo;
 ///
 ///   // ...
 /// }
@@ -5397,13 +5403,13 @@ class InheritedElement extends ProxyElement {
 ///
 /// #### Dynamically determining the children during layout
 ///
-/// If the widgets are to be generated at layout time, then generating them when
-/// the [update] method won't work: layout of this element's render object
-/// hasn't started yet at that point. Instead, the [update] method can mark the
-/// render object as needing layout (see [RenderObject.markNeedsLayout]), and
-/// then the render object's [RenderObject.performLayout] method can call back
-/// to the element to have it generate the widgets and call [updateChild]
-/// accordingly.
+/// If the widgets are to be generated at layout time, then generating them in
+/// the [mount] and [update] methods won't work: layout of this element's render
+/// object hasn't started yet at that point. Instead, the [update] method can
+/// mark the render object as needing layout (see
+/// [RenderObject.markNeedsLayout]), and then the render object's
+/// [RenderObject.performLayout] method can call back to the element to have it
+/// generate the widgets and call [updateChild] accordingly.
 ///
 /// For a render object to call an element during layout, it must use
 /// [RenderObject.invokeLayoutCallback]. For an element to call [updateChild]
@@ -5865,7 +5871,7 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// ## Deprecation
   ///
@@ -5912,7 +5918,7 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
-  /// {@template flutter.widgets.slots}
+  /// {@template flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   /// The semantics of `slot` are determined by this element. For example, if
   /// this element has a single child, the slot should always be null. If this
   /// element has a list of children, the previous sibling element wrapped in an
@@ -5927,7 +5933,7 @@ abstract class RenderObjectElement extends Element {
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// This method is only ever called if [updateChild] can end up being called
   /// with an existing [Element] child and a `slot` that differs from the slot
@@ -5987,7 +5993,7 @@ abstract class RenderObjectElement extends Element {
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
-  /// {@macro flutter.widgets.slots}
+  /// {@macro flutter.widgets.RenderObjectElement.insertRenderObjectChild}
   ///
   /// This method is only ever called if [updateChild] can end up being called
   /// with an existing [Element] child and a `slot` that differs from the slot
@@ -6217,6 +6223,11 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   MultiChildRenderObjectWidget get widget => super.widget as MultiChildRenderObjectWidget;
 
+  @override
+  ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> get renderObject {
+    return super.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+  }
+
   /// The current list of children of this element.
   ///
   /// This list is filtered to hide elements that have been forgotten (using
@@ -6232,8 +6243,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
-    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child, after: slot.value?.renderObject);
     assert(renderObject == this.renderObject);
@@ -6241,8 +6251,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void moveRenderObjectChild(RenderObject child, IndexedSlot<Element?> oldSlot, IndexedSlot<Element?> newSlot) {
-    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     assert(child.parent == renderObject);
     renderObject.move(child, after: newSlot.value?.renderObject);
     assert(renderObject == this.renderObject);
@@ -6250,8 +6259,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void removeRenderObjectChild(RenderObject child, dynamic slot) {
-    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     assert(child.parent == renderObject);
     renderObject.remove(child);
     assert(renderObject == this.renderObject);

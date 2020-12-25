@@ -52,7 +52,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount izinhlamvu ezisele",
   "refreshIndicatorSemanticLabel": "Vuselela",
   "moreButtonTooltip": "Okuningi",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "mm/dd/yyyy",
   "selectYearSemanticsLabel": "Khetha unyaka",
   "unspecifiedDate": "Idethi",

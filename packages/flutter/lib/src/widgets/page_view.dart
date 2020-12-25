@@ -46,19 +46,13 @@ import 'viewport.dart';
 ///
 /// ```dart
 /// class MyPageView extends StatefulWidget {
-///   MyPageView({Key key}) : super(key: key);
+///   MyPageView({Key? key}) : super(key: key);
 ///
 ///   _MyPageViewState createState() => _MyPageViewState();
 /// }
 ///
 /// class _MyPageViewState extends State<MyPageView> {
-///   PageController _pageController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _pageController = PageController();
-///   }
+///   PageController _pageController = PageController();
 ///
 ///   @override
 ///   void dispose() {
@@ -572,6 +566,35 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// Here is an example of [PageView]. It creates a centered [Text] in each of the three pages
+/// which scroll horizontally.
+///
+/// ```dart
+///  Widget build(BuildContext context) {
+///    final controller = PageController(initialPage: 0);
+///    return PageView(
+///      /// [PageView.scrollDirection] defaults to [Axis.horizontal].
+///      /// Use [Axis.vertical] to scroll vertically.
+///      scrollDirection: Axis.horizontal,
+///      controller: controller,
+///      children: [
+///        Center(
+///          child: Text("First Page"),
+///        ),
+///        Center(
+///          child: Text("Second Page"),
+///        ),
+///        Center(
+///          child: Text("Third Page"),
+///        )
+///      ],
+///    );
+///  }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PageController], which controls which page is visible in the view.
@@ -593,7 +616,7 @@ class PageView extends StatefulWidget {
   /// the [children] list will not be mutated after it has been passed in here.
   /// See the documentation at [SliverChildListDelegate.children] for more details.
   ///
-  /// {@template flutter.widgets.pageView.allowImplicitScrolling}
+  /// {@template flutter.widgets.PageView.allowImplicitScrolling}
   /// The [allowImplicitScrolling] parameter must not be null. If true, the
   /// [PageView] will participate in accessibility scrolling more like a
   /// [ListView], where implicit scroll actions will move to the next page
@@ -635,7 +658,7 @@ class PageView extends StatefulWidget {
   /// you are planning to change child order at a later time, consider using
   /// [PageView] or [PageView.custom].
   ///
-  /// {@macro flutter.widgets.pageView.allowImplicitScrolling}
+  /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.builder({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -693,7 +716,7 @@ class PageView extends StatefulWidget {
   ///             },
   ///             childCount: items.length,
   ///             findChildIndexCallback: (Key key) {
-  ///               final ValueKey valueKey = key;
+  ///               final ValueKey<String> valueKey = key as ValueKey<String>;
   ///               final String data = valueKey.value;
   ///               return items.indexOf(data);
   ///             }
@@ -716,7 +739,7 @@ class PageView extends StatefulWidget {
   /// }
   ///
   /// class KeepAlive extends StatefulWidget {
-  ///   const KeepAlive({Key key, this.data}) : super(key: key);
+  ///   const KeepAlive({Key? key, required this.data}) : super(key: key);
   ///
   ///   final String data;
   ///
@@ -737,7 +760,7 @@ class PageView extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@macro flutter.widgets.pageView.allowImplicitScrolling}
+  /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
   PageView.custom({
     Key? key,
     this.scrollDirection = Axis.horizontal,
@@ -824,7 +847,7 @@ class PageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;

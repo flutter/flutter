@@ -305,11 +305,11 @@ abstract class DeviceManager {
     if (userInput.toLowerCase() == 'q') {
       throwToolExit('');
     }
-    return devices[int.parse(userInput)];
+    return devices[int.parse(userInput) - 1];
   }
 
   void _displayDeviceOptions(List<Device> devices) {
-    int count = 0;
+    int count = 1;
     for (final Device device in devices) {
       _logger.printStatus(_userMessages.flutterChooseDevice(count, device.name, device.id));
       count++;
@@ -319,7 +319,7 @@ abstract class DeviceManager {
   Future<String> _readUserInput(int deviceCount) async {
     _terminal.usesTerminalUi = true;
     final String result = await _terminal.promptForCharInput(
-      <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
+      <String>[ for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
       displayAcceptedCharacters: false,
       logger: _logger,
       prompt: _userMessages.flutterChooseOne,
@@ -835,6 +835,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.disableDds = false,
+    this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
@@ -862,9 +863,11 @@ class DebuggingOptions {
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
+    this.nativeNullAssertions = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
+      this.dartEntrypointArgs = const <String>[],
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
@@ -895,13 +898,15 @@ class DebuggingOptions {
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
-      nullAssertions = false;
+      nullAssertions = false,
+      nativeNullAssertions = false;
 
   final bool debuggingEnabled;
 
   final BuildInfo buildInfo;
   final bool startPaused;
   final String dartFlags;
+  final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
   final bool disableDds;
   final bool enableSoftwareRendering;
@@ -943,6 +948,12 @@ class DebuggingOptions {
   final bool fastStart;
 
   final bool nullAssertions;
+
+  /// Additional null runtime checks inserted for web applications.
+  ///
+  /// See also:
+  ///   * https://github.com/dart-lang/sdk/blob/master/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
+  final bool nativeNullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }

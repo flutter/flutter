@@ -193,7 +193,7 @@ class Hero extends StatefulWidget {
   /// Changes in scale and aspect ratio work well in hero animations, changes
   /// in layout or composition do not.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Optional override to supply a widget that's shown during the hero's flight.

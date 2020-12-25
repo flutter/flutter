@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome') // diagnostics use Platform.operatingSystem.
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -530,6 +530,6 @@ void main() {
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                             size: Size(800.0, 400.0)\n'
     ));
-  });
+  }, skip: kIsWeb);
 
 }

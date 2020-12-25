@@ -382,7 +382,7 @@ class AndroidSdk {
             return fileSystem.path.join(javaHome, 'bin', 'java');
           }
         }
-      } on Exception catch (_) { /* ignore */ }
+      } on Exception { /* ignore */ }
     }
 
     // Fallback to PATH based lookup.

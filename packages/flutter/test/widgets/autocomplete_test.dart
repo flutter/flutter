@@ -45,7 +45,7 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  group('AutocompleteCore', () {
+  group('RawAutocomplete', () {
     testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
@@ -57,7 +57,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AutocompleteCore<String>(
+            body: RawAutocomplete<String>(
               optionsBuilder: (TextEditingValue textEditingValue) {
                 return kOptions.where((String option) {
                   return option.contains(textEditingValue.text.toLowerCase());
@@ -142,7 +142,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AutocompleteCore<User>(
+            body: RawAutocomplete<User>(
               optionsBuilder: (TextEditingValue textEditingValue) {
                 return kOptionsUsers.where((User option) {
                   return option.toString().contains(textEditingValue.text.toLowerCase());
@@ -221,7 +221,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AutocompleteCore<User>(
+            body: RawAutocomplete<User>(
               optionsBuilder: (TextEditingValue textEditingValue) {
                 return kOptionsUsers.where((User option) {
                   return option
@@ -302,7 +302,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AutocompleteCore<String>(
+            body: RawAutocomplete<String>(
               optionsBuilder: (TextEditingValue textEditingValue) {
                 return kOptions.where((String option) {
                   return option.contains(textEditingValue.text.toLowerCase());
@@ -365,7 +365,7 @@ void main() {
                 setState = setter;
                 return Align(
                   alignment: alignment,
-                  child: AutocompleteCore<String>(
+                  child: RawAutocomplete<String>(
                     optionsBuilder: (TextEditingValue textEditingValue) {
                       return kOptions.where((String option) {
                         return option.contains(textEditingValue.text.toLowerCase());
@@ -433,7 +433,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AutocompleteCore<String>(
+            body: RawAutocomplete<String>(
               optionsBuilder: (TextEditingValue textEditingValue) {
                 if (textEditingValue.text == null || textEditingValue.text == '') {
                   return const Iterable<String>.empty();

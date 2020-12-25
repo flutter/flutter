@@ -38,6 +38,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   runnable: true,
   startTime: 0,
   isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
 );
 
 final FlutterView fakeFlutterView = FlutterView(
@@ -183,6 +184,7 @@ void main() {
       final OperationResult result = await HotRunner(
         devices,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
       ).restart(fullRestart: true);
       // Expect hot restart failed.
       expect(result.isOk, false);
@@ -213,7 +215,8 @@ void main() {
       ];
       final OperationResult result = await HotRunner(
         devices,
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
       ).restart(fullRestart: true);
       // Expect hot restart failed.
       expect(result.isOk, false);
@@ -316,6 +319,7 @@ void main() {
       final HotRunner hotRunner = HotRunner(
         devices,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart was successful.
@@ -344,6 +348,7 @@ void main() {
       final OperationResult result = await HotRunner(
         devices,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
       ).restart(fullRestart: true);
       expect(result.isOk, false);
       expect(result.message, 'setupHotRestart failed');
@@ -409,6 +414,7 @@ void main() {
       final HotRunner hotRunner = HotRunner(
         devices,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
       );
       final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart successful.
@@ -445,7 +451,8 @@ void main() {
         ];
         await HotRunner(
           devices,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          target: 'main.dart',
         ).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
@@ -469,7 +476,8 @@ void main() {
         ];
         await HotRunner(
           devices,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug)
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          target: 'main.dart',
         ).preExit();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
@@ -513,6 +521,7 @@ void main() {
 
       final int exitCode = await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
       ).attach();
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{
@@ -545,6 +554,7 @@ void main() {
 
       await HotRunner(devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
       ).cleanupAtFinish();
 
       verify(mockDevice1.dispose());
@@ -588,6 +598,7 @@ class TestFlutterDevice extends FlutterDevice {
     bool ipv6 = false,
     int hostVmServicePort,
     int ddsPort,
+    bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
   }

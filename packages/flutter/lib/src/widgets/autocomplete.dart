@@ -12,27 +12,27 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
-/// The type of the [AutocompleteCore] callback which computes the list of
+/// The type of the [RawAutocomplete] callback which computes the list of
 /// optional completions for the widget's field based on the text the user has
 /// entered so far.
 ///
 /// See also:
-///   * [AutocompleteCore.optionsBuilder], which is of this type.
+///   * [RawAutocomplete.optionsBuilder], which is of this type.
 typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(TextEditingValue textEditingValue);
 
-/// The type of the callback used by the [AutocompleteCore] widget to indicate
+/// The type of the callback used by the [RawAutocomplete] widget to indicate
 /// that the user has selected an option.
 ///
 /// See also:
-///   * [AutocompleteCore.onSelected], which is of this type.
+///   * [RawAutocomplete.onSelected], which is of this type.
 typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 
-/// The type of the [AutocompleteCore] callback which returns a [Widget] that
+/// The type of the [RawAutocomplete] callback which returns a [Widget] that
 /// displays the specified [options] and calls [onSelected] if the user
 /// selects an option.
 ///
 /// See also:
-///   * [AutocompleteCore.optionsViewBuilder], which is of this type.
+///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
 typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   BuildContext context,
   AutocompleteOnSelected<T> onSelected,
@@ -43,7 +43,7 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
 /// contains the input [TextField] or [TextFormField].
 ///
 /// See also:
-///   * [AutocompleteCore.fieldViewBuilder], which is of this type.
+///   * [RawAutocomplete.fieldViewBuilder], which is of this type.
 typedef AutocompleteFieldViewBuilder = Widget Function(
   BuildContext context,
   TextEditingController textEditingController,
@@ -51,11 +51,11 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
   VoidCallback onFieldSubmitted,
 );
 
-/// The type of the [AutocompleteCore] callback that converts an option value to
+/// The type of the [RawAutocomplete] callback that converts an option value to
 /// a string which can be displayed in the widget's options menu.
 ///
 /// See also:
-///   * [AutocompleteCore.displayStringForOption], which is of this type.
+///   * [RawAutocomplete.displayStringForOption], which is of this type.
 typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
 // TODO(justinmc): Mention Autocomplete and AutocompleteCupertino when they are
@@ -80,7 +80,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 /// ```dart
 /// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({Key key}) : super(key: key);
+///   AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
 ///   static final List<String> _options = <String>[
 ///     'aardvark',
@@ -90,7 +90,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return AutocompleteCore<String>(
+///     return RawAutocomplete<String>(
 ///       optionsBuilder: (TextEditingValue textEditingValue) {
 ///         return _options.where((String option) {
 ///           return option.contains(textEditingValue.text.toLowerCase());
@@ -156,8 +156,8 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// // An example of a type that someone might want to autocomplete a list of.
 /// class User {
 ///   const User({
-///     this.email,
-///     this.name,
+///     required this.email,
+///     required this.name,
 ///   });
 ///
 ///   final String email;
@@ -182,7 +182,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 ///
 /// class AutocompleteCustomTypeExample extends StatelessWidget {
-///   AutocompleteCustomTypeExample({Key key});
+///   AutocompleteCustomTypeExample({Key? key}) : super(key: key);
 ///
 ///   static final List<User> _userOptions = <User>[
 ///     User(name: 'Alice', email: 'alice@example.com'),
@@ -194,7 +194,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return AutocompleteCore<User>(
+///     return RawAutocomplete<User>(
 ///       optionsBuilder: (TextEditingValue textEditingValue) {
 ///         return _userOptions.where((User option) {
 ///           // Search based on User.toString, which includes both name and
@@ -245,7 +245,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// {@end-tool}
 ///
 /// {@tool dartpad --template=freeform}
-/// This example shows the use of AutocompleteCore in a form.
+/// This example shows the use of RawAutocomplete in a form.
 ///
 /// ```dart imports
 /// import 'package:flutter/widgets.dart';
@@ -254,7 +254,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 /// ```dart
 /// class AutocompleteFormExamplePage extends StatefulWidget {
-///   AutocompleteFormExamplePage({Key key}) : super(key: key);
+///   AutocompleteFormExamplePage({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   AutocompleteFormExample createState() => AutocompleteFormExample();
@@ -263,8 +263,8 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// class AutocompleteFormExample extends State<AutocompleteFormExamplePage> {
 ///   final _formKey = GlobalKey<FormState>();
 ///   final TextEditingController _textEditingController = TextEditingController();
-///   String _dropdownValue;
-///   String _autocompleteSelection;
+///   String? _dropdownValue;
+///   String? _autocompleteSelection;
 ///
 ///   final List<String> _options = <String>[
 ///     'aardvark',
@@ -290,7 +290,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                 iconSize: 24,
 ///                 elevation: 16,
 ///                 style: TextStyle(color: Colors.deepPurple),
-///                 onChanged: (String newValue) {
+///                 onChanged: (String? newValue) {
 ///                   setState(() {
 ///                     _dropdownValue = newValue;
 ///                   });
@@ -302,7 +302,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                     child: Text(value),
 ///                   );
 ///                 }).toList(),
-///                 validator: (String value) {
+///                 validator: (String? value) {
 ///                   if (value == null) {
 ///                     return 'Must make a selection.';
 ///                   }
@@ -314,14 +314,14 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                 decoration: InputDecoration(
 ///                   hintText: 'This is a regular TextFormField',
 ///                 ),
-///                 validator: (String value) {
-///                   if (value.isEmpty) {
+///                 validator: (String? value) {
+///                   if (value == null || value.isEmpty) {
 ///                     return 'Can\'t be empty.';
 ///                   }
 ///                   return null;
 ///                 },
 ///               ),
-///               AutocompleteCore<String>(
+///               RawAutocomplete<String>(
 ///                 optionsBuilder: (TextEditingValue textEditingValue) {
 ///                   return _options.where((String option) {
 ///                     return option.contains(textEditingValue.text.toLowerCase());
@@ -336,13 +336,13 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                   return TextFormField(
 ///                     controller: textEditingController,
 ///                     decoration: InputDecoration(
-///                       hintText: 'This is an AutocompleteCore!',
+///                       hintText: 'This is an RawAutocomplete!',
 ///                     ),
 ///                     focusNode: focusNode,
 ///                     onFieldSubmitted: (String value) {
 ///                       onFieldSubmitted();
 ///                     },
-///                     validator: (String value) {
+///                     validator: (String? value) {
 ///                       if (!_options.contains(value)) {
 ///                         return 'Nothing selected.';
 ///                       }
@@ -380,7 +380,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///               ElevatedButton(
 ///                 onPressed: () {
 ///                   FocusScope.of(context).requestFocus(new FocusNode());
-///                   if (!_formKey.currentState.validate()) {
+///                   if (!_formKey.currentState!.validate()) {
 ///                     return;
 ///                   }
 ///                   showDialog<void>(
@@ -393,7 +393,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                             children: <Widget>[
 ///                               Text('DropdownButtonFormField: "$_dropdownValue"'),
 ///                               Text('TextFormField: "${_textEditingController.text}"'),
-///                               Text('AutocompleteCore: "$_autocompleteSelection"'),
+///                               Text('RawAutocomplete: "$_autocompleteSelection"'),
 ///                             ],
 ///                           ),
 ///                         ),
@@ -420,11 +420,11 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 /// ```
 /// {@end-tool}
-class AutocompleteCore<T extends Object> extends StatefulWidget {
-  /// Create an instance of AutocompleteCore.
+class RawAutocomplete<T extends Object> extends StatefulWidget {
+  /// Create an instance of RawAutocomplete.
   ///
   /// [fieldViewBuilder] and [optionsViewBuilder] must not be null.
-  const AutocompleteCore({
+  const RawAutocomplete({
     Key? key,
     required this.fieldViewBuilder,
     required this.optionsViewBuilder,
@@ -440,14 +440,14 @@ class AutocompleteCore<T extends Object> extends StatefulWidget {
   /// Builds the field whose input is used to get the options.
   ///
   /// Pass the provided [TextEditingController] to the field built here so that
-  /// AutocompleteCore can listen for changes.
+  /// RawAutocomplete can listen for changes.
   final AutocompleteFieldViewBuilder fieldViewBuilder;
 
   /// Builds the selectable options widgets from a list of options objects.
   ///
   /// The options are displayed floating below the field using a
   /// [CompositedTransformFollower] inside of an [Overlay], not at the same
-  /// place in the widget tree as AutocompleteCore.
+  /// place in the widget tree as RawAutocomplete.
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
   /// Returns the string to display in the field when the option is selected.
@@ -475,10 +475,10 @@ class AutocompleteCore<T extends Object> extends StatefulWidget {
   }
 
   @override
-  _AutocompleteCoreState<T> createState() => _AutocompleteCoreState<T>();
+  _RawAutocompleteState<T> createState() => _RawAutocompleteState<T>();
 }
 
-class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>> {
+class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   final TextEditingController _textEditingController = TextEditingController();
@@ -566,7 +566,7 @@ class _AutocompleteCoreState<T extends Object> extends State<AutocompleteCore<T>
   }
 
   @override
-  void didUpdateWidget(AutocompleteCore<T> oldWidget) {
+  void didUpdateWidget(RawAutocomplete<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
       _updateOverlay();

@@ -347,12 +347,12 @@ class NavigationRail extends StatefulWidget {
   ///   final Animation<double> animation = NavigationRail.extendedAnimation(context);
   ///   return AnimatedBuilder(
   ///     animation: animation,
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       // The extended fab has a shorter height than the regular fab.
   ///       return Container(
   ///         height: 56,
   ///         padding: EdgeInsets.symmetric(
-  ///           vertical: lerpDouble(0, 6, animation.value),
+  ///           vertical: lerpDouble(0, 6, animation.value)!,
   ///         ),
   ///         child: animation.value == 0
   ///           ? FloatingActionButton(
@@ -431,7 +431,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
@@ -726,7 +726,7 @@ class _RailDestination extends StatelessWidget {
         break;
     }
 
-    final ColorScheme colors = Theme.of(context)!.colorScheme;
+    final ColorScheme colors = Theme.of(context).colorScheme;
     return Semantics(
       container: true,
       selected: selected,

@@ -89,6 +89,7 @@ void main() {
 
     expect(output.childFile('kernel_blob.bin'), exists);
     expect(output.childFile('AssetManifest.json'), exists);
+    expect(output.childFile('version.json'), exists);
     // SkSL
     expect(output.childFile('io.flutter.shaders.json'), exists);
     expect(output.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
@@ -126,6 +127,7 @@ void main() {
 
     expect(libDir.childFile('libapp.so'), exists);
     expect(assetsDir.childFile('AssetManifest.json'), exists);
+    expect(assetsDir.childFile('version.json'), exists);
     // No bundled fonts
     expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
   }, overrides: <Type, Generator>{
@@ -159,6 +161,7 @@ void main() {
 
     expect(libDir.childFile('libapp.so'), exists);
     expect(assetsDir.childFile('AssetManifest.json'), exists);
+    expect(assetsDir.childFile('version.json'), exists);
     // No bundled fonts
     expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
   }, overrides: <Type, Generator>{

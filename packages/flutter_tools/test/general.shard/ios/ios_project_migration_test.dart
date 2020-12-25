@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/ios/migrations/ios_migrator.dart';
+import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
@@ -28,13 +28,13 @@ void main () {
 
     testWithoutContext('migrators succeed', () {
       final FakeIOSMigrator fakeIOSMigrator = FakeIOSMigrator(succeeds: true);
-      final IOSMigration migration = IOSMigration(<IOSMigrator>[fakeIOSMigrator]);
+      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeIOSMigrator]);
       expect(migration.run(), isTrue);
     });
 
     testWithoutContext('migrators fail', () {
       final FakeIOSMigrator fakeIOSMigrator = FakeIOSMigrator(succeeds: false);
-      final IOSMigration migration = IOSMigration(<IOSMigrator>[fakeIOSMigrator]);
+      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeIOSMigrator]);
       expect(migration.run(), isFalse);
     });
 
@@ -506,7 +506,7 @@ class MockIosProject extends Mock implements IosProject {}
 class MockXcode extends Mock implements Xcode {}
 class MockUsage extends Mock implements Usage {}
 
-class FakeIOSMigrator extends IOSMigrator {
+class FakeIOSMigrator extends ProjectMigrator {
   FakeIOSMigrator({@required this.succeeds})
     : super(null);
 

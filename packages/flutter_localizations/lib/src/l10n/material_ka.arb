@@ -52,7 +52,7 @@
   "remainingTextFieldCharacterCountOther": "დარჩა $remainingCount სიმბოლო",
   "refreshIndicatorSemanticLabel": "განახლება",
   "moreButtonTooltip": "მეტი",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "დდ/თთ/წწწწ",
   "selectYearSemanticsLabel": "აირჩიეთ წელი",
   "unspecifiedDate": "თარიღი",

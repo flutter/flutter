@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1652,7 +1653,7 @@ void main() {
           return RaisedButton(
             child: const Text('Home'),
             onPressed: () {
-              navigator = Navigator.of(context)!;
+              navigator = Navigator.of(context);
               assert(navigator != null);
               navigator.push<void>(r);
             },

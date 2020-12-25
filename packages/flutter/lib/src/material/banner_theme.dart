@@ -142,7 +142,7 @@ class MaterialBannerTheme extends InheritedTheme {
   /// ```
   static MaterialBannerThemeData of(BuildContext context) {
     final MaterialBannerTheme? bannerTheme = context.dependOnInheritedWidgetOfExactType<MaterialBannerTheme>();
-    return bannerTheme?.data ?? Theme.of(context)!.bannerTheme;
+    return bannerTheme?.data ?? Theme.of(context).bannerTheme;
   }
 
   @override

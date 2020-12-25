@@ -9,7 +9,7 @@ import 'divider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 /// A thin horizontal line, with padding on either side.
 ///
@@ -179,7 +179,7 @@ class Divider extends StatelessWidget {
   /// {@end-tool}
   static BorderSide createBorderSide(BuildContext? context, { Color? color, double? width }) {
     final Color? effectiveColor = color
-        ?? (context != null ? (DividerTheme.of(context).color ?? Theme.of(context)!.dividerColor) : null);
+        ?? (context != null ? (DividerTheme.of(context).color ?? Theme.of(context).dividerColor) : null);
     final double effectiveWidth =  width
         ?? (context != null ? DividerTheme.of(context).thickness : null)
         ?? 0.0;

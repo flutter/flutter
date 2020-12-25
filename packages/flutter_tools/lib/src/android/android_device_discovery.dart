@@ -16,7 +16,7 @@ import '../device.dart';
 import 'adb.dart';
 import 'android_device.dart';
 import 'android_sdk.dart';
-import 'android_workflow.dart' hide androidWorkflow;
+import 'android_workflow.dart';
 
 /// Device discovery for Android physical devices and emulators.
 ///

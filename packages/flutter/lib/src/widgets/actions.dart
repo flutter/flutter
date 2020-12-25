@@ -147,7 +147,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// leaks, use of the [ActionListener] widget to register and unregister your
   /// listener appropriately is highly recommended.
   ///
-  /// {@template flutter.widgets.actions.multipleAdds}
+  /// {@template flutter.widgets.Action.addActionListener}
   /// If a listener had been added twice, and is removed once during an
   /// iteration (i.e. in response to a notification), it will still be called
   /// again. If, on the other hand, it is removed as many times as it was
@@ -174,7 +174,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// memory leaks, use of the [ActionListener] widget to register and
   /// unregister your listener appropriately is highly recommended.
   ///
-  /// {@macro flutter.widgets.actions.multipleAdds}
+  /// {@macro flutter.widgets.Action.addActionListener}
   @mustCallSuper
   void removeActionListener(ActionListenerCallback listener) => _listeners.remove(listener);
 
@@ -266,7 +266,7 @@ class ActionListener extends StatefulWidget {
   /// Must not be null.
   final Action<Intent> action;
 
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -342,7 +342,7 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// ```
   @protected
   @override
-  Object invoke(covariant T intent, [BuildContext? context]);
+  Object? invoke(covariant T intent, [BuildContext? context]);
 }
 
 /// The signature of a callback accepted by [CallbackAction].
@@ -464,7 +464,7 @@ class Actions extends StatefulWidget {
   /// {@endtemplate}
   final Map<Type, Action<Intent>> actions;
 
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   // Visits the Actions widget ancestors of the given element using
@@ -622,22 +622,26 @@ class Actions extends StatefulWidget {
   ///
   /// The `context`, `intent` and `nullOk` arguments must not be null.
   ///
-  /// If the given `intent` isn't found in the first [Actions.actions] map, then
-  /// it will look to the next [Actions] widget in the hierarchy until it
-  /// reaches the root.
+  /// If the given `intent` doesn't map to an action, or doesn't map to one that
+  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
+  /// then it will look to the next ancestor [Actions] widget in the hierarchy
+  /// until it reaches the root.
   ///
-  /// Will throw if no ambient [Actions] widget is found, or if the given
-  /// `intent` doesn't map to an action in any of the [Actions.actions] maps
-  /// that are found.
+  /// In debug mode, if `nullOk` is false, this method will throw an exception
+  /// if no ambient [Actions] widget is found, or if the given `intent` doesn't
+  /// map to an action in any of the [Actions.actions] maps that are found. In
+  /// release mode, this method will return null if no matching enabled action
+  /// is found, regardless of the setting of `nullOk`.
   ///
-  /// Setting `nullOk` to true means that if no ambient [Actions] widget is
-  /// found, then this method will return null instead of throwing.
+  /// Setting `nullOk` to true indicates that if no ambient [Actions] widget is
+  /// found, then in debug mode, this method should return null instead of
+  /// throwing an exception.
   ///
-  /// Returns the result of invoking the action's [Action.invoke] method. If
-  /// no action mapping was found for the specified intent, or if the action
-  /// that was found was disabled, then this returns null. Callers can detect
-  /// whether or not the action is available (found, and not disabled) using
-  /// [Actions.find] with its `nullOk` argument set to true.
+  /// This method returns the result of invoking the action's [Action.invoke]
+  /// method. If no action mapping was found for the specified intent (and
+  /// `nullOk` is true), or if the actions that were found were disabled, or the
+  /// action itself returns null from [Action.invoke], then this method returns
+  /// null.
   static Object? invoke<T extends Intent>(
     BuildContext context,
     T intent, {
@@ -653,18 +657,17 @@ class Actions extends StatefulWidget {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
       final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
       if (result != null) {
-        action = result;
         actionElement = element;
-        return true;
+        if (result.isEnabled(intent)) {
+          action = result;
+          return true;
+        }
       }
       return false;
     });
 
     assert(() {
-      if (nullOk) {
-        return true;
-      }
-      if (action == null) {
+      if (!nullOk && actionElement == null) {
         throw FlutterError('Unable to find an action for an Intent with type '
             '${intent.runtimeType} in an $Actions widget in the given context.\n'
             '$Actions.invoke() was unable to find an $Actions widget that '
@@ -681,12 +684,9 @@ class Actions extends StatefulWidget {
     if (actionElement == null || action == null) {
       return null;
     }
-    if (action!.isEnabled(intent)) {
-      // Invoke the action we found using the relevant dispatcher from the Actions
-      // Element we found.
-      return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
-    }
-    return null;
+    // Invoke the action we found using the relevant dispatcher from the Actions
+    // Element we found.
+    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
   }
 
   @override
@@ -813,7 +813,11 @@ class _ActionsMarker extends InheritedWidget {
 ///
 /// ```dart preamble
 /// class FadButton extends StatefulWidget {
-///   const FadButton({Key key, this.onPressed, this.child}) : super(key: key);
+///   const FadButton({
+///     Key? key,
+///     required this.onPressed,
+///     required this.child,
+///   }) : super(key: key);
 ///
 ///   final VoidCallback onPressed;
 ///   final Widget child;
@@ -826,8 +830,8 @@ class _ActionsMarker extends InheritedWidget {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   Map<Type, Action<Intent>> _actionMap;
-///   Map<LogicalKeySet, Intent> _shortcutMap;
+///   late Map<Type, Action<Intent>> _actionMap;
+///   late Map<LogicalKeySet, Intent> _shortcutMap;
 ///
 ///   @override
 ///   void initState() {
@@ -999,7 +1003,7 @@ class FocusableActionDetector extends StatefulWidget {
 
   /// The child widget for this [FocusableActionDetector] widget.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
@@ -1248,10 +1252,39 @@ class DoNothingAction extends Action<Intent> {
   void invoke(Intent intent) {}
 }
 
-/// An intent that activates the currently focused control.
+/// An [Intent] that activates the currently focused control.
+///
+/// This intent is bound by default to the [LogicalKeyboardKey.space] key on all
+/// platforms, and also to the [LogicalKeyboardKey.enter] key on all platforms
+/// except the web, where ENTER doesn't toggle selection. On the web, ENTER is
+/// bound to [ButtonActivateIntent] instead.
+///
+/// See also:
+///
+///  * [WidgetsApp.defaultShortcuts], which contains the default shortcuts used
+///    in apps.
+///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
+///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ActivateIntent extends Intent {
   /// Creates a const [ActivateIntent] so subclasses can be const.
   const ActivateIntent();
+}
+
+/// An [Intent] that activates the currently focused button.
+///
+/// This intent is bound by default to the [LogicalKeyboardKey.enter] key on the
+/// web, where ENTER can be used to activate buttons, but not toggle selection.
+/// All other platforms bind [LogicalKeyboardKey.enter] to [ActivateIntent].
+///
+/// See also:
+///
+///  * [WidgetsApp.defaultShortcuts], which contains the default shortcuts used
+///    in apps.
+///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
+///    application (and defaults to [WidgetsApp.defaultShortcuts]).
+class ButtonActivateIntent extends Intent {
+  /// Creates a const [ButtonActivateIntent] so subclasses can be const.
+  const ButtonActivateIntent();
 }
 
 /// An action that activates the currently focused control.

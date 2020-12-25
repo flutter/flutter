@@ -27,6 +27,7 @@ import 'ticker_provider.dart';
 import 'viewport.dart';
 
 // Examples can assume:
+// // @dart = 2.9
 // List<String> _tabs;
 
 /// Signature used by [NestedScrollView] for building its header.
@@ -61,7 +62,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material_no_null_safety}
 ///
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
@@ -223,7 +224,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// configuration, the flexible space of the app bar will open and collapse,
 /// while the primary portion of the app bar remains pinned.
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material_no_null_safety}
 ///
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// floating [SliverAppBar]. By using the [floatHeaderSlivers] property, the
@@ -284,7 +285,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// for the nested "inner" scroll view below to end up under the [SliverAppBar]
 /// even when the inner scroll view thinks it has not been scrolled.
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material_no_null_safety}
 ///
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// snapping, floating [SliverAppBar]. _Without_ setting any additional flags,
@@ -452,7 +453,7 @@ class NestedScrollView extends StatefulWidget {
   /// is expected to float. This cannot be null.
   final bool floatHeaderSlivers;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -503,7 +504,7 @@ class NestedScrollView extends StatefulWidget {
 /// [NestedScrollView], you can get its [NestedScrollViewState] by supplying a
 /// `GlobalKey<NestedScrollViewState>` to the [NestedScrollView.key] parameter).
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// [NestedScrollViewState] can be obtained using a [GlobalKey].
 /// Using the following setup, you can access the inner scroll controller
 /// using `globalKey.currentState.innerController`.
@@ -1072,6 +1073,63 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     goBallistic(0.0);
   }
 
+  void pointerScroll(double delta) {
+    assert(delta != 0.0);
+
+    goIdle();
+    updateUserScrollDirection(
+        delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse
+    );
+
+    if (_innerPositions.isEmpty) {
+      // Does not enter overscroll.
+      _outerPosition!.applyClampedPointerSignalUpdate(delta);
+    } else if (delta > 0.0) {
+      // Dragging "up" - delta is positive
+      // Prioritize getting rid of any inner overscroll, and then the outer
+      // view, so that the app bar will scroll out of the way asap.
+      double outerDelta = delta;
+      for (final _NestedScrollPosition position in _innerPositions) {
+        if (position.pixels < 0.0) { // This inner position is in overscroll.
+          final double potentialOuterDelta = position.applyClampedPointerSignalUpdate(delta);
+          // In case there are multiple positions in varying states of
+          // overscroll, the first to 'reach' the outer view above takes
+          // precedence.
+          outerDelta = math.max(outerDelta, potentialOuterDelta);
+        }
+      }
+      if (outerDelta != 0.0) {
+        final double innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(
+            outerDelta
+        );
+        if (innerDelta != 0.0) {
+          for (final _NestedScrollPosition position in _innerPositions)
+            position.applyClampedPointerSignalUpdate(innerDelta);
+        }
+      }
+    } else {
+      // Dragging "down" - delta is negative
+      double innerDelta = delta;
+      // Apply delta to the outer header first if it is configured to float.
+      if (_floatHeaderSlivers)
+        innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(delta);
+
+      if (innerDelta != 0.0) {
+        // Apply the innerDelta, if we have not floated in the outer scrollable,
+        // any leftover delta after this will be passed on to the outer
+        // scrollable by the outerDelta.
+        double outerDelta = 0.0; // it will go negative if it changes
+        for (final _NestedScrollPosition position in _innerPositions) {
+          final double overscroll = position.applyClampedPointerSignalUpdate(innerDelta);
+          outerDelta = math.min(outerDelta, overscroll);
+        }
+        if (outerDelta != 0.0)
+          _outerPosition!.applyClampedPointerSignalUpdate(outerDelta);
+      }
+    }
+    goBallistic(0.0);
+  }
+
   @override
   double setPixels(double newPixels) {
     assert(false);
@@ -1386,6 +1444,32 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     return 0.0;
   }
 
+
+  // Returns the amount of delta that was not used.
+  //
+  // Negative delta represents a forward ScrollDirection, while the positive
+  // would be a reverse ScrollDirection.
+  //
+  // The method doesn't take into account the effects of [ScrollPhysics].
+  double applyClampedPointerSignalUpdate(double delta) {
+    assert(delta != 0.0);
+
+    final double min = delta > 0.0
+        ? -double.infinity
+        : math.min(minScrollExtent, pixels);
+    // The logic for max is equivalent but on the other side.
+    final double max = delta < 0.0
+        ? double.infinity
+        : math.max(maxScrollExtent, pixels);
+    final double newPixels = (pixels + delta).clamp(min, max);
+    final double clampedDelta = newPixels - pixels;
+    if (clampedDelta == 0.0)
+      return delta;
+    forcePixels(newPixels);
+    didUpdateScrollPositionBy(clampedDelta);
+    return delta - clampedDelta;
+  }
+
   @override
   ScrollDirection get userScrollDirection => coordinator.userScrollDirection;
 
@@ -1474,6 +1558,12 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   void jumpTo(double value) {
     return coordinator.jumpTo(coordinator.unnestOffset(value, this));
   }
+
+  @override
+  void pointerScroll(double delta) {
+    return coordinator.pointerScroll(delta);
+  }
+
 
   @override
   void jumpToWithoutSettling(double value) {

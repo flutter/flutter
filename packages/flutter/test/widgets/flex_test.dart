@@ -112,6 +112,9 @@ void main() {
       Duration.zero,
       EnginePhase.layout,
     );
+
+    // Turn off intrinsics checking, which also fails with the same exception.
+    debugCheckIntrinsicSizes = false;
     await tester.pumpWidget(
       Column(
         children: <Widget>[
@@ -125,6 +128,7 @@ void main() {
       Duration.zero,
       EnginePhase.layout,
     );
+    debugCheckIntrinsicSizes = true;
     final String message = tester.takeException().toString();
     expect(message, contains('\nSee also:'));
   });

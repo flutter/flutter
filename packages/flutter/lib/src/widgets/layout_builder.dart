@@ -18,7 +18,7 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// adhere to. This is useful when the parent constrains the child's size and layout,
 /// and doesn't depend on the child's intrinsic size.
 ///
-/// {@template flutter.widgets.layoutBuilder.builderFunctionInvocation}
+/// {@template flutter.widgets.ConstrainedLayoutBuilder}
 /// The [builder] function is called in the following situations:
 ///
 /// * The first time the widget is laid out.
@@ -235,7 +235,7 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
 /// child's size.
 ///
-/// {@macro flutter.widgets.layoutBuilder.builderFunctionInvocation}
+/// {@macro flutter.widgets.ConstrainedLayoutBuilder}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=IYDVcriKjsw}
 ///
@@ -343,6 +343,15 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   double computeMaxIntrinsicHeight(double width) {
     assert(_debugThrowIfNotCheckingIntrinsics());
     return 0.0;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(reason:
+      'Calculating the dry layout would require running the layout callback '
+      'speculatively, which might mutate the live render object tree.',
+    ));
+    return const Size(0, 0);
   }
 
   @override

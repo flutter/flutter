@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @TestOn('chrome') // Uses web-only Flutter SDK
 
 import 'dart:async';
@@ -29,7 +27,7 @@ void main() {
           PluginEventChannel<String>('test');
 
       final StreamController<String> controller = StreamController<String>();
-      sendingChannel.controller = controller;
+      sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(),
           emitsInOrder(<String>['hello', 'world']));
@@ -61,7 +59,7 @@ void main() {
           PluginEventChannel<String>('test2');
 
       final StreamController<String> controller = StreamController<String>();
-      sendingChannel.controller = controller;
+      sendingChannel.setController(controller);
 
       expect(
           listeningChannel.receiveBroadcastStream(),
@@ -96,7 +94,7 @@ void main() {
 
       final StreamController<String> controller = StreamController<String>(
           onListen: expectAsync0<void>(() {}, count: 1));
-      sendingChannel.controller = controller;
+      sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(),
           emitsInOrder(<String>['hello']));
@@ -128,11 +126,11 @@ void main() {
 
       final StreamController<String> controller =
           StreamController<String>(onCancel: expectAsync0<void>(() {}));
-      sendingChannel.controller = controller;
+      sendingChannel.setController(controller);
 
       final Stream<dynamic> eventStream =
           listeningChannel.receiveBroadcastStream();
-      StreamSubscription<dynamic> subscription;
+      late StreamSubscription<dynamic> subscription;
       subscription =
           eventStream.listen(expectAsync1<void, dynamic>((dynamic x) {
         expect(x, equals('hello'));
@@ -153,7 +151,7 @@ void main() {
 
       final Stream<dynamic> eventStream =
           listeningChannel.receiveBroadcastStream();
-      StreamSubscription<dynamic> subscription;
+      late StreamSubscription<dynamic> subscription;
       subscription =
           eventStream.listen(expectAsync1<void, dynamic>((dynamic x) {
         expect(x, equals('hello'));
