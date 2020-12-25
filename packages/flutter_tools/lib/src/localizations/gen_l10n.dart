@@ -1077,11 +1077,23 @@ class LocalizationsGenerator {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
         logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
       });
+      if (_useSyntheticPackage) {
+        logger.printStatus(
+          'To see a detailed report, use the untranslated-messages-file \n'
+          'option in the l10n.yaml file:\n'
+          'untranslated-messages-file: desiredFileName.txt\n'
+          '<other option>: <other selection> \n\n'
+        );
+      } else {
+        logger.printStatus(
+          'To see a detailed report, use the --untranslated-messages-file \n'
+          'option in the flutter gen-l10n tool:\n'
+          'flutter gen-l10n --untranslated-messages-file=desiredFileName.txt\n'
+          '<other options> \n\n'
+        );
+      }
+
       logger.printStatus(
-        'To see a detailed report, use the --untranslated-messages-file \n'
-        'option in the flutter gen-l10n tool: \n'
-        'flutter gen-l10n --untranslated-messages-file desiredFileName.txt '
-        '<other options> \n\n'
         'This will generate a JSON format file containing all messages that \n'
         'need to be translated.'
       );
