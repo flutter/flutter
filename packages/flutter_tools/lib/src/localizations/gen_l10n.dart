@@ -8,10 +8,66 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../project.dart';
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
+
+/// Run the localizations generation script with the configuration [options].
+void generateLocalizations({
+  @required Directory projectDir,
+  @required Directory dependenciesDir,
+  @required LocalizationOptions options,
+  @required LocalizationsGenerator localizationsGenerator,
+  @required Logger logger,
+}) {
+  // If generating a synthetic package, generate a warning if
+  // flutter: generate is not set.
+  final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDir);
+  if (options.useSyntheticPackage && !flutterProject.manifest.generateSyntheticPackage) {
+    logger.printError(
+      'Attempted to generate localizations code without having '
+      'the flutter: generate flag turned on.'
+      '\n'
+      'Check pubspec.yaml and ensure that flutter: generate: true has '
+      'been added and rebuild the project. Otherwise, the localizations '
+      'source code will not be importable.'
+    );
+    throw Exception();
+  }
+
+  precacheLanguageAndRegionTags();
+
+  final String inputPathString = options?.arbDirectory?.path ?? globals.fs.path.join('lib', 'l10n');
+  final String templateArbFileName = options?.templateArbFile?.toFilePath() ?? 'app_en.arb';
+  final String outputFileString = options?.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
+
+  try {
+    localizationsGenerator
+      ..initialize(
+        inputsAndOutputsListPath: dependenciesDir.path,
+        projectPathString: projectDir.path,
+        inputPathString: inputPathString,
+        templateArbFileName: templateArbFileName,
+        outputFileString: outputFileString,
+        outputPathString: options?.outputDirectory?.path,
+        classNameString: options.outputClass ?? 'AppLocalizations',
+        preferredSupportedLocale: options.preferredSupportedLocales,
+        headerString: options.header,
+        headerFile: options?.headerFile?.toFilePath(),
+        useDeferredLoading: options.deferredLoading ?? false,
+        useSyntheticPackage: options.useSyntheticPackage ?? true,
+        areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
+        untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
+      )
+      ..loadResources()
+      ..writeOutputFiles(logger);
+  } on L10nException catch (e) {
+    logger.printError(e.message);
+    throw Exception();
+  }
+}
 
 /// The path for the synthetic package.
 final String defaultSyntheticPackagePath = globals.fs.path.join('.dart_tool', 'flutter_gen');
