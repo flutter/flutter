@@ -10,31 +10,6 @@ void main() {
   test('analyze-sample-code', () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
-      <String>['analyze-sample-code.dart', 'test/analyze-sample-code-test-input'],
-    );
-    final List<String> stdoutLines = process.stdout.toString().split('\n');
-    final List<String> stderrLines = process.stderr.toString().split('\n')
-      ..removeWhere((String line) => line.startsWith('Analyzer output:') || line.startsWith('Building flutter tool...'));
-    expect(process.exitCode, isNot(equals(0)));
-    expect(stderrLines, <String>[
-      'known_broken_documentation.dart:31:9: new Opacity(',
-      '>>> Unnecessary new keyword (unnecessary_new)',
-      'known_broken_documentation.dart:63:9: new Opacity(',
-      '>>> Unnecessary new keyword (unnecessary_new)',
-      '',
-      'Found 1 sample code errors.',
-      '',
-    ]);
-    expect(stdoutLines, <String>[
-      'Found 7 sample code sections.',
-      'Starting analysis of code samples.',
-      '',
-    ]);
-  }, skip: Platform.isWindows);
-
-  test('analyze-sample-code null-safe', () {
-    final ProcessResult process = Process.runSync(
-      '../../bin/cache/dart-sdk/bin/dart',
       <String>['analyze-sample-code.dart', 'test/analyze-sample-code-test-null-safe-input'],
     );
     final List<String> stdoutLines = process.stdout.toString().split('\n');
