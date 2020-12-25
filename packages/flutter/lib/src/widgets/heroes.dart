@@ -447,7 +447,8 @@ class _HeroFlightManifest {
     return createRectTween?.call(begin, end) ?? RectTween(begin: begin, end: end);
   }
 
-  // The bounding box for `context` in `ancestorContext` coordinate system.
+  // The bounding box for `context`'s render object,  in `ancestorContext`'s
+  // render object's coordinate space.
   static Rect _boundingBoxFor(BuildContext context, BuildContext? ancestorContext) {
     assert(ancestorContext != null);
     final RenderBox box = context.findRenderObject()! as RenderBox;

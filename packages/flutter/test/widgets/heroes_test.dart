@@ -2840,7 +2840,7 @@ Future<void> main() async {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    // The text field on the new route should be visible .
+    // The Hero on the new route should be visible .
     expect(find.byType(Placeholder), findsOneWidget);
   });
 
