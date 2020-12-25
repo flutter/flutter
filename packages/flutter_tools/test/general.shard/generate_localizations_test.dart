@@ -938,7 +938,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          preferredSupportedLocale: preferredSupportedLocale,
+          preferredSupportedLocales: preferredSupportedLocale,
         );
         generator.loadResources();
       } on L10nException catch (e) {
@@ -974,7 +974,7 @@ void main() {
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
-            preferredSupportedLocale: preferredSupportedLocale,
+            preferredSupportedLocales: preferredSupportedLocale,
           );
           generator.loadResources();
         } on L10nException catch (e) {
@@ -1387,7 +1387,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          preferredSupportedLocale: preferredSupportedLocale,
+          preferredSupportedLocales: preferredSupportedLocale,
         );
         generator.loadResources();
         generator.writeOutputFiles(BufferLogger.test());

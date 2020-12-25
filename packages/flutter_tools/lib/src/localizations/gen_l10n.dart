@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
-import '../project.dart';
 
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
@@ -24,8 +25,12 @@ void generateLocalizations({
 }) {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
-  final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDir);
-  if (options.useSyntheticPackage && !flutterProject.manifest.generateSyntheticPackage) {
+  final FlutterManifest flutterManifest = FlutterManifest.createFromPath(
+    projectDir.childFile('pubspec.yaml').path,
+    fileSystem: projectDir.fileSystem,
+    logger: logger,
+  );
+  if (options.useSyntheticPackage && !flutterManifest.generateSyntheticPackage) {
     logger.printError(
       'Attempted to generate localizations code without having '
       'the flutter: generate flag turned on.'
@@ -46,14 +51,14 @@ void generateLocalizations({
   try {
     localizationsGenerator
       ..initialize(
-        inputsAndOutputsListPath: dependenciesDir.path,
+        inputsAndOutputsListPath: dependenciesDir?.path,
         projectPathString: projectDir.path,
         inputPathString: inputPathString,
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         outputPathString: options?.outputDirectory?.path,
         classNameString: options.outputClass ?? 'AppLocalizations',
-        preferredSupportedLocale: options.preferredSupportedLocales,
+        preferredSupportedLocales: options.preferredSupportedLocales,
         headerString: options.header,
         headerFile: options?.headerFile?.toFilePath(),
         useDeferredLoading: options.deferredLoading ?? false,
@@ -606,7 +611,7 @@ class LocalizationsGenerator {
     String templateArbFileName,
     String outputFileString,
     String classNameString,
-    List<String> preferredSupportedLocale,
+    List<String> preferredSupportedLocales,
     String headerString,
     String headerFile,
     bool useDeferredLoading = false,
@@ -622,7 +627,7 @@ class LocalizationsGenerator {
     setOutputDirectory(outputPathString ?? inputPathString);
     setTemplateArbFile(templateArbFileName);
     setBaseOutputFile(outputFileString);
-    setPreferredSupportedLocales(preferredSupportedLocale);
+    setPreferredSupportedLocales(preferredSupportedLocales);
     _setHeader(headerString, headerFile);
     _setUseDeferredLoading(useDeferredLoading);
     _setUntranslatedMessagesFile(untranslatedMessagesFile);
