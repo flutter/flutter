@@ -1079,8 +1079,11 @@ class LocalizationsGenerator {
       });
       logger.printStatus(
         'To see a detailed report, use the --untranslated-messages-file \n'
-        'option in the tool to generate a JSON format file containing \n'
-        'all messages that need to be translated.'
+        'option in the flutter gen-l10n tool: \n'
+        'flutter gen-l10n --untranslated-messages-file desiredFileName.txt '
+        '<other options> \n\n'
+        'This will generate a JSON format file containing all messages that \n'
+        'need to be translated.'
       );
     }
 
