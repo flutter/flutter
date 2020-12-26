@@ -804,6 +804,23 @@ void main() {
 
     text = tester.firstWidget(find.text(longHint));
     expect(text.overflow, TextOverflow.clip);
+
+    // InputDecoration hintOverflow takes precedence over InputDecorationTheme hintOverflow
+    await tester.pumpWidget(
+      buildInputDecorator(
+        inputDecorationTheme: const InputDecorationTheme(
+          hintOverflow: TextOverflow.clip
+        ),
+        decoration: InputDecoration(
+          hintText: longHint,
+          hintOverflow: TextOverflow.fade,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    text = tester.firstWidget(find.text(longHint));
+    expect(text.overflow, TextOverflow.fade);
   });
 
   testWidgets('InputDecorator with no input border', (WidgetTester tester) async {

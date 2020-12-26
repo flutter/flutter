@@ -2164,7 +2164,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: Text(
         decoration!.hintText!,
         style: hintStyle,
-        overflow: decoration!.hintOverflow,
+        overflow: decoration?.hintOverflow ?? themeData.inputDecorationTheme.hintOverflow ?? TextOverflow.ellipsis,
         textAlign: textAlign,
         maxLines: decoration!.hintMaxLines,
       ),
@@ -3611,7 +3611,7 @@ class InputDecorationTheme with Diagnosticable {
     this.helperStyle,
     this.helperMaxLines,
     this.hintStyle,
-    this.hintOverflow = TextOverflow.ellipsis,
+    this.hintOverflow,
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
