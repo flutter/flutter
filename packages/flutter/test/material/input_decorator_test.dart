@@ -793,7 +793,7 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         inputDecorationTheme: const InputDecorationTheme(
-          hintOverflow: TextOverflow.clip
+          hintOverflow: TextOverflow.clip,
         ),
         decoration: InputDecoration(
           hintText: longHint,
@@ -809,7 +809,7 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         inputDecorationTheme: const InputDecorationTheme(
-          hintOverflow: TextOverflow.clip
+          hintOverflow: TextOverflow.clip,
         ),
         decoration: InputDecoration(
           hintText: longHint,
