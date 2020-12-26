@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 
 import 'gen_l10n_templates.dart';
