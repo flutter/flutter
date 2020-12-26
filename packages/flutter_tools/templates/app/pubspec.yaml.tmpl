@@ -68,8 +68,28 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
 
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
+  # To add custom fonts to your package, just add 'google_fonts' package
+  # under the dependency section above, like this:
+  #
+  # dependencies:
+  #   flutter:
+  #     sdk: flutter
+  #   google_fonts: ^1.1.1
+  #
+  # Now import `GoogleFonts` package:
+  # import 'package:google_fonts/google_fonts.dart';
+  #
+  # Add the font to the style property of a widget such as a Text widget, like:
+  # Text(
+  #   "This is Flutter",
+  #   style: GoogleFonts.openSans(),
+  # )
+  
+  # For more details on using the google_fonts package, see
+  # https://pub.dev/packages/google_fonts
+  
+  # You can also add custom fonts without using a package. Add a fonts section
+  # here, in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
@@ -86,4 +106,4 @@ flutter:
   #         weight: 700
   #
   # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages
+  # see https://flutter.dev/docs/cookbook/design/fonts
