@@ -1368,174 +1368,63 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/6751
-  testWidgets('When InkWell/Ancestor has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
+  testWidgets('When InkWell has a GlobalKey and changes position, splash should not stop', (WidgetTester tester) async {
+    final GlobalKey<_TestAppState> testAppKey = GlobalKey();
+    int frames;
+
+    await tester.pumpWidget(TestApp(key: testAppKey));
+
     void expectPaintedCircle(bool painted) {
       final PaintPattern paintPattern = paints..circle();
-
       expect(
         Material.of(tester.element(find.byType(InkWell)))! as RenderBox,
         painted ? paintPattern : isNot(paintPattern),
       );
     }
-
-    Future<void> test(Widget Function(Key? key, {bool tapDownChangeWrap, bool tapChangeWrap}) buildApp) async {
-      int frames;
-
-      await tester.pumpWidget(buildApp(null, tapChangeWrap: true));
-      await tester.tap(find.byType(InkWell));
+    Future<void> expectSplashContinueAfterMove(bool value) async{
       await tester.pump();
       expectPaintedCircle(true);
       await tester.pump(const Duration(milliseconds: 10));
       expectPaintedCircle(true);
       await tester.pump(const Duration(milliseconds: 40));
-      expectPaintedCircle(false);
-      frames = await tester.pumpAndSettle();
-      expect(frames, 1);
-      expectPaintedCircle(false);
-
-      await tester.pumpWidget(buildApp(const Key('foo'), tapChangeWrap: true));
-      await tester.tap(find.byType(InkWell));
-      await tester.pump();
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 10));
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 40));
-      expectPaintedCircle(false);
-      frames = await tester.pumpAndSettle();
-      expect(frames, 1);
-      expectPaintedCircle(false);
-
-      // Does not call setState.
-      await tester.pumpWidget(buildApp(GlobalKey()));
-      await tester.tap(find.byType(InkWell));
-      await tester.pump();
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 10));
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 40));
-      expectPaintedCircle(true);
-      frames = await tester.pumpAndSettle();
-      expect(frames > 1, isTrue);
-      expectPaintedCircle(false);
-
-      await tester.pumpWidget(buildApp(GlobalKey(), tapChangeWrap: true));
-      await tester.tap(find.byType(InkWell));
-      await tester.pump();
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 10));
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 40));
-      expectPaintedCircle(true);
-      frames = await tester.pumpAndSettle();
-      expect(frames > 1, isTrue);
-      expectPaintedCircle(false);
-
-      await tester.pumpWidget(buildApp(GlobalKey(), tapDownChangeWrap: true));
-      final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-      await tester.pump();
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 10));
-      expectPaintedCircle(true);
-      await tester.pump(const Duration(milliseconds: 40));
-      expectPaintedCircle(true);
-      await testGesture.up();
-      frames = await tester.pumpAndSettle();
-      expect(frames > 1, isTrue);
-      expectPaintedCircle(false);
+      expectPaintedCircle(value);
     }
 
-    // InkWell have a key
-    await test((Key? key, {bool tapDownChangeWrap = false, bool tapChangeWrap = false}) {
-      bool wrap = false;
+    // InkWell does not have any key, so splash will stop.
+    testAppKey.currentState!.switchTapChangeWrap();
+    await tester.pump();
+    await tester.tap(find.byType(InkWell));
+    await expectSplashContinueAfterMove(false);
+    frames = await tester.pumpAndSettle();
+    expect(frames, 1);
+    expectPaintedCircle(false);
 
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: StatefulBuilder(
-              builder: (BuildContext context, void Function(void Function()) setState) {
-                Future<void> changeWrap() async {
-                  await Future<void>.delayed(const Duration(milliseconds: 50));
-                  setState(() {
-                    wrap = !wrap;
-                  });
-                }
-                Widget child = InkWell(
-                  key: key,
-                  onTapDown: (_) {
-                    if (tapDownChangeWrap)
-                      changeWrap();
-                  },
-                  onTap: () {
-                    if (tapChangeWrap)
-                      changeWrap();
-                  },
-                  child: Container(
-                    height: 160,
-                    alignment: Alignment.center,
-                  ),
-                );
-                if (wrap) {
-                  child = Container(
-                    margin: const EdgeInsets.only(top: 320),
-                    child: child,
-                  );
-                }
-                return child;
-              },
-            ),
-          ),
-        ),
-      );
-    });
+    // InkWell has a ValueKey, so splash will also stop.
+    testAppKey.currentState!.setInkWellKey(const Key('foo'));
+    await tester.pump();
+    await tester.tap(find.byType(InkWell));
+    await expectSplashContinueAfterMove(false);
+    frames = await tester.pumpAndSettle();
+    expect(frames, 1);
+    expectPaintedCircle(false);
 
-    // Ancestor widget have Key
-    await test((Key? key, {bool tapDownChangeWrap = false, bool tapChangeWrap = false}) {
-      bool wrap = false;
+    // InkWell has a GlobalKey, so splash will continue.
+    testAppKey.currentState!.setInkWellKey(GlobalKey());
+    await tester.pump();
+    await tester.tap(find.byType(InkWell));
+    await expectSplashContinueAfterMove(true);
+    frames = await tester.pumpAndSettle();
+    expect(frames > 1, isTrue);
+    expectPaintedCircle(false);
 
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: StatefulBuilder(
-              builder: (BuildContext context, void Function(void Function()) setState) {
-                Future<void> changeWrap() async {
-                  await Future<void>.delayed(const Duration(milliseconds: 50));
-                  setState(() {
-                    wrap = !wrap;
-                  });
-                }
-                Widget child = InkWell(
-                  onTapDown: (_) {
-                    if (tapDownChangeWrap)
-                      changeWrap();
-                  },
-                  onTap: () {
-                    if (tapChangeWrap)
-                      changeWrap();
-                  },
-                  child: Container(
-                    height: 160,
-                    alignment: Alignment.center,
-                  ),
-                );
-                child = Container(
-                  key: key,
-                  child: child,
-                );
-                if (wrap) {
-                  child = Container(
-                    margin: const EdgeInsets.only(top: 320),
-                    child: child,
-                  );
-                }
-                return child;
-              },
-            ),
-          ),
-        ),
-      );
-    });
+    testAppKey.currentState!.switchTapDownChangeWrap();
+    await tester.pump();
+    final TestGesture testGesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await expectSplashContinueAfterMove(true);
+    await testGesture.up();
+    frames = await tester.pumpAndSettle();
+    expect(frames > 1, isTrue);
+    expectPaintedCircle(false);
   });
 
   testWidgets('When InkWell/Ancestor has a GlobalKey and ancestor Material is replaced, splash should stop.', (WidgetTester tester)async {
@@ -1633,4 +1522,75 @@ void main() {
     expect(callChangeReplaceCount, 2);
     expect(replaced, false);
   });
+}
+
+class TestApp extends StatefulWidget {
+  const TestApp({Key? key}) : super(key: key);
+
+  @override
+  _TestAppState createState() => _TestAppState();
+}
+
+class _TestAppState extends State<TestApp> {
+  bool wrap = false;
+  bool tapDownChangeWrap = false;
+  bool tapChangeWrap = false;
+  Key? inkWellKey;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = InkWell(
+      key: inkWellKey,
+      onTap: () async {
+        if (tapChangeWrap) {
+          await changeWrap();
+        }
+      },
+      onTapDown: (_) async {
+        if (tapDownChangeWrap) {
+          await changeWrap();
+        }
+      },
+    );
+
+    if (wrap) {
+      child = Container(
+        child: child,
+      );
+    }
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: child,
+      ),
+    );
+  }
+
+  Future<void> changeWrap() async {
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    setState(() {
+      wrap = !wrap;
+    });
+  }
+
+  void setInkWellKey(Key key) {
+    setState(() {
+      inkWellKey = key;
+    });
+  }
+
+  void switchTapDownChangeWrap() {
+    setState(() {
+      tapDownChangeWrap = true;
+      tapChangeWrap = false;
+    });
+  }
+
+  void switchTapChangeWrap() {
+    setState(() {
+      tapChangeWrap = true;
+      tapDownChangeWrap = false;
+    });
+  }
 }
