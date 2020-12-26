@@ -81,7 +81,7 @@ class _TableElementRow {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_lbE0wsVZSw}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows a `Table` with borders, multiple types of column widths and different vertical cell alignments.
 ///
