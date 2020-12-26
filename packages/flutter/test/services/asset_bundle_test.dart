@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -16,13 +15,10 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
-    loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'AssetManifest.json')
       return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
 
-    if (key == 'NOTICES.Z')
-      return ByteData.view(Uint8List.fromList(gzip.encode(utf8.encode('All your base are belong to us'))).buffer);
-
+    loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'one')
       return ByteData(1)..setInt8(0, 49);
     throw FlutterError('key not found');
@@ -50,26 +46,6 @@ void main() {
       loadException = e;
     }
     expect(loadException, isFlutterError);
-  });
-
-  test('Test loading zipped strings', () async {
-    final TestAssetBundle bundle = TestAssetBundle();
-
-    String assetString = await bundle.loadString('NOTICES.Z', unzip: true);
-    expect(assetString, equals('All your base are belong to us'));
-
-    expect(bundle.loadCallCount['NOTICES.Z'], 1);
-
-    assetString = await bundle.loadString('NOTICES.Z', unzip: true);
-    expect(assetString, equals('All your base are belong to us'));
-
-    // Should have been cached and shouldn't retrieve and decode another time.
-    expect(bundle.loadCallCount['NOTICES.Z'], 1);
-  }, onPlatform: <String, dynamic>{
-    'browser': const Skip(
-      'Skip the NOTICES unzipping test because NOTICES are'
-      'not zipped for the web'
-    ),
   });
 
   test('AssetImage.obtainKey succeeds with ImageConfiguration.empty', () async {

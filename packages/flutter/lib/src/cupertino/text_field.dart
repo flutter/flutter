@@ -16,9 +16,6 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
-// Examples can assume:
-// // @dart = 2.9
-
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
   fontWeight: FontWeight.w400,
   color: CupertinoColors.placeholderText,
@@ -154,7 +151,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// }
 ///
 /// class _MyPrefilledTextState extends State<MyPrefilledText> {
-///   TextEditingController _textController;
+///   late TextEditingController _textController;
 ///
 ///   @override
 ///   void initState() {

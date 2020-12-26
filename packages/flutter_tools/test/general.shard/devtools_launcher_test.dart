@@ -34,6 +34,7 @@ void main() {
             'global',
             'run',
             'devtools',
+            '--no-launch-browser',
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
           completer: completer,
@@ -42,6 +43,39 @@ void main() {
     );
 
     final DevToolsServerAddress address = await launcher.serve();
+    expect(address.host, '127.0.0.1');
+    expect(address.port, 9100);
+  });
+
+  testWithoutContext('DevtoolsLauncher launches DevTools in browser', () async {
+    final Completer<void> completer = Completer<void>();
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'activate',
+            'devtools',
+          ],
+          stdout: 'Activated DevTools 0.9.5',
+        ),
+        FakeCommand(
+          command: const <String>[
+            'pub',
+            'global',
+            'run',
+            'devtools',
+          ],
+          stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
+          completer: completer,
+        ),
+      ]),
+    );
+
+    final DevToolsServerAddress address = await launcher.serve(openInBrowser: true);
     expect(address.host, '127.0.0.1');
     expect(address.port, 9100);
   });
@@ -68,6 +102,7 @@ void main() {
               'global',
               'run',
               'devtools',
+              '--no-launch-browser',
               '--vm-uri=http://127.0.0.1:1234/abcdefg',
             ],
             onRun: () {
@@ -103,6 +138,7 @@ void main() {
               'global',
               'run',
               'devtools',
+              '--no-launch-browser',
               '--vm-uri=http://127.0.0.1:1234/abcdefg',
             ],
             onRun: () {

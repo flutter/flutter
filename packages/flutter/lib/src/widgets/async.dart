@@ -6,16 +6,11 @@
 ///
 /// Asynchronous computations are represented by [Future]s and [Stream]s.
 
-import 'dart:async' show Future, Stream, StreamSubscription;
+import 'dart:async' show StreamSubscription;
 
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
-
-// Examples can assume:
-// // @dart = 2.9
-// dynamic _lot;
-// Future<String> _calculation;
 
 /// Base class for widgets that build themselves based on interaction with
 /// a specified [Stream].
@@ -371,7 +366,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// as the builder will always be called before the stream listener has a chance
 /// to be processed.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
 /// This sample shows a [StreamBuilder] that listens to a Stream that emits bids
 /// for an auction. Every time the StreamBuilder receives a bid from the Stream,
@@ -388,7 +383,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///
 /// Widget build(BuildContext context) {
 ///   return DefaultTextStyle(
-///     style: Theme.of(context).textTheme.headline2,
+///     style: Theme.of(context).textTheme.headline2!,
 ///     textAlign: TextAlign.center,
 ///     child: Container(
 ///       alignment: FractionalOffset.center,
@@ -614,7 +609,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
 /// This sample shows a [FutureBuilder] that displays a loading spinner while it
 /// loads data. It displays a success icon and text if the [Future] completes
@@ -630,7 +625,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// Widget build(BuildContext context) {
 ///   return DefaultTextStyle(
-///     style: Theme.of(context).textTheme.headline2,
+///     style: Theme.of(context).textTheme.headline2!,
 ///     textAlign: TextAlign.center,
 ///     child: FutureBuilder<String>(
 ///       future: _calculation, // a previously-obtained Future<String> or null

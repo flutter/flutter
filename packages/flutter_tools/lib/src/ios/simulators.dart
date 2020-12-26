@@ -66,9 +66,7 @@ class IOSSimulatorUtils {
       return <IOSSimulator>[];
     }
 
-    final List<SimDevice> connected = (await _simControl.getAvailableDevices())
-        .where((SimDevice device) => device.isBooted)
-        .toList();
+    final List<SimDevice> connected = await _simControl.getConnectedDevices();
     return connected.map<IOSSimulator>((SimDevice device) {
       return IOSSimulator(
         device.udid,
@@ -78,26 +76,6 @@ class IOSSimulatorUtils {
         xcode: _xcode,
       );
     }).toList();
-  }
-
-  Future<List<IOSSimulator>> getAvailableDevices() async {
-    if (!_xcode.isInstalledAndMeetsVersionCheck) {
-      return <IOSSimulator>[];
-    }
-
-    final List<SimDevice> available = await _simControl.getAvailableDevices();
-    return available
-        .map<IOSSimulator>((SimDevice device) {
-          return IOSSimulator(
-            device.udid,
-            name: device.name,
-            simControl: _simControl,
-            simulatorCategory: device.category,
-            xcode: _xcode,
-          );
-        })
-        .where((IOSSimulator simulator) => simulator.isSupported())
-        .toList();
   }
 }
 
@@ -110,23 +88,6 @@ class SimControl {
   })  : _logger = logger,
         _xcode = xcode,
         _processUtils = ProcessUtils(processManager: processManager, logger: logger);
-
-  /// Create a [SimControl] for testing.
-  ///
-  /// Defaults to a buffer logger.
-  @visibleForTesting
-  factory SimControl.test({
-    @required ProcessManager processManager,
-    Logger logger,
-    Xcode xcode,
-  }) {
-    logger ??= BufferLogger.test();
-    return SimControl(
-      logger: logger,
-      xcode: xcode,
-      processManager: processManager,
-    );
-  }
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -199,10 +160,10 @@ class SimControl {
     return devices;
   }
 
-  /// Returns all the available simulator devices.
-  Future<List<SimDevice>> getAvailableDevices() async {
+  /// Returns all the connected simulator devices.
+  Future<List<SimDevice>> getConnectedDevices() async {
     final List<SimDevice> simDevices = await getDevices();
-    return simDevices.where((SimDevice device) => device.isAvailable).toList();
+    return simDevices.where((SimDevice device) => device.isBooted).toList();
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
@@ -273,17 +234,6 @@ class SimControl {
     return result;
   }
 
-  Future<RunResult> boot(String deviceId) {
-    return _processUtils.run(
-      <String>[
-        ..._xcode.xcrunCommand(),
-        'simctl',
-        'boot',
-        deviceId,
-      ],
-    );
-  }
-
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
       await _processUtils.run(
@@ -346,11 +296,7 @@ class SimDevice {
   final Map<String, dynamic> data;
 
   String get state => data['state']?.toString();
-
-  bool get isAvailable =>
-      data['isAvailable'] == true ||
-      data['availability']?.toString() == '(available)';
-
+  String get availability => data['availability']?.toString();
   String get name => data['name']?.toString();
   String get udid => data['udid']?.toString();
 
@@ -448,6 +394,7 @@ class IOSSimulator extends Device {
   @override
   bool isSupported() {
     if (!globals.platform.isMacOS) {
+      _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
 
@@ -455,25 +402,21 @@ class IOSSimulator extends Device {
     // We do not yet support WatchOS or tvOS devices.
     final RegExp blocklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
     if (blocklist.hasMatch(name)) {
+      _supportMessage = 'Flutter does not support Apple TV or Apple Watch.';
       return false;
     }
     return true;
   }
 
-  Future<bool> boot() async {
-    final RunResult result = await _simControl.boot(id);
+  String _supportMessage;
 
-    if (result.exitCode == 0) {
-      return true;
-    }
-    // 149 exit code means the device is already booted. Ignore this error.
-    if (result.exitCode == 149) {
-      globals.printTrace('Simulator "$id" already booted.');
-      return true;
+  @override
+  String supportMessage() {
+    if (isSupported()) {
+      return 'Supported';
     }
 
-    globals.logger.printError('$result');
-    return false;
+    return _supportMessage ?? 'Unknown';
   }
 
   @override
