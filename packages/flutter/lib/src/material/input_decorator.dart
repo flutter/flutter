@@ -2697,7 +2697,7 @@ class InputDecoration {
   /// If null, defaults to a value derived from [Directionality] for the
   /// input field and the current context.
   final TextDirection? hintTextDirection;
-  
+
   /// Handles visual overflow for the [hintText].
   ///
   /// If null, then [InputDecorationTheme.hintOverflow] is used. If that's null
