@@ -31,7 +31,8 @@ import 'theme.dart';
 ///
 /// Since the value indicator is painted on the Overlay; this method paints the
 /// value indicator in a [RenderBox] that appears in the [Overlay].
-typedef PaintValueIndicator = void Function(PaintingContext context, Offset offset);
+typedef PaintValueIndicator = void Function(
+    PaintingContext context, Offset offset);
 
 enum _SliderType { material, adaptive }
 
@@ -158,14 +159,14 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-  }) : _sliderType = _SliderType.material,
-       assert(value != null),
-       assert(min != null),
-       assert(max != null),
-       assert(min <= max),
-       assert(value >= min && value <= max),
-       assert(divisions == null || divisions > 0),
-       super(key: key);
+  })  : _sliderType = _SliderType.material,
+        assert(value != null),
+        assert(min != null),
+        assert(max != null),
+        assert(min <= max),
+        assert(value >= min && value <= max),
+        assert(divisions == null || divisions > 0),
+        super(key: key);
 
   /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
   /// Material Design slider otherwise.
@@ -190,14 +191,14 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-  }) : _sliderType = _SliderType.adaptive,
-       assert(value != null),
-       assert(min != null),
-       assert(max != null),
-       assert(min <= max),
-       assert(value >= min && value <= max),
-       assert(divisions == null || divisions > 0),
-       super(key: key);
+  })  : _sliderType = _SliderType.adaptive,
+        assert(value != null),
+        assert(min != null),
+        assert(max != null),
+        assert(min <= max),
+        assert(value >= min && value <= max),
+        assert(divisions == null || divisions > 0),
+        super(key: key);
 
   /// The currently selected value for this slider.
   ///
@@ -431,7 +432,7 @@ class Slider extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  final _SliderType _sliderType ;
+  final _SliderType _sliderType;
 
   @override
   _SliderState createState() => _SliderState();
@@ -440,24 +441,31 @@ class Slider extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('value', value));
-    properties.add(ObjectFlagProperty<ValueChanged<double>>('onChanged', onChanged, ifNull: 'disabled'));
-    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('onChangeStart', onChangeStart));
-    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('onChangeEnd', onChangeEnd));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>(
+        'onChanged', onChanged,
+        ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has(
+        'onChangeStart', onChangeStart));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has(
+        'onChangeEnd', onChangeEnd));
     properties.add(DoubleProperty('min', min));
     properties.add(DoubleProperty('max', max));
     properties.add(IntProperty('divisions', divisions));
     properties.add(StringProperty('label', label));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
-    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has(
+        'semanticFormatterCallback', semanticFormatterCallback));
     properties.add(ObjectFlagProperty<FocusNode>.has('focusNode', focusNode));
-    properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'autofocus'));
+    properties
+        .add(FlagProperty('autofocus', value: autofocus, ifTrue: 'autofocus'));
   }
 }
 
 class _SliderState extends State<Slider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = Duration(milliseconds: 75);
-  static const Duration valueIndicatorAnimationDuration = Duration(milliseconds: 100);
+  static const Duration valueIndicatorAnimationDuration =
+      Duration(milliseconds: 100);
 
   // Animation controller that is run when the overlay (a.k.a radial reaction)
   // is shown in response to user interaction.
@@ -505,9 +513,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     positionController.value = _unlerp(widget.value);
     _shortcutMap = <LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.arrowUp): const _AdjustSliderIntent.up(),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const _AdjustSliderIntent.down(),
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.left(),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.right(),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown):
+          const _AdjustSliderIntent.down(),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft):
+          const _AdjustSliderIntent.left(),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight):
+          const _AdjustSliderIntent.right(),
     };
     _actionMap = <Type, Action<Intent>>{
       _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(
@@ -549,8 +560,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   void _actionHandler(_AdjustSliderIntent intent) {
-    final _RenderSlider renderSlider = _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
-    final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext);
+    final _RenderSlider renderSlider =
+        _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
+    final TextDirection textDirection =
+        Directionality.of(_renderObjectKey.currentContext);
     switch (intent.type) {
       case _SliderAdjustmentType.right:
         switch (textDirection) {
@@ -584,14 +597,18 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
     if (focused != _focused) {
-      setState(() { _focused = focused; });
+      setState(() {
+        _focused = focused;
+      });
     }
   }
 
   bool _hovering = false;
   void _handleHoverChanged(bool hovering) {
     if (hovering != _hovering) {
-      setState(() { _hovering = hovering; });
+      setState(() {
+        _hovering = hovering;
+      });
     }
   }
 
@@ -607,7 +624,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   double _unlerp(double value) {
     assert(value <= widget.max);
     assert(value >= widget.min);
-    return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
+    return widget.max > widget.min
+        ? (value - widget.min) / (widget.max - widget.min)
+        : 0.0;
   }
 
   @override
@@ -619,20 +638,21 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       case _SliderType.material:
         return _buildMaterialSlider(context);
 
-      case _SliderType.adaptive: {
-        final ThemeData theme = Theme.of(context);
-        assert(theme.platform != null);
-        switch (theme.platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            return _buildMaterialSlider(context);
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            return _buildCupertinoSlider(context);
+      case _SliderType.adaptive:
+        {
+          final ThemeData theme = Theme.of(context);
+          assert(theme.platform != null);
+          switch (theme.platform) {
+            case TargetPlatform.android:
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.linux:
+            case TargetPlatform.windows:
+              return _buildMaterialSlider(context);
+            case TargetPlatform.iOS:
+            case TargetPlatform.macOS:
+              return _buildCupertinoSlider(context);
+          }
         }
-      }
     }
     assert(false);
     return null;
@@ -651,49 +671,79 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
     const double _defaultTrackHeight = 4;
     const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
-    const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
+    const SliderTickMarkShape _defaultTickMarkShape =
+        RoundSliderTickMarkShape();
     const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
     const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
-    const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
-    const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+    const SliderComponentShape _defaultValueIndicatorShape =
+        RectangularSliderValueIndicatorShape();
+    const ShowValueIndicator _defaultShowValueIndicator =
+        ShowValueIndicator.onlyForDiscrete;
 
     // The value indicator's color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
     // value indicator is assumed to be the same as the active color.
-    final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape;
+    final SliderComponentShape valueIndicatorShape =
+        sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape;
     Color valueIndicatorColor;
     if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
-      valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
+      valueIndicatorColor = sliderTheme.valueIndicatorColor ??
+          Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60),
+              theme.colorScheme.surface.withOpacity(0.90));
     } else {
-      valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
+      valueIndicatorColor = widget.activeColor ??
+          sliderTheme.valueIndicatorColor ??
+          theme.colorScheme.primary;
     }
 
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
-      activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
-      inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
-      disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
-      disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
-      activeTickMarkColor: widget.inactiveColor ?? sliderTheme.activeTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.54),
-      inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? theme.colorScheme.primary.withOpacity(0.54),
-      disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
-      disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
-      thumbColor: widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
-      disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
-      overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
+      activeTrackColor: widget.activeColor ??
+          sliderTheme.activeTrackColor ??
+          theme.colorScheme.primary,
+      inactiveTrackColor: widget.inactiveColor ??
+          sliderTheme.inactiveTrackColor ??
+          theme.colorScheme.primary.withOpacity(0.24),
+      disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ??
+          theme.colorScheme.onSurface.withOpacity(0.32),
+      disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ??
+          theme.colorScheme.onSurface.withOpacity(0.12),
+      activeTickMarkColor: widget.inactiveColor ??
+          sliderTheme.activeTickMarkColor ??
+          theme.colorScheme.onPrimary.withOpacity(0.54),
+      inactiveTickMarkColor: widget.activeColor ??
+          sliderTheme.inactiveTickMarkColor ??
+          theme.colorScheme.primary.withOpacity(0.54),
+      disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ??
+          theme.colorScheme.onPrimary.withOpacity(0.12),
+      disabledInactiveTickMarkColor:
+          sliderTheme.disabledInactiveTickMarkColor ??
+              theme.colorScheme.onSurface.withOpacity(0.12),
+      thumbColor: widget.activeColor ??
+          sliderTheme.thumbColor ??
+          theme.colorScheme.primary,
+      disabledThumbColor: sliderTheme.disabledThumbColor ??
+          Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38),
+              theme.colorScheme.surface),
+      overlayColor: widget.activeColor?.withOpacity(0.12) ??
+          sliderTheme.overlayColor ??
+          theme.colorScheme.primary.withOpacity(0.12),
       valueIndicatorColor: valueIndicatorColor,
       trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
       tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
       thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
-      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1.copyWith(
-        color: theme.colorScheme.onPrimary,
-      ),
+      showValueIndicator:
+          sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ??
+          theme.textTheme.bodyText1.copyWith(
+            color: theme.colorScheme.onPrimary,
+          ),
     );
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+    final MouseCursor effectiveMouseCursor =
+        MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!_enabled) MaterialState.disabled,
@@ -728,8 +778,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             sliderTheme: sliderTheme,
             textScaleFactor: MediaQuery.of(context).textScaleFactor,
             screenSize: _screenSize(),
-            onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-            onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+            onChanged: (widget.onChanged != null) && (widget.max > widget.min)
+                ? _handleChanged
+                : null,
+            onChangeStart:
+                widget.onChangeStart != null ? _handleDragStart : null,
             onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
             state: this,
             semanticFormatterCallback: widget.semanticFormatterCallback,
@@ -759,6 +812,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ),
     );
   }
+
   final LayerLink _layerLink = LayerLink();
 
   OverlayEntry overlayEntry;
@@ -779,7 +833,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
   }
 }
-
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _SliderRenderObjectWidget({
@@ -874,7 +927,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     @required TextDirection textDirection,
     bool hasFocus,
     bool hovering,
-  }) : assert(value != null && value >= 0.0 && value <= 1.0),
+  })  : assert(value != null && value >= 0.0 && value <= 1.0),
         assert(state != null),
         assert(textDirection != null),
         _platform = platform,
@@ -911,11 +964,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed && _state.overlayEntry != null) {
-        _state.overlayEntry.remove();
-        _state.overlayEntry = null;
-      }
-    });
+        if (status == AnimationStatus.dismissed &&
+            _state.overlayEntry != null) {
+          _state.overlayEntry.remove();
+          _state.overlayEntry = null;
+        }
+      });
     _enableAnimation = CurvedAnimation(
       parent: _state.enableController,
       curve: Curves.easeInOut,
@@ -930,13 +984,16 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Compute the largest width and height needed to paint the slider shapes,
   // other than the track shape. It is assumed that these shapes are vertically
   // centered on the track.
-  double get _maxSliderPartWidth => _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
-  double get _maxSliderPartHeight => _sliderPartSizes.map((Size size) => size.height).reduce(math.max);
+  double get _maxSliderPartWidth =>
+      _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
+  double get _maxSliderPartHeight =>
+      _sliderPartSizes.map((Size size) => size.height).reduce(math.max);
   List<Size> get _sliderPartSizes => <Size>[
-    _sliderTheme.overlayShape.getPreferredSize(isInteractive, isDiscrete),
-    _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete),
-    _sliderTheme.tickMarkShape.getPreferredSize(isEnabled: isInteractive, sliderTheme: sliderTheme),
-  ];
+        _sliderTheme.overlayShape.getPreferredSize(isInteractive, isDiscrete),
+        _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete),
+        _sliderTheme.tickMarkShape.getPreferredSize(
+            isEnabled: isInteractive, sliderTheme: sliderTheme),
+      ];
   double get _minPreferredTrackHeight => _sliderTheme.trackHeight;
 
   final _SliderState _state;
@@ -953,11 +1010,11 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // are relative to the sliders origin. Therefore, the offset is passed as
   // (0,0).
   Rect get _trackRect => _sliderTheme.trackShape.getPreferredRect(
-    parentBox: this,
-    offset: Offset.zero,
-    sliderTheme: _sliderTheme,
-    isDiscrete: false,
-  );
+        parentBox: this,
+        offset: Offset.zero,
+        sliderTheme: _sliderTheme,
+        isDiscrete: false,
+      );
 
   bool get isInteractive => onChanged != null;
 
@@ -979,9 +1036,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // get to the new location.
       final double distance = (_value - _state.positionController.value).abs();
       _state.positionController.duration = distance != 0.0
-        ? _positionAnimationDuration * (1.0 / distance)
-        : Duration.zero;
-      _state.positionController.animateTo(convertedValue, curve: Curves.easeInOut);
+          ? _positionAnimationDuration * (1.0 / distance)
+          : Duration.zero;
+      _state.positionController
+          .animateTo(convertedValue, curve: Curves.easeInOut);
     } else {
       _state.positionController.value = convertedValue;
     }
@@ -991,17 +1049,16 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TargetPlatform _platform;
   TargetPlatform get platform => _platform;
   set platform(TargetPlatform value) {
-    if (_platform == value)
-      return;
+    if (_platform == value) return;
     _platform = value;
     markNeedsSemanticsUpdate();
   }
 
   SemanticFormatterCallback _semanticFormatterCallback;
-  SemanticFormatterCallback get semanticFormatterCallback => _semanticFormatterCallback;
+  SemanticFormatterCallback get semanticFormatterCallback =>
+      _semanticFormatterCallback;
   set semanticFormatterCallback(SemanticFormatterCallback value) {
-    if (_semanticFormatterCallback == value)
-      return;
+    if (_semanticFormatterCallback == value) return;
     _semanticFormatterCallback = value;
     markNeedsSemanticsUpdate();
   }
@@ -1104,8 +1161,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hasFocus;
   set hasFocus(bool value) {
     assert(value != null);
-    if (value == _hasFocus)
-      return;
+    if (value == _hasFocus) return;
     _hasFocus = value;
     _updateForFocusOrHover(_hasFocus);
     markNeedsSemanticsUpdate();
@@ -1116,8 +1172,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hovering;
   set hovering(bool value) {
     assert(value != null);
-    if (value == _hovering)
-      return;
+    if (value == _hovering) return;
     _hovering = value;
     _updateForFocusOrHover(_hovering);
   }
@@ -1227,7 +1282,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double _getValueFromGlobalPosition(Offset globalPosition) {
-    final double visualPosition = (globalToLocal(globalPosition).dx - _trackRect.left) / _trackRect.width;
+    final double visualPosition =
+        (globalToLocal(globalPosition).dx - _trackRect.left) / _trackRect.width;
     return _getValueFromVisualPosition(visualPosition);
   }
 
@@ -1255,10 +1311,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       if (showValueIndicator) {
         _state.valueIndicatorController.forward();
         _state.interactionTimer?.cancel();
-        _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
+        _state.interactionTimer =
+            Timer(_minimumInteractionTime * timeDilation, () {
           _state.interactionTimer = null;
           if (!_active &&
-              _state.valueIndicatorController.status == AnimationStatus.completed) {
+              _state.valueIndicatorController.status ==
+                  AnimationStatus.completed) {
             _state.valueIndicatorController.reverse();
           }
         });
@@ -1334,16 +1392,20 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) => _minPreferredTrackWidth + _maxSliderPartWidth;
+  double computeMinIntrinsicWidth(double height) =>
+      _minPreferredTrackWidth + _maxSliderPartWidth;
 
   @override
-  double computeMaxIntrinsicWidth(double height) => _minPreferredTrackWidth + _maxSliderPartWidth;
+  double computeMaxIntrinsicWidth(double height) =>
+      _minPreferredTrackWidth + _maxSliderPartWidth;
 
   @override
-  double computeMinIntrinsicHeight(double width) => math.max(_minPreferredTrackHeight, _maxSliderPartHeight);
+  double computeMinIntrinsicHeight(double width) =>
+      math.max(_minPreferredTrackHeight, _maxSliderPartHeight);
 
   @override
-  double computeMaxIntrinsicHeight(double width) => math.max(_minPreferredTrackHeight, _maxSliderPartHeight);
+  double computeMaxIntrinsicHeight(double width) =>
+      math.max(_minPreferredTrackHeight, _maxSliderPartHeight);
 
   @override
   bool get sizedByParent => true;
@@ -1351,8 +1413,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void performResize() {
     size = Size(
-      constraints.hasBoundedWidth ? constraints.maxWidth : _minPreferredTrackWidth + _maxSliderPartWidth,
-      constraints.hasBoundedHeight ? constraints.maxHeight : math.max(_minPreferredTrackHeight, _maxSliderPartHeight),
+      constraints.hasBoundedWidth
+          ? constraints.maxWidth
+          : _minPreferredTrackWidth + _maxSliderPartWidth,
+      constraints.hasBoundedHeight
+          ? constraints.maxHeight
+          : math.max(_minPreferredTrackHeight, _maxSliderPartHeight),
     );
   }
 
@@ -1379,7 +1445,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
+    final Offset thumbCenter = Offset(
+        trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
 
     _sliderTheme.trackShape.paint(
       context,
@@ -1409,10 +1476,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (isDiscrete) {
-      final double tickMarkWidth = _sliderTheme.tickMarkShape.getPreferredSize(
-        isEnabled: isInteractive,
-        sliderTheme: _sliderTheme,
-      ).width;
+      final double tickMarkWidth = _sliderTheme.tickMarkShape
+          .getPreferredSize(
+            isEnabled: isInteractive,
+            sliderTheme: _sliderTheme,
+          )
+          .width;
       final double padding = trackRect.height;
       final double adjustedTrackWidth = trackRect.width - padding;
       // If the tick marks would be too dense, don't bother painting them.
@@ -1422,7 +1491,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + padding / 2;
+          final double dx =
+              trackRect.left + value * adjustedTrackWidth + padding / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape.paint(
             context,
@@ -1438,7 +1508,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
     }
 
-    if (isInteractive && label != null && !_valueIndicatorAnimation.isDismissed) {
+    if (isInteractive &&
+        label != null &&
+        !_valueIndicatorAnimation.isDismissed) {
       if (showValueIndicator) {
         _state.paintValueIndicator = (PaintingContext context, Offset offset) {
           if (attached) {
@@ -1500,16 +1572,21 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     config.label = _label ?? '';
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback(_state._lerp(value));
-      config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0) as double));
-      config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0) as double));
+      config.increasedValue = semanticFormatterCallback(_state
+          ._lerp((value + _semanticActionUnit).clamp(0.0, 1.0) as double));
+      config.decreasedValue = semanticFormatterCallback(_state
+          ._lerp((value - _semanticActionUnit).clamp(0.0, 1.0) as double));
     } else {
       config.value = '${(value * 100).round()}%';
-      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.increasedValue =
+          '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.decreasedValue =
+          '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
     }
   }
 
-  double get _semanticActionUnit => divisions != null ? 1.0 / divisions : _adjustmentUnit;
+  double get _semanticActionUnit =>
+      divisions != null ? 1.0 / divisions : _adjustmentUnit;
 
   void increaseAction() {
     if (isInteractive) {
@@ -1525,9 +1602,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 }
 
 class _AdjustSliderIntent extends Intent {
-  const _AdjustSliderIntent({
-    @required this.type
-  });
+  const _AdjustSliderIntent({@required this.type});
 
   const _AdjustSliderIntent.right() : type = _SliderAdjustmentType.right;
 
@@ -1560,13 +1635,16 @@ class _ValueIndicatorRenderObjectWidget extends LeafRenderObjectWidget {
       state: state,
     );
   }
+
   @override
-  void updateRenderObject(BuildContext context, _RenderValueIndicator renderObject) {
+  void updateRenderObject(
+      BuildContext context, _RenderValueIndicator renderObject) {
     renderObject._state = state;
   }
 }
 
-class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
+class _RenderValueIndicator extends RenderBox
+    with RelayoutWhenSystemFontsChangeMixin {
   _RenderValueIndicator({
     _SliderState state,
   }) : _state = state {
