@@ -87,7 +87,7 @@ class DynamicFeatures {
   /// accurate reflection of the readiness of the dynamic feature. Code and assets
   /// may only be used after the Future completes succesfully, regardless of what
   /// the installation state is in.
-  static Future<String> getDynamicFeatureInstallState({@required String moduleName}) async {
+  static Future<String?> getDynamicFeatureInstallState({@required String moduleName}) async {
     await SystemChannels.dynamicfeature.invokeMethod<void>(
       'getDynamicFeatureInstallState',
       { 'loadingUnitId': -1, 'moduleName': moduleName },
