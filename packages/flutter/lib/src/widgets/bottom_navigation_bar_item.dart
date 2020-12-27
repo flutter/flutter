@@ -22,7 +22,7 @@ class BottomNavigationBarItem {
   /// Creates an item that is used with [BottomNavigationBar.items].
   ///
   /// The argument [icon] should not be null and the argument [label] should not be null when used in a Material Design's [BottomNavigationBar].
-  const BottomNavigationBarItem({
+  BottomNavigationBarItem({
     required this.icon,
     @Deprecated(
       'Use "label" instead, as it allows for an improved text-scaling experience. '
@@ -79,7 +79,7 @@ class BottomNavigationBarItem {
   /// The text label for this [BottomNavigationBarItem].
   ///
   /// This will be used to create a [Text] widget to put in the bottom navigation bar.
-  final String? label;
+  String? label;
 
   /// The color of the background radial animation for material [BottomNavigationBar].
   ///
