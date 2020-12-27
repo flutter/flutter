@@ -35,7 +35,31 @@ class DynamicFeatures {
   /// feature is ready to use or not. Readiness should be determined by
   /// completion of the future returned by [installDynamicFeature] or
   /// `loadLibrary()`.
-  enum DynamicFeatureInstallState { requested, downloading, installed }
+  ///
+  /// These states are an extension of the states in Android's
+  /// https://developer.android.com/reference/com/google/android/play/core/splitinstall/model/SplitInstallSessionStatus
+  ///
+  /// Typical state flow begins as `unknown`, and transitions into `requested`
+  /// when the installation is begun. When the request is processed, the
+  /// state changes to `downloading` and finally `installed`. Modules previously
+  /// installed but not loaded in this session will return
+  /// `installedPendingLoad`, which indicates that the installtion request call
+  /// (either `loadLibrary()` or [installDynamicFeature]) should be repeated to
+  /// complete the loading process.
+  enum DynamicFeatureInstallState {
+    requested,
+    pending,
+    requireUserConfirmation,
+    downloading,
+    downloaded,
+    installing,
+    installedPendingLoad,
+    installed,
+    cancelling,
+    canceled,
+    failed,
+    unknown,
+  }
 
   // TODO(garyq): We should eventually expand this to install modules by loadingUnitId
   // as well as moduleName, but currently, loadingUnitId is opaque to the dart code
@@ -79,7 +103,11 @@ class DynamicFeatures {
   ///
   /// Installations of dynamic feature modules may be triggered by either calling
   /// [installDynamicFeature] for assets-only modules or `loadLibrary()` on a deferred
-  /// imported library. Modules not yet requested will complete with null.
+  /// imported library. Modules not yet requested or do not exist will complete with
+  /// [DynamicFeatureInstallState.unknown]. Modules previously installed but not
+  /// loaded in this session will return [DynamicFeatureInstallState.installedPendingLoad],
+  /// which indicates that the installtion request call should be repeated to
+  /// complete the loading process.
   ///
   /// Due to the async nature of platform channels and network i/o, newly requested
   /// installs may return null until the installation request has been processed. Thus,
