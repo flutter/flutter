@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui';
 
 import 'message_codecs.dart';
@@ -338,8 +337,7 @@ class SystemChannels {
   ///    the dynamic feature identified by the loadingUnitId or moduleName.
   ///    This method returns a string that represents the state. Depending on
   ///    the implementation, this string may vary, but the default Google Play
-  ///    Store implementation beings in the "Requested" state before transitioning
-  ///    into the "Downloading" and finally the "Installed" state.
+  ///    Store implementation retuns a state in the [DynamicFeatureInstallState] enum
   ///  * `uninstallDynamicFeature`:  Requests that a dynamic feature identified by
   ///    the provided loadingUnitId or moduleName be uninstalled. Since
   ///    uninstallation typically requires significant disk i/o, this method only
