@@ -1,4 +1,4 @@
-Signature: 79f7a152cf04df1bfcc0b5bd3c9bd004
+Signature: ae7bddbd9f27cf4299170d05957ff7a0
 
 UNUSED LICENSES:
 
@@ -3919,6 +3919,7 @@ FILE: ../../../third_party/skia/src/gpu/GrCommandBufferRef.h
 FILE: ../../../third_party/skia/src/gpu/GrDDLTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDDLTask.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
+FILE: ../../../third_party/skia/src/gpu/GrPixmap.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetContext.h
 FILE: ../../../third_party/skia/src/gpu/GrRingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRingBuffer.h
