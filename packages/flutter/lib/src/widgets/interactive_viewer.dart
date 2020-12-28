@@ -80,6 +80,7 @@ class InteractiveViewer extends StatefulWidget {
     this.onInteractionStart,
     this.onInteractionUpdate,
     this.panEnabled = true,
+    this.rotateEnabled = true,
     this.scaleEnabled = true,
     this.transformationController,
     required this.child,
@@ -196,8 +197,19 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// See also:
   ///
+  ///   * [rotateEnabled], which is similar but for rotation.
   ///   * [scaleEnabled], which is similar but for scale.
   final bool panEnabled;
+
+  /// If false, the user will be prevented from rotating.
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///   * [panEnabled], which is similar but for panning.
+  ///   * [scaleEnabled], which is similar but for scale.
+  final bool rotateEnabled;
 
   /// If false, the user will be prevented from scaling.
   ///
@@ -205,6 +217,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// See also:
   ///
+  ///   * [rotateEnabled], which is similar but for rotation.
   ///   * [panEnabled], which is similar but for panning.
   final bool scaleEnabled;
 
@@ -416,39 +429,6 @@ class InteractiveViewer extends StatefulWidget {
     return 0 <= aMAB && aMAB <= aBAB && 0 <= aMAD && aMAD <= aDAD;
   }
 
-  /// Get the point inside (inclusively) the given Quad that is nearest to the
-  /// given Vector3.
-  /*
-  @visibleForTesting
-  static Vector3 getNearestPointInside(Vector3 point, Quad quad) {
-    // If the point is inside the axis aligned bounding box, then it's ok where
-    // it is.
-    if (pointIsInside(point, quad)) {
-      return point;
-    }
-
-    // Otherwise, return the nearest point on the quad.
-    final List<Vector3> closestPoints = <Vector3>[
-      InteractiveViewer.getNearestPointOnLine(point, quad.point0, quad.point1),
-      InteractiveViewer.getNearestPointOnLine(point, quad.point1, quad.point2),
-      InteractiveViewer.getNearestPointOnLine(point, quad.point2, quad.point3),
-      InteractiveViewer.getNearestPointOnLine(point, quad.point3, quad.point0),
-    ];
-    double minDistance = double.infinity;
-    late Vector3 closestOverall;
-    for (final Vector3 closePoint in closestPoints) {
-      final double distance = math.sqrt(
-        math.pow(point.x - closePoint.x, 2) + math.pow(point.y - closePoint.y, 2),
-      );
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestOverall = closePoint;
-      }
-    }
-    return closestOverall;
-  }
-  */
-
   /// Returns the axis aligned bounding box of the given quad.
   @visibleForTesting
   static Quad getAxisAlignedBoundingBox(Quad quad) {
@@ -530,11 +510,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   double? _rotationStart = 0.0; // Rotation at start of rotation gesture.
   _GestureType? _gestureType;
 
-  // TODO(justinmc): Add rotateEnabled parameter to the widget and remove this
-  // hardcoded value when the rotation feature is implemented.
-  // https://github.com/flutter/flutter/issues/57698
-  final bool _rotateEnabled = true;
-
   // Used as the coefficient of friction in the inertial translation animation.
   // This value was eyeballed to give a feel similar to Google Photos.
   static const double _kDrag = 0.0000135;
@@ -584,15 +559,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       alignedTranslation.dy,
     );
 
-    try {
-      return _validateMatrix(nextMatrix);
-    } catch (stacktrace) {
-      // If the matrix is invalid and can't be corrected, reject this
-      // translation and keep the original matrix. This doesn't interfere with
-      // inertia animations because it usually happens in corners where
-      // animations will stop anyway.
-      return matrix;
-    }
+    return _validateMatrix(nextMatrix, matrix);
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -638,22 +605,17 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       ..rotateZ(-rotation)
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
 
-    try {
-      return _validateMatrix(nextMatrix);
-    } catch (stacktrace) {
-      // If the matrix is invalid and can't be corrected, reject this rotation.
-      return matrix;
-    }
+    return _validateMatrix(nextMatrix, matrix);
   }
 
   // If the given matrix is valid, return it. If it is invalid, return the
-  // closest translated matrix that is valid. If none is possible, then throw an
-  // error.
+  // closest translated matrix that is valid. If none is possible, then return
+  // the defaultMatrix.
   //
   // A valid matrix is defined as a matrix where all sides of the viewport
   // intersect the boundary. This allows the viewport to partially see beyond
   // the boundary after rotation, but keeps the entire boundary visible.
-  Matrix4 _validateMatrix(Matrix4 matrix) {
+  Matrix4 _validateMatrix(Matrix4 matrix, Matrix4 defaultMatrix) {
     // If the boundaries are infinite, then no need to check if the translation
     // fits within them.
     if (_boundaryRect.isInfinite) {
@@ -692,29 +654,60 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix;
     }
 
-    // Invalid. Find the side that is farthest from being in a valid position.
-    final LineSegment invalidSide = (invalidSides
-      ..sort((LineSegment a, LineSegment b) {
-        final OffsetTuple closestPointsA = a.findClosestPointsRect(_boundaryRect);
-        final double distanceA = _distanceBetweenPoints(
-          closestPointsA.a,
-          closestPointsA.b,
-        ).abs();
-        final OffsetTuple closestPointsB = b.findClosestPointsRect(_boundaryRect);
-        final double distanceB = _distanceBetweenPoints(
-          closestPointsB.a,
-          closestPointsB.b,
-        ).abs();
-        return distanceB.compareTo(distanceA);
-      })).first;
+    bool magnitudesAligned = true;
+    late Offset correction;
 
-    // Find the nearest points on boundaryRect and the viewportSide that doesn't
-    // intersect to each other, and move the points on top of each other.
-    final OffsetTuple closestPoints = invalidSide.findClosestPointsRect(_boundaryRect);
-    final Offset difference = closestPoints.a - closestPoints.b;
+    // If there are multiple invalid sides, but they are all invalid in the same
+    // directions, then they should be able to be corrected by taking the
+    // greatest magnitude in each direction.
+    if (invalidSides.length > 1) {
+      correction = invalidSides.fold(Offset.zero, (Offset value, LineSegment invalidSide) {
+        final OffsetTuple closestPoints = invalidSide.findClosestPointsRect(_boundaryRect);
+        final Offset difference = closestPoints.a - closestPoints.b;
+        if (magnitudesAligned) {
+          final bool xMisaligned = difference.dx != 0.0 && value.dx != 0.0
+              && (difference.dx > 0.0 != value.dx > 0.0);
+          final bool yMisaligned = difference.dy != 0.0 && value.dy != 0.0
+              && (difference.dy > 0.0 != value.dy > 0.0);
+          if (xMisaligned || yMisaligned) {
+            magnitudesAligned = false;
+          }
+        }
+        return Offset(
+          difference.dx.abs() > value.dx.abs() ? difference.dx : value.dx,
+          difference.dy.abs() > value.dy.abs() ? difference.dy : value.dy,
+        );
+      });
+    }
+
+    // If there is only one invalid side, or if there are multiple but they are
+    // invalid in different directions, then just correct the single most
+    // invalid side.
+    if (!magnitudesAligned || invalidSides.length == 1) {
+      // Find the side that is farthest from being in a valid position.
+      final LineSegment invalidSide = (invalidSides
+        ..sort((LineSegment a, LineSegment b) {
+          final OffsetTuple closestPointsA = a.findClosestPointsRect(_boundaryRect);
+          final double distanceA = _distanceBetweenPoints(
+            closestPointsA.a,
+            closestPointsA.b,
+          ).abs();
+          final OffsetTuple closestPointsB = b.findClosestPointsRect(_boundaryRect);
+          final double distanceB = _distanceBetweenPoints(
+            closestPointsB.a,
+            closestPointsB.b,
+          ).abs();
+          return distanceB.compareTo(distanceA);
+        })).first;
+
+      // Find the nearest points on boundaryRect and the viewportSide that doesn't
+      // intersect to each other, and move the points on top of each other.
+      final OffsetTuple closestPoints = invalidSide.findClosestPointsRect(_boundaryRect);
+      correction = closestPoints.a - closestPoints.b;
+    }
 
     final Matrix4 correctedMatrix = matrix.clone()
-        ..translate(difference.dx, difference.dy);
+        ..translate(correction.dx, correction.dy);
     final Quad correctedNextViewport = _transformViewport(correctedMatrix, _viewport);
 
     final LineSegment correctedViewportSide01 = LineSegment.vector(
@@ -734,12 +727,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       correctedNextViewport.point0,
     );
 
-    // If this matrix is invalid and uncorrectable, then throw an error.
+    // If this matrix is invalid and uncorrectable, then return defaultMatrix.
     if (!correctedViewportSide01.intersectsRect(_boundaryRect)
         || !correctedViewportSide12.intersectsRect(_boundaryRect)
         || !correctedViewportSide23.intersectsRect(_boundaryRect)
         || !correctedViewportSide30.intersectsRect(_boundaryRect)) {
-      throw FlutterError('Matrix is invalid and not correctable');
+      return defaultMatrix;
       /*
       final LineSegment? correctedInvalidSide = <LineSegment?>[
         correctedViewportSide01,
@@ -764,7 +757,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   bool _gestureIsSupported(_GestureType? gestureType) {
     switch (gestureType) {
       case _GestureType.rotate:
-        return _rotateEnabled;
+        return widget.rotateEnabled;
 
       case _GestureType.scale:
         return widget.scaleEnabled;
@@ -781,7 +774,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // finger.
   _GestureType _getGestureType(ScaleUpdateDetails details) {
     final double scale = !widget.scaleEnabled ? 1.0 : details.scale;
-    final double rotation = !_rotateEnabled ? 0.0 : details.rotation;
+    final double rotation = !widget.rotateEnabled ? 0.0 : details.rotation;
     if ((scale - 1).abs() > rotation.abs()) {
       return _GestureType.scale;
     } else if (rotation != 0.0) {
@@ -815,11 +808,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle an update to an ongoing gesture. All of pan, scale, and rotate are
   // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
-    // Rotation is often 0.0 for the first call of _onScaleUpdate. Skip this
-    // event in order to get a fair comparison of scale and rotation.
-    if ((details.scale != 1.0 || details.rotation != 0.0) && (details.scale == 1.0 || details.rotation == 0.0)) {
-      return;
-    }
     final double scale = _transformationController!.value.getMaxScaleOnAxis();
     final Offset focalPointScene = _transformationController!.toScene(
       details.localFocalPoint,
@@ -1257,33 +1245,6 @@ String _stringifyQuad(Quad quad) {
   return '${quad.point0} ${quad.point1} ${quad.point2} ${quad.point3}';
 }
 
-// Return the amount that viewport lies outside of boundary. If the viewport
-// is completely contained within the boundary (inclusively), then returns
-// Offset.zero.
-/*
-Offset _exceedsBy(Quad boundary, Quad viewport) {
-  final List<Vector3> viewportPoints = <Vector3>[
-    viewport.point0, viewport.point1, viewport.point2, viewport.point3,
-  ];
-  Offset largestExcess = Offset.zero;
-  for (final Vector3 point in viewportPoints) {
-    final Vector3 pointInside = InteractiveViewer.getNearestPointInside(point, boundary);
-    final Offset excess = Offset(
-      pointInside.x - point.x,
-      pointInside.y - point.y,
-    );
-    if (excess.dx.abs() > largestExcess.dx.abs()) {
-      largestExcess = Offset(excess.dx, largestExcess.dy);
-    }
-    if (excess.dy.abs() > largestExcess.dy.abs()) {
-      largestExcess = Offset(largestExcess.dx, excess.dy);
-    }
-  }
-
-  return _round(largestExcess);
-}
-*/
-
 // Round the output values. This works around a precision problem where
 // values that should have been zero were given as within 10^-10 of zero.
 Offset _round(Offset offset) {
@@ -1407,7 +1368,7 @@ class LineSegment {
   bool _lineContains(Offset offset) {
     // Special case vertical line because of infinite slope.
     if (p0.dx == p1.dx) {
-      return offset.dx == p0.dx;
+      return (offset.dx - p0.dx).abs() <= 1 / _kTolerance;
     }
     // Use the line formula with a tolerance.
     return (offset.dy - (slope * offset.dx + lineYIntercept)).abs() <= 1 / _kTolerance;

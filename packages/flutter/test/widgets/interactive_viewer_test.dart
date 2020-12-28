@@ -8,7 +8,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4, Matrix3;
+
+import 'gesture_utils.dart';
 
 void main() {
   // Helper function for comparing all dimensions of a Vector3 with some
@@ -24,7 +26,6 @@ void main() {
     expect(a.dy, closeTo(b.dy, 0.0000000000001));
   }
 
-  /*
   group('InteractiveViewer', () {
     testWidgets('child fits in viewport', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
@@ -76,6 +77,60 @@ void main() {
       await gesture2.up();
       await tester.pumpAndSettle();
       expect(transformationController.value, isNot(equals(Matrix4.identity())));
+    });
+
+    testWidgets('child fits in viewport - rotation', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                // Scale seems to supercede rotation in the tests, so disable it
+                // here for simplicity.
+                scaleEnabled: false,
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Pinch to rotate works.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childCenter = Offset(
+        childOffset.dx + 100.0,
+        childOffset.dy + 100.0,
+      );
+      const double radius = 20.0;
+      final Offset rotateStart1 = Offset(childCenter.dx - radius, childCenter.dy);
+      final Offset rotateStart2 = Offset(childCenter.dx + radius, childCenter.dy);
+      // Rotate each finger 45 degrees in opposite directions on a circle of
+      // radius 20.0 pixels.
+      final double value = radius * math.sin(math.pi / 4);
+      final Offset rotateEnd1 = Offset(childCenter.dx - value, childCenter.dy - value);
+      final Offset rotateEnd2 = Offset(childCenter.dx + value, childCenter.dy + value);
+      final TestGesture gesture = await tester.createGesture();
+      addTearDown(gesture.removePointer);
+      final TestGesture gesture2 = await tester.createGesture();
+      addTearDown(gesture2.removePointer);
+      await gesture.down(rotateStart1);
+      await gesture2.down(rotateStart2);
+      await tester.pump();
+      await gesture.moveTo(rotateEnd1);
+      await gesture2.moveTo(rotateEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, isNot(equals(Matrix4.identity())));
+      expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
+      final Matrix3 rotationMatrix = transformationController.value.getRotation();
+      final double rotation = math.atan2(rotationMatrix.row1.x, rotationMatrix.row0.x);
+      expect(rotation, moreOrLessEquals(math.pi / 8, epsilon: 1e-9));
     });
 
     testWidgets('boundary slightly bigger than child', (WidgetTester tester) async {
@@ -146,6 +201,7 @@ void main() {
               child: InteractiveViewer(
                 constrained: false,
                 scaleEnabled: false,
+                rotateEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 2000.0, height: 2000.0),
               ),
@@ -352,6 +408,7 @@ void main() {
       expect(translation.y, 0.0);
     });
 
+    // TODO(justinmc): Do the same test but rotated.
     testWidgets('inertia fling and boundary sliding', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 50.0;
@@ -387,8 +444,8 @@ void main() {
       // inertia.
       await tester.pump(const Duration(milliseconds: 10));
       translation = transformationController.value.getTranslation();
-      expect(translation.x, greaterThan(20.0));
-      expect(translation.y, greaterThan(10.0));
+      expect(translation.x, greaterThan(flingEnd.dx));
+      expect(translation.y, greaterThan(flingEnd.dy));
       expect(translation.x, lessThan(boundaryMargin));
       expect(translation.y, lessThan(boundaryMargin));
 
@@ -400,7 +457,7 @@ void main() {
       final double yWhenXHits = translation.y;
 
       // x is held to the boundary while y slides along.
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 40));
       translation = transformationController.value.getTranslation();
       expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
       expect(translation.y, greaterThan(yWhenXHits));
@@ -637,11 +694,11 @@ void main() {
 
     testWidgets('Scale with mouse returns onInteraction properties', (WidgetTester tester) async{
       final TransformationController transformationController = TransformationController();
-      Offset focalPoint;
-      Offset localFocalPoint;
-      double scaleChange;
-      Velocity currentVelocity;
-      bool calledStart;
+      late final Offset focalPoint;
+      late final Offset localFocalPoint;
+      late final double scaleChange;
+      late final Velocity currentVelocity;
+      late final bool calledStart;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -689,11 +746,11 @@ void main() {
 
     testWidgets('onInteraction can be used to get scene point', (WidgetTester tester) async{
       final TransformationController transformationController = TransformationController();
-      Offset focalPoint;
-      Offset localFocalPoint;
-      double scaleChange;
-      Velocity currentVelocity;
-      bool calledStart;
+      late final Offset focalPoint;
+      late final Offset localFocalPoint;
+      late final double scaleChange;
+      late final Velocity currentVelocity;
+      late final bool calledStart;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -890,65 +947,6 @@ void main() {
     });
   });
 
-  group('getNearestPointOnLine', () {
-    test('does not modify parameters', () {
-      final Vector3 point = Vector3(5.0, 5.0, 0.0);
-      final Vector3 a = Vector3(0.0, 0.0, 0.0);
-      final Vector3 b = Vector3(10.0, 0.0, 0.0);
-
-      final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a , b);
-
-      expect(closestPoint, Vector3(5.0, 0.0, 0.0));
-      expect(point, Vector3(5.0, 5.0, 0.0));
-      expect(a, Vector3(0.0, 0.0, 0.0));
-      expect(b, Vector3(10.0, 0.0, 0.0));
-    });
-
-    test('simple example', () {
-      final Vector3 point = Vector3(0.0, 5.0, 0.0);
-      final Vector3 a = Vector3(0.0, 0.0, 0.0);
-      final Vector3 b = Vector3(5.0, 5.0, 0.0);
-
-      expect(InteractiveViewer.getNearestPointOnLine(point, a, b), Vector3(2.5, 2.5, 0.0));
-    });
-
-    test('closest to a', () {
-      final Vector3 point = Vector3(-1.0, -1.0, 0.0);
-      final Vector3 a = Vector3(0.0, 0.0, 0.0);
-      final Vector3 b = Vector3(5.0, 5.0, 0.0);
-
-      expect(InteractiveViewer.getNearestPointOnLine(point, a, b), a);
-    });
-
-    test('closest to b', () {
-      final Vector3 point = Vector3(6.0, 6.0, 0.0);
-      final Vector3 a = Vector3(0.0, 0.0, 0.0);
-      final Vector3 b = Vector3(5.0, 5.0, 0.0);
-
-      expect(InteractiveViewer.getNearestPointOnLine(point, a, b), b);
-    });
-
-    test('point already on the line returns the point', () {
-      final Vector3 point = Vector3(2.0, 2.0, 0.0);
-      final Vector3 a = Vector3(0.0, 0.0, 0.0);
-      final Vector3 b = Vector3(5.0, 5.0, 0.0);
-
-      expect(InteractiveViewer.getNearestPointOnLine(point, a, b), point);
-    });
-
-    test('real example', () {
-      final Vector3 point = Vector3(-436.9, 433.6, 0.0);
-      final Vector3 a = Vector3(-1114.0, -60.3, 0.0);
-      final Vector3 b = Vector3(288.8, 432.7, 0.0);
-
-      final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a , b);
-
-      expect(closestPoint.x, moreOrLessEquals(-356.8, epsilon: 0.1));
-      expect(closestPoint.y, moreOrLessEquals(205.8, epsilon: 0.1));
-    });
-  });
-  */
-
   group('getAxisAlignedBoundingBox', () {
     test("a square that's already axis aligned", () {
       const double dimension = 300.0;
@@ -1112,9 +1110,6 @@ void main() {
     });
   });
 
-  // TODO(justinmc): Repurpose these tests for _getAxisAlignedBoundingBoxWithRotation?
-  // It needs to be tested somehow, if not from these.
-  /*
   group('getAxisAlignedBoundingBox', () {
     test('rectangle already axis aligned returns the rectangle', () {
       final Quad quad = Quad.points(
@@ -1180,7 +1175,6 @@ void main() {
       expect(aabb.point3, Vector3(-462.7, 938.6, 0.0));
     });
   });
-  */
 
   group('pointIsInside', () {
     test('inside', () {
@@ -1219,53 +1213,6 @@ void main() {
       expect(InteractiveViewer.pointIsInside(point, quad), true);
     });
   });
-
-  /*
-  group('getNearestPointInside', () {
-    test('point already inside quad', () {
-      final Vector3 point = Vector3(5.0, 5.0, 0.0);
-      final Quad quad = Quad.points(
-        Vector3(0.0, 0.0, 0.0),
-        Vector3(0.0, 10.0, 0.0),
-        Vector3(10.0, 10.0, 0.0),
-        Vector3(10.0, 0.0, 0.0),
-      );
-
-      final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
-
-      expect(nearestPoint, point);
-    });
-
-    test('axis aligned quad', () {
-      final Vector3 point = Vector3(5.0, 15.0, 0.0);
-      final Quad quad = Quad.points(
-        Vector3(0.0, 0.0, 0.0),
-        Vector3(0.0, 10.0, 0.0),
-        Vector3(10.0, 10.0, 0.0),
-        Vector3(10.0, 0.0, 0.0),
-      );
-
-      final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
-
-      expect(nearestPoint, Vector3(5.0, 10.0, 0.0));
-    });
-
-    test('not axis aligned quad', () {
-      final Vector3 point = Vector3(5.0, 15.0, 0.0);
-      final Quad quad = Quad.points(
-        Vector3(0.0, 0.0, 0.0),
-        Vector3(2.0, 10.0, 0.0),
-        Vector3(12.0, 12.0, 0.0),
-        Vector3(10.0, 2.0, 0.0),
-      );
-
-      final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
-
-      expect(nearestPoint.x, moreOrLessEquals(5.8, epsilon: 0.1));
-      expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
-    });
-  });
-  */
 
   group('LineSegment', () {
     group('contains', () {
