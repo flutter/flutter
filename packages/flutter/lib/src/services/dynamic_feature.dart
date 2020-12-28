@@ -9,6 +9,44 @@ import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
+/// Default Google Play Store implementation states that reflect the current
+/// installation status of a dynamic feature module.
+///
+/// Returned by [DynamicFeature.getDynamicFeatureInstallState].
+///
+/// These states may differ in custom dynamic feature implementations.
+///
+/// Due to the asynchronous nature of platform channels, these states are
+/// informational and should not be depended on to determine if a dynamic
+/// feature is ready to use or not. Readiness should be determined by
+/// completion of the future returned by [installDynamicFeature] or
+/// `loadLibrary()`.
+///
+/// These states are an extension of the states in Android's
+/// https://developer.android.com/reference/com/google/android/play/core/splitinstall/model/SplitInstallSessionStatus
+///
+/// Typical state flow begins as `unknown`, and transitions into `requested`
+/// when the installation is begun. When the request is processed, the
+/// state changes to `downloading` and finally `installed`. Modules previously
+/// installed but not loaded in this session will be in the
+/// `installedPendingLoad` state, which indicates that the installation request
+/// call (either `loadLibrary()` or [installDynamicFeature]) should be repeated
+/// to trigger the loading process.
+enum DynamicFeatureInstallState {
+  requested,
+  pending,
+  requireUserConfirmation,
+  downloading,
+  downloaded,
+  installing,
+  installedPendingLoad,
+  installed,
+  cancelling,
+  canceled,
+  failed,
+  unknown,
+}
+
 /// Manages the installation and loading of dynamic feature modules.
 ///
 /// Dynamic features allow Flutter applications to download precompiled AOT
@@ -17,49 +55,11 @@ import 'system_channels.dart';
 /// use cases include deferring installation of advanced or infrequently
 /// used features and limiting locale specific features to users of matching
 /// locales.
-class DynamicFeatures {
+class DynamicFeature {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
-  DynamicFeatures._();
-
-  /// Default Google Play Store implementation states that reflect the current
-  /// installation status of a dynamic feature module.
-  ///
-  /// Returned by [getDynamicFeatureInstallState].
-  ///
-  /// These states may differ in custom dynamic feature implementations.
-  ///
-  /// Due to the asynchronous nature of platform channels, these states are
-  /// informational and should not be depended on to determine if a dynamic
-  /// feature is ready to use or not. Readiness should be determined by
-  /// completion of the future returned by [installDynamicFeature] or
-  /// `loadLibrary()`.
-  ///
-  /// These states are an extension of the states in Android's
-  /// https://developer.android.com/reference/com/google/android/play/core/splitinstall/model/SplitInstallSessionStatus
-  ///
-  /// Typical state flow begins as `unknown`, and transitions into `requested`
-  /// when the installation is begun. When the request is processed, the
-  /// state changes to `downloading` and finally `installed`. Modules previously
-  /// installed but not loaded in this session will return
-  /// `installedPendingLoad`, which indicates that the installtion request call
-  /// (either `loadLibrary()` or [installDynamicFeature]) should be repeated to
-  /// complete the loading process.
-  enum DynamicFeatureInstallState {
-    requested,
-    pending,
-    requireUserConfirmation,
-    downloading,
-    downloaded,
-    installing,
-    installedPendingLoad,
-    installed,
-    cancelling,
-    canceled,
-    failed,
-    unknown,
-  }
+  DynamicFeature._();
 
   // TODO(garyq): We should eventually expand this to install modules by loadingUnitId
   // as well as moduleName, but currently, loadingUnitId is opaque to the dart code
@@ -68,7 +68,7 @@ class DynamicFeatures {
 
   /// Requests that an assets-only dynamic feature identified by the [moduleName]
   /// be downloaded and installed.
-  /// 
+  ///
   /// This method returns a Future<void> that will complete when the feature is
   /// installed and any assets are ready to used. When an error occurs, the
   /// future will complete an error.
@@ -78,7 +78,7 @@ class DynamicFeatures {
   /// library's prefix to ensure that the dart code is properly loaded as
   /// `loadLibrary()` will provide the loading unit id needed for the dart
   /// library loading process. For example:
-  /// 
+  ///
   /// ```dart
   /// import 'split_module.dart' deferred as SplitModule;
   /// ...
@@ -88,8 +88,8 @@ class DynamicFeatures {
   /// This method will not load associated dart libraries contained in the dynamic
   /// feature module, though it will download the files necessary and subsequent
   /// calls to `loadLibrary()` to load will complete faster.
-  static Future<void> installDynamicFeature({@required String moduleName}) async {
-    await SystemChannels.dynamicfeature.invokeMethod<void>(
+  static Future<void> installDynamicFeature({@required String? moduleName}) async {
+    await SystemChannels.dynamicFeature.invokeMethod<void>(
       'installDynamicFeature',
       { 'loadingUnitId': -1, 'moduleName': moduleName },
     );
@@ -115,8 +115,8 @@ class DynamicFeatures {
   /// accurate reflection of the readiness of the dynamic feature. Code and assets
   /// may only be used after the Future completes succesfully, regardless of what
   /// the installation state is in.
-  static Future<String?> getDynamicFeatureInstallState({@required String moduleName}) async {
-    await SystemChannels.dynamicfeature.invokeMethod<void>(
+  static Future<String?> getDynamicFeatureInstallState({@required String? moduleName}) async {
+    await SystemChannels.dynamicFeature.invokeMethod<void>(
       'getDynamicFeatureInstallState',
       { 'loadingUnitId': -1, 'moduleName': moduleName },
     );
@@ -130,8 +130,8 @@ class DynamicFeatures {
   /// assets and files) may occur at a later time. However, once uninstallation
   /// is requested, the dynamic feature should not be used anymore until
   /// [installDynamicFeature] or `loadLibrary()` is called again.
-  static Future<void> uninstallDynamicFeature({@required String moduleName}) async {
-    await SystemChannels.dynamicfeature.invokeMethod<void>(
+  static Future<void> uninstallDynamicFeature({@required String? moduleName}) async {
+    await SystemChannels.dynamicFeature.invokeMethod<void>(
       'uninstallDynamicFeature',
       { 'loadingUnitId': -1, 'moduleName': moduleName },
     );

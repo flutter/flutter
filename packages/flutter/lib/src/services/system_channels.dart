@@ -345,7 +345,7 @@ class SystemChannels {
   ///    assets and files) may occur at a later time. However, once uninstallation
   ///    is requested, the dynamic feature should not be used anymore until
   ///    `installDynamicFeature` is called again.
-  static const MethodChannel dynamicfeature = OptionalMethodChannel(
+  static const MethodChannel dynamicFeature = OptionalMethodChannel(
     'flutter/dynamicfeature',
     StandardMethodCodec(),
   );
