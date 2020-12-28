@@ -128,7 +128,7 @@ class DriveCommand extends RunCommandBase {
           'Attempts to write an SkSL file when the drive process is finished '
           'to the provided file, overwriting it if necessary.')
       ..addMultiOption('test-arguments', help: 'Additional arguments to pass to the '
-          'Dart VM running The test script.');
+          'test script.');
   }
 
   // `pub` must always be run due to the test script running from source,

@@ -236,8 +236,13 @@ class FlutterDriverService extends DriverService {
     List<String> browserDimension,
   }) async {
     return _processUtils.stream(<String>[
-      _dartSdkPath,
-      ...<String>[...arguments, testFile, '-rexpanded'],
+      // This is probably not the correct way of calling the executable from
+      // package:test, and needs to be figured out somehow.
+      'flutter',
+      'pub',
+      'run',
+      'test',
+      ...<String>[testFile, '-rexpanded', ...arguments],
     ], environment: <String, String>{
       'VM_SERVICE_URL': _vmServiceUri,
       ...environment,
