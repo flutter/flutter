@@ -475,7 +475,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// ```
   ///
   /// ```dart
-  /// static final List<String> _options = <String>[
+  /// final List<String> _options = <String>[
   ///   'aardvark',
   ///   'bobcat',
   ///   'chameleon',
