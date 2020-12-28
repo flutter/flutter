@@ -54,6 +54,18 @@ void main() {
                 onTap: () {
                   log.add('cell-tap: ${dessert.calories}');
                 },
+                  onDoubleTap: () {
+                    log.add('cell-doubleTap: ${dessert.calories}');
+                  },
+                  onLongPress: () {
+                    log.add('cell-longPress: ${dessert.calories}');
+                  },
+                  onTapCancel: () {
+                    log.add('cell-tapCancel: ${dessert.calories}');
+                  },
+                  onTapDown: (TapDownDetails details) {
+                    log.add('cell-tapDown: ${dessert.calories}');
+                  }
               ),
             ],
           );
@@ -94,9 +106,40 @@ void main() {
     ));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
-    await tester.tap(find.text('375'));
+    await tester.tap(find.text('375'),pointer: 2);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('375'),pointer: 3);
 
-    expect(log, <String>['cell-tap: 375']);
+    expect(log, <String>['cell-doubleTap: 375']);
+    log.clear();
+
+    await tester.longPress(find.text('375'),pointer: 4);
+
+    expect(log,<String>['cell-tapDown: 375' ,'cell-tapCancel: 375', 'cell-longPress: 375']);
+    log.clear();
+
+    await tester.tap(find.text('375'),pointer: 1);
+
+    expect(log, isEmpty);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(log, equals(<String>['cell-tapDown: 375', 'cell-tap: 375']));
+    log.clear();
+
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(log, equals(<String>['cell-tapDown: 375']));
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    log.clear();
+    gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await gesture.cancel();
+    expect(log, equals(<String>['cell-tapDown: 375', 'cell-tapCancel: 375']));
+
     log.clear();
 
     await tester.tap(find.byType(Checkbox).last);
