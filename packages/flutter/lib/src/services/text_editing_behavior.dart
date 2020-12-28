@@ -6,8 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'keyboard_key.dart';
-
 // TODO(justinmc): Remove from widgets/text_selection.dart.
 /// A duration that controls how often the drag selection update callback is
 /// called.
@@ -15,16 +13,6 @@ const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
 class ArrowLeftTextIntent extends Intent {
   const ArrowLeftTextIntent({
-    required GlobalKey editableKey,
-  }) : _editableKey = editableKey;
-
-  final GlobalKey _editableKey;
-
-  RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
-}
-
-class ArrowLeftTextIntentRoot extends Intent {
-  const ArrowLeftTextIntentRoot({
     required this.context,
   });
 
@@ -160,112 +148,92 @@ class TextEditingAction<T extends Intent> extends Action<T> {
 // TextSelectionGestureDetectorBuilder and from
 // _TextFieldSelectionGestureDetectorBuilder.
 // Rename and move file.
-class TextEditingActionsMap {
-  TextEditingActionsMap({
-    required this.platform,
-  });
+/// The map of [Action]s that correspond to the default behavior for Flutter on
+/// the current platform.
+///
+/// See also:
+///
+/// * [Actions], the widget that accepts a map like this.
+final Map<Type, Action<Intent>> textEditingActionsMap = <Type, Action<Intent>>{
+  SingleTapUpTextIntent: _singleTapUpTextAction,
+  TapDownTextIntent: _tapDownTextAction,
+  ArrowLeftTextIntent: _arrowLeftTextAction,
+};
 
-  // TODO(justinmc): Can I just import foundation here to get this?
-  final TargetPlatform platform;
-
-  /// The top level actions map to be registered at the root of the app.
-  Map<Type, Action<Intent>>? _map;
-  Map<Type, Action<Intent>> get map {
-    _map ??= <Type, Action<Intent>>{
-      SingleTapUpTextIntent: singleTapUpTextAction,
-      TapDownTextIntent: tapDownTextAction,
-      ArrowLeftTextIntent: arrowLeftTextAction,
-    };
-    return _map!;
-  }
-
-  CallbackAction<SingleTapUpTextIntent>? _singleTapUpTextAction;
-  CallbackAction<SingleTapUpTextIntent> get singleTapUpTextAction {
-    _singleTapUpTextAction ??= CallbackAction<SingleTapUpTextIntent>(
-      onInvoke: (SingleTapUpTextIntent intent) {
-        print('justin TEB singleTapUp action invoked');
-        intent.editableTextState.hideToolbar();
-        if (intent.editableTextState.widget.selectionEnabled) {
-          switch (platform) {
-            case TargetPlatform.iOS:
-            case TargetPlatform.macOS:
-              switch (intent.details.kind) {
-                case PointerDeviceKind.mouse:
-                case PointerDeviceKind.stylus:
-                case PointerDeviceKind.invertedStylus:
-                  // Precise devices should place the cursor at a precise position.
-                  intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-                  break;
-                case PointerDeviceKind.touch:
-                case PointerDeviceKind.unknown:
-                  // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-                  // of the word.
-                  intent.editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-                  break;
-              }
-              break;
-            case TargetPlatform.android:
-            case TargetPlatform.fuchsia:
-            case TargetPlatform.linux:
-            case TargetPlatform.windows:
+final CallbackAction<SingleTapUpTextIntent> _singleTapUpTextAction = CallbackAction<SingleTapUpTextIntent>(
+  onInvoke: (SingleTapUpTextIntent intent) {
+    print('justin TEB singleTapUp action invoked');
+    intent.editableTextState.hideToolbar();
+    if (intent.editableTextState.widget.selectionEnabled) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          switch (intent.details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+              // Precise devices should place the cursor at a precise position.
               intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
               break;
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
+              // of the word.
+              intent.editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              break;
           }
-        }
-        // TODO(justinmc): State of keyboard visibility should be controllable here
-        // too.
-        //_state._requestKeyboard();
-
-        // TODO(justinmc): Still need to handle calling of onTap.
-        //if (_state.widget.onTap != null)
-        //  _state.widget.onTap!();
-      },
-    );
-    return _singleTapUpTextAction!;
-  }
-
-  /// Handler for [TextSelectionGestureDetector.onTapDown].
-  ///
-  /// By default, it forwards the tap to [RenderEditable.handleTapDown] and sets
-  /// [shouldShowSelectionToolbar] to true if the tap was initiated by a finger or stylus.
-  ///
-  /// See also:
-  ///
-  ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
-  CallbackAction<TapDownTextIntent>? _tapDownTextAction;
-  CallbackAction<TapDownTextIntent> get tapDownTextAction {
-    _tapDownTextAction ??= CallbackAction<TapDownTextIntent>(
-      onInvoke: (TapDownTextIntent intent) {
-        // TODO(justinmc): Should be no handling anything in renderEditable, it
-        // should just receive commands to do specific things.
-        intent.renderEditable.handleTapDown(intent.details);
-        // The selection overlay should only be shown when the user is interacting
-        // through a touch screen (via either a finger or a stylus). A mouse shouldn't
-        // trigger the selection overlay.
-        // For backwards-compatibility, we treat a null kind the same as touch.
-        //final PointerDeviceKind? kind = intent.details.kind;
-        // TODO(justinmc): What about _shouldShowSelectionToolbar?
-        /*
-        _shouldShowSelectionToolbar = kind == null
-          || kind == PointerDeviceKind.touch
-          || kind == PointerDeviceKind.stylus;
-          */
-      },
-    );
-    return _tapDownTextAction!;
-  }
-
-  CallbackAction<ArrowLeftTextIntent>? _arrowLeftTextAction;
-  CallbackAction<ArrowLeftTextIntent> get arrowLeftTextAction {
-    _arrowLeftTextAction ??= CallbackAction<ArrowLeftTextIntent>(
-      onInvoke: (ArrowLeftTextIntent intent) {
-        print('justin arrow left intent handler');
-        intent.renderEditable.moveSelectionLeft();
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
       }
-    );
-    return _arrowLeftTextAction!;
-  }
-}
+    }
+    // TODO(justinmc): State of keyboard visibility should be controllable here
+    // too.
+    //_state._requestKeyboard();
+
+    // TODO(justinmc): Still need to handle calling of onTap.
+    //if (_state.widget.onTap != null)
+    //  _state.widget.onTap!();
+  },
+);
+
+/// Handler for [TextSelectionGestureDetector.onTapDown].
+///
+/// By default, it forwards the tap to [RenderEditable.handleTapDown] and sets
+/// [shouldShowSelectionToolbar] to true if the tap was initiated by a finger or stylus.
+///
+/// See also:
+///
+///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
+final CallbackAction<TapDownTextIntent> _tapDownTextAction = CallbackAction<TapDownTextIntent>(
+  onInvoke: (TapDownTextIntent intent) {
+    // TODO(justinmc): Should be no handling anything in renderEditable, it
+    // should just receive commands to do specific things.
+    intent.renderEditable.handleTapDown(intent.details);
+    // The selection overlay should only be shown when the user is interacting
+    // through a touch screen (via either a finger or a stylus). A mouse shouldn't
+    // trigger the selection overlay.
+    // For backwards-compatibility, we treat a null kind the same as touch.
+    //final PointerDeviceKind? kind = intent.details.kind;
+    // TODO(justinmc): What about _shouldShowSelectionToolbar?
+    /*
+    _shouldShowSelectionToolbar = kind == null
+      || kind == PointerDeviceKind.touch
+      || kind == PointerDeviceKind.stylus;
+      */
+  },
+);
+
+final TextEditingAction<ArrowLeftTextIntent> _arrowLeftTextAction = TextEditingAction<ArrowLeftTextIntent>(
+  onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
+    print('justin texteditingaction in file');
+    editableTextState.renderEditable.moveSelectionLeft();
+  },
+);
 
 // TODO(justinmc): Remove from widgets/text_selection.dart.
 /// A gesture detector to respond to non-exclusive event chains for a text field.

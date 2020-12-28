@@ -12,8 +12,6 @@ import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
-import 'editable_text.dart';
-import 'focus_manager.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -27,6 +25,7 @@ import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
 import 'text.dart';
+import 'text_editing_shortcuts.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
 
@@ -1625,22 +1624,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       child: Shortcuts(
         shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
         debugLabel: '<Default WidgetsApp Shortcuts>',
-        child: Shortcuts(
-          shortcuts: <LogicalKeySet, Intent>{
-            LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntentRoot(
-              context: context,
-            ),
-          },
+        child: TextEditingShortcuts(
           child: Actions(
             actions: widget.actions ?? <Type, Action<Intent>>{
               ...WidgetsApp.defaultActions,
-              // TODO(justinmc): This should be in text_editing_behavior.dart somewhere.
-              ArrowLeftTextIntentRoot: TextEditingAction<ArrowLeftTextIntentRoot>(
-                onInvoke: (ArrowLeftTextIntentRoot intent, EditableTextState editableTextState) {
-                  print('justin texteditingaction');
-                  editableTextState.renderEditable.moveSelectionLeft();
-                }
-              ),
+              ...textEditingActionsMap,
             },
             child: FocusTraversalGroup(
               policy: ReadingOrderTraversalPolicy(),

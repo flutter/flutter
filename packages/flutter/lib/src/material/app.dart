@@ -688,8 +688,6 @@ class _MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
-  // TODO(justinmc): I believe this is unnecessary unlesss you are using it here?
-  final ActionDispatcher _actionDispatcher = ActionDispatcher();
   late HeroController _heroController;
 
   bool get _usesRouter => widget.routerDelegate != null;
@@ -854,20 +852,11 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     }());
 
-    final TextEditingActionsMap map = TextEditingActionsMap(
-      platform: defaultTargetPlatform,
-    );
-
-    // TODO(justinmc): Put this in CupertinoApp too. Or is there a better place?
-    return Actions(
-      actions: map.map,
-      dispatcher: _actionDispatcher,
-      child: ScrollConfiguration(
-        behavior: _MaterialScrollBehavior(),
-        child: HeroControllerScope(
-          controller: _heroController,
-          child: result,
-        )
+    return ScrollConfiguration(
+      behavior: _MaterialScrollBehavior(),
+      child: HeroControllerScope(
+        controller: _heroController,
+        child: result,
       ),
     );
   }
