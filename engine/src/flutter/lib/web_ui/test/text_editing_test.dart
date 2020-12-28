@@ -384,7 +384,7 @@ void testMain() {
       );
     });
 
-    test('Re-acquire focus', () {
+    test('Do not re-acquire focus', () {
       editingElement =
           SemanticsTextEditingStrategy(HybridTextEditing(), testInputElement);
 
@@ -398,17 +398,14 @@ void testMain() {
       );
       expect(document.activeElement, testInputElement);
 
-      // The input should refocus after blur.
+      // The input should not refocus after blur.
       editingElement.domElement.blur();
-      expect(document.activeElement, editingElement.domElement);
+      expect(document.activeElement, document.body);
 
       editingElement.disable();
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge ||
-            browserEngine == BrowserEngine.firefox));
+        skip: browserEngine == BrowserEngine.edge);
 
     test('Does not dispose and recreate dom elements in persistent mode', () {
       editingElement =
@@ -443,17 +440,18 @@ void testMain() {
       // It doesn't remove the DOM element.
       expect(editingElement.domElement, testInputElement);
       expect(document.body.contains(editingElement.domElement), isTrue);
-      // The textArea does not lose focus.
-      // Even though this passes on manual tests it does not work on
-      // Firefox automated unit tests.
-      if (browserEngine != BrowserEngine.firefox) {
+      // Editing element is not enabled.
+      expect(editingElement.isEnabled, isFalse);
+      // For mobile browsers `blur` is called to close the onscreen keyboard.
+      if (operatingSystem == OperatingSystem.iOs &&
+          browserEngine == BrowserEngine.webkit) {
+        expect(document.activeElement, document.body);
+      } else {
         expect(document.activeElement, editingElement.domElement);
       }
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge));
+        skip: browserEngine == BrowserEngine.edge);
 
     test('Refocuses when setting editing state', () {
       editingElement =
@@ -471,10 +469,8 @@ void testMain() {
 
       editingElement.disable();
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge));
+        skip: browserEngine == BrowserEngine.edge);
 
     test('Works in multi-line mode', () {
       final TextAreaElement textarea = TextAreaElement();
@@ -504,21 +500,17 @@ void testMain() {
       expect(document.activeElement, textarea);
 
       textarea.blur();
-      // The textArea does not lose focus.
-      // Even though this passes on manual tests it does not work on
-      // Firefox automated unit tests.
-      if (browserEngine != BrowserEngine.firefox) {
-        expect(document.activeElement, textarea);
-      }
+      // The textArea loses focus.
+      expect(document.activeElement, document.body);
 
       editingElement.disable();
       // It doesn't remove the textarea from the DOM.
       expect(document.body.contains(editingElement.domElement), isTrue);
+      // Editing element is not enabled.
+      expect(editingElement.isEnabled, isFalse);
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge));
+        skip: browserEngine == BrowserEngine.edge);
 
     test('Does not position or size its DOM element', () {
       editingElement.enable(
