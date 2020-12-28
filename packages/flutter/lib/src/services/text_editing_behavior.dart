@@ -91,6 +91,59 @@ class TapDownTextIntent extends Intent {
   final RenderEditable renderEditable;
 }
 
+// TODO(justinmc): Instead of passing in editableTextState like this, should I
+// create a hardcoded Intent type that has it?
+/// The signature of a callback accepted by [TextEditingAction].
+typedef OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
+  T intent,
+  EditableTextState editableTextState,
+);
+
+/// An [Action] related to editing text.
+///
+/// If an [EditableText] is currently focused, the given [onInvoke] callback
+/// will be called with the [EditableTextState]. If not, onInvoke will not be
+/// called.
+///
+/// See also:
+///
+///  * [CallbackAction], which is a similar Action type but unrelated to text
+///    editing.
+class TextEditingAction<T extends Intent> extends Action<T> {
+  /// A constructor for a [TextEditingAction].
+  ///
+  /// The [onInvoke] parameter must not be null.
+  /// The [onInvoke] parameter is required.
+  TextEditingAction({required this.onInvoke}) : assert(onInvoke != null);
+
+  /// The callback to be called when invoked.
+  ///
+  /// Will not be called if a valid EditableText is not currently focused. If it
+  /// is, the EditableTextState will be passed in.
+  ///
+  /// Must not be null.
+  @protected
+  final OnInvokeTextEditingCallback<T> onInvoke;
+
+  @override
+  Object? invoke(covariant T intent) {
+    // If an EditableText is not focused, then ignore this action.
+    if (primaryFocus?.context?.widget is! EditableText) {
+      return null;
+    }
+    final EditableText editableText = primaryFocus!.context!.widget as EditableText;
+    // TODO(justinmc): I seem to need the EditableText to have a key for
+    // this. Is there another way to get EditableTextState, or should I
+    // force EditableText to have a key?
+    if (editableText.key == null
+        || (editableText.key! as GlobalKey).currentState == null) {
+      return null;
+    }
+    final EditableTextState editableTextState = (editableText.key! as GlobalKey).currentState! as EditableTextState;
+    return onInvoke(intent, editableTextState);
+  }
+}
+
 // TODO(justinmc): Should handle all actions from
 // TextSelectionGestureDetectorBuilder and from
 // _TextFieldSelectionGestureDetectorBuilder.

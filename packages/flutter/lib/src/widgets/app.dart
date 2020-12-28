@@ -1106,22 +1106,9 @@ class WidgetsApp extends StatefulWidget {
     PreviousFocusIntent: PreviousFocusAction(),
     DirectionalFocusIntent: DirectionalFocusAction(),
     ScrollIntent: ScrollAction(),
-    ArrowLeftTextIntentRoot: CallbackAction<ArrowLeftTextIntentRoot>(
-        // TODO(justinmc): Abstract this to a new Action type.
-      onInvoke: (ArrowLeftTextIntentRoot intent) {
-        // If an EditableText is not focused, then ignore this action.
-        if (primaryFocus?.context?.widget is! EditableText) {
-          return;
-        }
-        final EditableText editableText = primaryFocus!.context!.widget as EditableText;
-        // TODO(justinmc): I seem to need the EditableText to have a key for
-        // this. Is there another way to get EditableTextState, or should I
-        // force EditableText to have a key?
-        if (editableText.key == null
-            || (editableText.key! as GlobalKey).currentState == null) {
-          return;
-        }
-        final EditableTextState editableTextState = (editableText.key! as GlobalKey).currentState! as EditableTextState;
+    ArrowLeftTextIntentRoot: TextEditingAction<ArrowLeftTextIntentRoot>(
+      onInvoke: (ArrowLeftTextIntentRoot intent, EditableTextState editableTextState) {
+        print('justin texteditingaction');
         editableTextState.renderEditable.moveSelectionLeft();
       }
     ),
