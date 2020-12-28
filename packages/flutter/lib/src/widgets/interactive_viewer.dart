@@ -632,13 +632,18 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset focalPointScene = _transformationController!.toScene(
       focalPoint,
     );
-    // TODO(justinmc): If rotation would result in viewing beyond the boundary,
-    // don't allow it. Use _validateMatrix here. And in _matrixScale as well?
-    return matrix
+    final Matrix4 nextMatrix = matrix
       .clone()
       ..translate(focalPointScene.dx, focalPointScene.dy)
       ..rotateZ(-rotation)
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
+
+    try {
+      return _validateMatrix(nextMatrix);
+    } catch (stacktrace) {
+      // If the matrix is invalid and can't be corrected, reject this rotation.
+      return matrix;
+    }
   }
 
   // If the given matrix is valid, return it. If it is invalid, return the
