@@ -300,10 +300,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _caretPainter.cursorOffset = cursorOffset;
     _caretPainter.backgroundCursorColor = backgroundCursorColor;
 
-    // Invalidate last caret rect cache.
-    if (onCaretChanged == null)
-      _lastCaretRect = null;
-
     _updateForgroundPainter(foregroundPainter);
     _updatePainter(painter);
   }
@@ -315,9 +311,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   RenderEditablePainter? _foregroundPainter;
   void _updateForgroundPainter(RenderEditablePainter? newPainter) {
     final _CompositeRenderEditablePainter effectivePainter = newPainter == null
-      ? _builtinForegounrdPainters
+      ? _builtInForegounrdPainters
       : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[
-         _builtinForegounrdPainters,
+         _builtInForegounrdPainters,
          newPainter,
       ]);
 
@@ -345,8 +341,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   RenderEditablePainter? _painter;
   void _updatePainter(RenderEditablePainter? newPainter) {
     final _CompositeRenderEditablePainter effectivePainter = newPainter == null
-      ? _builtinPainters
-      : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[_builtinPainters, newPainter]);
+      ? _builtInPainters
+      : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[_builtInPainters, newPainter]);
 
     if (_backgroundRenderObject == null) {
       final _RenderEditableCustomPaint backgroundRenderObject = _RenderEditableCustomPaint(painter: effectivePainter);
@@ -377,9 +373,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   final _TextHighlightPainter _selectionPainter = _TextHighlightPainter();
   final _TextHighlightPainter _autocorrectHighlightPainter = _TextHighlightPainter();
 
-  _CompositeRenderEditablePainter get _builtinForegounrdPainters => _cachedBuiltinForegroundPainters ??= _createBuiltinForegroundPainters();
-  _CompositeRenderEditablePainter? _cachedBuiltinForegroundPainters;
-  _CompositeRenderEditablePainter _createBuiltinForegroundPainters() {
+  _CompositeRenderEditablePainter get _builtInForegounrdPainters => _cachedBuiltInForegroundPainters ??= _createBuiltInForegroundPainters();
+  _CompositeRenderEditablePainter? _cachedBuiltInForegroundPainters;
+  _CompositeRenderEditablePainter _createBuiltInForegroundPainters() {
     return _CompositeRenderEditablePainter(
       painters: <RenderEditablePainter>[
         if (paintCursorAboveText) _caretPainter,
@@ -387,9 +383,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
-  _CompositeRenderEditablePainter get _builtinPainters => _cachedBuiltinPainters ??= _createBuiltinPainters();
-  _CompositeRenderEditablePainter? _cachedBuiltinPainters;
-  _CompositeRenderEditablePainter _createBuiltinPainters() {
+  _CompositeRenderEditablePainter get _builtInPainters => _cachedBuiltInPainters ??= _createBuiltInPainters();
+  _CompositeRenderEditablePainter? _cachedBuiltInPainters;
+  _CompositeRenderEditablePainter _createBuiltInPainters() {
     return _CompositeRenderEditablePainter(
       painters: <RenderEditablePainter>[
         _autocorrectHighlightPainter,
@@ -1309,9 +1305,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_paintCursorOnTop == value)
       return;
     _paintCursorOnTop = value;
-    // Clear cached builtin painters and reconfigure painters.
-    _cachedBuiltinForegroundPainters = null;
-    _cachedBuiltinPainters = null;
+    // Clear cached built-in painters and reconfigure painters.
+    _cachedBuiltInForegroundPainters = null;
+    _cachedBuiltInPainters = null;
     // Call update methods to rebuild and set the effective painters.
     _updateForgroundPainter(_foregroundPainter);
     _updatePainter(_painter);
@@ -2137,8 +2133,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  /// Computes the offset to apply to the given [sourceOffset] so it perfectly
-  /// snaps to physical pixels.
+  // Computes the offset to apply to the given [sourceOffset] so it perfectly
+  // snaps to physical pixels.
   Offset _snapToPhysicalPixel(Offset sourceOffset) {
     final Offset globalOffset = localToGlobal(sourceOffset);
     final double pixelMultiple = 1.0 / _devicePixelRatio;
@@ -2441,7 +2437,7 @@ class _RenderEditableCustomPaint extends RenderBox {
 /// will be scheduled to repaint when:
 ///   * It's assigned to a new [RenderEditable] and the [shouldRepaint] method
 ///     returns true.
-///   * Any of the [RenderEditable]s it is attched to repaints.
+///   * Any of the [RenderEditable]s it is attached to repaints.
 ///   * The [notifyListeners] method is called, which typically happens when the
 ///     painter's attributes change.
 ///
@@ -2449,7 +2445,7 @@ class _RenderEditableCustomPaint extends RenderBox {
 ///  * [RenderEditable.setForegroundPainter], which takes a [RenderEditablePainter]
 ///    and sets it as the foreground painter of the [RenderEditable].
 ///  * [RenderEditable.setPainter], which takes a [RenderEditablePainter]
-///    and sets it as the foreground painter of the [RenderEditable].
+///    and sets it as the background painter of the [RenderEditable].
 ///  * [CustomPainter] a similar class which paints within a [RenderCustomPaint].
 abstract class RenderEditablePainter extends ChangeNotifier {
 
