@@ -582,6 +582,8 @@ class SemanticsObject {
       hasAction(ui.SemanticsAction.scrollDown) ||
       hasAction(ui.SemanticsAction.scrollUp);
 
+  bool get hasFocus => hasFlag(ui.SemanticsFlag.isFocused);
+
   /// Whether this object represents a hotizontally scrollable area.
   bool get isHorizontalScrollContainer =>
       hasAction(ui.SemanticsAction.scrollLeft) ||
