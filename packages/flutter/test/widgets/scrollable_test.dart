@@ -1208,7 +1208,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71949
-  testWidgets('Zero offset pointer scroll should not trigger a assertion.', (WidgetTester tester) async {
+  testWidgets('Zero offset pointer scroll should not trigger an assertion.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget build(double height) {
       return MaterialApp(
