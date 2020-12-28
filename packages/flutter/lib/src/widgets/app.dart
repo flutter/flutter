@@ -1061,8 +1061,7 @@ class WidgetsApp extends StatefulWidget {
     // Keyboard traversal
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
-    // TODO(justinmc): What to do about two arrowLefts?
-    //LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
     LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
     LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
@@ -1106,12 +1105,6 @@ class WidgetsApp extends StatefulWidget {
     PreviousFocusIntent: PreviousFocusAction(),
     DirectionalFocusIntent: DirectionalFocusAction(),
     ScrollIntent: ScrollAction(),
-    ArrowLeftTextIntentRoot: TextEditingAction<ArrowLeftTextIntentRoot>(
-      onInvoke: (ArrowLeftTextIntentRoot intent, EditableTextState editableTextState) {
-        print('justin texteditingaction');
-        editableTextState.renderEditable.moveSelectionLeft();
-      }
-    ),
   };
 
   @override
@@ -1630,23 +1623,33 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: Shortcuts(
-        shortcuts: widget.shortcuts ?? <LogicalKeySet, Intent>{
-          // TODO(justinmc): Maybe a defaultTextEditingShortcuts or something.
-          ...WidgetsApp.defaultShortcuts,
-          LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntentRoot(
-            context: context,
-          ),
-        },
+        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
         debugLabel: '<Default WidgetsApp Shortcuts>',
-        child: Actions(
-          actions: widget.actions ?? WidgetsApp.defaultActions,
-          child: FocusTraversalGroup(
-            policy: ReadingOrderTraversalPolicy(),
-            child: _MediaQueryFromWindow(
-              child: Localizations(
-                locale: appLocale,
-                delegates: _localizationsDelegates.toList(),
-                child: title,
+        child: Shortcuts(
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntentRoot(
+              context: context,
+            ),
+          },
+          child: Actions(
+            actions: widget.actions ?? <Type, Action<Intent>>{
+              ...WidgetsApp.defaultActions,
+              // TODO(justinmc): This should be in text_editing_behavior.dart somewhere.
+              ArrowLeftTextIntentRoot: TextEditingAction<ArrowLeftTextIntentRoot>(
+                onInvoke: (ArrowLeftTextIntentRoot intent, EditableTextState editableTextState) {
+                  print('justin texteditingaction');
+                  editableTextState.renderEditable.moveSelectionLeft();
+                }
+              ),
+            },
+            child: FocusTraversalGroup(
+              policy: ReadingOrderTraversalPolicy(),
+              child: _MediaQueryFromWindow(
+                child: Localizations(
+                  locale: appLocale,
+                  delegates: _localizationsDelegates.toList(),
+                  child: title,
+                ),
               ),
             ),
           ),

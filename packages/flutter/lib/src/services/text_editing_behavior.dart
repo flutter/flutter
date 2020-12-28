@@ -93,6 +93,7 @@ class TapDownTextIntent extends Intent {
 
 // TODO(justinmc): Instead of passing in editableTextState like this, should I
 // create a hardcoded Intent type that has it?
+// Or, should _editableTextState be public but protected?
 /// The signature of a callback accepted by [TextEditingAction].
 typedef OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
   T intent,
@@ -102,8 +103,8 @@ typedef OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
 /// An [Action] related to editing text.
 ///
 /// If an [EditableText] is currently focused, the given [onInvoke] callback
-/// will be called with the [EditableTextState]. If not, onInvoke will not be
-/// called.
+/// will be called with the [EditableTextState]. If not, then [isEnabled] will
+/// be false and [onInvoke] will not be called.
 ///
 /// See also:
 ///
@@ -116,17 +117,7 @@ class TextEditingAction<T extends Intent> extends Action<T> {
   /// The [onInvoke] parameter is required.
   TextEditingAction({required this.onInvoke}) : assert(onInvoke != null);
 
-  /// The callback to be called when invoked.
-  ///
-  /// Will not be called if a valid EditableText is not currently focused. If it
-  /// is, the EditableTextState will be passed in.
-  ///
-  /// Must not be null.
-  @protected
-  final OnInvokeTextEditingCallback<T> onInvoke;
-
-  @override
-  Object? invoke(covariant T intent) {
+  EditableTextState? get _editableTextState {
     // If an EditableText is not focused, then ignore this action.
     if (primaryFocus?.context?.widget is! EditableText) {
       return null;
@@ -139,8 +130,29 @@ class TextEditingAction<T extends Intent> extends Action<T> {
         || (editableText.key! as GlobalKey).currentState == null) {
       return null;
     }
-    final EditableTextState editableTextState = (editableText.key! as GlobalKey).currentState! as EditableTextState;
-    return onInvoke(intent, editableTextState);
+    return (editableText.key! as GlobalKey).currentState! as EditableTextState;
+  }
+
+  /// The callback to be called when invoked.
+  ///
+  /// If an EditableText is not focused, then isEnabled will be false, and this
+  /// will not be invoked.
+  ///
+  /// Must not be null.
+  @protected
+  final OnInvokeTextEditingCallback<T> onInvoke;
+
+  @override
+  Object? invoke(covariant T intent) {
+    // _editableTextState shouldn't be null because isEnabled will return false
+    // and invoke shouldn't be called if so.
+    assert(_editableTextState != null);
+    return onInvoke(intent, _editableTextState!);
+  }
+
+  @override
+  bool isEnabled(Intent intent) {
+    return _editableTextState != null;
   }
 }
 
