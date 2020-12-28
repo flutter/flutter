@@ -38,7 +38,7 @@ import 'theme.dart';
 /// ```dart imports
 /// import 'package:flutter/material.dart';
 /// ```
-/// 
+///
 /// ```dart
 /// void main() {
 ///   runApp(BottomAppBarDemo());
