@@ -51,7 +51,11 @@ class _PaintRequest {
 List<_PaintRequest> _paintQueue = <_PaintRequest>[];
 
 void _recycleCanvas(EngineCanvas? canvas) {
-  assert(canvas == null || !_recycledCanvases.contains(canvas));
+  // If a canvas is in the paint queue it maybe be recycled. To
+  // prevent subsequent dispose recycling again check.
+  if (canvas != null && _recycledCanvases.contains(canvas)) {
+    return;
+  }
   if (canvas is BitmapCanvas) {
     canvas.setElementCache(null);
     if (canvas.isReusable()) {
