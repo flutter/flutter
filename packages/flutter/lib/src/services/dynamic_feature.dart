@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
@@ -30,20 +29,39 @@ import 'system_channels.dart';
 /// state changes to `downloading` and finally `installed`. Modules previously
 /// installed but not loaded in this session will be in the
 /// `installedPendingLoad` state, which indicates that the installation request
-/// call (either `loadLibrary()` or [installDynamicFeature]) should be repeated
-/// to trigger the loading process.
+/// call (either `loadLibrary()` or [DynamicFeature.installDynamicFeature]) should
+/// be repeated to trigger the loading process.
 enum DynamicFeatureInstallState {
+  /// The dynamic feature installation has been requested, but has not begun
+  /// download or installation yet.
   requested,
+  /// The dynamic feature installation is awaiting further action.
   pending,
+  /// User input is requried for continued installation.
   requireUserConfirmation,
+  /// The dynamic feature is being downloaded.
   downloading,
+  /// The dynamic feature has finished downloading but has not yet been
+  /// installed.
   downloaded,
+  /// The downloaded dynamic feature is being installed.
   installing,
+  /// The dynamic feature has previously been installed and all files/assets
+  /// are available, but has not been loaded into the VM in the current
+  /// app's session. Either `loadLibrary()` or [DynamicFeature.installDynamicFeature]
+  /// should be called to trigger the loading process to ensure the dynamic feature's
+  /// components can be safely used in the app.
   installedPendingLoad,
+  /// The dynamic feature has been succesfully downloaded and installed. Assets and
+  /// code from the dynamic feature are ready to use.
   installed,
+  /// An installation request has been asked to be canceled.
   cancelling,
+  /// An installation request has been canceled.
   canceled,
+  /// An installation request has failed.
   failed,
+  /// The dynamic feature has not been requested nor installed or is unavailable.
   unknown,
 }
 
@@ -91,7 +109,7 @@ class DynamicFeature {
   static Future<void> installDynamicFeature({@required String? moduleName}) async {
     await SystemChannels.dynamicFeature.invokeMethod<void>(
       'installDynamicFeature',
-      { 'loadingUnitId': -1, 'moduleName': moduleName },
+      <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
     );
   }
   /// Gets the current installation state of the dynamic feature identified by the
@@ -118,7 +136,7 @@ class DynamicFeature {
   static Future<String?> getDynamicFeatureInstallState({@required String? moduleName}) async {
     await SystemChannels.dynamicFeature.invokeMethod<void>(
       'getDynamicFeatureInstallState',
-      { 'loadingUnitId': -1, 'moduleName': moduleName },
+      <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
     );
   }
 
@@ -133,7 +151,7 @@ class DynamicFeature {
   static Future<void> uninstallDynamicFeature({@required String? moduleName}) async {
     await SystemChannels.dynamicFeature.invokeMethod<void>(
       'uninstallDynamicFeature',
-      { 'loadingUnitId': -1, 'moduleName': moduleName },
+      <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
     );
   }
 }
