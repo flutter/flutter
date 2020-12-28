@@ -325,8 +325,7 @@ class PlatformConfiguration final {
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the framework that it is time to begin working on a
-  /// new
-  ///             frame previously scheduled via a call to
+  ///             new frame previously scheduled via a call to
   ///             `PlatformConfigurationClient::ScheduleFrame`. This call
   ///             originates in the animator.
   ///
@@ -414,7 +413,16 @@ class PlatformConfiguration final {
 
  private:
   PlatformConfigurationClient* client_;
-  tonic::DartPersistentValue library_;
+  tonic::DartPersistentValue update_locales_;
+  tonic::DartPersistentValue update_user_settings_data_;
+  tonic::DartPersistentValue update_lifecycle_state_;
+  tonic::DartPersistentValue update_semantics_enabled_;
+  tonic::DartPersistentValue update_accessibility_features_;
+  tonic::DartPersistentValue dispatch_platform_message_;
+  tonic::DartPersistentValue dispatch_semantics_action_;
+  tonic::DartPersistentValue begin_frame_;
+  tonic::DartPersistentValue draw_frame_;
+  tonic::DartPersistentValue report_timings_;
 
   std::unordered_map<int64_t, std::unique_ptr<Window>> windows_;
 

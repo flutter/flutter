@@ -196,80 +196,109 @@ PlatformConfiguration::PlatformConfiguration(
 PlatformConfiguration::~PlatformConfiguration() {}
 
 void PlatformConfiguration::DidCreateIsolate() {
-  library_.Set(tonic::DartState::Current(),
-               Dart_LookupLibrary(tonic::ToDart("dart:ui")));
+  Dart_Handle library = Dart_LookupLibrary(tonic::ToDart("dart:ui"));
+  update_locales_.Set(tonic::DartState::Current(),
+                      Dart_GetField(library, tonic::ToDart("_updateLocales")));
+  update_user_settings_data_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_updateUserSettingsData")));
+  update_lifecycle_state_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_updateLifecycleState")));
+  update_semantics_enabled_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_updateSemanticsEnabled")));
+  update_accessibility_features_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_updateAccessibilityFeatures")));
+  dispatch_platform_message_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_dispatchPlatformMessage")));
+  dispatch_semantics_action_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_dispatchSemanticsAction")));
+  begin_frame_.Set(tonic::DartState::Current(),
+                   Dart_GetField(library, tonic::ToDart("_beginFrame")));
+  draw_frame_.Set(tonic::DartState::Current(),
+                  Dart_GetField(library, tonic::ToDart("_drawFrame")));
+  report_timings_.Set(tonic::DartState::Current(),
+                      Dart_GetField(library, tonic::ToDart("_reportTimings")));
   windows_.insert(std::make_pair(0, std::unique_ptr<Window>(new Window{
                                         0, ViewportMetrics{1.0, 0.0, 0.0}})));
 }
 
 void PlatformConfiguration::UpdateLocales(
     const std::vector<std::string>& locales) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      update_locales_.dart_state().lock();
   if (!dart_state) {
     return;
   }
+
   tonic::DartState::Scope scope(dart_state);
-  tonic::LogIfError(tonic::DartInvokeField(
-      library_.value(), "_updateLocales",
-      {
-          tonic::ToDart<std::vector<std::string>>(locales),
-      }));
+  tonic::LogIfError(
+      tonic::DartInvoke(update_locales_.Get(),
+                        {
+                            tonic::ToDart<std::vector<std::string>>(locales),
+                        }));
 }
 
 void PlatformConfiguration::UpdateUserSettingsData(const std::string& data) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      update_user_settings_data_.dart_state().lock();
   if (!dart_state) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
 
-  tonic::LogIfError(tonic::DartInvokeField(library_.value(),
-                                           "_updateUserSettingsData",
-                                           {
-                                               tonic::StdStringToDart(data),
-                                           }));
+  tonic::LogIfError(tonic::DartInvoke(update_user_settings_data_.Get(),
+                                      {
+                                          tonic::StdStringToDart(data),
+                                      }));
 }
 
 void PlatformConfiguration::UpdateLifecycleState(const std::string& data) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      update_lifecycle_state_.dart_state().lock();
   if (!dart_state) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
-  tonic::LogIfError(tonic::DartInvokeField(library_.value(),
-                                           "_updateLifecycleState",
-                                           {
-                                               tonic::StdStringToDart(data),
-                                           }));
+  tonic::LogIfError(tonic::DartInvoke(update_lifecycle_state_.Get(),
+                                      {
+                                          tonic::StdStringToDart(data),
+                                      }));
 }
 
 void PlatformConfiguration::UpdateSemanticsEnabled(bool enabled) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      update_semantics_enabled_.dart_state().lock();
   if (!dart_state) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
   UIDartState::ThrowIfUIOperationsProhibited();
 
-  tonic::LogIfError(tonic::DartInvokeField(
-      library_.value(), "_updateSemanticsEnabled", {tonic::ToDart(enabled)}));
+  tonic::LogIfError(tonic::DartInvoke(update_semantics_enabled_.Get(),
+                                      {tonic::ToDart(enabled)}));
 }
 
 void PlatformConfiguration::UpdateAccessibilityFeatures(int32_t values) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      update_accessibility_features_.dart_state().lock();
   if (!dart_state) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
 
-  tonic::LogIfError(tonic::DartInvokeField(library_.value(),
-                                           "_updateAccessibilityFeatures",
-                                           {tonic::ToDart(values)}));
+  tonic::LogIfError(tonic::DartInvoke(update_accessibility_features_.Get(),
+                                      {tonic::ToDart(values)}));
 }
 
 void PlatformConfiguration::DispatchPlatformMessage(
     fml::RefPtr<PlatformMessage> message) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      dispatch_platform_message_.dart_state().lock();
   if (!dart_state) {
     FML_DLOG(WARNING)
         << "Dropping platform message for lack of DartState on channel: "
@@ -293,15 +322,16 @@ void PlatformConfiguration::DispatchPlatformMessage(
   }
 
   tonic::LogIfError(
-      tonic::DartInvokeField(library_.value(), "_dispatchPlatformMessage",
-                             {tonic::ToDart(message->channel()), data_handle,
-                              tonic::ToDart(response_id)}));
+      tonic::DartInvoke(dispatch_platform_message_.Get(),
+                        {tonic::ToDart(message->channel()), data_handle,
+                         tonic::ToDart(response_id)}));
 }
 
 void PlatformConfiguration::DispatchSemanticsAction(int32_t id,
                                                     SemanticsAction action,
                                                     std::vector<uint8_t> args) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      dispatch_semantics_action_.dart_state().lock();
   if (!dart_state) {
     return;
   }
@@ -313,14 +343,15 @@ void PlatformConfiguration::DispatchSemanticsAction(int32_t id,
     return;
   }
 
-  tonic::LogIfError(tonic::DartInvokeField(
-      library_.value(), "_dispatchSemanticsAction",
+  tonic::LogIfError(tonic::DartInvoke(
+      dispatch_semantics_action_.Get(),
       {tonic::ToDart(id), tonic::ToDart(static_cast<int32_t>(action)),
        args_handle}));
 }
 
 void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      begin_frame_.dart_state().lock();
   if (!dart_state) {
     return;
   }
@@ -328,18 +359,19 @@ void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime) {
 
   int64_t microseconds = (frameTime - fml::TimePoint()).ToMicroseconds();
 
-  tonic::LogIfError(tonic::DartInvokeField(library_.value(), "_beginFrame",
-                                           {
-                                               Dart_NewInteger(microseconds),
-                                           }));
+  tonic::LogIfError(
+      tonic::DartInvoke(begin_frame_.Get(), {
+                                                Dart_NewInteger(microseconds),
+                                            }));
 
   UIDartState::Current()->FlushMicrotasksNow();
 
-  tonic::LogIfError(tonic::DartInvokeField(library_.value(), "_drawFrame", {}));
+  tonic::LogIfError(tonic::DartInvokeVoid(draw_frame_.Get()));
 }
 
 void PlatformConfiguration::ReportTimings(std::vector<int64_t> timings) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state =
+      report_timings_.dart_state().lock();
   if (!dart_state) {
     return;
   }
@@ -358,10 +390,9 @@ void PlatformConfiguration::ReportTimings(std::vector<int64_t> timings) {
   memcpy(data, timings.data(), sizeof(int64_t) * timings.size());
   FML_CHECK(Dart_TypedDataReleaseData(data_handle));
 
-  tonic::LogIfError(tonic::DartInvokeField(library_.value(), "_reportTimings",
-                                           {
-                                               data_handle,
-                                           }));
+  tonic::LogIfError(tonic::DartInvoke(report_timings_.Get(), {
+                                                                 data_handle,
+                                                             }));
 }
 
 void PlatformConfiguration::CompletePlatformMessageEmptyResponse(
