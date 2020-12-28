@@ -34,6 +34,9 @@ import 'ticker_provider.dart';
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 
+// Examples can assume:
+// late TextInputFormatter usPhoneNumberFormatter;
+
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
@@ -225,7 +228,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// change the controller's [value].
   ///
   /// If the new selection if of non-zero length, or is outside the composing
-  /// range, the composing composing range is cleared.
+  /// range, the composing range is cleared.
   set selection(TextSelection newSelection) {
     if (!isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
@@ -271,6 +274,49 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Check that the [selection] is inside of the composing range.
   bool _isSelectionWithinComposingRange(TextSelection selection) {
     return selection.start >= value.composing.start && selection.end <= value.composing.end;
+  }
+
+  List<TextInputFormatter>? _inputFormatters;
+  void _setInputFormatters(List<TextInputFormatter> newValue) {
+    // The setter does not take null values: if currentValue is null that means
+    // this is the first formatter list ever set, and we should not reformat.
+    final List<TextInputFormatter>? currentValue = _inputFormatters;
+    _inputFormatters = newValue;
+    if (newValue == currentValue || currentValue == null) {
+      return;
+    }
+
+    final Iterator<TextInputFormatter> oldFormatters = currentValue.iterator;
+    final Iterator<TextInputFormatter> newFormatters = newValue.iterator;
+
+    // Determining how many new input formatters need to be rerun:
+    //
+    //  * The entire `newValue` list needs to be rerun if it has less formatters
+    //    than the current list, or any of the new input formatter requests
+    //    reformatting.
+    //  * Otherwise, only apply the new input formatters whose index is larger
+    //    than newValue.length.
+    bool needsReformat = currentValue.length > newValue.length;
+    while (!needsReformat && oldFormatters.moveNext() && newFormatters.moveNext()) {
+      if (newFormatters.current.shouldReformat(oldFormatters.current)) {
+        needsReformat = true;
+      }
+    }
+
+    TextEditingValue formatted = value;
+
+    if (needsReformat || oldFormatters.moveNext()) {
+      formatted = newValue.fold(
+        formatted,
+        (TextEditingValue v, TextInputFormatter formatter) => formatter.format(v),
+      );
+    } else {
+      while (newFormatters.moveNext()) {
+        formatted = newFormatters.current.format(formatted);
+      }
+    }
+
+    value = formatted;
   }
 }
 
@@ -525,7 +571,7 @@ class EditableText extends StatefulWidget {
        inputFormatters = maxLines == 1
            ? <TextInputFormatter>[
                FilteringTextInputFormatter.singleLineFormatter,
-               ...inputFormatters ?? const Iterable<TextInputFormatter>.empty(),
+               ...?inputFormatters,
              ]
            : inputFormatters,
        showCursor = showCursor ?? !readOnly,
@@ -1058,9 +1104,76 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
   ///
-  /// Formatters are run in the provided order when the text input changes. When
-  /// this parameter changes, the new formatters will not be applied until the
-  /// next time the user inserts or deletes text.
+  /// Formatters are run in the provided order when the user changes the text
+  /// contained in the widget. They're not applied when the changes are
+  /// selection only, or not initiated by the user.
+  ///
+  /// When this widget rebuilds, each input formatter in the new widget's
+  /// [inputFormatters] list checks the configuration of the input formatter
+  /// from the same location in the old [inputFormatters], to determine if the
+  /// new formatters need to be re-applied to the current [TextEditingValue] of
+  /// this widget.
+  ///
+  /// {@tool snippet}
+  ///
+  /// The following code uses a combination of 2 [TextInputFormatter]s and a
+  /// `UsPhoneNumberFormatter` (which simply adds parentheses and hypens), to
+  /// turn user input into a valid United States telephone number (for example,
+  /// (123)456-7890).
+  ///
+  /// The combined effect of the 3 formatters is idempotent, meaning applying
+  /// them together to an already formatted value is a no-op. The
+  /// `UsPhoneNumberFormatter` is not idempotent, thus should not be used by
+  /// itself.
+  ///
+  /// ```dart
+  /// class UsPhoneNumberFormatter extends TextInputFormatter {
+  ///   const UsPhoneNumberFormatter();
+  ///
+  ///   @override
+  ///   TextEditingValue format(TextEditingValue value) {
+  ///     final int inputLength = value.text.length;
+  ///     if (inputLength <= 3)
+  ///       return value;
+  ///
+  ///     final StringBuffer newText = StringBuffer();
+  ///
+  ///     newText.write('(');
+  ///     newText.write(value.text.substring(0, 3));
+  ///     newText.write(')');
+  ///     newText.write(value.text.substring(3, math.min(6, inputLength)));
+  ///
+  ///     if (inputLength > 6) {
+  ///       newText.write('-');
+  ///       newText.write(value.text.substring(6));
+  ///     }
+  ///
+  ///     final int selectionOffset = value.selection.end <= 3 ? 1 : value.selection.end <= 6 ? 2 : 3;
+  ///     return TextEditingValue(
+  ///       text: newText.toString(),
+  ///       selection: TextSelection.collapsed(offset: value.selection.end + selectionOffset),
+  ///     );
+  ///   }
+  ///
+  ///   @override
+  ///   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) => format(newValue);
+  ///
+  ///   @override
+  ///   bool shouldReformat(TextInputFormatter oldFormatter) => oldFormatter is! UsPhoneNumberFormatter;
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  /// TextField(
+  ///   inputFormatters: <TextInputFormatter>[
+  ///     FilteringTextInputFormatter.digitsOnly,
+  ///     LengthLimitingTextInputFormatter(10),
+  ///     usPhoneNumberFormatter,
+  ///   ],
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
   /// {@endtemplate}
   final List<TextInputFormatter>? inputFormatters;
 
@@ -1550,6 +1663,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void initState() {
     super.initState();
     _clipboardStatus?.addListener(_onChangedClipboardStatus);
+    widget.controller._setInputFormatters(widget.inputFormatters ?? const <TextInputFormatter>[]);
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -1586,11 +1700,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void didUpdateWidget(EditableText oldWidget) {
+    beginBatchEdit();
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller.removeListener(_didChangeTextEditingValue);
       widget.controller.addListener(_didChangeTextEditingValue);
-      _updateRemoteEditingValueIfNeeded();
     }
     if (widget.controller.selection != oldWidget.controller.selection) {
       _selectionOverlay?.update(_value);
@@ -1636,6 +1750,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.selectionEnabled && pasteEnabled && widget.selectionControls?.canPaste(this) == true) {
       _clipboardStatus?.update();
     }
+
+    widget.controller._setInputFormatters(
+      widget.inputFormatters ?? const <TextInputFormatter>[]
+    );
+    endBatchEdit();
   }
 
   @override
@@ -2225,7 +2344,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
-  late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
+  _WhitespaceDirectionalityFormatter? _lastUsedWhitespaceFormatter;
+  _WhitespaceDirectionalityFormatter get _whitespaceFormatter {
+    final _WhitespaceDirectionalityFormatter? lastUsed = _lastUsedWhitespaceFormatter;
+    if (lastUsed != null && lastUsed._baseDirection == _textDirection)
+      return lastUsed;
+    return _lastUsedWhitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
+  }
 
   void _formatAndSetValue(TextEditingValue value) {
     // Only apply input formatters if the text has changed (including uncommited
@@ -2241,18 +2366,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool selectionChanged = _value.selection != value.selection;
 
     if (textChanged) {
-      value = widget.inputFormatters?.fold<TextEditingValue>(
+      final TextEditingValue formatted = widget.inputFormatters?.fold<TextEditingValue>(
         value,
         (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
       ) ?? value;
-
       // Always pass the text through the whitespace directionality formatter to
       // maintain expected behavior with carets on trailing whitespace.
-      // TODO(LongCatIsLooong): The if statement here is for retaining the
-      // previous behavior. The input formatter logic will be updated in an
-      // upcoming PR.
-      if (widget.inputFormatters?.isNotEmpty ?? false)
-        value = _whitespaceFormatter.formatEditUpdate(_value, value);
+      value = _whitespaceFormatter.formatEditUpdate(_value, formatted);
     }
 
     // Put all optional user callback invocations in a batch edit to prevent
