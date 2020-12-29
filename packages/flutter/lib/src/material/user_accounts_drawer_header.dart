@@ -303,8 +303,8 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.margin = const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
     this.otherAccountsPictures,
-    this.currentAccountPictureSize,
-    this.otherAccountsPicturesSize,
+    this.currentAccountPictureSize = 72.0,
+    this.otherAccountsPicturesSize = 48.0,
     required this.accountName,
     required this.accountEmail,
     this.onDetailsPressed,
@@ -327,13 +327,10 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   /// upper-right corner. Normally a list of [CircleAvatar] widgets.
   final List<Widget>? otherAccountsPictures;
 
-  /// The size of the widget that placed in the upper-left corner that represents the current
-  /// user's account. Normally a [CircleAvatar].
+  /// The size of the [currentAccountPicture].
   final double? currentAccountPictureSize;
 
-  /// The size of each widget in the list of widgets that represent the current user's other accounts.
-  /// Up to three of these widgets will be arranged in a row in the header's
-  /// upper-right corner. Normally a list of [CircleAvatar] widgets.
+  /// The size of each widget in [otherAccountsPicturesSize].
   final double? otherAccountsPicturesSize;
 
   /// A widget that represents the user's current account name. It is
