@@ -68,7 +68,7 @@ import 'theme.dart';
 ///     });
 ///   }
 ///
-///   void _onFabLocationChanged(FloatingActionButtonLocation value) {
+///   void _onFabLocationChanged(dynamic value) {
 ///     setState(() {
 ///       _fabLocation = value;
 ///     });
