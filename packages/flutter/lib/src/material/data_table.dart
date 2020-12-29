@@ -247,7 +247,7 @@ class DataCell {
   /// [DataRow.onSelectChanged] is provided).
   final GestureTapCallback? onTap;
 
-  /// Called if the cell is double tapped.
+  /// Called when the cell is double tapped.
   ///
   /// If non-null, tapping the cell will call this callback. If
   /// null (including [onTap], [onLongPress], [onTapCancel] and [onTapDown])
