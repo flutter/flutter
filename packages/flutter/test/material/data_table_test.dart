@@ -65,7 +65,7 @@ void main() {
                 },
                 onTapDown: (TapDownDetails details) {
                   log.add('cell-tapDown: ${dessert.calories}');
-                }
+                },
               ),
             ],
           );

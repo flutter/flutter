@@ -275,7 +275,7 @@ class DataCell {
   ///
   /// If non-null, cancelling the tap gesture will invoke this callback. If
   /// null (including [onTap] [onDoubleTap], [onLongPress] and 
-  /// [onTapCancel]), tapping the cell will attempt to select the 
+  /// [onTapDown]), tapping the cell will attempt to select the 
   /// row (if [DataRow.onSelectChanged] is provided).
   final GestureTapCancelCallback? onTapCancel;
 
