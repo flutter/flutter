@@ -1192,6 +1192,8 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
         '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
+      // TODO(ferhatb): Run web tests with both rendering backends.
+      '--web-renderer=html', // use html backend for web tests.
       '--sound-null-safety', // web tests do not autodetect yet.
       ...?flutterTestArgs,
       ...tests,
