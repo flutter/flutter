@@ -981,6 +981,32 @@ void main() {
     await tester.pumpAndSettle();
     expect(findRoute('p1', count: 0), findsOneWidget);
   });
+
+  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'material_app',
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(),
+        },
+        onGenerateInitialRoutes: (String initialRoute) {
+          return <MaterialPageRoute<void>>[
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => Container(),
+            ),
+          ];
+        },
+      ),
+    );
+    await tester.restartAndRestore();
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(
+      (exception as AssertionError).message,
+      contains('All routes returned by onGenerateInitialRoutes are not restorable.'),
+    );
+  });
 }
 
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
