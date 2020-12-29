@@ -11,23 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'text_editing.dart';
 import 'text_input.dart';
 
-// Examples can assume:
-// late int maxLength;
-
-/// Function signature expected for creating custom [TextInputFormatter]
-/// shorthands via [TextInputFormatter.withFunction].
-typedef TextInputFormatFunction = TextEditingValue Function(
-  TextEditingValue oldValue,
-  TextEditingValue newValue,
-);
-
-/// Function signature for creating a custom
-/// [CompositeTextInputFormatter.shouldReformat] implementation.
-typedef ShouldReformatPredicate = bool Function(
-  TextInputFormatter oldFormatter,
-  CompositeTextInputFormatter newFormatter,
-);
-
 /// {@template flutter.services.textFormatter.maxLengthEnforcement}
 /// ### [MaxLengthEnforcement.enforced] versus
 /// [MaxLengthEnforcement.truncateAfterCompositionEnds]
@@ -74,36 +57,16 @@ enum MaxLengthEnforcement {
 /// A [TextInputFormatter] can be optionally injected into an [EditableText]
 /// to provide as-you-type validation and formatting of the text being edited.
 ///
-/// An [EditableText] formats its [TextEditingValue] when the user changes the
-/// text, or when its [EditableText.inputFormatters] parameter changes.
-/// [EditableText] may repetitively apply the same formatter against the input
-/// text, therefore a formatter generally should not further modify a
-/// [TextEditingValue] if the value has already been formatted by the same
-/// formatter.
-///
-/// See also the [FilteringTextInputFormatter], a subclass that removes
-/// characters that the user tries to enter if they do, or do not, match a given
-/// pattern (as applicable).
-///
-/// ## Writing a Custom [TextInputFormatter].
-///
-/// To create custom formatters, extend the [TextInputFormatter] class.
-/// Generally, text modification should only be applied when text is being
-/// committed by the IME and not on text under composition (i.e., only when
+/// Text modification should only be applied when text is being committed by the
+/// IME and not on text under composition (i.e., only when
 /// [TextEditingValue.composing] is collapsed).
 ///
-/// It is often eaiser to achieve the desired effects by combining
-/// [TextInputFormatter]s, as opposed to creating a dedicated
-/// [TextInputFormatter] from the ground up. See [EditableText.inputFormatters]
-/// for an example that implements an idempotent US telephone number formatter
-/// using composition.
+/// See also the [FilteringTextInputFormatter], a subclass that
+/// removes characters that the user tries to enter if they do, or do
+/// not, match a given pattern (as applicable).
 ///
-/// If your input formatter is expensive to run, or the document itself is
-/// expensive to format, consider overriding [shouldReformat] to avoid unnessary
-/// reformats when the [EditableText] widget rebuilds. If you wish to change the
-/// [shouldReformat] strategy used by an existing formatter, consider wrapping
-/// it in a [CompositeTextInputFormatter] and providing it with the desired
-/// reformat strategy in [CompositeTextInputFormatter.shouldReformatPredicate].
+/// To create custom formatters, extend the [TextInputFormatter] class and
+/// implement the [formatEditUpdate] method.
 ///
 /// ## Handling emojis and other complex characters
 /// {@macro flutter.widgets.EditableText.onChanged}
@@ -114,11 +77,7 @@ enum MaxLengthEnforcement {
 ///  * [FilteringTextInputFormatter], a provided formatter for filtering
 ///    characters.
 abstract class TextInputFormatter {
-  /// Creates a new [TextInputFormatter].
-  const TextInputFormatter();
-
-  /// Called when text is being typed or cut/copy/pasted in the [EditableText]
-  /// by the user.
+  /// Called when text is being typed or cut/copy/pasted in the [EditableText].
   ///
   /// You can override the resulting text based on the previous text value and
   /// the incoming new text value.
@@ -137,145 +96,14 @@ abstract class TextInputFormatter {
   ) {
     return _SimpleTextInputFormatter(formatFunction);
   }
-
-  /// Whether this [TextInputFormatter] can replace another [TextInputFormatter]
-  /// without triggering a reformat.
-  ///
-  /// This method is called by the associated [EditableText] when it rebuilds,
-  /// to determine whether it can avoid calling [format]. See also
-  /// [LengthLimitingTextInputFormatter.shouldReformat] for an example that
-  /// skips reformatting whenever possible.
-  ///
-  /// An easy way to determine whether [oldFormatter] can be safely replaced
-  /// without having to rerun this [TextInputFormatter], is to manually apply
-  /// [format] to every possible return value of [oldFormatter]'s [format]. If
-  /// none of the return values changes, it's always safe to return false.
-  ///
-  /// The default implementation always returns true.
-  bool shouldReformat(TextInputFormatter oldFormatter) => true;
-
-  /// Called by [EditableText] when this formatter is added to its
-  /// [EditableText.inputFormatters].
-  ///
-  /// [EditableText] may repetitively apply this method to the same input text,
-  /// thus the implementation of this method should not further modify a
-  /// [TextEditingValue] if the value has already been formatted by the same
-  /// formatter (by this method or [formatEditUpdate]).
-  ///
-  /// If the formatting operation is expensive, try avoid unnecessary [format]
-  /// calls by returning `false` in [shouldReformat] as much as possible.
-  TextEditingValue format(TextEditingValue value) => formatEditUpdate(value, value);
 }
 
-/// A [TextInputFormatter] that composes one or more child [TextInputFormatter]s.
-///
-/// Applying this [CompositeTextInputFormatter] is equivalent to applying all
-/// its child [TextInputFormatter]s in the given order.
-///
-/// Aside from combining the effects of multiple [TextInputFormatter]s,
-/// [CompositeTextInputFormatter] can also be used to create an ad-hoc formatter
-/// with a different reformat strategy, without subclassing.
-///
-/// {@tool snippet}
-///
-/// The following code creates a [LengthLimitingTextInputFormatter] with a
-/// varying `maxLength`, but when the `TextField` rebuilds with a smaller
-/// `maxLength` value, the new character limit won't be enforced until the user
-/// changes the context of the `TextField`.
-///
-/// ```dart
-/// TextField(
-///   inputFormatters: <TextInputFormatter>[
-///     CompositeTextInputFormatter(
-///       <TextInputFormatter>[LengthLimitingTextInputFormatter(maxLength)],
-///       shouldReformatPredicate: CompositeTextInputFormatter.neverReformat,
-///     )
-///   ]
-/// )
-///
-/// ```
-/// {@end-tool}
-class CompositeTextInputFormatter implements TextInputFormatter {
-  /// Creates a [CompositeTextInputFormatter] with a list of child `formatters`
-  /// and a reformat strategy.
-  const CompositeTextInputFormatter(this.formatters, {
-    this.shouldReformatPredicate = anyChildNeedsReformat,
-  }) : assert(formatters != null),
-       assert(formatters.length > 0),
-       assert(shouldReformatPredicate != null);
-
-  /// Only skip reformatting if the [oldFormatter] is also a
-  /// [CompositeTextInputFormatter] and none of the child input formatters
-  /// requires reformatting.
-  ///
-  /// This is the default [shouldReformat] strategy employed by
-  /// [CompositeTextInputFormatter].
-  static bool anyChildNeedsReformat(TextInputFormatter oldFormatter, CompositeTextInputFormatter newFormatter) {
-    if (identical(oldFormatter, newFormatter))
-      return false;
-
-    if (oldFormatter is! CompositeTextInputFormatter
-      || newFormatter.formatters.length != oldFormatter.formatters.length) {
-      return true;
-    }
-
-    final Iterator<TextInputFormatter> newChild = newFormatter.formatters.iterator;
-    final Iterator<TextInputFormatter> oldChild = oldFormatter.formatters.iterator;
-    while(newChild.moveNext() && oldChild.moveNext()) {
-      if (newChild.current.shouldReformat(oldChild.current))
-        return true;
-    }
-    return false;
-  }
-
-  /// A [ShouldReformatPredicate] that indicates this [CompositeTextInputFormatter]
-  /// should never perform reformat when replacing another [TextInputFormatter].
-  static bool neverReformat(TextInputFormatter oldFormatter, CompositeTextInputFormatter newFormatter) => false;
-
-  /// A [ShouldReformatPredicate] that indicates this [CompositeTextInputFormatter]
-  /// should always reformat when replacing another [TextInputFormatter].
-  static bool alwaysReformat(TextInputFormatter oldFormatter, CompositeTextInputFormatter newFormatter) => true;
-
-  /// The list of child formatters that will be run in the provided order.
-  ///
-  /// Must not be null or empty.
-  final Iterable<TextInputFormatter> formatters;
-
-  /// The [shouldReformat] strategy this [CompositeTextInputFormatter] employs.
-  ///
-  /// This class provides 3 predefined reformat strategies:
-  /// * [neverReformat]: the resulting [CompositeTextInputFormatter] never
-  ///   reformats when the [EditableText] it is associated with rebuilds.
-  /// * [alwaysReformat]: the resulting [CompositeTextInputFormatter] always
-  ///   reformats the [TextEditingValue] when its [EditableText] rebuilds.
-  /// * [anyChildNeedsReformat]: the resulting [CompositeTextInputFormatter]
-  ///   reformats the [TextEditingValue] when its [EditableText] rebuilds,
-  ///   unless the old formatter is also a [CompositeTextInputFormatter], has
-  ///   the same number of child formatters, and none of the new child input
-  ///   formatters requests reformatting.
-  ///
-  /// Defaults to [anyChildNeedsReformat].
-  final ShouldReformatPredicate shouldReformatPredicate;
-
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    return formatters.fold<TextEditingValue>(
-      oldValue,
-      (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(oldValue, newValue),
-    );
-  }
-
-  @override
-  bool shouldReformat(TextInputFormatter oldFormatter) => shouldReformatPredicate(oldFormatter, this);
-
-  @override
-  TextEditingValue format(TextEditingValue value) {
-    return formatters.fold(
-      value,
-      (TextEditingValue newValue, TextInputFormatter formatter) => formatter.format(value),
-    );
-  }
-}
+/// Function signature expected for creating custom [TextInputFormatter]
+/// shorthands via [TextInputFormatter.withFunction].
+typedef TextInputFormatFunction = TextEditingValue Function(
+  TextEditingValue oldValue,
+  TextEditingValue newValue,
+);
 
 /// Wiring for [TextInputFormatter.withFunction].
 class _SimpleTextInputFormatter extends TextInputFormatter {
@@ -452,14 +280,6 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
   /// A [TextInputFormatter] that takes in digits `[0-9]` only.
   static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
-
-  @override
-  bool shouldReformat(TextInputFormatter oldFormatter) {
-    return oldFormatter is! FilteringTextInputFormatter
-        || allow != oldFormatter.allow
-        || filterPattern != oldFormatter.filterPattern
-        || replacementString != oldFormatter.replacementString;
-  }
 }
 
 /// Old name for [FilteringTextInputFormatter.deny].
@@ -705,23 +525,6 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
         return truncate(newValue, maxLength);
     }
-  }
-
-  @override
-  bool shouldReformat(TextInputFormatter oldFormatter) {
-    // With maxLength == null or -1, this formatter is basically an identity
-    // function and imposes no constraints on the user input. Thus it can be
-    // used to update an arbitrary formatter without re-formatting.
-    final int? maxLength = this.maxLength;
-    if (maxLength == null || maxLength == -1)
-      return false;
-
-    if (oldFormatter is! LengthLimitingTextInputFormatter)
-      return true;
-
-    final int? maxLengthOld = oldFormatter.maxLength;
-    return (maxLengthOld == null || maxLengthOld == -1)
-        || maxLength < maxLengthOld;
   }
 }
 
