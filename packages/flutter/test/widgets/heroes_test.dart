@@ -2891,22 +2891,21 @@ Future<void> main() async {
     // to make it unpaintable.
     navigatorKey.currentState?.pop();
     await tester.pump();
-
-
+    controller.jumpTo(1000);
+    // Starts Hero animation and scroll animation almost simutaneously.
+    // Scroll to make the Hero invisible.
+    await tester.pump();
     expect(findRenderOpacity()?.opacity, anyOf(isNull, 1.0));
 
-    // Scroll to make the Hero invisible.
-    controller.jumpTo(1000);
+    // In this frame the Hero animation finds out the toHero is not paintable,
+    // and starts fading.
     await tester.pump();
-    // The update happens in a build block so we need to keep pumping the
-    // animation to trigger updates.
-    await tester.pump(const Duration(milliseconds: 10));
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(findRenderOpacity()?.opacity, lessThan(1.0));
 
     await tester.pumpAndSettle();
-    // The Hero on the new route should be invisible .
+    // The Hero on the new route should be invisible.
     expect(find.byType(Placeholder), findsNothing);
   });
 

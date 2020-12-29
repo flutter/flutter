@@ -523,35 +523,8 @@ class _HeroFlight {
       animation: _proxyAnimation,
       child: shuttle,
       builder: (BuildContext context, Widget? child) {
-        final RenderBox? toHeroBox = manifest.toHero.mounted
-          ? manifest.toHero.context.findRenderObject() as RenderBox?
-          : null;
-
-        if (!_aborted && toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize) {
-          final RenderBox? finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?;
-          final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
-
-          _aborted = !toHeroOrigin.isFinite;
-          if (!_aborted && toHeroOrigin != heroRectTween.end!.topLeft) {
-            final Rect heroRectEnd = toHeroOrigin & heroRectTween.end!.size;
-            heroRectTween = manifest.createHeroRectTween(begin: heroRectTween.begin, end: heroRectEnd);
-          }
-        } else {
-          _aborted = true;
-        }
-
-
-        if (_aborted && _heroOpacity.isCompleted) {
-          // The toHero no longer exists or it's no longer the flight's destination.
-          // Continue flying while fading out.
-          _heroOpacity = _proxyAnimation.drive(
-            _reverseTween.chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0))),
-          );
-        }
-
         final Rect rect = heroRectTween.evaluate(_proxyAnimation)!;
         final RelativeRect offsets = RelativeRect.fromSize(rect, manifest.navigatorSize);
-
         return Positioned(
           top: offsets.top,
           right: offsets.right,
@@ -585,6 +558,7 @@ class _HeroFlight {
       manifest.fromHero.endFlight(keepPlaceholder: status == AnimationStatus.completed);
       manifest.toHero.endFlight(keepPlaceholder: status == AnimationStatus.dismissed);
       onFlightEnded(this);
+      _proxyAnimation.removeListener(onTick);
     }
   }
 
@@ -615,6 +589,33 @@ class _HeroFlight {
     assert(navigator.userGestureInProgress);
     _scheduledPerformAnimtationUpdate = true;
     navigator.userGestureInProgressNotifier.addListener(delayedPerformAnimtationUpdate);
+  }
+
+  void onTick() {
+    final RenderBox? toHeroBox = manifest.toHero.mounted
+      ? manifest.toHero.context.findRenderObject() as RenderBox?
+      : null;
+
+    if (!_aborted && toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize) {
+      final RenderBox? finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?;
+      final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
+
+      _aborted = !toHeroOrigin.isFinite;
+      if (!_aborted && toHeroOrigin != heroRectTween.end!.topLeft) {
+        final Rect heroRectEnd = toHeroOrigin & heroRectTween.end!.size;
+        heroRectTween = manifest.createHeroRectTween(begin: heroRectTween.begin, end: heroRectEnd);
+      }
+    } else {
+      _aborted = true;
+    }
+
+    if (_aborted && _heroOpacity.isCompleted) {
+      // The toHero no longer exists or it's no longer the flight's destination.
+      // Continue flying while fading out.
+      _heroOpacity = _proxyAnimation.drive(
+        _reverseTween.chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0))),
+      );
+    }
   }
 
   // The simple case: we're either starting a push or a pop animation.
@@ -656,6 +657,7 @@ class _HeroFlight {
     manifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: shouldIncludeChildInPlacehold);
     manifest.toHero.startFlight();
     manifest.overlay.insert(overlayEntry = OverlayEntry(builder: _buildOverlay));
+    _proxyAnimation.addListener(onTick);
   }
 
   // While this flight's hero was in transition a push or a pop occurred for
@@ -801,11 +803,11 @@ class HeroController extends NavigatorObserver {
     if (navigator!.userGestureInProgress)
       return;
 
-    // If the user horizontal drag gesture initiated the flight (i.e. the back swipe)
-    // didn't move towards the pop direction at all, the animation will not play
-    // and thus the status update callback _handleAnimationUpdate will never be
-    // called when the gesture finishes. In this case the initiated flight needs
-    // to be manually invalidated.
+    // When the user gesture ends, if the user horizontal drag gesture initiated
+    // the flight (i.e. the back swipe) didn't move towards the pop direction at
+    // all, the animation will not play and thus the status update callback
+    // _handleAnimationUpdate will never be called when the gesture finishes. In
+    // this case the initiated flight needs to be manually invalidated.
     bool isInvalidFlight(_HeroFlight flight) {
       return flight.manifest.isUserGestureTransition
           && flight.manifest.type == HeroFlightDirection.pop
