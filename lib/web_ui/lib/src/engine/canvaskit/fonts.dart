@@ -24,13 +24,24 @@ class SkiaFontCollection {
 
   final Set<String?> registeredFamilies = <String?>{};
 
+  final Map<String, List<SkTypeface>> familyToTypefaceMap =
+      <String, List<SkTypeface>>{};
+
+  final List<String> globalFontFallbacks = <String>[];
+
+  final Map<String, int> _fontFallbackCounts = <String, int>{};
+
   Future<void> ensureFontsLoaded() async {
     await _loadFonts();
 
     fontProvider = canvasKit.TypefaceFontProvider.Make();
+    familyToTypefaceMap.clear();
 
     for (var font in _registeredFonts) {
       fontProvider.registerFont(font.bytes, font.flutterFamily);
+      familyToTypefaceMap
+          .putIfAbsent(font.flutterFamily, () => <SkTypeface>[])
+          .add(font.typeface);
     }
   }
 
@@ -140,6 +151,15 @@ class SkiaFontCollection {
     return _RegisteredFont(bytes, family, actualFamily);
   }
 
+  void registerFallbackFont(String url, String family) {
+    _fontFallbackCounts.putIfAbsent(family, () => 0);
+    int fontFallbackTag = _fontFallbackCounts[family]!;
+    _fontFallbackCounts[family] = _fontFallbackCounts[family]! + 1;
+    String countedFamily = '$family $fontFallbackTag';
+    _unloadedFonts.add(_registerFont(url, countedFamily));
+    globalFontFallbacks.add(countedFamily);
+  }
+
   String? _readActualFamilyName(Uint8List bytes) {
     final SkFontMgr tmpFontMgr = canvasKit.FontMgr.FromData([bytes])!;
     String? actualFamily = tmpFontMgr.getFamilyName(0);
@@ -169,5 +189,12 @@ class _RegisteredFont {
   /// The font family that was parsed from the font's bytes.
   final String actualFamily;
 
-  _RegisteredFont(this.bytes, this.flutterFamily, this.actualFamily);
+  /// The [SkTypeface] created from this font's [bytes].
+  ///
+  /// This is used to determine which code points are supported by this font.
+  final SkTypeface typeface;
+
+  _RegisteredFont(this.bytes, this.flutterFamily, this.actualFamily)
+      : this.typeface =
+            canvasKit.FontMgr.RefDefault().MakeTypefaceFromData(bytes);
 }

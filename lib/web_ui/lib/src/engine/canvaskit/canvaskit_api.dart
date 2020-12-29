@@ -49,7 +49,7 @@ class CanvasKit {
   external SkMaskFilterNamespace get MaskFilter;
   external SkColorFilterNamespace get ColorFilter;
   external SkImageFilterNamespace get ImageFilter;
-  external SkPath MakePathFromOp(SkPath path1, SkPath path2, SkPathOp pathOp);
+  external SkPathNamespace get Path;
   external SkTonalColors computeTonalColors(SkTonalColors inTonalColors);
   external SkVertices MakeVertices(
     SkVertexMode mode,
@@ -95,10 +95,6 @@ class CanvasKit {
   );
   external SkSurface MakeSWCanvasSurface(html.CanvasElement canvas);
   external void setCurrentContext(int glContext);
-
-  /// Creates an [SkPath] using commands obtained from [SkPath.toCmds].
-  // TODO(yjbanov): switch to CanvasKit.Path.MakeFromCmds when it's available.
-  external SkPath MakePathFromCmds(List<dynamic> pathCommands);
 
   /// Creates an image from decoded pixels represented as a list of bytes.
   ///
@@ -723,7 +719,7 @@ class SkImage {
     SkTileMode tileModeY,
     Float32List? matrix, // 3x3 matrix
   );
-  external Uint8List readPixels(SkImageInfo imageInfo, int srcX, int srcY);
+  external Uint8List readPixels(int srcX, int srcY, SkImageInfo imageInfo);
   external SkData encodeToData();
   external bool isAliasOf(SkImage other);
   external bool isDeleted();
@@ -783,7 +779,7 @@ class SkShader {
 @JS()
 class SkMaskFilterNamespace {
   external SkMaskFilter MakeBlur(
-    SkBlurStyle blurStyle, double sigma, bool respectCTM);
+      SkBlurStyle blurStyle, double sigma, bool respectCTM);
 }
 
 // This needs to be bound to top-level because SkPaint is initialized
@@ -862,6 +858,14 @@ class SkImageFilterNamespace {
 @anonymous
 class SkImageFilter {
   external void delete();
+}
+
+@JS()
+class SkPathNamespace {
+  external SkPath MakeFromOp(SkPath path1, SkPath path2, SkPathOp pathOp);
+
+  /// Creates an [SkPath] using commands obtained from [SkPath.toCmds].
+  external SkPath MakeFromCmds(List<dynamic> pathCommands);
 }
 
 // Mappings from SkMatrix-index to input-index.
@@ -1183,7 +1187,8 @@ class SkPath {
 
   /// Serializes the path into a list of commands.
   ///
-  /// The list can be used to create a new [SkPath] using [CanvasKit.MakePathFromCmds].
+  /// The list can be used to create a new [SkPath] using
+  /// [CanvasKit.Path.MakeFromCmds].
   external List<dynamic> toCmds();
 
   external void delete();
@@ -1404,7 +1409,7 @@ class SkCanvas {
   );
   external void drawPoints(
     SkPointMode pointMode,
-    Float32List points,
+    List<Float32List> points,
     SkPaint paint,
   );
   external void drawRRect(
@@ -1786,7 +1791,8 @@ abstract class Collector {
 /// Uses timers to delete objects in batches and outside the animation frame.
 class ProductionCollector implements Collector {
   ProductionCollector() {
-    _skObjectFinalizationRegistry = SkObjectFinalizationRegistry(js.allowInterop((SkDeletable deletable) {
+    _skObjectFinalizationRegistry =
+        SkObjectFinalizationRegistry(js.allowInterop((SkDeletable deletable) {
       // This is called when GC decides to collect the wrapper object and
       // notify us, which may happen after the object is already deleted
       // explicitly, e.g. when its ref count drops to zero. When that happens
@@ -1967,7 +1973,8 @@ bool browserSupportsFinalizationRegistry =
 
 /// Sets the value of [browserSupportsFinalizationRegistry] to its true value.
 void debugResetBrowserSupportsFinalizationRegistry() {
-  browserSupportsFinalizationRegistry = _finalizationRegistryConstructor != null;
+  browserSupportsFinalizationRegistry =
+      _finalizationRegistryConstructor != null;
 }
 
 @JS()
