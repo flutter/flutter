@@ -19,7 +19,7 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 /// Defines the layout and behavior of a [BottomNavigationBar].
-///
+/// For a sample on how to use these, please see [BottomNavigationBar].
 /// See also:
 ///
 ///  * [BottomNavigationBar]
