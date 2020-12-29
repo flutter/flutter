@@ -69,7 +69,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// [fieldViewBuilder] parameter. The options to be displayed are determined
 /// using [optionsBuilder] and rendered with [optionsViewBuilder].
 ///
-/// {@tool dartpad --template=freeform_no_null_safety}
+/// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
 /// [fieldViewBuilder] and [optionsViewBuilder] parameters.
 ///
@@ -80,7 +80,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 /// ```dart
 /// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({Key key}) : super(key: key);
+///   AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
 ///   static final List<String> _options = <String>[
 ///     'aardvark',
@@ -143,7 +143,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// Options will be compared using `==`, so it may be beneficial to override
 /// [Object.==] and [Object.hashCode] for custom types.
 ///
-/// {@tool dartpad --template=freeform_no_null_safety}
+/// {@tool dartpad --template=freeform}
 /// This example is similar to the previous example, but it uses a custom T data
 /// type instead of directly using String.
 ///
@@ -156,8 +156,8 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// // An example of a type that someone might want to autocomplete a list of.
 /// class User {
 ///   const User({
-///     this.email,
-///     this.name,
+///     required this.email,
+///     required this.name,
 ///   });
 ///
 ///   final String email;
@@ -182,7 +182,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 ///
 /// class AutocompleteCustomTypeExample extends StatelessWidget {
-///   AutocompleteCustomTypeExample({Key key});
+///   AutocompleteCustomTypeExample({Key? key}) : super(key: key);
 ///
 ///   static final List<User> _userOptions = <User>[
 ///     User(name: 'Alice', email: 'alice@example.com'),
@@ -244,7 +244,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform_no_null_safety}
+/// {@tool dartpad --template=freeform}
 /// This example shows the use of RawAutocomplete in a form.
 ///
 /// ```dart imports
@@ -254,7 +254,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///
 /// ```dart
 /// class AutocompleteFormExamplePage extends StatefulWidget {
-///   AutocompleteFormExamplePage({Key key}) : super(key: key);
+///   AutocompleteFormExamplePage({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   AutocompleteFormExample createState() => AutocompleteFormExample();
@@ -263,8 +263,8 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// class AutocompleteFormExample extends State<AutocompleteFormExamplePage> {
 ///   final _formKey = GlobalKey<FormState>();
 ///   final TextEditingController _textEditingController = TextEditingController();
-///   String _dropdownValue;
-///   String _autocompleteSelection;
+///   String? _dropdownValue;
+///   String? _autocompleteSelection;
 ///
 ///   final List<String> _options = <String>[
 ///     'aardvark',
@@ -290,7 +290,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                 iconSize: 24,
 ///                 elevation: 16,
 ///                 style: TextStyle(color: Colors.deepPurple),
-///                 onChanged: (String newValue) {
+///                 onChanged: (String? newValue) {
 ///                   setState(() {
 ///                     _dropdownValue = newValue;
 ///                   });
@@ -302,7 +302,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                     child: Text(value),
 ///                   );
 ///                 }).toList(),
-///                 validator: (String value) {
+///                 validator: (String? value) {
 ///                   if (value == null) {
 ///                     return 'Must make a selection.';
 ///                   }
@@ -314,8 +314,8 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                 decoration: InputDecoration(
 ///                   hintText: 'This is a regular TextFormField',
 ///                 ),
-///                 validator: (String value) {
-///                   if (value.isEmpty) {
+///                 validator: (String? value) {
+///                   if (value == null || value.isEmpty) {
 ///                     return 'Can\'t be empty.';
 ///                   }
 ///                   return null;
@@ -342,7 +342,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///                     onFieldSubmitted: (String value) {
 ///                       onFieldSubmitted();
 ///                     },
-///                     validator: (String value) {
+///                     validator: (String? value) {
 ///                       if (!_options.contains(value)) {
 ///                         return 'Nothing selected.';
 ///                       }
@@ -380,7 +380,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///               ElevatedButton(
 ///                 onPressed: () {
 ///                   FocusScope.of(context).requestFocus(new FocusNode());
-///                   if (!_formKey.currentState.validate()) {
+///                   if (!_formKey.currentState!.validate()) {
 ///                     return;
 ///                   }
 ///                   showDialog<void>(

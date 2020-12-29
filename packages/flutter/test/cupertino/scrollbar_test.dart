@@ -263,16 +263,16 @@ void main() {
     await tester.pump(_kScrollbarFadeDuration);
   });
 
-  testWidgets('When isAlwaysShown is true, must pass a controller',
+  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController',
       (WidgetTester tester) async {
     Widget viewWithScroll() {
-      return Directionality(
+      return const Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: const MediaQueryData(),
+          data: MediaQueryData(),
           child: CupertinoScrollbar(
             isAlwaysShown: true,
-            child: const SingleChildScrollView(
+            child: SingleChildScrollView(
               child: SizedBox(
                 width: 4000.0,
                 height: 4000.0,
@@ -283,12 +283,12 @@ void main() {
       );
     }
 
-    expect(() async {
-      await tester.pumpWidget(viewWithScroll());
-    }, throwsAssertionError);
+    await tester.pumpWidget(viewWithScroll());
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
   });
 
-  testWidgets('When isAlwaysShown is true, must pass a controller that is attached to a scroll view',
+  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimarySCrollController that is attached to a scroll view',
       (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
@@ -313,6 +313,39 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     final dynamic exception = tester.takeException();
     expect(exception, isAssertionError);
+  });
+
+  testWidgets('On first render with isAlwaysShown: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: controller,
+            child: Builder(
+              builder: (BuildContext context) {
+                return const CupertinoScrollbar(
+                  isAlwaysShown: true,
+                  child: SingleChildScrollView(
+                    primary: true,
+                    child: SizedBox(
+                      width: 4000.0,
+                      height: 4000.0,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), paints..rect());
   });
 
   testWidgets('On first render with isAlwaysShown: true, the thumb shows',

@@ -9,8 +9,7 @@ import 'divider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// BuildContext context;
+// late BuildContext context;
 
 /// A thin horizontal line, with padding on either side.
 ///
@@ -25,7 +24,7 @@ import 'theme.dart';
 /// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the height.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to display a Divider between an orange and blue box
 /// inside a column. The Divider is 20 logical pixels in height and contains a

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -104,7 +105,7 @@ enum DragAnchor {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following example has a [Draggable] widget along with a [DragTarget]
 /// in a row demonstrating an incremented `acceptedData` integer value when
@@ -644,18 +645,28 @@ class DragTarget<T extends Object> extends StatefulWidget {
   _DragTargetState<T> createState() => _DragTargetState<T>();
 }
 
-List<T?> _mapAvatarsToData<T extends Object>(List<_DragAvatar<T>> avatars) {
-  return avatars.map<T?>((_DragAvatar<T> avatar) => avatar.data).toList();
+List<T?> _mapAvatarsToData<T extends Object>(List<_DragAvatar<Object>> avatars) {
+  return avatars.map<T?>((_DragAvatar<Object> avatar) => avatar.data as T?).toList();
 }
 
 class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
-  final List<_DragAvatar<T>> _candidateAvatars = <_DragAvatar<T>>[];
+  final List<_DragAvatar<Object>> _candidateAvatars = <_DragAvatar<Object>>[];
   final List<_DragAvatar<Object>> _rejectedAvatars = <_DragAvatar<Object>>[];
+
+  // On non-web platforms, checks if data Object is equal to type[T] or subtype of [T].
+  // On web, it does the same, but requires a check for ints and doubles
+  // because dart doubles and ints are backed by the same kind of object on web.
+  // JavaScript does not support integers.
+  bool isExpectedDataType(Object? data, Type type) {
+    if (kIsWeb && ((type == int && T == double) || (type == double && T == int)))
+      return false;
+    return data is T?;
+  }
 
   bool didEnter(_DragAvatar<Object> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    if (avatar is _DragAvatar<T> && (widget.onWillAccept == null || widget.onWillAccept!(avatar.data))) {
+    if (widget.onWillAccept == null || widget.onWillAccept!(avatar.data as T?)) {
       setState(() {
         _candidateAvatars.add(avatar);
       });
@@ -750,8 +761,8 @@ class _DragAvatar<T extends Object> extends Drag {
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
 
-  _DragTargetState<T>? _activeTarget;
-  final List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
+  _DragTargetState<Object>? _activeTarget;
+  final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
   Offset _position;
   Offset? _lastOffset;
   OverlayEntry? _entry;
@@ -783,12 +794,12 @@ class _DragAvatar<T extends Object> extends Drag {
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance!.hitTest(result, globalPosition + feedbackOffset);
 
-    final List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
+    final List<_DragTargetState<Object>> targets = _getDragTargets(result.path).toList();
 
     bool listsMatch = false;
     if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
       listsMatch = true;
-      final Iterator<_DragTargetState<T>> iterator = targets.iterator;
+      final Iterator<_DragTargetState<Object>> iterator = targets.iterator;
       for (int i = 0; i < _enteredTargets.length; i += 1) {
         iterator.moveNext();
         if (iterator.current != _enteredTargets[i]) {
@@ -800,7 +811,7 @@ class _DragAvatar<T extends Object> extends Drag {
 
     // If everything's the same, report moves, and bail early.
     if (listsMatch) {
-      for (final _DragTargetState<T> target in _enteredTargets) {
+      for (final _DragTargetState<Object> target in _enteredTargets) {
         target.didMove(this);
       }
       return;
@@ -810,8 +821,8 @@ class _DragAvatar<T extends Object> extends Drag {
     _leaveAllEntered();
 
     // Enter new targets.
-    final _DragTargetState<T>? newTarget = targets.cast<_DragTargetState<T>?>().firstWhere(
-      (_DragTargetState<T>? target) {
+    final _DragTargetState<Object>? newTarget = targets.cast<_DragTargetState<Object>?>().firstWhere(
+      (_DragTargetState<Object>? target) {
         if (target == null)
           return false;
         _enteredTargets.add(target);
@@ -821,21 +832,21 @@ class _DragAvatar<T extends Object> extends Drag {
     );
 
     // Report moves to the targets.
-    for (final _DragTargetState<T> target in _enteredTargets) {
+    for (final _DragTargetState<Object> target in _enteredTargets) {
       target.didMove(this);
     }
 
     _activeTarget = newTarget;
   }
 
-  Iterable<_DragTargetState<T>> _getDragTargets(Iterable<HitTestEntry> path) sync* {
+  Iterable<_DragTargetState<Object>> _getDragTargets(Iterable<HitTestEntry> path) sync* {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
     for (final HitTestEntry entry in path) {
       final HitTestTarget target = entry.target;
       if (target is RenderMetaData) {
         final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState<T>)
+        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T))
           yield metaData;
       }
     }

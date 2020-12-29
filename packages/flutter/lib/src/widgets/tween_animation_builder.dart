@@ -61,7 +61,7 @@ import 'value_listenable_builder.dart';
 ///
 /// ## Example Code
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example shows an [IconButton] that "zooms" in when the widget first
 /// builds (its size smoothly increases from 0 to 24) and whenever the button
 /// is pressed, it smoothly changes its size to the new target value of either
@@ -75,11 +75,11 @@ import 'value_listenable_builder.dart';
 ///   return TweenAnimationBuilder(
 ///     tween: Tween<double>(begin: 0, end: targetValue),
 ///     duration: Duration(seconds: 1),
-///     builder: (BuildContext context, double size, Widget child) {
+///     builder: (BuildContext context, double size, Widget? child) {
 ///       return IconButton(
 ///         iconSize: size,
 ///         color: Colors.blue,
-///         icon: child,
+///         icon: child!,
 ///         onPressed: () {
 ///           setState(() {
 ///             targetValue = targetValue == 24.0 ? 48.0 : 24.0;
@@ -113,7 +113,7 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
-class TweenAnimationBuilder<T extends Object> extends ImplicitlyAnimatedWidget {
+class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///
   /// The properties [tween], [duration], and [builder] are required. The values
@@ -194,7 +194,7 @@ class TweenAnimationBuilder<T extends Object> extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _TweenAnimationBuilderState<T extends Object> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
+class _TweenAnimationBuilderState<T extends Object?> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
   Tween<T>? _currentTween;
 
   @override
@@ -203,7 +203,7 @@ class _TweenAnimationBuilderState<T extends Object> extends AnimatedWidgetBaseSt
     _currentTween!.begin ??= _currentTween!.end;
     super.initState();
     if (_currentTween!.begin != _currentTween!.end) {
-      controller!.forward();
+      controller.forward();
     }
   }
 
@@ -221,6 +221,6 @@ class _TweenAnimationBuilderState<T extends Object> extends AnimatedWidgetBaseSt
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, _currentTween!.evaluate(animation!), widget.child);
+    return widget.builder(context, _currentTween!.evaluate(animation), widget.child);
   }
 }
