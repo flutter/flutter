@@ -212,12 +212,12 @@ bool _isTransitionable(BuildContext context) {
 ///       middle: const Text('Sample Code'),
 ///     ),
 ///     child: Column(
-///         children: [
-///           Container(height: 50, color: CupertinoColors.systemRed),
-///           Container(height: 50, color: CupertinoColors.systemGreen),
-///           Container(height: 50, color: CupertinoColors.systemBlue),
-///           Container(height: 50, color: CupertinoColors.systemYellow),
-///         ]
+///       children: [
+///         Container(height: 50, color: CupertinoColors.systemRed),
+///         Container(height: 50, color: CupertinoColors.systemGreen),
+///         Container(height: 50, color: CupertinoColors.systemBlue),
+///         Container(height: 50, color: CupertinoColors.systemYellow),
+///       ],
 ///     ),
 ///   );
 /// }

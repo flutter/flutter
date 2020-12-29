@@ -22,7 +22,6 @@ import 'theme.dart';
 /// This example shows a [CupertinoPageScaffold] with a [ListView] as a [child].
 /// The [CupertinoButton] is connected to a callback that increments a counter.
 ///
-///
 /// ```dart
 /// int _count = 0;
 ///
