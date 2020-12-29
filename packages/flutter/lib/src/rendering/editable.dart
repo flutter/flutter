@@ -1962,14 +1962,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
           return TextSelection(
-            baseOffset: _getStartIndexOfPreviousWord(text!.text!, position),
+            baseOffset: _getPreviousWord(word.start),
             extentOffset: position.offset,
           );
         case TargetPlatform.android:
-          return TextSelection(
-            baseOffset: _getStartIndexOfPreviousWord(originalText, position),
-            extentOffset: position.offset,
-          );
+          if(readOnly){
+            return TextSelection(
+              baseOffset: _getPreviousWord(word.start),
+              extentOffset: position.offset,
+            );
+          }
+          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
@@ -1979,45 +1982,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
-  }
-
-  int _getStartIndexOfPreviousWord(String word, TextPosition position){
-    assert(defaultTargetPlatform != null);
-    int startIndex = position.offset - 1;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        while (startIndex > 0
-            && (_isWhitespace(word.codeUnitAt(startIndex))
-                || word == '\u200e' || word == '\u200f')) {
-          startIndex--;
-        }
-        break;
-      case TargetPlatform.android:
-        while (startIndex > 0
-            && (_isWhitespace(word.codeUnitAt(startIndex))
-                || word[startIndex] == '\u200e' || word[startIndex] == '\u200f')) {
-          startIndex--;
-        }
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
-
-    if (startIndex > 0) {
-      final TextPosition positionBeforeSpace = TextPosition(
-        offset: startIndex,
-        affinity: position.affinity,
-      );
-      final TextRange wordBeforeSpace = _textPainter.getWordBoundary(
-        positionBeforeSpace,
-      );
-      startIndex = wordBeforeSpace.start;
-    }
-
-    return startIndex;
   }
 
   TextSelection _selectLineAtOffset(TextPosition position) {
