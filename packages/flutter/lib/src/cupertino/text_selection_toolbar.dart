@@ -8,8 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
-import 'button.dart';
-import 'colors.dart';
+import 'text_selection_toolbar_button.dart';
 
 // TODO(justinmc): Deduplicate between here and text_selection.dart.
 // Values extracted from https://developer.apple.com/design/resources/.
@@ -19,25 +18,6 @@ const double _kToolbarHeight = 43.0;
 // screen.
 const double _kToolbarScreenPadding = 8.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
-// Colors extracted from https://developer.apple.com/design/resources/.
-// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const Color _kToolbarBackgroundColor = Color(0xEB202020);
-
-const TextStyle _kToolbarButtonFontStyle = TextStyle(
-  inherit: false,
-  fontSize: 14.0,
-  letterSpacing: -0.15,
-  fontWeight: FontWeight.w400,
-  color: CupertinoColors.white,
-);
-
-const TextStyle _kToolbarButtonDisabledFontStyle = TextStyle(
-  inherit: false,
-  fontSize: 14.0,
-  letterSpacing: -0.15,
-  fontWeight: FontWeight.w400,
-  color: CupertinoColors.inactiveGray,
-);
 
 // TODO(justinmc): These constants are already deduped.
 // Values extracted from https://developer.apple.com/design/resources/.
@@ -100,6 +80,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 }
 
 // TODO(justinmc): Document and better name.
+// Positions the toolbar at the given position with the arrow pointing in the
+// given direction.
 class _CupertinoTextSelectionToolbarThing extends SingleChildRenderObjectWidget {
   /// Create an instance of CupertinoTextSelectionToolbar.
   const _CupertinoTextSelectionToolbarThing({
@@ -379,44 +361,26 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 
   @override
   Widget build(BuildContext context) {
-    final EdgeInsets arrowPadding = widget.isArrowPointingDown
-      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
-      : EdgeInsets.only(top: _kToolbarArrowSize.height);
-
     return DecoratedBox(
       decoration: const BoxDecoration(color: _kToolbarDividerColor),
       child: FadeTransition(
         opacity: _controller,
         child: _CupertinoTextSelectionToolbarItems(
           page: _page,
-          backButton: CupertinoButton(
-            borderRadius: null,
-            color: _kToolbarBackgroundColor,
-            minSize: _kToolbarHeight,
+          backButton: CupertinoTextSelectionToolbarButton(
+            isArrowPointingDown: widget.isArrowPointingDown,
             onPressed: _handlePreviousPage,
-            padding: arrowPadding,
-            pressedOpacity: 0.7,
-            child: const Text('◀', style: _kToolbarButtonFontStyle),
+            child: CupertinoTextSelectionToolbarButton.getText('◀'),
           ),
           dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
-          nextButton: CupertinoButton(
-            borderRadius: null,
-            color: _kToolbarBackgroundColor,
-            minSize: _kToolbarHeight,
-            onPressed: _handleNextPage,
-            padding: arrowPadding,
-            pressedOpacity: 0.7,
-            child: const Text('▶', style: _kToolbarButtonFontStyle),
+          nextButton: CupertinoTextSelectionToolbarButton(
+            isArrowPointingDown: widget.isArrowPointingDown,
+            onPressed: _handlePreviousPage,
+            child: CupertinoTextSelectionToolbarButton.getText('▶'),
           ),
-          nextButtonDisabled: CupertinoButton(
-            borderRadius: null,
-            color: _kToolbarBackgroundColor,
-            disabledColor: _kToolbarBackgroundColor,
-            minSize: _kToolbarHeight,
-            onPressed: null,
-            padding: arrowPadding,
-            pressedOpacity: 1.0,
-            child: const Text('▶', style: _kToolbarButtonDisabledFontStyle),
+          nextButtonDisabled: CupertinoTextSelectionToolbarButton(
+            isArrowPointingDown: widget.isArrowPointingDown,
+            child: CupertinoTextSelectionToolbarButton.getText('◀', false),
           ),
           children: widget.children,
         ),

@@ -9,9 +9,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'button.dart';
-import 'colors.dart';
 import 'localizations.dart';
 import 'text_selection_toolbar.dart';
+import 'text_selection_toolbar_button.dart';
 import 'theme.dart';
 
 // Read off from the output on iOS 12. This color does not vary with the
@@ -36,29 +36,6 @@ const double _kToolbarContentDistance = 8.0;
 // Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
 const double _kToolbarHeight = 43.0;
-const Size _kToolbarArrowSize = Size(14.0, 7.0);
-// Colors extracted from https://developer.apple.com/design/resources/.
-// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const Color _kToolbarBackgroundColor = Color(0xEB202020);
-
-const TextStyle _kToolbarButtonFontStyle = TextStyle(
-  inherit: false,
-  fontSize: 14.0,
-  letterSpacing: -0.15,
-  fontWeight: FontWeight.w400,
-  color: CupertinoColors.white,
-);
-
-const TextStyle _kToolbarButtonDisabledFontStyle = TextStyle(
-  inherit: false,
-  fontSize: 14.0,
-  letterSpacing: -0.15,
-  fontWeight: FontWeight.w400,
-  color: CupertinoColors.inactiveGray,
-);
-
-// Eyeballed value.
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
 
 // Generates the child that's passed into CupertinoTextSelectionToolbar.
 class _CupertinoTextSelectionToolbarWrapper extends StatefulWidget {
@@ -150,9 +127,6 @@ class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSel
 
     final List<Widget> items = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    final EdgeInsets arrowPadding = widget.isArrowPointingDown
-      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
-      : EdgeInsets.only(top: _kToolbarArrowSize.height);
     final Widget onePhysicalPixelVerticalDivider =
         SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
@@ -164,18 +138,10 @@ class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSel
         items.add(onePhysicalPixelVerticalDivider);
       }
 
-      items.add(CupertinoButton(
-        child: Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          style: _kToolbarButtonFontStyle,
-        ),
-        borderRadius: null,
-        color: _kToolbarBackgroundColor,
-        minSize: _kToolbarHeight,
+      items.add(CupertinoTextSelectionToolbarButton(
+        isArrowPointingDown: widget.isArrowPointingDown,
         onPressed: onPressed,
-        padding: _kToolbarButtonPadding.add(arrowPadding),
-        pressedOpacity: 0.7,
+        child: CupertinoTextSelectionToolbarButton.getText(text),
       ));
     }
 
