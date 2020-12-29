@@ -273,10 +273,10 @@ class DataCell {
 
   /// Called if the user cancels a tap was started on cell.
   ///
-  /// If non-null, tapping the cell will call this callback. If
-  /// null (including [onTap] [onDoubleTap], [onLongPress] and [onTapCancel])
-  /// tapping the cell will attempt to select the row (if
-  /// [DataRow.onSelectChanged] is provided).
+  /// If non-null, cancelling the tap gesture will invoke this callback. If
+  /// null (including [onTap] [onDoubleTap], [onLongPress] and 
+  /// [onTapCancel]), tapping the cell will attempt to select the 
+  /// row (if [DataRow.onSelectChanged] is provided).
   final GestureTapCancelCallback? onTapCancel;
 
   bool get _debugInteractive => onTap != null ||
