@@ -257,8 +257,8 @@ class DataCell {
 
   /// Called if the cell is long-pressed.
   ///
-  /// If non-null, tapping the cell will call this callback. If
-  /// null (including [onDoubleTap], [onTap], [onTapCancel] and [onTapDown])
+  /// If non-null, tapping the cell will invoke this callback. If
+  /// null (including [onDoubleTap], [onTap], [onTapCancel] and [onTapDown]),
   /// tapping the cell will attempt to select the row (if
   /// [DataRow.onSelectChanged] is provided).
   final GestureLongPressCallback? onLongPress;
