@@ -616,37 +616,78 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return 0;
   }
 
-  // TODO(justinmc): Definitely need a generic or more organized way to handle
-  // these directional movements.
+  // TODO(justinmc): Keep working towards a more generic or more organized way
+  // to handle the arrow key movements.
   void moveSelectionLeft() {
-    TextSelection newSelection = selection!;
-    if (newSelection.extentOffset <= 0) {
+    final TextSelection nextSelection = _moveGivenSelectionLeft(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
       return;
+    }
+    _cursorResetLocation -= selection!.extentOffset - nextSelection.extentOffset;
+    _updateSelection(nextSelection, SelectionChangedCause.keyboard);
+  }
+
+  static TextSelection _moveGivenSelectionLeft(TextSelection selection, String text) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.extentOffset <= 0) {
+      return selection;
     }
 
     int previousExtent;
-    if (newSelection.start != newSelection.end) {
-      previousExtent = newSelection.start;
+    if (selection.start != selection.end) {
+      previousExtent = selection.start;
     } else {
-      previousExtent = previousCharacter(newSelection.extentOffset, _plainText);
+      previousExtent = previousCharacter(selection.extentOffset, text);
     }
-    final int distance = newSelection.extentOffset - previousExtent;
-    newSelection = newSelection.copyWith(extentOffset: previousExtent);
-    _cursorResetLocation -= distance;
-
-    // Just place the collapsed selection at the end or beginning of the region
-    // if shift isn't down.
-    // We want to put the cursor at the correct location depending on which
-    // arrow is used while there is a selection.
-    final int newOffset = newSelection.extentOffset;
-    newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
-
-    _handleSelectionChange(
-      newSelection,
-      SelectionChangedCause.keyboard,
+    final TextSelection newSelection = selection.copyWith(
+      extentOffset: previousExtent,
     );
+
+    final int newOffset = newSelection.extentOffset;
+    return TextSelection.fromPosition(TextPosition(offset: newOffset));
+  }
+
+  // Return a new selection that has been moved right once.
+  //
+  // If it can't be moved right, the original TextSelection is returned.
+  static TextSelection _moveGivenSelectionRight(TextSelection selection, String text) {
+    // If the selection is already all the way right, there is nothing to do.
+    if (selection.extentOffset >= text.length) {
+      return selection;
+    }
+
+    int nextExtent;
+    if (selection.start != selection.end) {
+      nextExtent = selection.end;
+    } else {
+      nextExtent = nextCharacter(selection.extentOffset, text);
+    }
+    final TextSelection nextSelection = selection.copyWith(extentOffset: nextExtent);
+
+    int newOffset = nextSelection.extentOffset;
+    newOffset = nextSelection.baseOffset > nextSelection.extentOffset
+        ? nextSelection.baseOffset : nextSelection.extentOffset;
+    return TextSelection.fromPosition(TextPosition(offset: newOffset));
+  }
+
+  void moveSelectionRight() {
+    final TextSelection nextSelection = _moveGivenSelectionRight(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _updateSelection(nextSelection, SelectionChangedCause.keyboard);
+  }
+
+  void _updateSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    _handleSelectionChange(nextSelection, SelectionChangedCause.keyboard);
     // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
+    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection);
   }
 
   void _handleMovement(
@@ -714,6 +755,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         // The directional arrows move the TextSelection.extentOffset, while the
         // base remains fixed.
         if (rightArrow && newSelection.extentOffset < _plainText.length) {
+          // TODO(justinmc): This has been moved to _moveselectionRight above.
           int nextExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
             nextExtent = newSelection.end;
@@ -727,13 +769,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           }
         } else if (leftArrow && newSelection.extentOffset > 0) {
           // TODO(justinmc): This has been moved to _moveselectionleft above.
-          // How can I handle all of this movement key stuff nicely? Currently I might have some modifier key stuff messed up and removed.
-          // How can I write _moveselectionleft so that it makese sense independent of being what the left key does?
-          // Move all of this stuff to TEB.
-          print('justin old left arrow handler');
-          // TODO(justinmc): This should be invoked regardless of extentOffset.
-          // Actually, do it in editable text if you can?
-          /*
           int previousExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
             previousExtent = newSelection.start;
@@ -745,7 +780,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           if (shift) {
             _cursorResetLocation -= distance;
           }
-          */
         }
       }
     }
@@ -1055,12 +1089,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_hasFocus) {
       assert(!_listenerAttached);
       // TODO(justinmc): Get rid of this key listener altogether.
-      RawKeyboard.instance.addListener(_handleKeyEvent);
+      //RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
     } else {
       assert(_listenerAttached);
       // TODO(justinmc): Get rid of this key listener altogether.
-      RawKeyboard.instance.removeListener(_handleKeyEvent);
+      //RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
     markNeedsSemanticsUpdate();
@@ -1592,8 +1626,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(markNeedsPaint);
     // TODO(justinmc): Get rid of this key listener altogether.
-    if (_listenerAttached)
-      RawKeyboard.instance.removeListener(_handleKeyEvent);
+    //if (_listenerAttached)
+      //RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
   }
 

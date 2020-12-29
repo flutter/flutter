@@ -11,13 +11,8 @@ import 'package:flutter/widgets.dart';
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
-class ArrowLeftTextIntent extends Intent {
-  const ArrowLeftTextIntent({
-    required this.context,
-  });
-
-  final BuildContext context;
-}
+class ArrowLeftTextIntent extends Intent {}
+class ArrowRightTextIntent extends Intent {}
 
 class DoubleTapDownTextIntent extends Intent {
   const DoubleTapDownTextIntent();
@@ -158,6 +153,7 @@ final Map<Type, Action<Intent>> textEditingActionsMap = <Type, Action<Intent>>{
   SingleTapUpTextIntent: _singleTapUpTextAction,
   TapDownTextIntent: _tapDownTextAction,
   ArrowLeftTextIntent: _arrowLeftTextAction,
+  ArrowRightTextIntent: _arrowRightTextAction,
 };
 
 final CallbackAction<SingleTapUpTextIntent> _singleTapUpTextAction = CallbackAction<SingleTapUpTextIntent>(
@@ -230,8 +226,13 @@ final CallbackAction<TapDownTextIntent> _tapDownTextAction = CallbackAction<TapD
 
 final TextEditingAction<ArrowLeftTextIntent> _arrowLeftTextAction = TextEditingAction<ArrowLeftTextIntent>(
   onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
-    print('justin texteditingaction in file');
     editableTextState.renderEditable.moveSelectionLeft();
+  },
+);
+
+final TextEditingAction<ArrowRightTextIntent> _arrowRightTextAction = TextEditingAction<ArrowRightTextIntent>(
+  onInvoke: (ArrowRightTextIntent intent, EditableTextState editableTextState) {
+    editableTextState.renderEditable.moveSelectionRight();
   },
 );
 

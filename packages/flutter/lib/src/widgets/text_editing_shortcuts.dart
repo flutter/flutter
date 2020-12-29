@@ -23,9 +23,8 @@ class TextEditingShortcuts extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntent(
-          context: context,
-        ),
+        LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowRight): ArrowRightTextIntent(),
       },
       child: child,
     );
