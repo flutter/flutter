@@ -328,9 +328,7 @@ class SkiaPerfGcsAdaptor {
 class SkiaPerfDestination extends MetricDestination {
   SkiaPerfDestination(this._gcs, this._lock);
 
-  // TODO(liyuqian): create a new bucket so the migration will not interfere
-  // with the old bucket.
-  static const String kBucketName = 'flutter-skia-perf';
+  static const String kBucketName = 'flutter-skia-perf-prod';
   static const String kTestBucketName = 'flutter-skia-perf-test';
 
   /// Create from a full credentials json (of a service account).
