@@ -170,50 +170,6 @@ class Shell final : public PlatformView::Delegate,
       CreateCallback<Rasterizer> on_create_rasterizer);
 
   //----------------------------------------------------------------------------
-  /// @brief      Creates a shell instance using the provided settings. The
-  ///             callbacks to create the various shell subcomponents will be
-  ///             called on the appropriate threads before this method returns.
-  ///             Unlike the simpler variant of this factory method, this method
-  ///             allows for the specification of an isolate snapshot that
-  ///             cannot be adequately described in the settings. This call also
-  ///             requires the specification of a running VM instance.
-  ///
-  /// @param[in]  task_runners             The task runners
-  /// @param[in]  platform_data            The default data for setting up
-  ///                                      ui.Window that attached to this
-  ///                                      intance.
-  /// @param[in]  settings                 The settings
-  /// @param[in]  isolate_snapshot         A custom isolate snapshot. Takes
-  ///                                      precedence over any snapshots
-  ///                                      specified in the settings.
-  /// @param[in]  on_create_platform_view  The callback that must return a
-  ///                                      platform view. This will be called on
-  ///                                      the platform task runner before this
-  ///                                      method returns.
-  /// @param[in]  on_create_rasterizer     That callback that must provide a
-  ///                                      valid rasterizer. This will be called
-  ///                                      on the render task runner before this
-  ///                                      method returns.
-  /// @param[in]  vm                       A running VM instance.
-  ///
-  /// @return     A full initialized shell if the settings and callbacks are
-  ///             valid. The root isolate has been created but not yet launched.
-  ///             It may be launched by obtaining the engine weak pointer and
-  ///             posting a task onto the UI task runner with a valid run
-  ///             configuration to run the isolate. The embedder must always
-  ///             check the validity of the shell (using the IsSetup call)
-  ///             immediately after getting a pointer to it.
-  ///
-  static std::unique_ptr<Shell> Create(
-      TaskRunners task_runners,
-      const PlatformData platform_data,
-      Settings settings,
-      fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      const CreateCallback<PlatformView>& on_create_platform_view,
-      const CreateCallback<Rasterizer>& on_create_rasterizer,
-      DartVMRef vm);
-
-  //----------------------------------------------------------------------------
   /// @brief      Destroys the shell. This is a synchronous operation and
   ///             synchronous barrier blocks are introduced on the various
   ///             threads to ensure shutdown of all shell sub-components before

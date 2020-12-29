@@ -21,10 +21,10 @@
 #include <lib/vfs/cpp/pseudo_dir.h>
 #include <lib/zx/eventpair.h>
 
-#include "engine.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 
+#include "engine.h"
 #include "flutter_runner_product_configuration.h"
 #include "thread.h"
 #include "unique_fdio_ns.h"
@@ -131,8 +131,6 @@ class Application final : public Engine::Delegate,
 
   // |flutter::Engine::Delegate|
   void OnEngineTerminate(const Engine* holder) override;
-
-  void AttemptVMLaunchWithCurrentSettings(const flutter::Settings& settings);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Application);
 };

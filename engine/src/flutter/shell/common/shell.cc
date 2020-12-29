@@ -265,53 +265,28 @@ std::unique_ptr<Shell> Shell::Create(
 
   TRACE_EVENT0("flutter", "Shell::Create");
 
-  auto vm = DartVMRef::Create(settings);
-  FML_CHECK(vm) << "Must be able to initialize the VM.";
-
-  auto vm_data = vm->GetVMData();
-
-  return Shell::Create(std::move(task_runners),        //
-                       std::move(platform_data),       //
-                       std::move(settings),            //
-                       vm_data->GetIsolateSnapshot(),  // isolate snapshot
-                       on_create_platform_view,        //
-                       on_create_rasterizer,           //
-                       std::move(vm)                   //
-  );
-}
-
-std::unique_ptr<Shell> Shell::Create(
-    TaskRunners task_runners,
-    const PlatformData platform_data,
-    Settings settings,
-    fml::RefPtr<const DartSnapshot> isolate_snapshot,
-    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
-    DartVMRef vm) {
-  PerformInitializationTasks(settings);
-  PersistentCache::SetCacheSkSL(settings.cache_sksl);
-
-  TRACE_EVENT0("flutter", "Shell::CreateWithSnapshots");
-
   if (!task_runners.IsValid() || !on_create_platform_view ||
       !on_create_rasterizer) {
     return nullptr;
   }
 
+  auto vm = DartVMRef::Create(settings);
+  FML_CHECK(vm) << "Must be able to initialize the VM.";
+
   fml::AutoResetWaitableEvent latch;
   std::unique_ptr<Shell> shell;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetPlatformTaskRunner(),
-      fml::MakeCopyable([&latch,                                          //
-                         vm = std::move(vm),                              //
-                         &shell,                                          //
-                         task_runners = std::move(task_runners),          //
-                         platform_data,                                   //
-                         settings,                                        //
-                         isolate_snapshot = std::move(isolate_snapshot),  //
-                         on_create_platform_view,                         //
-                         on_create_rasterizer                             //
+      fml::MakeCopyable([&latch,                                  //
+                         vm = std::move(vm),                      //
+                         &shell,                                  //
+                         task_runners = std::move(task_runners),  //
+                         platform_data,                           //
+                         settings,                                //
+                         on_create_platform_view,                 //
+                         on_create_rasterizer                     //
   ]() mutable {
+        auto isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
         shell = CreateShellOnPlatformThread(std::move(vm),
                                             std::move(task_runners),      //
                                             platform_data,                //

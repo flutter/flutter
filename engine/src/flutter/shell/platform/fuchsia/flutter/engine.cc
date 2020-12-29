@@ -7,8 +7,6 @@
 #include <lib/async/cpp/task.h>
 #include <zircon/status.h>
 
-#include "../runtime/dart/utils/files.h"
-#include "flow/embedded_views.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/make_copyable.h"
@@ -18,16 +16,15 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/serialization_callbacks.h"
-#include "flutter_runner_product_configuration.h"
-#include "fuchsia_external_view_embedder.h"
+#include "third_party/skia/include/core/SkPicture.h"
+#include "third_party/skia/include/core/SkSerialProcs.h"
+#include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
+
+#include "../runtime/dart/utils/files.h"
 #include "fuchsia_intl.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkSerialProcs.h"
 #include "platform_view.h"
 #include "surface.h"
 #include "task_runner_adapter.h"
-#include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
-#include "thread.h"
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
 #include "compositor_context.h"  // nogncheck
@@ -67,7 +64,6 @@ Engine::Engine(Delegate& delegate,
                std::shared_ptr<sys::ServiceDirectory> svc,
                std::shared_ptr<sys::ServiceDirectory> runner_services,
                flutter::Settings settings,
-               fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
                fuchsia::ui::views::ViewToken view_token,
                scenic::ViewRefPair view_ref_pair,
                UniqueFDIONS fdio_ns,
@@ -310,22 +306,14 @@ Engine::Engine(Delegate& delegate,
         });
       });
 
-  auto vm = flutter::DartVMRef::Create(settings);
-
-  if (!isolate_snapshot) {
-    isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
-  }
-
   {
     TRACE_EVENT0("flutter", "CreateShell");
     shell_ = flutter::Shell::Create(
         std::move(task_runners),             // host task runners
         flutter::PlatformData(),             // default window data
         std::move(settings),                 // shell launch settings
-        std::move(isolate_snapshot),         // isolate snapshot
         std::move(on_create_platform_view),  // platform view create callback
-        std::move(on_create_rasterizer),     // rasterizer create callback
-        std::move(vm)                        // vm reference
+        std::move(on_create_rasterizer)      // rasterizer create callback
     );
   }
 
