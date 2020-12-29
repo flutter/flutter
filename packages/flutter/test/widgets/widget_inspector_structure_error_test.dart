@@ -81,11 +81,13 @@ class StructureErrorTestWidgetInspectorService extends Object with WidgetInspect
         );
         FlutterError.reportError(expectedError);
 
-        // Validates the new handler did not receive an error because the
-        // `FlutterError.onError` was set to
+        // For non-web apps, this validates the new handler did not receive an
+        // error because `FlutterError.onError` was set to
         // `WidgetInspectorService._structuredExceptionHandler` when service
-        // extensions were initialized.
-        expect(usingNewHandler, isFalse);
+        // extensions were initialized. For web apps, the new handler should
+        // have received an error because structured errors are disabled by
+        // default on the web.
+        expect(usingNewHandler, equals(kIsWeb));
       } finally {
         FlutterError.onError = oldHandler;
       }
