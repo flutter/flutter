@@ -118,20 +118,16 @@ void main() {
     expect(log,<String>['cell-tapDown: 375' ,'cell-tapCancel: 375', 'cell-longPress: 375']);
     log.clear();
 
-    await tester.tap(find.text('375'),pointer: 1);
-
-    expect(log, isEmpty);
-
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(log, equals(<String>['cell-tapDown: 375', 'cell-tap: 375']));
-    log.clear();
-
     TestGesture gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
     await tester.pump(const Duration(milliseconds: 100));
+    // onTapDown callback is registered.
     expect(log, equals(<String>['cell-tapDown: 375']));
     await gesture.up();
+
     await tester.pump(const Duration(seconds: 1));
+    // onTap callback is registered after the gesture is removed.
+    expect(log, equals(<String>['cell-tapDown: 375', 'cell-tap: 375']));
+    log.clear();
 
     log.clear();
     gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
