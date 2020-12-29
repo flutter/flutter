@@ -2797,12 +2797,7 @@ Future<void> main() async {
                 keepAlive: true,
                 child: Hero(
                   tag: 'a',
-                  child: Material(
-                    child: MediaQuery(
-                      data: MediaQueryData(),
-                      child: Placeholder()
-                    ),
-                  ),
+                  child: Placeholder(),
                 ),
               ),
               Container(height: 1000.0),
@@ -2825,12 +2820,7 @@ Future<void> main() async {
             body: Center(
               child: Hero(
                 tag: 'a',
-                child: Material(
-                  child: MediaQuery(
-                    data: MediaQueryData(),
-                    child: Placeholder(),
-                  ),
-                ),
+                child: Placeholder(),
               ),
             ),
           );
@@ -2842,6 +2832,82 @@ Future<void> main() async {
     expect(tester.takeException(), isNull);
     // The Hero on the new route should be visible .
     expect(find.byType(Placeholder), findsOneWidget);
+  });
+
+  testWidgets('toHero becomes unpaintable after the transition begins', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final ScrollController controller = ScrollController();
+
+    RenderOpacity? findRenderOpacity() {
+      AbstractNode? parent = tester.renderObject(find.byType(Placeholder));
+      while (parent is RenderObject && parent is! RenderOpacity) {
+        parent = parent.parent;
+      }
+      return parent is RenderOpacity ? parent : null;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(
+          body: ListView(
+            controller: controller,
+            addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
+            addSemanticIndexes: false,
+            children: <Widget>[
+              const KeepAlive(
+                keepAlive: true,
+                child: Hero(
+                  tag: 'a',
+                  child: Placeholder(),
+                ),
+              ),
+              Container(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    navigatorKey.currentState?.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Scaffold(
+            body: Center(
+              child: Hero(
+                tag: 'a',
+                child: Placeholder(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Pop the new route, and before the animation finishes we scroll the toHero
+    // to make it unpaintable.
+    navigatorKey.currentState?.pop();
+    await tester.pump();
+
+
+    expect(findRenderOpacity()?.opacity, anyOf(isNull, 1.0));
+
+    // Scroll to make the Hero invisible.
+    controller.jumpTo(1000);
+    await tester.pump();
+    // The update happens in a build block so we need to keep pumping the
+    // animation to trigger updates.
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(findRenderOpacity()?.opacity, lessThan(1.0));
+
+    await tester.pumpAndSettle();
+    // The Hero on the new route should be invisible .
+    expect(find.byType(Placeholder), findsNothing);
   });
 
   testWidgets('diverting to a keepalive but unpaintable hero', (WidgetTester tester) async {
@@ -2860,12 +2926,7 @@ Future<void> main() async {
                 keepAlive: true,
                 child: Hero(
                   tag: 'a',
-                  child: Material(
-                    child: MediaQuery(
-                      data: MediaQueryData(),
-                      child: Placeholder(),
-                    ),
-                  ),
+                  child: Placeholder(),
                 ),
               ),
               Container(height: 1000.0),
@@ -2889,12 +2950,7 @@ Future<void> main() async {
             body: Center(
               child: Hero(
                 tag: 'a',
-                child: Material(
-                  child: MediaQuery(
-                    data: MediaQueryData(),
-                    child: Placeholder(),
-                  ),
-                ),
+                child: Placeholder(),
               ),
             ),
           );
@@ -2911,12 +2967,7 @@ Future<void> main() async {
             body: Center(
               child: Hero(
                 tag: 'a',
-                child: Material(
-                  child: MediaQuery(
-                    data: MediaQueryData(),
-                    child: Placeholder(),
-                  ),
-                ),
+                child: Placeholder(),
               ),
             ),
           );

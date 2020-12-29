@@ -526,23 +526,27 @@ class _HeroFlight {
         final RenderBox? toHeroBox = manifest.toHero.mounted
           ? manifest.toHero.context.findRenderObject() as RenderBox?
           : null;
-        if (_aborted || toHeroBox == null || !toHeroBox.attached) {
-          // The toHero no longer exists or it's no longer the flight's destination.
-          // Continue flying while fading out.
-          if (_heroOpacity.isCompleted) {
-            _heroOpacity = _proxyAnimation.drive(
-              _reverseTween.chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0))),
-            );
-          }
-        } else if (toHeroBox.hasSize) {
-          // The toHero has been laid out. If it's no longer where the hero animation is
-          // supposed to end up then recreate the heroRect tween.
+
+        if (!_aborted && toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize) {
           final RenderBox? finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?;
           final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
-          if (toHeroOrigin != heroRectTween.end!.topLeft && toHeroOrigin.isFinite) {
+
+          _aborted = !toHeroOrigin.isFinite;
+          if (!_aborted && toHeroOrigin != heroRectTween.end!.topLeft) {
             final Rect heroRectEnd = toHeroOrigin & heroRectTween.end!.size;
             heroRectTween = manifest.createHeroRectTween(begin: heroRectTween.begin, end: heroRectEnd);
           }
+        } else {
+          _aborted = true;
+        }
+
+
+        if (_aborted && _heroOpacity.isCompleted) {
+          // The toHero no longer exists or it's no longer the flight's destination.
+          // Continue flying while fading out.
+          _heroOpacity = _proxyAnimation.drive(
+            _reverseTween.chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0))),
+          );
         }
 
         final Rect rect = heroRectTween.evaluate(_proxyAnimation)!;
