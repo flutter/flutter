@@ -18,8 +18,8 @@ import 'system_channels.dart';
 /// Due to the asynchronous nature of platform channels, these states are
 /// informational and should not be depended on to determine if a dynamic
 /// feature is ready to use or not. Readiness should be determined by
-/// completion of the future returned by [installDynamicFeature] or
-/// `loadLibrary()`.
+/// completion of the future returned by
+/// [DynamicFeature.installDynamicFeature] or `loadLibrary()`.
 ///
 /// These states are an extension of the states in Android's
 /// https://developer.android.com/reference/com/google/android/play/core/splitinstall/model/SplitInstallSessionStatus
