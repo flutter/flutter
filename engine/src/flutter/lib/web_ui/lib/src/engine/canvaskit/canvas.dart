@@ -176,7 +176,8 @@ class CkCanvas {
   void drawPoints(CkPaint paint, ui.PointMode pointMode, Float32List points) {
     skCanvas.drawPoints(
       toSkPointMode(pointMode),
-      points,
+      // TODO(hterkelsen): Don't convert this to 2d after we move to CK 0.21.
+      rawPointsToSkPoints2d(points),
       paint.skiaObject,
     );
   }
@@ -192,10 +193,10 @@ class CkCanvas {
     skCanvas.drawRect(toSkRect(rect), paint.skiaObject);
   }
 
-  void drawShadow(CkPath path, ui.Color color, double elevation,
-      bool transparentOccluder) {
-    drawSkShadow(skCanvas, path, color, elevation,
-        transparentOccluder, ui.window.devicePixelRatio);
+  void drawShadow(
+      CkPath path, ui.Color color, double elevation, bool transparentOccluder) {
+    drawSkShadow(skCanvas, path, color, elevation, transparentOccluder,
+        ui.window.devicePixelRatio);
   }
 
   void drawVertices(
@@ -237,7 +238,8 @@ class CkCanvas {
   }
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
-    final _CkManagedSkImageFilterConvertible convertible = filter as _CkManagedSkImageFilterConvertible;
+    final _CkManagedSkImageFilterConvertible convertible =
+        filter as _CkManagedSkImageFilterConvertible;
     return skCanvas.saveLayer(
       null,
       toSkRect(bounds),
@@ -267,8 +269,8 @@ class CkCanvas {
 
 class RecordingCkCanvas extends CkCanvas {
   RecordingCkCanvas(SkCanvas skCanvas, ui.Rect bounds)
-    : pictureSnapshot = CkPictureSnapshot(bounds),
-      super(skCanvas);
+      : pictureSnapshot = CkPictureSnapshot(bounds),
+        super(skCanvas);
 
   @override
   final CkPictureSnapshot pictureSnapshot;
@@ -310,7 +312,8 @@ class RecordingCkCanvas extends CkCanvas {
     CkPaint paint,
   ) {
     super.drawArc(oval, startAngle, sweepAngle, useCenter, paint);
-    _addCommand(CkDrawArcCommand(oval, startAngle, sweepAngle, useCenter, paint));
+    _addCommand(
+        CkDrawArcCommand(oval, startAngle, sweepAngle, useCenter, paint));
   }
 
   @override
@@ -323,7 +326,8 @@ class RecordingCkCanvas extends CkCanvas {
     ui.BlendMode blendMode,
   ) {
     super.drawAtlasRaw(paint, atlas, rstTransforms, rects, colors, blendMode);
-    _addCommand(CkDrawAtlasCommand(paint, atlas, rstTransforms, rects, colors, blendMode));
+    _addCommand(CkDrawAtlasCommand(
+        paint, atlas, rstTransforms, rects, colors, blendMode));
   }
 
   @override
@@ -418,10 +422,11 @@ class RecordingCkCanvas extends CkCanvas {
   }
 
   @override
-  void drawShadow(CkPath path, ui.Color color, double elevation,
-      bool transparentOccluder) {
+  void drawShadow(
+      CkPath path, ui.Color color, double elevation, bool transparentOccluder) {
     super.drawShadow(path, color, elevation, transparentOccluder);
-    _addCommand(CkDrawShadowCommand(path, color, elevation, transparentOccluder));
+    _addCommand(
+        CkDrawShadowCommand(path, color, elevation, transparentOccluder));
   }
 
   @override
@@ -627,7 +632,7 @@ class CkTransformCommand extends CkPaintCommand {
   @override
   void apply(SkCanvas canvas) {
     canvas.concat(toSkMatrixFromFloat32(matrix4));
- }
+  }
 }
 
 class CkSkewCommand extends CkPaintCommand {
@@ -660,7 +665,8 @@ class CkClipRectCommand extends CkPaintCommand {
 }
 
 class CkDrawArcCommand extends CkPaintCommand {
-  CkDrawArcCommand(this.oval, this.startAngle, this.sweepAngle, this.useCenter, this.paint);
+  CkDrawArcCommand(
+      this.oval, this.startAngle, this.sweepAngle, this.useCenter, this.paint);
 
   final ui.Rect oval;
   final double startAngle;
@@ -682,7 +688,8 @@ class CkDrawArcCommand extends CkPaintCommand {
 }
 
 class CkDrawAtlasCommand extends CkPaintCommand {
-  CkDrawAtlasCommand(this.paint, this.atlas, this.rstTransforms, this.rects, this.colors, this.blendMode);
+  CkDrawAtlasCommand(this.paint, this.atlas, this.rstTransforms, this.rects,
+      this.colors, this.blendMode);
 
   final CkPaint paint;
   final CkImage atlas;
@@ -807,7 +814,8 @@ class CkDrawPointsCommand extends CkPaintCommand {
   void apply(SkCanvas canvas) {
     canvas.drawPoints(
       toSkPointMode(pointMode),
-      points,
+      // TODO(hterkelsen): Don't convert this to 2d after we move to CK 0.21.
+      rawPointsToSkPoints2d(points),
       paint.skiaObject,
     );
   }
@@ -924,7 +932,7 @@ class CkDrawImageCommand extends CkPaintCommand {
   final CkPaint paint;
 
   CkDrawImageCommand(CkImage image, this.offset, this.paint)
-    : this.image = image.clone();
+      : this.image = image.clone();
 
   @override
   void apply(SkCanvas canvas) {
@@ -949,7 +957,7 @@ class CkDrawImageRectCommand extends CkPaintCommand {
   final CkPaint paint;
 
   CkDrawImageRectCommand(CkImage image, this.src, this.dst, this.paint)
-    : this.image = image.clone();
+      : this.image = image.clone();
 
   @override
   void apply(SkCanvas canvas) {
@@ -970,7 +978,7 @@ class CkDrawImageRectCommand extends CkPaintCommand {
 
 class CkDrawImageNineCommand extends CkPaintCommand {
   CkDrawImageNineCommand(CkImage image, this.center, this.dst, this.paint)
-    : this.image = image.clone();
+      : this.image = image.clone();
 
   final CkImage image;
   final ui.Rect center;
@@ -1061,7 +1069,8 @@ class CkSaveLayerWithFilterCommand extends CkPaintCommand {
 
   @override
   void apply(SkCanvas canvas) {
-    final _CkManagedSkImageFilterConvertible convertible = filter as _CkManagedSkImageFilterConvertible;
+    final _CkManagedSkImageFilterConvertible convertible =
+        filter as _CkManagedSkImageFilterConvertible;
     return canvas.saveLayer(
       null,
       toSkRect(bounds),

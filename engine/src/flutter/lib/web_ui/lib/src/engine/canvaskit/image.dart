@@ -300,7 +300,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
         width: skImage.width(),
         height: skImage.height(),
       );
-      bytes = skImage.readPixels(imageInfo, 0, 0);
+      bytes = skImage.readPixels(0, 0, imageInfo);
     } else {
       final SkData skData = skImage.encodeToData(); //defaults to PNG 100%
       // make a copy that we can return
