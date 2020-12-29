@@ -26,8 +26,8 @@ class _AccountPictures extends StatelessWidget {
 
   final Widget? currentAccountPicture;
   final List<Widget>? otherAccountsPictures;
-  final double currentAccountPictureSize;
-  final double otherAccountsPicturesSize;
+  final double? currentAccountPictureSize;
+  final double? otherAccountsPicturesSize;
 
   @override
   Widget build(BuildContext context) {
@@ -329,12 +329,12 @@ class UserAccountsDrawerHeader extends StatefulWidget {
 
   /// The size of the widget that placed in the upper-left corner that represents the current
   /// user's account. Normally a [CircleAvatar].
-  final double currentAccountPictureSize;
+  final double? currentAccountPictureSize;
 
   /// The size of each widget in the list of widgets that represent the current user's other accounts.
   /// Up to three of these widgets will be arranged in a row in the header's
   /// upper-right corner. Normally a list of [CircleAvatar] widgets.
-  final double otherAccountsPicturesSize;
+  final double? otherAccountsPicturesSize;
 
   /// A widget that represents the user's current account name. It is
   /// displayed on the left, below the [currentAccountPicture].
