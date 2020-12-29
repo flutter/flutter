@@ -20,10 +20,14 @@ class _AccountPictures extends StatelessWidget {
     Key? key,
     this.currentAccountPicture,
     this.otherAccountsPictures,
+    this.currentAccountPictureSize,
+    this.otherAccountsPicturesSize,
   }) : super(key: key);
 
   final Widget? currentAccountPicture;
   final List<Widget>? otherAccountsPictures;
+  final currentAccountPictureSize;
+  final otherAccountsPicturesSize;
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +43,11 @@ class _AccountPictures extends StatelessWidget {
                 child: Semantics(
                   container: true,
                   child: Container(
-                  padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                    width: 48.0,
-                    height: 48.0,
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    width: otherAccountsPicturesSize,
+                    height: otherAccountsPicturesSize,
                     child: picture,
-                 ),
+                  ),
                 ),
               );
             }).toList(),
@@ -54,8 +58,8 @@ class _AccountPictures extends StatelessWidget {
           child: Semantics(
             explicitChildNodes: true,
             child: SizedBox(
-              width: 72.0,
-              height: 72.0,
+              width: currentAccountPictureSize,
+              height: currentAccountPictureSize,
               child: currentAccountPicture,
             ),
           ),
@@ -182,8 +186,8 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
                       Icons.arrow_drop_down,
                       color: widget.arrowColor,
                       semanticLabel: widget.isOpen
-                        ? localizations.hideAccountsLabel
-                        : localizations.showAccountsLabel,
+                          ? localizations.hideAccountsLabel
+                          : localizations.showAccountsLabel,
                     ),
                   ),
                 ),
@@ -299,6 +303,8 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.margin = const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
     this.otherAccountsPictures,
+    this.currentAccountPictureSize,
+    this.otherAccountsPicturesSize,
     required this.accountName,
     required this.accountEmail,
     this.onDetailsPressed,
@@ -320,6 +326,15 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   /// Up to three of these widgets will be arranged in a row in the header's
   /// upper-right corner. Normally a list of [CircleAvatar] widgets.
   final List<Widget>? otherAccountsPictures;
+
+  /// The size of the widget that placed in the upper-left corner that represents the current
+  /// user's account. Normally a [CircleAvatar].
+  final currentAccountPictureSize;
+
+  /// The size of each widget in the list of widgets that represent the current user's other accounts.
+  /// Up to three of these widgets will be arranged in a row in the header's
+  /// upper-right corner. Normally a list of [CircleAvatar] widgets.
+  final otherAccountsPicturesSize;
 
   /// A widget that represents the user's current account name. It is
   /// displayed on the left, below the [currentAccountPicture].
@@ -374,6 +389,8 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                   child: _AccountPictures(
                     currentAccountPicture: widget.currentAccountPicture,
                     otherAccountsPictures: widget.otherAccountsPictures,
+                    currentAccountPictureSize: widget.currentAccountPictureSize,
+                    otherAccountsPicturesSize: widget.otherAccountsPicturesSize,
                   ),
                 ),
               ),
