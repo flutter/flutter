@@ -95,7 +95,7 @@ import 'theme.dart';
 ///
 /// {@tool snippet}
 /// This example shows how to create a [CupertinoApp] that defines a [theme] that
-/// will be used for cupertino widgets in the app.
+/// will be used for Cupertino widgets in the app.
 ///
 /// ![The CupertinoApp displays a CupertinoPageScaffold with orange-colored icons](https://flutter.github.io/assets-for-api-docs/assets/cupertino/theme_cupertino_app.png)
 ///
