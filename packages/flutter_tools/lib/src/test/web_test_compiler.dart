@@ -66,8 +66,6 @@ class WebTestCompiler {
       }
     }
 
-    // buildInfo.dartDefines.add('FLUTTER_WEB_USE_SKIA=true');
-    // buildInfo.dartDefines.add('FLUTTER_WEB_AUTO_DETECT=true');
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
     final List<File> generatedFiles = <File>[];
