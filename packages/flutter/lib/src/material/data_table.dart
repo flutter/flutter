@@ -851,7 +851,6 @@ class DataTable extends StatelessWidget {
     required GestureTapDownCallback? onTapDown,
     required GestureTapCancelCallback? onTapCancel,
     required MaterialStateProperty<Color?>? overlayColor,
-
   }) {
     final ThemeData themeData = Theme.of(context);
     if (showEditIcon) {
