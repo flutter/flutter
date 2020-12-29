@@ -21,6 +21,7 @@ import 'theme.dart';
 /// {@tool dartpad --template=stateful_widget_cupertino}
 /// This example shows a [CupertinoPageScaffold] with a [ListView] as a [child].
 /// The [CupertinoButton] is connected to a callback that increments a counter.
+/// The [backgroundColor] can be changed.
 ///
 /// ```dart
 /// int _count = 0;
