@@ -66,6 +66,30 @@ typedef DragTargetLeave = void Function(Object? data);
 /// Used by [DragTarget.onMove].
 typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
 
+/// Signature for the strategy that determines the drag start point.
+///
+/// Used for the injectable [Draggable.dragAnchorStrategy] and
+/// [_defaultDragAnchorStrategy]
+typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
+
+/// The default implementation of the strategy to determine the Offset for the
+/// dragStartPoint for the Draggable feedback. When it is [DragAnchor.child] the
+/// RenderBox of the Draggable. When it is [DragAnchor.pointer] it is simply
+/// Offset(0, 0). This strategy can be overridden by passing a function as the
+/// parameter [customDragAnchorStrategy] which follows the [DragAnchorStrategy]
+/// signature.
+Offset defaultDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
+  switch (draggable.dragAnchor) {
+    case DragAnchor.child:
+      final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+      return renderObject.globalToLocal(position);
+    case DragAnchor.pointer:
+      return Offset.zero;
+    default:
+      return Offset.zero;
+  }
+}
+
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
@@ -190,6 +214,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.childWhenDragging,
     this.feedbackOffset = Offset.zero,
     this.dragAnchor = DragAnchor.child,
+    this.dragAnchorStrategy = defaultDragAnchorStrategy,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
@@ -261,6 +286,13 @@ class Draggable<T extends Object> extends StatefulWidget {
 
   /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
+
+  /// An optional injectable strategy that overrides the
+  /// [_defaultDragAnchorStrategy] and is used to determine how this widget
+  /// should be anchored during a drag. When a custom [dragAnchorStrategy] is
+  /// injected it is asserted that the [dragAnchor] is custom, to prevent any
+  /// surprises.
+  final DragAnchorStrategy dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
@@ -467,16 +499,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   _DragAvatar<T>? _startDrag(Offset position) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
-    final Offset dragStartPoint;
-    switch (widget.dragAnchor) {
-      case DragAnchor.child:
-        final RenderBox renderObject = context.findRenderObject()! as RenderBox;
-        dragStartPoint = renderObject.globalToLocal(position);
-        break;
-      case DragAnchor.pointer:
-        dragStartPoint = Offset.zero;
-        break;
-    }
+    final Offset dragStartPoint = widget.dragAnchorStrategy(widget, context, position);
     setState(() {
       _activeCount += 1;
     });
