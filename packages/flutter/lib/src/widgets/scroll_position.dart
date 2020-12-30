@@ -106,8 +106,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       restoreScrollOffset();
   }
 
-  /// If applicable, the velocity at which the scroll offset is currently 
-  /// independently changing (i.e. without external stimuli such as a dragging gestures) 
+  /// If applicable, the velocity at which the scroll offset is currently
+  /// independently changing (i.e. without external stimuli such as a dragging gestures)
   /// in logical pixels per second for this activity.
   double? get velocity => activity?.velocity;
 
