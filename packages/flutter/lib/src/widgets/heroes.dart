@@ -901,7 +901,7 @@ class HeroController extends NavigatorObserver {
     }
     assert(navigatorRenderObject.hasSize);
 
-    // At this point the toHeroes may have been built and laid out for the first time.
+    // At this point, the toHeroes may have been built and laid out for the first time.
     //
     // If `fromSubtreeContext` is null, call endFlight on all toHeroes, for good measure.
     // If `toSubtreeContext` is null abort existingFlights.
