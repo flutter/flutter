@@ -140,7 +140,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       + _kToolbarHeight
       + _kToolbarContentDistance;
     final double availableHeight = widget.globalEditableRegion.top + widget.endpoints.first.point.dy - widget.textLineHeight;
-    final bool isArrowPointingDown = toolbarHeightNeeded <= availableHeight;
+    final bool isAbove = toolbarHeightNeeded <= availableHeight;
     final double anchorX = (widget.selectionMidpoint.dx + widget.globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
@@ -152,7 +152,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // going to be facing up or down.
     final Offset anchor = Offset(
       anchorX,
-      isArrowPointingDown
+      isAbove
         ? widget.endpoints.first.point.dy - widget.textLineHeight - _kToolbarContentDistance - _kToolbarHeight + widget.globalEditableRegion.top
         : widget.endpoints.last.point.dy + _kToolbarContentDistance + widget.globalEditableRegion.top,
     );
@@ -171,7 +171,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       }
 
       items.add(CupertinoTextSelectionToolbarButton(
-        isArrowPointingDown: isArrowPointingDown,
+        isAbove: isAbove,
         onPressed: onPressed,
         child: CupertinoTextSelectionToolbarButton.getText(text),
       ));
@@ -193,7 +193,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
 
     return CupertinoTextSelectionToolbar(
       anchor: anchor,
-      isArrowPointingDown: isArrowPointingDown,
+      isAbove: isAbove,
       children: items,
     );
   }

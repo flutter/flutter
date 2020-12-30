@@ -41,11 +41,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   const CupertinoTextSelectionToolbar({
     Key? key,
     required Offset anchor,
-    required bool isArrowPointingDown,
+    required bool isAbove,
     required List<Widget> children,
   }) : assert(children.length > 0),
        _anchor = anchor,
-       _isArrowPointingDown = isArrowPointingDown,
+       _isAbove = isAbove,
        _children = children,
        super(key: key);
 
@@ -53,7 +53,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 
   /// Whether the arrow should point down and be attached to the bottom
   /// of the toolbar, or point up and be attached to the top of the toolbar.
-  final bool _isArrowPointingDown;
+  final bool _isAbove;
 
   final List<Widget> _children;
 
@@ -61,9 +61,9 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return _CupertinoTextSelectionToolbarThing(
       anchor: _anchor,
-      isArrowPointingDown: _isArrowPointingDown,
+      isAbove: _isAbove,
       child: _CupertinoTextSelectionToolbarContent(
-        isArrowPointingDown: _isArrowPointingDown,
+        isAbove: _isAbove,
         children: _children,
       ),
     );
@@ -78,22 +78,22 @@ class _CupertinoTextSelectionToolbarThing extends SingleChildRenderObjectWidget 
   const _CupertinoTextSelectionToolbarThing({
     Key? key,
     required Offset anchor,
-    required bool isArrowPointingDown,
+    required bool isAbove,
     Widget? child,
   }) : _anchor = anchor,
-       _isArrowPointingDown = isArrowPointingDown,
+       _isAbove = isAbove,
        super(key: key, child: child);
 
   final Offset _anchor;
 
   // Whether the arrow should point down and be attached to the bottom
   // of the toolbar, or point up and be attached to the top of the toolbar.
-  final bool _isArrowPointingDown;
+  final bool _isAbove;
 
   @override
   _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox(
     _anchor,
-    _isArrowPointingDown,
+    _isAbove,
     null,
   );
 
@@ -101,7 +101,7 @@ class _CupertinoTextSelectionToolbarThing extends SingleChildRenderObjectWidget 
   void updateRenderObject(BuildContext context, _ToolbarRenderBox renderObject) {
     renderObject
       ..anchor = _anchor
-      ..isArrowPointingDown = _isArrowPointingDown;
+      ..isAbove = _isAbove;
   }
 }
 
@@ -113,7 +113,7 @@ class _CupertinoTextSelectionToolbarThing extends SingleChildRenderObjectWidget 
 class _ToolbarRenderBox extends RenderShiftedBox {
   _ToolbarRenderBox(
     this._anchor,
-    this._isArrowPointingDown,
+    this._isAbove,
     RenderBox? child,
   ) : super(child);
 
@@ -131,12 +131,12 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     markNeedsSemanticsUpdate();
   }
 
-  bool _isArrowPointingDown;
-  set isArrowPointingDown(bool value) {
-    if (_isArrowPointingDown == value) {
+  bool _isAbove;
+  set isAbove(bool value) {
+    if (_isAbove == value) {
       return;
     }
-    _isArrowPointingDown = value;
+    _isAbove = value;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
@@ -181,7 +181,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     final Path rrect = Path()
       ..addRRect(
         RRect.fromRectAndRadius(
-          Offset(0.0, _isArrowPointingDown ? 0.0 : _kToolbarArrowSize.height)
+          Offset(0.0, _isAbove ? 0.0 : _kToolbarArrowSize.height)
             & Size(child!.size.width, child!.size.height - _kToolbarArrowSize.height),
           _kToolbarBorderRadius,
         ),
@@ -191,11 +191,11 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     final double arrowXOffsetFromCenter = _anchor.dx - centerX;
     final double arrowTipX = child!.size.width / 2 + arrowXOffsetFromCenter;
 
-    final double arrowBottomY = _isArrowPointingDown
+    final double arrowBottomY = _isAbove
       ? child!.size.height - _kToolbarArrowSize.height
       : _kToolbarArrowSize.height;
 
-    final double arrowTipY = _isArrowPointingDown ? child!.size.height : 0;
+    final double arrowTipY = _isAbove ? child!.size.height : 0;
 
     final Path arrow = Path()
       ..moveTo(arrowTipX, arrowTipY)
@@ -256,14 +256,14 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   const _CupertinoTextSelectionToolbarContent({
     Key? key,
     required this.children,
-    required this.isArrowPointingDown,
+    required this.isAbove,
   }) : assert(children != null),
        // This ignore is used because .isNotEmpty isn't compatible with const.
        assert(children.length > 0), // ignore: prefer_is_empty
        super(key: key);
 
   final List<Widget> children;
-  final bool isArrowPointingDown;
+  final bool isAbove;
 
   @override
   _CupertinoTextSelectionToolbarContentState createState() => _CupertinoTextSelectionToolbarContentState();
@@ -338,18 +338,18 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
         child: _CupertinoTextSelectionToolbarItems(
           page: _page,
           backButton: CupertinoTextSelectionToolbarButton(
-            isArrowPointingDown: widget.isArrowPointingDown,
+            isAbove: widget.isAbove,
             onPressed: _handlePreviousPage,
             child: CupertinoTextSelectionToolbarButton.getText('◀'),
           ),
           dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
           nextButton: CupertinoTextSelectionToolbarButton(
-            isArrowPointingDown: widget.isArrowPointingDown,
+            isAbove: widget.isAbove,
             onPressed: _handlePreviousPage,
             child: CupertinoTextSelectionToolbarButton.getText('▶'),
           ),
           nextButtonDisabled: CupertinoTextSelectionToolbarButton(
-            isArrowPointingDown: widget.isArrowPointingDown,
+            isAbove: widget.isAbove,
             child: CupertinoTextSelectionToolbarButton.getText('◀', false),
           ),
           children: widget.children,

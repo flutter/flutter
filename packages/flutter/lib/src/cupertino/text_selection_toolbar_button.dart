@@ -33,7 +33,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// Create an instance of [CupertinoTextSelectionToolbarButton].
   const CupertinoTextSelectionToolbarButton({
     Key? key,
-    required this.isArrowPointingDown,
+    required this.isAbove,
     required this.child,
     this.onPressed,
   }) : super(key: key);
@@ -46,8 +46,8 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// Called when this button is pressed.
   final VoidCallback? onPressed;
 
-  // TODO(justinmc): Rethink isArrowPointingDown, is it needed?
-  final bool isArrowPointingDown;
+  // TODO(justinmc): Rethink isAbove, is it needed?
+  final bool isAbove;
 
   /// Returns a [Text] widget in the style of the iOS text selection toolbar
   /// buttons, to be passed as [child].
@@ -63,7 +63,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final EdgeInsets arrowPadding = isArrowPointingDown
+    final EdgeInsets arrowPadding = isAbove
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
 
