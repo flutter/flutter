@@ -32,7 +32,7 @@ import 'text_field.dart';
 /// }
 ///
 /// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   TextEditingController _textController;
+///   late TextEditingController _textController;
 ///
 ///   @override
 ///   void initState() {

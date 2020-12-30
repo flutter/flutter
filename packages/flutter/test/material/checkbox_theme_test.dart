@@ -290,6 +290,67 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
   });
+
+  testWidgets('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+    const Color activePressedOverlayColor = Color(0xFF000001);
+    const Color inactivePressedOverlayColor = Color(0xFF000002);
+
+    Color? getOverlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.selected)) {
+          return activePressedOverlayColor;
+        }
+        return inactivePressedOverlayColor;
+      }
+      return null;
+    }
+    const double splashRadius = 24.0;
+
+    Widget buildCheckbox({required bool active}) {
+      return MaterialApp(
+        theme: ThemeData(
+          checkboxTheme: CheckboxThemeData(
+            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+            splashRadius: splashRadius,
+          ),
+        ),
+        home: Scaffold(
+          body: Checkbox(
+            value: active,
+            onChanged: (_) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCheckbox(active: false));
+    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      _getCheckboxMaterial(tester),
+      paints
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Inactive pressed Checkbox should have overlay color: $inactivePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildCheckbox(active: true));
+    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      _getCheckboxMaterial(tester),
+      paints
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
+    );
+  });
 }
 
 Future<void> _pointGestureToCheckbox(WidgetTester tester) async {

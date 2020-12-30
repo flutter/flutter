@@ -6,6 +6,7 @@
 // precise contents (including especially the comments) of this file.
 
 // Examples can assume:
+// // @dart = 2.9
 // bool _visible = true;
 // class _Text extends Text {
 //   const _Text(String text) : super(text);
@@ -34,7 +35,7 @@
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
 /// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
 /// blabla it when it is blabla:
 ///

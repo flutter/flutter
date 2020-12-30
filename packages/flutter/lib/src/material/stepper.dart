@@ -254,7 +254,7 @@ class Stepper extends StatefulWidget {
   /// Widget build(BuildContext context) {
   ///   return Stepper(
   ///     controlsBuilder:
-  ///       (BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel }) {
+  ///       (BuildContext context, { VoidCallback? onStepContinue, VoidCallback? onStepCancel }) {
   ///          return Row(
   ///            children: <Widget>[
   ///              TextButton(

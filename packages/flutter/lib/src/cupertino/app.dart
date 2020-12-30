@@ -274,7 +274,7 @@ class CupertinoApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -307,7 +307,7 @@ class CupertinoApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );

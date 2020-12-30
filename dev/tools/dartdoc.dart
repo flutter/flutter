@@ -468,6 +468,10 @@ List<Directory> findPackages() {
       if (entity is! Directory)
         return false;
       final File pubspec = File('${entity.path}/pubspec.yaml');
+      if (!pubspec.existsSync()) {
+        print("Unexpected package '${entity.path}' found in packages directory");
+        return false;
+      }
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })

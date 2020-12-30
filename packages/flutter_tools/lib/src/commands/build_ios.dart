@@ -294,6 +294,14 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       globals.printStatus(
         'A summary of your iOS bundle analysis can be found at: ${outputFile.path}',
       );
+
+      // DevTools expects a file path relative to the .flutter-devtools/ dir.
+      final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+      globals.printStatus(
+        '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+        'flutter pub global activate devtools; flutter pub global run devtools '
+        '--appSizeBase=$relativeAppSizePath'
+      );
     }
 
     if (result.output != null) {

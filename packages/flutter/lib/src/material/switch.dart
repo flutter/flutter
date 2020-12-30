@@ -83,6 +83,7 @@ class Switch extends StatefulWidget {
     this.mouseCursor,
     this.focusColor,
     this.hoverColor,
+    this.overlayColor,
     this.splashRadius,
     this.focusNode,
     this.autofocus = false,
@@ -126,6 +127,7 @@ class Switch extends StatefulWidget {
     this.mouseCursor,
     this.focusColor,
     this.hoverColor,
+    this.overlayColor,
     this.splashRadius,
     this.focusNode,
     this.autofocus = false,
@@ -307,6 +309,9 @@ class Switch extends StatefulWidget {
 
   /// The color for the button's [Material] when it has the input focus.
   ///
+  /// If [overlayColor] returns a non-null color in the [MaterialState.focused]
+  /// state, it will be used instead.
+  ///
   /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
   /// focused state. If that is also null, then the value of
   /// [ThemeData.focusColor] is used.
@@ -314,10 +319,32 @@ class Switch extends StatefulWidget {
 
   /// The color for the button's [Material] when a pointer is hovering over it.
   ///
+  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
+  /// state, it will be used instead.
+  ///
   /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
   /// [ThemeData.hoverColor] is used.
   final Color? hoverColor;
+
+  /// {@template flutter.material.switch.overlayColor}
+  /// The color for the switch's [Material].
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  /// {@endtemplate}
+  ///
+  /// If null, then the value of [activeColor] with alpha
+  /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
+  /// pressed, focused and hovered state. If that is also null,
+  /// the value of [SwitchThemeData.overlayColor] is used. If that is
+  /// also null, then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
+  /// is used in the pressed, focused and hovered state.
+  final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@template flutter.material.switch.splashRadius}
   /// The splash radius of the circular [Material] ink response.
@@ -486,12 +513,28 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       ?? theme.switchTheme.trackColor?.resolve(inactiveStates)
       ?? _defaultTrackColor.resolve(inactiveStates);
 
-    final Color effectiveFocusOverlayColor = widget.focusColor
-        ?? theme.switchTheme.overlayColor?.resolve(<MaterialState>{MaterialState.focused})
-        ?? theme.focusColor;
-    final Color effectiveHoverOverlayColor = widget.hoverColor
-        ?? theme.switchTheme.overlayColor?.resolve(<MaterialState>{MaterialState.hovered})
+
+    final Set<MaterialState> focusedStates = _states..add(MaterialState.focused);
+    final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
+      ?? widget.focusColor
+      ?? theme.switchTheme.overlayColor?.resolve(focusedStates)
+      ?? theme.focusColor;
+
+    final Set<MaterialState> hoveredStates = _states..add(MaterialState.hovered);
+    final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
+        ?? widget.hoverColor
+        ?? theme.switchTheme.overlayColor?.resolve(hoveredStates)
         ?? theme.hoverColor;
+
+    final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
+    final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
+        ?? theme.switchTheme.overlayColor?.resolve(activePressedStates)
+        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+
+    final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
+    final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
+        ?? theme.switchTheme.overlayColor?.resolve(inactivePressedStates)
+        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
       ?? theme.switchTheme.mouseCursor?.resolve(_states)
@@ -515,6 +558,8 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             surfaceColor: theme.colorScheme.surface,
             focusColor: effectiveFocusOverlayColor,
             hoverColor: effectiveHoverOverlayColor,
+            reactionColor: effectiveActivePressedOverlayColor,
+            inactiveReactionColor: effectiveInactivePressedOverlayColor,
             splashRadius: widget.splashRadius ?? theme.switchTheme.splashRadius ?? kRadialReactionRadius,
             activeThumbImage: widget.activeThumbImage,
             onActiveThumbImageError: widget.onActiveThumbImageError,
@@ -586,6 +631,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.inactiveColor,
     required this.hoverColor,
     required this.focusColor,
+    required this.reactionColor,
+    required this.inactiveReactionColor,
     required this.splashRadius,
     required this.activeThumbImage,
     required this.onActiveThumbImageError,
@@ -608,6 +655,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveColor;
   final Color hoverColor;
   final Color focusColor;
+  final Color reactionColor;
+  final Color inactiveReactionColor;
   final double splashRadius;
   final ImageProvider? activeThumbImage;
   final ImageErrorListener? onActiveThumbImageError;
@@ -633,6 +682,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       inactiveColor: inactiveColor,
       hoverColor: hoverColor,
       focusColor: focusColor,
+      reactionColor: reactionColor,
+      inactiveReactionColor: inactiveReactionColor,
       splashRadius: splashRadius,
       activeThumbImage: activeThumbImage,
       onActiveThumbImageError: onActiveThumbImageError,
@@ -659,6 +710,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveColor = inactiveColor
       ..hoverColor = hoverColor
       ..focusColor = focusColor
+      ..reactionColor = reactionColor
+      ..inactiveReactionColor = inactiveReactionColor
       ..splashRadius = splashRadius
       ..activeThumbImage = activeThumbImage
       ..onActiveThumbImageError = onActiveThumbImageError
@@ -696,6 +749,8 @@ class _RenderSwitch extends RenderToggleable {
     required Color inactiveColor,
     required Color hoverColor,
     required Color focusColor,
+    required Color reactionColor,
+    required Color inactiveReactionColor,
     required double splashRadius,
     required ImageProvider? activeThumbImage,
     required ImageErrorListener? onActiveThumbImageError,
@@ -729,6 +784,8 @@ class _RenderSwitch extends RenderToggleable {
          inactiveColor: inactiveColor,
          hoverColor: hoverColor,
          focusColor: focusColor,
+         reactionColor: reactionColor,
+         inactiveReactionColor: inactiveReactionColor,
          splashRadius: splashRadius,
          onChanged: onChanged,
          additionalConstraints: additionalConstraints,

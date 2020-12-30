@@ -23,6 +23,7 @@ import 'theme.dart';
 
 
 // Examples can assume:
+// // @dart = 2.9
 // BuildContext context;
 
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);

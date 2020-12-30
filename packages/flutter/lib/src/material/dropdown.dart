@@ -753,9 +753,9 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///       height: 2,
 ///       color: Colors.deepPurpleAccent,
 ///     ),
-///     onChanged: (String newValue) {
+///     onChanged: (String? newValue) {
 ///       setState(() {
-///         dropdownValue = newValue;
+///         dropdownValue = newValue!;
 ///       });
 ///     },
 ///     items: <String>['One', 'Two', 'Free', 'Four']
@@ -927,7 +927,7 @@ class DropdownButton<T> extends StatefulWidget {
   ///     padding: const EdgeInsets.symmetric(horizontal: 12.0),
   ///     child: DropdownButton<String>(
   ///       value: selectedItem,
-  ///       onChanged: (String string) => setState(() => selectedItem = string),
+  ///       onChanged: (String? string) => setState(() => selectedItem = string!),
   ///       selectedItemBuilder: (BuildContext context) {
   ///         return items.map<Widget>((String item) {
   ///           return Text(item);
@@ -979,9 +979,9 @@ class DropdownButton<T> extends StatefulWidget {
   ///     color: Colors.blue,
   ///     child: DropdownButton<String>(
   ///       value: dropdownValue,
-  ///       onChanged: (String newValue) {
+  ///       onChanged: (String? newValue) {
   ///         setState(() {
-  ///           dropdownValue = newValue;
+  ///           dropdownValue = newValue!;
   ///         });
   ///       },
   ///       style: TextStyle(color: Colors.blue),
@@ -1112,6 +1112,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     _actionMap = <Type, Action<Intent>>{
       ActivateIntent: CallbackAction<ActivateIntent>(
         onInvoke: (ActivateIntent intent) => _handleTap(),
+      ),
+      ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
+        onInvoke: (ButtonActivateIntent intent) => _handleTap(),
       ),
     };
     focusNode!.addListener(_handleFocusChanged);
