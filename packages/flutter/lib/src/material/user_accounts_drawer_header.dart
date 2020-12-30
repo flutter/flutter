@@ -26,8 +26,8 @@ class _AccountPictures extends StatelessWidget {
 
   final Widget? currentAccountPicture;
   final List<Widget>? otherAccountsPictures;
-  final double? currentAccountPictureSize;
-  final double? otherAccountsPicturesSize;
+  final Size? currentAccountPictureSize;
+  final Size? otherAccountsPicturesSize;
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +44,8 @@ class _AccountPictures extends StatelessWidget {
                   container: true,
                   child: Container(
                     padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                    width: otherAccountsPicturesSize,
-                    height: otherAccountsPicturesSize,
+                    width: otherAccountsPicturesSize?.width,
+                    height: otherAccountsPicturesSize?.height,
                     child: picture,
                   ),
                 ),
@@ -58,8 +58,8 @@ class _AccountPictures extends StatelessWidget {
           child: Semantics(
             explicitChildNodes: true,
             child: SizedBox(
-              width: currentAccountPictureSize,
-              height: currentAccountPictureSize,
+              width: currentAccountPictureSize?.width,
+              height: currentAccountPictureSize?.height,
               child: currentAccountPicture,
             ),
           ),
@@ -303,8 +303,8 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.margin = const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
     this.otherAccountsPictures,
-    this.currentAccountPictureSize = 72.0,
-    this.otherAccountsPicturesSize = 48.0,
+    this.currentAccountPictureSize = const Size.square(72.0),
+    this.otherAccountsPicturesSize = const Size.square(48.0),
     required this.accountName,
     required this.accountEmail,
     this.onDetailsPressed,
@@ -328,10 +328,10 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   final List<Widget>? otherAccountsPictures;
 
   /// The size of the [currentAccountPicture].
-  final double? currentAccountPictureSize;
+  final Size? currentAccountPictureSize;
 
   /// The size of each widget in [otherAccountsPicturesSize].
-  final double? otherAccountsPicturesSize;
+  final Size? otherAccountsPicturesSize;
 
   /// A widget that represents the user's current account name. It is
   /// displayed on the left, below the [currentAccountPicture].
