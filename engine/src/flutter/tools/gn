@@ -39,6 +39,9 @@ def get_out_dir(args):
     if args.ios_cpu != 'arm64':
         target_dir.append(args.ios_cpu)
 
+    if args.simulator_cpu != 'x64':
+        target_dir.append(args.simulator_cpu)
+
     if args.linux_cpu is not None:
       target_dir.append(args.linux_cpu)
 
@@ -168,7 +171,7 @@ def to_gn_args(args):
         gn_args['target_cpu'] = args.android_cpu
     elif args.target_os == 'ios':
         if args.simulator:
-            gn_args['target_cpu'] = 'x64'
+            gn_args['target_cpu'] = args.simulator_cpu
         else:
             gn_args['target_cpu'] = args.ios_cpu
     elif args.target_os == 'linux':
@@ -351,6 +354,7 @@ def parse_args(args):
   parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
   parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
+  parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
   parser.add_argument('--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp'])
 
   parser.add_argument('--goma', default=True, action='store_true')
