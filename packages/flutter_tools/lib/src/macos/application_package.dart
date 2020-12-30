@@ -137,7 +137,7 @@ class PrebuiltMacOSApp extends MacOSApp {
 }
 
 class BuildableMacOSApp extends MacOSApp {
-  BuildableMacOSApp(this.project);
+  BuildableMacOSApp(this.project) : super(projectBundleId: '');
 
   final MacOSProject project;
 
