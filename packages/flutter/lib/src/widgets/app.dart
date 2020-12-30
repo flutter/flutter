@@ -30,9 +30,6 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// The signature of [WidgetsApp.localeListResolutionCallback].
 ///
 /// A [LocaleListResolutionCallback] is responsible for computing the locale of the app's
@@ -883,7 +880,7 @@ class WidgetsApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -937,7 +934,7 @@ class WidgetsApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );

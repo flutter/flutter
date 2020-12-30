@@ -28,9 +28,6 @@ export 'package:flutter/gestures.dart' show
   PointerUpEvent,
   PointerCancelEvent;
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// A base class for render boxes that resemble their children.
 ///
 /// A proxy box has a single child and simply mimics all the properties of that
@@ -3053,7 +3050,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   PngHome({Key key}) : super(key: key);
+  ///   PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
   ///   _PngHomeState createState() => _PngHomeState();
@@ -3063,10 +3060,10 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   GlobalKey globalKey = GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
-  ///     RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
+  ///     RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
   ///     ui.Image image = await boundary.toImage();
-  ///     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  ///     Uint8List pngBytes = byteData.buffer.asUint8List();
+  ///     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     Uint8List pngBytes = byteData!.buffer.asUint8List();
   ///     print(pngBytes);
   ///   }
   ///

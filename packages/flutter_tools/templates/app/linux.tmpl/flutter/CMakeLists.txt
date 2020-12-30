@@ -83,6 +83,7 @@ add_custom_command(
     ${FLUTTER_TOOL_ENVIRONMENT}
     "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
       linux-x64 ${CMAKE_BUILD_TYPE}
+  VERBATIM
 )
 add_custom_target(flutter_assemble DEPENDS
   "${FLUTTER_LIBRARY}"

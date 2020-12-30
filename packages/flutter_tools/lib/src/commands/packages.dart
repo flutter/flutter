@@ -12,6 +12,7 @@ import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -79,10 +80,10 @@ class PackagesGetCommand extends FlutterCommand {
       return usageValues;
     }
     final FlutterProject rootProject = FlutterProject.fromPath(target);
-    final bool hasPlugins = rootProject.flutterPluginsFile.existsSync();
+    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync();
     if (hasPlugins) {
-      final int numberOfPlugins = (rootProject.flutterPluginsFile.readAsLinesSync()).length;
-      usageValues[CustomDimensions.commandPackagesNumberPlugins] = '$numberOfPlugins';
+      final List<Plugin> plugins = await findPlugins(rootProject);
+      usageValues[CustomDimensions.commandPackagesNumberPlugins] = plugins.length.toString();
     } else {
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
     }
