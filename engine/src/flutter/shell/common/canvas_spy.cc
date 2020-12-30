@@ -125,6 +125,7 @@ void DidDrawCanvas::onDrawPath(const SkPath& path, const SkPaint& paint) {
   MarkDrawIfNonTransparentPaint(paint);
 }
 
+#ifdef SK_SUPPORT_LEGACY_ONDRAWIMAGERECT
 void DidDrawCanvas::onDrawImage(const SkImage* image,
                                 SkScalar left,
                                 SkScalar top,
@@ -140,17 +141,47 @@ void DidDrawCanvas::onDrawImageRect(const SkImage* image,
   did_draw_ = true;
 }
 
-void DidDrawCanvas::onDrawImageNine(const SkImage* image,
-                                    const SkIRect& center,
-                                    const SkRect& dst,
-                                    const SkPaint* paint) {
-  did_draw_ = true;
-}
-
 void DidDrawCanvas::onDrawImageLattice(const SkImage* image,
                                        const Lattice& lattice,
                                        const SkRect& dst,
                                        const SkPaint* paint) {
+  did_draw_ = true;
+}
+
+void DidDrawCanvas::onDrawAtlas(const SkImage* image,
+                                const SkRSXform xform[],
+                                const SkRect tex[],
+                                const SkColor colors[],
+                                int count,
+                                SkBlendMode bmode,
+                                const SkRect* cull,
+                                const SkPaint* paint) {
+  did_draw_ = true;
+}
+#endif
+
+void DidDrawCanvas::onDrawImage2(const SkImage* image,
+                                 SkScalar left,
+                                 SkScalar top,
+                                 const SkSamplingOptions&,
+                                 const SkPaint* paint) {
+  did_draw_ = true;
+}
+
+void DidDrawCanvas::onDrawImageRect2(const SkImage* image,
+                                     const SkRect& src,
+                                     const SkRect& dst,
+                                     const SkSamplingOptions&,
+                                     const SkPaint* paint,
+                                     SrcRectConstraint constraint) {
+  did_draw_ = true;
+}
+
+void DidDrawCanvas::onDrawImageLattice2(const SkImage* image,
+                                        const Lattice& lattice,
+                                        const SkRect& dst,
+                                        SkFilterMode,
+                                        const SkPaint* paint) {
   did_draw_ = true;
 }
 
@@ -186,14 +217,15 @@ void DidDrawCanvas::onDrawPatch(const SkPoint cubics[12],
   MarkDrawIfNonTransparentPaint(paint);
 }
 
-void DidDrawCanvas::onDrawAtlas(const SkImage* image,
-                                const SkRSXform xform[],
-                                const SkRect tex[],
-                                const SkColor colors[],
-                                int count,
-                                SkBlendMode bmode,
-                                const SkRect* cull,
-                                const SkPaint* paint) {
+void DidDrawCanvas::onDrawAtlas2(const SkImage* image,
+                                 const SkRSXform xform[],
+                                 const SkRect tex[],
+                                 const SkColor colors[],
+                                 int count,
+                                 SkBlendMode bmode,
+                                 const SkSamplingOptions&,
+                                 const SkRect* cull,
+                                 const SkPaint* paint) {
   did_draw_ = true;
 }
 
