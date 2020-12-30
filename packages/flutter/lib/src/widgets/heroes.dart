@@ -592,30 +592,28 @@ class _HeroFlight {
   }
 
   void onTick() {
-    final RenderBox? toHeroBox = manifest.toHero.mounted
-      ? manifest.toHero.context.findRenderObject() as RenderBox?
+    final RenderBox? toHeroBox = manifest.toHero.context.findRenderObject() as RenderBox?;
+    // Try to find the new origin of the toHero, if the flight isn't aborted.
+    final Offset? toHeroOrigin = !_aborted && toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize
+      ? toHeroBox.localToGlobal(Offset.zero, ancestor: manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?)
       : null;
 
-    if (!_aborted && toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize) {
-      final RenderBox? finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?;
-      final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
-
-      _aborted = !toHeroOrigin.isFinite;
-      if (!_aborted && toHeroOrigin != heroRectTween.end!.topLeft) {
+    if (toHeroOrigin != null && toHeroOrigin.isFinite) {
+      // If the new origin of toHero is available and also paintable, try to
+      // update heroRectTween with it.
+      if (toHeroOrigin != heroRectTween.end!.topLeft) {
         final Rect heroRectEnd = toHeroOrigin & heroRectTween.end!.size;
         heroRectTween = manifest.createHeroRectTween(begin: heroRectTween.begin, end: heroRectEnd);
       }
-    } else {
-      _aborted = true;
-    }
-
-    if (_aborted && _heroOpacity.isCompleted) {
+    } else if (_heroOpacity.isCompleted) {
       // The toHero no longer exists or it's no longer the flight's destination.
       // Continue flying while fading out.
       _heroOpacity = _proxyAnimation.drive(
         _reverseTween.chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0))),
       );
     }
+    // Update _aborted for the next animation tick.
+    _aborted = toHeroOrigin == null || !toHeroOrigin.isFinite;
   }
 
   // The simple case: we're either starting a push or a pop animation.
