@@ -880,9 +880,10 @@ abstract class FlutterCommand extends Command<void> {
       throwToolExit('--analyze-size cannot be combined with --split-debug-info.');
     }
 
-    final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
-      && buildMode.isPrecompiled
-      && boolArg('tree-shake-icons');
+    // fixme treeShakeIcons has some problem when build macos release
+    final bool treeShakeIcons = name != 'macos' && argParser.options.containsKey('tree-shake-icons')
+        && buildMode.isPrecompiled
+        && boolArg('tree-shake-icons');
 
     final String bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
       ? stringArg(FlutterOptions.kBundleSkSLPathOption)
