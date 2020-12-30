@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'button.dart';
 import 'localizations.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_button.dart';
@@ -37,12 +36,13 @@ const double _kToolbarContentDistance = 8.0;
 // The height of the toolbar, including the arrow.
 const double _kToolbarHeight = 43.0;
 
+// TODO(justinmc): Rename to _CupertinoTextSelectionControlsToolbar to be
+// aligned with Material naming.
 // Generates the child that's passed into CupertinoTextSelectionToolbar.
 class _CupertinoTextSelectionToolbarWrapper extends StatefulWidget {
   const _CupertinoTextSelectionToolbarWrapper({
     Key? key,
-    required this.arrowTipX,
-    required this.barTopY,
+    required this.anchor,
     this.clipboardStatus,
     this.handleCut,
     this.handleCopy,
@@ -51,8 +51,7 @@ class _CupertinoTextSelectionToolbarWrapper extends StatefulWidget {
     required this.isArrowPointingDown,
   }) : super(key: key);
 
-  final double arrowTipX;
-  final double barTopY;
+  final Offset anchor;
   final ClipboardStatusNotifier? clipboardStatus;
   final VoidCallback? handleCut;
   final VoidCallback? handleCopy;
@@ -160,8 +159,7 @@ class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSel
     }
 
     return CupertinoTextSelectionToolbar(
-      barTopY: widget.barTopY,
-      arrowTipX: widget.arrowTipX,
+      anchor: widget.anchor,
       isArrowPointingDown: widget.isArrowPointingDown,
       children: items,
     );
@@ -227,14 +225,14 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough space
     // at the bottom in this case.
+    // TODO(justinmc): Make this generic so toolbars of other heights work.
     final double toolbarHeightNeeded = mediaQuery.padding.top
       + _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance;
     final double availableHeight = globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
     final bool isArrowPointingDown = toolbarHeightNeeded <= availableHeight;
-
-    final double arrowTipX = (position.dx + globalEditableRegion.left).clamp(
+    final double anchorX = (position.dx + globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
@@ -242,13 +240,15 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // The y-coordinate has to be calculated instead of directly quoting position.dy,
     // since the caller (TextSelectionOverlay._buildToolbar) does not know whether
     // the toolbar is going to be facing up or down.
-    final double localBarTopY = isArrowPointingDown
-      ? endpoints.first.point.dy - textLineHeight - _kToolbarContentDistance - _kToolbarHeight
-      : endpoints.last.point.dy + _kToolbarContentDistance;
+    final Offset anchor = Offset(
+      anchorX,
+      isArrowPointingDown
+        ? endpoints.first.point.dy - textLineHeight - _kToolbarContentDistance - _kToolbarHeight + globalEditableRegion.top
+        : endpoints.last.point.dy + _kToolbarContentDistance + globalEditableRegion.top,
+    );
 
     return _CupertinoTextSelectionToolbarWrapper(
-      arrowTipX: arrowTipX,
-      barTopY: localBarTopY + globalEditableRegion.top,
+      anchor: anchor,
       clipboardStatus: clipboardStatus,
       handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,

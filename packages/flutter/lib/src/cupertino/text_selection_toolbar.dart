@@ -40,24 +40,16 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// Creates an instancwe of CupertinoTextSelectionToolbar.
   const CupertinoTextSelectionToolbar({
     Key? key,
-    // TODO(justinmc): Are these params ideal? Material uses anchorAbove,
-    // anchorBelow, toolbarBuilder, and children.
-    required double barTopY,
-    required double arrowTipX,
+    required Offset anchor,
     required bool isArrowPointingDown,
     required List<Widget> children,
   }) : assert(children.length > 0),
-       _arrowTipX = arrowTipX,
-       _barTopY = barTopY,
+       _anchor = anchor,
        _isArrowPointingDown = isArrowPointingDown,
        _children = children,
        super(key: key);
 
-  /// The y-coordinate of toolbar's top edge, in global coordinate system.
-  final double _barTopY;
-
-  /// The y-coordinate of the tip of the arrow, in global coordinate system.
-  final double _arrowTipX;
+  final Offset _anchor;
 
   /// Whether the arrow should point down and be attached to the bottom
   /// of the toolbar, or point up and be attached to the top of the toolbar.
@@ -68,8 +60,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _CupertinoTextSelectionToolbarThing(
-      barTopY: _barTopY,
-      arrowTipX: _arrowTipX,
+      anchor: _anchor,
       isArrowPointingDown: _isArrowPointingDown,
       child: _CupertinoTextSelectionToolbarContent(
         isArrowPointingDown: _isArrowPointingDown,
@@ -86,42 +77,42 @@ class _CupertinoTextSelectionToolbarThing extends SingleChildRenderObjectWidget 
   /// Create an instance of CupertinoTextSelectionToolbar.
   const _CupertinoTextSelectionToolbarThing({
     Key? key,
-    required double barTopY,
-    required double arrowTipX,
+    required Offset anchor,
     required bool isArrowPointingDown,
     Widget? child,
-  }) : _barTopY = barTopY,
-       _arrowTipX = arrowTipX,
+  }) : _anchor = anchor,
        _isArrowPointingDown = isArrowPointingDown,
        super(key: key, child: child);
 
-  // The y-coordinate of toolbar's top edge, in global coordinate system.
-  final double _barTopY;
-
-  // The y-coordinate of the tip of the arrow, in global coordinate system.
-  final double _arrowTipX;
+  final Offset _anchor;
 
   // Whether the arrow should point down and be attached to the bottom
   // of the toolbar, or point up and be attached to the top of the toolbar.
   final bool _isArrowPointingDown;
 
   @override
-  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox(_barTopY, _arrowTipX, _isArrowPointingDown, null);
+  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox(
+    _anchor,
+    _isArrowPointingDown,
+    null,
+  );
 
   @override
   void updateRenderObject(BuildContext context, _ToolbarRenderBox renderObject) {
     renderObject
-      ..barTopY = _barTopY
-      ..arrowTipX = _arrowTipX
+      ..anchor = _anchor
       ..isArrowPointingDown = _isArrowPointingDown;
   }
 }
 
-// TODO(justinmc): Document.
+// Positions and clips the toolbar.
+//
+// The toolbar is positioned at the correct anchor facing up or down.
+//
+// It is clipped down to a rounded rectangle with a protruding arrow.
 class _ToolbarRenderBox extends RenderShiftedBox {
   _ToolbarRenderBox(
-    this._barTopY,
-    this._arrowTipX,
+    this._anchor,
     this._isArrowPointingDown,
     RenderBox? child,
   ) : super(child);
@@ -130,22 +121,12 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   @override
   bool get isRepaintBoundary => true;
 
-  double _barTopY;
-  set barTopY(double value) {
-    if (_barTopY == value) {
+  Offset _anchor;
+  set anchor(Offset value) {
+    if (value == _anchor) {
       return;
     }
-    _barTopY = value;
-    markNeedsLayout();
-    markNeedsSemanticsUpdate();
-  }
-
-  double _arrowTipX;
-  set arrowTipX(double value) {
-    if (_arrowTipX == value) {
-      return;
-    }
-    _arrowTipX = value;
+    _anchor = value;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
@@ -161,13 +142,6 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   }
 
   final BoxConstraints heightConstraint = const BoxConstraints.tightFor(height: _kToolbarHeight);
-
-  @override
-  void setupParentData(RenderObject child) {
-    if (child.parentData is! _ToolbarParentData) {
-      child.parentData = _ToolbarParentData();
-    }
-  }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
@@ -187,30 +161,35 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       .loosen();
 
     child!.layout(heightConstraint.enforce(enforcedConstraint), parentUsesSize: true,);
-    final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
 
-    // The local x-coordinate of the center of the toolbar.
-    final double lowerBound = child!.size.width/2 + _kToolbarScreenPadding;
-    final double upperBound = size.width - child!.size.width/2 - _kToolbarScreenPadding;
-    final double adjustedCenterX = _arrowTipX.clamp(lowerBound, upperBound);
+    // The local x-coordinate of the center of the toolbar. The toolbar would
+    // like to horizontally center itself on the anchor if possible.
+    final double leftBound = child!.size.width/2 + _kToolbarScreenPadding;
+    final double rightBound = size.width - child!.size.width/2 - _kToolbarScreenPadding;
+    final double adjustedCenterX = _anchor.dx.clamp(leftBound, rightBound);
 
-    childParentData.offset = Offset(adjustedCenterX - child!.size.width / 2, _barTopY);
-    childParentData.arrowXOffsetFromCenter = _arrowTipX - adjustedCenterX;
+    childParentData.offset = Offset(
+      adjustedCenterX - child!.size.width/2,
+      _anchor.dy,
+    );
   }
 
   // The path is described in the toolbar's coordinate system.
   Path _clipPath() {
-    final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
     final Path rrect = Path()
       ..addRRect(
         RRect.fromRectAndRadius(
-          Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height)
+          Offset(0.0, _isArrowPointingDown ? 0.0 : _kToolbarArrowSize.height)
             & Size(child!.size.width, child!.size.height - _kToolbarArrowSize.height),
           _kToolbarBorderRadius,
         ),
       );
 
-    final double arrowTipX = child!.size.width / 2 + childParentData.arrowXOffsetFromCenter!;
+    final double centerX = childParentData.offset.dx + child!.size.width / 2;
+    final double arrowXOffsetFromCenter = _anchor.dx - centerX;
+    final double arrowTipX = child!.size.width / 2 + arrowXOffsetFromCenter;
 
     final double arrowBottomY = _isArrowPointingDown
       ? child!.size.height - _kToolbarArrowSize.height
@@ -233,7 +212,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       return;
     }
 
-    final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
     _clipPathLayer = context.pushClipPath(
       needsCompositing,
       offset + childParentData.offset,
@@ -265,20 +244,11 @@ class _ToolbarRenderBox extends RenderShiftedBox {
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke;
 
-      final _ToolbarParentData childParentData = child!.parentData! as _ToolbarParentData;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
       context.canvas.drawPath(_clipPath().shift(offset + childParentData.offset), _debugPaint!);
       return true;
     }());
   }
-}
-
-class _ToolbarParentData extends BoxParentData {
-  // The x offset from the tip of the arrow to the center of the toolbar.
-  // Positive if the tip of the arrow has a larger x-coordinate than the
-  // center of the toolbar.
-  double? arrowXOffsetFromCenter;
-  @override
-  String toString() => 'offset=$offset, arrowXOffsetFromCenter=$arrowXOffsetFromCenter';
 }
 
 // Renders the content of the selection menu and maintains the page state.
