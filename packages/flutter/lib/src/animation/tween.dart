@@ -273,10 +273,10 @@ class Tween<T extends dynamic> extends Animatable<T> {
   /// subclass.
   @override
   T transform(double t) {
-    if (t == 0.0)
-      return begin as T;
-    if (t == 1.0)
-      return end as T;
+    // if (t == 0.0)
+    //   return begin as T;
+    // if (t == 1.0)
+    //   return end as T;
     return lerp(t);
   }
 
