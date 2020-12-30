@@ -592,9 +592,11 @@ class _HeroFlight {
   }
 
   void onTick() {
-    final RenderBox? toHeroBox = manifest.toHero.context.findRenderObject() as RenderBox?;
+    final RenderBox? toHeroBox = (!_aborted && manifest.toHero.mounted)
+      ? manifest.toHero.context.findRenderObject() as RenderBox?
+      : null;
     // Try to find the new origin of the toHero, if the flight isn't aborted.
-    final Offset? toHeroOrigin = !_aborted && toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize
+    final Offset? toHeroOrigin = toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize
       ? toHeroBox.localToGlobal(Offset.zero, ancestor: manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?)
       : null;
 
