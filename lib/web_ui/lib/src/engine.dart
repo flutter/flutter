@@ -32,7 +32,6 @@ part 'engine/canvaskit/canvaskit_api.dart';
 part 'engine/canvaskit/color_filter.dart';
 part 'engine/canvaskit/embedded_views.dart';
 part 'engine/canvaskit/fonts.dart';
-part 'engine/canvaskit/font_fallbacks.dart';
 part 'engine/canvaskit/image.dart';
 part 'engine/canvaskit/image_filter.dart';
 part 'engine/canvaskit/initialization.dart';

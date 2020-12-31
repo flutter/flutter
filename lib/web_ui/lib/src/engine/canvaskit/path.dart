@@ -265,7 +265,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
   ) {
     final CkPath path1 = uiPath1 as CkPath;
     final CkPath path2 = uiPath2 as CkPath;
-    final SkPath newPath = canvasKit.Path.MakeFromOp(
+    final SkPath newPath = canvasKit.MakePathFromOp(
       path1.skiaObject,
       path2.skiaObject,
       toSkPathOp(operation),
@@ -320,7 +320,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
 
   @override
   SkPath resurrect() {
-    final SkPath path = canvasKit.Path.MakeFromCmds(_cachedCommands!);
+    final SkPath path = canvasKit.MakePathFromCmds(_cachedCommands!);
     path.setFillType(toSkFillType(_fillType));
     return path;
   }
