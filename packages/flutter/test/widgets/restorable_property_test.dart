@@ -308,6 +308,43 @@ void main() {
     });
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
+
+
+  testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
+    await tester.pumpWidget(const RootRestorationScope(
+      restorationId: 'root-child',
+      child: _RestorableWidget(),
+    ));
+
+    expect(find.text('hello world'), findsOneWidget);
+    final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
+    state.setProperties(() {
+      state.nullableIntValue.value = 24;
+      state.nullableDoubleValue.value = 1.5;
+    });
+
+    // The following types of asserts do not work. They pass even when the
+    // type of `value` is a `num` and not an `int` because `num` is a
+    // superclass of `int`. This test is intended to prevent a regression
+    // where RestorableIntN's value is of type `num?`, but it is passed into
+    // a function which requires an `int?` value. This resulted in Dart
+    // compile-time errors.
+    //
+    // expect(state.nullableIntValue.value, isA<int>());
+    // expect(state.nullableIntValue.value.runtimeType, int);
+
+    // A function that takes a nullable int value.
+    void takesInt(int? value) {}
+    // The following would result in a Dart compile-time error if `value` is
+    // a `num?` instead of an `int?`.
+    takesInt(state.nullableIntValue.value);
+
+    // A function that takes a nullable double value.
+    void takesDouble(double? value) {}
+    // The following would result in a Dart compile-time error if `value` is
+    // a `num?` instead of a `double?`.
+    takesDouble(state.nullableDoubleValue.value);
+  });
 }
 
 class _TestRestorableValue extends RestorableValue<Object?> {
