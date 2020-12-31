@@ -836,7 +836,7 @@ void _pathTests() {
     expect(measure2, isNull);
   });
 
-  test('SkPath.toCmds and CanvasKit.Path.MakeFromCmds', () {
+  test('SkPath.toCmds and CanvasKit.MakePathFromCmds', () {
     const ui.Rect rect = ui.Rect.fromLTRB(0, 0, 10, 10);
     final SkPath path = SkPath();
     path.addRect(toSkRect(rect));
@@ -848,7 +848,7 @@ void _pathTests() {
       <num>[5], // close
     ]);
 
-    final SkPath copy = canvasKit.Path.MakeFromCmds(path.toCmds());
+    final SkPath copy = canvasKit.MakePathFromCmds(path.toCmds());
     expect(fromSkRect(copy.getBounds()), rect);
   });
 }
@@ -1055,11 +1055,7 @@ void _canvasTests() {
   test('drawPoints', () {
     canvas.drawPoints(
       canvasKit.PointMode.Lines,
-      <Float32List>[
-        Float32List.fromList([0, 0]),
-        Float32List.fromList([10, 10]),
-        Float32List.fromList([0, 10]),
-      ],
+      Float32List.fromList([0, 0, 10, 10, 0, 10]),
       SkPaint(),
     );
   });

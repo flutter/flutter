@@ -62,7 +62,11 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       skTextStyle.fontSize = fontSize;
     }
 
-    skTextStyle.fontFamilies = _getEffectiveFontFamilies(fontFamily);
+    if (fontFamily == null ||
+        !skiaFontCollection.registeredFamilies.contains(fontFamily)) {
+      fontFamily = 'Roboto';
+    }
+    skTextStyle.fontFamilies = [fontFamily];
 
     return skTextStyle;
   }
@@ -70,8 +74,20 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   static SkStrutStyleProperties toSkStrutStyleProperties(ui.StrutStyle value) {
     EngineStrutStyle style = value as EngineStrutStyle;
     final SkStrutStyleProperties skStrutStyle = SkStrutStyleProperties();
-    skStrutStyle.fontFamilies =
-        _getEffectiveFontFamilies(style._fontFamily, style._fontFamilyFallback);
+    if (style._fontFamily != null) {
+      String fontFamily = style._fontFamily!;
+      if (!skiaFontCollection.registeredFamilies.contains(fontFamily)) {
+        fontFamily = 'Roboto';
+      }
+      final List<String> fontFamilies = <String>[fontFamily];
+      if (style._fontFamilyFallback != null) {
+        fontFamilies.addAll(style._fontFamilyFallback!);
+      }
+      skStrutStyle.fontFamilies = fontFamilies;
+    } else {
+      // If no strut font family is given, default to Roboto.
+      skStrutStyle.fontFamilies = ['Roboto'];
+    }
 
     if (style._fontSize != null) {
       skStrutStyle.fontSize = style._fontSize;
@@ -263,8 +279,18 @@ class CkTextStyle implements ui.TextStyle {
       properties.locale = locale.toLanguageTag();
     }
 
-    properties.fontFamilies =
-        _getEffectiveFontFamilies(fontFamily, fontFamilyFallback);
+    if (fontFamily == null ||
+        !skiaFontCollection.registeredFamilies.contains(fontFamily)) {
+      fontFamily = 'Roboto';
+    }
+
+    List<String> fontFamilies = <String>[fontFamily];
+    if (fontFamilyFallback != null &&
+        !fontFamilyFallback.every((font) => fontFamily == font)) {
+      fontFamilies.addAll(fontFamilyFallback);
+    }
+
+    properties.fontFamilies = fontFamilies;
 
     if (fontWeight != null || fontStyle != null) {
       properties.fontStyle = toSkFontStyle(fontWeight, fontStyle);
@@ -538,6 +564,7 @@ class CkParagraph extends ManagedSkiaObject<SkParagraph>
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
+    assert(constraints.width != null); // ignore: unnecessary_null_comparison
     _lastLayoutConstraints = constraints;
 
     // TODO(het): CanvasKit throws an exception when laid out with
@@ -633,65 +660,8 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     return properties;
   }
 
-  /// Determines if the given [text] contains any code points which are not
-  /// supported by the current set of fonts.
-  void _ensureFontsSupportText(String text) {
-    // TODO(hterkelsen): Make this faster for the common case where the text
-    // is supported by the given fonts.
-
-    // If the text is ASCII, then skip this check.
-    bool isAscii = true;
-    for (int i = 0; i < text.length; i++) {
-      if (text.codeUnitAt(i) >= 160) {
-        isAscii = false;
-        break;
-      }
-    }
-    if (isAscii) {
-      return;
-    }
-    CkTextStyle style = _peekStyle();
-    List<String> fontFamilies =
-        _getEffectiveFontFamilies(style.fontFamily, style.fontFamilyFallback);
-    List<SkTypeface> typefaces = <SkTypeface>[];
-    for (var font in fontFamilies) {
-      List<SkTypeface>? typefacesForFamily =
-          skiaFontCollection.familyToTypefaceMap[font];
-      if (typefacesForFamily != null) {
-        typefaces.addAll(typefacesForFamily);
-      }
-    }
-    // List<int> codeUnits = text.codeUnits;
-    List<bool> codeUnitsSupported = List<bool>.filled(text.length, false);
-    for (SkTypeface typeface in typefaces) {
-      SkFont font = SkFont(typeface);
-      Uint8List glyphs = font.getGlyphIDs(text);
-      assert(glyphs.length == codeUnitsSupported.length);
-      for (int i = 0; i < glyphs.length; i++) {
-        codeUnitsSupported[i] |=
-            glyphs[i] != 0 || _isControlCode(text.codeUnitAt(i));
-      }
-    }
-
-    if (codeUnitsSupported.any((x) => !x)) {
-      List<int> missingCodeUnits = <int>[];
-      for (int i = 0; i < codeUnitsSupported.length; i++) {
-        if (!codeUnitsSupported[i]) {
-          missingCodeUnits.add(text.codeUnitAt(i));
-        }
-      }
-      _findFontsForMissingCodeunits(missingCodeUnits);
-    }
-  }
-
-  /// Returns [true] if [codepoint] is a Unicode control code.
-  bool _isControlCode(int codepoint) {
-    return codepoint < 32 || (codepoint > 127 && codepoint < 160);
-  }
-
   @override
   void addText(String text) {
-    _ensureFontsSupportText(text);
     _commands.add(_ParagraphCommand.addText(text));
     _paragraphBuilder.addText(text);
   }
@@ -742,10 +712,8 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     _styleStack.add(skStyle);
     _commands.add(_ParagraphCommand.pushStyle(ckStyle));
     if (skStyle.foreground != null || skStyle.background != null) {
-      final SkPaint foreground =
-          skStyle.foreground?.skiaObject ?? _defaultTextStylePaint;
-      final SkPaint background =
-          skStyle.background?.skiaObject ?? _defaultTextStylePaint;
+      final SkPaint foreground = skStyle.foreground?.skiaObject ?? _defaultTextStylePaint;
+      final SkPaint background = skStyle.background?.skiaObject ?? _defaultTextStylePaint;
       _paragraphBuilder.pushPaintStyle(
           skStyle.skTextStyle, foreground, background);
     } else {
@@ -787,19 +755,4 @@ enum _ParagraphCommandType {
   pop,
   pushStyle,
   addPlaceholder,
-}
-
-List<String> _getEffectiveFontFamilies(String? fontFamily,
-    [List<String>? fontFamilyFallback]) {
-  if (fontFamily == null ||
-      !skiaFontCollection.registeredFamilies.contains(fontFamily)) {
-    fontFamily = 'Roboto';
-  }
-  List<String> fontFamilies = <String>[fontFamily];
-  if (fontFamilyFallback != null &&
-      !fontFamilyFallback.every((font) => fontFamily == font)) {
-    fontFamilies.addAll(fontFamilyFallback);
-  }
-  fontFamilies.addAll(skiaFontCollection.globalFontFallbacks);
-  return fontFamilies;
 }
