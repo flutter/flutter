@@ -14,6 +14,9 @@ import 'text_selection_toolbar_button.dart';
 // Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
 const double _kToolbarHeight = 43.0;
+// Vertical distance between the tip of the arrow and the line of text the arrow
+// is pointing to. The value used here is eyeballed.
+const double _kToolbarContentDistance = 8.0;
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // screen.
 const double _kToolbarScreenPadding = 8.0;
@@ -40,30 +43,36 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// Creates an instancwe of CupertinoTextSelectionToolbar.
   const CupertinoTextSelectionToolbar({
     Key? key,
-    required Offset anchor,
-    required bool isAbove,
+    required Offset anchorAbove,
+    required Offset anchorBelow,
     required List<Widget> children,
   }) : assert(children.length > 0),
-       _anchor = anchor,
-       _isAbove = isAbove,
+       _anchorAbove = anchorAbove,
+       _anchorBelow = anchorBelow,
        _children = children,
        super(key: key);
 
-  final Offset _anchor;
-
-  /// Whether the arrow should point down and be attached to the bottom
-  /// of the toolbar, or point up and be attached to the top of the toolbar.
-  final bool _isAbove;
+  final Offset _anchorAbove;
+  final Offset _anchorBelow;
 
   final List<Widget> _children;
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+
+    final double toolbarHeightNeeded = mediaQuery.padding.top
+      + _kToolbarScreenPadding
+      + _kToolbarHeight
+      + _kToolbarContentDistance;
+    final bool isAbove = _anchorAbove.dy >= toolbarHeightNeeded;
+
     return _CupertinoTextSelectionToolbarThing(
-      anchor: _anchor,
-      isAbove: _isAbove,
+      anchor: isAbove ? _anchorAbove : _anchorBelow,
+      isAbove: isAbove,
       child: _CupertinoTextSelectionToolbarContent(
-        isAbove: _isAbove,
+        isAbove: isAbove,
         children: _children,
       ),
     );
@@ -171,7 +180,9 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
     childParentData.offset = Offset(
       adjustedCenterX - child!.size.width/2,
-      _anchor.dy,
+      _isAbove
+          ? _anchor.dy - child!.size.height - _kToolbarContentDistance
+          : _anchor.dy + _kToolbarContentDistance,
     );
   }
 
@@ -338,18 +349,18 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
         child: _CupertinoTextSelectionToolbarItems(
           page: _page,
           backButton: CupertinoTextSelectionToolbarButton(
-            isAbove: widget.isAbove,
             onPressed: _handlePreviousPage,
+            padding: CupertinoTextSelectionToolbarButton.getPadding(widget.isAbove),
             child: CupertinoTextSelectionToolbarButton.getText('◀'),
           ),
           dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
           nextButton: CupertinoTextSelectionToolbarButton(
-            isAbove: widget.isAbove,
-            onPressed: _handlePreviousPage,
+            onPressed: _handleNextPage,
+            padding: CupertinoTextSelectionToolbarButton.getPadding(widget.isAbove),
             child: CupertinoTextSelectionToolbarButton.getText('▶'),
           ),
           nextButtonDisabled: CupertinoTextSelectionToolbarButton(
-            isAbove: widget.isAbove,
+            padding: CupertinoTextSelectionToolbarButton.getPadding(widget.isAbove),
             child: CupertinoTextSelectionToolbarButton.getText('◀', false),
           ),
           children: widget.children,

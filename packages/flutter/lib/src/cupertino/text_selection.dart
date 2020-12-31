@@ -139,8 +139,6 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       + _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance;
-    final double availableHeight = widget.globalEditableRegion.top + widget.endpoints.first.point.dy - widget.textLineHeight;
-    final bool isAbove = toolbarHeightNeeded <= availableHeight;
     final double anchorX = (widget.selectionMidpoint.dx + widget.globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
@@ -150,12 +148,15 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // selectionMidpoint.dy, since the caller
     // (TextSelectionOverlay._buildToolbar) does not know whether the toolbar is
     // going to be facing up or down.
-    final Offset anchor = Offset(
+    final Offset anchorAbove = Offset(
       anchorX,
-      isAbove
-        ? widget.endpoints.first.point.dy - widget.textLineHeight - _kToolbarContentDistance - _kToolbarHeight + widget.globalEditableRegion.top
-        : widget.endpoints.last.point.dy + _kToolbarContentDistance + widget.globalEditableRegion.top,
+      widget.endpoints.first.point.dy - widget.textLineHeight + widget.globalEditableRegion.top,
     );
+    final Offset anchorBelow = Offset(
+      anchorX,
+      widget.endpoints.last.point.dy + widget.globalEditableRegion.top,
+    );
+    final bool isAbove = anchorAbove.dy >= toolbarHeightNeeded;
 
     final List<Widget> items = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
@@ -171,8 +172,8 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       }
 
       items.add(CupertinoTextSelectionToolbarButton(
-        isAbove: isAbove,
         onPressed: onPressed,
+        padding: CupertinoTextSelectionToolbarButton.getPadding(isAbove),
         child: CupertinoTextSelectionToolbarButton.getText(text),
       ));
     }
@@ -192,8 +193,8 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     }
 
     return CupertinoTextSelectionToolbar(
-      anchor: anchor,
-      isAbove: isAbove,
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
       children: items,
     );
   }
@@ -231,7 +232,8 @@ class _TextSelectionHandlePainter extends CustomPainter {
   bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
-class _CupertinoTextSelectionControls extends TextSelectionControls {
+/// iOS Cupertino styled text selection controls.
+class CupertinoTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Cupertino handle.
   @override
   Size getHandleSize(double textLineHeight) {
@@ -332,4 +334,4 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 }
 
 /// Text selection controls that follows iOS design conventions.
-final TextSelectionControls cupertinoTextSelectionControls = _CupertinoTextSelectionControls();
+final TextSelectionControls cupertinoTextSelectionControls = CupertinoTextSelectionControls();

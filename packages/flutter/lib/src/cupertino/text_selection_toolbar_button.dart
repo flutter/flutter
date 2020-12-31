@@ -33,9 +33,9 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// Create an instance of [CupertinoTextSelectionToolbarButton].
   const CupertinoTextSelectionToolbarButton({
     Key? key,
-    required this.isAbove,
-    required this.child,
     this.onPressed,
+    this.padding,
+    required this.child,
   }) : super(key: key);
 
   /// The child of this button.
@@ -46,11 +46,14 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// Called when this button is pressed.
   final VoidCallback? onPressed;
 
-  // TODO(justinmc): Rethink isAbove, is it needed?
-  final bool isAbove;
+  /// Padding for the underlying [CupertinoButton].
+  final EdgeInsetsGeometry? padding;
 
   /// Returns a [Text] widget in the style of the iOS text selection toolbar
-  /// buttons, to be passed as [child].
+  /// buttons.
+  ///
+  /// Pass the resulting widget into the [child] parameter when using a
+  /// CupertinoTextSelectionToolbarButton in a CupertinoTextSelectionToolbar.
   static Text getText(String string, [bool enabled = true]) {
     return Text(
       string,
@@ -61,12 +64,19 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  /// Gets the padding for use in the default iOS text selection toolbar.
+  ///
+  /// Pass the resulting value into the [padding] parameter when using a
+  /// CupertinoTextSelectionToolbarButton in a CupertinoTextSelectionToolbar.
+  static EdgeInsetsGeometry getPadding(bool isAbove) {
     final EdgeInsets arrowPadding = isAbove
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
+    return _kToolbarButtonPadding.add(arrowPadding);
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return CupertinoButton(
       child: child,
       borderRadius: null,
@@ -74,7 +84,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       disabledColor: _kToolbarBackgroundColor,
       minSize: _kToolbarHeight,
       onPressed: onPressed,
-      padding: _kToolbarButtonPadding.add(arrowPadding),
+      padding: padding,
       pressedOpacity: onPressed == null ? 1.0 : 0.7,
     );
   }
