@@ -1,11 +1,11 @@
 {
-    "name": "lkrjangid",
-    "short_name": "lkrjangid",
+    "name": "hello_world",
+    "short_name": "hello_world",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "lokesh jangid portfoliyo app",
+    "description": "hello_world",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
