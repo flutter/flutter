@@ -1027,12 +1027,14 @@ void main() {
       ),
     );
 
-    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild'));
+    final Finder textButtonWithIconFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild');
+
+    final dynamic textButtonWithIconWidget = tester.widget(textButtonWithIconFinder);
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
 
     final Row rowInsideTextButton = tester.widget(
       find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild'),
+        of: textButtonWithIconFinder,
         matching: find.byType(Row),
       ),
     );
@@ -1058,12 +1060,14 @@ void main() {
       ),
     );
 
-    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild'));
+    final Finder textButtonWithIconFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild');
+
+    final dynamic textButtonWithIconWidget = tester.widget(textButtonWithIconFinder);
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
 
     final Row rowInsideTextButton = tester.widget(
       find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TextButtonWithIconChild'),
+        of: textButtonWithIconFinder,
         matching: find.byType(Row),
       ),
     );

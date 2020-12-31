@@ -1040,7 +1040,7 @@ void main() {
   testWidgets('ElevatedButton.icon is configurable when iconAlignment set to ButtonIconAlignment.start', (WidgetTester tester) async {
     const Widget icon = Icon(Icons.add);
     const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.start;
-    const Widget label = Text('text button');
+    const Widget label = Text('elevated button');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1055,12 +1055,14 @@ void main() {
       ),
     );
 
-    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'));
+    final Finder elevatedButtonWithIconFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild');
+
+    final dynamic textButtonWithIconWidget = tester.widget(elevatedButtonWithIconFinder);
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
 
     final Row rowInsideElevatedButton = tester.widget(
       find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'),
+        of: elevatedButtonWithIconFinder,
         matching: find.byType(Row),
       ),
     );
@@ -1071,7 +1073,7 @@ void main() {
   testWidgets('ElevatedButton.icon is configurable when iconAlignment set to ButtonIconAlignment.end', (WidgetTester tester) async {
     const Widget icon = Icon(Icons.add);
     const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.end;
-    const Widget label = Text('text button');
+    const Widget label = Text('elevated button');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1085,12 +1087,15 @@ void main() {
         ),
       ),
     );
-    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'));
+
+    final Finder elevatedButtonWithIconFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild');
+
+    final dynamic textButtonWithIconWidget = tester.widget(elevatedButtonWithIconFinder);
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
 
     final Row rowInsideElevatedButton = tester.widget(
       find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'),
+        of: elevatedButtonWithIconFinder,
         matching: find.byType(Row),
       ),
     );

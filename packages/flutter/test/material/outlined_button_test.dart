@@ -1216,7 +1216,7 @@ void main() {
   testWidgets('OutlinedButton.icon is configurable when iconAlignment set to ButtonIconAlignment.start', (WidgetTester tester) async {
     const Widget icon = Icon(Icons.add);
     const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.start;
-    const Widget label = Text('text button');
+    const Widget label = Text('outlined button');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1231,12 +1231,14 @@ void main() {
       ),
     );
 
-    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_OutlinedButtonWithIconChild'));
+    final Finder outlinedButtonWithIconFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_OutlinedButtonWithIconChild');
+
+    final dynamic textButtonWithIconWidget = tester.widget(outlinedButtonWithIconFinder);
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
 
     final Row rowInsideOutlinedButton = tester.widget(
       find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_OutlinedButtonWithIconChild'),
+        of: outlinedButtonWithIconFinder,
         matching: find.byType(Row),
       ),
     );
@@ -1247,7 +1249,7 @@ void main() {
   testWidgets('OutlinedButton.icon is configurable when iconAlignment set to ButtonIconAlignment.end', (WidgetTester tester) async {
     const Widget icon = Icon(Icons.add);
     const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.end;
-    const Widget label = Text('text button');
+    const Widget label = Text('outlined button');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1262,12 +1264,14 @@ void main() {
       ),
     );
 
-    final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_OutlinedButtonWithIconChild'));
+    final Finder outlinedButtonWithIconFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_OutlinedButtonWithIconChild');
+
+    final dynamic textButtonWithIconWidget = tester.widget(outlinedButtonWithIconFinder);
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
 
     final Row rowInsideElevatedButton = tester.widget(
       find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_OutlinedButtonWithIconChild'),
+        of: outlinedButtonWithIconFinder,
         matching: find.byType(Row),
       ),
     );
