@@ -12,9 +12,6 @@ import 'binding.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
 ///
@@ -196,9 +193,9 @@ class MethodChannel {
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
-  ///     // invokeMethod returns a Future<T> which can be inferred as bool
-  ///     // in this context.
-  ///     return _channel.invokeMethod('isLicensed');
+  ///     // invokeMethod returns a Future<T?>, so we handle the case where
+  ///     // the return value is null by treating null as false.
+  ///     return _channel.invokeMethod<bool>('isLicensed').then<bool>((bool? value) => value ?? false);
   ///   }
   ///
   ///   static Future<List<Song>> songs() async {
