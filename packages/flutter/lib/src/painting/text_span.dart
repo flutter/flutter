@@ -13,9 +13,6 @@ import 'inline_span.dart';
 import 'text_painter.dart';
 import 'text_style.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// An immutable span of text.
 ///
 /// A [TextSpan] object can be styled using its [style] property. The style will
@@ -128,7 +125,7 @@ class TextSpan extends InlineSpan {
   /// }
   ///
   /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   LongPressGestureRecognizer _longPressRecognizer;
+  ///   late LongPressGestureRecognizer _longPressRecognizer;
   ///
   ///   @override
   ///   void initState() {
