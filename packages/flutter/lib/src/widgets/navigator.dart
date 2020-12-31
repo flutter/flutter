@@ -3388,6 +3388,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       }
     }
 
+    assert(
+      _history.isNotEmpty,
+      'All routes returned by onGenerateInitialRoutes are not restorable. '
+      'Please make sure that all routes returned by onGenerateInitialRoutes '
+      'have their RouteSettings defined with names that are defined in the '
+      'app\'s routes table.',
+    );
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
     _flushHistoryUpdates();
