@@ -1038,43 +1038,64 @@ void main() {
   });
 
   testWidgets('ElevatedButton.icon is configurable when iconAlignment set to ButtonIconAlignment.start', (WidgetTester tester) async {
-    const IconData iconData = Icons.add;
+    const Widget icon = Icon(Icons.add);
     const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.start;
+    const Widget label = Text('text button');
 
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
           child: ElevatedButton.icon(
             onPressed: () { },
-            icon: const Icon(iconData),
+            icon: icon,
             iconAlignment: buttonIconAlignment,
-            label: const Text('text button'),
+            label: label,
           ),
         ),
       ),
     );
+
     final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'));
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
+
+    final Row rowInsideElevatedButton = tester.widget(
+      find.descendant(
+        of: find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'),
+        matching: find.byType(Row),
+      ),
+    );
+    expect(icon, rowInsideElevatedButton.children.first);
+    expect(label, rowInsideElevatedButton.children.last);
   });
 
   testWidgets('ElevatedButton.icon is configurable when iconAlignment set to ButtonIconAlignment.end', (WidgetTester tester) async {
-    const IconData iconData = Icons.add;
+    const Widget icon = Icon(Icons.add);
     const ButtonIconAlignment buttonIconAlignment = ButtonIconAlignment.end;
+    const Widget label = Text('text button');
 
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
           child: ElevatedButton.icon(
             onPressed: () { },
-            icon: const Icon(iconData),
+            icon: icon,
             iconAlignment: buttonIconAlignment,
-            label: const Text('text button'),
+            label: label,
           ),
         ),
       ),
     );
     final dynamic textButtonWithIconWidget = tester.widget(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'));
     expect(textButtonWithIconWidget.iconAlignment, buttonIconAlignment);
+
+    final Row rowInsideElevatedButton = tester.widget(
+      find.descendant(
+        of: find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_ElevatedButtonWithIconChild'),
+        matching: find.byType(Row),
+      ),
+    );
+    expect(label, rowInsideElevatedButton.children.first);
+    expect(icon, rowInsideElevatedButton.children.last);
   });
 }
 
