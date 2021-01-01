@@ -2010,10 +2010,10 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
   @override
   Iterable<RenderSliver> get childrenInPaintOrder sync* {
-    RenderSliver? child = firstChild;
+    RenderSliver? child = lastChild;
     while (child != null) {
       yield child;
-      child = childAfter(child);
+      child = childBefore(child);
     }
   }
 
