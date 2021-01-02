@@ -22,6 +22,9 @@ class EmbedderTestContextGL : public EmbedderTestContext {
 
   size_t GetSurfacePresentCount() const override;
 
+  // |EmbedderTestContext|
+  EmbedderTestContextType GetContextType() const override;
+
   //----------------------------------------------------------------------------
   /// @brief      Sets a callback that will be invoked (on the raster task
   ///             runner) when the engine asks the embedder for a new FBO ID at

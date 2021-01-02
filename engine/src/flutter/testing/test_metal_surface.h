@@ -6,6 +6,7 @@
 #define FLUTTER_TESTING_TEST_METAL_SURFACE_H_
 
 #include "flutter/fml/macros.h"
+#include "flutter/testing/test_metal_context.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
@@ -21,6 +22,12 @@ class TestMetalSurface {
   static bool PlatformSupportsMetal();
 
   static std::unique_ptr<TestMetalSurface> Create(
+      const TestMetalContext& test_metal_context,
+      SkISize surface_size = SkISize::MakeEmpty());
+
+  static std::unique_ptr<TestMetalSurface> Create(
+      const TestMetalContext& test_metal_context,
+      int64_t texture_id,
       SkISize surface_size = SkISize::MakeEmpty());
 
   virtual ~TestMetalSurface();
@@ -31,13 +38,15 @@ class TestMetalSurface {
 
   virtual sk_sp<SkSurface> GetSurface() const;
 
+  virtual sk_sp<SkImage> GetRasterSurfaceSnapshot();
+
  protected:
   TestMetalSurface();
 
  private:
   std::unique_ptr<TestMetalSurface> impl_;
 
-  TestMetalSurface(std::unique_ptr<TestMetalSurface> impl);
+  explicit TestMetalSurface(std::unique_ptr<TestMetalSurface> impl);
 
   FML_DISALLOW_COPY_AND_ASSIGN(TestMetalSurface);
 };

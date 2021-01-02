@@ -8,28 +8,13 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#include "flutter/testing/test_metal_context.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
 
-TestMetalSurfaceImpl::TestMetalSurfaceImpl(SkISize surface_size) {
-  if (surface_size.isEmpty()) {
-    FML_LOG(ERROR) << "Size of test Metal surface was empty.";
-    return;
-  }
-
-  auto device = fml::scoped_nsobject{[MTLCreateSystemDefaultDevice() retain]};
-  if (!device) {
-    FML_LOG(ERROR) << "Could not acquire Metal device.";
-    return;
-  }
-
-  auto command_queue = fml::scoped_nsobject{[device.get() newCommandQueue]};
-  if (!command_queue) {
-    FML_LOG(ERROR) << "Could not create the default command queue.";
-    return;
-  }
-
+void TestMetalSurfaceImpl::Init(const TestMetalContext::TextureInfo& texture_info,
+                                const SkISize& surface_size) {
   auto texture_descriptor = fml::scoped_nsobject{
       [[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
                                                           width:surface_size.width()
@@ -46,48 +31,16 @@ TestMetalSurfaceImpl::TestMetalSurfaceImpl(SkISize surface_size) {
     return;
   }
 
-  auto texture =
-      fml::scoped_nsobject{[device.get() newTextureWithDescriptor:texture_descriptor.get()]};
-
-  if (!texture) {
-    FML_LOG(ERROR) << "Could not create texture from texture descriptor.";
-    return;
-  }
-
-  auto skia_context = GrDirectContext::MakeMetal(device.get(), command_queue.get());
-
-  if (skia_context) {
-    // Skia wants ownership of the device and queue. If a context was created,
-    // we now no longer own the argument. Release the arguments only on
-    // successful creation of the context.
-    FML_ALLOW_UNUSED_LOCAL(device.release());
-    FML_ALLOW_UNUSED_LOCAL(command_queue.release());
-  } else {
-    FML_LOG(ERROR) << "Could not create the GrDirectContext from the Metal Device "
-                      "and command queue.";
-    return;
-  }
+  id<MTLTexture> texture = (__bridge id<MTLTexture>)texture_info.texture;
 
   GrMtlTextureInfo skia_texture_info;
-  skia_texture_info.fTexture = sk_cf_obj<const void*>{[texture.get() retain]};
+  skia_texture_info.fTexture.reset([texture retain]);
+  GrBackendTexture backend_texture(surface_size.width(), surface_size.height(), GrMipmapped::kNo,
+                                   skia_texture_info);
 
-  auto backend_render_target = GrBackendRenderTarget{
-      surface_size.width(),   // width
-      surface_size.height(),  // height
-      1,                      // sample count
-      skia_texture_info       // texture info
-  };
-
-  auto surface = SkSurface::MakeFromBackendRenderTarget(
-      skia_context.get(),        // context
-      backend_render_target,     // backend render target
-      kTopLeft_GrSurfaceOrigin,  // surface origin
-      kBGRA_8888_SkColorType,    // color type
-      nullptr,                   // color space
-      nullptr,                   // surface properties
-      nullptr,                   // release proc (texture is already ref counted in sk_cf_obj)
-      nullptr                    // release context
-  );
+  sk_sp<SkSurface> surface = SkSurface::MakeFromBackendTexture(
+      test_metal_context_.GetSkiaContext().get(), backend_texture, kTopLeft_GrSurfaceOrigin, 1,
+      kBGRA_8888_SkColorType, nullptr, nullptr);
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create Skia surface from a Metal texture.";
@@ -95,9 +48,58 @@ TestMetalSurfaceImpl::TestMetalSurfaceImpl(SkISize surface_size) {
   }
 
   surface_ = std::move(surface);
-  context_ = std::move(skia_context);
-
   is_valid_ = true;
+}
+
+TestMetalSurfaceImpl::TestMetalSurfaceImpl(const TestMetalContext& test_metal_context,
+                                           int64_t texture_id,
+                                           const SkISize& surface_size)
+    : test_metal_context_(test_metal_context) {
+  TestMetalContext::TextureInfo texture_info =
+      const_cast<TestMetalContext&>(test_metal_context_).GetTextureInfo(texture_id);
+  Init(texture_info, surface_size);
+}
+
+TestMetalSurfaceImpl::TestMetalSurfaceImpl(const TestMetalContext& test_metal_context,
+                                           const SkISize& surface_size)
+    : test_metal_context_(test_metal_context) {
+  if (surface_size.isEmpty()) {
+    FML_LOG(ERROR) << "Size of test Metal surface was empty.";
+    return;
+  }
+  TestMetalContext::TextureInfo texture_info =
+      const_cast<TestMetalContext&>(test_metal_context_).CreateMetalTexture(surface_size);
+  Init(texture_info, surface_size);
+}
+
+sk_sp<SkImage> TestMetalSurfaceImpl::GetRasterSurfaceSnapshot() {
+  if (!IsValid()) {
+    return nullptr;
+  }
+
+  if (!surface_) {
+    FML_LOG(ERROR) << "Aborting snapshot because of on-screen surface "
+                      "acquisition failure.";
+    return nullptr;
+  }
+
+  auto device_snapshot = surface_->makeImageSnapshot();
+
+  if (!device_snapshot) {
+    FML_LOG(ERROR) << "Could not create the device snapshot while attempting "
+                      "to snapshot the Metal surface.";
+    return nullptr;
+  }
+
+  auto host_snapshot = device_snapshot->makeRasterImage();
+
+  if (!host_snapshot) {
+    FML_LOG(ERROR) << "Could not create the host snapshot while attempting to "
+                      "snapshot the Metal surface.";
+    return nullptr;
+  }
+
+  return host_snapshot;
 }
 
 // |TestMetalSurface|
@@ -107,10 +109,12 @@ TestMetalSurfaceImpl::~TestMetalSurfaceImpl() = default;
 bool TestMetalSurfaceImpl::IsValid() const {
   return is_valid_;
 }
+
 // |TestMetalSurface|
 sk_sp<GrDirectContext> TestMetalSurfaceImpl::GetGrContext() const {
-  return IsValid() ? context_ : nullptr;
+  return IsValid() ? test_metal_context_.GetSkiaContext() : nullptr;
 }
+
 // |TestMetalSurface|
 sk_sp<SkSurface> TestMetalSurfaceImpl::GetSurface() const {
   return IsValid() ? surface_ : nullptr;

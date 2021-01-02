@@ -42,7 +42,7 @@ TEST(EmbedderTestNoFixture, MustNotRunWithInvalidArgs) {
 }
 
 TEST_F(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   fml::AutoResetWaitableEvent latch;
   context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
   EmbedderConfigBuilder builder(context);
@@ -57,7 +57,7 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
 // TODO(41999): Disabled because flaky.
 TEST_F(EmbedderTest, DISABLED_CanLaunchAndShutdownMultipleTimes) {
   EmbedderConfigBuilder builder(
-      GetEmbedderContext(ContextType::kSoftwareContext));
+      GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
   builder.SetSoftwareRendererConfig();
   for (size_t i = 0; i < 3; ++i) {
     auto engine = builder.LaunchEngine();
@@ -67,7 +67,7 @@ TEST_F(EmbedderTest, DISABLED_CanLaunchAndShutdownMultipleTimes) {
 }
 
 TEST_F(EmbedderTest, CanInvokeCustomEntrypoint) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   static fml::AutoResetWaitableEvent latch;
   Dart_NativeFunction entrypoint = [](Dart_NativeArguments args) {
     latch.Signal();
@@ -82,7 +82,7 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypoint) {
 }
 
 TEST_F(EmbedderTest, CanInvokeCustomEntrypointMacro) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
   fml::AutoResetWaitableEvent latch1;
   fml::AutoResetWaitableEvent latch2;
@@ -125,7 +125,7 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypointMacro) {
 std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 
 TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   fml::AutoResetWaitableEvent latch;
 
   // Run the test on its own thread with a message loop so that it can safely
@@ -197,7 +197,7 @@ TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
 }
 
 TEST_F(EmbedderTest, CanReloadSystemFonts) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
   auto engine = builder.LaunchEngine();
@@ -208,7 +208,7 @@ TEST_F(EmbedderTest, CanReloadSystemFonts) {
 }
 
 TEST_F(EmbedderTest, IsolateServiceIdSent) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   fml::AutoResetWaitableEvent latch;
 
   fml::Thread thread;
@@ -251,7 +251,7 @@ TEST_F(EmbedderTest, IsolateServiceIdSent) {
 /// immediately collects the same.
 ///
 TEST_F(EmbedderTest, CanCreateAndCollectCallbacks) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("platform_messages_response");
@@ -289,7 +289,8 @@ TEST_F(EmbedderTest, PlatformMessagesCanReceiveResponse) {
 
   CreateNewThread()->PostTask([&]() {
     captures.thread_id = std::this_thread::get_id();
-    auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+    auto& context =
+        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
     EmbedderConfigBuilder builder(context);
     builder.SetSoftwareRendererConfig();
     builder.SetDartEntrypoint("platform_messages_response");
@@ -345,7 +346,7 @@ TEST_F(EmbedderTest, PlatformMessagesCanReceiveResponse) {
 /// callback with the response is invoked to assert integrity.
 ///
 TEST_F(EmbedderTest, PlatformMessagesCanBeSentWithoutResponseHandles) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("platform_messages_no_response");
@@ -390,7 +391,7 @@ TEST_F(EmbedderTest, PlatformMessagesCanBeSentWithoutResponseHandles) {
 /// Tests that a null platform message can be sent.
 ///
 TEST_F(EmbedderTest, NullPlatformMessagesCanBeSent) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("null_platform_messages");
@@ -432,7 +433,7 @@ TEST_F(EmbedderTest, NullPlatformMessagesCanBeSent) {
 /// isn't equals to 0.
 ///
 TEST_F(EmbedderTest, InvalidPlatformMessages) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
   auto engine = builder.LaunchEngine();
@@ -456,7 +457,7 @@ TEST_F(EmbedderTest, InvalidPlatformMessages) {
 /// set to true by default in these unit-tests).
 ///
 TEST_F(EmbedderTest, VMShutsDownWhenNoEnginesInProcess) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
   const auto launch_count = DartVM::GetVMLaunchCount();
@@ -475,7 +476,7 @@ TEST_F(EmbedderTest, VMShutsDownWhenNoEnginesInProcess) {
 //------------------------------------------------------------------------------
 ///
 TEST_F(EmbedderTest, DartEntrypointArgs) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
   builder.AddDartEntrypointArgument("foo");
@@ -509,7 +510,7 @@ TEST_F(EmbedderTest, VMAndIsolateSnapshotSizesAreRedundantInAOTMode) {
     GTEST_SKIP();
     return;
   }
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
 
@@ -529,7 +530,7 @@ TEST_F(EmbedderTest, VMAndIsolateSnapshotSizesAreRedundantInAOTMode) {
 ///
 TEST_F(EmbedderTest,
        CompositorMustBeAbleToRenderKnownSceneWithSoftwareCompositor) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig(SkISize::Make(800, 600));
@@ -701,7 +702,7 @@ TEST_F(EmbedderTest,
 ///
 TEST_F(EmbedderTest, CanCreateInitializedEngine) {
   EmbedderConfigBuilder builder(
-      GetEmbedderContext(ContextType::kSoftwareContext));
+      GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
   builder.SetSoftwareRendererConfig();
   auto engine = builder.InitializeEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -713,7 +714,7 @@ TEST_F(EmbedderTest, CanCreateInitializedEngine) {
 ///
 TEST_F(EmbedderTest, CanRunInitializedEngine) {
   EmbedderConfigBuilder builder(
-      GetEmbedderContext(ContextType::kSoftwareContext));
+      GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
   builder.SetSoftwareRendererConfig();
   auto engine = builder.InitializeEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -728,7 +729,7 @@ TEST_F(EmbedderTest, CanRunInitializedEngine) {
 ///
 TEST_F(EmbedderTest, CaDeinitializeAnEngine) {
   EmbedderConfigBuilder builder(
-      GetEmbedderContext(ContextType::kSoftwareContext));
+      GetEmbedderContext(EmbedderTestContextType::kSoftwareContext));
   builder.SetSoftwareRendererConfig();
   auto engine = builder.InitializeEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -751,7 +752,7 @@ TEST_F(EmbedderTest, CaDeinitializeAnEngine) {
 }
 
 TEST_F(EmbedderTest, CanUpdateLocales) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("can_receive_locale_updates");
@@ -810,7 +811,7 @@ TEST_F(EmbedderTest, CanUpdateLocales) {
 }
 
 TEST_F(EmbedderTest, LocalizationCallbacksCalled) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   fml::AutoResetWaitableEvent latch;
   context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
   EmbedderConfigBuilder builder(context);
@@ -842,7 +843,7 @@ TEST_F(EmbedderTest, CanQueryDartAOTMode) {
 }
 
 TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig(SkISize::Make(1024, 600));
@@ -961,7 +962,7 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
 }
 
 TEST_F(EmbedderTest, CanSendLowMemoryNotification) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetSoftwareRendererConfig();
@@ -990,7 +991,8 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
   auto platform_task_runner = CreateNewThread("platform_thread");
 
   platform_task_runner->PostTask([&]() {
-    auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+    auto& context =
+        GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
     EmbedderConfigBuilder builder(context);
     builder.SetSoftwareRendererConfig();
@@ -1128,7 +1130,7 @@ TEST_F(EmbedderTest, MustNotRunWithMultipleAOTSources) {
     GTEST_SKIP();
     return;
   }
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
   EmbedderConfigBuilder builder(
       context,
@@ -1170,7 +1172,7 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
     GTEST_SKIP();
     return;
   }
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
   fml::AutoResetWaitableEvent latch;
   context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });

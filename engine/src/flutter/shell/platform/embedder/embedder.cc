@@ -61,6 +61,10 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 #endif
 
+#ifdef SHELL_ENABLE_METAL
+#include "flutter/shell/platform/embedder/embedder_surface_metal.h"
+#endif
+
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
 
@@ -121,6 +125,24 @@ static bool IsSoftwareRendererConfigValid(const FlutterRendererConfig* config) {
   return true;
 }
 
+static bool IsMetalRendererConfigValid(const FlutterRendererConfig* config) {
+  if (config->type != kMetal) {
+    return false;
+  }
+
+  const FlutterMetalRendererConfig* metal_config = &config->metal;
+
+  bool device = SAFE_ACCESS(metal_config, device, nullptr);
+  bool command_queue =
+      SAFE_ACCESS(metal_config, present_command_queue, nullptr);
+
+  bool present = SAFE_ACCESS(metal_config, present_drawable_callback, nullptr);
+  bool get_texture =
+      SAFE_ACCESS(metal_config, get_next_drawable_callback, nullptr);
+
+  return device && command_queue && present && get_texture;
+}
+
 static bool IsRendererValid(const FlutterRendererConfig* config) {
   if (config == nullptr) {
     return false;
@@ -131,6 +153,8 @@ static bool IsRendererValid(const FlutterRendererConfig* config) {
       return IsOpenGLRendererConfigValid(config);
     case kSoftware:
       return IsSoftwareRendererConfigValid(config);
+    case kMetal:
+      return IsMetalRendererConfigValid(config);
     default:
       return false;
   }
@@ -276,6 +300,74 @@ InferOpenGLPlatformViewCreationCallback(
 }
 
 static flutter::Shell::CreateCallback<flutter::PlatformView>
+InferMetalPlatformViewCreationCallback(
+    const FlutterRendererConfig* config,
+    void* user_data,
+    flutter::PlatformViewEmbedder::PlatformDispatchTable
+        platform_dispatch_table,
+    std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
+        external_view_embedder) {
+  if (config->type != kMetal) {
+    return nullptr;
+  }
+
+#ifdef SHELL_ENABLE_METAL
+  std::function<bool(flutter::GPUMTLTextureInfo texture)> metal_present =
+      [ptr = config->metal.present_drawable_callback,
+       user_data](flutter::GPUMTLTextureInfo texture) {
+        FlutterMetalTexture embedder_texture;
+        embedder_texture.struct_size = sizeof(FlutterMetalTexture);
+        embedder_texture.texture = texture.texture;
+        embedder_texture.texture_id = texture.texture_id;
+        return ptr(user_data, &embedder_texture);
+      };
+  auto metal_get_texture =
+      [ptr = config->metal.get_next_drawable_callback,
+       user_data](const SkISize& frame_size) -> flutter::GPUMTLTextureInfo {
+    FlutterFrameInfo frame_info = {};
+    frame_info.struct_size = sizeof(FlutterFrameInfo);
+    frame_info.size = {static_cast<uint32_t>(frame_size.width()),
+                       static_cast<uint32_t>(frame_size.height())};
+    flutter::GPUMTLTextureInfo texture_info;
+
+    FlutterMetalTexture metal_texture = ptr(user_data, &frame_info);
+    texture_info.texture_id = metal_texture.texture_id;
+    texture_info.texture = metal_texture.texture;
+    return texture_info;
+  };
+
+  flutter::EmbedderSurfaceMetal::MetalDispatchTable metal_dispatch_table = {
+      .present = metal_present,
+      .get_texture = metal_get_texture,
+  };
+
+  std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
+      std::move(external_view_embedder);
+
+  std::unique_ptr<flutter::EmbedderSurfaceMetal> embedder_surface =
+      std::make_unique<flutter::EmbedderSurfaceMetal>(
+          const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
+          const_cast<flutter::GPUMTLCommandQueueHandle>(
+              config->metal.present_command_queue),
+          metal_dispatch_table, view_embedder);
+
+  return fml::MakeCopyable(
+      [embedder_surface = std::move(embedder_surface), platform_dispatch_table,
+       external_view_embedder = view_embedder](flutter::Shell& shell) mutable {
+        return std::make_unique<flutter::PlatformViewEmbedder>(
+            shell,                             // delegate
+            shell.GetTaskRunners(),            // task runners
+            std::move(embedder_surface),       // embedder surface
+            platform_dispatch_table,           // platform dispatch table
+            std::move(external_view_embedder)  // external view embedder
+        );
+      });
+#else
+  return nullptr;
+#endif
+}
+
+static flutter::Shell::CreateCallback<flutter::PlatformView>
 InferSoftwarePlatformViewCreationCallback(
     const FlutterRendererConfig* config,
     void* user_data,
@@ -331,6 +423,10 @@ InferPlatformViewCreationCallback(
           std::move(external_view_embedder));
     case kSoftware:
       return InferSoftwarePlatformViewCreationCallback(
+          config, user_data, platform_dispatch_table,
+          std::move(external_view_embedder));
+    case kMetal:
+      return InferMetalPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
           std::move(external_view_embedder));
     default:

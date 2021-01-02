@@ -1898,6 +1898,8 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_metal.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_metal.mm
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_task_runner.cc
@@ -1913,6 +1915,7 @@ FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_with_root_lay
 FILE: ../../../flutter/shell/platform/embedder/fixtures/dpr_noxform.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/dpr_xform.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/gradient.png
+FILE: ../../../flutter/shell/platform/embedder/fixtures/gradient_metal.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/gradient_xform.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/main.dart
 FILE: ../../../flutter/shell/platform/embedder/fixtures/scene_without_custom_compositor.png

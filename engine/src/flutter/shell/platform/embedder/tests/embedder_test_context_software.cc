@@ -34,6 +34,10 @@ size_t EmbedderTestContextSoftware::GetSurfacePresentCount() const {
   return software_surface_present_count_;
 }
 
+EmbedderTestContextType EmbedderTestContextSoftware::GetContextType() const {
+  return EmbedderTestContextType::kSoftwareContext;
+}
+
 void EmbedderTestContextSoftware::SetupSurface(SkISize surface_size) {
   surface_size_ = surface_size;
 }

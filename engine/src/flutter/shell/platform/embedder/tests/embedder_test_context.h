@@ -38,6 +38,12 @@ struct AOTDataDeleter {
 
 using UniqueAOTData = std::unique_ptr<_FlutterEngineAOTData, AOTDataDeleter>;
 
+enum class EmbedderTestContextType {
+  kSoftwareContext,
+  kOpenGLContext,
+  kMetalContext,
+};
+
 class EmbedderTestContext {
  public:
   EmbedderTestContext(std::string assets_path = "");
@@ -76,6 +82,8 @@ class EmbedderTestContext {
   EmbedderTestCompositor& GetCompositor();
 
   virtual size_t GetSurfacePresentCount() const = 0;
+
+  virtual EmbedderTestContextType GetContextType() const = 0;
 
   // TODO(gw280): encapsulate these properly for subclasses to use
  protected:

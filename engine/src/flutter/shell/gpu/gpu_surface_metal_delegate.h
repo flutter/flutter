@@ -24,10 +24,10 @@ typedef void* GPUMTLCommandQueueHandle;
 typedef void* GPUCAMetalLayerHandle;
 
 // expected to be id<MTLTexture>
-typedef void* GPUMTLTextureHandle;
+typedef const void* GPUMTLTextureHandle;
 
 struct GPUMTLTextureInfo {
-  intptr_t texture_id;
+  int64_t texture_id;
   GPUMTLTextureHandle texture;
 };
 
@@ -87,7 +87,7 @@ class GPUSurfaceMetalDelegate {
   ///
   /// @see |GPUSurfaceMetalDelegate::GetMTLTexture|
   ///
-  virtual bool PresentTexture(intptr_t texture_id) const = 0;
+  virtual bool PresentTexture(GPUMTLTextureInfo texture) const = 0;
 
   MTLRenderTargetType GetRenderTargetType();
 

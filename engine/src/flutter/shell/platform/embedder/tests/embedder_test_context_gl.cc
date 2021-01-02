@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_compositor_gl.h"
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/paths.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_compositor_gl.h"
 #include "flutter/testing/testing.h"
+#include "tests/embedder_test.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -55,11 +56,7 @@ bool EmbedderTestContextGL::GLPresent(uint32_t fbo_id) {
   FireRootSurfacePresentCallbackIfPresent(
       [&]() { return gl_surface_->GetRasterSurfaceSnapshot(); });
 
-  if (!gl_surface_->Present()) {
-    return false;
-  }
-
-  return true;
+  return gl_surface_->Present();
 }
 
 void EmbedderTestContextGL::SetGLGetFBOCallback(GLGetFBOCallback callback) {
@@ -101,6 +98,10 @@ void* EmbedderTestContextGL::GLGetProcAddress(const char* name) {
 
 size_t EmbedderTestContextGL::GetSurfacePresentCount() const {
   return gl_surface_present_count_;
+}
+
+EmbedderTestContextType EmbedderTestContextGL::GetContextType() const {
+  return EmbedderTestContextType::kOpenGLContext;
 }
 
 uint32_t EmbedderTestContextGL::GetWindowFBOId() const {
