@@ -18,6 +18,9 @@ class EmbedderTestContextSoftware : public EmbedderTestContext {
 
   size_t GetSurfacePresentCount() const override;
 
+  // |EmbedderTestContext|
+  EmbedderTestContextType GetContextType() const override;
+
   bool Present(sk_sp<SkImage> image);
 
  protected:

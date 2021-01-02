@@ -4,6 +4,8 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <limits>
+
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 
 namespace flutter {
@@ -58,6 +60,30 @@ bool RasterImagesAreSame(sk_sp<SkImage> a, sk_sp<SkImage> b) {
     return false;
   }
 
+  if (pixmapA.info() != pixmapB.info()) {
+    // Given that the sizes are equal but the infos aren't equal
+    // we have a situation where the color-type, color-space and
+    // alpha type are potentially mismatched. We fallback to compating
+    // pixel-wise values for alpha and color.
+    for (int x = 0; x < pixmapA.width(); x++) {
+      for (int y = 0; y < pixmapA.height(); y++) {
+        SkColor color_a = pixmapA.getColor(x, y);
+        SkColor color_b = pixmapB.getColor(x, y);
+        if (color_a != color_b) {
+          return false;
+        }
+        float alpha_a = pixmapA.getAlphaf(x, y);
+        float alpha_b = pixmapB.getAlphaf(x, y);
+        if (std::abs(alpha_a - alpha_b) >
+            std::numeric_limits<float>::epsilon()) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   return ::memcmp(pixmapA.addr(), pixmapB.addr(), sizeA) == 0;
 }
 
@@ -68,7 +94,7 @@ bool WriteImageToDisk(const fml::UniqueFD& directory,
     return false;
   }
 
-  auto data = image->encodeToData(SkEncodedImageFormat::kPNG, 100);
+  auto data = image->encodeToData();
 
   if (!data) {
     return false;
@@ -93,6 +119,8 @@ bool ImageMatchesFixture(const std::string& fixture_file_name,
 
   FML_CHECK(fixture_image) << "Could not create image from fixture: "
                            << fixture_file_name;
+
+  FML_CHECK(scene_image) << "Invalid scene image.";
 
   auto scene_image_subset = scene_image->makeSubset(
       SkIRect::MakeWH(fixture_image->width(), fixture_image->height()));

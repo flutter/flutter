@@ -9,6 +9,10 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_gl.h"
 #endif
 
+#ifdef SHELL_ENABLE_METAL
+#include "flutter/shell/platform/embedder/tests/embedder_test_context_metal.h"
+#endif
+
 namespace flutter {
 namespace testing {
 
@@ -18,20 +22,27 @@ std::string EmbedderTest::GetFixturesDirectory() const {
   return GetFixturesPath();
 }
 
-EmbedderTestContext& EmbedderTest::GetEmbedderContext(ContextType type) {
+EmbedderTestContext& EmbedderTest::GetEmbedderContext(
+    EmbedderTestContextType type) {
   // Setup the embedder context lazily instead of in the constructor because we
   // don't to do all the work if the test won't end up using context.
   if (!embedder_contexts_[type]) {
     switch (type) {
-      case ContextType::kSoftwareContext:
+      case EmbedderTestContextType::kSoftwareContext:
         embedder_contexts_[type] =
             std::make_unique<EmbedderTestContextSoftware>(
                 GetFixturesDirectory());
         break;
 #ifdef SHELL_ENABLE_GL
-      case ContextType::kOpenGLContext:
+      case EmbedderTestContextType::kOpenGLContext:
         embedder_contexts_[type] =
             std::make_unique<EmbedderTestContextGL>(GetFixturesDirectory());
+        break;
+#endif
+#ifdef SHELL_ENABLE_METAL
+      case EmbedderTestContextType::kMetalContext:
+        embedder_contexts_[type] =
+            std::make_unique<EmbedderTestContextMetal>(GetFixturesDirectory());
         break;
 #endif
       default:

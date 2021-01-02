@@ -36,7 +36,7 @@ using EmbedderTest = testing::EmbedderTest;
 
 TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
   EmbedderConfigBuilder builder(
-      GetEmbedderContext(ContextType::kOpenGLContext));
+      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
   builder.SetOpenGLRendererConfig(SkISize::Make(1, 1));
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -49,7 +49,7 @@ TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
 ///
 TEST_F(EmbedderTest,
        MustPreventEngineLaunchWhenRequiredCompositorArgsAreAbsent) {
-  auto& context = GetEmbedderContext(ContextType::kSoftwareContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(1, 1));
   builder.SetCompositor();
@@ -65,7 +65,7 @@ TEST_F(EmbedderTest,
 /// complete OpenGL textures.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -156,7 +156,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
 /// Layers in a hierarchy containing a platform view should not be cached. The
 /// other layers in the hierarchy should be, however.
 TEST_F(EmbedderTest, RasterCacheDisabledWithPlatformViews) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -260,7 +260,7 @@ TEST_F(EmbedderTest, RasterCacheDisabledWithPlatformViews) {
 /// The RasterCache should normally be enabled.
 ///
 TEST_F(EmbedderTest, RasterCacheEnabled) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -331,7 +331,7 @@ TEST_F(EmbedderTest, RasterCacheEnabled) {
 /// the individual layers are OpenGL textures.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -423,7 +423,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
 /// individual layers are software buffers.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -514,7 +514,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
 /// Test the layer structure and pixels rendered when using a custom compositor.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -685,7 +685,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
 /// thread merging mechanism must not interfere with the custom compositor.
 ///
 TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
 
@@ -810,7 +810,7 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
 /// and a single layer.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -877,7 +877,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
 /// and ensure that a redundant layer is not added.
 ///
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -990,7 +990,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
 ///
 TEST_F(EmbedderTest,
        CompositorMustBeAbleToRenderKnownSceneWithRootSurfaceTransformation) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
@@ -1164,7 +1164,7 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
 
@@ -1190,7 +1190,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
 }
 
 TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   const auto root_surface_transformation =
       SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
@@ -1223,7 +1223,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
 
@@ -1248,7 +1248,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   const auto root_surface_transformation =
       SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
@@ -1281,7 +1281,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
 
@@ -1309,7 +1309,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   // This must match the transformation provided in the
   // |CanRenderGradientWithoutCompositorWithXform| test to ensure that
@@ -1346,7 +1346,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
 
@@ -1451,7 +1451,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   // This must match the transformation provided in the
   // |CanRenderGradientWithoutCompositorWithXform| test to ensure that
@@ -1565,7 +1565,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
 }
 
 TEST_F(EmbedderTest, VerifyB141980393) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
 
@@ -1686,7 +1686,7 @@ TEST_F(EmbedderTest, CanCreateEmbedderWithCustomRenderTaskRunner) {
         }
       });
   EmbedderConfigBuilder builder(
-      GetEmbedderContext(ContextType::kOpenGLContext));
+      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
   builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
   builder.SetRenderTaskRunner(
@@ -1745,7 +1745,7 @@ TEST_F(EmbedderTest,
 
   platform_task_runner->PostTask([&]() {
     EmbedderConfigBuilder builder(
-        GetEmbedderContext(ContextType::kOpenGLContext));
+        GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
     builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
     builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
     builder.SetRenderTaskRunner(
@@ -1799,7 +1799,7 @@ TEST_F(EmbedderTest,
 
 TEST_F(EmbedderTest,
        CompositorMustBeAbleToRenderKnownScenePixelRatioOnSurface) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -1890,7 +1890,7 @@ TEST_F(EmbedderTest,
 TEST_F(
     EmbedderTest,
     CompositorMustBeAbleToRenderKnownScenePixelRatioOnSurfaceWithRootSurfaceXformation) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
@@ -1984,7 +1984,7 @@ TEST_F(
 
 TEST_F(EmbedderTest,
        PushingMutlipleFramesSetsUpNewRecordingCanvasWithCustomCompositor) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
@@ -2026,7 +2026,7 @@ TEST_F(EmbedderTest,
 
 TEST_F(EmbedderTest,
        PushingMutlipleFramesSetsUpNewRecordingCanvasWithoutCustomCompositor) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
@@ -2063,7 +2063,7 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, PlatformViewMutatorsAreValid) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -2159,7 +2159,7 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValid) {
 }
 
 TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -2256,7 +2256,7 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
 
 TEST_F(EmbedderTest,
        PlatformViewMutatorsAreValidWithPixelRatioAndRootSurfaceTransformation) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -2358,7 +2358,7 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, EmptySceneIsAcceptable) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -2384,7 +2384,7 @@ TEST_F(EmbedderTest, EmptySceneIsAcceptable) {
 }
 
 TEST_F(EmbedderTest, SceneWithNoRootContainerIsAcceptable) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -2414,7 +2414,7 @@ TEST_F(EmbedderTest, SceneWithNoRootContainerIsAcceptable) {
 // Verifies that https://skia-review.googlesource.com/c/skia/+/259174 is pulled
 // into the engine.
 TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 1024));
@@ -2448,7 +2448,7 @@ TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
 }
 
 TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(400, 300));
@@ -2527,7 +2527,7 @@ TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
 }
 
 TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(1024, 600));
@@ -2611,7 +2611,7 @@ TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
 }
 
 TEST_F(EmbedderTest, ObjectsCanBePostedViaPorts) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 1024));
   builder.SetDartEntrypoint("objects_can_be_posted");
@@ -2810,7 +2810,7 @@ TEST_F(EmbedderTest, ObjectsCanBePostedViaPorts) {
 }
 
 TEST_F(EmbedderTest, CompositorCanPostZeroLayersForPresentation) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(300, 200));
@@ -2843,7 +2843,7 @@ TEST_F(EmbedderTest, CompositorCanPostZeroLayersForPresentation) {
 }
 
 TEST_F(EmbedderTest, CompositorCanPostOnlyPlatformViews) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(300, 200));
@@ -2906,7 +2906,7 @@ TEST_F(EmbedderTest, CompositorCanPostOnlyPlatformViews) {
 }
 
 TEST_F(EmbedderTest, CompositorRenderTargetsAreRecycled) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(300, 200));
@@ -2951,7 +2951,7 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreRecycled) {
 }
 
 TEST_F(EmbedderTest, CompositorRenderTargetsAreInStableOrder) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(300, 200));
@@ -3020,7 +3020,7 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreInStableOrder) {
 }
 
 TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
@@ -3063,7 +3063,7 @@ TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
 }
 
 TEST_F(EmbedderTest, MustNotRunWithBothFBOCallbacksSet) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
@@ -3074,7 +3074,7 @@ TEST_F(EmbedderTest, MustNotRunWithBothFBOCallbacksSet) {
 }
 
 TEST_F(EmbedderTest, MustNotRunWithBothPresentCallbacksSet) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
@@ -3085,7 +3085,7 @@ TEST_F(EmbedderTest, MustNotRunWithBothPresentCallbacksSet) {
 }
 
 TEST_F(EmbedderTest, PresentInfoContainsValidFBOId) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 1024));
@@ -3128,7 +3128,7 @@ TEST_F(EmbedderTest, PresentInfoContainsValidFBOId) {
 }
 
 TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithDisplayId) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -3170,7 +3170,7 @@ TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithDisplayId) {
 }
 
 TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithoutDisplayId) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -3212,7 +3212,7 @@ TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithoutDisplayId) {
 }
 
 TEST_F(EmbedderTest, SetValidMultiDisplayConfiguration) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -3261,7 +3261,7 @@ TEST_F(EmbedderTest, SetValidMultiDisplayConfiguration) {
 }
 
 TEST_F(EmbedderTest, MultipleDisplaysWithSingleDisplayTrueIsInvalid) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -3307,7 +3307,7 @@ TEST_F(EmbedderTest, MultipleDisplaysWithSingleDisplayTrueIsInvalid) {
 }
 
 TEST_F(EmbedderTest, MultipleDisplaysWithSameDisplayIdIsInvalid) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
@@ -3353,7 +3353,7 @@ TEST_F(EmbedderTest, MultipleDisplaysWithSameDisplayIdIsInvalid) {
 }
 
 TEST_F(EmbedderTest, CompositorRenderTargetsNotRecycledWhenAvoidsCacheSet) {
-  auto& context = GetEmbedderContext(ContextType::kOpenGLContext);
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
 
   EmbedderConfigBuilder builder(context);
   builder.SetOpenGLRendererConfig(SkISize::Make(300, 200));

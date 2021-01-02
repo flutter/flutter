@@ -48,6 +48,8 @@ class EmbedderConfigBuilder {
 
   void SetOpenGLRendererConfig(SkISize surface_size);
 
+  void SetMetalRendererConfig(SkISize surface_size);
+
   // Used to explicitly set an `open_gl.fbo_callback`. Using this method will
   // cause your test to fail since the ctor for this class sets
   // `open_gl.fbo_callback_with_frame_info`. This method exists as a utility to
@@ -103,6 +105,10 @@ class EmbedderConfigBuilder {
   FlutterSoftwareRendererConfig software_renderer_config_ = {};
 #ifdef SHELL_ENABLE_GL
   FlutterOpenGLRendererConfig opengl_renderer_config_ = {};
+#endif
+#ifdef SHELL_ENABLE_METAL
+  void InitializeMetalRendererConfig();
+  FlutterMetalRendererConfig metal_renderer_config_ = {};
 #endif
   std::string dart_entrypoint_;
   FlutterCustomTaskRunners custom_task_runners_ = {};

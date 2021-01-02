@@ -19,6 +19,10 @@
 #include "flutter/shell/platform/embedder/embedder_surface_gl.h"
 #endif
 
+#ifdef SHELL_ENABLE_METAL
+#include "flutter/shell/platform/embedder/embedder_surface_metal.h"
+#endif
+
 namespace flutter {
 
 class PlatformViewEmbedder final : public PlatformView {
@@ -59,6 +63,16 @@ class PlatformViewEmbedder final : public PlatformView {
       flutter::TaskRunners task_runners,
       EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
       bool fbo_reset_after_present,
+      PlatformDispatchTable platform_dispatch_table,
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+#endif
+
+#ifdef SHELL_ENABLE_METAL
+  // Creates a platform view that sets up an metal rasterizer.
+  PlatformViewEmbedder(
+      PlatformView::Delegate& delegate,
+      flutter::TaskRunners task_runners,
+      std::unique_ptr<EmbedderSurfaceMetal> embedder_surface,
       PlatformDispatchTable platform_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 #endif
