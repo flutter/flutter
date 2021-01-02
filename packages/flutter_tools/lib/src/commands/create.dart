@@ -297,13 +297,14 @@ class CreateCommand extends CreateBase {
         _printNoPluginMessage();
       }
       _printWarningToEnablePlatforms(requestedPlatforms, templateContext);
-      _printAddPlatformMessage(relativePluginPath);
+      _printPluginAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
+      final List<String> requestedPlatforms = _getUserRequestedPlatforms();
 
       // Let them know a summary of the state of their tooling.
       globals.printStatus('''
@@ -314,7 +315,11 @@ In order to run your $application, type:
 
 Your $application code is in $relativeAppMain.
 ''');
+    // Show warning if any selected platform is not enabled
+    _printWarningToEnablePlatforms(requestedPlatforms, templateContext);
+    _printAppAddPlatformMessage(projectDirPath);
     }
+
     return FlutterCommandResult.success();
   }
 
@@ -503,12 +508,16 @@ You've created a plugin project that doesn't yet support any platforms.
 ''');
 }
 
-void _printAddPlatformMessage(String pluginPath) {
+void _printPluginAddPlatformMessage(String pluginPath) {
   globals.printStatus('''
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
 For more information, see https://flutter.dev/go/plugin-platforms.
 
 ''');
+}
+
+void _printAppAddPlatformMessage(String appPath) {
+  globals.printStatus('After enabling the platforms run `flutter create .` under $appPath to add platforms.\n');
 }
 
 // shows warning if user requested a platform and if it's not enabled
