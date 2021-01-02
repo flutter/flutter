@@ -296,7 +296,7 @@ class CreateCommand extends CreateBase {
       } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
         _printNoPluginMessage();
       }
-      _printWarningToEnablePlatforms(requestedPlatforms, templateContext);
+      _printWarningToEnablePlatforms(requestedPlatforms);
       _printPluginAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
@@ -316,8 +316,7 @@ In order to run your $application, type:
 Your $application code is in $relativeAppMain.
 ''');
     // Show warning if any selected platform is not enabled
-    _printWarningToEnablePlatforms(requestedPlatforms, templateContext);
-    _printAppAddPlatformMessage(projectDirPath);
+    _printWarningToEnablePlatforms(requestedPlatforms, true);
     }
 
     return FlutterCommandResult.success();
@@ -516,12 +515,11 @@ For more information, see https://flutter.dev/go/plugin-platforms.
 ''');
 }
 
-void _printAppAddPlatformMessage(String appPath) {
-  globals.printStatus('After enabling the platforms run `flutter create .` under $appPath to add platforms.\n');
-}
-
 // shows warning if user requested a platform and if it's not enabled
-void _printWarningToEnablePlatforms(List<String> requestedPlatforms, Map<String, dynamic> templateContext) {
+void _printWarningToEnablePlatforms(
+  List<String> requestedPlatforms, 
+  [bool isApp = false]
+) {
   final List<String> _showWarning = <String>[
   if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled)
     'web',
@@ -543,4 +541,8 @@ void _printWarningToEnablePlatforms(List<String> requestedPlatforms, Map<String,
     emphasis: true, 
     color: TerminalColor.yellow
   );
+
+  if (isApp){
+      globals.printStatus('After enabling the platforms run `flutter create .`\n');
+  }
 }
