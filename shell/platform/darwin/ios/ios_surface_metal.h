@@ -47,7 +47,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetal final : public IOSSurface,
   GPUMTLTextureInfo GetMTLTexture(const SkISize& frame_info) const override;
 
   // |GPUSurfaceMetalDelegate|
-  bool PresentTexture(intptr_t texture_id) const override;
+  bool PresentTexture(GPUMTLTextureInfo texture) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceMetal);
 };

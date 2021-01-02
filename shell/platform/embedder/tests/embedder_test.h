@@ -18,19 +18,14 @@ namespace testing {
 
 class EmbedderTest : public ThreadTest {
  public:
-  enum class ContextType {
-    kSoftwareContext,
-    kOpenGLContext,
-  };
-
   EmbedderTest();
 
   std::string GetFixturesDirectory() const;
 
-  EmbedderTestContext& GetEmbedderContext(ContextType type);
+  EmbedderTestContext& GetEmbedderContext(EmbedderTestContextType type);
 
  private:
-  std::map<ContextType, std::unique_ptr<EmbedderTestContext>>
+  std::map<EmbedderTestContextType, std::unique_ptr<EmbedderTestContext>>
       embedder_contexts_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTest);

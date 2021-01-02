@@ -125,7 +125,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromMTLTexture(
     return nullptr;
   }
 
-  auto submit_callback = [texture_id = texture.texture_id, delegate = delegate_](
+  auto submit_callback = [texture = texture, delegate = delegate_](
                              const SurfaceFrame& surface_frame, SkCanvas* canvas) -> bool {
     TRACE_EVENT0("flutter", "GPUSurfaceMetal::PresentTexture");
     if (canvas == nullptr) {
@@ -135,7 +135,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrameFromMTLTexture(
 
     canvas->flush();
 
-    return delegate->PresentTexture(texture_id);
+    return delegate->PresentTexture(texture);
   };
 
   return std::make_unique<SurfaceFrame>(std::move(surface), true, submit_callback);

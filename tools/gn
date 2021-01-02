@@ -247,6 +247,18 @@ def to_gn_args(args):
       # attributes in release modes till the toolchain is updated.
       gn_args['skia_enable_api_available_macro'] = args.runtime_mode != "release"
 
+    if sys.platform == 'darwin' and args.macos_enable_metal:
+      # OpenGL is deprecated on macOS > 10.11.
+      # This is not neccessarily needed but enabling this until we have a way to
+      # build a macOS metal only shell and a gl only shell.
+      gn_args['allow_deprecated_api_calls'] = True
+      gn_args['skia_use_metal'] = True
+      gn_args['shell_enable_metal'] = True
+      # Skia has Metal support on macOS version >= 10.14.
+      MACOS_SKIA_METAL_SUPPORTED_MIN_VERSION = '10.14'
+      gn_args['mac_sdk_min'] = MACOS_SKIA_METAL_SUPPORTED_MIN_VERSION
+      gn_args['mac_deployment_target'] = MACOS_SKIA_METAL_SUPPORTED_MIN_VERSION
+
     if args.enable_vulkan:
       # Enable vulkan in the Flutter shell.
       gn_args['shell_enable_vulkan'] = True
@@ -365,6 +377,7 @@ def parse_args(args):
   parser.add_argument('--target-triple', type=str)
   parser.add_argument('--operator-new-alignment', dest='operator_new_alignment', type=str, default=None)
 
+  parser.add_argument('--macos-enable-metal', action='store_true', default=False)
   parser.add_argument('--enable-vulkan', action='store_true', default=False)
 
   parser.add_argument('--enable-fontconfig', action='store_true', default=False)
