@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -822,6 +823,13 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
+  double getReferenceBoxRadius(RenderBox referenceBox) {
+    final size = widget.getRectCallback!(referenceBox)?.call()?.size ?? referenceBox.size;
+    final w = size.width;
+    final h = size.height;
+    return sqrt(w * w + h * h) / 2;
+  }
+
   void updateHighlight(_HighlightType type, { required bool value, bool callOnHover = true }) {
     final InkHighlight? highlight = _highlights[type];
     void handleInkRemoval() {
@@ -843,7 +851,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           referenceBox: referenceBox,
           color: getHighlightColorForType(type),
           shape: widget.highlightShape,
-          radius: widget.radius,
+          radius: widget.radius ?? getReferenceBoxRadius(referenceBox),
           borderRadius: widget.borderRadius,
           customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback!(referenceBox),
@@ -902,7 +910,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       color: color,
       containedInkWell: widget.containedInkWell,
       rectCallback: rectCallback,
-      radius: widget.radius,
+      radius: widget.radius ?? getReferenceBoxRadius(referenceBox),
       borderRadius: borderRadius,
       customBorder: customBorder,
       onRemoved: onRemoved,
