@@ -296,6 +296,7 @@ class CreateCommand extends CreateBase {
       } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
         _printNoPluginMessage();
       }
+      _printWarningToEnablePlatforms(requestedPlatforms, templateContext);
       _printAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
@@ -508,4 +509,29 @@ To add platforms, run `flutter create -t plugin --platforms <platforms> .` under
 For more information, see https://flutter.dev/go/plugin-platforms.
 
 ''');
+}
+
+// shows warning if user requested a platform and if it's not enabled
+void _printWarningToEnablePlatforms(List<String> requestedPlatforms, Map<String, dynamic> templateContext) {
+  final List<String> _showWarning = <String>[
+  if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled)
+    'web',
+  if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled) 
+    'macos',
+  if (requestedPlatforms.contains('windows') && !featureFlags.isWindowsEnabled)
+    'windows',
+  if (requestedPlatforms.contains('linux') && !featureFlags.isLinuxEnabled) 
+    'linux',
+  ];
+
+  if (_showWarning.isEmpty){
+    return;
+  }
+
+  final String _disabledPlatforms = _showWarning.join(', ');
+
+  globals.printStatus('! $_disabledPlatforms are not enabled; enable the platforms and then add them.', 
+    emphasis: true, 
+    color: TerminalColor.yellow
+  );
 }
