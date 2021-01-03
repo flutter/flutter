@@ -125,6 +125,14 @@ void main() {
   });
 
   group('Ink feature color states', () {
+    MaterialStateProperty<Color> resolveColor({required MaterialState state, required Color color}) {
+      return MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        if (states.contains(state))
+          return color;
+        return const Color(0xffbadbad); // Shouldn't happen.
+      });
+    }
+
     Widget boilerplate({InteractiveInkFeatureFactory? splashFactory, required Widget child}) {
       return Theme(
         data: ThemeData(splashFactory: splashFactory),
@@ -166,10 +174,7 @@ void main() {
         await tester.pumpWidget(
           boilerplate(
             child: InkWell(
-              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) return const Color(0xff00ff00);
-                return const Color(0xffbadbad); // Shouldn't happen.
-              }),
+              overlayColor: resolveColor(state: MaterialState.hovered, color: const Color(0xff00ff00)),
               onTap: () {},
               onHover: (bool hover) {},
             ),
@@ -217,10 +222,7 @@ void main() {
           boilerplate(
             child: InkWell(
               focusNode: focusNode,
-              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.focused)) return const Color(0xff0000ff);
-                return const Color(0xffbadbad); // Shouldn't happen.
-              }),
+              overlayColor: resolveColor(state: MaterialState.focused, color: const Color(0xff0000ff)),
               highlightColor: const Color(0xf00fffff),
               onTap: () {},
               onHover: (bool hover) {},
@@ -306,10 +308,7 @@ void main() {
             boilerplate(
               splashFactory: InkSplash.splashFactory,
               child: InkWell(
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed)) return splashColor;
-                  return const Color(0xffbadbad); // Shouldn't happen.
-                }),
+                overlayColor: resolveColor(state: MaterialState.pressed, color: splashColor),
                 onTap: () {},
               ),
             ),
@@ -353,10 +352,7 @@ void main() {
             boilerplate(
               splashFactory: InkRipple.splashFactory,
               child: InkWell(
-                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed)) return splashColor;
-                  return const Color(0xffbadbad); // Shouldn't happen.
-                }),
+                overlayColor: resolveColor(state: MaterialState.pressed, color: splashColor),
                 onTap: () {},
               ),
             ),
