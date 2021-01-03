@@ -436,8 +436,10 @@ class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
   }
 }
 
-/// How the icon in any `button.icon` should be placed, where `button` could be:
-///
+/// Position of the icon in a `button.icon` relative to the label.
+/// 
+/// This is used by:
+/// 
 /// * [TextButton]
 /// * [ElevatedButton]
 /// * [OutlinedButton]
@@ -445,23 +447,11 @@ class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
 /// In buttons that have an icon, we generally tend to use a `Row` widget
 /// to be able to put multiple widgets in a horizontal way, aka `Row`.
 ///
-/// Hover over enum values to be able to see more deailed description
-/// on what do they do.
+/// `start` enum value places the icon at the `start` on the horizontal axis
+/// relative to the label.
+/// `end` enum value places the icon at the `end` on the horizontal axis relative
+/// to the label.
 enum ButtonIconAlignment {
-  /// Places the icon to the `start` of the button which means the
-  /// first child in the `Row`.
-  ///
-  /// The `Row` will be like this if you choose to use `start` which is
-  /// the default:
-  ///
-  /// `[YOUR_ICON, SIZEDBOX, LABEL]`
   start,
-
-  /// Places the icon to the `end` of the button which means the
-  /// last child in the `Row`.
-  ///
-  /// The `Row` will be like this if you choose to use `end`:
-  ///
-  /// `[LABEL, SIZEDBOX, YOUR_ICON]`
   end,
 }
