@@ -12,6 +12,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 import '../rendering/mock_canvas.dart';
 import 'data_table_test_utils.dart';
+import 'ink_paint_test_utils.dart';
 
 void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
@@ -1326,144 +1327,100 @@ void main() {
     expect(lastCheckbox().checkColor, _themeData.colorScheme.onPrimary);
   });
 
-  testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
-    const Color selectedColor = Colors.green;
-    const Color defaultColor = Colors.red;
+  group('DataRow custom colors', () {
+    const Color stateColor = Colors.blue;
+    const Color defaultColor = Colors.transparent;
 
-    Widget buildTable({bool selected = false}) {
-      return Material(
-        child: DataTable(
-          columns: const <DataColumn>[
-            DataColumn(
-              label: Text('Column1'),
-            ),
-          ],
-          rows: <DataRow>[
-            DataRow(
-              selected: selected,
-              color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected))
-                    return selectedColor;
-                  return defaultColor;
-                },
-              ),
-              cells: const <DataCell>[
-                DataCell(Text('Content1')),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
-    BoxDecoration lastTableRowBoxDecoration() {
+    Color? lastRowDecorationColor(WidgetTester tester) {
       final Table table = tester.widget(find.byType(Table));
-      final TableRow tableRow = table.children.last;
-      return tableRow.decoration! as BoxDecoration;
+      return (table.children.last.decoration! as BoxDecoration).color;
     }
 
-    await tester.pumpWidget(MaterialApp(
-      home: buildTable(),
-    ));
-    expect(lastTableRowBoxDecoration().color, defaultColor);
-
-    await tester.pumpWidget(MaterialApp(
-      home: buildTable(selected: true),
-    ));
-    expect(lastTableRowBoxDecoration().color, selectedColor);
-  });
-
-  testWidgets('DataRow renders custom colors when disabled', (WidgetTester tester) async {
-    const Color disabledColor = Colors.grey;
-    const Color defaultColor = Colors.red;
-
-    Widget buildTable({bool disabled = false}) {
-      return Material(
-        child: DataTable(
-          columns: const <DataColumn>[
-            DataColumn(
-              label: Text('Column1'),
-            ),
-          ],
-          rows: <DataRow>[
-            DataRow(
-              cells: const <DataCell>[
-                DataCell(Text('Content1')),
-              ],
-              onSelectChanged: (bool? value) {},
-            ),
-            DataRow(
-              color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled))
-                    return disabledColor;
-                  return defaultColor;
-                },
+    Widget buildTable({
+      InteractiveInkFeatureFactory? splashFactory,
+      bool selected = false,
+      bool disabled = false,
+      required MaterialState state,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(splashFactory: splashFactory),
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
+            rows: <DataRow>[
+              DataRow(
+                onSelectChanged: (bool? _) {},
+                cells: const <DataCell>[DataCell(Text('Content1'))],
               ),
-              cells: const <DataCell>[
-                DataCell(Text('Content2')),
-              ],
-              onSelectChanged: disabled ? null : (bool? value) {},
-            ),
-          ],
-        ),
-      );
-    }
-
-    BoxDecoration lastTableRowBoxDecoration() {
-      final Table table = tester.widget(find.byType(Table));
-      final TableRow tableRow = table.children.last;
-      return tableRow.decoration! as BoxDecoration;
-    }
-
-    await tester.pumpWidget(MaterialApp(
-      home: buildTable(),
-    ));
-    expect(lastTableRowBoxDecoration().color, defaultColor);
-
-    await tester.pumpWidget(MaterialApp(
-      home: buildTable(disabled: true),
-    ));
-    expect(lastTableRowBoxDecoration().color, disabledColor);
-  });
-
-  testWidgets('DataRow renders custom colors when pressed', (WidgetTester tester) async {
-    const Color pressedColor = Color(0xff4caf50);
-    Widget buildTable() {
-      return DataTable(
-        columns: const <DataColumn>[
-          DataColumn(
-            label: Text('Column1'),
-          ),
-        ],
-        rows: <DataRow>[
-          DataRow(
-            color: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed))
-                  return pressedColor;
-                return Colors.transparent;
-              },
-            ),
-            onSelectChanged: (bool? value) {},
-            cells: const <DataCell>[
-              DataCell(Text('Content1')),
+              DataRow(
+                color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  if (states.contains(state))
+                    return stateColor;
+                  return defaultColor;
+                }),
+                selected: selected,
+                onSelectChanged: disabled ? null : (bool? _) {},
+                cells: const <DataCell>[DataCell(Text('Content2'))],
+              ),
             ],
           ),
-        ],
+        ),
       );
     }
 
-    await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable()),
-    ));
+    testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
+      Widget table({bool selected = false}) => buildTable(state: MaterialState.selected, selected: selected);
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
-    await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    expect(box, paints..circle(x: 68.0, y: 24.0, color: pressedColor));
-    await gesture.up();
+      await tester.pumpWidget(table());
+      expect(lastRowDecorationColor(tester), defaultColor);
+
+      await tester.pumpWidget(table(selected: true));
+      expect(lastRowDecorationColor(tester), stateColor);
+    });
+
+    testWidgets('DataRow renders custom colors when disabled', (WidgetTester tester) async {
+      Widget table({bool disabled = false}) => buildTable(state: MaterialState.disabled, disabled: disabled);
+
+      await tester.pumpWidget(table());
+      expect(lastRowDecorationColor(tester), defaultColor);
+
+      await tester.pumpWidget(table(disabled: true));
+      expect(lastRowDecorationColor(tester), stateColor);
+    });
+
+    testWidgets('DataRow with InkSplash splash factory renders custom colors when pressed', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildTable(
+          splashFactory: InkSplash.splashFactory,
+          state: MaterialState.pressed,
+        ),
+      );
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content2')));
+      await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
+
+      expect(tester.material<InkWell>(), paints..ripple(center: const Offset(68, 24), color: stateColor));
+      await gesture.up();
+    });
+
+    testWidgets('DataRow with InkRipple splash factory renders custom colors when pressed', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildTable(
+          splashFactory: InkRipple.splashFactory,
+          state: MaterialState.pressed,
+        ),
+      );
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content2')));
+      await tester.pump(const Duration(milliseconds: 200)); // ripple is well underway
+
+      expect(tester.material<InkWell>(), paints..ripple(center: const Offset(68, 24), color: stateColor, alpha: 0));
+
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.material<InkWell>(), paints..ripple(center: const Offset(159, 24), color: stateColor));
+
+      await gesture.up();
+    });
   });
 
   testWidgets('DataTable can render inside an AlertDialog', (WidgetTester tester) async {
