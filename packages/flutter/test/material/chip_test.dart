@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
+import 'ink_paint_test_utils.dart';
 
 Finder findRenderChipElement() {
   return find.byElementPredicate((Element e) => '${e.runtimeType}' == '_RenderChipElement');
@@ -75,12 +76,16 @@ double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAn
 /// Adds the basic requirements for a Chip.
 Widget _wrapForChip({
   required Widget child,
+  InteractiveInkFeatureFactory? splashFactory,
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
+    theme: ThemeData(
+      brightness: brightness,
+      splashFactory: splashFactory,
+    ),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -194,11 +199,13 @@ void _expectCheckmarkColor(Finder finder, Color color) {
 Widget _chipWithOptionalDeleteButton({
   UniqueKey? deleteButtonKey,
   UniqueKey? labelKey,
+  InteractiveInkFeatureFactory? splashFactory,
   required bool deletable,
   TextDirection textDirection = TextDirection.ltr,
   bool hasDeleteButtonTooltip = true,
 }) {
   return _wrapForChip(
+    splashFactory: splashFactory,
     textDirection: textDirection,
     child: Wrap(
       children: <Widget>[
@@ -217,43 +224,6 @@ Widget _chipWithOptionalDeleteButton({
       ],
     ),
   );
-}
-
-bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
-bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
-
-// Ripple pattern matches if there exists at least one ripple
-// with the [expectedCenter] and [expectedRadius].
-// This ensures the existence of a ripple.
-PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
-  return paints
-    ..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle)
-          return false;
-        final Offset center = arguments[0] as Offset;
-        final double radius = arguments[1] as double;
-        return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
-      }
-    );
-}
-
-// Unique ripple pattern matches if there does not exist ripples
-// other than ones with the [expectedCenter] and [expectedRadius].
-// This ensures the nonexistence of two different ripples.
-PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
-  return paints
-    ..everything((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle)
-          return true;
-        final Offset center = arguments[0] as Offset;
-        final double radius = arguments[1] as double;
-        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
-          return true;
-        throw '''
-              Expected: center == $expectedCenter, radius == $expectedRadius
-              Found: center == $center radius == $radius''';
-      }
-    );
 }
 
 // Finds any container of a tooltip.
@@ -1021,116 +991,720 @@ void main() {
     expect(find.byKey(deleteButtonKey), findsNothing);
   });
 
-  testWidgets('Chip creates centered, unique ripple when label is tapped', (WidgetTester tester) async {
-    // Creates a chip with a delete button.
-    final UniqueKey labelKey = UniqueKey();
-    final UniqueKey deleteButtonKey = UniqueKey();
+  group('Ink features', () {
+    group('with InkSplash splash factory', () {
+      testWidgets('Chip creates centered, unique splash when label is tapped', (WidgetTester tester) async {
+        final UniqueKey labelKey = UniqueKey();
+        final UniqueKey deleteButtonKey = UniqueKey();
 
-    await tester.pumpWidget(
-      _chipWithOptionalDeleteButton(
-        labelKey: labelKey,
-        deleteButtonKey: deleteButtonKey,
-        deletable: true,
-      ),
-    );
+        await tester.pumpWidget(
+          _chipWithOptionalDeleteButton(
+            splashFactory: InkSplash.splashFactory,
+            labelKey: labelKey,
+            deleteButtonKey: deleteButtonKey,
+            deletable: true,
+          ),
+        );
 
-    final RenderBox box = getMaterialBox(tester);
+        final RenderBox box = getMaterialBox(tester);
 
-    // Taps at a location close to the center of the label.
-    final Offset centerOfLabel = tester.getCenter(find.byKey(labelKey));
-    final Offset tapLocationOfLabel = centerOfLabel + const Offset(-10, -10);
-    final TestGesture gesture = await tester.startGesture(tapLocationOfLabel);
-    await tester.pump();
+        // Taps at a location close to the center of the label.
+        final Offset centerOfLabel = tester.getCenter(find.byKey(labelKey));
+        final Offset tapLocationOfLabel = centerOfLabel + const Offset(-10, -10);
+        final TestGesture gesture = await tester.startGesture(tapLocationOfLabel);
+        await tester.pump();
 
-    // Waits for 100 ms.
-    await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
 
-    // There should be exactly one ink-creating widget.
-    expect(find.byType(InkWell), findsOneWidget);
-    expect(find.byType(InkResponse), findsNothing);
+        expect(find.byType(InkWell), findsOneWidget);
+        expect(find.byType(InkResponse), findsNothing);
 
-    // There should be one unique, centered ink ripple.
-    expect(box, ripplePattern(const Offset(163.0, 6.0), 20.9));
-    expect(box, uniqueRipplePattern(const Offset(163.0, 6.0), 20.9));
+        expect(box, paints..ripple(center: const Offset(163, 6), radius: 21)); // Splash is centered and growing
+        expect(box, paints..ripple(center: const Offset(163, 6), radius: 21, unique: true));
 
-    // There should be no tooltip.
-    expect(findTooltipContainer('Delete'), findsNothing);
+        expect(findTooltipContainer('Delete'), findsNothing);
 
-    // Waits for 100 ms again.
-    await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
 
-    // The ripple should grow, with the same center.
-    expect(box, ripplePattern(const Offset(163.0, 6.0), 41.8));
-    expect(box, uniqueRipplePattern(const Offset(163.0, 6.0), 41.8));
+        expect(box, paints..ripple(center: const Offset(163, 6), radius: 42));
+        expect(box, paints..ripple(center: const Offset(163, 6), radius: 42, unique: true));
 
-    // There should be no tooltip.
-    expect(findTooltipContainer('Delete'), findsNothing);
+        expect(findTooltipContainer('Delete'), findsNothing);
 
-    // Waits for a very long time.
-    await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-    // There should still be no tooltip.
-    expect(findTooltipContainer('Delete'), findsNothing);
+        expect(findTooltipContainer('Delete'), findsNothing);
 
-    await gesture.up();
-  });
+        await gesture.up();
+      });
 
-  testWidgets('Delete button creates non-centered, unique ripple when tapped', (WidgetTester tester) async {
-    // Creates a chip with a delete button.
-    final UniqueKey labelKey = UniqueKey();
-    final UniqueKey deleteButtonKey = UniqueKey();
+      testWidgets('Delete button creates non-centered, unique splash when tapped', (WidgetTester tester) async {
+        final UniqueKey labelKey = UniqueKey();
+        final UniqueKey deleteButtonKey = UniqueKey();
 
-    await tester.pumpWidget(
-      _chipWithOptionalDeleteButton(
-        labelKey: labelKey,
-        deleteButtonKey: deleteButtonKey,
-        deletable: true,
-      ),
-    );
+        await tester.pumpWidget(
+          _chipWithOptionalDeleteButton(
+            splashFactory: InkSplash.splashFactory,
+            labelKey: labelKey,
+            deleteButtonKey: deleteButtonKey,
+            deletable: true,
+          ),
+        );
 
-    final RenderBox box = getMaterialBox(tester);
+        final RenderBox box = getMaterialBox(tester);
 
-    // Taps at a location close to the center of the delete icon.
-    final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
-    final Offset tapLocationOfDeleteButton = centerOfDeleteButton + const Offset(-10, -10);
-    final TestGesture gesture = await tester.startGesture(tapLocationOfDeleteButton);
-    await tester.pump();
+        // Taps at a location close to the center of the delete icon.
+        final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
+        final Offset tapLocationOfDeleteButton = centerOfDeleteButton + const Offset(-10, -10);
+        final TestGesture gesture = await tester.startGesture(tapLocationOfDeleteButton);
+        await tester.pump();
 
-    // Waits for 200 ms.
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
 
-    // There should be exactly one ink-creating widget.
-    expect(find.byType(InkWell), findsOneWidget);
-    expect(find.byType(InkResponse), findsNothing);
+        expect(find.byType(InkWell), findsOneWidget);
+        expect(find.byType(InkResponse), findsNothing);
 
-    // There should be one unique ink ripple.
-    expect(box, ripplePattern(const Offset(3.0, 3.0), 3.5));
-    expect(box, uniqueRipplePattern(const Offset(3.0, 3.0), 3.5));
+        expect(box, paints..ripple(center: const Offset(3, 3), radius: 3.5));
+        expect(box, paints..ripple(center: const Offset(3, 3), radius: 3.5, unique: true));
 
-    // There should be no tooltip.
-    expect(findTooltipContainer('Delete'), findsNothing);
+        expect(findTooltipContainer('Delete'), findsNothing);
 
-    // Waits for 200 ms again.
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
 
-    // The ripple should grow, but the center should move,
-    // Towards the center of the delete icon.
-    expect(box, ripplePattern(const Offset(5.0, 5.0), 10.5));
-    expect(box, uniqueRipplePattern(const Offset(5.0, 5.0), 10.5));
+        expect(box, paints..ripple(center: const Offset(5, 5), radius: 10.5)); // Moves toward center of delete icon
+        expect(box, paints..ripple(center: const Offset(5, 5), radius: 10.5, unique: true));
 
-    // There should be no tooltip.
-    expect(findTooltipContainer('Delete'), findsNothing);
+        expect(findTooltipContainer('Delete'), findsNothing);
 
-    // Waits for a very long time.
-    // This is pressing and holding the delete button.
-    await tester.pumpAndSettle();
+        await tester.pumpAndSettle(); // Pressing and holding the delete button
 
-    // There should be a tooltip.
-    expect(findTooltipContainer('Delete'), findsOneWidget);
+        expect(findTooltipContainer('Delete'), findsOneWidget);
 
-    await gesture.up();
+        await gesture.up();
+      });
+
+      testWidgets('Chip without delete button creates correct ripple', (WidgetTester tester) async {
+        final UniqueKey labelKey = UniqueKey();
+
+        await tester.pumpWidget(
+          _chipWithOptionalDeleteButton(
+            splashFactory: InkSplash.splashFactory,
+            labelKey: labelKey,
+            deletable: false,
+          ),
+        );
+
+        final RenderBox box = getMaterialBox(tester);
+
+        // Taps at a location close to the bottom-right corner of the chip.
+        final Offset bottomRightOfInkWell = tester.getBottomRight(find.byType(InkWell));
+        final Offset tapLocation = bottomRightOfInkWell + const Offset(-10, -10);
+        final TestGesture gesture = await tester.startGesture(tapLocation);
+        await tester.pump();
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.byType(InkWell), findsOneWidget);
+        expect(find.byType(InkResponse), findsNothing);
+
+        expect(box, paints..ripple(center: const Offset(378, 22), radius: 38));
+        expect(box, paints..ripple(center: const Offset(378, 22), radius: 38, unique: true));
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(box, paints..ripple(center: const Offset(378, 22), radius: 76));
+        expect(box, paints..ripple(center: const Offset(378, 22), radius: 76, unique: true));
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await tester.pumpAndSettle();
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await gesture.up();
+      });
+
+      testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
+        bool selected = false;
+        final UniqueKey labelKey = UniqueKey();
+        Future<void> pushChip({Widget? avatar, bool selectable = false}) async {
+          return tester.pumpWidget(
+            _wrapForChip(
+              splashFactory: InkSplash.splashFactory,
+              child: Wrap(
+                children: <Widget>[
+                  StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      avatar: avatar,
+                      onSelected: selectable != null
+                          ? (bool value) {
+                              setState(() {
+                                selected = value;
+                              });
+                            }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: true,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // With avatar, but not selectable.
+        final UniqueKey avatarKey = UniqueKey();
+        await pushChip(
+          avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+        );
+        expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+
+        // Turn on selection.
+        await pushChip(
+          avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+          selectable: true,
+        );
+        await tester.pumpAndSettle();
+
+        // Simulate a tap on the label to select the chip.
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(true));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(1.0));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pumpAndSettle();
+        // Simulate another tap on the label to deselect the chip.
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(false));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.13, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(0.0));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+      });
+
+      testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
+        bool selected = false;
+        final UniqueKey labelKey = UniqueKey();
+        Future<void> pushChip({bool selectable = false}) async {
+          return tester.pumpWidget(
+            _wrapForChip(
+              splashFactory: InkSplash.splashFactory,
+              child: Wrap(
+                children: <Widget>[
+                  StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      onSelected: selectable != null
+                          ? (bool value) {
+                              setState(() {
+                                selected = value;
+                              });
+                            }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: true,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Without avatar, but not selectable.
+        await pushChip();
+        expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+
+        // Turn on selection.
+        await pushChip(selectable: true);
+        await tester.pumpAndSettle();
+
+        // Simulate a tap on the label to select the chip.
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(true));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.459, epsilon: 0.01));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.92, epsilon: 0.01));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(1.0));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pumpAndSettle();
+        // Simulate another tap on the label to deselect the chip.
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(false));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.96, epsilon: 0.01));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.13, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.75, epsilon: 0.01));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(0.0));
+        expect(getAvatarDrawerProgress(tester), equals(0.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+      });
+
+      testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
+        bool selected = false;
+        final UniqueKey labelKey = UniqueKey();
+        Future<void> pushChip({Widget? avatar, bool selectable = false}) async {
+          return tester.pumpWidget(
+            _wrapForChip(
+              splashFactory: InkSplash.splashFactory,
+              child: Wrap(
+                children: <Widget>[
+                  StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      avatar: avatar,
+                      onSelected: selectable != null
+                          ? (bool value) {
+                              setState(() {
+                                selected = value;
+                              });
+                            }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: false,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final UniqueKey avatarKey = UniqueKey();
+        await pushChip(
+          avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+          selectable: true,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(true));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(1.0));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pumpAndSettle();
+      });
+    });
+
+    group('with InkRipple splash factory', () {
+      testWidgets('Chip creates centered, unique ripple when label is tapped', (WidgetTester tester) async {
+        final UniqueKey labelKey = UniqueKey();
+        final UniqueKey deleteButtonKey = UniqueKey();
+
+        await tester.pumpWidget(
+          _chipWithOptionalDeleteButton(
+            splashFactory: InkRipple.splashFactory,
+            labelKey: labelKey,
+            deleteButtonKey: deleteButtonKey,
+            deletable: true,
+          ),
+        );
+
+        final RenderBox box = getMaterialBox(tester);
+
+        // Taps at a location close to the center of the label.
+        final Offset centerOfLabel = tester.getCenter(find.byKey(labelKey));
+        final Offset tapLocationOfLabel = centerOfLabel + const Offset(-10, -10);
+        final TestGesture gesture = await tester.startGesture(tapLocationOfLabel);
+        await tester.pump();
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.byType(InkWell), findsOneWidget);
+        expect(find.byType(InkResponse), findsNothing);
+
+        expect(box, paints..ripple(center: const Offset(165, 7), radius: 69));
+        expect(box, paints..ripple(center: const Offset(165, 7), radius: 69, unique: true));
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(box, paints..ripple(center: const Offset(170, 9), radius: 96));
+        expect(box, paints..ripple(center: const Offset(170, 9), radius: 96, unique: true));
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await tester.pumpAndSettle();
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await gesture.up();
+      });
+
+      testWidgets('Delete button creates non-centered, unique ripple when tapped', (WidgetTester tester) async {
+        final UniqueKey labelKey = UniqueKey();
+        final UniqueKey deleteButtonKey = UniqueKey();
+
+        await tester.pumpWidget(
+          _chipWithOptionalDeleteButton(
+            splashFactory: InkRipple.splashFactory,
+            labelKey: labelKey,
+            deleteButtonKey: deleteButtonKey,
+            deletable: true,
+          ),
+        );
+
+        final RenderBox box = getMaterialBox(tester);
+
+        // Taps at a location close to the center of the delete icon.
+        final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
+        final Offset tapLocationOfDeleteButton = centerOfDeleteButton + const Offset(-10, -10);
+        final TestGesture gesture = await tester.startGesture(tapLocationOfDeleteButton);
+        await tester.pump();
+
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.byType(InkWell), findsOneWidget);
+        expect(find.byType(InkResponse), findsNothing);
+
+        expect(box, paints..ripple(center: const Offset(3, 3), radius: 6.7));
+        expect(box, paints..ripple(center: const Offset(3, 3), radius: 6.7, unique: true));
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(box, paints..ripple(center: const Offset(7.2, 7.2), radius: 13.7)); // Moves toward center of delete icon
+        expect(box, paints..ripple(center: const Offset(7.2, 7.2), radius: 13.7, unique: true));
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await tester.pumpAndSettle(); // Pressing and holding the delete button.
+
+        expect(findTooltipContainer('Delete'), findsOneWidget);
+
+        await gesture.up();
+      });
+
+      testWidgets('Chip without delete button creates correct ripple', (WidgetTester tester) async {
+        final UniqueKey labelKey = UniqueKey();
+
+        await tester.pumpWidget(
+          _chipWithOptionalDeleteButton(
+            splashFactory: InkRipple.splashFactory,
+            labelKey: labelKey,
+            deletable: false,
+          ),
+        );
+
+        final RenderBox box = getMaterialBox(tester);
+
+        // Taps at a location close to the bottom-right corner of the chip.
+        final Offset bottomRightOfInkWell = tester.getBottomRight(find.byType(InkWell));
+        final Offset tapLocation = bottomRightOfInkWell + const Offset(-10, -10);
+        final TestGesture gesture = await tester.startGesture(tapLocation);
+        await tester.pump();
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.byType(InkWell), findsOneWidget);
+        expect(find.byType(InkResponse), findsNothing);
+
+        expect(box, paints..ripple(center: const Offset(360.4, 21.4), radius: 71.8));
+        expect(box, paints..ripple(center: const Offset(360.4, 21.4), radius: 71.8, unique: true));
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(box, paints..ripple(center: const Offset(323.4, 20.2), radius: 100.3));
+        expect(box, paints..ripple(center: const Offset(323.4, 20.2), radius: 100.3, unique: true));
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await tester.pumpAndSettle();
+
+        expect(findTooltipContainer('Delete'), findsNothing);
+
+        await gesture.up();
+      });
+
+      testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
+        bool selected = false;
+        final UniqueKey labelKey = UniqueKey();
+        Future<void> pushChip({Widget? avatar, bool selectable = false}) async {
+          return tester.pumpWidget(
+            _wrapForChip(
+              splashFactory: InkRipple.splashFactory,
+              child: Wrap(
+                children: <Widget>[
+                  StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      avatar: avatar,
+                      onSelected: selectable != null
+                          ? (bool value) {
+                              setState(() {
+                                selected = value;
+                              });
+                            }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: true,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // With avatar, but not selectable.
+        final UniqueKey avatarKey = UniqueKey();
+        await pushChip(
+          avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+        );
+        expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+
+        // Turn on selection.
+        await pushChip(
+          avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+          selectable: true,
+        );
+        await tester.pumpAndSettle();
+
+        // Simulate a tap on the label to select the chip.
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(true));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(3));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(1.0));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pumpAndSettle();
+        // Simulate another tap on the label to deselect the chip.
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(false));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(3));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.13, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(0.0));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+      });
+
+      testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
+        bool selected = false;
+        final UniqueKey labelKey = UniqueKey();
+        Future<void> pushChip({bool selectable = false}) async {
+          return tester.pumpWidget(
+            _wrapForChip(
+              splashFactory: InkRipple.splashFactory,
+              child: Wrap(
+                children: <Widget>[
+                  StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      onSelected: selectable != null
+                          ? (bool value) {
+                              setState(() {
+                                selected = value;
+                              });
+                            }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: true,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Without avatar, but not selectable.
+        await pushChip();
+        expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+
+        // Turn on selection.
+        await pushChip(selectable: true);
+        await tester.pumpAndSettle();
+
+        // Simulate a tap on the label to select the chip.
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(true));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(3));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.459, epsilon: 0.01));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.92, epsilon: 0.01));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(1.0));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pumpAndSettle();
+        // Simulate another tap on the label to deselect the chip.
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(false));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(3));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.96, epsilon: 0.01));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.13, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.75, epsilon: 0.01));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(0.0));
+        expect(getAvatarDrawerProgress(tester), equals(0.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+      });
+
+      testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
+        bool selected = false;
+        final UniqueKey labelKey = UniqueKey();
+        Future<void> pushChip({Widget? avatar, bool selectable = false}) async {
+          return tester.pumpWidget(
+            _wrapForChip(
+              splashFactory: InkRipple.splashFactory,
+              child: Wrap(
+                children: <Widget>[
+                  StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      avatar: avatar,
+                      onSelected: selectable != null
+                          ? (bool value) {
+                              setState(() {
+                                selected = value;
+                              });
+                            }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: false,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final UniqueKey avatarKey = UniqueKey();
+        await pushChip(
+          avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
+          selectable: true,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(labelKey));
+        expect(selected, equals(true));
+        expect(SchedulerBinding.instance!.transientCallbackCount, equals(3));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(getSelectProgress(tester), equals(1.0));
+        expect(getAvatarDrawerProgress(tester), equals(1.0));
+        expect(getDeleteDrawerProgress(tester), equals(0.0));
+        await tester.pumpAndSettle();
+      });
+    });
   });
 
   testWidgets('RTL delete button responds to tap on the left of the chip', (WidgetTester tester) async {
@@ -1161,277 +1735,6 @@ void main() {
     expect(findTooltipContainer('Delete'), findsOneWidget);
 
     await gesture.up();
-  });
-
-  testWidgets('Chip without delete button creates correct ripple', (WidgetTester tester) async {
-    // Creates a chip with a delete button.
-    final UniqueKey labelKey = UniqueKey();
-
-    await tester.pumpWidget(
-      _chipWithOptionalDeleteButton(
-        labelKey: labelKey,
-        deletable: false,
-      ),
-    );
-
-    final RenderBox box = getMaterialBox(tester);
-
-    // Taps at a location close to the bottom-right corner of the chip.
-    final Offset bottomRightOfInkWell = tester.getBottomRight(find.byType(InkWell));
-    final Offset tapLocation = bottomRightOfInkWell + const Offset(-10, -10);
-    final TestGesture gesture = await tester.startGesture(tapLocation);
-    await tester.pump();
-
-    // Waits for 100 ms.
-    await tester.pump(const Duration(milliseconds: 100));
-
-    // There should be exactly one ink-creating widget.
-    expect(find.byType(InkWell), findsOneWidget);
-    expect(find.byType(InkResponse), findsNothing);
-
-    // There should be one unique, centered ink ripple.
-    expect(box, ripplePattern(const Offset(378.0, 22.0), 37.9));
-    expect(box, uniqueRipplePattern(const Offset(378.0, 22.0), 37.9));
-
-    // There should be no tooltip.
-    expect(findTooltipContainer('Delete'), findsNothing);
-
-    // Waits for 100 ms again.
-    await tester.pump(const Duration(milliseconds: 100));
-
-    // The ripple should grow, with the same center.
-    // This indicates that the tap is not on a delete icon.
-    expect(box, ripplePattern(const Offset(378.0, 22.0), 75.8));
-    expect(box, uniqueRipplePattern(const Offset(378.0, 22.0), 75.8));
-
-    // There should be no tooltip.
-    expect(findTooltipContainer('Delete'), findsNothing);
-
-    // Waits for a very long time.
-    await tester.pumpAndSettle();
-
-    // There should still be no tooltip.
-    // This indicates that the tap is not on a delete icon.
-    expect(findTooltipContainer('Delete'), findsNothing);
-
-    await gesture.up();
-  });
-
-  testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
-    bool selected = false;
-    final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
-      return tester.pumpWidget(
-        _wrapForChip(
-          child: Wrap(
-            children: <Widget>[
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return RawChip(
-                  avatar: avatar,
-                  onSelected: selectable != null
-                    ? (bool value) {
-                        setState(() {
-                          selected = value;
-                        });
-                      }
-                    : null,
-                  selected: selected,
-                  label: Text('Chip', key: labelKey),
-                  shape: const StadiumBorder(),
-                  showCheckmark: true,
-                  tapEnabled: true,
-                  isEnabled: true,
-                );
-              }),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // With avatar, but not selectable.
-    final UniqueKey avatarKey = UniqueKey();
-    await pushChip(
-      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
-    );
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
-
-    // Turn on selection.
-    await pushChip(
-      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
-      selectable: true,
-    );
-    await tester.pumpAndSettle();
-
-    // Simulate a tap on the label to select the chip.
-    await tester.tap(find.byKey(labelKey));
-    expect(selected, equals(true));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(getSelectProgress(tester), equals(1.0));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pumpAndSettle();
-    // Simulate another tap on the label to deselect the chip.
-    await tester.tap(find.byKey(labelKey));
-    expect(selected, equals(false));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 20));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 20));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.13, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(getSelectProgress(tester), equals(0.0));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-  });
-
-  testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
-    bool selected = false;
-    final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({ bool selectable = false }) async {
-      return tester.pumpWidget(
-        _wrapForChip(
-          child: Wrap(
-            children: <Widget>[
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return RawChip(
-                  onSelected: selectable != null
-                    ? (bool value) {
-                        setState(() {
-                          selected = value;
-                        });
-                      }
-                    : null,
-                  selected: selected,
-                  label: Text('Chip', key: labelKey),
-                  shape: const StadiumBorder(),
-                  showCheckmark: true,
-                  tapEnabled: true,
-                  isEnabled: true,
-                );
-              }),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Without avatar, but not selectable.
-    await pushChip();
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
-
-    // Turn on selection.
-    await pushChip(selectable: true);
-    await tester.pumpAndSettle();
-
-    // Simulate a tap on the label to select the chip.
-    await tester.tap(find.byKey(labelKey));
-    expect(selected, equals(true));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.459, epsilon: 0.01));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.92, epsilon: 0.01));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(getSelectProgress(tester), equals(1.0));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pumpAndSettle();
-    // Simulate another tap on the label to deselect the chip.
-    await tester.tap(find.byKey(labelKey));
-    expect(selected, equals(false));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 20));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.96, epsilon: 0.01));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 20));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.13, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), moreOrLessEquals(0.75, epsilon: 0.01));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(getSelectProgress(tester), equals(0.0));
-    expect(getAvatarDrawerProgress(tester), equals(0.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-  });
-
-  testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
-    bool selected = false;
-    final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
-      return tester.pumpWidget(
-        _wrapForChip(
-          child: Wrap(
-            children: <Widget>[
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return RawChip(
-                  avatar: avatar,
-                  onSelected: selectable != null
-                    ? (bool value) {
-                        setState(() {
-                          selected = value;
-                        });
-                      }
-                    : null,
-                  selected: selected,
-                  label: Text('Chip', key: labelKey),
-                  shape: const StadiumBorder(),
-                  showCheckmark: false,
-                  tapEnabled: true,
-                  isEnabled: true,
-                );
-              }),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final UniqueKey avatarKey = UniqueKey();
-    await pushChip(
-      avatar: SizedBox(width: 40.0, height: 40.0, key: avatarKey),
-      selectable: true,
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(labelKey));
-    expect(selected, equals(true));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(2));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), moreOrLessEquals(0.54, epsilon: 0.01));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(getSelectProgress(tester), equals(1.0));
-    expect(getAvatarDrawerProgress(tester), equals(1.0));
-    expect(getDeleteDrawerProgress(tester), equals(0.0));
-    await tester.pumpAndSettle();
   });
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
