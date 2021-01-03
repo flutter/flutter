@@ -1582,6 +1582,7 @@ void main() {
     Widget runTest() {
       int _currentIndex = 0;
       return MaterialApp(
+        theme: ThemeData(splashFactory: InkSplash.splashFactory),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
