@@ -449,8 +449,8 @@ class _LerpShapes implements MaterialStateProperty<OutlinedBorder?> {
 ///
 /// `start` enum value places the icon at the `start` on the horizontal axis
 /// relative to the label.
-/// `end` enum value places the icon at the `end` on the horizontal axis relative
-/// to the label.
+/// `end` enum value places the icon at the `end` on the horizontal axis 
+/// relative to the label.
 enum ButtonIconAlignment {
   start,
   end,
