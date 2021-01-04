@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 
 // Checks sending window metrics events works.
@@ -76,12 +77,18 @@ TEST(FlEngineTest, PlatformMessage) {
   FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
   bool called = false;
+  FlutterEngineSendPlatformMessageFnPtr old_handler =
+      embedder_api->SendPlatformMessage;
   embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
       SendPlatformMessage,
-      ([&called](auto engine, const FlutterPlatformMessage* message) {
+      ([&called, old_handler](auto engine,
+                              const FlutterPlatformMessage* message) {
+        if (strcmp(message->channel, "test") != 0) {
+          return old_handler(engine, message);
+        }
+
         called = true;
 
-        EXPECT_STREQ(message->channel, "test");
         EXPECT_EQ(message->message_size, static_cast<size_t>(4));
         EXPECT_EQ(message->message[0], 't');
         EXPECT_EQ(message->message[1], 'e');
@@ -133,6 +140,55 @@ TEST(FlEngineTest, PlatformMessageResponse) {
   EXPECT_TRUE(fl_engine_send_platform_message_response(
       engine, reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(42),
       response, &error));
+  EXPECT_EQ(error, nullptr);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks settings plugin sends settings on startup.
+TEST(FlEngineTest, SettingsPlugin) {
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&called](auto engine, const FlutterPlatformMessage* message) {
+        called = true;
+
+        EXPECT_STREQ(message->channel, "flutter/settings");
+
+        g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
+        g_autoptr(GBytes) data =
+            g_bytes_new(message->message, message->message_size);
+        g_autoptr(GError) error = nullptr;
+        g_autoptr(FlValue) settings = fl_message_codec_decode_message(
+            FL_MESSAGE_CODEC(codec), data, &error);
+        EXPECT_NE(settings, nullptr);
+        EXPECT_EQ(error, nullptr);
+        g_printerr("%s\n", fl_value_to_string(settings));
+
+        g_autoptr(FlValue) text_scale_factor =
+            fl_value_lookup_string(settings, "textScaleFactor");
+        EXPECT_NE(text_scale_factor, nullptr);
+        EXPECT_EQ(fl_value_get_type(text_scale_factor), FL_VALUE_TYPE_FLOAT);
+
+        g_autoptr(FlValue) always_use_24hr_format =
+            fl_value_lookup_string(settings, "alwaysUse24HourFormat");
+        EXPECT_NE(always_use_24hr_format, nullptr);
+        EXPECT_EQ(fl_value_get_type(always_use_24hr_format),
+                  FL_VALUE_TYPE_BOOL);
+
+        g_autoptr(FlValue) platform_brightness =
+            fl_value_lookup_string(settings, "platformBrightness");
+        EXPECT_NE(platform_brightness, nullptr);
+        EXPECT_EQ(fl_value_get_type(platform_brightness), FL_VALUE_TYPE_STRING);
+
+        return kSuccess;
+      }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
   EXPECT_TRUE(called);
