@@ -331,10 +331,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
     _controller.addStatusListener((AnimationStatus status) {
+      // Only update the drawer animation value when the drawer is fully open
+      // or closed.
       if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
         _restorableAnimationValue.value = _controller.value;
       }
-     });
+    });
   }
 
   @override
