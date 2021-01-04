@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_renderer_headless.h"
+#include "flutter/shell/platform/linux/fl_settings_plugin.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 static constexpr int kMicrosecondsPerNanosecond = 1000;
@@ -30,6 +31,7 @@ struct _FlEngine {
   FlDartProject* project;
   FlRenderer* renderer;
   FlBinaryMessenger* binary_messenger;
+  FlSettingsPlugin* settings_plugin;
   FlutterEngineAOTData aot_data;
   FLUTTER_API_SYMBOL(FlutterEngine) engine;
   FlutterEngineProcTable embedder_api;
@@ -315,6 +317,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->project);
   g_clear_object(&self->renderer);
   g_clear_object(&self->binary_messenger);
+  g_clear_object(&self->settings_plugin);
 
   if (self->platform_message_handler_destroy_notify) {
     self->platform_message_handler_destroy_notify(
@@ -433,6 +436,9 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   }
 
   setup_locales(self);
+
+  self->settings_plugin = fl_settings_plugin_new(self->binary_messenger);
+  fl_settings_plugin_start(self->settings_plugin);
 
   return TRUE;
 }
