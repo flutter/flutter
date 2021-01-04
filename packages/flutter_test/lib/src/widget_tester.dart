@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -901,6 +903,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// See [TestWidgetsFlutterBinding.takeException] for details.
   dynamic takeException() {
     return binding.takeException();
+  }
+
+  /// Intercepts errors reported by the framework until [callback] finishes.
+  ///
+  /// See [TestWidgetsFlutterBinding.wrapExceptions] for details.
+  Future<T> wrapExceptions<T>(FutureOr<T> Function() callback, {
+    required FlutterExceptionHandler onError,
+  }) {
+    return binding.wrapExceptions(callback, onError: onError);
   }
 
   /// Acts as if the application went idle.
