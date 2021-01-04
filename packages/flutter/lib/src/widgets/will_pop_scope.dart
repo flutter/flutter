@@ -29,7 +29,7 @@ import 'routes.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 /// ```dart
 /// bool shouldPop = true;
 /// @override

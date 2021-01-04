@@ -303,10 +303,10 @@ enum UnfocusDisposition {
 /// [DirectionalFocusTraversalPolicyMixin], but custom policies can be built
 /// based upon these policies. See [FocusTraversalPolicy] for more information.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety} This example shows how
-/// a FocusNode should be managed if not using the [Focus] or [FocusScope]
-/// widgets. See the [Focus] widget for a similar example using [Focus] and
-/// [FocusScope] widgets.
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This example shows how a FocusNode should be managed if not using the
+/// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
+/// example using [Focus] and [FocusScope] widgets.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';
@@ -314,16 +314,16 @@ enum UnfocusDisposition {
 ///
 /// ```dart preamble
 /// class ColorfulButton extends StatefulWidget {
-///   ColorfulButton({Key key}) : super(key: key);
+///   ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _ColorfulButtonState createState() => _ColorfulButtonState();
 /// }
 ///
 /// class _ColorfulButtonState extends State<ColorfulButton> {
-///   FocusNode _node;
+///   late FocusNode _node;
 ///   bool _focused = false;
-///   FocusAttachment _nodeAttachment;
+///   late FocusAttachment _nodeAttachment;
 ///   Color _color = Colors.white;
 ///
 ///   @override
@@ -406,7 +406,7 @@ enum UnfocusDisposition {
 /// Widget build(BuildContext context) {
 ///   final TextTheme textTheme = Theme.of(context).textTheme;
 ///   return DefaultTextStyle(
-///     style: textTheme.headline4,
+///     style: textTheme.headline4!,
 ///     child: ColorfulButton(),
 ///   );
 /// }
@@ -786,7 +786,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// previous node in the enclosing [FocusTraversalGroup], call [nextFocus] or
   /// [previousFocus] instead of calling `unfocus`.
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   /// This example shows the difference between the different [UnfocusDisposition]
   /// values for [unfocus].
   ///
@@ -835,9 +835,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                   children: <Widget>[
   ///                     Radio<UnfocusDisposition>(
   ///                       groupValue: disposition,
-  ///                       onChanged: (UnfocusDisposition value) {
+  ///                       onChanged: (UnfocusDisposition? value) {
   ///                         setState(() {
-  ///                           disposition = value;
+  ///                           if (value != null) {
+  ///                             disposition = value;
+  ///                           }
   ///                         });
   ///                       },
   ///                       value: UnfocusDisposition.values[index],
@@ -850,7 +852,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                 child: const Text('UNFOCUS'),
   ///                 onPressed: () {
   ///                   setState(() {
-  ///                     primaryFocus.unfocus(disposition: disposition);
+  ///                     primaryFocus!.unfocus(disposition: disposition);
   ///                   });
   ///                 },
   ///               ),
