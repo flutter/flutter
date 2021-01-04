@@ -321,7 +321,7 @@ class DrawerController extends StatefulWidget {
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
 class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin, RestorationMixin {
-  final _RestorableAnimationValue _restorableAnimationValue = _RestorableAnimationValue(0.0);
+  final RestorableDouble _restorableAnimationValue = RestorableDouble(0.0);
 
   @override
   void initState() {
@@ -330,7 +330,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
-    _restorableAnimationValue.registerAnimationController(_controller);
+    _controller.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
+        _restorableAnimationValue.value = _controller.value;
+      }
+     });
   }
 
   @override
@@ -339,6 +343,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_restorableAnimationValue, 'animation_value');
+    _controller.value = _restorableAnimationValue.value;
   }
 
   @override
@@ -631,49 +636,5 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       style: ListTileStyle.drawer,
       child: _buildDrawer(context),
     );
-  }
-}
-
-class _RestorableAnimationValue extends RestorableDouble {
-  _RestorableAnimationValue(double defaultValue) : super(defaultValue);
-
-  void _updateAnimationValue(AnimationStatus status) {
-    // Only modify the value after the property has been registered with a
-    // RestorationMixin.
-    if (isRegistered && (status == AnimationStatus.completed || status == AnimationStatus.dismissed)) {
-      value = _animationController.value;
-    }
-  }
-
-  late AnimationController _animationController;
-  /// Sets the animation controller for the [RestorableDouble].
-  ///
-  /// This adds a listener to the [AnimationController] to update the
-  /// restorable animation value whenever an animation completes or
-  /// is dismissed.
-  void registerAnimationController(AnimationController controller) {
-    _animationController = controller;
-    _animationController.addStatusListener(_updateAnimationValue);
-  }
-  AnimationController get animationController => _animationController;
-
-  @override
-  void dispose() {
-    _animationController.removeStatusListener(_updateAnimationValue);
-    super.dispose();
-  }
-
-  @override
-  double fromPrimitives(Object? data) {
-    assert(data != null);
-    // When retrieving serialized data, set the animation controller value to
-    // the saved value.
-    final double? savedAnimationValue = data as double?;
-    if (_animationController != null &&
-        savedAnimationValue != null &&
-        _animationController.value != savedAnimationValue) {
-      _animationController.value = savedAnimationValue;
-    }
-    return super.fromPrimitives(data);
   }
 }
