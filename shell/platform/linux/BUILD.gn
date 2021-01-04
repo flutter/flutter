@@ -110,6 +110,7 @@ source_set("flutter_linux_sources") {
     "fl_renderer_headless.cc",
     "fl_renderer_wayland.cc",
     "fl_renderer_x11.cc",
+    "fl_settings_plugin.cc",
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
     "fl_string_codec.cc",

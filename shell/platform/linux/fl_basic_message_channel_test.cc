@@ -24,11 +24,17 @@ TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
   FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
   bool called = false;
+  FlutterEngineSendPlatformMessageFnPtr old_handler =
+      embedder_api->SendPlatformMessage;
   embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
       SendPlatformMessage,
-      ([&called](auto engine, const FlutterPlatformMessage* message) {
+      ([&called, old_handler](auto engine,
+                              const FlutterPlatformMessage* message) {
+        if (strcmp(message->channel, "test") != 0) {
+          return old_handler(engine, message);
+        }
+
         called = true;
-        EXPECT_STREQ(message->channel, "test");
         EXPECT_EQ(message->response_handle, nullptr);
 
         g_autoptr(GBytes) message_bytes =
