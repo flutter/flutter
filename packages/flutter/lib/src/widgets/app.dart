@@ -880,7 +880,7 @@ class WidgetsApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -934,7 +934,7 @@ class WidgetsApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -1025,6 +1025,8 @@ class WidgetsApp extends StatefulWidget {
   static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
     // Activation
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+    // On the web, enter activates buttons, but not other controls.
+    LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
 
     // Dismissal
     LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
@@ -1043,7 +1045,7 @@ class WidgetsApp extends StatefulWidget {
   };
 
   // Default shortcuts for the macOS platform.
-  static final Map<LogicalKeySet, Intent> _defaultMacOsShortcuts = <LogicalKeySet, Intent>{
+  static final Map<LogicalKeySet, Intent> _defaultAppleOsShortcuts = <LogicalKeySet, Intent>{
     // Activation
     LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
@@ -1083,13 +1085,10 @@ class WidgetsApp extends StatefulWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return _defaultShortcuts;
-      case TargetPlatform.macOS:
-        return _defaultMacOsShortcuts;
       case TargetPlatform.iOS:
-        // No keyboard support on iOS yet.
-        break;
+      case TargetPlatform.macOS:
+        return _defaultAppleOsShortcuts;
     }
-    return <LogicalKeySet, Intent>{};
   }
 
   /// The default value of [WidgetsApp.actions].

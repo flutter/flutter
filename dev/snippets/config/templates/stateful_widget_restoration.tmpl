@@ -1,5 +1,4 @@
 /// Flutter code sample for {{element}}
-// @dart = 2.9
 
 {{description}}
 
@@ -27,9 +26,9 @@ class MyApp extends StatelessWidget {
 
 /// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
-  MyStatefulWidget({Key key, this.restorationId}) : super(key: key);
+  MyStatefulWidget({Key? key, this.restorationId}) : super(key: key);
 
-  final String restorationId;
+  final String? restorationId;
 
   @override
   _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
@@ -41,7 +40,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> with RestorationMix
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override
-  String get restorationId => widget.restorationId;
+  String? get restorationId => widget.restorationId;
 
 {{code}}
 }

@@ -236,10 +236,10 @@ class FlutterDevice {
       bool existingDds = false;
       vm_service.VmService service;
       if (!disableDds) {
-        void handleError(Exception e) {
+        void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
           if (!completer.isCompleted) {
-            completer.completeError('failed to connect to $observatoryUri');
+            completer.completeError('failed to connect to $observatoryUri', st);
           }
         }
         // This first try block is meant to catch errors that occur during DDS startup
@@ -252,16 +252,16 @@ class FlutterDevice {
             ipv6,
             disableServiceAuthCodes,
           );
-        } on dds.DartDevelopmentServiceException catch (e) {
+        } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
               (e.errorCode != dds.DartDevelopmentServiceException.existingDdsInstanceError)) {
-            handleError(e);
+            handleError(e, st);
             return;
           } else {
             existingDds = true;
           }
-        } on Exception catch (e) {
-          handleError(e);
+        } on Exception catch (e, st) {
+          handleError(e, st);
           return;
         }
       }
@@ -1250,13 +1250,16 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<bool> launchDevTools() async {
+  Future<bool> launchDevTools({bool openInBrowser = false}) async {
     if (!supportsServiceProtocol) {
       return false;
     }
     assert(supportsServiceProtocol);
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    await _devtoolsLauncher.launch(flutterDevices.first.vmService.httpAddress);
+    unawaited(_devtoolsLauncher.launch(
+      flutterDevices.first.vmService.httpAddress,
+      openInBrowser: openInBrowser,
+    ));
     return true;
   }
 
@@ -1549,7 +1552,7 @@ class TerminalHandler {
       case 'U':
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
-        return residentRunner.launchDevTools();
+        return residentRunner.launchDevTools(openInBrowser: true);
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
@@ -1642,9 +1645,12 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
-  Future<void> launch(Uri observatoryAddress);
+  /// Launch a Dart DevTools process, optionally targeting a specific VM Service
+  /// URI if [vmServiceUri] is non-null.
+  Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false});
 
-  Future<DevToolsServerAddress> serve();
+  /// Serve Dart DevTools and return the host and port they are available on.
+  Future<DevToolsServerAddress> serve({bool openInBrowser = false});
 
   Future<void> close();
 

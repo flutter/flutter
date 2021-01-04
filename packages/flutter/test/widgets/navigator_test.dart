@@ -2489,6 +2489,62 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
+  testWidgets('hero controller throws has correct error message', (WidgetTester tester) async {
+    final HeroControllerSpy spy = HeroControllerSpy();
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Navigator(
+                initialRoute: 'navigator1',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+              Navigator(
+                initialRoute: 'navigator2',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final FlutterError error = exception as FlutterError;
+    expect(
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A HeroController can not be shared by multiple Navigators. The\n'
+        '   Navigators that share the same HeroController are:\n'
+        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   Please create a HeroControllerScope for each Navigator or use a\n'
+        '   HeroControllerScope.none to prevent subtree from receiving a\n'
+        '   HeroController.\n'
+        ''
+      ),
+    );
+  });
+
   group('Page api', (){
     Widget buildNavigator({
       required List<Page<dynamic>> pages,

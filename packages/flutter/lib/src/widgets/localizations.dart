@@ -14,8 +14,8 @@ import 'debug.dart';
 import 'framework.dart';
 
 // Examples can assume:
-// class Intl { static String message(String s, { String name, String locale }) => ''; }
-// Future<void> initializeMessages(String locale) => null;
+// class Intl { static String message(String s, { String? name, String? locale }) => ''; }
+// Future<void> initializeMessages(String locale) => Future.value();
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
 // waiting for.
@@ -323,7 +323,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///   }
 ///
 ///   static MyLocalizations of(BuildContext context) {
-///     return Localizations.of<MyLocalizations>(context, MyLocalizations);
+///     return Localizations.of<MyLocalizations>(context, MyLocalizations)!;
 ///   }
 ///
 ///   String title() => Intl.message('<title>', name: 'title', locale: locale.toString());

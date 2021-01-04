@@ -32,17 +32,18 @@ const String _extensionMethodName = 'driver';
 typedef DataHandler = Future<String> Function(String? message);
 
 class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
-  _DriverBinding(this._handler, this._silenceErrors, this.finders, this.commands);
+  _DriverBinding(this._handler, this._silenceErrors, this._enableTextEntryEmulation, this.finders, this.commands);
 
   final DataHandler? _handler;
   final bool _silenceErrors;
+  final bool _enableTextEntryEmulation;
   final List<FinderExtension>? finders;
   final List<CommandExtension>? commands;
 
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    final FlutterDriverExtension extension = FlutterDriverExtension(_handler, _silenceErrors, finders: finders ?? const <FinderExtension>[], commands: commands ?? const <CommandExtension>[]);
+    final FlutterDriverExtension extension = FlutterDriverExtension(_handler, _silenceErrors, _enableTextEntryEmulation, finders: finders ?? const <FinderExtension>[], commands: commands ?? const <CommandExtension>[]);
     registerServiceExtension(
       name: _extensionMethodName,
       callback: extension.call,
@@ -77,6 +78,12 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// for tests where exceptions are expected. Defaults to false. Any errors
 /// will still be returned in the `response` field of the result JSON along
 /// with an `isError` boolean.
+///
+/// The `enableTextEntryEmulation` parameter controls whether the application interacts
+/// with the system's text entry methods or a mocked out version used by Flutter Driver.
+/// If it is set to false, [FlutterDriver.enterText] will fail,
+/// but testing the application with real keyboard input is possible.
+/// This value may be updated during a test by calling [FlutterDriver.setTextEntryEmulation].
 ///
 /// The `finders` and `commands` parameters are optional and used to add custom
 /// finders or commands, as in the following example.
@@ -217,9 +224,9 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// }
 /// ```
 ///
-void enableFlutterDriverExtension({ DataHandler? handler, bool silenceErrors = false, List<FinderExtension>? finders, List<CommandExtension>? commands}) {
+void enableFlutterDriverExtension({ DataHandler? handler, bool silenceErrors = false, bool enableTextEntryEmulation = true, List<FinderExtension>? finders, List<CommandExtension>? commands}) {
   assert(WidgetsBinding.instance == null);
-  _DriverBinding(handler, silenceErrors, finders ?? <FinderExtension>[], commands ?? <CommandExtension>[]);
+  _DriverBinding(handler, silenceErrors, enableTextEntryEmulation, finders ?? <FinderExtension>[], commands ?? <CommandExtension>[]);
   assert(WidgetsBinding.instance is _DriverBinding);
 }
 
@@ -315,11 +322,14 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(
     this._requestDataHandler,
-    this._silenceErrors, {
+    this._silenceErrors,
+    this._enableTextEntryEmulation, {
     List<FinderExtension> finders = const <FinderExtension>[],
     List<CommandExtension> commands = const <CommandExtension>[],
   }) : assert(finders != null) {
-    registerTextInput();
+    if (_enableTextEntryEmulation) {
+      registerTextInput();
+    }
 
     for(final FinderExtension finder in finders) {
       _finderExtensions[finder.finderType] = finder;
@@ -335,6 +345,8 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
   final DataHandler? _requestDataHandler;
 
   final bool _silenceErrors;
+
+  final bool _enableTextEntryEmulation;
 
   void _log(String message) {
     driverLog('FlutterDriverExtension', message);

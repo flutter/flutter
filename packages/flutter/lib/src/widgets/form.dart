@@ -38,7 +38,7 @@ import 'will_pop_scope.dart';
 ///             hintText: 'Enter your email',
 ///           ),
 ///           validator: (value) {
-///             if (value.isEmpty) {
+///             if (value!.isEmpty) {
 ///               return 'Please enter some text';
 ///             }
 ///             return null;
@@ -50,7 +50,7 @@ import 'will_pop_scope.dart';
 ///             onPressed: () {
 ///               // Validate will return true if the form is valid, or false if
 ///               // the form is invalid.
-///               if (_formKey.currentState.validate()) {
+///               if (_formKey.currentState!.validate()) {
 ///                 // Process data.
 ///               }
 ///             },
