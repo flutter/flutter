@@ -15,6 +15,8 @@ import 'ticker_provider.dart';
 
 /// A widget that enables pan and zoom interactions with its child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=zrn7V3bMJvg}
+///
 /// The user can transform the child by dragging to pan or pinching to zoom.
 ///
 /// By default, InteractiveViewer may draw outside of its original area of the

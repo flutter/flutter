@@ -30,7 +30,7 @@ const double _kInnerRadius = 4.5;
 /// will respond to [onChanged] by calling [State.setState] to update the
 /// radio button's [groupValue].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// Here is an example of Radio widgets wrapped in ListTiles, which is similar
 /// to what you could get with the RadioListTile widget.
@@ -52,7 +52,7 @@ const double _kInnerRadius = 4.5;
 /// ```
 ///
 /// ```dart
-/// SingingCharacter _character = SingingCharacter.lafayette;
+/// SingingCharacter? _character = SingingCharacter.lafayette;
 ///
 /// Widget build(BuildContext context) {
 ///   return Column(
@@ -62,7 +62,7 @@ const double _kInnerRadius = 4.5;
 ///         leading: Radio(
 ///           value: SingingCharacter.lafayette,
 ///           groupValue: _character,
-///           onChanged: (SingingCharacter value) {
+///           onChanged: (SingingCharacter? value) {
 ///             setState(() { _character = value; });
 ///           },
 ///         ),
@@ -72,7 +72,7 @@ const double _kInnerRadius = 4.5;
 ///         leading: Radio(
 ///           value: SingingCharacter.jefferson,
 ///           groupValue: _character,
-///           onChanged: (SingingCharacter value) {
+///           onChanged: (SingingCharacter? value) {
 ///             setState(() { _character = value; });
 ///           },
 ///         ),
@@ -202,12 +202,12 @@ class Radio<T> extends StatefulWidget {
   ///
   /// The default is false.
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_scaffold}
   /// This example shows how to enable deselecting a radio button by setting the
   /// [toggleable] attribute.
   ///
   /// ```dart
-  /// int groupValue;
+  /// int? groupValue;
   /// static const List<String> selections = <String>[
   ///   'Hercules Mulligan',
   ///   'Eliza Hamilton',
@@ -231,7 +231,7 @@ class Radio<T> extends StatefulWidget {
   ///                 // TRY THIS: Try setting the toggleable value to false and
   ///                 // see how that changes the behavior of the widget.
   ///                 toggleable: true,
-  ///                 onChanged: (int value) {
+  ///                 onChanged: (int? value) {
   ///                   setState(() {
   ///                     groupValue = value;
   ///                   });
