@@ -1033,7 +1033,7 @@ class LocalizationsGenerator {
       .replaceAll('@(delegateClass)', delegateClass);
   }
 
-  void writeOutputFiles(Logger logger) {
+  void writeOutputFiles(Logger logger, { bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
     _generateCode();
 
@@ -1077,10 +1077,25 @@ class LocalizationsGenerator {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
         logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
       });
+      if (isFromYaml) {
+        logger.printStatus(
+          'To see a detailed report, use the untranslated-messages-file \n'
+          'option in the l10n.yaml file:\n'
+          'untranslated-messages-file: desiredFileName.txt\n'
+          '<other option>: <other selection> \n\n'
+        );
+      } else {
+        logger.printStatus(
+          'To see a detailed report, use the --untranslated-messages-file \n'
+          'option in the flutter gen-l10n tool:\n'
+          'flutter gen-l10n --untranslated-messages-file=desiredFileName.txt\n'
+          '<other options> \n\n'
+        );
+      }
+
       logger.printStatus(
-        'To see a detailed report, use the --untranslated-messages-file \n'
-        'option in the tool to generate a JSON format file containing \n'
-        'all messages that need to be translated.'
+        'This will generate a JSON format file containing all messages that \n'
+        'need to be translated.'
       );
     }
 
