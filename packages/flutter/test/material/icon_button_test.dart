@@ -283,8 +283,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
       expect(
-        tester.material<IconButton>(),
-        paints..ripple(color: directSplashColor)..ripple(color: directHighlightColor),
+        getMaterial<IconButton>(tester),
+        paintsRipple(color: directSplashColor)..circle(color: directHighlightColor),
       );
 
       const Color themeSplashColor1 = Color(0xFF000F00);
@@ -308,8 +308,8 @@ void main() {
       );
 
       expect(
-        tester.material<IconButton>(),
-        paints..ripple(color: themeSplashColor1)..ripple(color: themeHighlightColor1),
+        getMaterial<IconButton>(tester),
+        paintsRipple(color: themeSplashColor1)..circle(color: themeHighlightColor1),
       );
 
       const Color themeSplashColor2 = Color(0xFF002200);
@@ -326,7 +326,7 @@ void main() {
       );
 
       expect(
-        tester.material<IconButton>(),
+        getMaterial<IconButton>(tester),
         paints..circle(color: themeSplashColor2)..circle(color: themeHighlightColor2),
       );
 
@@ -358,7 +358,7 @@ void main() {
         await tester.pump(); // Start gesture.
         await tester.pump(const Duration(milliseconds: 1000)); // Wait for splash to be well under way.
 
-        expect(tester.material<IconButton>(), paints..ripple(radius: splashRadius));
+        expect(getMaterial<IconButton>(tester), paintsRipple(radius: splashRadius));
 
         await gesture.up();
       });
@@ -389,7 +389,7 @@ void main() {
         await tester.pump(); // Start gesture.
         await tester.pump(const Duration(milliseconds: 1000)); // Wait for ripple to be well under way.
 
-        expect(tester.material<IconButton>(), paints..ripple(radius: splashRadius + 5));
+        expect(getMaterial<IconButton>(tester), paintsRipple(radius: splashRadius + 5));
 
         await gesture.up();
       });
@@ -408,23 +408,28 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics.rootChild(
-          rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-          actions: <SemanticsAction>[
-            SemanticsAction.tap,
-          ],
-          flags: <SemanticsFlag>[
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isButton,
-            SemanticsFlag.isEnabled,
-            SemanticsFlag.isFocusable,
-          ],
-          label: 'link',
-        ),
-      ],
-    ), ignoreId: true, ignoreTransform: true));
+    expect(
+        semantics,
+        hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  label: 'link',
+                ),
+              ],
+            ),
+            ignoreId: true,
+            ignoreTransform: true));
 
     semantics.dispose();
   });

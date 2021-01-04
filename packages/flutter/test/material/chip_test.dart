@@ -1019,15 +1019,15 @@ void main() {
         expect(find.byType(InkWell), findsOneWidget);
         expect(find.byType(InkResponse), findsNothing);
 
-        expect(box, paints..ripple(center: const Offset(163, 6), radius: 21)); // Splash is centered and growing
-        expect(box, paints..ripple(center: const Offset(163, 6), radius: 21, unique: true));
+        expect(box, paintsRipple(center: const Offset(163, 6), radius: 21)); // Splash is centered and growing
+        expect(box, paintsRipple(center: const Offset(163, 6), radius: 21, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(box, paints..ripple(center: const Offset(163, 6), radius: 42));
-        expect(box, paints..ripple(center: const Offset(163, 6), radius: 42, unique: true));
+        expect(box, paintsRipple(center: const Offset(163, 6), radius: 42));
+        expect(box, paintsRipple(center: const Offset(163, 6), radius: 42, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
@@ -1065,16 +1065,16 @@ void main() {
         expect(find.byType(InkWell), findsOneWidget);
         expect(find.byType(InkResponse), findsNothing);
 
-        expect(box, paints..ripple(center: const Offset(3, 3), radius: 3.5));
-        expect(box, paints..ripple(center: const Offset(3, 3), radius: 3.5, unique: true));
+        expect(box, paintsRipple(center: const Offset(3, 3), radius: 3.5));
+        expect(box, paintsRipple(center: const Offset(3, 3), radius: 3.5, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
         await tester.pump(const Duration(milliseconds: 100));
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(box, paints..ripple(center: const Offset(5, 5), radius: 10.5)); // Moves toward center of delete icon
-        expect(box, paints..ripple(center: const Offset(5, 5), radius: 10.5, unique: true));
+        expect(box, paintsRipple(center: const Offset(5, 5), radius: 10.5)); // Moves toward center of delete icon
+        expect(box, paintsRipple(center: const Offset(5, 5), radius: 10.5, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
@@ -1109,15 +1109,15 @@ void main() {
         expect(find.byType(InkWell), findsOneWidget);
         expect(find.byType(InkResponse), findsNothing);
 
-        expect(box, paints..ripple(center: const Offset(378, 22), radius: 38));
-        expect(box, paints..ripple(center: const Offset(378, 22), radius: 38, unique: true));
+        expect(box, paintsRipple(center: const Offset(378, 22), radius: 38));
+        expect(box, paintsRipple(center: const Offset(378, 22), radius: 38, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(box, paints..ripple(center: const Offset(378, 22), radius: 76));
-        expect(box, paints..ripple(center: const Offset(378, 22), radius: 76, unique: true));
+        expect(box, paintsRipple(center: const Offset(378, 22), radius: 76));
+        expect(box, paintsRipple(center: const Offset(378, 22), radius: 76, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
@@ -1376,15 +1376,15 @@ void main() {
         expect(find.byType(InkWell), findsOneWidget);
         expect(find.byType(InkResponse), findsNothing);
 
-        expect(box, paints..ripple(center: const Offset(165, 7), radius: 69));
-        expect(box, paints..ripple(center: const Offset(165, 7), radius: 69, unique: true));
+        expect(box, paintsRipple(center: const Offset(165, 7), radius: 69));
+        expect(box, paintsRipple(center: const Offset(165, 7), radius: 69, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(box, paints..ripple(center: const Offset(170, 9), radius: 96));
-        expect(box, paints..ripple(center: const Offset(170, 9), radius: 96, unique: true));
+        expect(box, paintsRipple(center: const Offset(170, 9), radius: 96));
+        expect(box, paintsRipple(center: const Offset(170, 9), radius: 96, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
@@ -1422,16 +1422,16 @@ void main() {
         expect(find.byType(InkWell), findsOneWidget);
         expect(find.byType(InkResponse), findsNothing);
 
-        expect(box, paints..ripple(center: const Offset(3, 3), radius: 6.7));
-        expect(box, paints..ripple(center: const Offset(3, 3), radius: 6.7, unique: true));
+        expect(box, paintsRipple(center: const Offset(3, 3), radius: 6.7));
+        expect(box, paintsRipple(center: const Offset(3, 3), radius: 6.7, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
         await tester.pump(const Duration(milliseconds: 100));
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(box, paints..ripple(center: const Offset(7.2, 7.2), radius: 13.7)); // Moves toward center of delete icon
-        expect(box, paints..ripple(center: const Offset(7.2, 7.2), radius: 13.7, unique: true));
+        expect(box, paintsRipple(center: const Offset(7.2, 7.2), radius: 13.7)); // Moves toward center of delete icon
+        expect(box, paintsRipple(center: const Offset(7.2, 7.2), radius: 13.7, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
@@ -1466,15 +1466,15 @@ void main() {
         expect(find.byType(InkWell), findsOneWidget);
         expect(find.byType(InkResponse), findsNothing);
 
-        expect(box, paints..ripple(center: const Offset(360.4, 21.4), radius: 71.8));
-        expect(box, paints..ripple(center: const Offset(360.4, 21.4), radius: 71.8, unique: true));
+        expect(box, paintsRipple(center: const Offset(360.4, 21.4), radius: 71.8));
+        expect(box, paintsRipple(center: const Offset(360.4, 21.4), radius: 71.8, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(box, paints..ripple(center: const Offset(323.4, 20.2), radius: 100.3));
-        expect(box, paints..ripple(center: const Offset(323.4, 20.2), radius: 100.3, unique: true));
+        expect(box, paintsRipple(center: const Offset(323.4, 20.2), radius: 100.3));
+        expect(box, paintsRipple(center: const Offset(323.4, 20.2), radius: 100.3, unique: true));
 
         expect(findTooltipContainer('Delete'), findsNothing);
 

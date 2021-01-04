@@ -68,7 +68,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
     expect(
-      tester.material<InkWell>(),
+      getMaterial<InkWell>(tester),
       paints
         ..translate(x: 0.0, y: 0.0)
         ..save()
@@ -118,33 +118,46 @@ void main() {
     await tester.tapAt(tapDownOffset);
     await tester.pump(); // start gesture
 
-    final RenderBox box = tester.material<InkWell>() as RenderBox;
-
     // Initially the ripple's center is where the tap occurred;
-    // ripplePattern always add a translation of tapDownOffset.
-    expect(box, paints..ripple(tapDown: tapDownOffset, center: Offset.zero, radius: 30.0, alpha: 0));
+    // paintsRipple always adds a translation of tapDownOffset.
+    expect(
+      getMaterial<InkWell>(tester),
+      paintsRipple(tapDown: tapDownOffset, center: Offset.zero, radius: 30.0, alpha: 0),
+    );
 
     // The ripple fades in for 75ms. During that time its alpha is eased from
     // 0 to the splashColor's alpha value and its center moves towards the
     // center of the ink well.
     await tester.pump(const Duration(milliseconds: 50));
-    expect(box, paints..ripple(tapDown: tapDownOffset, center: const Offset(17, 17), radius: 56, alpha: 120));
+    expect(
+      getMaterial<InkWell>(tester),
+      paintsRipple(tapDown: tapDownOffset, center: const Offset(17, 17), radius: 56, alpha: 120),
+    );
 
     // At 75ms the ripple has fade in: it's alpha matches the splashColor's
     // alpha and its center has moved closer to the ink well's center.
     await tester.pump(const Duration(milliseconds: 25));
-    expect(box, paints..ripple(tapDown: tapDownOffset, center: const Offset(29, 29), radius: 73, alpha: 180));
+    expect(
+      getMaterial<InkWell>(tester),
+      paintsRipple(tapDown: tapDownOffset, center: const Offset(29, 29), radius: 73, alpha: 180),
+    );
 
     // At this point the splash radius has expanded to its limit: 5 past the
     // ink well's radius parameter. The splash center has moved to its final
     // location at the inkwell's center and the fade-out is about to start.
     // The fade-out begins at 225ms = 50ms + 25ms + 150ms.
     await tester.pump(const Duration(milliseconds: 150));
-    expect(box, paints..ripple(tapDown: tapDownOffset, center: inkWellCenter - tapDownOffset, radius: 105, alpha: 180));
+    expect(
+      getMaterial<InkWell>(tester),
+      paintsRipple(tapDown: tapDownOffset, center: inkWellCenter - tapDownOffset, radius: 105, alpha: 180),
+    );
 
     // After another 150ms the fade-out is complete.
     await tester.pump(const Duration(milliseconds: 150));
-    expect(box, paints..ripple(tapDown: tapDownOffset, center: inkWellCenter - tapDownOffset, radius: 105, alpha: 0));
+    expect(
+      getMaterial<InkWell>(tester),
+      paintsRipple(tapDown: tapDownOffset, center: inkWellCenter - tapDownOffset, radius: 105, alpha: 0),
+    );
   });
 
   testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
@@ -172,9 +185,8 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(
-      box,
+      getMaterial<InkWell>(tester),
       paints
         ..rect(rect: const Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.blue.value))
         ..circle(color: Color(Colors.green.value)),
@@ -199,10 +211,8 @@ void main() {
       ),
     );
 
-    expect(Material.of(tester.element(find.byType(InkWell))), same(box));
-
     expect(
-      box,
+      getMaterial<InkWell>(tester),
       paints
         ..rect(rect: const Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.red.value))
         ..circle(color: Color(Colors.green.value)),
@@ -222,10 +232,8 @@ void main() {
       ),
     );
 
-    expect(Material.of(tester.element(find.byType(InkWell))), same(box));
-
-    expect(box, isNot(paints..rect()));
-    expect(box, isNot(paints..circle()));
+    expect(getMaterial<InkWell>(tester), isNot(paints..rect()));
+    expect(getMaterial<InkWell>(tester), isNot(paints..circle()));
 
     await gesture.up();
   });
@@ -281,27 +289,27 @@ void main() {
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
 
     // ripplePattern always add a translation of topLeft.
-    expect(box, paints..ripple(tapDown: topLeft, center: inkWellCenter, radius: 30, alpha: 0));
+    expect(box, paintsRipple(tapDown: topLeft, center: inkWellCenter, radius: 30, alpha: 0));
 
     // The ripple fades in for 75ms. During that time its alpha is eased from
     // 0 to the splashColor's alpha value.
     await tester.pump(const Duration(milliseconds: 50));
-    expect(box, paints..ripple(tapDown: topLeft, center: inkWellCenter, radius: 56, alpha: 120));
+    expect(box, paintsRipple(tapDown: topLeft, center: inkWellCenter, radius: 56, alpha: 120));
 
     // At 75ms the ripple has faded in: it's alpha matches the splashColor's
     // alpha.
     await tester.pump(const Duration(milliseconds: 25));
-    expect(box, paints..ripple(tapDown: topLeft, center: inkWellCenter, radius: 73, alpha: 180));
+    expect(box, paintsRipple(tapDown: topLeft, center: inkWellCenter, radius: 73, alpha: 180));
 
     // At this point the splash radius has expanded to its limit: 5 past the
     // ink well's radius parameter. The fade-out is about to start.
     // The fade-out begins at 225ms = 50ms + 25ms + 150ms.
     await tester.pump(const Duration(milliseconds: 150));
-    expect(box, paints..ripple(tapDown: topLeft, center: inkWellCenter, radius: 105, alpha: 180));
+    expect(box, paintsRipple(tapDown: topLeft, center: inkWellCenter, radius: 105, alpha: 180));
 
     // After another 150ms the fade-out is complete.
     await tester.pump(const Duration(milliseconds: 150));
-    expect(box, paints..ripple(tapDown: topLeft, center: inkWellCenter, radius: 105, alpha: 0));
+    expect(box, paintsRipple(tapDown: topLeft, center: inkWellCenter, radius: 105, alpha: 0));
   });
 
   testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
@@ -374,7 +382,6 @@ void main() {
     await gesture.moveTo(Offset.zero);
     await gesture.up(); // generates a tap cancel
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
-    expect(box, paints..ripple(tapDown: tapDownOffset, alpha: 0, unique: true));
+    expect(getMaterial<InkWell>(tester), paintsRipple(tapDown: tapDownOffset, alpha: 0, unique: true));
   });
 }

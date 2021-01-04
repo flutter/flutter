@@ -38,7 +38,7 @@ void main() {
         await tester.tap(find.text('BUTTON'));
         await tester.pump(const Duration(milliseconds: 10));
 
-        expect(tester.material<InkWell>(), paints..ripple(color: splashColor));
+        expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor));
 
         await tester.pumpAndSettle();
 
@@ -80,7 +80,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 10));
 
         if (!kIsWeb) {
-          expect(tester.material<InkWell>(), paints..ripple(color: splashColor));
+          expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor));
         }
 
         await tester.pumpAndSettle();
@@ -97,7 +97,7 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pump(const Duration(milliseconds: 10));
 
-        expect(tester.material<InkWell>(), paints..ripple(color: splashColor));
+        expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor));
 
         await tester.pumpAndSettle();
 
@@ -140,7 +140,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
         // centered in material button.
-        expect(tester.material<InkWell>(), paints..ripple(center: const Offset(44, 18), color: splashColor));
+        expect(
+          getMaterial<InkWell>(tester),
+          paintsRipple(center: const Offset(44, 18), color: splashColor),
+        );
         await gesture.up();
       });
 
@@ -173,7 +176,10 @@ void main() {
         await tester.pump(); // start gesture
         await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
         // paints above above material
-        expect(tester.material<InkWell>(), paints..ripple(center: const Offset(44, 0), color: splashColor));
+        expect(
+          getMaterial<InkWell>(tester),
+          paintsRipple(center: const Offset(44, 0), color: splashColor),
+        );
         await gesture.up();
       });
     });
@@ -201,11 +207,10 @@ void main() {
         await tester.tap(find.text('BUTTON'));
         await tester.pump(const Duration(milliseconds: 10));
 
-        final RenderBox box = tester.material<InkWell>() as RenderBox;
-        expect(box, paints..ripple(color: splashColor, alpha: 0));
+        expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor, alpha: 0));
 
         await tester.pump(const Duration(milliseconds: 100));
-        expect(box, paints..ripple(color: splashColor));
+        expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor));
 
         await tester.pumpAndSettle();
 
@@ -247,11 +252,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 10));
 
         if (!kIsWeb) {
-          final RenderBox box = tester.material<InkWell>() as RenderBox;
-          expect(box, paints..ripple(color: splashColor, alpha: 0));
+          expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor, alpha: 0));
 
           await tester.pump(const Duration(milliseconds: 100));
-          expect(box, paints..ripple(color: splashColor));
+          expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor));
         }
 
         await tester.pumpAndSettle();
@@ -268,11 +272,10 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pump(const Duration(milliseconds: 10));
 
-        final RenderBox box = tester.material<InkWell>() as RenderBox;
-        expect(box, paints..ripple(color: splashColor, alpha: 0));
+        expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor, alpha: 0));
 
         await tester.pump(const Duration(milliseconds: 100));
-        expect(box, paints..ripple(color: splashColor));
+        expect(getMaterial<InkWell>(tester), paintsRipple(color: splashColor));
 
         await tester.pumpAndSettle();
 
@@ -315,7 +318,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
         // centered in material button.
-        expect(tester.material<InkWell>(), paints..ripple(center: const Offset(44, 18), color: splashColor));
+        expect(
+          getMaterial<InkWell>(tester),
+          paintsRipple(center: const Offset(44, 18), color: splashColor),
+        );
         await gesture.up();
       });
 
@@ -348,7 +354,10 @@ void main() {
         await tester.pump(); // start gesture
         await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
         // paints above above material
-        expect(tester.material<InkWell>(), paints..ripple(center: const Offset(44, 0), color: splashColor));
+        expect(
+          getMaterial<InkWell>(tester),
+          paintsRipple(center: const Offset(44, 0), color: splashColor),
+        );
         await gesture.up();
       });
     });
@@ -514,13 +523,12 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = tester.material<InkWell>() as RenderBox;
-    expect(box, isNot(paints..rect(color: focusColor)));
+    expect(getMaterial<InkWell>(tester), isNot(paints..rect(color: focusColor)));
 
     focusNode.requestFocus();
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    expect(box, paints..rect(color: focusColor));
+    expect(getMaterial<InkWell>(tester), paints..rect(color: focusColor));
   });
 
   testWidgets('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
@@ -613,16 +621,15 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = tester.material<InkWell>() as RenderBox;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    expect(box, isNot(paints..rect(color: hoverColor)));
+    expect(getMaterial<InkWell>(tester), isNot(paints..rect(color: hoverColor)));
 
     await gesture.moveTo(tester.getCenter(find.byType(RawMaterialButton)));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    expect(box, paints..rect(color: hoverColor));
+    expect(getMaterial<InkWell>(tester), paints..rect(color: hoverColor));
   });
 
   testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {

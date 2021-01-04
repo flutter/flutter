@@ -167,7 +167,10 @@ void main() {
         addTearDown(gesture.removePointer);
         await gesture.moveTo(tester.getCenter(find.byType(Container)));
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
+        expect(
+          getInkFeatures(tester),
+          paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)),
+        );
       });
 
       testWidgets('InkWell uses resolved overlayColor MaterialState.hovered', (WidgetTester tester) async {
@@ -186,7 +189,10 @@ void main() {
         await gesture.moveTo(tester.getCenter(find.byType(Container)));
         await tester.pumpAndSettle();
 
-        expect(tester.inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
+        expect(
+          getInkFeatures(tester),
+          paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)),
+        );
       });
     });
 
@@ -209,10 +215,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
+        expect(getInkFeatures(tester), paintsExactlyCountTimes(#drawRect, 0));
         focusNode.requestFocus();
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+        expect(
+          getInkFeatures(tester),
+          paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
+        );
       });
 
       testWidgets('ink response changes color on focus with overlayColor', (WidgetTester tester) async {
@@ -230,10 +239,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
+        expect(getInkFeatures(tester), paintsExactlyCountTimes(#drawRect, 0));
         focusNode.requestFocus();
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+        expect(getInkFeatures(tester), paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
       });
 
       testWidgets('ink response uses radius for focus highlight', (WidgetTester tester) async {
@@ -250,10 +259,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+        expect(getInkFeatures(tester), paintsExactlyCountTimes(#drawCircle, 0));
         focusNode.requestFocus();
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paints..circle(radius: 20, color: const Color(0xff0000ff)));
+        expect(getInkFeatures(tester), paints..circle(radius: 20, color: const Color(0xff0000ff)));
       });
 
       testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
@@ -274,10 +283,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
+        expect(getInkFeatures(tester), paintsExactlyCountTimes(#drawRect, 0));
         focusNode.requestFocus();
         await tester.pumpAndSettle();
-        expect(tester.inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
+        expect(getInkFeatures(tester), paintsExactlyCountTimes(#drawRect, 0));
       });
     });
 
@@ -298,7 +307,10 @@ void main() {
           await tester.pumpAndSettle();
           final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
           await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-          expect(tester.inkFeatures, paints..ripple(center: const Offset(50, 50), color: splashColor));
+          expect(
+            getInkFeatures(tester),
+            paintsRipple(center: const Offset(50, 50), color: splashColor),
+          );
           await gesture.up();
         });
 
@@ -316,10 +328,16 @@ void main() {
           await tester.pumpAndSettle();
           final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
           await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-          expect(tester.inkFeatures, paints..ripple(center: const Offset(50, 50), color: splashColor));
+          expect(
+            getInkFeatures(tester),
+            paintsRipple(center: const Offset(50, 50), color: splashColor),
+          );
 
           await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-          expect(tester.inkFeatures, paints..ripple(center: const Offset(50, 50), color: splashColor));
+          expect(
+            getInkFeatures(tester),
+            paintsRipple(center: const Offset(50, 50), color: splashColor),
+          );
           await gesture.up();
         });
       });
@@ -339,10 +357,16 @@ void main() {
           await tester.pumpAndSettle();
           final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
           await tester.pump(const Duration(milliseconds: 200));
-          expect(tester.inkFeatures, paints..ripple(center: const Offset(50, 50), color: splashColor, alpha: 0));
+          expect(
+            getInkFeatures(tester),
+            paintsRipple(center: const Offset(50, 50), color: splashColor, alpha: 0),
+          );
 
           await tester.pump(const Duration(milliseconds: 200));
-          expect(tester.inkFeatures, paints..ripple(center: const Offset(50, 50), color: splashColor));
+          expect(
+            getInkFeatures(tester),
+            paintsRipple(center: const Offset(50, 50), color: splashColor),
+          );
           await gesture.up();
         });
 
@@ -360,10 +384,16 @@ void main() {
           await tester.pumpAndSettle();
           final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
           await tester.pump(const Duration(milliseconds: 200));
-          expect(tester.inkFeatures, paints..ripple(center: const Offset(50, 50), color: splashColor, alpha: 0));
+          expect(
+            getInkFeatures(tester),
+            paintsRipple(center: const Offset(50, 50), color: splashColor, alpha: 0),
+          );
 
           await tester.pump(const Duration(milliseconds: 200));
-          expect(tester.inkFeatures, paints..ripple(center: const Offset(50, 50), color: splashColor));
+          expect(
+            getInkFeatures(tester),
+            paintsRipple(center: const Offset(50, 50), color: splashColor),
+          );
           await gesture.up();
         });
       });

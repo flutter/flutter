@@ -41,19 +41,21 @@ Expected - ${formattedValues(expectedCenter, expectedRadius, expectedColorWithAl
   };
 }
 
-extension RipplePaintPatternX on PaintPattern {
-  void ripple({Offset? tapDown, Offset? center, double? radius, Color? color, int? alpha, bool unique = false}) {
-    if (tapDown != null) {
-      translate(x: 0, y: 0);
-      translate(x: tapDown.dx, y: tapDown.dy);
-    }
-    final PaintPatternPredicate predicate = _ripplePatternPredicate(center, radius, color, alpha, unique);
-    return unique ? everything(predicate) : something(predicate);
+PaintPattern paintsRipple({Offset? tapDown, Offset? center, double? radius, Color? color, int? alpha, bool unique = false}) {
+  final PaintPattern pattern = paints;
+  if (tapDown != null) {
+    pattern.translate(x: 0, y: 0);
+    pattern.translate(x: tapDown.dx, y: tapDown.dy);
   }
+  final PaintPatternPredicate predicate = _ripplePatternPredicate(center, radius, color, alpha, unique);
+  unique ? pattern.everything(predicate) : pattern.something(predicate);
+  return pattern;
 }
 
-extension MaterialFinderX on WidgetTester {
-  MaterialInkController material<T>() => Material.of(element(find.byType(T)))!;
+MaterialInkController getMaterial<T>(WidgetTester tester) {
+  return Material.of(tester.element(find.byType(T)))!;
+}
 
-  RenderObject get inkFeatures => allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+RenderObject getInkFeatures(WidgetTester tester) {
+  return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
 }

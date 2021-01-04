@@ -992,7 +992,8 @@ void main() {
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildCustomTable(
+      home: Material(
+          child: buildCustomTable(
         horizontalMargin: _customHorizontalMargin,
         columnSpacing: _customColumnSpacing,
       )),
@@ -1399,7 +1400,10 @@ void main() {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content2')));
       await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
 
-      expect(tester.material<InkWell>(), paints..ripple(center: const Offset(68, 24), color: stateColor));
+      expect(
+        getMaterial<InkWell>(tester),
+        paintsRipple(center: const Offset(68, 24), color: stateColor),
+      );
       await gesture.up();
     });
 
@@ -1414,10 +1418,16 @@ void main() {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content2')));
       await tester.pump(const Duration(milliseconds: 200)); // ripple is well underway
 
-      expect(tester.material<InkWell>(), paints..ripple(center: const Offset(68, 24), color: stateColor, alpha: 0));
+      expect(
+        getMaterial<InkWell>(tester),
+        paintsRipple(center: const Offset(68, 24), color: stateColor, alpha: 0),
+      );
 
       await tester.pump(const Duration(milliseconds: 200));
-      expect(tester.material<InkWell>(), paints..ripple(center: const Offset(159, 24), color: stateColor));
+      expect(
+        getMaterial<InkWell>(tester),
+        paintsRipple(center: const Offset(159, 24), color: stateColor),
+      );
 
       await gesture.up();
     });
