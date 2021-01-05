@@ -191,7 +191,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
   section('Check debug build has no Dart AOT');
 
-  final String aotSymbols = await dylibSymbols(debugAppFrameworkPath);
+  final String aotSymbols = await _dylibSymbols(debugAppFrameworkPath);
 
   if (aotSymbols.contains('architecture') ||
       aotSymbols.contains('_kDartVmSnapshot')) {
@@ -212,7 +212,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
     await _checkBitcode(appFrameworkPath, mode);
 
-    final String aotSymbols = await dylibSymbols(appFrameworkPath);
+    final String aotSymbols = await _dylibSymbols(appFrameworkPath);
 
     if (!aotSymbols.contains('_kDartVmSnapshot')) {
       throw TaskResult.failure('$mode App.framework missing Dart AOT');
@@ -228,7 +228,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'vm_snapshot_data',
     ));
 
-    checkFileNotExists(path.join(
+    checkFileExists(path.join(
       outputPath,
       mode,
       'App.xcframework',
@@ -314,13 +314,8 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'DeviceInfoPlugin.h',
     );
 
-    if (mode == 'Debug') {
-      checkFileExists(simulatorFrameworkPath);
-      checkFileExists(simulatorFrameworkHeaderPath);
-    } else {
-      checkFileNotExists(simulatorFrameworkPath);
-      checkFileNotExists(simulatorFrameworkHeaderPath);
-    }
+    checkFileExists(simulatorFrameworkPath);
+    checkFileExists(simulatorFrameworkHeaderPath);
   }
 
   section('Check all modes have generated plugin registrant');
@@ -357,11 +352,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'Headers',
       'GeneratedPluginRegistrant.h',
     );
-    if (mode == 'Debug') {
-      checkFileExists(simulatorHeaderPath);
-    } else {
-      checkFileNotExists(simulatorHeaderPath);
-    }
+    checkFileExists(simulatorHeaderPath);
   }
 
   // This builds all build modes' frameworks by default
@@ -442,4 +433,13 @@ Future<void> _checkBitcode(String frameworkPath, String mode) async {
   if (mode == 'Release' && !await containsBitcode(frameworkPath)) {
     throw TaskResult.failure('$frameworkPath does not contain bitcode');
   }
+}
+
+Future<String> _dylibSymbols(String pathToDylib) {
+  return eval('nm', <String>[
+    '-g',
+    pathToDylib,
+    '-arch',
+    'arm64',
+  ]);
 }
