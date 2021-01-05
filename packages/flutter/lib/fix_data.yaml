@@ -15,7 +15,7 @@ transforms:
   - title: 'Rename to dependOnInheritedElement'
     date: 2020-12-23
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'inheritFromElement'
       inClass: 'Element'
     changes:
@@ -26,7 +26,7 @@ transforms:
   - title: 'Rename to dependOnInheritedWidgetOfExactType'
     date: 2020-09-14
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'inheritFromWidgetOfExactType'
       inClass: 'Element'
     changes:
@@ -48,7 +48,7 @@ transforms:
   - title: 'Rename to getElementForInheritedWidgetOfExactType'
     date: 2020-09-14
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'ancestorInheritedElementForWidgetOfExactType'
       inClass: 'Element'
     changes:
@@ -70,7 +70,7 @@ transforms:
   - title: 'Rename to getElementForInheritedWidgetOfExactType'
     date: 2020-12-23
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'ancestorWidgetOfExactType'
       inClass: 'Element'
     changes:
@@ -92,7 +92,7 @@ transforms:
   - title: 'Rename to findAncestorStateOfType'
     date: 2020-12-23
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'ancestorStateOfType'
       inClass: 'Element'
     changes:
@@ -114,7 +114,7 @@ transforms:
   - title: 'Rename to findAncestorRenderObjectOfType'
     date: 2020-12-23
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'ancestorRenderObjectOfType'
       inClass: 'Element'
     changes:
@@ -136,7 +136,7 @@ transforms:
   - title: 'Rename to findAncestorRenderObjectOfType'
     date: 2020-12-23
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'rootAncestorStateOfType'
       inClass: 'Element'
     changes:
@@ -154,7 +154,6 @@ transforms:
       - kind: 'removeParameter'
         index: 0
 
-=======
   # Changes made in https://github.com/flutter/flutter/pull/15303
   - title: 'Replace child with builder'
     date: 2020-12-17
