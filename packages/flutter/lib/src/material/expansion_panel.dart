@@ -148,7 +148,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// Note that [expansionCallback] behaves differently for [ExpansionPanelList]
 /// and [ExpansionPanelList.radio].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// Here is a simple example of how to implement ExpansionPanelList.
 ///
@@ -156,8 +156,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// // stores ExpansionPanel state information
 /// class Item {
 ///   Item({
-///     this.expandedValue,
-///     this.headerValue,
+///     required this.expandedValue,
+///     required this.headerValue,
 ///     this.isExpanded = false,
 ///   });
 ///
@@ -252,7 +252,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
-  /// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_scaffold}
   ///
   /// Here is a simple example of how to implement ExpansionPanelList.radio.
   ///
@@ -260,9 +260,9 @@ class ExpansionPanelList extends StatefulWidget {
   /// // stores ExpansionPanel state information
   /// class Item {
   ///   Item({
-  ///     this.id,
-  ///     this.expandedValue,
-  ///     this.headerValue,
+  ///     required this.id,
+  ///     required this.expandedValue,
+  ///     required this.headerValue,
   ///   });
   ///
   ///   int id;

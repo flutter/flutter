@@ -795,7 +795,7 @@ class _ActionsMarker extends InheritedWidget {
 /// widget, and the new control should be enabled for keyboard traversal and
 /// activation.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows how keyboard interaction can be added to a custom control
 /// that changes color when hovered and focused, and can toggle a light when
 /// activated, either by touch or by hitting the `X` key on the keyboard when
@@ -813,7 +813,11 @@ class _ActionsMarker extends InheritedWidget {
 ///
 /// ```dart preamble
 /// class FadButton extends StatefulWidget {
-///   const FadButton({Key key, this.onPressed, this.child}) : super(key: key);
+///   const FadButton({
+///     Key? key,
+///     required this.onPressed,
+///     required this.child,
+///   }) : super(key: key);
 ///
 ///   final VoidCallback onPressed;
 ///   final Widget child;
@@ -826,8 +830,8 @@ class _ActionsMarker extends InheritedWidget {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   Map<Type, Action<Intent>> _actionMap;
-///   Map<LogicalKeySet, Intent> _shortcutMap;
+///   late Map<Type, Action<Intent>> _actionMap;
+///   late Map<LogicalKeySet, Intent> _shortcutMap;
 ///
 ///   @override
 ///   void initState() {
