@@ -8,4 +8,8 @@ void main() {
   // Change made in https://github.com/flutter/flutter/pull/41859
   const CupertinoTextThemeData themeData = CupertinoTextThemeData(brightness: Brightness.dark);
   themeData.copyWith(brightness: Brightness.light);
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const StatefulElement statefulElement = StatefulElement(myWidget);
+  statefulElement.inheritFromElement(ancestor);
 }
