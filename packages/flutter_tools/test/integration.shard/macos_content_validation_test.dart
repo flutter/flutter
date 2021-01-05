@@ -78,19 +78,39 @@ void main() {
 
       expect(vmSnapshot.existsSync(), buildMode == 'Debug');
 
-      final File outputFlutterFrameworkBinary =
-          fileSystem.file(fileSystem.path.join(
-        outputApp.path,
-        'Contents',
-        'Frameworks',
-        'FlutterMacOS.framework',
-        'FlutterMacOS',
-      ));
-      expect(outputFlutterFrameworkBinary, exists);
+      final Directory outputFlutterFramework = fileSystem.directory(
+        fileSystem.path.join(
+          outputApp.path,
+          'Contents',
+          'Frameworks',
+          'FlutterMacOS.framework',
+        ),
+      );
+
+      // Check complicated macOS framework symlink structure.
+      final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');
+
+      expect(current.targetSync(), 'A');
+
+      expect(outputFlutterFramework.childLink('FlutterMacOS').targetSync(),
+          fileSystem.path.join('Versions', 'Current', 'FlutterMacOS'));
+
+      expect(outputFlutterFramework.childLink('Resources'), exists);
+      expect(outputFlutterFramework.childLink('Resources').targetSync(),
+          fileSystem.path.join('Versions', 'Current', 'Resources'));
+
+      expect(outputFlutterFramework.childLink('Headers'), isNot(exists));
+      expect(outputFlutterFramework.childDirectory('Headers'), isNot(exists));
+      expect(outputFlutterFramework.childLink('Modules'), isNot(exists));
+      expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
 
       // Archiving should contain a bitcode blob, but not building.
       // This mimics Xcode behavior and present a developer from having to install a
       // 300+MB app.
+      final File outputFlutterFrameworkBinary = outputFlutterFramework
+          .childDirectory('Versions')
+          .childDirectory('A')
+          .childFile('FlutterMacOS');
       expect(
         await containsBitcode(outputFlutterFrameworkBinary.path),
         isFalse,
