@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
@@ -27,9 +26,6 @@ import 'sliver.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// A controller for [PageView].
 ///
 /// A page controller lets you manipulate which page is visible in a [PageView].
@@ -49,19 +45,13 @@ import 'viewport.dart';
 ///
 /// ```dart
 /// class MyPageView extends StatefulWidget {
-///   MyPageView({Key key}) : super(key: key);
+///   MyPageView({Key? key}) : super(key: key);
 ///
 ///   _MyPageViewState createState() => _MyPageViewState();
 /// }
 ///
 /// class _MyPageViewState extends State<MyPageView> {
-///   PageController _pageController;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _pageController = PageController();
-///   }
+///   PageController _pageController = PageController();
 ///
 ///   @override
 ///   void dispose() {
@@ -725,7 +715,7 @@ class PageView extends StatefulWidget {
   ///             },
   ///             childCount: items.length,
   ///             findChildIndexCallback: (Key key) {
-  ///               final ValueKey valueKey = key;
+  ///               final ValueKey<String> valueKey = key as ValueKey<String>;
   ///               final String data = valueKey.value;
   ///               return items.indexOf(data);
   ///             }
@@ -748,7 +738,7 @@ class PageView extends StatefulWidget {
   /// }
   ///
   /// class KeepAlive extends StatefulWidget {
-  ///   const KeepAlive({Key key, this.data}) : super(key: key);
+  ///   const KeepAlive({Key? key, required this.data}) : super(key: key);
   ///
   ///   final String data;
   ///

@@ -142,7 +142,7 @@ class AndroidEmulator extends Emulator {
   Category get category => Category.mobile;
 
   @override
-  String get platformDisplay => PlatformType.android.toString();
+  PlatformType get platformType => PlatformType.android;
 
   String _prop(String name) => _properties != null ? _properties[name] : null;
 

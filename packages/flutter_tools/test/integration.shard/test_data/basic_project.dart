@@ -76,7 +76,7 @@ class BasicProjectWithFlutterGen extends Project {
   @override
   final String main = r'''
   // @dart = 2.8
-  // generated package does not syupport null safety.
+  // generated package does not support null safety.
   import 'dart:async';
   import 'package:flutter_gen/flutter_gen.dart';
 

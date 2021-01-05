@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/rendering.dart';
@@ -267,15 +266,11 @@ typedef RefreshCallback = Future<void> Function();
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
 /// content's sliver.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_cupertino}
 ///
 /// When the user scrolls past [refreshTriggerPullDistance],
 /// this sample shows the default iOS pull to refresh indicator for 1 second and
 /// adds a new item to the top of the list view.
-///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
 ///
 /// ```dart
 /// List<Color> colors = [
