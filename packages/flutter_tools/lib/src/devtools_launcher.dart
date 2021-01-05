@@ -31,17 +31,16 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   final Logger _logger;
 
   io.Process _devToolsProcess;
-  Uri _devToolsUri;
 
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
   @override
   Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false}) async {
-    if (_devToolsProcess != null && _devToolsUri != null) {
+    if (_devToolsProcess != null && devToolsUri != null) {
       // DevTools is already running.
       if (openInBrowser) {
-        await Chrome.start(<String>[_devToolsUri.toString()]);
+        await Chrome.start(<String>[devToolsUri.toString()]);
       }
       return;
     }
@@ -91,13 +90,12 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
               }
               completer.complete(Uri.parse(uri));
             }
-            _logger.printStatus(line);
          });
       _devToolsProcess.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen(_logger.printError);
-      _devToolsUri = await completer.future;
+      devToolsUri = await completer.future;
     } on Exception catch (e, st) {
       status.cancel();
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
@@ -107,10 +105,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   @override
   Future<DevToolsServerAddress> serve({bool openInBrowser = false}) async {
     await launch(null, openInBrowser: openInBrowser);
-    if (_devToolsUri == null) {
-      return null;
-    }
-    return DevToolsServerAddress(_devToolsUri.host, _devToolsUri.port);
+    return activeDevToolsServer;
   }
 
   @override
