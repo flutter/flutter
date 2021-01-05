@@ -54,6 +54,9 @@ def get_out_dir(args):
     if args.enable_vulkan:
         target_dir.append('vulkan')
 
+    if args.macos_enable_metal:
+      target_dir.append('metal')
+
     return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
 
 def to_command_line(gn_args):
