@@ -12,64 +12,6 @@ import '../depfile.dart';
 
 const String _kDependenciesFileName = 'gen_l10n_inputs_and_outputs.json';
 
-<<<<<<< HEAD
-=======
-/// Run the localizations generation script with the configuration [options].
-void generateLocalizations({
-  @required Directory projectDir,
-  @required Directory dependenciesDir,
-  @required LocalizationOptions options,
-  @required LocalizationsGenerator localizationsGenerator,
-  @required Logger logger,
-}) {
-  // If generating a synthetic package, generate a warning if
-  // flutter: generate is not set.
-  final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDir);
-  if (options.useSyntheticPackage && !flutterProject.manifest.generateSyntheticPackage) {
-    logger.printError(
-      'Attempted to generate localizations code without having '
-      'the flutter: generate flag turned on.'
-      '\n'
-      'Check pubspec.yaml and ensure that flutter: generate: true has '
-      'been added and rebuild the project. Otherwise, the localizations '
-      'source code will not be importable.'
-    );
-    throw Exception();
-  }
-
-  precacheLanguageAndRegionTags();
-
-  final String inputPathString = options?.arbDirectory?.path ?? globals.fs.path.join('lib', 'l10n');
-  final String templateArbFileName = options?.templateArbFile?.toFilePath() ?? 'app_en.arb';
-  final String outputFileString = options?.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
-
-  try {
-    localizationsGenerator
-      ..initialize(
-        inputsAndOutputsListPath: dependenciesDir.path,
-        projectPathString: projectDir.path,
-        inputPathString: inputPathString,
-        templateArbFileName: templateArbFileName,
-        outputFileString: outputFileString,
-        outputPathString: options?.outputDirectory?.path,
-        classNameString: options.outputClass ?? 'AppLocalizations',
-        preferredSupportedLocale: options.preferredSupportedLocales,
-        headerString: options.header,
-        headerFile: options?.headerFile?.toFilePath(),
-        useDeferredLoading: options.deferredLoading ?? false,
-        useSyntheticPackage: options.useSyntheticPackage ?? true,
-        areResourceAttributesRequired: options.areResourceAttributesRequired ?? false,
-        untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
-      )
-      ..loadResources()
-      ..writeOutputFiles(logger, isFromYaml: true);
-  } on L10nException catch (e) {
-    logger.printError(e.message);
-    throw Exception();
-  }
-}
-
->>>>>>> 47e3e75b0789f615ef14ba198efad89f030debb3
 /// A build step that runs the generate localizations script from
 /// dev/tool/localizations.
 class GenerateLocalizationsTarget extends Target {
@@ -123,20 +65,17 @@ class GenerateLocalizationsTarget extends Target {
       localizationsGenerator: LocalizationsGenerator(environment.fileSystem),
     );
 
-    final Map<String, Object> dependencies = json.decode(
-      environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()
-    ) as Map<String, Object>;
-    final Depfile depfile = Depfile(
-      <File>[
-        configFile,
-        for (dynamic inputFile in dependencies['inputs'] as List<dynamic>)
-          environment.fileSystem.file(inputFile)
-      ],
-      <File>[
-        for (dynamic outputFile in dependencies['outputs'] as List<dynamic>)
-          environment.fileSystem.file(outputFile)
-      ]
-    );
+    final Map<String, Object> dependencies = json.decode(environment.buildDir
+        .childFile(_kDependenciesFileName)
+        .readAsStringSync()) as Map<String, Object>;
+    final Depfile depfile = Depfile(<File>[
+      configFile,
+      for (dynamic inputFile in dependencies['inputs'] as List<dynamic>)
+        environment.fileSystem.file(inputFile)
+    ], <File>[
+      for (dynamic outputFile in dependencies['outputs'] as List<dynamic>)
+        environment.fileSystem.file(outputFile)
+    ]);
     depfileService.writeToFile(
       depfile,
       environment.buildDir.childFile('gen_localizations.d'),
