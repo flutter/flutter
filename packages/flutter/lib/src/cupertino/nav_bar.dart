@@ -197,6 +197,33 @@ bool _isTransitionable(BuildContext context) {
 /// value from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
+/// {@tool dartpad --template=stateful_widget_cupertino}
+/// This example shows a [CupertinoNavigationBar] placed in a [CupertinoPageScaffold].
+/// Since [backgroundColor]'s opacity is not 1.0, there is a blur effect and
+/// content slides underneath.
+///
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     navigationBar: CupertinoNavigationBar(
+///       // Try removing opacity to observe the lack of a blur effect and of sliding content.
+///       backgroundColor: CupertinoColors.systemGrey.withOpacity(0.5),
+///       middle: const Text('Sample Code'),
+///     ),
+///     child: Column(
+///       children: [
+///         Container(height: 50, color: CupertinoColors.systemRed),
+///         Container(height: 50, color: CupertinoColors.systemGreen),
+///         Container(height: 50, color: CupertinoColors.systemBlue),
+///         Container(height: 50, color: CupertinoColors.systemYellow),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoPageScaffold], a page layout helper typically hosting the

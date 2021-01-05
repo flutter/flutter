@@ -105,9 +105,6 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   late ScrollbarThemeData _scrollbarTheme;
   // On Android, scrollbars should match native appearance.
   late bool _useAndroidScrollbar;
-  // Hover events should be ignored on mobile, the exit event cannot be
-  // triggered, but the enter event can on tap.
-  late bool _isMobile;
 
   @override
   bool get showScrollbar => widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
@@ -185,14 +182,14 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
         return widget.hoverThickness
           ?? _scrollbarTheme.thickness?.resolve(<MaterialState>{MaterialState.hovered})
           ?? _kScrollbarThicknessWithTrack;
-      }
+      // The default scrollbar thickness is smaller on mobile.
       return widget.thickness
         ?? _scrollbarTheme.thickness?.resolve(<MaterialState>{})
-        ?? (_kScrollbarThickness / (_isMobile ? 2 : 1));
+        ?? (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
     });
   }
 
@@ -216,18 +213,13 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     switch (theme.platform) {
       case TargetPlatform.android:
         _useAndroidScrollbar = true;
-        _isMobile = true;
         break;
       case TargetPlatform.iOS:
-        _useAndroidScrollbar = false;
-        _isMobile = true;
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.fuchsia:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         _useAndroidScrollbar = false;
-        _isMobile = false;
         break;
     }
     super.didChangeDependencies();
@@ -262,8 +254,6 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void handleHover(PointerHoverEvent event) {
-    // Hover events should not be triggered on mobile.
-    assert(!_isMobile);
     super.handleHover(event);
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position)) {
@@ -279,8 +269,6 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void handleHoverExit(PointerExitEvent event) {
-    // Hover events should not be triggered on mobile.
-    assert(!_isMobile);
     super.handleHoverExit(event);
     setState(() { _hoverIsActive = false; });
     _hoverAnimationController.reverse();

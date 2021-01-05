@@ -31,6 +31,8 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
       if (!useCanvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+      if (!useCanvasKit)
+        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
       if (useCanvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       '--profile',

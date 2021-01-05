@@ -5,7 +5,6 @@
 import 'dart:async' show Timer;
 import 'dart:math' as math;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -46,7 +45,7 @@ import 'ticker_provider.dart';
 /// [OverscrollIndicatorNotification.paintOffset] to the
 /// notification, or use a [NestedScrollView].
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This example demonstrates how to use a [NotificationListener] to manipulate
 /// the placement of a [GlowingOverscrollIndicator] when building a
@@ -81,7 +80,7 @@ import 'ticker_provider.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This example demonstrates how to use a [NestedScrollView] to manipulate the
 /// placement of a [GlowingOverscrollIndicator] when building a
