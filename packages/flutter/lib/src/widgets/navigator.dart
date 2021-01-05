@@ -3310,10 +3310,35 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void initState() {
     super.initState();
-    assert(
-      widget.pages.isEmpty || widget.onPopPage != null,
-      'The Navigator.onPopPage must be provided to use the Navigator.pages API',
-    );
+    assert((){
+      if (widget.pages != const <Page<dynamic>>[]) {
+        // This navigator uses page API.
+        if (widget.pages.isEmpty) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.pages must not be empty to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        } else if (widget.onPopPage == null) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.onPopPage must be provided to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+      }
+      return true;
+    }());
     for (final NavigatorObserver observer in widget.observers) {
       assert(observer.navigator == null);
       observer._navigator = this;
@@ -3388,6 +3413,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       }
     }
 
+    assert(
+      _history.isNotEmpty,
+      'All routes returned by onGenerateInitialRoutes are not restorable. '
+      'Please make sure that all routes returned by onGenerateInitialRoutes '
+      'have their RouteSettings defined with names that are defined in the '
+      'app\'s routes table.',
+    );
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
     _flushHistoryUpdates();
@@ -3473,10 +3505,35 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert(
-      widget.pages.isEmpty || widget.onPopPage != null,
-      'The Navigator.onPopPage must be provided to use the Navigator.pages API',
-    );
+    assert((){
+      if (widget.pages != const <Page<dynamic>>[]) {
+        // This navigator uses page API.
+        if (widget.pages.isEmpty) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.pages must not be empty to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        } else if (widget.onPopPage == null) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.onPopPage must be provided to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+      }
+      return true;
+    }());
     if (oldWidget.observers != widget.observers) {
       for (final NavigatorObserver observer in oldWidget.observers)
         observer._navigator = null;
@@ -3487,10 +3544,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _updateEffectiveObservers();
     }
     if (oldWidget.pages != widget.pages && !restorePending) {
-      assert(
-        widget.pages.isNotEmpty,
-        'To use the Navigator.pages, there must be at least one page in the list.'
-      );
+      assert((){
+        if (widget.pages.isEmpty) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.pages must not be empty to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+        return true;
+      }());
       _updatePages();
     }
 

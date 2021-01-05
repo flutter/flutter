@@ -306,11 +306,11 @@ class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
 /// See also:
 ///
 ///  * [RestorableNum] for the non-nullable version of this class.
-class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<num?> {
+class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<T> {
   /// Creates a [RestorableNumN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableNumN(num? defaultValue) : super(defaultValue);
+  RestorableNumN(T defaultValue) : super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [double]
@@ -321,7 +321,7 @@ class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<num?> {
 /// See also:
 ///
 ///  * [RestorableDouble] for the non-nullable version of this class.
-class RestorableDoubleN extends RestorableNumN<double> {
+class RestorableDoubleN extends RestorableNumN<double?> {
   /// Creates a [RestorableDoubleN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
@@ -336,7 +336,7 @@ class RestorableDoubleN extends RestorableNumN<double> {
 /// See also:
 ///
 ///  * [RestorableInt] for the non-nullable version of this class.
-class RestorableIntN extends RestorableNumN<int> {
+class RestorableIntN extends RestorableNumN<int?> {
   /// Creates a [RestorableIntN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
