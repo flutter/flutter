@@ -581,4 +581,46 @@ void main() {
     final TextField widget = tester.widget(find.byType(TextField));
     expect(widget.selectionControls, equals(materialTextSelectionControls));
   });
+
+  testWidgets('TextFormField respects hintTextDirection', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: TextFormField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Some Label',
+              hintText: 'Some Hint',
+              hintTextDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final Finder hintTextFinder = find.text('Some Hint');
+
+    final Text hintText = tester.firstWidget(hintTextFinder);
+    expect(hintText.textDirection, TextDirection.ltr);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: TextFormField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Some Label',
+              hintText: 'Some Hint',
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final BuildContext context = tester.element(hintTextFinder);
+    final TextDirection textDirection = Directionality.of(context);
+    expect(textDirection, TextDirection.rtl);
+  });
 }
