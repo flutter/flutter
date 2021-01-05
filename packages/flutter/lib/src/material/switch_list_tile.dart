@@ -17,6 +17,8 @@ enum _SwitchListTileType { material, adaptive }
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=0igIjvtEWNU}
+///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
 /// the switch. Tapping and dragging the [Switch] also triggers the [onChanged]
 /// callback.
