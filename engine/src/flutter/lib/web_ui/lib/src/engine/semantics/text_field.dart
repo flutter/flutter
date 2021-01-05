@@ -15,12 +15,16 @@ part of engine;
 /// This class is still responsible for hooking up the DOM element with the
 /// [HybridTextEditing] instance so that changes are communicated to Flutter.
 class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
+  /// The semantics object which this text editing element belongs to.
+  final SemanticsObject semanticsObject;
+
   /// Creates a [SemanticsTextEditingStrategy] that eagerly instantiates
   /// [domElement] so the caller can insert it before calling
   /// [SemanticsTextEditingStrategy.enable].
-  SemanticsTextEditingStrategy(
+  SemanticsTextEditingStrategy(SemanticsObject semanticsObject,
       HybridTextEditing owner, html.HtmlElement domElement)
-      : super(owner) {
+      : this.semanticsObject = semanticsObject,
+        super(owner) {
     // Make sure the DOM element is of a type that we support for text editing.
     // TODO(yjbanov): move into initializer list when https://github.com/dart-lang/sdk/issues/37881 is fixed.
     assert((domElement is html.InputElement) ||
@@ -43,6 +47,20 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
     _subscriptions.clear();
     _lastEditingState = null;
+
+    // If focused element is a part of a form, it needs to stay on the DOM
+    // until the autofill context of the form is finalized.
+    // More details on `TextInput.finishAutofillContext` call.
+    if (_appendedToForm &&
+        _inputConfiguration.autofillGroup?.formElement != null) {
+      // We want to save the domElement with the form. However we still
+      // need to keep the text editing domElement attached to the semantics
+      // tree. In order to simplify the logic we will create a clone of the
+      // element.
+      final html.Node textFieldClone = domElement.clone(false);
+      domElement = textFieldClone as html.HtmlElement;
+      _inputConfiguration.autofillGroup?.storeForm();
+    }
 
     // If the text element still has focus, remove focus from the editable
     // element to cause the keyboard to hide.
@@ -87,6 +105,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     _inputConfiguration = inputConfig;
     _onChange = onChange;
     _onAction = onAction;
+    _applyConfiguration(inputConfig);
   }
 
   @override
@@ -95,6 +114,25 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
     // Refocus after setting editing state.
     domElement.focus();
+  }
+
+  @override
+  void placeElement() {
+    // If this text editing element is a part of an autofill group.
+    if (hasAutofillGroup) {
+      placeForm();
+    }
+    domElement.focus();
+  }
+
+  @override
+  void placeForm() {
+    // Switch domElement's parent from semantics object to form.
+    domElement.remove();
+    _inputConfiguration.autofillGroup!.formElement.append(domElement);
+    semanticsObject.element
+        .append(_inputConfiguration.autofillGroup!.formElement);
+    _appendedToForm = true;
   }
 }
 
@@ -114,6 +152,7 @@ class TextField extends RoleManager {
             ? html.TextAreaElement()
             : html.InputElement();
     textEditingElement = SemanticsTextEditingStrategy(
+      semanticsObject,
       textEditing,
       editableDomElement,
     );
@@ -191,8 +230,8 @@ class TextField extends RoleManager {
   void _initializeForWebkit() {
     // Safari for desktop is also initialized as the other browsers.
     if (operatingSystem == OperatingSystem.macOs) {
-       _initializeForBlink();
-       return;
+      _initializeForBlink();
+      return;
     }
     num? lastTouchStartOffsetX;
     num? lastTouchStartOffsetY;
