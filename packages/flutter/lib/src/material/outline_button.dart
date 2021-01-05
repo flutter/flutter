@@ -84,7 +84,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 ///  * <https://material.io/design/components/buttons.html>
 @Deprecated(
   'Use OutlinedButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
-  'This feature was deprecated after 1.25.0-8.1.pre.'
+  'This feature was deprecated after v1.25.0-8.1.pre.'
 )
 class OutlineButton extends MaterialButton {
   /// Create an outline button.
