@@ -15,7 +15,7 @@ transforms:
   - title: 'Rename to deferFirstFrame'
     date: 2020-12-23
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'deferFirstFrameReport'
       inClass: 'WidgetsBinding'
     changes:
@@ -26,7 +26,7 @@ transforms:
   - title: 'Rename to allowFirstFrame'
     date: 2020-12-23
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
       method: 'allowFirstFrameReport'
       inClass: 'WidgetsBinding'
     changes:
