@@ -408,7 +408,6 @@ void main() {
       expect(translation.y, 0.0);
     });
 
-    // TODO(justinmc): Do the same test but rotated.
     testWidgets('inertia fling and boundary sliding', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 50.0;
@@ -468,6 +467,101 @@ void main() {
       translation = transformationController.value.getTranslation();
       expect(translation.x, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
       expect(translation.y, moreOrLessEquals(boundaryMargin, epsilon: 1e-9));
+    });
+
+    testWidgets('inertia fling and boundary sliding with rotation', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      const double minScale = 0.8;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                minScale: minScale,
+                scaleEnabled: false,
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Pinch to rotate a bit.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childCenter = Offset(
+        childOffset.dx + 100.0,
+        childOffset.dy + 100.0,
+      );
+      const double radius = 20.0;
+      final Offset rotateStart1 = Offset(childCenter.dx - radius, childCenter.dy);
+      final Offset rotateStart2 = Offset(childCenter.dx + radius, childCenter.dy);
+      final double value = radius * math.sin(math.pi / 4);
+      final Offset rotateEnd1 = Offset(childCenter.dx - value, childCenter.dy - value);
+      final Offset rotateEnd2 = Offset(childCenter.dx + value, childCenter.dy + value);
+      final TestGesture gesture = await tester.createGesture();
+      addTearDown(gesture.removePointer);
+      final TestGesture gesture2 = await tester.createGesture();
+      addTearDown(gesture2.removePointer);
+      await gesture.down(rotateStart1);
+      await gesture2.down(rotateStart2);
+      await tester.pump();
+      await gesture.moveTo(rotateEnd1);
+      await gesture2.moveTo(rotateEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, isNot(equals(Matrix4.identity())));
+      expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
+      final Matrix3 rotationMatrix = transformationController.value.getRotation();
+      final double rotation = math.atan2(rotationMatrix.row1.x, rotationMatrix.row0.x);
+      expect(rotation, moreOrLessEquals(math.pi / 8, epsilon: 1e-9));
+
+      // Fling the child.
+      const Offset flingEnd = Offset(20.0, 15.0);
+      final Vector3 translationAfterRotate = transformationController.value.getTranslation();
+      await tester.flingFrom(childOffset, flingEnd, 1000.0);
+      await tester.pump();
+
+      // Immediately after the gesture, the child has moved to exactly follow
+      // the gesture.
+      final Vector3 translationAtRelease = transformationController.value.getTranslation();
+      expect(translationAtRelease.x, moreOrLessEquals(translationAfterRotate.x + flingEnd.dx));
+      expect(translationAtRelease.y, moreOrLessEquals(translationAfterRotate.y + flingEnd.dy));
+
+      // A short time after the gesture was released, it continues to move with
+      // inertia, and hasn't hit the boundary yet.
+      await tester.pump(const Duration(milliseconds: 10));
+      Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, greaterThan(translationAtRelease.x));
+      expect(translation.y, greaterThan(translationAtRelease.y));
+
+      // It hits the boundary in the y direction first. The y coordinate has
+      // been increasing up to this point but will now start decreasing.
+      await tester.pump(const Duration(milliseconds: 161));
+      final Vector3 translationWhenYHitsBounds = transformationController.value.getTranslation();
+      expect(translationWhenYHitsBounds.x, greaterThan(translationAtRelease.x));
+      expect(translationWhenYHitsBounds.y, greaterThan(translationAtRelease.y));
+
+      // x slides along while y is held to the boundary at the rotated angle,
+      // which causes it to decrease.
+      await tester.pump(const Duration(milliseconds: 40));
+      final Vector3 translationSliding = transformationController.value.getTranslation();
+      expect(translationSliding.x, greaterThan(translationWhenYHitsBounds.x));
+      expect(translationSliding.y, lessThan(translationWhenYHitsBounds.y));
+
+      // Eventually it stops.
+      await tester.pump(const Duration(milliseconds: 40));
+      final Vector3 translationEnd = transformationController.value.getTranslation();
+      expect(translationEnd.x, greaterThan(translationSliding.x));
+      expect(translationEnd.y, lessThan(translationSliding.y));
+      await tester.pumpAndSettle();
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, equals(translationEnd.x));
+      expect(translation.y, equals(translationEnd.y));
     });
 
     testWidgets('Scaling automatically causes a centering translation', (WidgetTester tester) async {
