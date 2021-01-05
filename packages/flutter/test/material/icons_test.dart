@@ -52,19 +52,21 @@ void main() {
   );
 
   testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
-    const double iconSize = 200.0;
 
     await tester.pumpWidget(MaterialApp(
-      home: Wrap(
-        children: const <Icon>[
-          Icon(Icons.ten_k, size: iconSize),
-          Icon(Icons.ac_unit, size: iconSize),
-          Icon(Icons.local_taxi, size: iconSize),
-          Icon(Icons.local_taxi_outlined, size: iconSize),
-          Icon(Icons.local_taxi_rounded, size: iconSize),
-          Icon(Icons.local_taxi_sharp, size: iconSize),
-          Icon(Icons.zoom_out_sharp, size: iconSize),
-        ],
+      home: IconTheme(
+        data: const IconThemeData(size: 200),
+        child: Wrap(
+          children: const <Icon>[
+            Icon(Icons.ten_k),
+            Icon(Icons.ac_unit),
+            Icon(Icons.local_taxi),
+            Icon(Icons.local_taxi_outlined),
+            Icon(Icons.local_taxi_rounded),
+            Icon(Icons.local_taxi_sharp),
+            Icon(Icons.zoom_out_sharp),
+          ],
+        ),
       ),
     ));
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.material.png'));
