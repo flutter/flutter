@@ -53,7 +53,7 @@ enum StretchMode {
 /// [FlexibleSpaceBar.createSettings], to convey sizing information down to the
 /// [FlexibleSpaceBar].
 ///
-/// {@tool dartpad --template=freeform_no_null_safety}
+/// {@tool dartpad --template=freeform}
 /// This sample application demonstrates the different features of the
 /// [FlexibleSpaceBar] when used in a [SliverAppBar]. This app bar is configured
 /// to stretch into the overscroll space, and uses the
@@ -78,7 +78,7 @@ enum StretchMode {
 ///             stretch: true,
 ///             onStretchTrigger: () {
 ///               // Function callback for stretch
-///               return;
+///               return Future.value();
 ///             },
 ///             expandedHeight: 300.0,
 ///             flexibleSpace: FlexibleSpaceBar(
