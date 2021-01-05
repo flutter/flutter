@@ -1341,7 +1341,6 @@ class PrioritizedIntents extends Intent {
 class PrioritizedAction extends Action<PrioritizedIntents> {
   late Action<dynamic> _selectedAction;
   late Intent _selectedIntent;
-  
   @override
   bool isEnabled(PrioritizedIntents intent) {
     final FocusNode? focus = primaryFocus;
@@ -1360,7 +1359,6 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
     }
     return false;
   }
-  
   @override
   Object? invoke(PrioritizedIntents intent) {
     assert(_selectedAction != null);
