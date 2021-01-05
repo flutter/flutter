@@ -900,7 +900,7 @@ abstract class TextInputConnection {
   /// Requests that the text input control become visible.
   void show();
 
-  /// Requests that the text input control is hid.
+  /// Requests that the text input control is hidden.
   ///
   /// This method is called by the framework when the text input control should
   /// hide.
@@ -973,7 +973,7 @@ abstract class TextInputConnection {
   /// Use [TextInput.detach] instead.
   @Deprecated(
     'Use TextInput.detach instead. '
-    'This feature was deprecated after v1.26.0-2.0.pre.'
+    'This feature was deprecated after v1.26.0-1.0.pre.'
   )
   void close() {
     TextInput.detach(_client);
@@ -983,7 +983,7 @@ abstract class TextInputConnection {
   /// Use [TextInput.reset] instead.
   @Deprecated(
     'Use TextInput.reset instead. '
-    'This feature was deprecated after v1.26.0-2.0.pre.'
+    'This feature was deprecated after v1.26.0-1.0.pre.'
   )
   void connectionClosedReceived() {
     TextInput.reset();
