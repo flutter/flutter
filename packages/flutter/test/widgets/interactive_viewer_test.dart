@@ -1650,7 +1650,7 @@ void main() {
           Offset(110.0, 0.0),
         );
 
-        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        final ClosestPoints pair = a.findClosestPointsLineSegment(b);
         expect(pair.a, const Offset(0.0, 0.0));
         expect(pair.b, const Offset(10.0, 0.0));
       });
@@ -1665,7 +1665,7 @@ void main() {
           Offset(0.0, 100.0),
         );
 
-        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        final ClosestPoints pair = a.findClosestPointsLineSegment(b);
         expect(pair.a, const Offset(50.0, 50.0));
         expect(pair.b, const Offset(50.0, 50.0));
       });
@@ -1680,7 +1680,7 @@ void main() {
           Offset(110.0, 100.0),
         );
 
-        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        final ClosestPoints pair = a.findClosestPointsLineSegment(b);
         expect(pair.a, const Offset(0.0, 0.0));
         expect(pair.b, const Offset(10.0, 0.0));
       });
@@ -1695,7 +1695,7 @@ void main() {
           Offset(100.0, 200.0),
         );
 
-        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        final ClosestPoints pair = a.findClosestPointsLineSegment(b);
         expect(pair.a, const Offset(100.0, 100.0));
         expect(pair.b.dx, moreOrLessEquals(109.1, epsilon: 0.1));
         expect(pair.b.dy, moreOrLessEquals(109.1, epsilon: 0.1));
@@ -1711,7 +1711,7 @@ void main() {
           Offset(300.0, 300.0),
         );
 
-        final OffsetTuple pair = a.findClosestPointsLineSegment(b);
+        final ClosestPoints pair = a.findClosestPointsLineSegment(b);
         expect(pair.a, const Offset(307.0, 157.1));
         expect(pair.b, const Offset(300.0, 157.1));
       });
@@ -1729,11 +1729,11 @@ void main() {
         );
         const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
 
-        final OffsetTuple closestPointsVertical = vertical.findClosestPointsRect(rect);
+        final ClosestPoints closestPointsVertical = vertical.findClosestPointsRect(rect);
         expect(closestPointsVertical.a, const Offset(310.0, 0.0));
         expect(closestPointsVertical.b, const Offset(300.0, 0.0));
 
-        final OffsetTuple closestPointsHorizontal = horizontal.findClosestPointsRect(rect);
+        final ClosestPoints closestPointsHorizontal = horizontal.findClosestPointsRect(rect);
         expect(closestPointsHorizontal.a, const Offset(0.0, 310.0));
         expect(closestPointsHorizontal.b, const Offset(0.0, 300.0));
       });
@@ -1745,7 +1745,7 @@ void main() {
         );
         const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
 
-        final OffsetTuple closestPoints = a.findClosestPointsRect(rect);
+        final ClosestPoints closestPoints = a.findClosestPointsRect(rect);
         expect(closestPoints.a, const Offset(-10.0, 300.0));
         expect(closestPoints.b, const Offset(0.0, 300.0));
       });
@@ -1757,7 +1757,7 @@ void main() {
         );
         const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
 
-        final OffsetTuple closestPoints = a.findClosestPointsRect(rect);
+        final ClosestPoints closestPoints = a.findClosestPointsRect(rect);
         expect(closestPoints.a, const Offset(306.7, 26.0));
         expect(closestPoints.b, const Offset(300.0, 26.0));
       });
