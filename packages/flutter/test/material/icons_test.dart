@@ -29,8 +29,7 @@ void main() {
     expect(Icons.access_time_sharp.matchTextDirection, false);
   });
 
-  testWidgets('Adaptive icons are correct on cupertino platforms',
-        (WidgetTester tester) async {
+  testWidgets('Adaptive icons are correct on cupertino platforms', (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back_ios);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_ios_outlined);
     },
@@ -40,9 +39,7 @@ void main() {
     }),
   );
 
-  testWidgets(
-    'Adaptive icons are correct on non-cupertino platforms',
-        (WidgetTester tester) async {
+  testWidgets('Adaptive icons are correct on non-cupertino platforms', (WidgetTester tester) async {
       expect(Icons.adaptive.arrow_back, Icons.arrow_back);
       expect(Icons.adaptive.arrow_back_outlined, Icons.arrow_back_outlined);
     },
@@ -53,4 +50,23 @@ void main() {
       TargetPlatform.linux,
     }),
   );
+
+  testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
+    const double iconSize = 200.0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Wrap(
+        children: const <Icon>[
+          Icon(Icons.ten_k, size: iconSize),
+          Icon(Icons.ac_unit, size: iconSize),
+          Icon(Icons.local_taxi, size: iconSize),
+          Icon(Icons.local_taxi_outlined, size: iconSize),
+          Icon(Icons.local_taxi_rounded, size: iconSize),
+          Icon(Icons.local_taxi_sharp, size: iconSize),
+          Icon(Icons.zoom_out_sharp, size: iconSize),
+        ],
+      ),
+    ));
+    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.material.png'));
+  });
 }
