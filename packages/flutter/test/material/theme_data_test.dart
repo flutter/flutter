@@ -153,7 +153,7 @@ void main() {
   });
 
   test('cursorColor', () {
-    expect(ThemeData(cursorColor: Colors.red).cursorColor, Colors.red);
+    expect(const TextSelectionThemeData(cursorColor: Colors.red).cursorColor, Colors.red);
   });
 
   testWidgets('ThemeData.from a light color scheme sets appropriate values', (WidgetTester tester) async {
@@ -312,6 +312,9 @@ void main() {
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
       dataTableTheme: const DataTableThemeData(),
+      checkboxTheme: const CheckboxThemeData(),
+      radioTheme: const RadioThemeData(),
+      switchTheme: const SwitchThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
     );
@@ -401,6 +404,9 @@ void main() {
       outlinedButtonTheme: const OutlinedButtonThemeData(),
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
       dataTableTheme: const DataTableThemeData(),
+      checkboxTheme: const CheckboxThemeData(),
+      radioTheme: const RadioThemeData(),
+      switchTheme: const SwitchThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
     );
@@ -430,9 +436,9 @@ void main() {
       toggleButtonsTheme: otherTheme.toggleButtonsTheme,
       buttonColor: otherTheme.buttonColor,
       secondaryHeaderColor: otherTheme.secondaryHeaderColor,
-      textSelectionColor: otherTheme.textSelectionColor,
-      cursorColor: otherTheme.cursorColor,
-      textSelectionHandleColor: otherTheme.textSelectionHandleColor,
+      textSelectionColor: otherTheme.textSelectionTheme.selectionColor,
+      cursorColor: otherTheme.textSelectionTheme.cursorColor,
+      textSelectionHandleColor: otherTheme.textSelectionTheme.selectionHandleColor,
       backgroundColor: otherTheme.backgroundColor,
       dialogBackgroundColor: otherTheme.dialogBackgroundColor,
       indicatorColor: otherTheme.indicatorColor,
@@ -476,7 +482,6 @@ void main() {
       outlinedButtonTheme: otherTheme.outlinedButtonTheme,
       textSelectionTheme: otherTheme.textSelectionTheme,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
-      useTextSelectionTheme: otherTheme.useTextSelectionTheme,
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
@@ -505,11 +510,11 @@ void main() {
     expect(themeDataCopy.toggleButtonsTheme, equals(otherTheme.toggleButtonsTheme));
     expect(themeDataCopy.buttonColor, equals(otherTheme.buttonColor));
     expect(themeDataCopy.secondaryHeaderColor, equals(otherTheme.secondaryHeaderColor));
-    expect(themeDataCopy.textSelectionColor, equals(otherTheme.textSelectionColor));
-    expect(themeDataCopy.cursorColor, equals(otherTheme.cursorColor));
-    expect(themeDataCopy.textSelectionColor, equals(otherTheme.textSelectionColor));
-    expect(themeDataCopy.cursorColor, equals(otherTheme.cursorColor));
-    expect(themeDataCopy.textSelectionHandleColor, equals(otherTheme.textSelectionHandleColor));
+    expect(themeDataCopy.textSelectionTheme.selectionColor, equals(otherTheme.textSelectionTheme.selectionColor));
+    expect(themeDataCopy.textSelectionTheme.cursorColor, equals(otherTheme.textSelectionTheme.cursorColor));
+    expect(themeDataCopy.textSelectionTheme.selectionColor, equals(otherTheme.textSelectionTheme.selectionColor));
+    expect(themeDataCopy.textSelectionTheme.cursorColor, equals(otherTheme.textSelectionTheme.cursorColor));
+    expect(themeDataCopy.textSelectionTheme.selectionHandleColor, equals(otherTheme.textSelectionTheme.selectionHandleColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
     expect(themeDataCopy.dialogBackgroundColor, equals(otherTheme.dialogBackgroundColor));
     expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
@@ -549,7 +554,6 @@ void main() {
     expect(themeDataCopy.outlinedButtonTheme, equals(otherTheme.outlinedButtonTheme));
     expect(themeDataCopy.textSelectionTheme, equals(otherTheme.textSelectionTheme));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
-    expect(themeDataCopy.useTextSelectionTheme, equals(otherTheme.useTextSelectionTheme));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {

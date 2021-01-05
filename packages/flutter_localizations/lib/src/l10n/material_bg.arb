@@ -53,7 +53,7 @@
   "remainingTextFieldCharacterCountOther": "Остават $remainingCount знака",
   "refreshIndicatorSemanticLabel": "Опресняване",
   "moreButtonTooltip": "Още",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "дд/мм/гггг",
   "selectYearSemanticsLabel": "Избиране на година",
   "unspecifiedDate": "Дата",

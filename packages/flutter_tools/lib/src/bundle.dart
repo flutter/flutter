@@ -9,6 +9,7 @@ import 'package:pool/pool.dart';
 
 import 'asset.dart';
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
@@ -27,7 +28,9 @@ const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
-String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
+String getDefaultApplicationKernelPath({
+  @required bool trackWidgetCreation,
+}) {
   return getKernelPathForTransformerOptions(
     globals.fs.path.join(getBuildDirectory(), 'app.dill'),
     trackWidgetCreation: trackWidgetCreation,
@@ -38,6 +41,8 @@ String getDefaultCachedKernelPath({
   @required bool trackWidgetCreation,
   @required List<String> dartDefines,
   @required List<String> extraFrontEndOptions,
+  FileSystem fileSystem,
+  Config config,
 }) {
   final StringBuffer buffer = StringBuffer();
   buffer.writeAll(dartDefines);
@@ -49,7 +54,10 @@ String getDefaultCachedKernelPath({
     buildPrefix = '${hex.encode(digest.bytes)}.';
   }
   return getKernelPathForTransformerOptions(
-    globals.fs.path.join(getBuildDirectory(), '${buildPrefix}cache.dill'),
+    (fileSystem ?? globals.fs).path.join(getBuildDirectory(
+      config ?? globals.config,
+     fileSystem ?? globals.fs
+    ), '${buildPrefix}cache.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
@@ -79,11 +87,7 @@ class BundleBuilder {
     String manifestPath = defaultManifestPath,
     String applicationKernelFilePath,
     String depfilePath,
-    String privateKeyPath = defaultPrivateKeyPath,
     String assetDirPath,
-    String packagesPath,
-    bool precompiledSnapshot = false,
-    bool reportLicensedPackages = false,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions = const <String>[],
     List<String> extraGenSnapshotOptions = const <String>[],
@@ -94,7 +98,6 @@ class BundleBuilder {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute('.packages');
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
       buildMode: buildInfo.mode,
@@ -103,7 +106,6 @@ class BundleBuilder {
       flutterProject: flutterProject,
       outputDir: assetDirPath,
       depfilePath: depfilePath,
-      precompiled: precompiledSnapshot,
       trackWidgetCreation: trackWidgetCreation,
       treeShakeIcons: treeShakeIcons,
       dartDefines: buildInfo.dartDefines,
@@ -129,13 +131,11 @@ Future<void> buildWithAssemble({
   @required String mainPath,
   @required String outputDir,
   @required String depfilePath,
-  @required bool precompiled,
   bool trackWidgetCreation,
   @required bool treeShakeIcons,
   List<String> dartDefines,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
-  buildMode = precompiled ? buildMode : BuildMode.debug;
   final Environment environment = Environment(
     projectDir: flutterProject.directory,
     outputDir: globals.fs.directory(outputDir),
@@ -192,8 +192,6 @@ Future<AssetBundle> buildAssets({
   String manifestPath,
   String assetDirPath,
   @required String packagesPath,
-  bool includeDefaultFonts = true,
-  bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= globals.fs.path.absolute(packagesPath);
@@ -204,8 +202,6 @@ Future<AssetBundle> buildAssets({
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
-    includeDefaultFonts: includeDefaultFonts,
-    reportLicensedPackages: reportLicensedPackages,
   );
   if (result != 0) {
     return null;

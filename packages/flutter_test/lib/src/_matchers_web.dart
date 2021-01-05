@@ -88,7 +88,7 @@ RenderObject _findRepaintBoundary(Element element) {
   return renderObject;
 }
 
-void _renderElement(ui.Window window, RenderObject renderObject) {
+void _renderElement(ui.FlutterView window, RenderObject renderObject) {
   assert(renderObject.debugLayer != null);
   final Layer layer = renderObject.debugLayer!;
   final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();

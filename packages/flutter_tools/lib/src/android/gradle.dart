@@ -136,10 +136,9 @@ Future<File> getGradleAppOut(AndroidProject androidProject) async {
 Future<void> checkGradleDependencies() async {
   final Status progress = globals.logger.startProgress(
     'Ensuring gradle dependencies are up to date...',
-    timeout: timeoutConfiguration.slowOperation,
   );
   final FlutterProject flutterProject = FlutterProject.current();
-  await processUtils.run(<String>[
+  await globals.processUtils.run(<String>[
       gradleUtils.getExecutable(flutterProject),
       'dependencies',
     ],
@@ -167,8 +166,7 @@ void createSettingsAarGradle(Directory androidDirectory) {
   final String currentFileContent = currentSettingsFile.readAsStringSync();
 
   final String newSettingsRelativeFile = globals.fs.path.relative(newSettingsFile.path);
-  final Status status = globals.logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...',
-      timeout: timeoutConfiguration.fastOperation);
+  final Status status = globals.logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...');
 
   final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
   final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
@@ -270,7 +268,6 @@ Future<void> buildGradleApp({
 
   final Status status = globals.logger.startProgress(
     "Running Gradle task '$assembleTask'...",
-    timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
 
@@ -281,6 +278,9 @@ Future<void> buildGradleApp({
     command.add('-Pverbose=true');
   } else {
     command.add('-q');
+  }
+  if (!buildInfo.androidGradleDaemon) {
+    command.add('--no-daemon');
   }
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
@@ -323,9 +323,6 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.splitPerAbi) {
     command.add('-Psplit-per-abi=true');
-  }
-  if (androidBuildInfo.shrink) {
-    command.add('-Pshrink=true');
   }
   if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
     command.add('-Pdart-defines=${encodeDartDefines(androidBuildInfo.buildInfo.dartDefines)}');
@@ -388,7 +385,7 @@ Future<void> buildGradleApp({
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
-    exitCode = await processUtils.stream(
+    exitCode = await globals.processUtils.stream(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
@@ -535,11 +532,21 @@ Future<void> _performCodeSizeAnalysis(
     kind: kind,
   );
   final File outputFile = globals.fsUtils.getUniqueFile(
-    globals.fs.directory(getBuildDirectory()),'$kind-code-size-analysis', 'json',
+    globals.fs
+      .directory(globals.fsUtils.homeDirPath)
+      .childDirectory('.flutter-devtools'), '$kind-code-size-analysis', 'json',
   )..writeAsStringSync(jsonEncode(output));
   // This message is used as a sentinel in analyze_apk_size_test.dart
   globals.printStatus(
     'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
+  );
+
+  // DevTools expects a file path relative to the .flutter-devtools/ dir.
+  final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+  globals.printStatus(
+    '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+    'flutter pub global activate devtools; flutter pub global run devtools '
+    '--appSizeBase=$relativeAppSizePath'
   );
 }
 
@@ -571,7 +578,6 @@ Future<void> buildGradleAar({
   final String aarTask = getAarTaskFor(buildInfo);
   final Status status = globals.logger.startProgress(
     "Running Gradle task '$aarTask'...",
-    timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
 
@@ -595,6 +601,9 @@ Future<void> buildGradleAar({
     command.add('-Pverbose=true');
   } else {
     command.add('-q');
+  }
+  if (!buildInfo.androidGradleDaemon) {
+    command.add('--no-daemon');
   }
 
   if (target != null && target.isNotEmpty) {
@@ -653,7 +662,7 @@ Future<void> buildGradleAar({
   final Stopwatch sw = Stopwatch()..start();
   RunResult result;
   try {
-    result = await processUtils.run(
+    result = await globals.processUtils.run(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
@@ -1088,6 +1097,21 @@ Directory _getLocalEngineRepo({
         '${abi}_$buildMode',
         artifactVersion,
         '${abi}_$buildMode-$artifactVersion.$artifact',
+      ),
+    );
+  }
+  for (final String artifact in <String>['flutter_embedding_$buildMode', '${abi}_$buildMode']) {
+    _createSymlink(
+      globals.fs.path.join(
+        engineOutPath,
+        '$artifact.maven-metadata.xml',
+      ),
+      globals.fs.path.join(
+        localEngineRepo.path,
+        'io',
+        'flutter',
+        artifact,
+        'maven-metadata.xml',
       ),
     );
   }

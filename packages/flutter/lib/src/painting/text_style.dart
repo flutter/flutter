@@ -25,7 +25,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 const double _kDefaultFontSize = 14.0;
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 /// An immutable style describing how to format and paint text.
 ///
@@ -204,7 +204,7 @@ const double _kDefaultFontSize = 14.0;
 ///         foreground: Paint()
 ///           ..style = PaintingStyle.stroke
 ///           ..strokeWidth = 6
-///           ..color = Colors.blue[700],
+///           ..color = Colors.blue[700]!,
 ///       ),
 ///     ),
 ///     // Solid text as fill.

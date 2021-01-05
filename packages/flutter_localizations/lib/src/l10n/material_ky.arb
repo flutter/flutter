@@ -52,7 +52,7 @@
   "remainingTextFieldCharacterCountOther": "$remainingCount белги калды",
   "refreshIndicatorSemanticLabel": "Жаңыртуу",
   "moreButtonTooltip": "Дагы",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "аа/кк/жжжж",
   "selectYearSemanticsLabel": "Жылды тандоо",
   "unspecifiedDate": "Күн",

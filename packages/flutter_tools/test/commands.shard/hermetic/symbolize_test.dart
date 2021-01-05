@@ -37,7 +37,6 @@ void main() {
       fileSystem: fileSystem,
       dwarfSymbolizationService: mockDwarfSymbolizationService,
     );
-    applyMocksToCommand(command);
   });
 
   testUsingContext('Regression test for type error in codec', () async {
@@ -81,7 +80,7 @@ void main() {
     expect(result, throwsToolExit(message: ''));
   });
 
-  testUsingContext('symbolize succeedes when DwarfSymbolizationService does not throw', () async {
+  testUsingContext('symbolize succeeds when DwarfSymbolizationService does not throw', () async {
     fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
     fileSystem.file('foo.stack').writeAsStringSync('hello');
 

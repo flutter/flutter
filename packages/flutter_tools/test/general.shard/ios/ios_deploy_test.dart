@@ -104,7 +104,10 @@ void main () {
           'success', // ignore first "success" from lldb, but log subsequent ones from real logging.
           'Log on attach1',
           'Log on attach2',
-          '', '']);
+          '',
+          '',
+          'Log after process exit',
+        ]);
       });
 
       testWithoutContext('app exit', () async {
@@ -124,7 +127,34 @@ void main () {
 
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
         await logLines.toList();
-        expect(receivedLogLines, <String>['Log on attach']);
+        expect(receivedLogLines, <String>[
+          'Log on attach',
+          'Log after process exit',
+        ]);
+      });
+
+      testWithoutContext('app crash', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            stdout:
+                '(lldb)     run\r\nsuccess\r\nLog on attach\r\n(lldb) Process 6156 stopped\r\n* thread #1, stop reason = Assertion failed:',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.toList();
+        expect(receivedLogLines, <String>[
+          'Log on attach',
+          '* thread #1, stop reason = Assertion failed:',
+        ]);
       });
 
       testWithoutContext('attach failed', () async {
@@ -196,7 +226,7 @@ void main () {
         expect(logger.errorText, contains('Your device is locked.'));
       });
 
-      testWithoutContext('device locked', () async {
+      testWithoutContext('unknown app launch error', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],

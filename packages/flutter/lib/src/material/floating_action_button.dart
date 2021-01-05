@@ -241,7 +241,7 @@ class FloatingActionButton extends StatelessWidget {
   /// is used.
   ///
   /// Although the color of theme's `accentIconTheme` currently provides a
-  /// default that supercedes the `onSecondary` color, this dependency
+  /// default that supersedes the `onSecondary` color, this dependency
   /// has been deprecated:  https://flutter.dev/go/remove-fab-accent-theme-dependency.
   /// It will be removed in the future.
   final Color? foregroundColor;
@@ -290,7 +290,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback? onPressed;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -381,7 +381,7 @@ class FloatingActionButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder? shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -415,17 +415,15 @@ class FloatingActionButton extends StatelessWidget {
   final BoxConstraints _sizeConstraints;
 
   static const double _defaultElevation = 6;
-  // TODO(gspencer): verify focus and hover elevation values are correct
-  // according to spec.
-  static const double _defaultFocusElevation = 8;
-  static const double _defaultHoverElevation = 10;
+  static const double _defaultFocusElevation = 6;
+  static const double _defaultHoverElevation = 8;
   static const double _defaultHighlightElevation = 12;
   static const ShapeBorder _defaultShape = CircleBorder();
   static const ShapeBorder _defaultExtendedShape = StadiumBorder();
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
 
     // Applications should no longer use accentIconTheme's color to configure
@@ -584,6 +582,19 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) => 0.0;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      final Size childSize = child!.getDryLayout(const BoxConstraints());
+      return Size(
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, childSize.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, childSize.height)),
+      );
+    } else {
+      return constraints.biggest;
+    }
+  }
 
   @override
   void performLayout() {

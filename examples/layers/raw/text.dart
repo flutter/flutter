@@ -9,7 +9,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 // A paragraph represents a rectangular region that contains some text.
-ui.Paragraph paragraph;
+late ui.Paragraph paragraph;
 
 ui.Picture paint(ui.Rect paintBounds) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();

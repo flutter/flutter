@@ -50,13 +50,13 @@ import 'framework.dart';
 /// ```dart preamble
 /// class SpinModel extends InheritedNotifier<AnimationController> {
 ///   SpinModel({
-///     Key key,
-///     AnimationController notifier,
-///     Widget child,
+///     Key? key,
+///     AnimationController? notifier,
+///     required Widget child,
 ///   }) : super(key: key, notifier: notifier, child: child);
 ///
 ///   static double of(BuildContext context) {
-///     return context.dependOnInheritedWidgetOfExactType<SpinModel>().notifier.value;
+///     return context.dependOnInheritedWidgetOfExactType<SpinModel>()!.notifier!.value;
 ///   }
 /// }
 ///
@@ -81,7 +81,7 @@ import 'framework.dart';
 /// ```
 ///
 /// ```dart
-/// AnimationController _controller;
+/// late AnimationController _controller;
 ///
 /// @override
 /// void initState() {

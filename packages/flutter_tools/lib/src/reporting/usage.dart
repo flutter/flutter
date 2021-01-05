@@ -59,6 +59,8 @@ enum CustomDimensions {
   commandPackagesAndroidEmbeddingVersion, // cd46
   nullSafety, // cd47
   fastReassemble, // cd48
+  nullSafeMigratedLibraries, // cd49
+  nullSafeTotalLibraries, // cd 50
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';
@@ -423,8 +425,7 @@ class _DefaultUsage implements Usage {
         isFirstRun ||
         // Display the welcome message if we are not on master, and if the
         // persistent tool state instructs that we should.
-        (!globals.flutterVersion.isMaster &&
-        (globals.persistentToolState.redisplayWelcomeMessage ?? true))) {
+        (globals.persistentToolState.redisplayWelcomeMessage ?? true)) {
       _printWelcome();
       _printedWelcome = true;
       globals.persistentToolState.redisplayWelcomeMessage = false;

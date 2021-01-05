@@ -573,6 +573,7 @@ void main() {
          isChecked: true,
          isSelected: true,
          isButton: true,
+         isSlider: true,
          isLink: true,
          isTextField: true,
          isReadOnly: true,
@@ -616,7 +617,7 @@ void main() {
          hasDismissAction: true,
          customActions: <CustomSemanticsAction>[action],
       ));
-    }, skip: true); // TODO(abrusher): Enable once engine PR #20385 lands.
+    });
 
     testWidgets('Can match child semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();

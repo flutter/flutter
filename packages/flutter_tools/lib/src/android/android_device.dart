@@ -63,7 +63,6 @@ class AndroidDevice extends Device {
     @required Platform platform,
     @required AndroidSdk androidSdk,
     @required FileSystem fileSystem,
-    TimeoutConfiguration timeoutConfiguration = const TimeoutConfiguration(),
     AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
   }) : _logger = logger,
        _processManager = processManager,
@@ -71,7 +70,6 @@ class AndroidDevice extends Device {
        _platform = platform,
        _fileSystem = fileSystem,
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
-       _timeoutConfiguration = timeoutConfiguration,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(
          id,
@@ -87,7 +85,6 @@ class AndroidDevice extends Device {
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
-  final TimeoutConfiguration _timeoutConfiguration;
 
   final String productID;
   final String modelID;
@@ -176,12 +173,12 @@ class AndroidDevice extends Device {
       try {
         await console
             .connect()
-            .timeout(_timeoutConfiguration.fastOperation,
+            .timeout(const Duration(seconds: 2),
                 onTimeout: () => throw TimeoutException('Connection timed out'));
 
         return await console
             .getAvdName()
-            .timeout(_timeoutConfiguration.fastOperation,
+            .timeout(const Duration(seconds: 2),
                 onTimeout: () => throw TimeoutException('"avd name" timed out'));
       } finally {
         console.destroy();
@@ -443,7 +440,6 @@ class AndroidDevice extends Device {
 
     final Status status = _logger.startProgress(
       'Installing ${_fileSystem.path.relative(app.file.path)}...',
-      timeout: _timeoutConfiguration.slowOperation,
     );
     final RunResult installResult = await _processUtils.run(
       adbCommandForDevice(<String>[
@@ -579,7 +575,8 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = await AndroidApk.fromAndroidProject(project.android);
+      package = await ApplicationPackageFactory.instance
+        .getPackageForPlatform(devicePlatform, buildInfo: debuggingOptions.buildInfo) as AndroidApk;
     }
     // There was a failure parsing the android project information.
     if (package == null) {
@@ -594,13 +591,17 @@ class AndroidDevice extends Device {
     }
 
     final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
-    _logger.printTrace('$this startApp');
-
     ProtocolDiscovery observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
       observatoryDiscovery = ProtocolDiscovery.observatory(
-        await getLogReader(),
+        // Avoid using getLogReader, which returns a singleton instance, because the
+        // observatory discovery will dipose at the end. creating a new logger here allows
+        // logs to be surfaced normally during `flutter drive`.
+        await AdbLogReader.createLogReader(
+          this,
+          _processManager,
+        ),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -673,8 +674,6 @@ class AndroidDevice extends Device {
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Observatory is listening on...".
     _logger.printTrace('Waiting for observatory port to be available...');
-
-    // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {

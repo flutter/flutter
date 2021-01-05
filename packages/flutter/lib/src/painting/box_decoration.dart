@@ -59,7 +59,7 @@ import 'image_provider.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@template flutter.painting.boxDecoration.clip}
+/// {@template flutter.painting.BoxDecoration.clip}
 /// The [shape] or the [borderRadius] won't clip the children of the
 /// decorated [Container]. If the clip is required, insert a clip widget
 /// (e.g., [ClipRect], [ClipRRect], [ClipPath]) as the child of the [Container].
@@ -167,7 +167,7 @@ class BoxDecoration extends Decoration {
   /// Applies only to boxes with rectangular shapes; ignored if [shape] is not
   /// [BoxShape.rectangle].
   ///
-  /// {@macro flutter.painting.boxDecoration.clip}
+  /// {@macro flutter.painting.BoxDecoration.clip}
   final BorderRadiusGeometry? borderRadius;
 
   /// A list of shadows cast by this box behind the box.
@@ -208,7 +208,7 @@ class BoxDecoration extends Decoration {
   /// [BoxShape.circle] and [RoundedRectangleBorder] instead of
   /// [BoxShape.rectangle].
   ///
-  /// {@macro flutter.painting.boxDecoration.clip}
+  /// {@macro flutter.painting.BoxDecoration.clip}
   final BoxShape shape;
 
   @override

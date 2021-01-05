@@ -132,23 +132,6 @@ void main() {
     expect(result.stderr, contains('Target file')); // Target file not found, but different paths on Windows and Linux/macOS.
   });
 
-  testWithoutContext('flutter build aot is deprecated', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      '-h',
-      '-v',
-    ]);
-
-    // Deprecated.
-    expect(result.stdout, isNot(contains('aot')));
-
-    // Only printed by verbose tool.
-    expect(result.stdout, isNot(contains('exiting with code 0')));
-  });
-
   testWithoutContext('flutter --version --machine outputs JSON with flutterRoot', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
@@ -220,5 +203,20 @@ void main() {
 
     expect(result.exitCode, 1);
     expect(result.stderr, contains('No SkSL shader bundle found at foo/bar/baz.json'));
+  });
+
+  testWithoutContext('flutter attach does not support --release', () async {
+    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      '--show-test-device',
+      'attach',
+      '--release',
+    ], workingDirectory: helloWorld);
+
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains('Could not find an option named "release"'));
   });
 }

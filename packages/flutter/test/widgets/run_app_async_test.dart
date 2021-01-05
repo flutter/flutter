@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fake_async/fake_async.dart';
@@ -11,7 +9,7 @@ import 'package:fake_async/fake_async.dart';
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance.resetEpoch();
+    WidgetsBinding.instance!.resetEpoch();
   });
 
   test('WidgetBinding build rendering tree and warm up frame back to back', () {
@@ -25,9 +23,9 @@ void main() {
         ),
       );
       // Rendering tree is not built synchronously.
-      expect(WidgetsBinding.instance.renderViewElement, isNull);
+      expect(WidgetsBinding.instance!.renderViewElement, isNull);
       fakeAsync.flushTimers();
-      expect(WidgetsBinding.instance.renderViewElement, isNotNull);
+      expect(WidgetsBinding.instance!.renderViewElement, isNotNull);
     });
   });
 }

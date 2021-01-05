@@ -174,11 +174,11 @@ class FakeAndroidPlatformViewsController {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
-    final double width = args['width'] as double;
-    final double height = args['height'] as double;
+    final double? width = args['width'] as double?;
+    final double? height = args['height'] as double?;
     final int layoutDirection = args['direction'] as int;
-    final bool hybrid = args['hybrid'] as bool;
-    final Uint8List creationParams = args['params'] as Uint8List;
+    final bool? hybrid = args['hybrid'] as bool?;
+    final Uint8List? creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id))
       throw PlatformException(
@@ -197,7 +197,7 @@ class FakeAndroidPlatformViewsController {
     }
 
     _views[id] = FakeAndroidPlatformView(id, viewType,
-        width != null || height != null ? Size(width, height) : null,
+        width != null && height != null ? Size(width, height) : null,
         layoutDirection,
         hybrid,
         creationParams,
@@ -344,7 +344,7 @@ class FakeIosPlatformViewsController {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
-    final Uint8List creationParams = args['params'] as Uint8List;
+    final Uint8List? creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id)) {
       throw PlatformException(

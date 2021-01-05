@@ -30,12 +30,7 @@ class CocoaPodsValidator extends DoctorValidator {
 
     ValidationType status = ValidationType.installed;
     if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
-      if (await _cocoaPods.isCocoaPodsInitialized) {
-        messages.add(ValidationMessage(_userMessages.cocoaPodsVersion(await _cocoaPods.cocoaPodsVersionText)));
-      } else {
-        status = ValidationType.partial;
-        messages.add(ValidationMessage.error(_userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
-      }
+      messages.add(ValidationMessage(_userMessages.cocoaPodsVersion(await _cocoaPods.cocoaPodsVersionText)));
     } else {
       if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
         status = ValidationType.missing;
@@ -50,12 +45,12 @@ class CocoaPodsValidator extends DoctorValidator {
       } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.hint(
-          _userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          _userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       } else {
         status = ValidationType.partial;
         final String currentVersionText = await _cocoaPods.cocoaPodsVersionText;
         messages.add(ValidationMessage.hint(
-          _userMessages.cocoaPodsOutdated(currentVersionText, _cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          _userMessages.cocoaPodsOutdated(currentVersionText, _cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
       }
     }
 

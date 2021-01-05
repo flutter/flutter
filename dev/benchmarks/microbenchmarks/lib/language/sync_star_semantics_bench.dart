@@ -21,7 +21,7 @@ void main() {
       data.add(
         InlineSpanSemanticsInformation(words[i], isPlaceholder: false),
       );
-    } else if (i % 2 == 0) {
+    } else if (i.isEven) {
       data.add(
         InlineSpanSemanticsInformation(words[i], isPlaceholder: true),
       );

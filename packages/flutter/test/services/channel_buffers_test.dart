@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(yjbanov): enable Web when https://github.com/flutter/engine/pull/12747 rolls into the framework.
-@TestOn('!chrome')
-
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;

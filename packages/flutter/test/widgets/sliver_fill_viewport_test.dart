@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -174,7 +172,7 @@ void main() {
     );
 
     final RenderSliver boxWithPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
-    expect(boxWithPadding.geometry.paintExtent, equals(600.0));
+    expect(boxWithPadding.geometry!.paintExtent, equals(600.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -192,6 +190,6 @@ void main() {
     );
 
     final RenderSliver boxWithoutPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
-    expect(boxWithoutPadding.geometry.paintExtent, equals(300.0));
+    expect(boxWithoutPadding.geometry!.paintExtent, equals(300.0));
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -60,11 +58,11 @@ void main() {
       final NavigatorState navigator = tester.state(find.byType(Navigator));
       final List<String> log = <String>[];
       observer
-        ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
-          log.add('${route.settings.name} pushed, previous route: ${previousRoute.settings.name}');
+        ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+          log.add('${route!.settings.name} pushed, previous route: ${previousRoute!.settings.name}');
         }
-        ..onRemoved = (Route<dynamic> route, Route<dynamic> previousRoute) {
-          log.add('${route.settings.name} removed, previous route: ${previousRoute?.settings?.name}');
+        ..onRemoved = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+          log.add('${route!.settings.name} removed, previous route: ${previousRoute?.settings.name}');
         };
 
 

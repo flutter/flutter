@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+@TestOn('!chrome')
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -75,7 +74,7 @@ void main() {
 
     await pumpWithColor(Colors.red);
     final RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered));
-    final ColorFilterLayer originalLayer = renderObject.debugLayer as ColorFilterLayer;
+    final ColorFilterLayer originalLayer = renderObject.debugLayer! as ColorFilterLayer;
     expect(originalLayer, isNotNull);
 
     // Change color to force a repaint.

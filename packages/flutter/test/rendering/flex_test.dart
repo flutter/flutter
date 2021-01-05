@@ -606,4 +606,46 @@ void main() {
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
   });
+
+  test('Intrinsics throw if alignment is baseline', () {
+    final RenderDecoratedBox box = RenderDecoratedBox(
+      decoration: const BoxDecoration(),
+    );
+    final RenderFlex flex = RenderFlex(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[box],
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+    );
+    layout(flex, constraints: const BoxConstraints(
+      minWidth: 200.0, maxWidth: 200.0, minHeight: 200.0, maxHeight: 200.0,
+    ));
+
+    final Matcher cannotCalculateIntrinsics = throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      'Intrinsics are not available for CrossAxisAlignment.baseline.',
+    ));
+
+    expect(() => flex.getMaxIntrinsicHeight(100), cannotCalculateIntrinsics);
+    expect(() => flex.getMinIntrinsicHeight(100), cannotCalculateIntrinsics);
+    expect(() => flex.getMaxIntrinsicWidth(100), cannotCalculateIntrinsics);
+    expect(() => flex.getMinIntrinsicWidth(100), cannotCalculateIntrinsics);
+  });
+
+  test('Can call methods that check overflow even if overflow value is not set', () {
+    final List<dynamic> exceptions = <dynamic>[];
+    final RenderFlex flex = RenderFlex(children: const <RenderBox>[]);
+    // This forces a check for _hasOverflow
+    expect(flex.toStringShort(), isNot(contains('OVERFLOWING')));
+    layout(flex, phase: EnginePhase.paint, onErrors: () {
+      exceptions.addAll(renderer.takeAllFlutterExceptions());
+    });
+    // We expect the RenderFlex to throw during performLayout() for not having
+    // a text direction, thus leaving it with a null overflow value. It'll then
+    // try to paint(), which also checks _hasOverflow, and it should be able to
+    // do so without an ancillary error.
+    expect(exceptions, hasLength(1));
+    expect(exceptions.first.message, isNot(contains('Null check operator')));
+  });
 }

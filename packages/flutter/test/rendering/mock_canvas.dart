@@ -823,7 +823,6 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
       while (predicate.moveNext()) {
         predicate.current.match(call);
       }
-      assert(predicate.current == null);
       // We allow painting more than expected.
     } on _MismatchedCall catch (data) {
       description.writeln(data.message);

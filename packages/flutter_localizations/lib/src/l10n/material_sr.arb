@@ -56,7 +56,7 @@
   "remainingTextFieldCharacterCountOther": "Преостало је $remainingCount знакова",
   "refreshIndicatorSemanticLabel": "Освежи",
   "moreButtonTooltip": "Још",
-  "dateSeparator": "/",
+  "dateSeparator": ".",
   "dateHelpText": "дд/мм/гггг",
   "selectYearSemanticsLabel": "Изаберите годину",
   "unspecifiedDate": "Датум",

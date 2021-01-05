@@ -34,7 +34,11 @@ class UserMessages {
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
-  String get noIdeInstallationInfo => 'IntelliJ - https://www.jetbrains.com/idea/';
+  List<String> get noIdeInstallationInfo => <String>[
+    'IntelliJ - https://www.jetbrains.com/idea/',
+    'Android Studio - https://developer.android.com/studio/',
+    'VS Code - https://code.visualstudio.com/',
+  ];
 
   // Messages used in IntellijValidator
   String intellijStatusInfo(String version) => 'version $version';
@@ -156,32 +160,22 @@ class UserMessages {
 
   // Messages used in CocoaPodsValidator
   String cocoaPodsVersion(String version) => 'CocoaPods version $version';
-  String cocoaPodsUninitialized(String consequence) =>
-      'CocoaPods installed but not initialized.\n'
-      '$consequence\n'
-      'To initialize CocoaPods, run:\n'
-      '  pod setup\n'
-      "once to finalize CocoaPods' installation.";
   String cocoaPodsMissing(String consequence, String installInstructions) =>
       'CocoaPods not installed.\n'
       '$consequence\n'
-      'To install:\n'
-      '$installInstructions';
+      'To install $installInstructions';
   String cocoaPodsUnknownVersion(String consequence, String upgradeInstructions) =>
       'Unknown CocoaPods version installed.\n'
       '$consequence\n'
-      'To upgrade:\n'
-      '$upgradeInstructions';
+      'To upgrade $upgradeInstructions';
   String cocoaPodsOutdated(String currentVersion, String recVersion, String consequence, String upgradeInstructions) =>
       'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
       '$consequence\n'
-      'To upgrade:\n'
-      '$upgradeInstructions';
+      'To upgrade $upgradeInstructions';
   String cocoaPodsBrokenInstall(String consequence, String reinstallInstructions) =>
       'CocoaPods installed but not working.\n'
       '$consequence\n'
-      'To re-install CocoaPods, run:\n'
-      '$reinstallInstructions';
+      'To re-install $reinstallInstructions';
 
   // Messages used in VsCodeValidator
   String vsCodeVersion(String version) => 'version $version';
@@ -237,6 +231,8 @@ class UserMessages {
       'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
   String get blkidLibraryMissing => 'The blkid development library is required for Linux development.\n'
       'It is likely available from your distribution (e.g.: apt install libblkid-dev)';
+  String get lzmaLibraryMissing => 'The lzma development library is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install liblzma-dev)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';

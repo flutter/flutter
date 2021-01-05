@@ -31,11 +31,32 @@ bool _focusDebug(String message, [Iterable<String>? details]) {
   return true;
 }
 
+/// An enum that describes how to handle a key event handled by a
+/// [FocusOnKeyCallback].
+enum KeyEventResult {
+  /// The key event has been handled, and the event should not be propagated to
+  /// other key event handlers.
+  handled,
+  /// The key event has not been handled, and the event should continue to be
+  /// propagated to other key event handlers, even non-Flutter ones.
+  ignored,
+  /// The key event has not been handled, but the key event should not be
+  /// propagated to other key event handlers.
+  ///
+  /// It will be returned to the platform embedding to be propagated to text
+  /// fields and non-Flutter key event handlers on the platform.
+  skipRemainingHandlers,
+}
+
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
 /// to receive key events.
 ///
 /// The [node] is the node that received the event.
-typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
+///
+/// Returns a [KeyEventResult] that describes how, and whether, the key event
+/// was handled.
+// TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
+typedef FocusOnKeyCallback = dynamic Function(FocusNode node, RawKeyEvent event);
 
 /// An attachment point for a [FocusNode].
 ///
@@ -122,7 +143,7 @@ class FocusAttachment {
     assert(_node != null);
     if (isAttached) {
       assert(_node.context != null);
-      parent ??= Focus.of(_node.context!, nullOk: true, scopeOk: true);
+      parent ??= Focus.maybeOf(_node.context!, scopeOk: true);
       parent ??= _node.context!.owner!.focusManager.rootScope;
       assert(parent != null);
       parent._reparent(_node);
@@ -201,7 +222,7 @@ enum UnfocusDisposition {
 /// To see the focus tree in the debug console, call [debugDumpFocusTree]. To
 /// get the focus tree as a string, call [debugDescribeFocusTree].
 ///
-/// {@template flutter.widgets.focus_manager.focus.lifecycle}
+/// {@template flutter.widgets.FocusNode.lifecycle}
 /// ## Lifecycle
 ///
 /// There are several actors involved in the lifecycle of a
@@ -244,7 +265,7 @@ enum UnfocusDisposition {
 /// call [dispose] when the node is done being used.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.focus_manager.focus.keyEvents}
+/// {@template flutter.widgets.FocusNode.keyEvents}
 /// ## Key Event Propagation
 ///
 /// The [FocusManager] receives key events from [RawKeyboard] and will pass them
@@ -282,10 +303,10 @@ enum UnfocusDisposition {
 /// [DirectionalFocusTraversalPolicyMixin], but custom policies can be built
 /// based upon these policies. See [FocusTraversalPolicy] for more information.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold} This example shows how
-/// a FocusNode should be managed if not using the [Focus] or [FocusScope]
-/// widgets. See the [Focus] widget for a similar example using [Focus] and
-/// [FocusScope] widgets.
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This example shows how a FocusNode should be managed if not using the
+/// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
+/// example using [Focus] and [FocusScope] widgets.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';
@@ -293,16 +314,16 @@ enum UnfocusDisposition {
 ///
 /// ```dart preamble
 /// class ColorfulButton extends StatefulWidget {
-///   ColorfulButton({Key key}) : super(key: key);
+///   ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _ColorfulButtonState createState() => _ColorfulButtonState();
 /// }
 ///
 /// class _ColorfulButtonState extends State<ColorfulButton> {
-///   FocusNode _node;
+///   late FocusNode _node;
 ///   bool _focused = false;
-///   FocusAttachment _nodeAttachment;
+///   late FocusAttachment _nodeAttachment;
 ///   Color _color = Colors.white;
 ///
 ///   @override
@@ -321,7 +342,7 @@ enum UnfocusDisposition {
 ///     }
 ///   }
 ///
-///   bool _handleKeyPress(FocusNode node, RawKeyEvent event) {
+///   KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
 ///     if (event is RawKeyDownEvent) {
 ///       print('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
 ///       if (event.logicalKey == LogicalKeyboardKey.keyR) {
@@ -329,22 +350,22 @@ enum UnfocusDisposition {
 ///         setState(() {
 ///           _color = Colors.red;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
 ///         print('Changing color to green.');
 ///         setState(() {
 ///           _color = Colors.green;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
 ///         print('Changing color to blue.');
 ///         setState(() {
 ///           _color = Colors.blue;
 ///         });
-///         return true;
+///         return KeyEventResult.handled;
 ///       }
 ///     }
-///     return false;
+///     return KeyEventResult.ignored;
 ///   }
 ///
 ///   @override
@@ -385,7 +406,7 @@ enum UnfocusDisposition {
 /// Widget build(BuildContext context) {
 ///   final TextTheme textTheme = Theme.of(context).textTheme;
 ///   return DefaultTextStyle(
-///     style: textTheme.headline4,
+///     style: textTheme.headline4!,
 ///     child: ColorfulButton(),
 ///   );
 /// }
@@ -551,7 +572,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
   ///
-  /// {@macro flutter.widgets.focus_manager.focus.keyEvents}
+  /// {@macro flutter.widgets.FocusNode.keyEvents}
   FocusOnKeyCallback? get onKey => _onKey;
   FocusOnKeyCallback? _onKey;
 
@@ -814,9 +835,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                   children: <Widget>[
   ///                     Radio<UnfocusDisposition>(
   ///                       groupValue: disposition,
-  ///                       onChanged: (UnfocusDisposition value) {
+  ///                       onChanged: (UnfocusDisposition? value) {
   ///                         setState(() {
-  ///                           disposition = value;
+  ///                           if (value != null) {
+  ///                             disposition = value;
+  ///                           }
   ///                         });
   ///                       },
   ///                       value: UnfocusDisposition.values[index],
@@ -829,7 +852,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                 child: const Text('UNFOCUS'),
   ///                 onPressed: () {
   ///                   setState(() {
-  ///                     primaryFocus.unfocus(disposition: disposition);
+  ///                     primaryFocus!.unfocus(disposition: disposition);
   ///                   });
   ///                 },
   ///               ),
@@ -984,7 +1007,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       _manager?.primaryFocus?._setAsFocusedChildForScope();
     }
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
-      FocusTraversalGroup.of(child.context!, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
+      FocusTraversalGroup.maybeOf(child.context!)?.changedScope(node: child, oldScope: oldScope);
     }
     if (child._requestFocusWhenReparented) {
       child._doRequestFocus(findFirstFocus: true);
@@ -1124,19 +1147,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusTraversalPolicy.next] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool nextFocus() => FocusTraversalGroup.of(context!)!.next(this);
+  bool nextFocus() => FocusTraversalGroup.of(context!).next(this);
 
   /// Request to move the focus to the previous focus node, by calling the
   /// [FocusTraversalPolicy.previous] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool previousFocus() => FocusTraversalGroup.of(context!)!.previous(this);
+  bool previousFocus() => FocusTraversalGroup.of(context!).previous(this);
 
   /// Request to move the focus to the nearest focus node in the given
   /// direction, by calling the [FocusTraversalPolicy.inDirection] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool focusInDirection(TraversalDirection direction) => FocusTraversalGroup.of(context!)!.inDirection(this, direction);
+  bool focusInDirection(TraversalDirection direction) => FocusTraversalGroup.of(context!).inDirection(this, direction);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1184,8 +1207,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 /// as the [focusedChild] of this node, adopting if it isn't already part of the
 /// focus tree.
 ///
-/// {@macro flutter.widgets.focus_manager.focus.lifecycle}
-/// {@macro flutter.widgets.focus_manager.focus.keyEvents}
+/// {@macro flutter.widgets.FocusNode.lifecycle}
+/// {@macro flutter.widgets.FocusNode.keyEvents}
 ///
 /// See also:
 ///
@@ -1613,17 +1636,43 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     _updateHighlightMode();
 
     assert(_focusDebug('Received key event ${event.logicalKey}'));
-    // Walk the current focus from the leaf to the root, calling each one's
-    // onKey on the way up, and if one responds that they handled it, stop.
     if (_primaryFocus == null) {
       assert(_focusDebug('No primary focus for key event, ignored: $event'));
       return false;
     }
+
+    // Walk the current focus from the leaf to the root, calling each one's
+    // onKey on the way up, and if one responds that they handled it or want to
+    // stop propagation, stop.
     bool handled = false;
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
-      if (node.onKey != null && node.onKey!(node, event)) {
-        assert(_focusDebug('Node $node handled key event $event.'));
-        handled = true;
+      if (node.onKey != null) {
+        // TODO(gspencergoog): Convert this from dynamic to KeyEventResult once migration is complete.
+        final dynamic result = node.onKey!(node, event);
+        assert(result is bool || result is KeyEventResult,
+            'Value returned from onKey handler must be a non-null bool or KeyEventResult, not ${result.runtimeType}');
+        if (result is KeyEventResult) {
+          switch (result) {
+            case KeyEventResult.handled:
+              assert(_focusDebug('Node $node handled key event $event.'));
+              handled = true;
+              break;
+            case KeyEventResult.skipRemainingHandlers:
+              assert(_focusDebug('Node $node stopped key event propagation: $event.'));
+              handled = false;
+              break;
+            case KeyEventResult.ignored:
+              continue;
+          }
+        } else if (result is bool){
+          if (result) {
+            assert(_focusDebug('Node $node handled key event $event.'));
+            handled = true;
+            break;
+          } else {
+            continue;
+          }
+        }
         break;
       }
     }

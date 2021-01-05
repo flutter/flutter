@@ -4,8 +4,10 @@
 
 import 'package:meta/meta.dart';
 
+import 'base/config.dart';
 import 'base/context.dart';
-import 'globals.dart' as globals;
+import 'base/platform.dart';
+import 'version.dart';
 
 /// The current [FeatureFlags] implementation.
 ///
@@ -47,6 +49,9 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
+  /// Whether the CFE experimental invalidation strategy is enabled.
+  bool get isExperimentalInvalidationStrategyEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -54,7 +59,17 @@ abstract class FeatureFlags {
 }
 
 class FlutterFeatureFlags implements FeatureFlags {
-  const FlutterFeatureFlags();
+  FlutterFeatureFlags({
+    @required FlutterVersion flutterVersion,
+    @required Config config,
+    @required Platform platform,
+  }) : _flutterVersion = flutterVersion,
+       _config = config,
+       _platform = platform;
+
+  final FlutterVersion _flutterVersion;
+  final Config _config;
+  final Platform _platform;
 
   @override
   bool get isLinuxEnabled => isEnabled(flutterLinuxDesktopFeature);
@@ -81,21 +96,24 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
+  bool get isExperimentalInvalidationStrategyEnabled => isEnabled(experimentalInvalidationStrategy);
+
+  @override
   bool isEnabled(Feature feature) {
-    final String currentChannel = globals.flutterVersion.channel;
+    final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
       return false;
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = globals.config.getValue(feature.configSetting) as bool;
+      final bool configOverride = _config.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }
     }
     if (feature.environmentOverride != null) {
-      if (globals.platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+      if (_platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
         isEnabled = true;
       }
     }
@@ -113,6 +131,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterAndroidFeature,
   flutterIOSFeature,
   flutterFuchsiaFeature,
+  experimentalInvalidationStrategy,
 ];
 
 /// The [Feature] for flutter web.
@@ -122,15 +141,19 @@ const Feature flutterWebFeature = Feature(
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: flutterNext,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: flutterNext,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: flutterNext,
   ),
 );
 
@@ -246,7 +269,30 @@ const Feature singleWidgetReload = Feature(
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The CFE experimental invalidation strategy.
+const Feature experimentalInvalidationStrategy = Feature(
+  name: 'Hot reload optimization that reduces incremental artifact size',
+  configSetting: 'experimental-invalidation-strategy',
+  environmentOverride: 'FLUTTER_CFE_EXPERIMENTAL_INVALIDATION',
+  master: FeatureChannelSetting(
+    available: true,
     enabledByDefault: true,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
   ),
   beta: FeatureChannelSetting(
     available: true,
@@ -366,3 +412,5 @@ class FeatureChannelSetting {
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
 }
+
+const bool flutterNext = false;

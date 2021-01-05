@@ -78,6 +78,7 @@ class ExpansionPanel {
     required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.backgroundColor,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -101,6 +102,10 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool canTapOnHeader;
 
+  /// Defines the background color of the panel.
+  ///
+  /// Defaults to [ThemeData.cardColor].
+  final Color? backgroundColor;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -123,11 +128,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required ExpansionPanelHeaderBuilder headerBuilder,
     required Widget body,
     bool canTapOnHeader = false,
+    Color? backgroundColor,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
+        backgroundColor: backgroundColor,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -149,8 +156,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// // stores ExpansionPanel state information
 /// class Item {
 ///   Item({
-///     this.expandedValue,
-///     this.headerValue,
+///     required this.expandedValue,
+///     required this.headerValue,
 ///     this.isExpanded = false,
 ///   });
 ///
@@ -253,9 +260,9 @@ class ExpansionPanelList extends StatefulWidget {
   /// // stores ExpansionPanel state information
   /// class Item {
   ///   Item({
-  ///     this.id,
-  ///     this.expandedValue,
-  ///     this.headerValue,
+  ///     required this.id,
+  ///     required this.expandedValue,
+  ///     required this.headerValue,
   ///   });
   ///
   ///   int id;
@@ -496,7 +503,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         ),
       );
       if (!child.canTapOnHeader) {
-        final MaterialLocalizations localizations = MaterialLocalizations.of(context)!;
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         expandIconContainer = Semantics(
           label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
           container: true,
@@ -530,6 +537,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       items.add(
         MaterialSlice(
           key: _SaltedKey<BuildContext, int>(context, index * 2),
+          color: child.backgroundColor,
           child: Column(
             children: <Widget>[
               header,

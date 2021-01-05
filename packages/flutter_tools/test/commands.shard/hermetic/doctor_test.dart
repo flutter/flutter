@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_studio_validator.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -82,6 +84,16 @@ void main() {
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
       expect(message.isError, isFalse);
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('No IDE Validator includes expected installation messages', () async {
+      final ValidationResult result = await NoIdeValidator().validate();
+      expect(result.type, ValidationType.missing);
+
+      expect(
+        result.messages.map((ValidationMessage vm) => vm.message),
+        UserMessages().noIdeInstallationInfo,
+      );
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when 64bit installed', () async {
@@ -673,6 +685,13 @@ void main() {
     FlutterVersion: () => mockFlutterVersion,
     Doctor: () => NoOpDoctor(),
   }, initializeFlutterRoot: false);
+
+  testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
+    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<AndroidStudioValidator>())));
+    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+  });
 }
 
 class NoOpDoctor implements Doctor {
@@ -686,7 +705,12 @@ class NoOpDoctor implements Doctor {
   Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
 
   @override
-  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async => true;
+  Future<bool> diagnose({
+    bool androidLicenses = false,
+    bool verbose = true,
+    bool showColor = true,
+    AndroidLicenseValidator androidLicenseValidator,
+  }) async => true;
 
   @override
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
@@ -1041,5 +1065,6 @@ class MockDevice extends Mock implements Device {
     when(id).thenReturn('device-id');
     when(isLocalEmulator).thenAnswer((_) => Future<bool>.value(false));
     when(targetPlatform).thenAnswer((_) => Future<TargetPlatform>.value(TargetPlatform.android));
+    when(targetPlatformDisplayName).thenAnswer((_) async => 'android');
   }
 }

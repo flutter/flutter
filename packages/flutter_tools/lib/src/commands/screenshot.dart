@@ -77,6 +77,9 @@ class ScreenshotCommand extends FlutterCommand {
         if (observatoryUri == null) {
           throwToolExit('Observatory URI must be specified for screenshot type $screenshotType');
         }
+        if (observatoryUri.isEmpty || Uri.tryParse(observatoryUri) == null) {
+          throwToolExit('Observatory URI "$observatoryUri" is invalid');
+        }
     }
   }
 

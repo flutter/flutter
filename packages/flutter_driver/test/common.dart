@@ -11,6 +11,7 @@ import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignor
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher; // ignore: deprecated_member_use
 
 export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test_api/fake.dart'; // ignore: deprecated_member_use
 
 // Defines a 'package:test' shim.
 // TODO(ianh): Clean this up once https://github.com/dart-lang/matcher/issues/98 is fixed
@@ -31,3 +32,6 @@ void tryToDelete(Directory directory) {
 
 /// Matcher for functions that throw [DriverError].
 final Matcher throwsDriverError = throwsA(isA<DriverError>());
+
+/// Matcher for functions that throw [AssertionError].
+final Matcher throwsAssertionError = throwsA(isA<AssertionError>());

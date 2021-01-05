@@ -1,4 +1,5 @@
 {
+  "searchTextFieldPlaceholderLabel": "Rechercher",
   "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour heure",
   "datePickerHourSemanticsLabelOther": "$hour heures",

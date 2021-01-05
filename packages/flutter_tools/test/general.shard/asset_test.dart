@@ -31,7 +31,6 @@ void main() {
       await asset.build(
         manifestPath : globals.fs.path.join(dataPath, 'main', 'pubspec.yaml'),
         packagesPath: globals.fs.path.join(dataPath, 'main', '.packages'),
-        includeDefaultFonts: false,
       );
 
       expect(asset.entries.containsKey('FontManifest.json'), isTrue);
@@ -55,7 +54,6 @@ void main() {
       await asset.build(
         manifestPath : globals.fs.path.join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
         packagesPath: globals.fs.path.join(dataPath, 'main', '.packages'),
-        includeDefaultFonts: false,
       );
       expect(asset.wasBuiltOnce(), true);
     });

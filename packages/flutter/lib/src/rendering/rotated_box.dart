@@ -42,7 +42,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     markNeedsLayout();
   }
 
-  bool get _isVertical => quarterTurns % 2 == 1;
+  bool get _isVertical => quarterTurns.isOdd;
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -75,6 +75,15 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   Matrix4? _paintTransform;
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child == null) {
+      return constraints.smallest;
+    }
+    final Size childSize = child!.getDryLayout(_isVertical ? constraints.flipped : constraints);
+    return _isVertical ? Size(childSize.height, childSize.width) : childSize;
+  }
+
+  @override
   void performLayout() {
     _paintTransform = null;
     if (child != null) {
@@ -85,7 +94,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
         ..rotateZ(_kQuarterTurnsInRadians * (quarterTurns % 4))
         ..translate(-child!.size.width / 2.0, -child!.size.height / 2.0);
     } else {
-      performResize();
+      size = constraints.smallest;
     }
   }
 

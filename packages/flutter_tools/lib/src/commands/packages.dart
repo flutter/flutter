@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
+
 import '../base/common.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -10,6 +12,7 @@ import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -19,7 +22,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('get', false));
     addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(PackagesPublishCommand());
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
@@ -77,10 +80,10 @@ class PackagesGetCommand extends FlutterCommand {
       return usageValues;
     }
     final FlutterProject rootProject = FlutterProject.fromPath(target);
-    final bool hasPlugins = rootProject.flutterPluginsFile.existsSync();
+    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync();
     if (hasPlugins) {
-      final int numberOfPlugins = (rootProject.flutterPluginsFile.readAsLinesSync()).length;
-      usageValues[CustomDimensions.commandPackagesNumberPlugins] = '$numberOfPlugins';
+      final List<Plugin> plugins = await findPlugins(rootProject);
+      usageValues[CustomDimensions.commandPackagesNumberPlugins] = plugins.length.toString();
     } else {
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
     }
@@ -115,9 +118,8 @@ class PackagesGetCommand extends FlutterCommand {
       await pub.get(
         context: PubContext.pubGet,
         directory: directory,
-        upgrade: upgrade ,
+        upgrade: upgrade,
         offline: boolArg('offline'),
-        checkLastModified: false,
         generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
       );
       pubGetTimer.stop();
@@ -147,13 +149,13 @@ class PackagesGetCommand extends FlutterCommand {
     final FlutterProject rootProject = FlutterProject.fromPath(target);
 
     await _runPubGet(target, rootProject);
-    await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+    await rootProject.regeneratePlatformSpecificTooling();
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {
       final FlutterProject exampleProject = rootProject.example;
       await _runPubGet(exampleProject.directory.path, exampleProject);
-      await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+      await exampleProject.regeneratePlatformSpecificTooling();
     }
 
     return FlutterCommandResult.success();
@@ -190,52 +192,16 @@ class PackagesTestCommand extends FlutterCommand {
   }
 }
 
-class PackagesPublishCommand extends FlutterCommand {
-  PackagesPublishCommand() {
-    requiresPubspecYaml();
-    argParser.addFlag('dry-run',
-      abbr: 'n',
-      negatable: false,
-      help: 'Validate but do not publish the package.',
-    );
-    argParser.addFlag('force',
-      abbr: 'f',
-      negatable: false,
-      help: 'Publish without confirmation if there are no errors.',
-    );
-  }
-
-  @override
-  String get name => 'publish';
-
-  @override
-  String get description {
-    return 'Publish the current package to pub.dev';
-  }
-
-  @override
-  String get invocation {
-    return '${runner.executableName} pub publish [--dry-run]';
-  }
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    final List<String> args = <String>[
-      ...argResults.rest,
-      if (boolArg('dry-run')) '--dry-run',
-      if (boolArg('force')) '--force',
-    ];
-    await pub.interactively(<String>['publish', ...args], stdio: globals.stdio);
-    return FlutterCommandResult.success();
-  }
-}
-
 class PackagesForwardCommand extends FlutterCommand {
   PackagesForwardCommand(this._commandName, this._description, {bool requiresPubspec = false}) {
     if (requiresPubspec) {
       requiresPubspecYaml();
     }
   }
+
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
+
   final String _commandName;
   final String _description;
 
@@ -255,10 +221,11 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.interactively(<String>[_commandName, ...argResults.rest], stdio: globals.stdio);
+    final List<String> subArgs = argResults.rest.toList()
+      ..removeWhere((String arg) => arg == '--');
+    await pub.interactively(<String>[_commandName, ...subArgs], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
-
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {

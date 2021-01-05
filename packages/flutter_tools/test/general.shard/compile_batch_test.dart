@@ -75,10 +75,6 @@ void main() {
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(logger.errorText, equals('line1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
-    expect(argVerification.captured.single, containsAll(<String>[
-      '-Ddart.developer.causal_async_stacks=true',
-    ]));
   });
 
   testWithoutContext('passes correct AOT config to kernel compiler in aot/profile mode', () async {
@@ -113,7 +109,6 @@ void main() {
       '--tfa',
       '-Ddart.vm.profile=true',
       '-Ddart.vm.product=false',
-      '-Ddart.developer.causal_async_stacks=false',
     ]));
   });
 
@@ -149,7 +144,6 @@ void main() {
       '--tfa',
       '-Ddart.vm.profile=false',
       '-Ddart.vm.product=true',
-      '-Ddart.developer.causal_async_stacks=false',
     ]));
   });
 
@@ -240,7 +234,7 @@ void main() {
     expect(latestCommand, containsAllInOrder(<String>['-DFOO=bar', '-DBAZ=qux']));
   });
 
-  testWithoutContext('maps a file to a multiroot scheme if providfed', () async {
+  testWithoutContext('maps a file to a multiroot scheme if provided', () async {
     // Use unsuccessful result because it's easier to setup in test. We only care about arguments passed to the compiler.
     when(mockFrontendServer.exitCode).thenAnswer((_) async => 255);
     when(mockFrontendServer.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(

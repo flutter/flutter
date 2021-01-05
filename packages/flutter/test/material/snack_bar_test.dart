@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart' show FlutterExceptionHandler;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -253,8 +251,8 @@ void main() {
   testWidgets('SnackBar cancel test', (WidgetTester tester) async {
     int snackBarCount = 0;
     const Key tapTarget = Key('tap-target');
-    int time;
-    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
+    late int time;
+    late ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -339,8 +337,8 @@ void main() {
   testWidgets('SnackBar cancel test - ScaffoldMessenger', (WidgetTester tester) async {
     int snackBarCount = 0;
     const Key tapTarget = Key('tap-target');
-    int time;
-    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
+    late int time;
+    late ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -671,6 +669,152 @@ void main() {
     expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
   });
 
+  testWidgets('SnackBar should inherit theme data from its ancestor.', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
+      primaryColor: Colors.black,
+      primaryColorDark: Colors.black,
+      primaryColorLight: Colors.black,
+      valueIndicatorTextStyle: const TextStyle(color: Colors.black),
+    );
+
+    final ChipThemeData chipTheme = ChipThemeData.fromDefaults(
+      primaryColor: Colors.black,
+      secondaryColor: Colors.white,
+      labelStyle: const TextStyle(color: Colors.black),
+    );
+
+    const PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+      },
+    );
+
+    final ThemeData theme = ThemeData.raw(
+      visualDensity: const VisualDensity(),
+      primaryColor: Colors.black,
+      primaryColorBrightness: Brightness.dark,
+      primaryColorLight: Colors.black,
+      primaryColorDark: Colors.black,
+      accentColor: Colors.black,
+      accentColorBrightness: Brightness.dark,
+      canvasColor: Colors.black,
+      shadowColor: Colors.black,
+      scaffoldBackgroundColor: Colors.black,
+      bottomAppBarColor: Colors.black,
+      cardColor: Colors.black,
+      dividerColor: Colors.black,
+      focusColor: Colors.black,
+      hoverColor: Colors.black,
+      highlightColor: Colors.black,
+      splashColor: Colors.black,
+      splashFactory: InkRipple.splashFactory,
+      selectedRowColor: Colors.black,
+      unselectedWidgetColor: Colors.black,
+      disabledColor: Colors.black,
+      buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
+      toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
+      buttonColor: Colors.black,
+      secondaryHeaderColor: Colors.black,
+      textSelectionColor: Colors.black,
+      cursorColor: Colors.black,
+      textSelectionHandleColor: Colors.black,
+      backgroundColor: Colors.black,
+      dialogBackgroundColor: Colors.black,
+      indicatorColor: Colors.black,
+      hintColor: Colors.black,
+      errorColor: Colors.black,
+      toggleableActiveColor: Colors.black,
+      textTheme: ThemeData.dark().textTheme,
+      primaryTextTheme: ThemeData.dark().textTheme,
+      accentTextTheme: ThemeData.dark().textTheme,
+      inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
+      iconTheme: ThemeData.dark().iconTheme,
+      primaryIconTheme: ThemeData.dark().iconTheme,
+      accentIconTheme: ThemeData.dark().iconTheme,
+      sliderTheme: sliderTheme,
+      tabBarTheme: const TabBarTheme(labelColor: Colors.black),
+      tooltipTheme: const TooltipThemeData(height: 100),
+      cardTheme: const CardTheme(color: Colors.black),
+      chipTheme: chipTheme,
+      platform: TargetPlatform.iOS,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      applyElevationOverlayColor: false,
+      pageTransitionsTheme: pageTransitionTheme,
+      appBarTheme: const AppBarTheme(color: Colors.black),
+      bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
+      colorScheme: const ColorScheme.light(),
+      dialogTheme: const DialogTheme(backgroundColor: Colors.black),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
+      navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
+      typography: Typography.material2018(platform: TargetPlatform.android),
+      cupertinoOverrideTheme: null,
+      snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
+      bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
+      popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
+      bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
+      dividerTheme: const DividerThemeData(color: Colors.black),
+      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
+      timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
+      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.red)),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.green)),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(primary: Colors.blue)),
+      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
+      dataTableTheme: const DataTableThemeData(),
+      checkboxTheme: const CheckboxThemeData(),
+      radioTheme: const RadioThemeData(),
+      switchTheme: const SwitchThemeData(),
+      fixTextFieldOutlineLabel: false,
+      useTextSelectionTheme: false,
+    );
+
+    ThemeData? themeBeforeSnackBar;
+    ThemeData? themeAfterSnackBar;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              themeBeforeSnackBar = Theme.of(context);
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Builder(
+                        builder: (BuildContext context) {
+                          themeAfterSnackBar = Theme.of(context);
+                          return const Text('I am a snack bar.');
+                        },
+                      ),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () { },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final ThemeData comparedTheme = themeBeforeSnackBar!.copyWith(
+      colorScheme: themeAfterSnackBar!.colorScheme,
+    ); // Fields replaced by SnackBar.
+
+    expect(comparedTheme, themeAfterSnackBar);
+  });
+
   testWidgets('Snackbar margin can be customized', (WidgetTester tester) async {
     const double padding = 20.0;
     await tester.pumpWidget(
@@ -925,8 +1069,7 @@ void main() {
     final Widget textWidget = actionTextBox.widget;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
     if (textWidget is Text) {
-      TextStyle effectiveStyle = textWidget.style;
-      effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+      final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
       expect(effectiveStyle.color, Colors.lightBlue);
     } else {
       expect(false, true);
@@ -975,8 +1118,8 @@ void main() {
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0 + 40.0); // margin + bottom padding
-    expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
-    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0 + 12.0); // action padding + margin
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 12.0 + 30.0); // action (padding + margin) + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0 + 40.0); // margin + bottom padding
   });
 
@@ -1030,8 +1173,8 @@ void main() {
 
       expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
       expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0); // margin (with no bottom padding)
-      expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
-      expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
+      expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0 + 12.0); // action padding + margin
+      expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 12.0 + 30.0); // action (padding + margin) + right padding
       expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
     });
 
@@ -1135,8 +1278,8 @@ void main() {
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 31.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
-    expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
-    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0 + 8.0); // action padding + margin
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0 + 8.0); // margin + right (padding + margin)
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
   });
 
@@ -1193,15 +1336,15 @@ void main() {
 
       expect(textBottomLeft.dx - snackBarBottomLeft.dx, 31.0 + 10.0); // margin + left padding
       expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
-      expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
-      expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
+      expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0 + 8.0); // action (margin + padding)
+      expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0 + 8.0); // margin + right (padding + margin)
       expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
     });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     bool actionPressed = false;
-    SnackBarClosedReason closedReason;
+    SnackBarClosedReason? closedReason;
 
     await tester.pumpWidget(MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
@@ -1255,14 +1398,14 @@ void main() {
     // Pop up the snack bar and then remove it.
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
-    scaffoldMessengerKey.currentState.removeCurrentSnackBar();
+    scaffoldMessengerKey.currentState!.removeCurrentSnackBar();
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.remove));
 
     // Pop up the snack bar and then hide it.
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
-    scaffoldMessengerKey.currentState.hideCurrentSnackBar();
+    scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.hide));
 
@@ -1493,7 +1636,7 @@ void main() {
   });
 
   testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
-    Future<void> boilerplate({ bool accessibleNavigation }) {
+    Future<void> boilerplate({ required bool accessibleNavigation }) {
       return tester.pumpWidget(MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(accessibleNavigation: accessibleNavigation),
@@ -1541,7 +1684,7 @@ void main() {
   });
 
   testWidgets('SnackBar handles updates to accessibleNavigation - ScaffoldMessenger', (WidgetTester tester) async {
-    Future<void> boilerplate({ bool accessibleNavigation }) {
+    Future<void> boilerplate({ required bool accessibleNavigation }) {
       return tester.pumpWidget(MaterialApp(
           home: MediaQuery(
               data: MediaQueryData(accessibleNavigation: accessibleNavigation),
@@ -1586,35 +1729,6 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 5750));
 
     expect(find.text('test'), findsNothing);
-  });
-
-  testWidgets('Snackbar asserts if passed a null duration', (WidgetTester tester) async {
-    const Key tapTarget = Key('tap-target');
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Builder(
-          builder: (BuildContext context) {
-            return GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(nonconst('hello')),
-                  duration: null,
-                ));
-              },
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                height: 100.0,
-                width: 100.0,
-                key: tapTarget,
-              ),
-            );
-          },
-        ),
-      ),
-    ));
-
-    await tester.tap(find.byKey(tapTarget));
-    expect(tester.takeException(), isNotNull);
   });
 
   testWidgets('Snackbar calls onVisible once', (WidgetTester tester) async {
@@ -1974,6 +2088,79 @@ void main() {
         expect(snackBarBottomRight.dy, equals(fabTopRight.dy));
       },
     );
+
+    testWidgets(
+      'SnackBar has correct end padding when it contains an action with fixed behavior',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                    return GestureDetector(
+                      onTap: () {
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          content: const Text('Some content'),
+                          behavior: SnackBarBehavior.fixed,
+                          action: SnackBarAction(
+                            label: 'ACTION',
+                            onPressed: () {},
+                          ),
+                        ));
+                      },
+                      child: const Text('X'),
+                    );
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle();
+
+        final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
+        final Offset actionTopRight = tester.getTopRight(find.byType(SnackBarAction));
+
+        expect(snackBarTopRight.dx - actionTopRight.dx, 12.0);
+      },
+    );
+
+    testWidgets(
+      'SnackBar has correct end padding when it contains an action with floating behavior',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                    return GestureDetector(
+                      onTap: () {
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          content: const Text('Some content'),
+                          behavior: SnackBarBehavior.floating,
+                          action: SnackBarAction(
+                            label: 'ACTION',
+                            onPressed: () {},
+                          ),
+                        ));
+                      },
+                      child: const Text('X'),
+                    );
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle();
+        final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
+        final Offset actionTopRight = tester.getTopRight(find.byType(SnackBarAction));
+
+        expect(snackBarTopRight.dx - actionTopRight.dx, 8.0 + 15.0); // button margin + horizontal scaffold outside margin
+      },
+    );
   });
 
   testWidgets('SnackBars hero across transitions when using ScaffoldMessenger', (WidgetTester tester) async {
@@ -2067,7 +2254,7 @@ void main() {
     ));
 
     final List<dynamic> exceptions = <dynamic>[];
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };

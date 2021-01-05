@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome') // web has different stack traces
-
+@TestOn('!chrome')
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
@@ -151,7 +150,7 @@ Future<void> main() async {
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
       exception: getAssertionErrorWithoutMessage(),
     ));
-    expect(console.join('\n'), matches("Another exception was thrown: '[^']+flutter/test/foundation/error_reporting_test\\.dart': Failed assertion: line [0-9]+ pos [0-9]+: 'false': is not true\\."));
+    expect(console.join('\n'), matches(r"Another exception was thrown: '[^']+flutter/test/foundation/error_reporting_test\.dart': Failed assertion: line [0-9]+ pos [0-9]+: 'false': is not true\."));
     console.clear();
     FlutterError.resetErrorCount();
   });

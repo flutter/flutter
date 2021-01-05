@@ -10,8 +10,11 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'plugins.dart';
+
+const Set<String> _kValidPluginPlatforms = <String>{
+  'android', 'ios', 'web', 'windows', 'linux', 'macos'
+};
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -200,6 +203,20 @@ class FlutterManifest {
     return null;
   }
 
+  /// Like [supportedPlatforms], but only returns the valid platforms that are supported in flutter plugins.
+  Map<String, dynamic> get validSupportedPlatforms {
+    final Map<String, dynamic> allPlatforms = supportedPlatforms;
+    if (allPlatforms == null) {
+      return null;
+    }
+    final Map<String, dynamic> platforms = <String, dynamic>{}..addAll(supportedPlatforms);
+    platforms.removeWhere((String key, dynamic _) => !_kValidPluginPlatforms.contains(key));
+    if (platforms.isEmpty) {
+      return null;
+    }
+    return platforms;
+  }
+
   List<Map<String, dynamic>> get fontsDescriptor {
     return fonts.map((Font font) => font.descriptor).toList();
   }
@@ -347,24 +364,7 @@ class FontAsset {
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
 
-@visibleForTesting
-String buildSchemaDir(FileSystem fileSystem) {
-  return fileSystem.path.join(
-    fileSystem.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
-  );
-}
 
-@visibleForTesting
-String buildSchemaPath(FileSystem fileSystem) {
-  return fileSystem.path.join(
-    buildSchemaDir(fileSystem),
-    'pubspec_yaml.json',
-  );
-}
-
-/// This method should be kept in sync with the schema in
-/// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
-/// but avoid introducing dependencies on packages for simple validation.
 bool _validate(dynamic manifest, Logger logger) {
   final List<String> errors = <String>[];
   if (manifest is! YamlMap) {
@@ -423,7 +423,6 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         break;
       case 'assets':
-      case 'services':
         if (kvp.value is! YamlList || kvp.value[0] is! String) {
           errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }

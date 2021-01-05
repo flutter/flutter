@@ -27,7 +27,6 @@ class AnalyzeOnce extends AnalyzeBase {
     @required Platform platform,
     @required ProcessManager processManager,
     @required Terminal terminal,
-    @required List<String> experiments,
     @required Artifacts artifacts,
     this.workingDirectory,
   }) : super(
@@ -39,7 +38,6 @@ class AnalyzeOnce extends AnalyzeBase {
         platform: platform,
         processManager: processManager,
         terminal: terminal,
-        experiments: experiments,
         artifacts: artifacts,
       );
 
@@ -95,7 +93,6 @@ class AnalyzeOnce extends AnalyzeBase {
       logger: logger,
       processManager: processManager,
       terminal: terminal,
-      experiments: experiments,
     );
 
     Stopwatch timer;
@@ -137,7 +134,6 @@ class AnalyzeOnce extends AnalyzeBase {
       progress = argResults['preamble'] as bool
           ? logger.startProgress(
             'Analyzing $message...',
-            timeout: timeoutConfiguration.slowOperation,
           )
           : null;
 

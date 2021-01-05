@@ -20,5 +20,6 @@
   "pasteButtonLabel": "جای‌گذاری",
   "selectAllButtonLabel": "انتخاب همه",
   "tabSemanticsLabel": "برگه $tabIndex از $tabCount",
-  "modalBarrierDismissLabel": "نپذیرفتن"
+  "modalBarrierDismissLabel": "نپذیرفتن",
+  "searchTextFieldPlaceholderLabel": "جستجو"
 }

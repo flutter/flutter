@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import 'base/config.dart';
 import 'base/context.dart';
@@ -31,9 +32,11 @@ class BuildInfo {
     this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages',
-    this.nullSafetyMode = NullSafetyMode.autodetect,
+    this.packagesPath = '.packages', // TODO(jonahwilliams): make this required and remove the default.
+    this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
+    this.androidGradleDaemon = true,
+    this.packageConfig = PackageConfig.empty,
   });
 
   final BuildMode mode;
@@ -118,6 +121,26 @@ class BuildInfo {
   /// will be written for code size profiling.
   final String codeSizeDirectory;
 
+  /// Whether to enable the Gradle daemon when performing an Android build.
+  ///
+  /// Starting the daemon is the default behavior of the gradle wrapper script created
+  /// in a Flutter project. Setting this value to false will cause the tool to pass
+  /// `--no-daemon` to the gradle wrapper script, preventing it from spawning a daemon
+  /// process.
+  ///
+  /// For one-off builds or CI systems, preventing the daemon from spawning will
+  /// reduce system resource usage, at the cost of any subsequent builds starting
+  /// up slightly slower.
+  ///
+  /// The Gradle daemon may also be disabled in the Android application's properties file.
+  final bool androidGradleDaemon;
+
+  /// The package configuration for the loaded application.
+  ///
+  /// This is captured once during startup, but the actual package configuration
+  /// may change during a 'flutter run` workflow.
+  final PackageConfig packageConfig;
+
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -198,7 +221,6 @@ class AndroidBuildInfo {
       AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
-    this.shrink = false,
     this.fastStart = false,
   });
 
@@ -211,9 +233,6 @@ class AndroidBuildInfo {
   /// build artifact. When this is true, multiple build artifacts (one per ABI)
   /// will be produced.
   final bool splitPerAbi;
-
-  /// Whether to enable code shrinking on release mode.
-  final bool shrink;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
@@ -294,6 +313,12 @@ String getNameForBuildMode(BuildMode buildMode) {
 /// Returns the [BuildMode] for a particular `name`.
 BuildMode getBuildModeForName(String name) {
   return BuildMode.fromName(name);
+}
+
+/// Environment type of the target device.
+enum EnvironmentType {
+  physical,
+  simulator,
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
@@ -398,6 +423,7 @@ bool isEmulatorBuildMode(BuildMode mode) {
 
 enum HostPlatform {
   darwin_x64,
+  darwin_arm,
   linux_x64,
   windows_x64,
 }
@@ -406,6 +432,8 @@ String getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
       return 'darwin-x64';
+    case HostPlatform.darwin_arm:
+      return 'darwin-arm';
     case HostPlatform.linux_x64:
       return 'linux-x64';
     case HostPlatform.windows_x64:
@@ -418,6 +446,7 @@ String getNameForHostPlatform(HostPlatform platform) {
 enum TargetPlatform {
   android,
   ios,
+  // darwin_arm64 not yet supported, macOS desktop targets run in Rosetta as x86.
   darwin_x64,
   linux_x64,
   windows_x64,
@@ -453,9 +482,19 @@ enum AndroidArch {
 }
 
 /// The default set of iOS device architectures to build for.
-const List<DarwinArch> defaultIOSArchs = <DarwinArch>[
-  DarwinArch.arm64,
-];
+List<DarwinArch> defaultIOSArchsForEnvironment(
+    EnvironmentType environmentType) {
+  if (environmentType == EnvironmentType.simulator) {
+    return <DarwinArch>[
+      // Apple Silicon ARM simulators not yet supported.
+      DarwinArch.x86_64,
+    ];
+  }
+  return <DarwinArch>[
+    DarwinArch.armv7,
+    DarwinArch.arm64,
+  ];
+}
 
 String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {
@@ -717,5 +756,6 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
 enum NullSafetyMode {
   sound,
   unsound,
+  /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
 }

@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
+@TestOn('!chrome')
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,9 +12,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import '../widgets/semantics_tester.dart';
+import '../widgets/text.dart' show textOffsetToPosition;
 
 class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
+  dynamic _clipboardData = <String, dynamic>{
     'text': null,
   };
 
@@ -52,7 +52,7 @@ class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliza
   bool shouldReload(WidgetsLocalizationsDelegate old) => false;
 }
 
-Widget overlay({ Widget child }) {
+Widget overlay({ Widget? child }) {
   final OverlayEntry entry = OverlayEntry(
     builder: (BuildContext context) {
       return Center(
@@ -86,7 +86,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
   );
 }
 
-Widget boilerplate({ Widget child }) {
+Widget boilerplate({ Widget? child }) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: <LocalizationsDelegate<dynamic>>[
@@ -139,7 +139,7 @@ void main() {
     final RenderObject root = tester.renderObject(find.byType(EditableText));
     expect(root, isNotNull);
 
-    RenderEditable renderEditable;
+    late RenderEditable renderEditable;
     void recursiveFinder(RenderObject child) {
       if (child is RenderEditable) {
         renderEditable = child;
@@ -161,26 +161,14 @@ void main() {
     }).toList();
   }
 
-  Offset textOffsetToPosition(WidgetTester tester, int offset) {
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(
-        TextSelection.collapsed(offset: offset),
-      ),
-      renderEditable,
-    );
-    expect(endpoints.length, 1);
-    return endpoints[0].point + const Offset(0.0, -2.0);
-  }
-
   setUp(() {
     debugResetSemanticsIdCounter();
   });
 
   Widget selectableTextBuilder({
     String text = '',
-    int maxLines = 1,
-    int minLines,
+    int? maxLines = 1,
+    int? minLines,
   }) {
     return boilerplate(
       child: SelectableText(
@@ -625,7 +613,7 @@ void main() {
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
     // Collapse selection should not paint.
-    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     // Long press on the 't' character of text 'selectable' to show context menu.
     const int dIndex = 5;
     final Offset dPos = textOffsetToPosition(tester, dIndex);
@@ -766,8 +754,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset, 8);
+    expect(controller.selection.baseOffset, 8);
+    expect(controller.selection.extentOffset, 5);
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
@@ -858,6 +846,58 @@ void main() {
 
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 11);
+  });
+
+  testWidgets('Dragging handles calls onSelectionChanged', (WidgetTester tester) async {
+    TextSelection? newSelection;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SelectableText(
+            'abc def ghi',
+            dragStartBehavior: DragStartBehavior.down,
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+              expect(newSelection, isNull);
+              newSelection = selection;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Long press the 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    expect(newSelection!.baseOffset, 4);
+    expect(newSelection!.extentOffset, 7);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(newSelection!),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+    newSelection = null;
+
+    // Drag the right handle 2 letters to the right.
+    // We use a small offset because the endpoint is on the very corner
+    // of the handle.
+    final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, 9);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(newSelection!.baseOffset, 4);
+    expect(newSelection!.extentOffset, 9);
   });
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
@@ -1328,7 +1368,7 @@ void main() {
   });
 
   group('Keyboard Tests', () {
-    TextEditingController controller;
+    late TextEditingController controller;
 
     Future<void> setupWidget(WidgetTester tester, String text) async {
       final FocusNode focusNode = FocusNode();
@@ -1545,6 +1585,53 @@ void main() {
 
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, 31);
+  });
+
+  testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    TextSelection? newSelection;
+    const String testValue = 'a big house\njumped over a mouse';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child: SelectableText(
+              testValue,
+              maxLines: 3,
+              onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+                expect(newSelection, isNull);
+                newSelection = selection;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
+    focusNode.requestFocus();
+    await tester.pump();
+
+    await tester.tap(find.byType(SelectableText));
+    await tester.pumpAndSettle();
+    expect(newSelection!.baseOffset, 31);
+    expect(newSelection!.extentOffset, 31);
+    newSelection = null;
+
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+
+    // Select the first 5 characters
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    for (int i = 0; i < 5; i += 1) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(newSelection!.baseOffset, 0);
+      expect(newSelection!.extentOffset, i + 1);
+      newSelection = null;
+    }
   });
 
   testWidgets('Changing positions of selectable text', (WidgetTester tester) async {
@@ -2099,7 +2186,7 @@ void main() {
 
   testWidgets('SelectableText change selection with semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -2204,7 +2291,7 @@ void main() {
     const String testValue = 'Hello';
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -2278,7 +2365,7 @@ void main() {
     await tester.pumpWidget(selectableText);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No MediaQuery widget found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
+    expect(exception.toString(), startsWith('No MediaQuery widget ancestor found.\nSelectableText widgets require a MediaQuery widget ancestor.'));
   });
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
@@ -2772,6 +2859,93 @@ void main() {
       expect(find.byType(TextButton), findsNWidgets(2));
     },
   );
+
+  testWidgets(
+    'long press selects word and shows custom toolbar (Android)',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+              selectionControls: cupertinoTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      // The longpressed word is selected.
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 7,
+        ),
+      );
+
+      // Toolbar shows one button.
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
+  }, variant:  TargetPlatformVariant.all());
+
+  testWidgets(
+    'long press selects word and shows custom toolbar (iOS)',
+    (WidgetTester tester) async {
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+              selectionControls: materialTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Collapsed toolbar shows 2 buttons: copy, select all
+      expect(find.byType(TextButton), findsNWidgets(2));
+  }, variant: TargetPlatformVariant.all());
+
+ testWidgets('textSelectionControls is passed to EditableText',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Scaffold(
+              body: SelectableText('Atwater Peel Sherbrooke Bonaventure',
+                selectionControls: materialTextSelectionControls,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableText widget = tester.widget(find.byType(EditableText));
+      expect(widget.selectionControls, equals(materialTextSelectionControls));
+  });
 
   testWidgets(
     'long press tap cannot initiate a double tap',
@@ -3694,8 +3868,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
   });
 
   testWidgets('Double tap shows handles and toolbar', (WidgetTester tester) async {
@@ -3715,8 +3889,8 @@ void main() {
     await tester.pump();
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
   });
 
   testWidgets(
@@ -3743,8 +3917,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     },
   );
 
@@ -3772,8 +3946,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     },
   );
 
@@ -3805,8 +3979,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
     },
   );
 
@@ -3928,7 +4102,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
   testWidgets('The handles show after pressing Select All', (WidgetTester tester) async {
@@ -3950,8 +4124,8 @@ void main() {
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
     EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
-    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
 
     await tester.tap(find.text('Select all'));
     await tester.pump();
@@ -3960,7 +4134,45 @@ void main() {
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
     editableText = tester.state(find.byType(EditableText));
-    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay!.handlesAreVisible, isTrue);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets('The Select All calls on selection changed', (WidgetTester tester) async {
+    TextSelection? newSelection;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SelectableText(
+            'abc def ghi',
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+              expect(newSelection, isNull);
+              newSelection = selection;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Long press at 'e' in 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    await tester.longPressAt(ePos);
+    await tester.pumpAndSettle();
+
+    expect(newSelection!.baseOffset, 4);
+    expect(newSelection!.extentOffset, 7);
+    newSelection = null;
+
+    await tester.tap(find.text('Select all'));
+    await tester.pump();
+    expect(newSelection!.baseOffset, 0);
+    expect(newSelection!.extentOffset, 11);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
@@ -3991,7 +4203,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final EditableTextState state = tester.state(find.byType(EditableText));
-    expect(state.selectionOverlay.handlesAreVisible, isFalse);
+    expect(state.selectionOverlay!.handlesAreVisible, isFalse);
     expect(
       state.currentTextEditingValue.selection,
       const TextSelection.collapsed(offset: 0),
@@ -4007,7 +4219,7 @@ void main() {
         state.currentTextEditingValue.selection,
         const TextSelection(baseOffset: 2, extentOffset: 7),
       );
-      expect(state.selectionOverlay.handlesAreVisible, isFalse);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
     }
   });
 
@@ -4019,7 +4231,7 @@ void main() {
         home: Material(
           child: SelectableText(
             'abc def ghi',
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
               onSelectionChangedCallCount += 1;
             },
           ),
@@ -4032,11 +4244,12 @@ void main() {
     await tester.longPressAt(aLocation);
     await tester.pump();
     expect(onSelectionChangedCallCount, equals(1));
-
-    // Tap on 'Select all' option to select the whole text.
+    // Long press to select 'def'.
     await tester.longPressAt(textOffsetToPosition(tester, 5));
     await tester.pump();
-    await tester.tap(find.text('Select all'));
     expect(onSelectionChangedCallCount, equals(2));
+    // Tap on 'Select all' option to select the whole text.
+    await tester.tap(find.text('Select all'));
+    expect(onSelectionChangedCallCount, equals(3));
   });
 }

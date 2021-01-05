@@ -779,8 +779,7 @@ const String _dartPluginRegistryTemplate = '''
 // Generated file. Do not edit.
 //
 
-// ignore: unused_import
-import 'dart:ui';
+// ignore_for_file: lines_longer_than_80_chars
 
 {{#plugins}}
 import 'package:{{name}}/{{file}}';
@@ -789,11 +788,11 @@ import 'package:{{name}}/{{file}}';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
-void registerPlugins(PluginRegistry registry) {
+void registerPlugins(Registrar registrar) {
 {{#plugins}}
-  {{class}}.registerWith(registry.registrarFor({{class}}));
+  {{class}}.registerWith(registrar);
 {{/plugins}}
-  registry.registerMessageHandler();
+  registrar.registerMessageHandler();
 }
 ''';
 
@@ -897,36 +896,24 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
     'framework': 'Flutter',
     'plugins': iosPlugins,
   };
-  final String registryDirectory = project.ios.pluginRegistrantHost.path;
   if (project.isModule) {
-    final String registryClassesDirectory = globals.fs.path.join(registryDirectory, 'Classes');
+    final String registryDirectory = project.ios.pluginRegistrantHost.path;
     _renderTemplateToFile(
       _pluginRegistrantPodspecTemplate,
       context,
       globals.fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
     );
-    _renderTemplateToFile(
-      _objcPluginRegistryHeaderTemplate,
-      context,
-      globals.fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
-    );
-    _renderTemplateToFile(
-      _objcPluginRegistryImplementationTemplate,
-      context,
-      globals.fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
-    );
-  } else {
-    _renderTemplateToFile(
-      _objcPluginRegistryHeaderTemplate,
-      context,
-      globals.fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.h'),
-    );
-    _renderTemplateToFile(
-      _objcPluginRegistryImplementationTemplate,
-      context,
-      globals.fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.m'),
-    );
   }
+  _renderTemplateToFile(
+    _objcPluginRegistryHeaderTemplate,
+    context,
+    project.ios.pluginRegistrantHeader.path,
+  );
+  _renderTemplateToFile(
+    _objcPluginRegistryImplementationTemplate,
+    context,
+    project.ios.pluginRegistrantImplementation.path,
+  );
 }
 
 /// The relative path from a project's main CMake file to the plugin symlink
@@ -1100,7 +1087,7 @@ void handleSymlinkException(FileSystemException e, {
   if (platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
     final String versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
     final Version version = Version.parse(versionString);
-    // Window 10 14972 is the oldest version that allows creating symlinks
+    // Windows 10 14972 is the oldest version that allows creating symlinks
     // just by enabling developer mode; before that it requires running the
     // terminal as Administrator.
     // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
@@ -1145,11 +1132,12 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> pla
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin
 /// dependencies declared in `pubspec.yaml`.
 ///
-/// If `checkProjects` is true, then plugins are only injected into directories
-/// which already exist.
-///
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
-Future<void> refreshPluginsList(FlutterProject project, {bool checkProjects = false}) async {
+Future<void> refreshPluginsList(
+  FlutterProject project, {
+  bool iosPlatform = false,
+  bool macOSPlatform = false,
+}) async {
   final List<Plugin> plugins = await findPlugins(project);
 
   // TODO(franciscojma): Remove once migration is complete.
@@ -1159,12 +1147,10 @@ Future<void> refreshPluginsList(FlutterProject project, {bool checkProjects = fa
   final bool changed = _writeFlutterPluginsList(project, plugins);
   if (changed || legacyChanged) {
     createPluginSymlinks(project, force: true);
-    if (!checkProjects || project.ios.existsSync()) {
+    if (iosPlatform) {
       globals.cocoaPods.invalidatePodInstallOutput(project.ios);
     }
-    // TODO(stuartmorgan): Potentially add checkProjects once a decision has
-    // made about how to handle macOS in existing projects.
-    if (project.macos.existsSync()) {
+    if (macOSPlatform) {
       globals.cocoaPods.invalidatePodInstallOutput(project.macos);
     }
   }
@@ -1172,34 +1158,40 @@ Future<void> refreshPluginsList(FlutterProject project, {bool checkProjects = fa
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
 ///
-/// If `checkProjects` is true, then plugins are only injected into directories
-/// which already exist.
-///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
-Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false}) async {
+Future<void> injectPlugins(
+  FlutterProject project, {
+  bool androidPlatform = false,
+  bool iosPlatform = false,
+  bool linuxPlatform = false,
+  bool macOSPlatform = false,
+  bool windowsPlatform = false,
+  bool webPlatform = false,
+}) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
-  if ((checkProjects && project.android.existsSync()) || !checkProjects) {
+  if (androidPlatform) {
     await _writeAndroidPluginRegistrant(project, plugins);
   }
-  if ((checkProjects && project.ios.existsSync()) || !checkProjects) {
+  if (iosPlatform) {
     await _writeIOSPluginRegistrant(project, plugins);
   }
-  // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
-  // desktop in existing projects are in place. For now, ignore checkProjects
-  // on desktop and always treat it as true.
-  if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
+  if (linuxPlatform) {
     await _writeLinuxPluginFiles(project, plugins);
   }
-  if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
+  if (macOSPlatform) {
     await _writeMacOSPluginRegistrant(project, plugins);
   }
-  if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
+  if (windowsPlatform) {
     await _writeWindowsPluginFiles(project, plugins);
   }
-  for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
-    if (!project.isModule && (!checkProjects || subproject.existsSync())) {
+  if (!project.isModule) {
+    final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[
+      if (iosPlatform) project.ios,
+      if (macOSPlatform) project.macos,
+    ];
+    for (final XcodeBasedProject subproject in darwinProjects) {
       if (plugins.isNotEmpty) {
         await globals.cocoaPods.setupPodfile(subproject);
       }
@@ -1210,7 +1202,7 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
       }
     }
   }
-  if (featureFlags.isWebEnabled && project.web.existsSync()) {
+  if (webPlatform) {
     await _writeWebPluginRegistrant(project, plugins);
   }
 }

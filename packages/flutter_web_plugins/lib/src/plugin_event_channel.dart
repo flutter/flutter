@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -28,14 +26,14 @@ import 'plugin_registry.dart';
 ///
 /// The first method is `listen`. When called, it begins forwarding
 /// messages to the framework side when they are added to the
-/// [controller]. This triggers the [StreamController.onListen] callback
-/// on the [controller].
+/// `controller`. This triggers the [StreamController.onListen] callback
+/// on the `controller`.
 ///
 /// The other method is `cancel`. When called, it stops forwarding
 /// events to the framework. This triggers the [StreamController.onCancel]
-/// callback on the [controller].
+/// callback on the `controller`.
 ///
-/// Events added to the [controller] when the framework is not
+/// Events added to the `controller` when the framework is not
 /// subscribed are silently discarded.
 class PluginEventChannel<T> {
   /// Creates a new plugin event channel.
@@ -45,8 +43,8 @@ class PluginEventChannel<T> {
     this.name, [
     this.codec = const StandardMethodCodec(),
     this.binaryMessenger,
-  ])  : assert(name != null),
-        assert(codec != null);
+  ]) : assert(name != null), // ignore: unnecessary_null_comparison
+       assert(codec != null); // ignore: unnecessary_null_comparison
 
   /// The logical channel on which communication happens.
   ///
@@ -63,7 +61,7 @@ class PluginEventChannel<T> {
   /// When this is null, the [pluginBinaryMessenger] is used instead,
   /// which sends messages from the platform-side to the
   /// framework-side.
-  final BinaryMessenger binaryMessenger;
+  final BinaryMessenger? binaryMessenger;
 
   /// Use [setController] instead.
   ///
@@ -81,7 +79,7 @@ class PluginEventChannel<T> {
   ///
   /// Setting the controller to null disconnects from the channel (setting
   /// the message handler on the [binaryMessenger] to null).
-  void setController(StreamController<T> controller) {
+  void setController(StreamController<T>? controller) {
     final BinaryMessenger messenger = binaryMessenger ?? pluginBinaryMessenger;
     if (controller == null) {
       messenger.setMessageHandler(name, null);
@@ -105,16 +103,21 @@ class PluginEventChannel<T> {
 }
 
 class _EventChannelHandler<T> {
-  _EventChannelHandler(this.name, this.codec, this.controller, this.messenger) : assert(messenger != null);
+  _EventChannelHandler(
+    this.name,
+    this.codec,
+    this.controller,
+    this.messenger,
+  ) : assert(messenger != null); // ignore: unnecessary_null_comparison
 
   final String name;
   final MethodCodec codec;
   final StreamController<T> controller;
   final BinaryMessenger messenger;
 
-  StreamSubscription<T> subscription;
+  StreamSubscription<T>? subscription;
 
-  Future<ByteData> handle(ByteData message) {
+  Future<ByteData>? handle(ByteData? message) {
     final MethodCall call = codec.decodeMethodCall(message);
     switch (call.method) {
       case 'listen':
@@ -128,9 +131,8 @@ class _EventChannelHandler<T> {
   }
 
   Future<ByteData> _listen() async {
-    if (subscription != null) {
-      await subscription.cancel();
-    }
+    // Cancel any existing subscription.
+    await subscription?.cancel();
     subscription = controller.stream.listen((dynamic event) {
       messenger.send(name, codec.encodeSuccessEnvelope(event));
     }, onError: (dynamic error) {
@@ -146,7 +148,7 @@ class _EventChannelHandler<T> {
         message: 'No active subscription to cancel.',
       );
     }
-    await subscription.cancel();
+    await subscription!.cancel();
     subscription = null;
     return codec.encodeSuccessEnvelope(null);
   }

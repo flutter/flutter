@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -37,6 +38,47 @@ void main() {
   });
 
   group('network errors', () {
+    testUsingContext('retries and deletes zip if gradle fails to unzip', () async {
+      globals.fs.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+      const String errorMessage = r'''
+Exception in thread "main" java.util.zip.ZipException: error in opening zip file
+at java.util.zip.ZipFile.open(Native Method)
+at java.util.zip.ZipFile.(ZipFile.java:225)
+at java.util.zip.ZipFile.(ZipFile.java:155)
+at java.util.zip.ZipFile.(ZipFile.java:169)
+at org.gradle.wrapper.Install.unzip(Install.java:214)
+at org.gradle.wrapper.Install.access$600(Install.java:27)
+at org.gradle.wrapper.Install$1.call(Install.java:74)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
+[!] Gradle threw an error while trying to update itself. Retrying the update...
+Exception in thread "main" java.util.zip.ZipException: error in opening zip file
+at java.util.zip.ZipFile.open(Native Method)
+at java.util.zip.ZipFile.(ZipFile.java:225)
+at java.util.zip.ZipFile.(ZipFile.java:155)
+at java.util.zip.ZipFile.(ZipFile.java:169)
+at org.gradle.wrapper.Install.unzip(Install.java:214)
+at org.gradle.wrapper.Install.access$600(Install.java:27)
+at org.gradle.wrapper.Install$1.call(Install.java:74)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
+''';
+
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
+      expect(globals.fs.file('foo/.gradle/fizz.zip'), isNot(exists));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+    });
+
     testUsingContext('retries if gradle fails while downloading', () async {
       const String errorMessage = r'''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
@@ -61,6 +103,9 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
           'Retrying to download...'
         )
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('retries if gradle fails downloading with proxy error', () async {
@@ -89,6 +134,9 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
           'Retrying to download...'
         )
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('retries if gradle times out waiting for exclusive access to zip', () async {
@@ -108,6 +156,9 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
           'Retrying to download...'
         )
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('retries if remote host closes connection', () async {
@@ -143,6 +194,9 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
           'Retrying to download...'
         )
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('retries if file opening fails', () async {
@@ -170,6 +224,9 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
           'Retrying to download...'
         )
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('retries if the connection is reset', () async {
@@ -208,6 +265,9 @@ Exception in thread "main" java.net.SocketException: Connection reset
           'Retrying to download...'
         )
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('retries if Gradle could not get a resource', () async {
@@ -233,6 +293,9 @@ A problem occurred configuring root project 'android'.
           'Retrying to download...'
         )
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -378,8 +441,8 @@ Command: /home/android/gradlew assembleRelease
 
       expect(testLogger.statusText,
         contains(
-          'The built failed likely due to AndroidX incompatibilities in a plugin. '
-          'The tool is about to try using Jetfier to solve the incompatibility.'
+          'The build failed likely due to AndroidX incompatibilities in a plugin. '
+          'The tool is about to try using Jetifier to solve the incompatibility.'
         )
       );
       verify(mockUsage.sendEvent(

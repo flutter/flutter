@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -305,7 +306,7 @@ void main() {
         final FlutterError error = FlutterError('Oops');
         double errorCount = 0;
 
-        runZoned(
+        runZonedGuarded(
           () async {
             mockHelper.refreshCompleter = Completer<void>.sync();
             await tester.pumpWidget(
@@ -371,7 +372,7 @@ void main() {
             )));
             expect(mockHelper.invocations, hasLength(5));
           },
-          onError: (dynamic e) {
+          (Object e, StackTrace stack) {
             expect(e, error);
             expect(errorCount, 0);
             errorCount++;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -96,7 +94,7 @@ void main() {
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
         '           │\n'
@@ -169,7 +167,7 @@ void main() {
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
         '           │\n'
@@ -267,7 +265,7 @@ void main() {
         '           │ layer: null\n'
         '           │ semantics node: null\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ textDirection: null\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
@@ -394,7 +392,7 @@ void main() {
         '           │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
         '           │ isSemanticBoundary: false\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ textDirection: null\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
@@ -440,7 +438,7 @@ void main() {
 
     final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
     final PaintingContext context = _MockPaintingContext();
-    FlutterError error;
+    late FlutterError error;
     try {
       decoratedBox.paint(context, const Offset(0, 0));
     } on FlutterError catch (e) {

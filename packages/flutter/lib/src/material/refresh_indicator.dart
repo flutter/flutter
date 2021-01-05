@@ -47,6 +47,17 @@ enum _RefreshIndicatorMode {
   canceled, // Animating the indicator's fade-out after not arming.
 }
 
+/// Used to configure how [RefreshIndicator] can be triggered.
+enum RefreshIndicatorTriggerMode {
+  /// The indicator can be triggered regardless of the scroll position
+  /// of the [Scrollable] when the drag starts.
+  anywhere,
+
+  /// The indicator can only be triggered if the [Scrollable] is at the edge
+  /// when the drag starts.
+  onEdge,
+}
+
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
 /// When the child's [Scrollable] descendant overscrolls, an animated circular
@@ -55,6 +66,8 @@ enum _RefreshIndicatorMode {
 /// the [onRefresh] callback is called. The callback is expected to update the
 /// scrollable's contents and then complete the [Future] it returns. The refresh
 /// indicator disappears after the callback's [Future] has completed.
+///
+/// The trigger mode is configured by [RefreshIndicator.triggerMode].
 ///
 /// ## Troubleshooting
 ///
@@ -106,11 +119,13 @@ class RefreshIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
-    this.strokeWidth = 2.0
+    this.strokeWidth = 2.0,
+    this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
        assert(strokeWidth != null),
+       assert(triggerMode != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -146,19 +161,34 @@ class RefreshIndicator extends StatefulWidget {
   /// else for more complicated layouts.
   final ScrollNotificationPredicate notificationPredicate;
 
-  /// {@macro flutter.material.progressIndicator.semanticsLabel}
+  /// {@macro flutter.progress_indicator.ProgressIndicator.semanticsLabel}
   ///
   /// This will be defaulted to [MaterialLocalizations.refreshIndicatorSemanticLabel]
   /// if it is null.
   final String? semanticsLabel;
 
-  /// {@macro flutter.material.progressIndicator.semanticsValue}
+  /// {@macro flutter.progress_indicator.ProgressIndicator.semanticsValue}
   final String? semanticsValue;
 
   /// Defines `strokeWidth` for `RefreshIndicator`.
   ///
   /// By default, the value of `strokeWidth` is 2.0 pixels.
   final double strokeWidth;
+
+  /// Defines how this [RefreshIndicator] can be triggered when users overscroll.
+  ///
+  /// The [RefreshIndicator] can be pulled out in two cases,
+  /// 1, Keep dragging if the scrollable widget at the edge with zero scroll position
+  ///    when the drag starts.
+  /// 2, Keep dragging after overscroll occurs if the scrollable widget has
+  ///    a non-zero scroll position when the drag starts.
+  ///
+  /// If this is [RefreshIndicatorTriggerMode.anywhere], both of the cases above can be triggered.
+  ///
+  /// If this is [RefreshIndicatorTriggerMode.onEdge], only case 1 can be triggered.
+  ///
+  /// Defaults to [RefreshIndicatorTriggerMode.onEdge].
+  final RefreshIndicatorTriggerMode triggerMode;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -196,11 +226,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   @override
   void didChangeDependencies() {
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     _valueColor = _positionController.drive(
       ColorTween(
-        begin: (widget.color ?? theme!.accentColor).withOpacity(0.0),
-        end: (widget.color ?? theme!.accentColor).withOpacity(1.0),
+        begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
+        end: (widget.color ?? theme.accentColor).withOpacity(1.0),
       ).chain(CurveTween(
         curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
       )),
@@ -215,11 +245,17 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     super.dispose();
   }
 
+  bool _shouldStart(ScrollNotification notification) {
+    return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
+      && notification.metrics.extentBefore == 0.0
+      && _mode == null
+      && _start(notification.metrics.axisDirection);
+  }
+
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification))
       return false;
-    if (notification is ScrollStartNotification && notification.metrics.extentBefore == 0.0 &&
-        _mode == null && _start(notification.metrics.axisDirection)) {
+    if (_shouldStart(notification)) {
       setState(() {
         _mode = _RefreshIndicatorMode.drag;
       });
@@ -258,7 +294,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        _dragOffset = _dragOffset! - notification.overscroll / 2.0;
+        _dragOffset = _dragOffset! - notification.overscroll;
         _checkDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
@@ -467,7 +503,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                   animation: _positionController,
                   builder: (BuildContext context, Widget? child) {
                     return RefreshProgressIndicator(
-                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context)!.refreshIndicatorSemanticLabel,
+                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,

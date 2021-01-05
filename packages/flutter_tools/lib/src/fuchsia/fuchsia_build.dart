@@ -10,7 +10,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -92,8 +91,6 @@ Future<void> _genSnapshot(
 
   final List<String> command = <String>[
     genSnapshot,
-    '--no-causal-async-stacks',
-    '--lazy-async-stacks',
     '--deterministic',
     '--snapshot_kind=app-aot-elf',
     '--elf=$elf',
@@ -103,10 +100,9 @@ Future<void> _genSnapshot(
   int result;
   final Status status = globals.logger.startProgress(
     'Compiling Fuchsia application to native code...',
-    timeout: null,
   );
   try {
-    result = await processUtils.stream(command, trace: true);
+    result = await globals.processUtils.stream(command, trace: true);
   } finally {
     status.cancel();
   }
@@ -125,7 +121,6 @@ Future<void> _buildAssets(
     manifestPath: fuchsiaProject.project.pubspecFile.path,
     packagesPath: fuchsiaProject.project.packagesFile.path,
     assetDirPath: assetDir,
-    includeDefaultFonts: false,
   );
 
   final Map<String, DevFSContent> assetEntries =

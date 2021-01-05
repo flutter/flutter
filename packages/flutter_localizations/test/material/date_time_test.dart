@@ -163,7 +163,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/67644.
   testWidgets('en_US is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
-    DateFormat dateFormat;
+    late DateFormat dateFormat;
 
     await tester.pumpWidget(MaterialApp(
       supportedLocales: const <Locale>[
@@ -180,7 +180,7 @@ void main() {
       }),
     ));
 
-    expect(dateFormat?.locale, 'en_US');
+    expect(dateFormat.locale, 'en_US');
   });
 }
 

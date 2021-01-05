@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -30,29 +29,16 @@ const int kXcodeRequiredVersionMajor = 11;
 const int kXcodeRequiredVersionMinor = 0;
 const int kXcodeRequiredVersionPatch = 0;
 
-enum SdkType {
-  iPhone,
-  iPhoneSimulator,
-  macOS,
-}
-
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
 ///
 /// Usage: xcrun [options] <tool name> ... arguments ...
 /// ...
 /// --sdk <sdk name>            find the tool for the given SDK name.
-String getNameForSdk(SdkType sdk) {
-  switch (sdk) {
-    case SdkType.iPhone:
-      return 'iphoneos';
-    case SdkType.iPhoneSimulator:
-      return 'iphonesimulator';
-    case SdkType.macOS:
-      return 'macosx';
-  }
-  assert(false);
-  return null;
+String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
+  return (environmentType == EnvironmentType.simulator)
+      ? 'iphonesimulator'
+      : 'iphoneos';
 }
 
 /// A utility class for interacting with Xcode command line tools.
@@ -63,10 +49,11 @@ class Xcode {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required XcodeProjectInterpreter xcodeProjectInterpreter,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  })  : _platform = platform,
+        _fileSystem = fileSystem,
+        _xcodeProjectInterpreter = xcodeProjectInterpreter,
+        _processUtils =
+            ProcessUtils(logger: logger, processManager: processManager);
 
   final Platform _platform;
   final ProcessUtils _processUtils;
@@ -110,7 +97,7 @@ class Xcode {
     if (_eulaSigned == null) {
       try {
         final RunResult result = _processUtils.runSync(
-          <String>['/usr/bin/xcrun', 'clang'],
+          <String>[...xcrunCommand(), 'clang'],
         );
         if (result.stdout != null && result.stdout.contains('license')) {
           _eulaSigned = false;
@@ -135,7 +122,7 @@ class Xcode {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
         final RunResult result = _processUtils.runSync(
-          <String>['/usr/bin/xcrun', 'simctl', 'list'],
+          <String>[...xcrunCommand(), 'simctl', 'list'],
         );
         _isSimctlInstalled = result.stderr == null || result.stderr == '';
       } on ProcessException {
@@ -161,24 +148,27 @@ class Xcode {
     return false;
   }
 
+  /// See [XcodeProjectInterpreter.xcrunCommand].
+  List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
+
   Future<RunResult> cc(List<String> args) {
     return _processUtils.run(
-      <String>['xcrun', 'cc', ...args],
+      <String>[...xcrunCommand(), 'cc', ...args],
       throwOnError: true,
     );
   }
 
   Future<RunResult> clang(List<String> args) {
     return _processUtils.run(
-      <String>['xcrun', 'clang', ...args],
+      <String>[...xcrunCommand(), 'clang', ...args],
       throwOnError: true,
     );
   }
 
-  Future<String> sdkLocation(SdkType sdk) async {
-    assert(sdk != null);
+  Future<String> sdkLocation(EnvironmentType environmentType) async {
+    assert(environmentType != null);
     final RunResult runResult = await _processUtils.run(
-      <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
+      <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-path'],
     );
     if (runResult.exitCode != 0) {
       throwToolExit('Could not find SDK location: ${runResult.stderr}');
@@ -198,6 +188,17 @@ class Xcode {
       orElse: () => null,
     );
   }
+}
+
+EnvironmentType environmentTypeFromSdkroot(Directory sdkroot) {
+  assert(sdkroot != null);
+  // iPhoneSimulator.sdk or iPhoneOS.sdk
+  final String sdkName = sdkroot.basename.toLowerCase();
+  if (sdkName.contains('iphone')) {
+    return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+  }
+  assert(false);
+  return null;
 }
 
 enum XCDeviceEvent {
@@ -260,28 +261,7 @@ class XCDevice {
     );
   }
 
-  bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
-
-  String _xcdevicePath;
-  String get xcdevicePath {
-    if (_xcdevicePath == null) {
-      try {
-        _xcdevicePath = _processUtils.runSync(
-          <String>[
-            'xcrun',
-            '--find',
-            'xcdevice'
-          ],
-          throwOnError: true,
-        ).stdout.trim();
-      } on ProcessException catch (exception) {
-        _logger.printTrace('Process exception finding xcdevice:\n$exception');
-      } on ArgumentError catch (exception) {
-        _logger.printTrace('Argument exception finding xcdevice:\n$exception');
-      }
-    }
-    return _xcdevicePath;
-  }
+  bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck;
 
   Future<List<dynamic>> _getAllDevices({
     bool useCache = false,
@@ -298,7 +278,7 @@ class XCDevice {
       // USB-tethered devices should be found quickly. 1 second timeout is faster than the default.
       final RunResult result = await _processUtils.run(
         <String>[
-          'xcrun',
+          ..._xcode.xcrunCommand(),
           'xcdevice',
           'list',
           '--timeout',
@@ -352,7 +332,7 @@ class XCDevice {
           '-t',
           '0',
           '/dev/null',
-          'xcrun',
+          ..._xcode.xcrunCommand(),
           'xcdevice',
           'observe',
           '--both',
@@ -512,7 +492,6 @@ class XCDevice {
         iosDeploy: _iosDeploy,
         iMobileDevice: _iMobileDevice,
         platform: globals.platform,
-        vmServiceConnectUri: vm_service_io.vmServiceConnectUri,
       ));
     }
     return devices;
@@ -581,7 +560,7 @@ class XCDevice {
         if (architecture.startsWith('armv7')) {
           cpuArchitecture = DarwinArch.armv7;
         } else {
-          cpuArchitecture = defaultIOSArchs.first;
+          cpuArchitecture = DarwinArch.arm64;
         }
         _logger.printError(
           'Unknown architecture $architecture, defaulting to '

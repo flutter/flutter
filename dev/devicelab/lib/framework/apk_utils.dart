@@ -119,9 +119,23 @@ Future<String> _evalApkAnalyzer(
   String workingDirectory,
 }) async {
   final String javaHome = await findJavaHome();
+
+   final String apkAnalyzer = path
+     .join(_androidHome, 'cmdline-tools', 'latest', 'bin', Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer');
+   if (canRun(apkAnalyzer)) {
+     return eval(
+       apkAnalyzer,
+       args,
+       printStdout: printStdout,
+       workingDirectory: workingDirectory,
+       environment: <String, String>{
+         'JAVA_HOME': javaHome,
+       },
+     );
+   }
+
   final String javaBinary = path.join(javaHome, 'bin', 'java');
   assert(canRun(javaBinary));
-
   final String androidTools = path.join(_androidHome, 'tools');
   final String libs = path.join(androidTools, 'lib');
   assert(Directory(libs).existsSync());
@@ -266,12 +280,15 @@ subprojects {
     ''');
   }
 
-  Future<void> addPlugin(String plugin) async {
+  /// Adds a plugin to the pubspec.
+  /// In pubspec, each dependency is expressed as key, value pair joined by a colon `:`.
+  /// such as `plugin_a`:`^0.0.1` or `plugin_a`:`\npath: /some/path`.
+  Future<void> addPlugin(String plugin, { String value = '' }) async {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
       '${platformLineSep}dependencies:$platformLineSep',
-      '${platformLineSep}dependencies:$platformLineSep  $plugin:$platformLineSep',
+      '${platformLineSep}dependencies:$platformLineSep  $plugin:$value$platformLineSep',
     );
     await pubspec.writeAsString(content, flush: true);
   }
@@ -365,10 +382,6 @@ class FlutterPluginProject {
   String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk','app-armeabi-v7a-release.apk');
   String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-arm64-v8a-release.apk');
   String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
-
-  Future<void> runGradleTask(String task, {List<String> options}) async {
-    return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
-  }
 }
 
 class FlutterModuleProject {

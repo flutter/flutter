@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -610,6 +609,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.hintOverrides,
     this.textDirection,
     this.sortKey,
+    this.tagForChildren,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -912,6 +912,22 @@ class SemanticsProperties extends DiagnosticableTree {
   /// traversed by the accessibility services on the platform (e.g. VoiceOver
   /// on iOS and TalkBack on Android).
   final SemanticsSortKey? sortKey;
+
+  /// A tag to be applied to the child [SemanticsNode]s of this widget.
+  ///
+  /// The tag is added to all child [SemanticsNode]s that pass through the
+  /// [RenderObject] corresponding to this widget while looking to be attached
+  /// to a parent SemanticsNode.
+  ///
+  /// Tags are used to communicate to a parent SemanticsNode that a child
+  /// SemanticsNode was passed through a particular RenderObject. The parent can
+  /// use this information to determine the shape of the semantics tree.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.addTagForChildren], to which the tags provided
+  ///    here will be passed.
+  final SemanticsTag? tagForChildren;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -2594,7 +2610,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [Window.updateSemantics].
+  /// Update the semantics using [dart:ui.PlatformDispatcher.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;

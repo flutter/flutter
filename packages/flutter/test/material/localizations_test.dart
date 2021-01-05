@@ -102,4 +102,28 @@ void main() {
     expect(localizations.licensesPackageDetailText(2).contains(r'$licensesCount'), isFalse);
     expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
   });
+
+  testWidgets('MaterialLocalizations.of throws', (WidgetTester tester) async {
+    final GlobalKey noLocalizationsAvailable = GlobalKey();
+    final GlobalKey localizationsAvailable = GlobalKey();
+
+    await tester.pumpWidget(
+      Container(
+        key: noLocalizationsAvailable,
+        child: MaterialApp(
+          home: Container(
+            key: localizationsAvailable,
+          ),
+        ),
+      ),
+    );
+
+    expect(() => MaterialLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
+      (AssertionError e) => e.message,
+      'message',
+      contains('No MaterialLocalizations found'),
+    )));
+
+    expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isA<MaterialLocalizations>());
+  });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,8 +10,8 @@ void main() {
   testWidgets('FadeTransition', (WidgetTester tester) async {
     final DebugPrintCallback oldPrint = debugPrint;
     final List<String> log = <String>[];
-    debugPrint = (String message, { int wrapWidth }) {
-      log.add(message);
+    debugPrint = (String? message, { int? wrapWidth }) {
+      log.add(message!);
     };
     debugPrintBuildScope = true;
     final AnimationController controller = AnimationController(

@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 
 class _GesturePainter extends CustomPainter {
   const _GesturePainter({
-    this.zoom,
-    this.offset,
-    this.swatch,
-    this.forward,
-    this.scaleEnabled,
-    this.tapEnabled,
-    this.doubleTapEnabled,
-    this.longPressEnabled,
+    required this.zoom,
+    required this.offset,
+    required this.swatch,
+    required this.forward,
+    required this.scaleEnabled,
+    required this.tapEnabled,
+    required this.doubleTapEnabled,
+    required this.longPressEnabled,
   });
 
   final double zoom;
@@ -61,12 +61,12 @@ class GestureDemo extends StatefulWidget {
 
 class GestureDemoState extends State<GestureDemo> {
 
-  Offset _startingFocalPoint;
+  late Offset _startingFocalPoint;
 
-  Offset _previousOffset;
+  late Offset _previousOffset;
   Offset _offset = Offset.zero;
 
-  double _previousZoom;
+  late double _previousZoom;
   double _zoom = 1.0;
 
   static const List<MaterialColor> kSwatches = <MaterialColor>[
@@ -175,7 +175,7 @@ class GestureDemoState extends State<GestureDemo> {
                     children: <Widget>[
                       Checkbox(
                         value: _scaleEnabled,
-                        onChanged: (bool value) { setState(() { _scaleEnabled = value; }); },
+                        onChanged: (bool? value) { setState(() { _scaleEnabled = value!; }); },
                       ),
                       const Text('Scale'),
                     ],
@@ -184,7 +184,7 @@ class GestureDemoState extends State<GestureDemo> {
                     children: <Widget>[
                       Checkbox(
                         value: _tapEnabled,
-                        onChanged: (bool value) { setState(() { _tapEnabled = value; }); },
+                        onChanged: (bool? value) { setState(() { _tapEnabled = value!; }); },
                       ),
                       const Text('Tap'),
                     ],
@@ -193,7 +193,7 @@ class GestureDemoState extends State<GestureDemo> {
                     children: <Widget>[
                       Checkbox(
                         value: _doubleTapEnabled,
-                        onChanged: (bool value) { setState(() { _doubleTapEnabled = value; }); },
+                        onChanged: (bool? value) { setState(() { _doubleTapEnabled = value!; }); },
                       ),
                       const Text('Double Tap'),
                     ],
@@ -202,7 +202,7 @@ class GestureDemoState extends State<GestureDemo> {
                     children: <Widget>[
                       Checkbox(
                         value: _longPressEnabled,
-                        onChanged: (bool value) { setState(() { _longPressEnabled = value; }); },
+                        onChanged: (bool? value) { setState(() { _longPressEnabled = value!; }); },
                       ),
                       const Text('Long Press'),
                     ],

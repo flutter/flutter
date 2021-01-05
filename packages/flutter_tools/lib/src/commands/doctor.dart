@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
@@ -26,13 +27,6 @@ class DoctorCommand extends FlutterCommand {
   final String name = 'doctor';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    // This is required because the gradle host-only tests do not correctly specify
-    // their dependencies.
-    DevelopmentArtifact.androidGenSnapshot,
-  };
-
-  @override
   final String description = 'Show information about the installed tooling.';
 
   @override
@@ -51,7 +45,11 @@ class DoctorCommand extends FlutterCommand {
             'git hash.');
       }
     }
-    final bool success = await globals.doctor.diagnose(androidLicenses: boolArg('android-licenses'), verbose: verbose);
+    final bool success = await globals.doctor.diagnose(
+      androidLicenses: boolArg('android-licenses'),
+      verbose: verbose,
+      androidLicenseValidator: androidLicenseValidator,
+    );
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }

@@ -30,7 +30,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   }
 
   List<Map<Object, Object?>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object>>[]);
+    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object?>>[]);
   }
 
   Iterable<Map<Object, Object?>> getServiceExtensionStateChangedEvents(String extensionName) {

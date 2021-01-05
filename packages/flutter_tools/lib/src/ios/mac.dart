@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -23,7 +24,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'devices.dart';
-import 'migrations/ios_migrator.dart';
 import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
@@ -102,13 +102,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  final List<IOSMigrator> migrators = <IOSMigrator>[
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
   ];
 
-  final IOSMigration migration = IOSMigration(migrators);
+  final ProjectMigration migration = ProjectMigration(migrators);
   if (!migration.run()) {
     return XcodeBuildResult(success: false);
   }
@@ -117,7 +117,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  await removeFinderExtendedAttributes(app.project.hostAppRoot, processUtils, globals.logger);
+  await removeFinderExtendedAttributes(app.project.hostAppRoot, globals.processUtils, globals.logger);
 
   final XcodeProjectInfo projectInfo = await app.project.projectInfo();
   final String scheme = projectInfo.schemeFor(buildInfo);
@@ -192,10 +192,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<String> buildCommands = <String>[
-    '/usr/bin/env',
-    'xcrun',
+    ...globals.xcode.xcrunCommand(),
     'xcodebuild',
-    '-configuration', configuration,
+    '-configuration',
+    configuration,
   ];
 
   if (globals.logger.isVerbose) {
@@ -302,7 +302,6 @@ Future<XcodeBuildResult> buildXcodeProject({
           initialBuildStatus = null;
           buildSubStatus = globals.logger.startProgress(
             line,
-            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: kDefaultStatusPadding - 7,
           );
         }
@@ -331,7 +330,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final Stopwatch sw = Stopwatch()..start();
-  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.slowOperation);
+  initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
 
   final RunResult buildResult = await _runBuildWithRetries(buildCommands, app);
 
@@ -366,7 +365,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   const Duration showBuildSettingsTimeout = Duration(minutes: 1);
   Map<String, String> buildSettings;
   try {
-    final RunResult showBuildSettingsResult = await processUtils.run(
+    final RunResult showBuildSettingsResult = await globals.processUtils.run(
       showBuildSettingsCommand,
       throwOnError: true,
       workingDirectory: app.project.hostAppRoot.path,
@@ -439,7 +438,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
       }
     } else {
-      outputDir = '${globals.fs.path.absolute(app.archiveBundlePath)}.xcarchive';
+      outputDir = globals.fs.path.absolute(app.archiveBundleOutputPath);
       if (!globals.fs.isDirectorySync(outputDir)) {
         globals.printError('Archive succeeded but the expected xcarchive at $outputDir not found');
       }
@@ -485,7 +484,7 @@ Future<RunResult> _runBuildWithRetries(List<String> buildCommands, BuildableIOSA
     remainingTries--;
     buildRetryDelaySeconds *= 2;
 
-    buildResult = await processUtils.run(
+    buildResult = await globals.processUtils.run(
       buildCommands,
       workingDirectory: app.project.hostAppRoot.path,
       allowReentrantFlutter: true,
@@ -540,7 +539,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     logger.printError('');
     logger.printError('You can temporarily work around this issue by running:');
-    logger.printError('  rm -rf ios/Flutter/App.framework');
+    logger.printError('  flutter clean');
     return;
   }
 
