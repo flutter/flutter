@@ -54,7 +54,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// descendant [Scrollbar] widgets.
   final bool? showTrackOnHover;
 
-  /// Overrides the default value of [Scrollbar.showScrollbar] in all
+  /// Overrides the default value of [Scrollbar.isAlwaysShown] in all
   /// descendant [Scrollbar] widgets.
   final bool? isAlwaysShown;
 
