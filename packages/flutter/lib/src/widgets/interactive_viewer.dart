@@ -13,7 +13,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'ticker_provider.dart';
 
-// TODO(justinmc): Cleaner way about this?
+// TODO(justinmc): Cleaner way about this? See _round method.
 const double _kTolerance = 100000000000.0;
 
 /// A widget that enables pan and zoom interactions with its child.
@@ -414,7 +414,8 @@ class InteractiveViewer extends StatefulWidget {
 
   /// Returns true iff the point is inside the rectangle given by the Quad,
   /// inclusively.
-  /// Algorithm from https://math.stackexchange.com/a/190373.
+  ///
+  /// Algorithm from [https://math.stackexchange.com/a/190373].
   @visibleForTesting
   static bool pointIsInside(Vector3 point, Quad quad) {
     final Vector3 aM = point - quad.point0;
@@ -427,71 +428,6 @@ class InteractiveViewer extends StatefulWidget {
     final double aDAD = aD.dot(aD);
 
     return 0 <= aMAB && aMAB <= aBAB && 0 <= aMAD && aMAD <= aDAD;
-  }
-
-  /// Returns the axis aligned bounding box of the given quad.
-  @visibleForTesting
-  static Quad getAxisAlignedBoundingBox(Quad quad) {
-    final double left = math.min(
-      quad.point0.x,
-      math.min(
-        quad.point1.x,
-        math.min(quad.point2.x, quad.point3.x),
-      ),
-    );
-    final double top = math.min(
-      quad.point0.y,
-      math.min(
-        quad.point1.y,
-        math.min(quad.point2.y, quad.point3.y),
-      ),
-    );
-    final double right = math.max(
-      quad.point0.x,
-      math.max(
-        quad.point1.x,
-        math.max(quad.point2.x, quad.point3.x),
-      ),
-    );
-    final double bottom = math.max(
-      quad.point0.y,
-      math.max(
-        quad.point1.y,
-        math.max(quad.point2.y, quad.point3.y),
-      ),
-    );
-    return Quad.points(
-      Vector3(left, top, 0.0),
-      Vector3(right, top, 0.0),
-      Vector3(right, bottom, 0.0),
-      Vector3(left, bottom, 0.0),
-    );
-  }
-
-  /// Returns the axis aligned bounding box of the given Rect after it has been
-  /// rotated by the given rotation.
-  @visibleForTesting
-  static Quad getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
-    // Distance center of rect to any corner.
-    //final double d = math.sqrt(math.pow(rect.width, 2) + math.pow(rect.height, 2)) / 2;
-
-    final double diagonal = math.sqrt(math.pow(rect.height, 2) + math.pow(rect.height, 2));
-    final double directionOfBR = math.asin(rect.height / diagonal);
-    final double directionOfBL = math.pi - directionOfBR;
-    final double directionOfTL = math.pi + directionOfBR;
-    final double directionOfTR = 2 * math.pi - directionOfBR;
-    // The corners of the rectangle after rotation.
-    final Offset br = pointAt(rect.center, directionOfBR + rotation, diagonal / 2);
-    final Offset bl = pointAt(rect.center, directionOfBL + rotation, diagonal / 2);
-    final Offset tl = pointAt(rect.center, directionOfTL + rotation, diagonal / 2);
-    final Offset tr = pointAt(rect.center, directionOfTR + rotation, diagonal / 2);
-    final Quad out = Quad.points(
-      Vector3(tl.dx, tl.dy, 0.0),
-      Vector3(tr.dx, tr.dy, 0.0),
-      Vector3(br.dx, br.dy, 0.0),
-      Vector3(bl.dx, bl.dy, 0.0),
-    );
-    return getAxisAlignedBoundingBox(out);
   }
 
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
@@ -1197,12 +1133,6 @@ double _getFinalTime(double velocity, double drag) {
   return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
 }
 
-// Return the translation from the given Matrix4 as an Offset.
-Offset _getMatrixTranslation(Matrix4 matrix) {
-  final Vector3 nextTranslation = matrix.getTranslation();
-  return Offset(nextTranslation.x, nextTranslation.y);
-}
-
 // TODO(justinmc): Consider caching this.
 // Returns the rotation about the z axis in radians of the given Matrix4.
 double _getMatrixRotation(Matrix4 matrix) {
@@ -1275,14 +1205,6 @@ Axis? _getPanAxis(Offset point1, Offset point2) {
   final double x = point2.dx - point1.dx;
   final double y = point2.dy - point1.dy;
   return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
-}
-
-/// Returns the point located at the given distance and angle from the start.
-/// Direction is in radians. A direction of zero points to the right of start.
-@visibleForTesting
-Offset pointAt(Offset start, double direction, double distance) {
-  final Offset fromOrigin = Offset.fromDirection(direction, distance);
-  return fromOrigin + start;
 }
 
 // Simple 2D distance formula.
@@ -1526,7 +1448,7 @@ class LineSegment {
     final LineSegment left = LineSegment(rect.topLeft, rect.bottomLeft);
     final ClosestPoints toLeft = findClosestPointsLineSegment(left);
 
-    // TODO(justinmc): Find distance between two closestpoints for each side,
+    // TODO(justinmc): Find distance between two ClosestPoints for each side,
     // and return the closest.
     return (<ClosestPoints>[toTop, toRight, toBottom, toLeft]
         ..sort((ClosestPoints first, ClosestPoints second) {
