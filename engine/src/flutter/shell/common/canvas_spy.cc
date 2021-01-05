@@ -51,11 +51,6 @@ bool DidDrawCanvas::onDoSaveBehind(const SkRect* bounds) {
 
 void DidDrawCanvas::willRestore() {}
 
-#ifdef SK_SUPPORT_LEGACY_CANVASMATRIX33
-void DidDrawCanvas::didConcat(const SkMatrix& matrix) {}
-void DidDrawCanvas::didSetMatrix(const SkMatrix& matrix) {}
-#endif
-
 void DidDrawCanvas::didConcat44(const SkM44&) {}
 
 void DidDrawCanvas::didScale(SkScalar, SkScalar) {}
