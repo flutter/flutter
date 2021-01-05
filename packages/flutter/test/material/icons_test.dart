@@ -52,7 +52,6 @@ void main() {
   );
 
   testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
-
     await tester.pumpWidget(MaterialApp(
       home: IconTheme(
         data: const IconThemeData(size: 200),
@@ -69,6 +68,7 @@ void main() {
         ),
       ),
     ));
+    
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.material.png'));
   });
 }
