@@ -14,13 +14,13 @@ import 'theme_data.dart';
 
 /// A material design "flat button".
 ///
-/// ### This class is obsolete, please use [TextButton] instead.
+/// ### This class is deprecated, please use [TextButton] instead.
 ///
 /// FlatButton, RaisedButton, and OutlineButton have been replaced by
 /// TextButton, ElevatedButton, and OutlinedButton respectively.
 /// ButtonTheme has been replaced by TextButtonTheme,
 /// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
-/// will be deprecated soon, please migrate code that uses them.
+/// will eventually be removed, please migrate code that uses them.
 /// There's a detailed migration guide for the new button and button
 /// theme classes in
 /// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
@@ -108,6 +108,10 @@ import 'theme_data.dart';
 ///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * Cookbook: [Build a form with validation](https://flutter.dev/docs/cookbook/forms/validation)
+@Deprecated(
+  'Use TextButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
+  'This feature was deprecated after v1.25.0.'
+)
 class FlatButton extends MaterialButton {
   /// Create a simple text button.
   ///
