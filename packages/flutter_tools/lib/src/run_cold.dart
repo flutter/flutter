@@ -204,7 +204,7 @@ class ColdRunner extends ResidentRunner {
 
         final DevToolsServerAddress devToolsServerAddress = activeDevToolsServer();
         if (devToolsServerAddress != null) {
-          final Uri uri = devToolsServerAddress.uri()?.replace(
+          final Uri uri = devToolsServerAddress.uri?.replace(
             queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
           );
           if (uri != null) {

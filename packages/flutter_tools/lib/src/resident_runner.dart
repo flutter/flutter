@@ -1674,7 +1674,7 @@ class DevToolsServerAddress {
   final String host;
   final int port;
 
-  Uri uri() {
+  Uri get uri {
     if (host == null || port == null) {
       return null;
     }
