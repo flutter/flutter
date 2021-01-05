@@ -997,6 +997,8 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       if (!canvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+      if (!canvasKit)
+        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
       '--driver=test_driver/transitions_perf_e2e_test.dart',
       '--target=test_driver/transitions_perf_e2e.dart',
       '--browser-name=chrome',
@@ -1150,6 +1152,8 @@ Future<void> _runWebDebugTest(String target, {
       '-d',
       'chrome',
       '--web-run-headless',
+      '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+      '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
       ...additionalArguments,
       '-t',
       target,
@@ -1188,6 +1192,8 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
         '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
+      // TODO(ferhatb): Run web tests with both rendering backends.
+      '--web-renderer=html', // use html backend for web tests.
       '--sound-null-safety', // web tests do not autodetect yet.
       ...?flutterTestArgs,
       ...tests,

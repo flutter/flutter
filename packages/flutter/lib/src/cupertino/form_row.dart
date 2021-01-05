@@ -8,9 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 // Content padding determined via SwiftUI's `Form` view in the iOS 14.2 SDK.
 const EdgeInsetsGeometry _kDefaultPadding =
     EdgeInsetsDirectional.fromSTEB(20.0, 6.0, 6.0, 6.0);
@@ -45,7 +42,7 @@ const EdgeInsetsGeometry _kDefaultPadding =
 ///
 /// ```dart
 /// class FlutterDemo extends StatefulWidget {
-///   FlutterDemo({Key key}) : super(key: key);
+///   FlutterDemo({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _FlutterDemoState createState() => _FlutterDemoState();
