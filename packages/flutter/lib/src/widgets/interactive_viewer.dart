@@ -669,23 +669,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         || !correctedViewportSide23.intersectsRect(_boundaryRect)
         || !correctedViewportSide30.intersectsRect(_boundaryRect)) {
       return defaultMatrix;
-      /*
-      final LineSegment? correctedInvalidSide = <LineSegment?>[
-        correctedViewportSide01,
-        correctedViewportSide12,
-        correctedViewportSide23,
-        correctedViewportSide30,
-      ].firstWhere((LineSegment? side) {
-        return !side!.intersectsRect(_boundaryRect);
-      }, orElse: () => null);
-      */
-      // TODO(justinmc): This case is possible when 2 sides go invalid at the
-      // same time. Can happen when the boundary corner is in the viewport
-      // corner. Fix by correcting both sides at once?
     }
 
-    // TODO(justinmc): Instead of identity matrix, return the original matrix?
-    // If the corrected matrix is still invalid, return the identity matrix.
     return correctedMatrix;
   }
 
@@ -1168,11 +1153,6 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
       0.0,
     )),
   );
-}
-
-// TODO(justinmc): Remove.
-String _stringifyQuad(Quad quad) {
-  return '${quad.point0} ${quad.point1} ${quad.point2} ${quad.point3}';
 }
 
 // Round the output values. This works around a precision problem where

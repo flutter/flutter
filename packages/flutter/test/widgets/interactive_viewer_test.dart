@@ -13,19 +13,6 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4, Ma
 import 'gesture_utils.dart';
 
 void main() {
-  // Helper function for comparing all dimensions of a Vector3 with some
-  // precision.
-  void expectCloseToVector3(Vector3 a, Vector3 b, [double precision = 0.000000000001]) {
-    expect(a.x, closeTo(b.x, precision));
-    expect(a.y, closeTo(b.y, precision));
-    expect(a.z, closeTo(b.z, precision));
-  }
-
-  void expectCloseToOffset(Offset a, Offset b) {
-    expect(a.dx, closeTo(b.dx, 0.0000000000001));
-    expect(a.dy, closeTo(b.dy, 0.0000000000001));
-  }
-
   group('InteractiveViewer', () {
     testWidgets('child fits in viewport', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
