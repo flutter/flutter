@@ -80,6 +80,9 @@ Future<void> main() async {
           'Frameworks',
           'Flutter.framework',
         ));
+
+        checkDirectoryNotExists(path.join(outputFlutterFramework.path, 'Headers'));
+        checkDirectoryNotExists(path.join(outputFlutterFramework.path, 'Modules'));
         final File outputFlutterFrameworkBinary = File(path.join(
           outputFlutterFramework.path,
           'Flutter',

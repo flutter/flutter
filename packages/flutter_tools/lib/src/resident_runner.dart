@@ -236,10 +236,10 @@ class FlutterDevice {
       bool existingDds = false;
       vm_service.VmService service;
       if (!disableDds) {
-        void handleError(Exception e) {
+        void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
           if (!completer.isCompleted) {
-            completer.completeError('failed to connect to $observatoryUri');
+            completer.completeError('failed to connect to $observatoryUri', st);
           }
         }
         // This first try block is meant to catch errors that occur during DDS startup
@@ -252,16 +252,16 @@ class FlutterDevice {
             ipv6,
             disableServiceAuthCodes,
           );
-        } on dds.DartDevelopmentServiceException catch (e) {
+        } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
               (e.errorCode != dds.DartDevelopmentServiceException.existingDdsInstanceError)) {
-            handleError(e);
+            handleError(e, st);
             return;
           } else {
             existingDds = true;
           }
-        } on Exception catch (e) {
-          handleError(e);
+        } on Exception catch (e, st) {
+          handleError(e, st);
           return;
         }
       }

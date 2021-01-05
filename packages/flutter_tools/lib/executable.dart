@@ -116,6 +116,7 @@ Future<void> main(List<String> args) async {
     GenerateCommand(),
     GenerateLocalizationsCommand(
       fileSystem: globals.fs,
+      logger: globals.logger,
     ),
     InstallCommand(),
     LogsCommand(),

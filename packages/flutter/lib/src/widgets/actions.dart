@@ -795,7 +795,7 @@ class _ActionsMarker extends InheritedWidget {
 /// widget, and the new control should be enabled for keyboard traversal and
 /// activation.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows how keyboard interaction can be added to a custom control
 /// that changes color when hovered and focused, and can toggle a light when
 /// activated, either by touch or by hitting the `X` key on the keyboard when
@@ -813,7 +813,11 @@ class _ActionsMarker extends InheritedWidget {
 ///
 /// ```dart preamble
 /// class FadButton extends StatefulWidget {
-///   const FadButton({Key key, this.onPressed, this.child}) : super(key: key);
+///   const FadButton({
+///     Key? key,
+///     required this.onPressed,
+///     required this.child,
+///   }) : super(key: key);
 ///
 ///   final VoidCallback onPressed;
 ///   final Widget child;
@@ -826,8 +830,8 @@ class _ActionsMarker extends InheritedWidget {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   Map<Type, Action<Intent>> _actionMap;
-///   Map<LogicalKeySet, Intent> _shortcutMap;
+///   late Map<Type, Action<Intent>> _actionMap;
+///   late Map<LogicalKeySet, Intent> _shortcutMap;
 ///
 ///   @override
 ///   void initState() {
@@ -1317,3 +1321,50 @@ class DismissIntent extends Intent {
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
 abstract class DismissAction extends Action<DismissIntent> {}
+
+/// An [Intent] that evaluates a series of specified [orderedIntents] for
+/// execution.
+class PrioritizedIntents extends Intent {
+  /// Creates a set of const [PrioritizedIntents].
+  const PrioritizedIntents({
+    required this.orderedIntents,
+  })  : assert(orderedIntents != null);
+
+  /// List of intents to be evaluated in order for execution. When an
+  /// [Action.isEnabled] returns true, that action will be invoked and
+  /// progression through the ordered intents stops.
+  final List<Intent> orderedIntents;
+}
+
+/// An [Action] that iterates through a list of [Intent]s, invoking the first
+/// that is enabled.
+class PrioritizedAction extends Action<PrioritizedIntents> {
+  late Action<dynamic> _selectedAction;
+  late Intent _selectedIntent;
+
+  @override
+  bool isEnabled(PrioritizedIntents intent) {
+    final FocusNode? focus = primaryFocus;
+    if  (focus == null || focus.context == null)
+      return false;
+    for (final Intent candidateIntent in intent.orderedIntents) {
+      final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
+        focus.context!,
+        intent: candidateIntent,
+      );
+      if (candidateAction != null && candidateAction.isEnabled(candidateIntent)) {
+        _selectedAction = candidateAction;
+        _selectedIntent = candidateIntent;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  Object? invoke(PrioritizedIntents intent) {
+    assert(_selectedAction != null);
+    assert(_selectedIntent != null);
+    _selectedAction.invoke(_selectedIntent);
+  }
+}
