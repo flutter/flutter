@@ -113,7 +113,7 @@ import 'theme_data.dart';
 ///  * Cookbook: [Build a form with validation](https://flutter.dev/docs/cookbook/forms/validation)
 @Deprecated(
   'Use ElevatedButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
-  'This feature was deprecated after v1.25.0.'
+  'This feature was deprecated after 1.25.0-8.1.pre'
 )
 class RaisedButton extends MaterialButton {
   /// Create a filled button.
