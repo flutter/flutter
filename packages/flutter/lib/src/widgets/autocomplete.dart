@@ -451,7 +451,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// RawAutocomplete can listen for changes.
   final AutocompleteFieldViewBuilder? fieldViewBuilder;
 
-  /// The FocusNode that is used for the text field.
+  /// The [FocusNode] that is used for the text field.
   ///
   /// {@template flutter.widgets.RawAutocomplete.split}
   /// The main purpose of this parameter is to allow the use of a separate text
@@ -579,7 +579,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// current TextEditingValue.
   final AutocompleteOptionsBuilder<T> optionsBuilder;
 
-  /// The TextEditingController that is used for the text field.
+  /// The [TextEditingController] that is used for the text field.
   ///
   /// {@macro flutter.widgets.RawAutocomplete.split}
   ///
