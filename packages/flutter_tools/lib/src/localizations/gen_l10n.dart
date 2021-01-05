@@ -66,7 +66,7 @@ void generateLocalizations({
         untranslatedMessagesFile: options?.untranslatedMessagesFile?.toFilePath(),
       )
       ..loadResources()
-      ..writeOutputFiles(logger);
+      ..writeOutputFiles(logger, isFromYaml: true);
   } on L10nException catch (e) {
     logger.printError(e.message);
     throw Exception();
