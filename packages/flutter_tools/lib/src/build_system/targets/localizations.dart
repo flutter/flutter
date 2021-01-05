@@ -65,17 +65,20 @@ class GenerateLocalizationsTarget extends Target {
       localizationsGenerator: LocalizationsGenerator(environment.fileSystem),
     );
 
-    final Map<String, Object> dependencies = json.decode(environment.buildDir
-        .childFile(_kDependenciesFileName)
-        .readAsStringSync()) as Map<String, Object>;
-    final Depfile depfile = Depfile(<File>[
-      configFile,
-      for (dynamic inputFile in dependencies['inputs'] as List<dynamic>)
-        environment.fileSystem.file(inputFile)
-    ], <File>[
-      for (dynamic outputFile in dependencies['outputs'] as List<dynamic>)
-        environment.fileSystem.file(outputFile)
-    ]);
+    final Map<String, Object> dependencies = json.decode(
+      environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()
+    ) as Map<String, Object>;
+    final Depfile depfile = Depfile(
+      <File>[
+        configFile,
+        for (dynamic inputFile in dependencies['inputs'] as List<dynamic>)
+          environment.fileSystem.file(inputFile)
+      ],
+      <File>[
+        for (dynamic outputFile in dependencies['outputs'] as List<dynamic>)
+          environment.fileSystem.file(outputFile)
+      ],
+    );
     depfileService.writeToFile(
       depfile,
       environment.buildDir.childFile('gen_localizations.d'),
