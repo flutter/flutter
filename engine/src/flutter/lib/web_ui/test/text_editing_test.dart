@@ -365,6 +365,13 @@ void testMain() {
     InputElement testInputElement;
     HybridTextEditing testTextEditing;
 
+    final PlatformMessagesSpy spy = PlatformMessagesSpy();
+
+    /// Emulates sending of a message by the framework to the engine.
+    void sendFrameworkMessage(dynamic message) {
+      textEditing.channel.handleTextInput(message, (ByteData data) {});
+    }
+
     setUp(() {
       testInputElement = InputElement();
       testTextEditing = HybridTextEditing();
@@ -375,18 +382,77 @@ void testMain() {
       testInputElement = null;
     });
 
+    test('autofill form lifecycle works', () async {
+      editingElement = SemanticsTextEditingStrategy(
+          SemanticsObject(5, null), testTextEditing, testInputElement);
+      // Create a configuration with an AutofillGroup of four text fields.
+      final Map<String, dynamic> flutterMultiAutofillElementConfig =
+          createFlutterConfig('text',
+              autofillHint: 'username',
+              autofillHintsForFields: [
+            'username',
+            'email',
+            'name',
+            'telephoneNumber'
+          ]);
+      final MethodCall setClient = MethodCall('TextInput.setClient',
+          <dynamic>[123, flutterMultiAutofillElementConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall setEditingState1 =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The transform is changed. For example after a validation error, red
+      // line appeared under the input field.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      // Form is added to DOM.
+      expect(document.getElementsByTagName('form'), isNotEmpty);
+
+      const MethodCall clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+
+      // Confirm that [HybridTextEditing] didn't send any messages.
+      expect(spy.messages, isEmpty);
+      // Form stays on the DOM until autofill context is finalized.
+      expect(document.getElementsByTagName('form'), isNotEmpty);
+      expect(formsOnTheDom, hasLength(1));
+
+      const MethodCall finishAutofillContext =
+          MethodCall('TextInput.finishAutofillContext', false);
+      sendFrameworkMessage(codec.encodeMethodCall(finishAutofillContext));
+
+      // Form element is removed from DOM.
+      expect(document.getElementsByTagName('form'), hasLength(0));
+      expect(formsOnTheDom, hasLength(0));
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
+        skip: browserEngine == BrowserEngine.edge);
+
     test('Does not accept dom elements of a wrong type', () {
       // A regular <span> shouldn't be accepted.
       final HtmlElement span = SpanElement();
       expect(
-        () => SemanticsTextEditingStrategy(HybridTextEditing(), span),
+        () => SemanticsTextEditingStrategy(
+            SemanticsObject(5, null), HybridTextEditing(), span),
         throwsAssertionError,
       );
     });
 
     test('Do not re-acquire focus', () {
-      editingElement =
-          SemanticsTextEditingStrategy(HybridTextEditing(), testInputElement);
+      editingElement = SemanticsTextEditingStrategy(
+          SemanticsObject(5, null), HybridTextEditing(), testInputElement);
 
       expect(document.activeElement, document.body);
 
@@ -408,8 +474,8 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
 
     test('Does not dispose and recreate dom elements in persistent mode', () {
-      editingElement =
-          SemanticsTextEditingStrategy(HybridTextEditing(), testInputElement);
+      editingElement = SemanticsTextEditingStrategy(
+          SemanticsObject(5, null), HybridTextEditing(), testInputElement);
 
       // The DOM element should've been eagerly created.
       expect(testInputElement, isNotNull);
@@ -454,8 +520,8 @@ void testMain() {
         skip: browserEngine == BrowserEngine.edge);
 
     test('Refocuses when setting editing state', () {
-      editingElement =
-          SemanticsTextEditingStrategy(HybridTextEditing(), testInputElement);
+      editingElement = SemanticsTextEditingStrategy(
+          SemanticsObject(5, null), HybridTextEditing(), testInputElement);
 
       document.body.append(testInputElement);
       editingElement.enable(
@@ -474,8 +540,8 @@ void testMain() {
 
     test('Works in multi-line mode', () {
       final TextAreaElement textarea = TextAreaElement();
-      editingElement =
-          SemanticsTextEditingStrategy(HybridTextEditing(), textarea);
+      editingElement = SemanticsTextEditingStrategy(
+          SemanticsObject(5, null), HybridTextEditing(), textarea);
 
       expect(editingElement.domElement, textarea);
       expect(document.activeElement, document.body);
@@ -731,8 +797,8 @@ void testMain() {
           operatingSystem == OperatingSystem.iOs) {
         expect(spy.messages, hasLength(1));
         expect(spy.messages[0].channel, 'flutter/textinput');
-        expect(spy.messages[0].methodName,
-            'TextInputClient.onConnectionClosed');
+        expect(
+            spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
         await Future<void>.delayed(Duration.zero);
         // DOM element loses the focus.
         expect(document.activeElement, document.body);
@@ -787,10 +853,8 @@ void testMain() {
       // Input element is removed from DOM.
       expect(document.getElementsByTagName('input'), hasLength(0));
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge));
+        skip: browserEngine == BrowserEngine.edge);
 
     test('finishAutofillContext removes form from DOM', () async {
       // Create a configuration with an AutofillGroup of four text fields.
@@ -818,6 +882,13 @@ void testMain() {
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
+      // The transform is changed. For example after a validation error, red
+      // line appeared under the input field.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
       // Form is added to DOM.
       expect(document.getElementsByTagName('form'), isNotEmpty);
 
@@ -838,10 +909,8 @@ void testMain() {
       expect(document.getElementsByTagName('form'), hasLength(0));
       expect(formsOnTheDom, hasLength(0));
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge));
+        skip: browserEngine == BrowserEngine.edge);
 
     test('finishAutofillContext with save submits forms', () async {
       // Create a configuration with an AutofillGroup of four text fields.
@@ -869,6 +938,13 @@ void testMain() {
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
+      // The transform is changed. For example after a validation error, red
+      // line appeared under the input field.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
       // Form is added to DOM.
       expect(document.getElementsByTagName('form'), isNotEmpty);
       FormElement formElement = document.getElementsByTagName('form')[0];
@@ -886,10 +962,8 @@ void testMain() {
       // `submit` action is called on form.
       await expectLater(await submittedForm.future, true);
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge));
+        skip: browserEngine == BrowserEngine.edge);
 
     test('forms submits for focused input', () async {
       // Create a configuration with an AutofillGroup of four text fields.
@@ -917,6 +991,13 @@ void testMain() {
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
+      // The transform is changed. For example after a validation error, red
+      // line appeared under the input field.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
       // Form is added to DOM.
       expect(document.getElementsByTagName('form'), isNotEmpty);
       FormElement formElement = document.getElementsByTagName('form')[0];
@@ -940,10 +1021,8 @@ void testMain() {
       expect(document.getElementsByTagName('form'), hasLength(0));
       expect(formsOnTheDom, hasLength(0));
     },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50769
-        skip: (browserEngine == BrowserEngine.webkit ||
-            browserEngine == BrowserEngine.edge));
+        skip: browserEngine == BrowserEngine.edge);
 
     test('setClient, setEditingState, show, setClient', () {
       final MethodCall setClient = MethodCall(

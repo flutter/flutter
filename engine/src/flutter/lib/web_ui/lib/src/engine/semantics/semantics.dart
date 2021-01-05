@@ -927,6 +927,7 @@ class SemanticsObject {
           ..height = '${rect.height}px';
       }
     } else {
+      // TODO: https://github.com/flutter/flutter/issues/73347
       if (isDesktop) {
         element.style
           ..removeProperty('transform-origin')
