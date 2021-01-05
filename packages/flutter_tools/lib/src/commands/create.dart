@@ -521,6 +521,10 @@ void _printWarningToEnablePlatforms(
   [bool isApp = false]
 ) {
   final List<String> _showWarning = <String>[
+  if (requestedPlatforms.contains('android') && !featureFlags.isAndroidEnabled)
+    'android',
+  if (requestedPlatforms.contains('ios') && !featureFlags.isIOSEnabled)
+    'ios',
   if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled)
     'web',
   if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled)
