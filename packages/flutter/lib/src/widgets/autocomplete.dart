@@ -586,7 +586,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// If this parameter is not null, then [focusNode] must also be not null.
   final TextEditingController? textEditingController;
 
-  /// Calls the [AutocompleteFieldViewBuilder.onFieldSubmitted] callback for the
+  /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
   /// RawAutocomplete widget indicated by the given [GlobalKey].
   ///
   /// This is not typically used unless a custom field is implemented instead of
