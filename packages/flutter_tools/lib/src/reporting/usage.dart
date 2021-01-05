@@ -96,9 +96,6 @@ abstract class Usage {
     Map<CustomDimensions, Object> parameters,
   }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
 
-  /// Whether this is the first run of the tool.
-  bool get isFirstRun;
-
   /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
 
@@ -289,9 +286,6 @@ class _DefaultUsage implements Usage {
   bool _printedWelcome = false;
   bool _suppressAnalytics = false;
   SystemClock _clock;
-
-  @override
-  bool get isFirstRun => _analytics.firstRun;
 
   @override
   bool get suppressAnalytics => _suppressAnalytics || _analytics.firstRun;
