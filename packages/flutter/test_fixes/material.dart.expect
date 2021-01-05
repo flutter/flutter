@@ -7,4 +7,9 @@ import 'package:flutter/material.dart';
 void main() {
   // Change made in https://github.com/flutter/flutter/pull/15303
   showDialog(builder: (context) => Text('Fix me.'));
+
+  // Changes made in https://github.com/flutter/flutter/pull/45941
+  final WidgetsBinding binding = WidgetsBinding.instance!;
+  binding.deferFirstFrame();
+  binding.allowFirstFrame();
 }
