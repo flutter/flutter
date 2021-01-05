@@ -5676,9 +5676,10 @@ void main() {
     });
 
     testWidgets('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
-      final AccentColorTextEditingController controller = AccentColorTextEditingController('a');
+      final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
+      const Color color = Color.fromARGB(255, 1, 2, 3);
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData.light().copyWith(accentColor: const Color.fromARGB(255, 1, 2, 3)),
+        theme: ThemeData.light().copyWith(accentColor: color),
         home: EditableText(
           controller: controller,
           focusNode: FocusNode(),
@@ -5690,7 +5691,7 @@ void main() {
 
       final RenderEditable renderEditable = findRenderEditable(tester);
       final TextSpan textSpan = renderEditable.text!;
-      expect(textSpan.style!.color, const Color.fromARGB(255, 1, 2, 3));
+      expect(textSpan.style!.color, color);
     });
   });
 
@@ -7128,8 +7129,8 @@ class SkipPaintingRenderObject extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) { }
 }
 
-class AccentColorTextEditingController extends TextEditingController {
-  AccentColorTextEditingController(String text) : super(text: text);
+class _AccentColorTextEditingController extends TextEditingController {
+  _AccentColorTextEditingController(String text) : super(text: text);
 
   @override
   TextSpan buildTextSpan({TextStyle? style, required bool withComposing, required BuildContext context}) {
