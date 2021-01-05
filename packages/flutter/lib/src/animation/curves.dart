@@ -319,7 +319,7 @@ class Cubic extends Curve {
 /// part of the curve, or hardly at all in another part of the curve, depending
 /// on the definition of the curve.
 ///
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use a [Curve2D] to modify the position of a widget
 /// so that it can follow an arbitrary path.
 ///
@@ -346,16 +346,12 @@ class Cubic extends Curve {
 ///
 /// class FollowCurve2D extends StatefulWidget {
 ///   const FollowCurve2D({
-///     Key key,
-///     @required this.path,
+///     Key? key,
+///     required this.path,
 ///     this.curve = Curves.easeInOut,
-///     @required this.child,
+///     required this.child,
 ///     this.duration = const Duration(seconds: 1),
-///   })  : assert(path != null),
-///         assert(curve != null),
-///         assert(child != null),
-///         assert(duration != null),
-///         super(key: key);
+///   }) : super(key: key);
 ///
 ///   final Curve2D path;
 ///   final Curve curve;
@@ -368,9 +364,9 @@ class Cubic extends Curve {
 ///
 /// class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateMixin {
 ///   // The animation controller for this animation.
-///   AnimationController controller;
+///   late AnimationController controller;
 ///   // The animation that will be used to apply the widget's animation curve.
-///   Animation<double> animation;
+///   late Animation<double> animation;
 ///
 ///   @override
 ///   void initState() {
@@ -414,7 +410,7 @@ class Cubic extends Curve {
 ///         child: CircleAvatar(
 ///           backgroundColor: Colors.yellow,
 ///           child: DefaultTextStyle(
-///             style: Theme.of(context).textTheme.headline6,
+///             style: Theme.of(context).textTheme.headline6!,
 ///             child: Text("B"), // Buzz, buzz!
 ///           ),
 ///         ),
