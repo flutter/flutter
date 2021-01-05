@@ -1331,7 +1331,7 @@ class PrioritizedIntents extends Intent {
   })  : assert(orderedIntents != null);
 
   /// List of intents to be evaluated in order for execution. When an
-  /// [Intent.isEnabled] returns true, that intent will be invoked and
+  /// [Action.isEnabled] returns true, that action will be invoked and
   /// progression through the ordered intents stops.
   final List<Intent> orderedIntents;
 }
@@ -1341,6 +1341,7 @@ class PrioritizedIntents extends Intent {
 class PrioritizedAction extends Action<PrioritizedIntents> {
   late Action<dynamic> _selectedAction;
   late Intent _selectedIntent;
+
   @override
   bool isEnabled(PrioritizedIntents intent) {
     final FocusNode? focus = primaryFocus;
@@ -1359,6 +1360,7 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
     }
     return false;
   }
+
   @override
   Object? invoke(PrioritizedIntents intent) {
     assert(_selectedAction != null);
