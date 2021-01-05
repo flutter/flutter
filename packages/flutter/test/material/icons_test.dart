@@ -68,7 +68,7 @@ void main() {
         ),
       ),
     ));
-    
+
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.material.png'));
   });
 }
