@@ -928,9 +928,21 @@ class MemoryImage extends ImageProvider<MemoryImage> {
       assert(scale != null);
 
   /// The bytes to decode into an image.
+  ///
+  /// The bytes represent encoded image bytes and can be encoded in any of the
+  /// following supported image formats: {@macro flutter.dart:ui.imageFormats}
+  ///
+  /// See also:
+  ///
+  ///  * [PaintingBinding.instantiateImageCodec]
   final Uint8List bytes;
 
   /// The scale to place in the [ImageInfo] object of the image.
+  ///
+  /// See also:
+  ///
+  ///  * [ImageInfo.scale], which gives more information on how this scale is
+  ///    applied.
   final double scale;
 
   @override

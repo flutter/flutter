@@ -24,9 +24,8 @@ import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // dynamic routeObserver;
-// NavigatorState navigator;
+// late NavigatorState navigator;
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -541,7 +540,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///     // rectangle. When this local history entry is removed, we hide the red
   ///     // rectangle.
   ///     setState(() => _showRectangle = true);
-  ///     ModalRoute.of(context).addLocalHistoryEntry(
+  ///     ModalRoute.of(context)?.addLocalHistoryEntry(
   ///         LocalHistoryEntry(
   ///             onRemove: () {
   ///               // Hide the red rectangle.

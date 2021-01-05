@@ -23,8 +23,7 @@ import 'sliver.dart';
 import 'viewport.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// int itemCount;
+// late int itemCount;
 
 /// A representation of how a [ScrollView] should dismiss the on-screen
 /// keyboard.
@@ -468,7 +467,7 @@ abstract class ScrollView extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
 /// By default, if items are inserted at the "top" of a scrolling container like
 /// [ListView] or [CustomScrollView], the top item and all of the items below it
@@ -1335,7 +1334,7 @@ class ListView extends BoxScrollView {
   ///             },
   ///             childCount: items.length,
   ///             findChildIndexCallback: (Key key) {
-  ///               final ValueKey valueKey = key;
+  ///               final ValueKey valueKey = key as ValueKey;
   ///               final String data = valueKey.value;
   ///               return items.indexOf(data);
   ///             }
@@ -1358,7 +1357,10 @@ class ListView extends BoxScrollView {
   /// }
   ///
   /// class KeepAlive extends StatefulWidget {
-  ///   const KeepAlive({Key key, this.data}) : super(key: key);
+  ///   const KeepAlive({
+  ///     required Key key,
+  ///     required this.data,
+  ///   }) : super(key: key);
   ///
   ///   final String data;
   ///
@@ -1454,6 +1456,8 @@ class ListView extends BoxScrollView {
 }
 
 /// A scrollable, 2D array of widgets.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=bLOtZDTm4H8}
 ///
 /// The main axis direction of a grid is the direction in which it scrolls (the
 /// [scrollDirection]).
