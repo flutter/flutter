@@ -1427,6 +1427,7 @@ Directory createTemporaryFlutterSdk(
 ) {
   final Set<String> currentPackages = <String>{};
   for (final FileSystemEntity entity in realFlutter.childDirectory('packages').listSync()) {
+    // Verify that a pubspec.yaml exists to ensure this isn't a left over directory.
     if (entity is Directory && entity.childFile('pubspec.yaml').existsSync()) {
       currentPackages.add(fileSystem.path.basename(entity.path));
     }
