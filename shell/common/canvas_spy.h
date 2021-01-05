@@ -70,10 +70,6 @@ class DidDrawCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
   void willRestore() override;
 
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
-#ifdef SK_SUPPORT_LEGACY_CANVASMATRIX33
-  void didConcat(const SkMatrix&) override;
-  void didSetMatrix(const SkMatrix&) override;
-#endif
   void didConcat44(const SkM44&) override;
   void didScale(SkScalar, SkScalar) override;
   void didTranslate(SkScalar, SkScalar) override;

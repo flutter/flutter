@@ -56,15 +56,6 @@ void MockCanvas::willRestore() {
   current_layer_--;  // Must go here; func params order of eval is undefined
 }
 
-#ifdef SK_SUPPORT_LEGACY_CANVASMATRIX33
-void MockCanvas::didConcat(const SkMatrix& matrix) {
-  this->didConcat44(SkM44(matrix));
-}
-void MockCanvas::didSetMatrix(const SkMatrix& matrix) {
-  this->didSetM44(SkM44(matrix));
-}
-#endif
-
 void MockCanvas::didConcat44(const SkM44& matrix) {
   draw_calls_.emplace_back(DrawCall{current_layer_, ConcatMatrixData{matrix}});
 }
