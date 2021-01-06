@@ -1959,7 +1959,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         && _isWhitespace(originalText.codeUnitAt(position.offset))
         && position.offset > 0)) {
       assert(defaultTargetPlatform != null);
-      TextRange? previousWord = _getPreviousWord(word.start);
+      final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
           return TextSelection(
