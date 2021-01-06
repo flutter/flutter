@@ -170,9 +170,7 @@ class CanvasParagraph implements EngineParagraph {
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() {
-    // TODO(mdebbar): After layout, placeholders positions should've been
-    // determined and can be used to compute their boxes.
-    return <ui.TextBox>[];
+    return _layoutService.getBoxesForPlaceholders();
   }
 
   // TODO(mdebbar): Check for child spans if any has styles that can't be drawn
