@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4, Matrix3;
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix3, Matrix4;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -562,7 +562,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // If the given matrix is valid, return it. If it is invalid, return the
   // closest translated matrix that is valid. If none is possible, then return
-  // the defaultMatrix.
+  // the given defaultMatrix.
   //
   // A valid matrix is defined as a matrix where all sides of the viewport
   // intersect the boundary. This allows the viewport to partially see beyond
@@ -578,8 +578,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // the child has been transformed.
     final Quad nextViewport = _transformViewport(matrix, _viewport);
 
-    // If any side of the viewport does not intersect the interior of the
-    // boundary, it's invalid.
+    // Any side of the viewport that does not intersect the interior of the
+    // boundary is invalid. If all sides are valid, then the matrix is valid.
     final LineSegment viewportSide01 = LineSegment.vector(
       nextViewport.point0,
       nextViewport.point1,
@@ -606,12 +606,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return matrix;
     }
 
+    // If there are multiple invalid sides, but they are all invalid in non-
+    // conflicting directions (e.g. correcting one isn't going to make another
+    // worse), then they should be able to be corrected by taking the greatest
+    // magnitude in each direction.
     bool magnitudesAligned = true;
     late Offset correction;
-
-    // If there are multiple invalid sides, but they are all invalid in the same
-    // directions, then they should be able to be corrected by taking the
-    // greatest magnitude in each direction.
     if (invalidSides.length > 1) {
       correction = invalidSides.fold(Offset.zero, (Offset value, LineSegment invalidSide) {
         final ClosestPoints closestPoints = invalidSide.findClosestPointsRect(_boundaryRect);
@@ -633,7 +633,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
 
     // If there is only one invalid side, or if there are multiple but they are
-    // invalid in different directions, then just correct the single most
+    // invalid in different directions, then just try to correct the single most
     // invalid side.
     if (!magnitudesAligned || invalidSides.length == 1) {
       // Find the side that is farthest from being in a valid position.
@@ -1256,14 +1256,11 @@ class LineSegment {
       (offset.dx * _kTolerance).round() / _kTolerance,
       (offset.dy * _kTolerance).round() / _kTolerance,
     );
-    if (!(rOffset.dx >= rRect.left && rOffset.dx <= rRect.right
-        && rOffset.dy >= rRect.top && rOffset.dy <= rRect.bottom)) {
-    }
     return rOffset.dx >= rRect.left && rOffset.dx <= rRect.right
         && rOffset.dy >= rRect.top && rOffset.dy <= rRect.bottom;
   }
 
-  /// A subcase of the linesIntersectAt method.
+  /// A special case of the linesIntersectAt method.
   static Offset _isVerticalAndInterceptsNonVerticalLineAt(LineSegment vertical, LineSegment nonVertical) {
     // Assert that vertical is indeed vertical.
     assert(vertical.p0.dx == vertical.p1.dx);
@@ -1278,7 +1275,7 @@ class LineSegment {
     );
   }
 
-  // A subcase of the intercepts method.
+  // A special case of the intercepts method.
   static bool _isVerticalAndInterceptsNonVertical(LineSegment vertical, LineSegment nonVertical) {
     final Offset intersection = _isVerticalAndInterceptsNonVerticalLineAt(vertical, nonVertical);
     return vertical.contains(intersection) && nonVertical.contains(intersection);
@@ -1296,6 +1293,7 @@ class LineSegment {
   }
 
   /// True iff the offset lies on the line segment, inclusively.
+  @visibleForTesting
   bool contains(Offset offset) {
     final double xMin = math.min(p0.dx, p1.dx);
     final double xMax = math.max(p0.dx, p1.dx);
