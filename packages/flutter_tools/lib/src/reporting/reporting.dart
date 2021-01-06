@@ -35,6 +35,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import 'first_run.dart';
 
 part 'crash_reporting.dart';
 part 'disabled_usage.dart';

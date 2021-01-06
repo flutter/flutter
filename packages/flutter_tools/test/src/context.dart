@@ -332,9 +332,6 @@ class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
 class FakeUsage implements Usage {
   @override
-  bool get isFirstRun => false;
-
-  @override
   bool get suppressAnalytics => false;
 
   @override
