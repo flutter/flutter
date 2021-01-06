@@ -589,7 +589,7 @@ class HotRunner extends ResidentRunner {
     bool silent = false,
     bool pause = false,
   }) async {
-    if (flutterDevices.every((FlutterDevice device) => device.devFS == null)) {
+    if (flutterDevices.any((FlutterDevice device) => device.devFS == null)) {
       return OperationResult(1, 'Device initialization has not completed.');
     }
     String targetPlatform;
