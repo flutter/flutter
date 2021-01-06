@@ -12,6 +12,14 @@
 /// Design](https://flutter.dev/docs/development/ui/widgets/material) set.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3PdUaidHc-E}
+///
+/// See also:
+///
+///  * [flutter.dev/widgets/cupertino](https://flutter.dev/docs/development/ui/widgets/cupertino)
+///    for a catalog of all Cupertino widgets.
+///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
+///    for a catalog of commonly-used Flutter widgets.
+
 library cupertino;
 
 export 'src/cupertino/action_sheet.dart';

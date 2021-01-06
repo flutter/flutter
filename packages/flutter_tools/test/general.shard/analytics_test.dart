@@ -160,7 +160,6 @@ void main() {
       memoryFileSystem = MemoryFileSystem.test();
       mockStdio = MockStdio();
       mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = MockClock();
       mockDoctor = MockDoctor();
       when(mockClock.now()).thenAnswer(
