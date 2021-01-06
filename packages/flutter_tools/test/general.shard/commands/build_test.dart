@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/build.dart';
