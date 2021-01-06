@@ -56,8 +56,6 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 /// configuration) -- prefilled with the arguments passed to test.dart.
 final List<String> flutterTestArgs = <String>[];
 
-final Map<String, String> localEngineEnv = <String, String>{};
-
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
 
@@ -107,13 +105,6 @@ Future<void> main(List<String> args) async {
   print('$clock STARTING ANALYSIS');
   try {
     flutterTestArgs.addAll(args);
-    for (final String arg in args) {
-      if (arg.startsWith('--local-engine='))
-        localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
-      if (arg.startsWith('--local-engine-src-path='))
-        localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
-    }
-
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
       print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     print('═' * 80);
@@ -653,6 +644,18 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
+  Future<void> runFixTests() async {
+    final List<String> args = <String>[
+      'fix',
+      '--compare-to-golden',
+    ];
+    await runCommand(
+      dart,
+      args,
+      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_fixes'),
+    );
+  }
+
   Future<void> runPrivateTests() async {
     final List<String> args = <String>[
       'run',
@@ -711,6 +714,7 @@ Future<void> _runFrameworkTests() async {
       options: <String>['--enable-vmservice'],
       tableData: bigqueryApi?.tabledata,
     );
+    await runFixTests();
     await runPrivateTests();
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
@@ -991,6 +995,10 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
       'drive',
       if (canvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+      if (!canvasKit)
+        '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+      if (!canvasKit)
+        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
       '--driver=test_driver/transitions_perf_e2e_test.dart',
       '--target=test_driver/transitions_perf_e2e.dart',
       '--browser-name=chrome',
@@ -1144,6 +1152,8 @@ Future<void> _runWebDebugTest(String target, {
       '-d',
       'chrome',
       '--web-run-headless',
+      '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+      '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
       ...additionalArguments,
       '-t',
       target,
@@ -1182,6 +1192,8 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
         '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
       '-v',
       '--platform=chrome',
+      // TODO(ferhatb): Run web tests with both rendering backends.
+      '--web-renderer=html', // use html backend for web tests.
       '--sound-null-safety', // web tests do not autodetect yet.
       ...?flutterTestArgs,
       ...tests,
@@ -1240,7 +1252,6 @@ Future<void> _pubRunTest(String workingDirectory, {
   ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
-    ...localEngineEnv
   };
   if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;

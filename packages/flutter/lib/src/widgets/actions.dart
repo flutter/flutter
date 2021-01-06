@@ -813,7 +813,11 @@ class _ActionsMarker extends InheritedWidget {
 ///
 /// ```dart preamble
 /// class FadButton extends StatefulWidget {
-///   const FadButton({Key key, this.onPressed, this.child}) : super(key: key);
+///   const FadButton({
+///     Key? key,
+///     required this.onPressed,
+///     required this.child,
+///   }) : super(key: key);
 ///
 ///   final VoidCallback onPressed;
 ///   final Widget child;
@@ -826,8 +830,8 @@ class _ActionsMarker extends InheritedWidget {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   Map<Type, Action<Intent>> _actionMap;
-///   Map<LogicalKeySet, Intent> _shortcutMap;
+///   late Map<Type, Action<Intent>> _actionMap;
+///   late Map<LogicalKeySet, Intent> _shortcutMap;
 ///
 ///   @override
 ///   void initState() {
@@ -1248,10 +1252,39 @@ class DoNothingAction extends Action<Intent> {
   void invoke(Intent intent) {}
 }
 
-/// An intent that activates the currently focused control.
+/// An [Intent] that activates the currently focused control.
+///
+/// This intent is bound by default to the [LogicalKeyboardKey.space] key on all
+/// platforms, and also to the [LogicalKeyboardKey.enter] key on all platforms
+/// except the web, where ENTER doesn't toggle selection. On the web, ENTER is
+/// bound to [ButtonActivateIntent] instead.
+///
+/// See also:
+///
+///  * [WidgetsApp.defaultShortcuts], which contains the default shortcuts used
+///    in apps.
+///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
+///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ActivateIntent extends Intent {
   /// Creates a const [ActivateIntent] so subclasses can be const.
   const ActivateIntent();
+}
+
+/// An [Intent] that activates the currently focused button.
+///
+/// This intent is bound by default to the [LogicalKeyboardKey.enter] key on the
+/// web, where ENTER can be used to activate buttons, but not toggle selection.
+/// All other platforms bind [LogicalKeyboardKey.enter] to [ActivateIntent].
+///
+/// See also:
+///
+///  * [WidgetsApp.defaultShortcuts], which contains the default shortcuts used
+///    in apps.
+///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
+///    application (and defaults to [WidgetsApp.defaultShortcuts]).
+class ButtonActivateIntent extends Intent {
+  /// Creates a const [ButtonActivateIntent] so subclasses can be const.
+  const ButtonActivateIntent();
 }
 
 /// An action that activates the currently focused control.
@@ -1288,3 +1321,50 @@ class DismissIntent extends Intent {
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
 abstract class DismissAction extends Action<DismissIntent> {}
+
+/// An [Intent] that evaluates a series of specified [orderedIntents] for
+/// execution.
+class PrioritizedIntents extends Intent {
+  /// Creates a set of const [PrioritizedIntents].
+  const PrioritizedIntents({
+    required this.orderedIntents,
+  })  : assert(orderedIntents != null);
+
+  /// List of intents to be evaluated in order for execution. When an
+  /// [Action.isEnabled] returns true, that action will be invoked and
+  /// progression through the ordered intents stops.
+  final List<Intent> orderedIntents;
+}
+
+/// An [Action] that iterates through a list of [Intent]s, invoking the first
+/// that is enabled.
+class PrioritizedAction extends Action<PrioritizedIntents> {
+  late Action<dynamic> _selectedAction;
+  late Intent _selectedIntent;
+
+  @override
+  bool isEnabled(PrioritizedIntents intent) {
+    final FocusNode? focus = primaryFocus;
+    if  (focus == null || focus.context == null)
+      return false;
+    for (final Intent candidateIntent in intent.orderedIntents) {
+      final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
+        focus.context!,
+        intent: candidateIntent,
+      );
+      if (candidateAction != null && candidateAction.isEnabled(candidateIntent)) {
+        _selectedAction = candidateAction;
+        _selectedIntent = candidateIntent;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  Object? invoke(PrioritizedIntents intent) {
+    assert(_selectedAction != null);
+    assert(_selectedIntent != null);
+    _selectedAction.invoke(_selectedIntent);
+  }
+}

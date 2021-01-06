@@ -586,6 +586,51 @@ void main() {
     expect(itemBoxes[1].size.width, equals(800.0 - 16.0 * 2));
   });
 
+  testWidgets('Dropdown menu can position correctly inside a nested navigator', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66870
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: Column(
+            children: <Widget>[
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500, maxHeight: 200),
+                child: Navigator(
+                  onGenerateRoute: (RouteSettings s) {
+                    return MaterialPageRoute<void>(builder: (BuildContext context) {
+                      return Center(
+                        child: DropdownButton<int>(
+                          value: 1,
+                          items: const <DropdownMenuItem<int>>[
+                            DropdownMenuItem<int>(
+                              child: Text('First Item'),
+                              value: 1,
+                            ),
+                            DropdownMenuItem<int>(
+                              child: Text('Second Item'),
+                              value: 2,
+                            ),
+                          ],
+                          onChanged: (_) { },
+                        ),
+                      );
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('First Item'));
+    await tester.pump();
+    final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item')).toList()[1];
+    expect(secondItem.localToGlobal(Offset.zero).dx, equals(150.0));
+    expect(secondItem.localToGlobal(Offset.zero).dy, equals(176.0));
+  });
+
   testWidgets('Dropdown screen edges', (WidgetTester tester) async {
     int? value = 4;
     final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[
@@ -2358,7 +2403,7 @@ void main() {
     expect(find.byKey(buttonKey), isNot(paints ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 104.0, 48.0, 4.0, 4.0), color: const Color(0xff00ff00))));
   });
 
-  testWidgets('DropdownButton is activated with the enter/space key', (WidgetTester tester) async {
+  testWidgets('DropdownButton is activated with the enter key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
     String? value = 'one';
 
@@ -2397,15 +2442,69 @@ void main() {
     await tester.pump(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
 
-    // Web doesn't respond to enter, only space.
-    await tester.sendKeyEvent(kIsWeb ? LogicalKeyboardKey.space : LogicalKeyboardKey.enter);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
     expect(value, equals('one'));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'two'
     await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select 'two', should work on web too.
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select 'two'.
+    await tester.pump();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('two'));
+  });
+
+  testWidgets('DropdownButton is activated with the space key', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    String? value = 'one';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<String>(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  value: value,
+                  itemHeight: null,
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item, key: ValueKey<String>(item + 'Text')),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+    expect(value, equals('one'));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab); // Focus 'two'
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space); // Select 'two'.
     await tester.pump();
 
     await tester.pump();

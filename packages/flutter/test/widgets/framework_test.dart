@@ -1494,44 +1494,6 @@ void main() {
     expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
-
-  testWidgets('Errors in build', (WidgetTester tester) async {
-    final ErrorWidgetBuilder oldErrorBuilder = ErrorWidget.builder;
-    ErrorWidget.builder = (FlutterErrorDetails detail) => throw AssertionError();
-    try {
-      final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails detail) {};
-      try {
-        int buildCount = 0;
-        void handleBuild() => buildCount++;
-        expect(tester.binding.buildOwner!.debugCurrentBuildTarget, isNull);
-        await tester.pumpWidget(_WidgetThatCanThrowInBuild(onBuild: handleBuild));
-        expect(buildCount, 1);
-        await tester.pumpWidget(_WidgetThatCanThrowInBuild(onBuild: handleBuild, shouldThrow: true));
-        tester.takeException();
-        expect(buildCount, 2);
-        expect(tester.binding.buildOwner!.debugCurrentBuildTarget, isNull);
-      } finally {
-        FlutterError.onError = oldErrorHandler;
-      }
-    } finally {
-      ErrorWidget.builder = oldErrorBuilder;
-    }
-  });
-}
-
-class _WidgetThatCanThrowInBuild extends StatelessWidget {
-  const _WidgetThatCanThrowInBuild({required this.onBuild, this.shouldThrow = false});
-
-  final VoidCallback onBuild;
-  final bool shouldThrow;
-
-  @override
-  Widget build(BuildContext context) {
-    onBuild();
-    assert(!shouldThrow);
-    return Container();
-  }
 }
 
 class _FakeFocusManager implements FocusManager {

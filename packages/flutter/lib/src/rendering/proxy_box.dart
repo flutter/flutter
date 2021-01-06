@@ -234,7 +234,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   double computeMinIntrinsicWidth(double height) {
     if (_additionalConstraints.hasBoundedWidth && _additionalConstraints.hasTightWidth)
       return _additionalConstraints.minWidth;
-    final double width = super.computeMinIntrinsicWidth(_additionalConstraints.constrainHeight(height));
+    final double width = super.computeMinIntrinsicWidth(height);
     assert(width.isFinite);
     if (!_additionalConstraints.hasInfiniteWidth)
       return _additionalConstraints.constrainWidth(width);
@@ -245,7 +245,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   double computeMaxIntrinsicWidth(double height) {
     if (_additionalConstraints.hasBoundedWidth && _additionalConstraints.hasTightWidth)
       return _additionalConstraints.minWidth;
-    final double width = super.computeMaxIntrinsicWidth(_additionalConstraints.constrainHeight(height));
+    final double width = super.computeMaxIntrinsicWidth(height);
     assert(width.isFinite);
     if (!_additionalConstraints.hasInfiniteWidth)
       return _additionalConstraints.constrainWidth(width);
@@ -256,7 +256,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   double computeMinIntrinsicHeight(double width) {
     if (_additionalConstraints.hasBoundedHeight && _additionalConstraints.hasTightHeight)
       return _additionalConstraints.minHeight;
-    final double height = super.computeMinIntrinsicHeight(_additionalConstraints.constrainWidth(width));
+    final double height = super.computeMinIntrinsicHeight(width);
     assert(height.isFinite);
     if (!_additionalConstraints.hasInfiniteHeight)
       return _additionalConstraints.constrainHeight(height);
@@ -267,7 +267,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   double computeMaxIntrinsicHeight(double width) {
     if (_additionalConstraints.hasBoundedHeight && _additionalConstraints.hasTightHeight)
       return _additionalConstraints.minHeight;
-    final double height = super.computeMaxIntrinsicHeight(_additionalConstraints.constrainWidth(width));
+    final double height = super.computeMaxIntrinsicHeight(width);
     assert(height.isFinite);
     if (!_additionalConstraints.hasInfiniteHeight)
       return _additionalConstraints.constrainHeight(height);
@@ -3050,7 +3050,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   /// ```dart
   /// class PngHome extends StatefulWidget {
-  ///   PngHome({Key key}) : super(key: key);
+  ///   PngHome({Key? key}) : super(key: key);
   ///
   ///   @override
   ///   _PngHomeState createState() => _PngHomeState();
@@ -3060,10 +3060,10 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   GlobalKey globalKey = GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
-  ///     RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
+  ///     RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
   ///     ui.Image image = await boundary.toImage();
-  ///     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  ///     Uint8List pngBytes = byteData.buffer.asUint8List();
+  ///     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     Uint8List pngBytes = byteData!.buffer.asUint8List();
   ///     print(pngBytes);
   ///   }
   ///

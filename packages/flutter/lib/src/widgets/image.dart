@@ -7,7 +7,6 @@ import 'dart:io' show File;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
@@ -649,7 +648,15 @@ class Image extends StatefulWidget {
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
-  /// The [bytes], [scale], and [repeat] arguments must not be null.
+  /// The `bytes` argument specifies encoded image bytes, which can be encoded
+  /// in any of the following supported image formats:
+  /// {@macro flutter.dart:ui.imageFormats}
+  ///
+  /// The `scale` argument specifies the linear scale factor for drawing this
+  /// image at its intended size and applies to both the width and the height.
+  /// {@macro flutter.painting.imageInfo.scale}
+  ///
+  /// The `bytes`, `scale`, and [repeat] arguments must not be null.
   ///
   /// This only accepts compressed image formats (e.g. PNG). Uncompressed
   /// formats like rawRgba (the default format of [dart:ui.Image.toByteData])
@@ -773,8 +780,8 @@ class Image extends StatefulWidget {
   ///     ),
   ///     child: Image.network(
   ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-  ///       frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
-  ///         if (wasSynchronouslyLoaded) {
+  ///       frameBuilder: (BuildContext context, Widget child, int? frame, bool? wasSynchronouslyLoaded) {
+  ///         if (wasSynchronouslyLoaded ?? false) {
   ///           return child;
   ///         }
   ///         return AnimatedOpacity(
@@ -835,13 +842,13 @@ class Image extends StatefulWidget {
   ///     ),
   ///     child: Image.network(
   ///       'https://example.com/image.jpg',
-  ///       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+  ///       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
   ///         if (loadingProgress == null)
   ///           return child;
   ///         return Center(
   ///           child: CircularProgressIndicator(
   ///             value: loadingProgress.expectedTotalBytes != null
-  ///                 ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+  ///                 ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
   ///                 : null,
   ///           ),
   ///         );
@@ -880,7 +887,7 @@ class Image extends StatefulWidget {
   ///     ),
   ///     child: Image.network(
   ///       'https://example.does.not.exist/image.jpg',
-  ///       errorBuilder: (BuildContext context, Object exception, StackTrace stackTrace) {
+  ///       errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
   ///         // Appropriate logging or analytics, e.g.
   ///         // myAnalytics.recordError(
   ///         //   'An error occurred loading "https://example.does.not.exist/image.jpg"',

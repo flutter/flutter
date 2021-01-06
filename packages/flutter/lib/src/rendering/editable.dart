@@ -678,6 +678,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
         }
       } else {
+        // The directional arrows move the TextSelection.extentOffset, while the
+        // base remains fixed.
         if (rightArrow && newSelection.extentOffset < _plainText.length) {
           int nextExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
@@ -741,8 +743,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     // Just place the collapsed selection at the end or beginning of the region
-    // if shift isn't down.
-    if (!shift) {
+    // if shift isn't down or selection isn't enabled.
+    if (!shift || !selectionEnabled) {
       // We want to put the cursor at the correct location depending on which
       // arrow is used while there is a selection.
       int newOffset = newSelection.extentOffset;
@@ -756,12 +758,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
     }
 
-    // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
     );
+    // Update the text selection delegate so that the engine knows what we did.
+    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
   }
 
   // Handles shortcut functionality including cut, copy, paste and select all
@@ -778,39 +780,44 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       return;
     }
+    TextEditingValue? value;
     if (key == LogicalKeyboardKey.keyX && !_readOnly) {
       if (!selection.isCollapsed) {
         Clipboard.setData(ClipboardData(text: selection.textInside(text)));
-        textSelectionDelegate.textEditingValue = TextEditingValue(
+        value = TextEditingValue(
           text: selection.textBefore(text) + selection.textAfter(text),
           selection: TextSelection.collapsed(offset: math.min(selection.start, selection.end)),
         );
       }
-      return;
-    }
-    if (key == LogicalKeyboardKey.keyV && !_readOnly) {
+    } else if (key == LogicalKeyboardKey.keyV && !_readOnly) {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
-        textSelectionDelegate.textEditingValue = TextEditingValue(
+        value = TextEditingValue(
           text: selection.textBefore(text) + data.text! + selection.textAfter(text),
           selection: TextSelection.collapsed(
             offset: math.min(selection.start, selection.end) + data.text!.length,
           ),
         );
       }
-      return;
-    }
-    if (key == LogicalKeyboardKey.keyA) {
-      _handleSelectionChange(
-        selection.copyWith(
+    } else if (key == LogicalKeyboardKey.keyA) {
+      value = TextEditingValue(
+        text: text,
+        selection: selection.copyWith(
           baseOffset: 0,
           extentOffset: textSelectionDelegate.textEditingValue.text.length,
         ),
-        SelectionChangedCause.keyboard,
       );
-      return;
+    }
+    if (value != null) {
+      if (textSelectionDelegate.textEditingValue.selection != value.selection) {
+        _handleSelectionChange(
+          value.selection,
+          SelectionChangedCause.keyboard,
+        );
+      }
+      textSelectionDelegate.textEditingValue = value;
     }
   }
 
@@ -836,9 +843,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         textAfter = textAfter.substring(deleteCount);
       }
     }
+    final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
+    if (selection != newSelection) {
+      _handleSelectionChange(
+        newSelection,
+        SelectionChangedCause.keyboard,
+      );
+    }
     textSelectionDelegate.textEditingValue = TextEditingValue(
       text: textBefore + textAfter,
-      selection: TextSelection.collapsed(offset: cursorPosition),
+      selection: newSelection,
     );
   }
 
@@ -1837,6 +1851,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// Select text between the global positions [from] and [to].
+  ///
+  /// [from] corresponds to the [TextSelection.baseOffset], and [to] corresponds
+  /// to the [TextSelection.extentOffset].
   void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     assert(cause != null);
     assert(from != null);
@@ -1849,12 +1866,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ? null
       : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
 
-    int baseOffset = fromPosition.offset;
-    int extentOffset = fromPosition.offset;
-    if (toPosition != null) {
-      baseOffset = math.min(fromPosition.offset, toPosition.offset);
-      extentOffset = math.max(fromPosition.offset, toPosition.offset);
-    }
+    final int baseOffset = fromPosition.offset;
+    final int extentOffset = toPosition?.offset ?? fromPosition.offset;
 
     final TextSelection newSelection = TextSelection(
       baseOffset: baseOffset,

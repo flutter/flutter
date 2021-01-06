@@ -1425,12 +1425,13 @@ Directory createTemporaryFlutterSdk(
   Directory realFlutter,
   List<PubspecYaml> pubspecs,
 ) {
-  final Set<String> currentPackages = realFlutter
-    .childDirectory('packages')
-    .listSync()
-    .whereType<Directory>()
-    .map((Directory directory) => fileSystem.path.basename(directory.path))
-    .toSet();
+  final Set<String> currentPackages = <String>{};
+  for (final FileSystemEntity entity in realFlutter.childDirectory('packages').listSync()) {
+    // Verify that a pubspec.yaml exists to ensure this isn't a left over directory.
+    if (entity is Directory && entity.childFile('pubspec.yaml').existsSync()) {
+      currentPackages.add(fileSystem.path.basename(entity.path));
+    }
+  }
 
   final Map<String, PubspecYaml> pubspecsByName = <String, PubspecYaml>{};
   for (final PubspecYaml pubspec in pubspecs) {

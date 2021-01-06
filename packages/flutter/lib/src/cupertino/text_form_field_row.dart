@@ -61,12 +61,12 @@ import 'theme.dart';
 /// ```dart
 /// CupertinoTextFormFieldRow(
 ///   prefix: Text('Username'),
-///   onSaved: (String value) {
+///   onSaved: (String? value) {
 ///     // This optional block of code can be used to run
 ///     // code when the user saves the form.
 ///   },
-///   validator: (String value) {
-///     return value.contains('@') ? 'Do not use the @ char.' : null;
+///   validator: (String? value) {
+///     return (value != null && value.contains('@')) ? 'Do not use the @ char.' : null;
 ///   },
 /// )
 /// ```
@@ -87,7 +87,7 @@ import 'theme.dart';
 ///       child: Form(
 ///         autovalidateMode: AutovalidateMode.always,
 ///         onChanged: () {
-///           Form.of(primaryFocus.context).save();
+///           Form.of(primaryFocus!.context!)?.save();
 ///         },
 ///         child: CupertinoFormSection.insetGrouped(
 ///           header: Text('SECTION 1'),
@@ -96,7 +96,7 @@ import 'theme.dart';
 ///               prefix: Text('Enter text'),
 ///               placeholder: 'Enter text',
 ///               validator: (value) {
-///                 if (value.isEmpty) {
+///                 if (value == null || value.isEmpty) {
 ///                   return 'Please enter a value';
 ///                 }
 ///                 return null;

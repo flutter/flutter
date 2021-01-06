@@ -347,12 +347,12 @@ class NavigationRail extends StatefulWidget {
   ///   final Animation<double> animation = NavigationRail.extendedAnimation(context);
   ///   return AnimatedBuilder(
   ///     animation: animation,
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       // The extended fab has a shorter height than the regular fab.
   ///       return Container(
   ///         height: 56,
   ///         padding: EdgeInsets.symmetric(
-  ///           vertical: lerpDouble(0, 6, animation.value),
+  ///           vertical: lerpDouble(0, 6, animation.value)!,
   ///         ),
   ///         child: animation.value == 0
   ///           ? FloatingActionButton(
