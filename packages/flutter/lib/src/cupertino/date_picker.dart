@@ -719,6 +719,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             Text(dateText, style: _themeTextStyle(context)),
           );
         },
+        selectionOverlay: selectionOverlay,
       ),
     );
   }
@@ -802,6 +803,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
+        selectionOverlay: selectionOverlay,
       )
     );
   }
