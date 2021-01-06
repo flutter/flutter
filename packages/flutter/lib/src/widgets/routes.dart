@@ -1460,7 +1460,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// When this changes, if the route is visible, the route will
   /// rebuild, and any widgets that used [ModalRoute.of] will be
   /// notified.
-  bool get canPop => !isFirst || willHandlePopInternally;
+  bool get canPop => isActive && (!isFirst || willHandlePopInternally);
 
   // Internals
 
