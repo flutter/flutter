@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 
 import 'text_selection_toolbar_button.dart';
 
-// TODO(justinmc): Deduplicate between here and text_selection.dart.
 // Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
 const double _kToolbarHeight = 43.0;
@@ -22,7 +21,6 @@ const double _kToolbarContentDistance = 8.0;
 const double _kToolbarScreenPadding = 8.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
-// TODO(justinmc): These constants are already deduped.
 // Values extracted from https://developer.apple.com/design/resources/.
 const Radius _kToolbarBorderRadius = Radius.circular(8);
 
@@ -150,7 +148,15 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     markNeedsSemanticsUpdate();
   }
 
-  final BoxConstraints heightConstraint = const BoxConstraints.tightFor(height: _kToolbarHeight);
+  // The child is tall enough to have the arrow clipped out of it on both sides
+  // top and bottom. Since _kToolbarHeight includes the height of one arrow, the
+  // total height that the child is given is that plus one more arrow height.
+  // The extra height on the opposite side of the arrow will be clipped out. By
+  // using this appraoch, the buttons don't need any special padding that
+  // depends on isAbove.
+  final BoxConstraints _heightConstraint = BoxConstraints.tightFor(
+    height: _kToolbarHeight + _kToolbarArrowSize.height,
+  );
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
@@ -169,13 +175,13 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       .deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding))
       .loosen();
 
-    child!.layout(heightConstraint.enforce(enforcedConstraint), parentUsesSize: true,);
+    child!.layout(_heightConstraint.enforce(enforcedConstraint), parentUsesSize: true);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
 
     // The local x-coordinate of the center of the toolbar. The toolbar would
     // like to horizontally center itself on the anchor if possible.
     final double leftBound = child!.size.width/2 + _kToolbarScreenPadding;
-    final double rightBound = size.width - child!.size.width/2 - _kToolbarScreenPadding;
+    final double rightBound = constraints.maxWidth - child!.size.width/2 - _kToolbarScreenPadding;
     final double adjustedCenterX = _anchor.dx.clamp(leftBound, rightBound);
 
     childParentData.offset = Offset(
@@ -192,8 +198,11 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     final Path rrect = Path()
       ..addRRect(
         RRect.fromRectAndRadius(
-          Offset(0.0, _isAbove ? 0.0 : _kToolbarArrowSize.height)
-            & Size(child!.size.width, child!.size.height - _kToolbarArrowSize.height),
+          Offset(0.0, _kToolbarArrowSize.height)
+            & Size(
+                child!.size.width,
+                child!.size.height - _kToolbarArrowSize.height * 2,
+              ),
           _kToolbarBorderRadius,
         ),
       );
@@ -202,7 +211,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     final double arrowXOffsetFromCenter = _anchor.dx - centerX;
     final double arrowTipX = child!.size.width / 2 + arrowXOffsetFromCenter;
 
-    final double arrowBottomY = _isAbove
+    final double arrowBaseY = _isAbove
       ? child!.size.height - _kToolbarArrowSize.height
       : _kToolbarArrowSize.height;
 
@@ -210,8 +219,8 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
     final Path arrow = Path()
       ..moveTo(arrowTipX, arrowTipY)
-      ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBottomY)
-      ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBottomY)
+      ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBaseY)
+      ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBaseY)
       ..close();
 
     return Path.combine(PathOperation.union, rrect, arrow);
@@ -259,6 +268,24 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       context.canvas.drawPath(_clipPath().shift(offset + childParentData.offset), _debugPaint!);
       return true;
     }());
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    // Positions outside of the clipped area of the child are not counted as
+    // hits.
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final Rect hitBox = Rect.fromLTWH(
+      childParentData.offset.dx,
+      childParentData.offset.dy + _kToolbarArrowSize.height,
+      child!.size.width,
+      child!.size.height - _kToolbarArrowSize.height * 2,
+    );
+    if (!hitBox.contains(position)) {
+      return false;
+    }
+
+    return super.hitTestChildren(result, position: position);
   }
 }
 
@@ -350,17 +377,14 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           page: _page,
           backButton: CupertinoTextSelectionToolbarButton(
             onPressed: _handlePreviousPage,
-            padding: CupertinoTextSelectionToolbarButton.getPadding(widget.isAbove),
             child: CupertinoTextSelectionToolbarButton.getText('◀'),
           ),
           dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
           nextButton: CupertinoTextSelectionToolbarButton(
             onPressed: _handleNextPage,
-            padding: CupertinoTextSelectionToolbarButton.getPadding(widget.isAbove),
             child: CupertinoTextSelectionToolbarButton.getText('▶'),
           ),
           nextButtonDisabled: CupertinoTextSelectionToolbarButton(
-            padding: CupertinoTextSelectionToolbarButton.getPadding(widget.isAbove),
             child: CupertinoTextSelectionToolbarButton.getText('◀', false),
           ),
           children: widget.children,

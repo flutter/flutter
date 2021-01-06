@@ -19,22 +19,9 @@ const double _kSelectionHandleOverlap = 1.5;
 // Extracted from https://developer.apple.com/design/resources/.
 const double _kSelectionHandleRadius = 6;
 
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// screen.
-const double _kToolbarScreenPadding = 8.0;
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
 // screen. Eyeballed value.
 const double _kArrowScreenPadding = 26.0;
-
-// Vertical distance between the tip of the arrow and the line of text the arrow
-// is pointing to. The value used here is eyeballed.
-const double _kToolbarContentDistance = 8.0;
-// Values derived from https://developer.apple.com/design/resources/.
-// 92% Opacity ~= 0xEB
-
-// Values extracted from https://developer.apple.com/design/resources/.
-// The height of the toolbar, including the arrow.
-const double _kToolbarHeight = 43.0;
 
 // TODO(justinmc): Rename to _CupertinoTextSelectionControlsToolbar to be
 // aligned with Material naming.
@@ -134,11 +121,6 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough
     // space at the bottom in this case.
-    // TODO(justinmc): Make this generic so toolbars of other heights work.
-    final double toolbarHeightNeeded = mediaQuery.padding.top
-      + _kToolbarScreenPadding
-      + _kToolbarHeight
-      + _kToolbarContentDistance;
     final double anchorX = (widget.selectionMidpoint.dx + widget.globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
@@ -156,7 +138,6 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       anchorX,
       widget.endpoints.last.point.dy + widget.globalEditableRegion.top,
     );
-    final bool isAbove = anchorAbove.dy >= toolbarHeightNeeded;
 
     final List<Widget> items = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
@@ -173,7 +154,6 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
 
       items.add(CupertinoTextSelectionToolbarButton(
         onPressed: onPressed,
-        padding: CupertinoTextSelectionToolbarButton.getPadding(isAbove),
         child: CupertinoTextSelectionToolbarButton.getText(text),
       ));
     }

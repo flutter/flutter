@@ -18,15 +18,8 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 
-// TODO(justinmc): Deduplicate this constant with cupertino/text_selection.dart.
-// Values extracted from https://developer.apple.com/design/resources/.
-// The height of the toolbar, including the arrow.
-const double _kToolbarHeight = 43.0;
-
 // Eyeballed value.
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
-// TODO(justinmc): Deduplicate with cupertino/text_selection_toolbar.dart.
-const Size _kToolbarArrowSize = Size(14.0, 7.0);
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 16.0, horizontal: 18.0);
 
 /// A button in the style of the iOS text selection toolbar buttons.
 class CupertinoTextSelectionToolbarButton extends StatelessWidget {
@@ -64,17 +57,6 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     );
   }
 
-  /// Gets the padding for use in the default iOS text selection toolbar.
-  ///
-  /// Pass the resulting value into the [padding] parameter when using a
-  /// CupertinoTextSelectionToolbarButton in a CupertinoTextSelectionToolbar.
-  static EdgeInsetsGeometry getPadding(bool isAbove) {
-    final EdgeInsets arrowPadding = isAbove
-      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
-      : EdgeInsets.only(top: _kToolbarArrowSize.height);
-    return _kToolbarButtonPadding.add(arrowPadding);
-  }
-
   @override
   Widget build(BuildContext context) {
     return CupertinoButton(
@@ -82,9 +64,8 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       borderRadius: null,
       color: _kToolbarBackgroundColor,
       disabledColor: _kToolbarBackgroundColor,
-      minSize: _kToolbarHeight,
       onPressed: onPressed,
-      padding: padding,
+      padding: _kToolbarButtonPadding,
       pressedOpacity: onPressed == null ? 1.0 : 0.7,
     );
   }
