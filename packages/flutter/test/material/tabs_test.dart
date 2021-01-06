@@ -2791,8 +2791,10 @@ void main() {
                   )
                 ],
                 overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) return const Color(0xff00ff00);
-                  if (states.contains(MaterialState.pressed)) return const Color(0xf00fffff);
+                  if (states.contains(MaterialState.hovered))
+                    return const Color(0xff00ff00);
+                  if (states.contains(MaterialState.pressed))
+                    return const Color(0xf00fffff);
                   return const Color(0xffbadbad); // Shouldn't happen.
                 },
               ),
