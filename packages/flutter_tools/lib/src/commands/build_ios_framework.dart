@@ -342,17 +342,9 @@ end
     );
     final List<EnvironmentType> environmentTypes = <EnvironmentType>[
       EnvironmentType.physical,
+      EnvironmentType.simulator,
     ];
     final List<Directory> frameworks = <Directory>[];
-    Target target;
-    if (buildInfo.isDebug) {
-      environmentTypes.add(EnvironmentType.simulator);
-      target = const DebugIosApplicationBundle();
-    } else if (buildInfo.isProfile) {
-      target = const ProfileIosApplicationBundle();
-    } else {
-      target = const ReleaseIosApplicationBundle();
-    }
 
     try {
       for (final EnvironmentType sdkType in environmentTypes) {
@@ -392,6 +384,15 @@ end
               ? null
               : globals.flutterVersion.engineRevision,
         );
+        Target target;
+        // Always build debug for simulator.
+        if (buildInfo.isDebug || sdkType == EnvironmentType.simulator) {
+          target = const DebugIosApplicationBundle();
+        } else if (buildInfo.isProfile) {
+          target = const ProfileIosApplicationBundle();
+        } else {
+          target = const ReleaseIosApplicationBundle();
+        }
         final BuildResult result = await buildSystem.build(target, environment);
         if (!result.success) {
           for (final ExceptionMeasurement measurement
@@ -453,42 +454,42 @@ end
         throwToolExit('Unable to build plugin frameworks: ${buildPluginsResult.stderr}');
       }
 
-      if (mode == BuildMode.debug) {
-        pluginsBuildCommand = <String>[
-          ...globals.xcode.xcrunCommand(),
-          'xcodebuild',
-          '-alltargets',
-          '-sdk',
-          'iphonesimulator',
-          '-configuration',
-          xcodeBuildConfiguration,
-          'SYMROOT=${simulatorBuildOutput.path}',
-          'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
-          'ARCHS=x86_64',
-          'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
-          'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        ];
+      // Always build debug for simulator.
+      final String simulatorConfiguration = toTitleCase(getNameForBuildMode(BuildMode.debug));
+      pluginsBuildCommand = <String>[
+        ...globals.xcode.xcrunCommand(),
+        'xcodebuild',
+        '-alltargets',
+        '-sdk',
+        'iphonesimulator',
+        '-configuration',
+        simulatorConfiguration,
+        'SYMROOT=${simulatorBuildOutput.path}',
+        'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
+        'ARCHS=x86_64',
+        'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
+        'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+      ];
 
-        buildPluginsResult = await globals.processUtils.run(
-          pluginsBuildCommand,
-          workingDirectory: _project.ios.hostAppRoot
-            .childDirectory('Pods')
-            .path,
-          allowReentrantFlutter: false,
+      buildPluginsResult = await globals.processUtils.run(
+        pluginsBuildCommand,
+        workingDirectory: _project.ios.hostAppRoot
+          .childDirectory('Pods')
+          .path,
+        allowReentrantFlutter: false,
+      );
+
+      if (buildPluginsResult.exitCode != 0) {
+        throwToolExit(
+          'Unable to build plugin frameworks for simulator: ${buildPluginsResult.stderr}',
         );
-
-        if (buildPluginsResult.exitCode != 0) {
-          throwToolExit(
-            'Unable to build plugin frameworks for simulator: ${buildPluginsResult.stderr}',
-          );
-        }
       }
 
       final Directory iPhoneBuildConfiguration = iPhoneBuildOutput.childDirectory(
         '$xcodeBuildConfiguration-iphoneos',
       );
       final Directory simulatorBuildConfiguration = simulatorBuildOutput.childDirectory(
-        '$xcodeBuildConfiguration-iphonesimulator',
+        '$simulatorConfiguration-iphonesimulator',
       );
 
       final Iterable<Directory> products = iPhoneBuildConfiguration
@@ -504,10 +505,9 @@ end
 
           final List<Directory> frameworks = <Directory>[
             podProduct as Directory,
-            if (mode == BuildMode.debug)
-              simulatorBuildConfiguration
-                  .childDirectory(builtProduct.basename)
-                  .childDirectory(podFrameworkName)
+            simulatorBuildConfiguration
+                .childDirectory(builtProduct.basename)
+                .childDirectory(podFrameworkName)
           ];
 
           await _produceXCFramework(frameworks, binaryName, modeDirectory);
