@@ -35,7 +35,7 @@ PaintPatternPredicate _ripplePatternPredicate(Offset? expectedCenter, double? ex
       return true;
     }
     throw '''
-    
+
 Expected - ${formattedValues(expectedCenter, expectedRadius, expectedColorWithAlpha, expectedAlpha)}
    Found - ${formattedValues(center, radius, color, alpha)}''';
   };
