@@ -1350,7 +1350,7 @@ void main() {
             columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
             rows: <DataRow>[
               DataRow(
-                onSelectChanged: (bool? _) {},
+                onSelectChanged: (bool? checked) {},
                 cells: const <DataCell>[DataCell(Text('Content1'))],
               ),
               DataRow(
@@ -1360,7 +1360,7 @@ void main() {
                   return defaultColor;
                 }),
                 selected: selected,
-                onSelectChanged: disabled ? null : (bool? _) {},
+                onSelectChanged: disabled ? null : (bool? checked) {},
                 cells: const <DataCell>[DataCell(Text('Content2'))],
               ),
             ],
