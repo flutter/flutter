@@ -77,7 +77,7 @@ void main() {
     ));
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
-  });
+  }, skip: isBrowser); // uses dart:io
 }
 
 // Loads the Material icon font. Only necessary for golden tests.
