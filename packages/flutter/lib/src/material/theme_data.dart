@@ -527,7 +527,7 @@ class ThemeData with Diagnosticable {
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the
-  /// [new ThemeData] constructor.
+  /// [ThemeData] constructor.
   const ThemeData.raw({
     // Warning: make sure these properties are in the exact same order as in
     // operator == and in the hashValues method and in the order of fields
@@ -755,7 +755,7 @@ class ThemeData with Diagnosticable {
   /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.dark() => ThemeData(brightness: Brightness.dark);
 
-  /// The default color theme. Same as [new ThemeData.light].
+  /// The default color theme. Same as [ThemeData.light].
   ///
   /// This is used by [Theme.of] when no theme has been specified.
   ///
