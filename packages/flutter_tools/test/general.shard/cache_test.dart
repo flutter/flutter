@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/artifact_updater.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 import 'package:flutter_tools/src/base/io.dart';
@@ -240,12 +241,6 @@ void main() {
 
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
-  });
-
-  testWithoutContext('flattenNameSubdirs', () {
-    expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar'), MemoryFileSystem.test()), 'flutter.dev/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar'), MemoryFileSystem.test()), 'docs.flutter.io/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem.test()), 'www.flutter.dev');
   });
 
   testWithoutContext('EngineCachedArtifact makes binary dirs readable and executable by all', () async {

@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/artifact_updater.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -20,6 +20,12 @@ import '../src/mocks.dart';
 final Platform testPlatform = FakePlatform(environment: const <String, String>{});
 
 void main() {
+  testWithoutContext('flattenNameSubdirs', () {
+    expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar'), MemoryFileSystem.test()), 'flutter.dev/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar'), MemoryFileSystem.test()), 'docs.flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem.test()), 'www.flutter.dev');
+  });
+
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {
     final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
