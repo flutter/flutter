@@ -4377,7 +4377,7 @@ void main() {
     expect(onSelectionChangedCallCount, equals(3));
   });
 
-  testWidgets('selecting a space selects the previous word', (WidgetTester tester) async {
+  testWidgets('selecting a space selects the previous word on mobile', (WidgetTester tester) async {
     TextSelection? selection;
 
     await tester.pumpWidget(
@@ -4419,5 +4419,128 @@ void main() {
     expect(selection, isNotNull);
     expect(selection!.baseOffset, 0);
     expect(selection!.extentOffset, 1);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+
+  testWidgets('selecting a space selects the space on non-mobile platforms', (WidgetTester tester) async {
+    TextSelection? selection;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText(
+              ' blah blah',
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+                selection = newSelection;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(selection, isNull);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 10);
+    expect(selection!.extentOffset, 10);
+
+    // Double tapping the second space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 5);
+    expect(selection!.extentOffset, 6);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 10);
+    expect(selection!.extentOffset, 10);
+
+    // Double tapping the second space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 0);
+    expect(selection!.extentOffset, 1);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+
+  testWidgets('double tapping a space selects the previous word on mobile', (WidgetTester tester) async {
+    TextSelection? selection;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText(
+              ' blah blah  \n  blah',
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+                selection = newSelection;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(selection, isNull);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 19);
+    expect(selection!.extentOffset, 19);
+
+    // Double tapping does the same thing
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 1);
+    expect(selection!.extentOffset, 5);
+
+    // Put the cursor at the end of the field.
+    // await tester.tapAt(textOffsetToPosition(tester, 19));
+    // expect(selection, isNotNull);
+    // expect(selection!.baseOffset, 19);
+    // expect(selection!.extentOffset, 19);
+
+    // Double tapping does the same thing for the first space.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 0);
+    expect(selection!.extentOffset, 1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 19);
+    expect(selection!.extentOffset, 19);
+
+    // Double tapping the last space selects all previous contiguous spaces on
+    // both lines and the previous word.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 14));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 14));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 6);
+    expect(selection!.extentOffset, 14);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 }
