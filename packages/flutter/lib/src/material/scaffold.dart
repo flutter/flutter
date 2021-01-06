@@ -2076,8 +2076,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_drawerOpened, 'drawer');
-    registerForRestoration(_endDrawerOpened, 'end_drawer');
+    registerForRestoration(_drawerOpened, 'drawer_open');
+    registerForRestoration(_endDrawerOpened, 'end_drawer_open');
   }
 
   // DRAWER API
@@ -2882,7 +2882,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
-          isDrawerOpen: _endDrawerOpened,
+          isDrawerOpen: _endDrawerOpened.value,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2908,7 +2908,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
-          isDrawerOpen: _drawerOpened,
+          isDrawerOpen: _drawerOpened.value,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching

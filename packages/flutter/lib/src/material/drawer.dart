@@ -231,7 +231,7 @@ class DrawerController extends StatefulWidget {
     GlobalKey? key,
     required this.child,
     required this.alignment,
-    required this.isDrawerOpen,
+    this.isDrawerOpen = false,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
@@ -299,8 +299,8 @@ class DrawerController extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double? edgeDragWidth;
 
-  /// docs.
-  final RestorableBool isDrawerOpen;
+  /// Whether or not the drawer is initially opened or closed.
+  final bool isDrawerOpen;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -315,27 +315,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     super.initState();
     _scrimColorTween = _buildScrimColorTween();
     _controller = AnimationController(
-      value: widget.isDrawerOpen.value ? 1.0 : 0.0,
+      value: widget.isDrawerOpen ? 1.0 : 0.0,
       duration: _kBaseSettleDuration,
       vsync: this,
     );
     _controller
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
-    _controller.addStatusListener((AnimationStatus status) {
-      // Only update the drawer animation value when the drawer is fully open
-      // or closed.
-      switch(status) {
-        case AnimationStatus.completed:
-          widget.isDrawerOpen.value = true;
-          break;
-        case AnimationStatus.dismissed:
-          widget.isDrawerOpen.value = false;
-          break;
-        default:
-          break;
-      }
-    });
   }
 
   @override
