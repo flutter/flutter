@@ -956,13 +956,13 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   }
 
   void _makeFilesExecutable(Directory dir, OperatingSystemUtils operatingSystemUtils) {
-    operatingSystemUtils.chmod(dir, 'a+r,a+x');
+    operatingSystemUtils?.chmod(dir, 'a+r,a+x');
     for (final File file in dir.listSync(recursive: true).whereType<File>()) {
       final FileStat stat = file.statSync();
       final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
       if (file.basename == 'flutter_tester' || isUserExecutable) {
         // Make the file readable and executable by all users.
-        operatingSystemUtils.chmod(file, 'a+r,a+x');
+        operatingSystemUtils?.chmod(file, 'a+r,a+x');
       }
     }
   }
