@@ -1,0 +1,6 @@
+{
+  "Shift": ["ShiftLeft", "ShiftRight"],
+  "Meta": ["MetaLeft", "MetaRight"],
+  "Alt": ["AltLeft", "AltRight"],
+  "Control": ["ControlLeft", "ControlRight"]
+}

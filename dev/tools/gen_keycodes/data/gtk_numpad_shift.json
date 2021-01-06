@@ -1,0 +1,12 @@
+{
+  "numpad0": "numpadInsert",
+  "numpad1": "numpadEnd",
+  "numpad2": "numpadDown",
+  "numpad3": "numpadPageDown",
+  "numpad4": "numpadLeft",
+  "numpad6": "numpadRight",
+  "numpad7": "numpadHome",
+  "numpad8": "numpadUp",
+  "numpad9": "numpadPageUp",
+  "numpadPeriod": "numpadDelete"
+}

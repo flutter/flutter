@@ -1,0 +1,20 @@
+{
+  "ControlRight": "controlRight",
+  "AltRight": "altRight",
+  "Numpad1": "numpad1",
+  "Numpad2": "numpad2",
+  "Numpad3": "numpad3",
+  "Numpad4": "numpad4",
+  "Numpad5": "numpad5",
+  "Numpad6": "numpad6",
+  "Numpad7": "numpad7",
+  "Numpad8": "numpad8",
+  "Numpad9": "numpad9",
+  "Numpad0": "numpad0",
+  "NumpadAdd": "numpadAdd",
+  "NumpadDecimal": "numpadDecimal",
+  "NumpadDivide": "numpadDivide",
+  "NumpadEqual": "numpadEqual",
+  "NumpadMultiply": "numpadMultiply",
+  "NumpadSubtract": "numpadSubtract"
+}

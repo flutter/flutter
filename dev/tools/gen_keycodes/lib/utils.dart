@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:path/path.dart' as path;
 
@@ -21,8 +22,14 @@ String shoutingToLowerCamel(String shouting) {
 }
 
 /// Converts 'FooBar' to 'fooBar'.
+///
+/// 'TVFoo' should be convert to 'tvFoo'.
+/// 'KeyX' should be convert to 'keyX'.
 String upperCamelToLowerCamel(String upperCamel) {
-  return upperCamel.substring(0, 1).toLowerCase() + upperCamel.substring(1);
+  final RegExp initialGroup = RegExp(r'^([A-Z]([A-Z]*|[^A-Z]*))([A-Z]([^A-Z]|$)|$)');
+  return upperCamel.replaceFirstMapped(initialGroup, (Match match) {
+    return match.group(1).toLowerCase() + (match.group(3) ?? '');
+  });
 }
 
 /// Converts 'fooBar' to 'FooBar'.
@@ -107,4 +114,77 @@ String toHex(int value, {int digits = 8}) {
 /// Parses an integer from a hex string.
 int getHex(String input) {
   return int.parse(input, radix: 16);
+}
+
+/// Given an [input] string, wraps the text at 80 characters and prepends each
+/// line with the [prefix] string. Use for generated comments.
+String wrapString(String input, {String prefix}) {
+  final int wrapWidth = 80 - prefix.length;
+  final StringBuffer result = StringBuffer();
+  final List<String> words = input.split(RegExp(r'\s+'));
+  String currentLine = words.removeAt(0);
+  for (final String word in words) {
+    if ((currentLine.length + word.length) < wrapWidth) {
+      currentLine += ' $word';
+    } else {
+      result.writeln('$prefix$currentLine');
+      currentLine = word;
+    }
+  }
+  if (currentLine.isNotEmpty) {
+    result.writeln('$prefix$currentLine');
+  }
+  return result.toString();
+}
+
+/// Run `fn` with each corresponding element from list1 and list2.
+///
+/// If `list1` has a different length from `list2`, the execution is aborted
+/// after printing an error.
+///
+/// An null list is considered a list with length 0.
+void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1, T2) fn) {
+  if (list1 == null && list2 == null)
+    return;
+  if ((list1?.length ?? 0) != (list2?.length ?? 0)) {
+    print('Mismatched lists $list1 to $list2');
+    return;
+  }
+  final Iterator<T1> it1 = list1.iterator;
+  final Iterator<T2> it2 = list2.iterator;
+  while (it1.moveNext()) {
+    it2.moveNext();
+    fn(it1.current, it2.current);
+  }
+}
+
+/// Read a Map<String, List<String>> out of its string representation in JSON.
+Map<String, List<String>> parseMapOfListOfString(String jsonString) {
+  final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
+  return dynamicMap.map<String, List<String>>((String key, List<dynamic> value) {
+    return MapEntry<String, List<String>>(key, value.cast<String>());
+  });
+}
+
+/// Reverse the map of { fromValue -> list of toValue } to { toValue -> fromValue } and return.
+Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, void Function(String fromValue, String newToValue) onDuplicate) {
+  final Map<String, String> result = <String, String>{};
+  inMap.forEach((String fromValue, List<String> toValues) {
+    for (final String toValue in toValues) {
+      if (result.containsKey(toValue)) {
+        onDuplicate(fromValue, toValue);
+        continue;
+      }
+      result[toValue] = fromValue;
+    }
+  });
+  return result;
+}
+
+/// Remove entries whose value `isEmpty` or is null, and return the map.
+///
+/// Will modify the input map.
+Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
+  return map..removeWhere((String key, dynamic value) =>
+      value == null || (value is List<dynamic> && value.isEmpty));
 }

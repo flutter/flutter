@@ -5,19 +5,19 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 
 /// Generates the key mapping of GLFW, based on the information in the key
 /// data structure given to it.
 class GlfwCodeGenerator extends PlatformCodeGenerator {
-  GlfwCodeGenerator(KeyData keyData) : super(keyData);
+  GlfwCodeGenerator(PhysicalKeyData keyData) : super(keyData);
 
   /// This generates the map of GLFW number pad key codes to logical keys.
   String get _glfwNumpadMap {
     final StringBuffer glfwNumpadMap = StringBuffer();
-    for (final Key entry in numpadKeyData) {
+    for (final PhysicalKeyEntry entry in numpadKeyData) {
       if (entry.glfwKeyCodes != null) {
         for (final int code in entry.glfwKeyCodes.cast<int>()) {
           glfwNumpadMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
@@ -30,7 +30,7 @@ class GlfwCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of GLFW key codes to logical keys.
   String get _glfwKeyCodeMap {
     final StringBuffer glfwKeyCodeMap = StringBuffer();
-    for (final Key entry in keyData.data) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.glfwKeyCodes != null) {
         for (final int code in entry.glfwKeyCodes.cast<int>()) {
           glfwKeyCodeMap.writeln('  { $code, ${toHex(entry.flutterId, digits: 10)} },    // ${entry.constantName}');
