@@ -45,21 +45,27 @@ class TextSelectionToolbar extends StatelessWidget {
   }) : assert(children.length > 0),
        super(key: key);
 
+  /// {@template flutter.material.TextSelectionToolbar.anchorAbove}
   /// The focal point above which the toolbar attempts to position itself.
   ///
   /// If there is not enough room above before reaching the top of the screen,
   /// then the toolbar will position itself below [anchorBelow].
+  /// {@endtemplate}
   final Offset anchorAbove;
 
+  /// {@template flutter.material.TextSelectionToolbar.anchorBelow}
   /// The focal point below which the toolbar attempts to position itself, if it
   /// doesn't fit above [anchorAbove].
+  /// {@endtemplate}
   final Offset anchorBelow;
 
+  /// {@template flutter.material.TextSelectionToolbar.children}
   /// The children that will be displayed in the text selection toolbar.
   ///
   /// Typically these are buttons.
   ///
   /// Must not be empty.
+  /// {@endtemplate}
   ///
   /// See also:
   ///   * [TextSelectionToolbarTextButton], which builds a default Material-

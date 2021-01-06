@@ -38,22 +38,27 @@ const Color _kToolbarDividerColor = Color(0xFF808080);
 ///  * [TextSelectionControls.buildToolbar], where this is used by default to
 ///    build an iOS-style toolbar.
 class CupertinoTextSelectionToolbar extends StatelessWidget {
-  /// Creates an instancwe of CupertinoTextSelectionToolbar.
+  /// Creates an instance of CupertinoTextSelectionToolbar.
   const CupertinoTextSelectionToolbar({
     Key? key,
-    required Offset anchorAbove,
-    required Offset anchorBelow,
-    required List<Widget> children,
+    required this.anchorAbove,
+    required this.anchorBelow,
+    required this.children,
   }) : assert(children.length > 0),
-       _anchorAbove = anchorAbove,
-       _anchorBelow = anchorBelow,
-       _children = children,
        super(key: key);
 
-  final Offset _anchorAbove;
-  final Offset _anchorBelow;
+  /// {@macro flutter.material.TextSelectionToolbar.anchorAbove}
+  final Offset anchorAbove;
 
-  final List<Widget> _children;
+  /// {@macro flutter.material.TextSelectionToolbar.anchorBelow}
+  final Offset anchorBelow;
+
+  /// {@macro flutter.material.TextSelectionToolbar.children}
+  ///
+  /// See also:
+  ///   * [CupertinoTextSelectionToolbarButton], which builds a default
+  ///     Cupertino-style text selection toolbar text button.
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -64,14 +69,14 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       + _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance;
-    final bool isAbove = _anchorAbove.dy >= toolbarHeightNeeded;
+    final bool isAbove = anchorAbove.dy >= toolbarHeightNeeded;
 
     return _CupertinoTextSelectionToolbarThing(
-      anchor: isAbove ? _anchorAbove : _anchorBelow,
+      anchor: isAbove ? anchorAbove : anchorBelow,
       isAbove: isAbove,
       child: _CupertinoTextSelectionToolbarContent(
         isAbove: isAbove,
-        children: _children,
+        children: children,
       ),
     );
   }
