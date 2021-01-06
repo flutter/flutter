@@ -12,6 +12,7 @@ import 'package:process/process.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'convert.dart';
+import 'globals.dart' as globals;
 import 'resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses the server package.
@@ -126,6 +127,15 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   /// Returns a bool indicating whether or not the package was successfully
   /// activated from pub.
   Future<bool> _activateDevTools() async {
+    final DateTime now = DateTime.now();
+    // Only attempt to activate DevTools twice a day.
+    final bool shouldActivate =
+        globals.persistentToolState.lastDevToolsActivationTime == null ||
+        now.difference(globals.persistentToolState.lastDevToolsActivationTime).inHours >= 12;
+    if (!shouldActivate) {
+      return false;
+    }
+
     final Status status = _logger.startProgress(
       'Activating Dart DevTools...',
     );
@@ -144,6 +154,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         return false;
       }
       status.stop();
+      globals.persistentToolState.lastDevToolsActivationTime = DateTime.now();
       return true;
     } on Exception catch (e, _) {
       status.stop();
