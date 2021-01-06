@@ -119,7 +119,6 @@ class Cache {
         platform: platform,
         httpClient: HttpClient(),
       ) {
-    _artifactUpdater.tempStorage = getDownloadDir();
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
       _artifacts.add(GradleWrapper(this));
@@ -425,7 +424,7 @@ class Cache {
     final Directory dir = _fileSystem.directory(_fileSystem.path.join(getRoot().path, name));
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
-      _osUtils.chmod(dir, '755');
+      _osUtils?.chmod(dir, '755');
     }
     return dir;
   }
@@ -539,6 +538,7 @@ class Cache {
 
   /// Update the cache to contain all `requiredArtifacts`.
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+    _artifactUpdater.tempStorage = getDownloadDir();
     if (!_lockEnabled) {
       return;
     }

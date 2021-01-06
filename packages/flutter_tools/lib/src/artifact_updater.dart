@@ -304,4 +304,3 @@ final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
   r'|'.codeUnitAt(0): '@pip@'.codeUnits,
   r'?'.codeUnitAt(0): '@ques@'.codeUnits,
 };
-
