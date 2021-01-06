@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, hashValues;
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -26,7 +25,7 @@ class IconThemeData with Diagnosticable {
   /// is clamped between 0.0 and 1.0.
   const IconThemeData({this.color, double? opacity, this.size}) : _opacity = opacity;
 
-  /// Creates an icon them with some reasonable default values.
+  /// Creates an icon theme with some reasonable default values.
   ///
   /// The [color] is black, the [opacity] is 1.0, and the [size] is 24.0.
   const IconThemeData.fallback()
