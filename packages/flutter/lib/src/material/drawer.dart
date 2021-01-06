@@ -231,12 +231,12 @@ class DrawerController extends StatefulWidget {
     GlobalKey? key,
     required this.child,
     required this.alignment,
+    required this.isDrawerOpen,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
-    this.restorationId,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -299,19 +299,8 @@ class DrawerController extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double? edgeDragWidth;
 
-  /// Restoration ID to save and restore the state of the [DrawerController].
-  ///
-  /// If it is non-null, the drawer's state will persist and restore
-  /// whether the drawer was open or closed.
-  ///
-  /// The state of this widget is persisted in a [RestorationBucket] claimed
-  /// from the surrounding [RestorationScope] using the provided restoration ID.
-  ///
-  /// See also:
-  ///
-  ///  * [RestorationManager], which explains how state restoration works in
-  ///    Flutter.
-  final String? restorationId;
+  /// docs.
+  final RestorableBool isDrawerOpen;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -320,14 +309,17 @@ class DrawerController extends StatefulWidget {
 /// State for a [DrawerController].
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
-class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin, RestorationMixin {
-  final RestorableBool _isDrawerOpen = RestorableBool(false);
-
+class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
     _scrimColorTween = _buildScrimColorTween();
-    _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
+    _controller = AnimationController(
+      value: widget.isDrawerOpen.value ? 1.0 : 0.0,
+      duration: _kBaseSettleDuration,
+      vsync: this,
+    );
+    _controller
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
     _controller.addStatusListener((AnimationStatus status) {
@@ -335,10 +327,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       // or closed.
       switch(status) {
         case AnimationStatus.completed:
-          _isDrawerOpen.value = true;
+          widget.isDrawerOpen.value = true;
           break;
         case AnimationStatus.dismissed:
-          _isDrawerOpen.value = false;
+          widget.isDrawerOpen.value = false;
           break;
         default:
           break;
@@ -347,22 +339,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   @override
-  String? get restorationId => widget.restorationId;
-
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_isDrawerOpen, 'animation_value');
-    if (_isDrawerOpen.value) {
-      _controller.value = 1.0;
-    } else {
-      _controller.value = 0.0;
-    }
-  }
-
-  @override
   void dispose() {
     _historyEntry?.remove();
-    _isDrawerOpen.dispose();
     _controller.dispose();
     super.dispose();
   }
