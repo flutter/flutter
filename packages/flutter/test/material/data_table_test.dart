@@ -992,8 +992,7 @@ void main() {
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(
-          child: buildCustomTable(
+      home: Material(child: buildCustomTable(
         horizontalMargin: _customHorizontalMargin,
         columnSpacing: _customColumnSpacing,
       )),
