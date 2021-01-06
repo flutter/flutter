@@ -343,8 +343,8 @@ void main() {
       ));
     final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
     final LicenseResult result = licenseCollector.obtainLicenses(packageConfig, <String, List<File>>{
-      'foo': [fileSystem.file('foo.txt').absolute],
-      'bar': [fileSystem.file('bar.txt').absolute],
+      'foo': <File>[fileSystem.file('foo.txt').absolute],
+      'bar': <File>[fileSystem.file('bar.txt').absolute],
     });
 
     // Additional license files are included in the result.
