@@ -104,21 +104,16 @@ class TextLayoutService {
       // ********************************* //
 
       if (span is PlaceholderSpan) {
-        spanometer.currentSpan = null;
-        final double lineWidth = currentLine.width + span.width;
-        if (lineWidth <= constraints.width) {
+        if (currentLine.widthIncludingSpace + span.width <= constraints.width) {
           // The placeholder fits on the current line.
-          // TODO(mdebbar):
-          // (1) adjust the current line's height to fit the placeholder.
-          // (2) update accumulated line width.
-          // (3) add placeholder box to line.
+          currentLine.addPlaceholder(span);
         } else {
           // The placeholder can't fit on the current line.
-          // TODO(mdebbar):
-          // (1) create a line.
-          // (2) adjust the new line's height to fit the placeholder.
-          // (3) update `lineStart`, etc.
-          // (4) add placeholder box to line.
+          if (currentLine.isNotEmpty) {
+            lines.add(currentLine.build());
+            currentLine = currentLine.nextLine();
+          }
+          currentLine.addPlaceholder(span);
         }
       } else if (span is FlatTextSpan) {
         spanometer.currentSpan = span;
@@ -203,7 +198,7 @@ class TextLayoutService {
 
     while (currentLine.end.type != LineBreakType.endOfText) {
       if (span is PlaceholderSpan) {
-        // TODO(mdebbar): Do placeholders affect min/max intrinsic width?
+        currentLine.addPlaceholder(span);
       } else if (span is FlatTextSpan) {
         spanometer.currentSpan = span;
         final LineBreakResult nextBreak = currentLine.findNextBreak(span.end);
@@ -211,26 +206,38 @@ class TextLayoutService {
         // For the purpose of max intrinsic width, we don't care if the line
         // fits within the constraints or not. So we always extend it.
         currentLine.extendTo(nextBreak);
+      }
 
-        final double widthOfLastSegment = currentLine.lastSegment.width;
-        if (minIntrinsicWidth < widthOfLastSegment) {
-          minIntrinsicWidth = widthOfLastSegment;
+      final double widthOfLastSegment = currentLine.lastSegment.width;
+      if (minIntrinsicWidth < widthOfLastSegment) {
+        minIntrinsicWidth = widthOfLastSegment;
+      }
+
+      if (currentLine.end.isHard) {
+        // Max intrinsic width includes the width of trailing spaces.
+        if (maxIntrinsicWidth < currentLine.widthIncludingSpace) {
+          maxIntrinsicWidth = currentLine.widthIncludingSpace;
         }
+        currentLine = currentLine.nextLine();
+      }
 
-        if (currentLine.end.isHard) {
-          // Max intrinsic width includes the width of trailing spaces.
-          if (maxIntrinsicWidth < currentLine.widthIncludingSpace) {
-            maxIntrinsicWidth = currentLine.widthIncludingSpace;
-          }
-          currentLine = currentLine.nextLine();
-        }
+      // Only go to the next span if we've reached the end of this span.
+      if (currentLine.end.index >= span.end && spanIndex < spanCount - 1) {
+        span = paragraph.spans[++spanIndex];
+      }
+    }
+  }
 
-        // Only go to the next span if we've reached the end of this span.
-        if (currentLine.end.index >= span.end && spanIndex < spanCount - 1) {
-          span = paragraph.spans[++spanIndex];
+  List<ui.TextBox> getBoxesForPlaceholders() {
+    final List<ui.TextBox> boxes = <ui.TextBox>[];
+    for (final EngineLineMetrics line in lines) {
+      for (final RangeBox box in line.boxes!) {
+        if (box is PlaceholderBox) {
+          boxes.add(box.toTextBox(line));
         }
       }
     }
+    return boxes;
   }
 
   List<ui.TextBox> getBoxesForRange(
@@ -255,7 +262,7 @@ class TextLayoutService {
     for (final EngineLineMetrics line in lines) {
       if (line.overlapsWith(start, end)) {
         for (final RangeBox box in line.boxes!) {
-          if (box.overlapsWith(start, end)) {
+          if (box is SpanBox && box.overlapsWith(start, end)) {
             boxes.add(box.intersect(line, start, end));
           }
         }
@@ -328,23 +335,133 @@ class TextLayoutService {
 /// The box's coordinates are all relative to the line it belongs to. For
 /// example, [left] is the distance from the left edge of the line to the left
 /// edge of the box.
-class RangeBox {
-  RangeBox.fromSpanometer(
-    this.spanometer, {
+abstract class RangeBox {
+  LineBreakResult get start;
+  LineBreakResult get end;
+
+  /// The distance from the left edge of the line to the left edge of the box.
+  double get left;
+
+  /// The distance from the left edge of the line to the right edge of the box.
+  double get right;
+
+  /// The direction in which text inside this box flows.
+  ui.TextDirection get direction;
+
+  /// Returns a [ui.TextBox] representing this range box in the given [line].
+  ///
+  /// The coordinates of the resulting [ui.TextBox] are relative to the
+  /// paragraph, not to the line.
+  ui.TextBox toTextBox(EngineLineMetrics line);
+
+  /// Returns the text position within this box's range that's closest to the
+  /// given [x] offset.
+  ///
+  /// The [x] offset is expected to be relative to the left edge of the line,
+  /// just like the coordinates of this box.
+  ui.TextPosition getPositionForX(double x);
+}
+
+/// Represents a box for a [PlaceholderSpan].
+class PlaceholderBox extends RangeBox {
+  PlaceholderBox(
+    this.placeholder, {
+    required LineBreakResult index,
+    required this.left,
+    required this.direction,
+  }) : start = index, end = index;
+
+  final PlaceholderSpan placeholder;
+
+  @override
+  final LineBreakResult start;
+
+  @override
+  final LineBreakResult end;
+
+  @override
+  final double left;
+
+  @override
+  double get right => left + placeholder.width;
+
+  @override
+  final ui.TextDirection direction;
+
+  ui.TextBox toTextBox(EngineLineMetrics line) {
+    final double left = line.left + this.left;
+    final double right = line.left + this.right;
+
+    final double lineTop = line.baseline - line.ascent;
+
+    final double top;
+    switch (placeholder.alignment) {
+      case ui.PlaceholderAlignment.top:
+        top = lineTop;
+        break;
+
+      case ui.PlaceholderAlignment.middle:
+        top = lineTop + (line.height - placeholder.height) / 2;
+        break;
+
+      case ui.PlaceholderAlignment.bottom:
+        top = lineTop + line.height - placeholder.height;
+        break;
+
+      case ui.PlaceholderAlignment.aboveBaseline:
+        top = line.baseline - placeholder.height;
+        break;
+
+      case ui.PlaceholderAlignment.belowBaseline:
+        top = line.baseline;
+        break;
+
+      case ui.PlaceholderAlignment.baseline:
+        top = line.baseline - placeholder.baselineOffset;
+        break;
+    }
+
+    return ui.TextBox.fromLTRBD(
+      left,
+      top,
+      right,
+      top + placeholder.height,
+      direction,
+    );
+  }
+
+  @override
+  ui.TextPosition getPositionForX(double x) {
+    // See if `x` is closer to the left edge or the right edge of the box.
+    final bool closerToLeft = x - left < right - x;
+    return ui.TextPosition(
+      offset: start.index,
+      affinity: closerToLeft ? ui.TextAffinity.upstream : ui.TextAffinity.downstream,
+    );
+  }
+}
+
+/// Represents a box in a [FlatTextSpan].
+class SpanBox extends RangeBox {
+  SpanBox(
+    Spanometer spanometer, {
     required this.start,
     required this.end,
     required this.left,
-  })   : span = spanometer.currentSpan,
+    required this.direction,
+  })   : this.spanometer = spanometer,
+        span = spanometer.currentSpan,
         height = spanometer.height,
-        baseline = spanometer.alphabeticBaseline,
+        baseline = spanometer.ascent,
         width = spanometer.measureIncludingSpace(start, end);
 
+
   final Spanometer spanometer;
-  final ParagraphSpan span;
+  final FlatTextSpan span;
   final LineBreakResult start;
   final LineBreakResult end;
 
-  /// The distance from the left edge of the line to the left edge of the box.
+  @override
   final double left;
 
   /// The distance from the left edge to the right edge of the box.
@@ -357,11 +474,10 @@ class RangeBox {
   /// the box.
   final double baseline;
 
-  /// The direction in which text inside this box flows.
-  ui.TextDirection get direction =>
-      spanometer.paragraph.paragraphStyle._effectiveTextDirection;
+  @override
+  final ui.TextDirection direction;
 
-  /// The distance from the left edge of the line to the right edge of the box.
+  @override
   double get right => left + width;
 
   /// Whether this box's range overlaps with the range from [startIndex] to
@@ -390,14 +506,14 @@ class RangeBox {
     if (start <= this.start.index) {
       left = this.left;
     } else {
-      spanometer.currentSpan = span as FlatTextSpan;
+      spanometer.currentSpan = span;
       left = this.left + spanometer._measure(this.start.index, start);
     }
 
     if (end >= this.end.indexWithoutTrailingNewlines) {
       right = this.right;
     } else {
-      spanometer.currentSpan = span as FlatTextSpan;
+      spanometer.currentSpan = span;
       right = this.right -
           spanometer._measure(end, this.end.indexWithoutTrailingNewlines);
     }
@@ -414,13 +530,9 @@ class RangeBox {
     );
   }
 
-  /// Returns the text position within this box's range that's closest to the
-  /// given [x] offset.
-  ///
-  /// The [x] offset is expected to be relative to the left edge of the line,
-  /// just like the coordinates of this box.
+  @override
   ui.TextPosition getPositionForX(double x) {
-    spanometer.currentSpan = span as FlatTextSpan;
+    spanometer.currentSpan = span;
 
     // Make `x` relative to this box.
     x -= left;
@@ -572,11 +684,14 @@ class LineBuilder {
   /// The width of trailing white space in the line.
   double get widthOfTrailingSpace => widthIncludingSpace - width;
 
-  /// The alphabetic baseline of the line so far.
-  double alphabeticBaseline = 0.0;
+  /// The distance from the top of the line to the alphabetic baseline.
+  double ascent = 0.0;
+
+  /// The distance from the bottom of the line to the alphabetic baseline.
+  double descent = 0.0;
 
   /// The height of the line so far.
-  double height = 0.0;
+  double get height => ascent + descent;
 
   /// The last segment in this line.
   LineSegment get lastSegment => _segments.last;
@@ -626,11 +741,73 @@ class LineBuilder {
       'Cannot extend a line that ends with a hard break.',
     );
 
-    alphabeticBaseline =
-        math.max(alphabeticBaseline, spanometer.alphabeticBaseline);
-    height = math.max(height, spanometer.height);
+    ascent = math.max(ascent, spanometer.ascent);
+    descent = math.max(descent, spanometer.descent);
 
     _addSegment(_createSegment(newEnd));
+  }
+
+  void addPlaceholder(PlaceholderSpan placeholder) {
+    // Increase the line's height to fit the placeholder, if necessary.
+    final double ascent, descent;
+    switch (placeholder.alignment) {
+      case ui.PlaceholderAlignment.top:
+        // The placeholder is aligned to the top of text, which means it has the
+        // same `ascent` as the remaining text. We only need to extend the
+        // `descent` enough to fit the placeholder.
+        ascent = this.ascent;
+        descent = placeholder.height - this.ascent;
+        break;
+
+      case ui.PlaceholderAlignment.bottom:
+        // The opposite of `top`. The `descent` is the same, but we extend the
+        // `ascent`.
+        ascent = placeholder.height - this.descent;
+        descent = this.descent;
+        break;
+
+      case ui.PlaceholderAlignment.middle:
+        final double textMidPoint = this.height / 2;
+        final double placeholderMidPoint = placeholder.height / 2;
+        final double diff = placeholderMidPoint - textMidPoint;
+        ascent = this.ascent + diff;
+        descent = this.descent + diff;
+        break;
+
+      case ui.PlaceholderAlignment.aboveBaseline:
+        ascent = placeholder.height;
+        descent = 0.0;
+        break;
+
+      case ui.PlaceholderAlignment.belowBaseline:
+        ascent = 0.0;
+        descent = placeholder.height;
+        break;
+
+      case ui.PlaceholderAlignment.baseline:
+        ascent = placeholder.baselineOffset;
+        descent = placeholder.height - ascent;
+        break;
+    }
+
+    this.ascent = math.max(this.ascent, ascent);
+    this.descent = math.max(this.descent, descent);
+
+    _addSegment(LineSegment(
+      span: placeholder,
+      start: end,
+      end: end,
+      width: placeholder.width,
+      widthIncludingSpace: placeholder.width,
+    ));
+
+    // Add the placeholder box.
+    _boxes.add(PlaceholderBox(
+      placeholder,
+      index: _boxStart,
+      left: _boxLeft,
+      direction: paragraph.paragraphStyle._effectiveTextDirection,
+    ));
   }
 
   /// Creates a new segment to be appended to the end of this line.
@@ -822,11 +999,12 @@ class LineBuilder {
       return;
     }
 
-    _boxes.add(RangeBox.fromSpanometer(
+    _boxes.add(SpanBox(
       spanometer,
       start: boxStart,
       end: boxEnd,
       left: _boxLeft,
+      direction: paragraph.paragraphStyle._effectiveTextDirection,
     ));
   }
 
@@ -849,7 +1027,9 @@ class LineBuilder {
       widthWithTrailingSpaces: widthIncludingSpace + ellipsisWidth,
       left: alignOffset,
       height: height,
-      baseline: accumulatedHeight + alphabeticBaseline,
+      baseline: accumulatedHeight + ascent,
+      ascent: ascent,
+      descent: descent,
       boxes: _boxes,
     );
   }
@@ -929,8 +1109,11 @@ class Spanometer {
     }
   }
 
-  /// The alphabetic baseline for the current span.
-  double get alphabeticBaseline => _currentRuler!.alphabeticBaseline;
+  /// The distance from the top of the current span to the alphabetic baseline.
+  double get ascent => _currentRuler!.alphabeticBaseline;
+
+  /// The distance from the bottom of the current span to the alphabetic baseline.
+  double get descent => height - ascent;
 
   /// The line height of the current span.
   double get height => _currentRuler!.height;
