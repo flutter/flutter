@@ -154,8 +154,8 @@ import 'theme.dart';
 ///
 /// class _DemoBottomAppBar extends StatelessWidget {
 ///   const _DemoBottomAppBar({
-///     this.fabLocation,
-///     this.shape,
+///     this.fabLocation = FloatingActionButtonLocation.endDocked,
+///     this.shape = const CircularNotchedRectangle(),
 ///   });
 ///
 ///   final FloatingActionButtonLocation fabLocation;
