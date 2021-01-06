@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   testWidgets('IconData object test', (WidgetTester tester) async {
@@ -52,6 +57,8 @@ void main() {
   );
 
   testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
+    await _loadIconFont();
+
     await tester.pumpWidget(MaterialApp(
       home: IconTheme(
         data: const IconThemeData(size: 200),
@@ -71,4 +78,24 @@ void main() {
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
   });
+}
+
+// Loads the Material icon font. Only necessary for golden tests.
+Future<void> _loadIconFont() async {
+  final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent;
+  final File iconFont = File(path.joinAll(<String>[
+    flutterRoot.path,
+    'bin',
+    'cache',
+    'artifacts',
+    'material_fonts',
+    'MaterialIcons-Regular.otf'
+  ]));
+
+  final Future<ByteData> bytes = Future<ByteData>.value(iconFont
+      .readAsBytesSync()
+      .buffer
+      .asByteData());
+
+  await (FontLoader('MaterialIcons')..addFont(bytes)).load();
 }
