@@ -50,6 +50,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     bool offline = false;
     try {
       await http.head('https://pub.dev');
+      await http.head('https://pub.flutter-io.cn');
     } on Exception catch (_, __) {
       offline = true;
     }
