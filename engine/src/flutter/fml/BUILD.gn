@@ -187,6 +187,7 @@ source_set("fml") {
       "$fuchsia_sdk_root/pkg:async-cpp",
       "$fuchsia_sdk_root/pkg:async-loop-cpp",
       "$fuchsia_sdk_root/pkg:async-loop-default",
+      "$fuchsia_sdk_root/pkg:syslog",
       "$fuchsia_sdk_root/pkg:trace",
       "$fuchsia_sdk_root/pkg:trace-engine",
       "$fuchsia_sdk_root/pkg:zx",
