@@ -43,6 +43,7 @@ void main() {
         projectUnderTest.macos.xcodeWorkspace.createSync(recursive: true);
 
         projectUnderTest.dartTool.createSync(recursive: true);
+        projectUnderTest.packagesFile.createSync(recursive: true);
         projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
 
         projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);
@@ -80,6 +81,7 @@ void main() {
 
         expect(projectUnderTest.flutterPluginsFile.existsSync(), isFalse);
         expect(projectUnderTest.flutterPluginsDependenciesFile.existsSync(), isFalse);
+        expect(projectUnderTest.packagesFile.existsSync(), isFalse);
 
         verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: false)).called(2);
       }, overrides: <Type, Generator>{

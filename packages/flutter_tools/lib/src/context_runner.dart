@@ -46,6 +46,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
+import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
@@ -278,6 +279,7 @@ Future<T> runInContext<T>(
       SystemClock: () => const SystemClock(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
+        firstRunMessenger: FirstRunMessenger(persistentToolState: globals.persistentToolState),
       ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
