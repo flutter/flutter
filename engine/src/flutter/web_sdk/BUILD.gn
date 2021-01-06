@@ -100,7 +100,7 @@ copy("web_ui_library") {
   outputs = [ "$root_out_dir/flutter_web_sdk/{{source_file_part}}" ]
 }
 
-# Compile the DDC SDK's summary.
+# Compile the unsound DDC SDK's summary.
 prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
   deps = [
     "//third_party/dart:create_sdk",
@@ -141,7 +141,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
   ]
 }
 
-# Compiles the DDC SDK's JS code.
+# Compiles the unsound html only renderer.
 prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
   deps = [
     "//third_party/dart:create_sdk",
@@ -181,6 +181,8 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
     "--libraries-file",
     "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
     "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=false",
+    "-DFLUTTER_WEB_AUTO_DETECT=false",
     "--modules",
     "amd",
     "-o",
@@ -192,7 +194,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
   ]
 }
 
-# Compiles the DDC CanvasKit SDK's JS code.
+# Compiles the unsound canvaskit only renderer.
 prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk") {
   deps = [
     "//third_party/dart:create_sdk",
@@ -233,6 +235,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk") {
     "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
     "--inline-source-map",
     "-DFLUTTER_WEB_USE_SKIA=true",
+    "-DFLUTTER_WEB_AUTO_DETECT=false",
     "--modules",
     "amd",
     "-o",
@@ -246,7 +249,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk") {
   ]
 }
 
-# Compiles the DDC CanvasKit and Html SDK's JS code.
+# Compiles the unsound autodetect renderer.
 prebuilt_dart_action("flutter_dartdevc_canvaskit_html_kernel_sdk") {
   deps = [
     "//third_party/dart:create_sdk",
@@ -286,6 +289,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_html_kernel_sdk") {
     "--libraries-file",
     "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
     "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=true",
     "-DFLUTTER_WEB_AUTO_DETECT=true",
     "--modules",
     "amd",
@@ -300,7 +304,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_html_kernel_sdk") {
   ]
 }
 
-# Compiles the DDC SDK's JS code for null safety.
+# Compiles the sound html only renderer.
 prebuilt_dart_action("flutter_dartdevc_kernel_sdk_sound") {
   deps = [
     "//third_party/dart:create_sdk",
@@ -341,6 +345,8 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_sound") {
     "--libraries-file",
     "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
     "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=false",
+    "-DFLUTTER_WEB_AUTO_DETECT=false",
     "--modules",
     "amd",
     "-o",
@@ -353,7 +359,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_sound") {
   ]
 }
 
-# Compiles the DDC CanvasKit SDK's JS code for null safety.
+# Compiles the sound canvaskit only renderer.
 prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
   deps = [
     "//third_party/dart:create_sdk",
@@ -395,6 +401,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
     "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
     "--inline-source-map",
     "-DFLUTTER_WEB_USE_SKIA=true",
+    "-DFLUTTER_WEB_AUTO_DETECT=false",
     "--modules",
     "amd",
     "-o",
@@ -408,7 +415,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_kernel_sdk_sound") {
   ]
 }
 
-# Compiles the DDC CanvasKit and Html SDK's JS code for null safety.
+# Compiles the sound autodetect renderer.
 prebuilt_dart_action("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
   deps = [
     "//third_party/dart:create_sdk",
@@ -449,6 +456,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
     "--libraries-file",
     "org-dartlang-sdk:///flutter_web_sdk/libraries.json",
     "--inline-source-map",
+    "-DFLUTTER_WEB_USE_SKIA=false",
     "-DFLUTTER_WEB_AUTO_DETECT=true",
     "--modules",
     "amd",
@@ -463,7 +471,7 @@ prebuilt_dart_action("flutter_dartdevc_canvaskit_html_kernel_sdk_sound") {
   ]
 }
 
-# Compile the DDC SDK's summary.
+# Compile the sound DDC SDK's summary.
 prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline_sound") {
   deps = [
     "//third_party/dart:create_sdk",
