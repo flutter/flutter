@@ -321,7 +321,7 @@ class DrawerController extends StatefulWidget {
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
 class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin, RestorationMixin {
-  final RestorableDouble _restorableAnimationValue = RestorableDouble(0.0);
+  final RestorableBool _isDrawerOpen = RestorableBool(false);
 
   @override
   void initState() {
@@ -333,8 +333,15 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller.addStatusListener((AnimationStatus status) {
       // Only update the drawer animation value when the drawer is fully open
       // or closed.
-      if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
-        _restorableAnimationValue.value = _controller.value;
+      switch(status) {
+        case AnimationStatus.completed:
+          _isDrawerOpen.value = true;
+          break;
+        case AnimationStatus.dismissed:
+          _isDrawerOpen.value = false;
+          break;
+        default:
+          break;
       }
     });
   }
@@ -344,14 +351,18 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_restorableAnimationValue, 'animation_value');
-    _controller.value = _restorableAnimationValue.value;
+    registerForRestoration(_isDrawerOpen, 'animation_value');
+    if (_isDrawerOpen.value) {
+      _controller.value = 1.0;
+    } else {
+      _controller.value = 0.0;
+    }
   }
 
   @override
   void dispose() {
     _historyEntry?.remove();
-    _restorableAnimationValue.dispose();
+    _isDrawerOpen.dispose();
     _controller.dispose();
     super.dispose();
   }
