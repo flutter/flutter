@@ -207,12 +207,8 @@ void main() {
     ProcessManager mockProcessManager;
     Directory tempDir;
     AndroidSdk mockAndroidSdk;
-    Usage mockUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(true);
-
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
 
       mockProcessManager = MockProcessManager();

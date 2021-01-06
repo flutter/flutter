@@ -364,6 +364,9 @@ abstract class CmakeBasedProject {
   /// The native project CMake specification.
   File get cmakeFile;
 
+  /// Contains definitions for the Flutter library and the tool.
+  File get managedCmakeFile;
+
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
   File get generatedCmakeConfigFile;
@@ -1100,6 +1103,9 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
 
   @override
+  File get managedCmakeFile => managedDirectory.childFile('CMakeLists.txt');
+
+  @override
   File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
 
   @override
@@ -1152,6 +1158,9 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
 
   @override
   File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
+
+  @override
+  File get managedCmakeFile => managedDirectory.childFile('CMakeLists.txt');
 
   @override
   File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
