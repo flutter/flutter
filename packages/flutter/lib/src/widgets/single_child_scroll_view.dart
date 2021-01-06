@@ -80,7 +80,7 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 /// In this example, the children are spaced out equally, unless there's no more
 /// room, in which case they stack vertically and scroll.
 ///
@@ -91,7 +91,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
@@ -154,14 +154,14 @@ import 'scrollable.dart';
 /// so that the intrinsic sizing algorithm can short-circuit the computation when it
 /// reaches those parts of the subtree.
 ///
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 /// In this example, the column becomes either as big as viewport, or as big as
 /// the contents, whichever is biggest.
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
