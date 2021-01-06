@@ -1262,8 +1262,9 @@ abstract class ResidentRunner {
     try {
       _devToolsLauncher ??= DevtoolsLauncher.instance;
       return await _devToolsLauncher.serve(openInBrowser: openInBrowser);
-    } catch (_) { // ignore: avoid_catches_without_on_clauses
+    } catch (e) { // ignore: avoid_catches_without_on_clauses
       // We need to fail gracefully if attempting to serve DevTools fails.
+      globals.printError('Failed to serve Flutter DevTools: $e');
     }
   }
 

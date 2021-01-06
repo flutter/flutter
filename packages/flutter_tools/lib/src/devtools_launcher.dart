@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:browser_launcher/browser_launcher.dart';
+import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -45,26 +46,30 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       return;
     }
 
-    final Status status = _logger.startProgress(
-      'Activating Dart DevTools...',
-    );
+    bool offline = false;
     try {
-      // TODO(kenz): https://github.com/dart-lang/pub/issues/2791 - calling `pub
-      // global activate` adds ~ 4.5 seconds of latency.
-      final io.ProcessResult _devToolsActivateProcess = await _processManager.run(<String>[
-        _pubExecutable,
-        'global',
-        'activate',
-        'devtools'
-      ]);
-      if (_devToolsActivateProcess.exitCode != 0) {
-        status.cancel();
-        _logger.printError('Error running `pub global activate '
-            'devtools`:\n${_devToolsActivateProcess.stderr}');
+      await http.head('https://pub.dev');
+    } on Exception catch (_, __) {
+      offline = true;
+    }
+
+    if (offline) {
+      // TODO(kenz): we should launch an already activated version of DevTools
+      // here, if available, once DevTools has offline support. DevTools does
+      // not work without internet currently due to the failed request of a
+      // couple scripts. See https://github.com/flutter/devtools/issues/2420.
+      return;
+    } else {
+      final bool didActivateDevTools = await _activateDevTools();
+      final bool devToolsActive = await _checkForActiveDevTools();
+      if (!didActivateDevTools && !devToolsActive) {
+        // At this point, we failed to activate the DevTools package and the
+        // package is not already active.
         return;
       }
-      status.stop();
+    }
 
+    try {
       _devToolsProcess = await _processManager.start(<String>[
         _pubExecutable,
         'global',
@@ -97,8 +102,53 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .listen(_logger.printError);
       devToolsUri = await completer.future;
     } on Exception catch (e, st) {
-      status.cancel();
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
+    }
+  }
+
+  Future<bool> _checkForActiveDevTools() async {
+    // We are offline, and cannot activate DevTools, so check if the DevTools
+    // package is already active.
+    final io.ProcessResult _pubGlobalListProcess = await _processManager.run(<String>[
+      _pubExecutable,
+      'global',
+      'list',
+    ]);
+
+    if (_pubGlobalListProcess.stdout.toString().contains('devtools ')) {
+      return true;
+    }
+    return false;
+  }
+
+  /// Helper method to activate the DevTools pub package.
+  ///
+  /// Returns a bool indicating whether or not the package was successfully
+  /// activated from pub.
+  Future<bool> _activateDevTools() async {
+    final Status status = _logger.startProgress(
+      'Activating Dart DevTools...',
+    );
+    try {
+      final io.ProcessResult _devToolsActivateProcess = await _processManager
+          .run(<String>[
+        _pubExecutable,
+        'global',
+        'activate',
+        'devtools'
+      ]);
+      if (_devToolsActivateProcess.exitCode != 0) {
+        status.cancel();
+        _logger.printError('Error running `pub global activate '
+            'devtools`:\n${_devToolsActivateProcess.stderr}');
+        return false;
+      }
+      status.stop();
+      return true;
+    } on Exception catch (e, _) {
+      status.stop();
+      _logger.printError('Error running `pub global activate devtools`: $e');
+      return false;
     }
   }
 
