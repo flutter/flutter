@@ -140,6 +140,22 @@ class FlutterManifest {
     return false;
   }
 
+  /// Any additional license files listed under the `flutter` key.
+  ///
+  /// This is expected to be a list of file paths that should be treated as
+  /// relative to the pubspec in this directory.
+  ///
+  /// For example:
+  ///
+  /// ```yaml
+  /// flutter:
+  ///   licenses:
+  ///     - assets/foo_license.txt
+  /// ```
+  List<String> get additionalLicenses => _flutterDescriptor.containsKey('licenses')
+    ? (_flutterDescriptor['licenses'] as YamlList).map((dynamic element) => element.toString()).toList()
+    : <String>[];
+
   /// True if this manifest declares a Flutter module project.
   ///
   /// A Flutter project is considered a module when it has a `module:`
@@ -432,6 +448,11 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
           errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
         } else {
           _validateFonts(kvp.value as YamlList, errors);
+        }
+        break;
+      case 'licenses':
+        if (kvp.value is! YamlList || kvp.value[0] is! String) {
+          errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType})');
         }
         break;
       case 'module':

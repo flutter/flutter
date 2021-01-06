@@ -224,7 +224,8 @@ class ManifestAssetBundle implements AssetBundle {
       primary: true,
     );
 
-    // Add fonts and assets from packages.
+    // Add fonts, assets, and licenses from packages.
+    final Map<String, List<File>> additionalLicenseFiles = <String, List<File>>{};
     for (final Package package in packageConfig.packages) {
       final Uri packageUri = package.packageUriRoot;
       if (packageUri != null && packageUri.scheme == 'file') {
@@ -237,6 +238,14 @@ class ManifestAssetBundle implements AssetBundle {
         if (packageFlutterManifest == null) {
           continue;
         }
+        // Collect any additional licenses from each package.
+        final List<File> licenseFiles = <File>[];
+        for (final String relativeLicensePath in packageFlutterManifest.additionalLicenses) {
+          final String absoluteLicensePath = _fileSystem.path.fromUri(package.root.resolve(relativeLicensePath));
+          licenseFiles.add(_fileSystem.file(absoluteLicensePath).absolute);
+        }
+        additionalLicenseFiles[packageFlutterManifest.appName] = licenseFiles;
+
         // Skip the app itself
         if (packageFlutterManifest.appName == flutterManifest.appName) {
           continue;
@@ -319,7 +328,12 @@ class ManifestAssetBundle implements AssetBundle {
 
     final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
-    final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig);
+    final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
+    if (licenseResult.errorMessages.isNotEmpty) {
+      licenseResult.errorMessages.forEach(_logger.printError);
+      return 1;
+    }
+
     final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
@@ -749,8 +763,12 @@ class LicenseCollector {
   static final String licenseSeparator = '\n' + ('-' * 80) + '\n';
 
   /// Obtain licenses from the `packageMap` into a single result.
+  ///
+  /// [additionalLicenses] should contain aggregated license files from all
+  /// of the current applications dependencies.
   LicenseResult obtainLicenses(
     PackageConfig packageConfig,
+    Map<String, List<File>> additionalLicenses,
   ) {
     final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
     final Set<String> allPackages = <String>{};
@@ -788,11 +806,11 @@ class LicenseCollector {
           packageNames = <String>[package.name];
           licenseText = rawLicense;
         }
-        packageLicenses.putIfAbsent(licenseText, () => <String>{})
-          .addAll(packageNames);
+        packageLicenses.putIfAbsent(licenseText, () => <String>{}).addAll(packageNames);
         allPackages.addAll(packageNames);
       }
     }
+
     final List<String> combinedLicensesList = packageLicenses.keys
       .map<String>((String license) {
         final List<String> packageNames = packageLicenses[license].toList()
@@ -800,11 +818,47 @@ class LicenseCollector {
         return packageNames.join('\n') + '\n\n' + license;
       }).toList();
     combinedLicensesList.sort();
-    final String combinedLicenses = combinedLicensesList.join(licenseSeparator);
+
+    /// Append additional LICENSE files as specified in the pubspec.yaml.
+    final List<String> additionalLicenseText = <String>[];
+    final List<String> errorMessages = <String>[];
+    for (final String package in additionalLicenses.keys) {
+      for (final File license in additionalLicenses[package]) {
+        if (!license.existsSync()) {
+          errorMessages.add(
+            'package $package specified an additional license at ${license.path}, but this file '
+            'does not exist.'
+          );
+          continue;
+        }
+        dependencies.add(license);
+        try {
+          additionalLicenseText.add(license.readAsStringSync());
+        } on FormatException catch (err) {
+          // File has an invalid encoding.
+          errorMessages.add(
+            'package $package specified an additional license at ${license.path}, but this file '
+            'could not be read:\n$err'
+          );
+        }
+      }
+    }
+    if (errorMessages.isNotEmpty) {
+      return LicenseResult(
+        combinedLicenses: '',
+        dependencies: <File>[],
+        errorMessages: errorMessages,
+      );
+    }
+
+    final String combinedLicenses = combinedLicensesList
+      .followedBy(additionalLicenseText)
+      .join(licenseSeparator);
 
     return LicenseResult(
       combinedLicenses: combinedLicenses,
       dependencies: dependencies,
+      errorMessages: errorMessages,
     );
   }
 }
@@ -814,6 +868,7 @@ class LicenseResult {
   const LicenseResult({
     @required this.combinedLicenses,
     @required this.dependencies,
+    @required this.errorMessages,
   });
 
   /// The raw text of the consumed licenses.
@@ -821,6 +876,10 @@ class LicenseResult {
 
   /// Each license file that was consumed as input.
   final List<File> dependencies;
+
+  /// If non-empty, license collection failed and this messages should
+  /// be displayed by the asset parser.
+  final List<String> errorMessages;
 }
 
 // Given an assets directory like this:
