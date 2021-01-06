@@ -19,6 +19,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Insets;
+import android.graphics.Region;
 import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
@@ -793,6 +794,20 @@ public class FlutterViewTest {
     // Then, the second image is closed.
     imageView.onDraw(mock(Canvas.class));
     verify(mockImage, times(2)).close();
+  }
+
+  @Test
+  public void flutterSurfaceView_GathersTransparentRegion() {
+    final Region mockRegion = mock(Region.class);
+    final FlutterSurfaceView surfaceView = new FlutterSurfaceView(RuntimeEnvironment.application);
+
+    surfaceView.setAlpha(0.0f);
+    assertFalse(surfaceView.gatherTransparentRegion(mockRegion));
+    verify(mockRegion, times(0)).op(anyInt(), anyInt(), anyInt(), anyInt(), any());
+
+    surfaceView.setAlpha(1.0f);
+    assertTrue(surfaceView.gatherTransparentRegion(mockRegion));
+    verify(mockRegion, times(1)).op(0, 0, 0, 0, Region.Op.DIFFERENCE);
   }
 
   /*

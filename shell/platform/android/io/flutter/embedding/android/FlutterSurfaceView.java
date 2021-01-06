@@ -6,6 +6,7 @@ package io.flutter.embedding.android;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.Region;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -133,6 +134,28 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     // Keep this SurfaceView transparent until Flutter has a frame ready to render. This avoids
     // displaying a black rectangle in our place.
     setAlpha(0.0f);
+  }
+
+  // This is a work around for TalkBack.
+  // If Android decides that our layer is transparent because, e.g. the status-
+  // bar is transparent, TalkBack highlighting stops working.
+  // Explicitly telling Android this part of the region is not actually
+  // transparent makes TalkBack work again.
+  // See https://github.com/flutter/flutter/issues/73413 for context.
+  @Override
+  public boolean gatherTransparentRegion(Region region) {
+    if (getAlpha() < 1.0f) {
+      return false;
+    }
+    final int[] location = new int[2];
+    getLocationInWindow(location);
+    region.op(
+        location[0],
+        location[1],
+        location[0] + getRight() - getLeft(),
+        location[1] + getBottom() - getTop(),
+        Region.Op.DIFFERENCE);
+    return true;
   }
 
   @Nullable
