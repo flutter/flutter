@@ -493,15 +493,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   };
 
   static final Set<LogicalKeyboardKey> _modifierKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.alt,
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+    LogicalKeyboardKey.controlLeft,
+    LogicalKeyboardKey.controlRight,
+    LogicalKeyboardKey.altLeft,
+    LogicalKeyboardKey.altRight,
   };
 
   static final Set<LogicalKeyboardKey> _macOsModifierKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.meta,
-    LogicalKeyboardKey.alt,
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+    LogicalKeyboardKey.metaLeft,
+    LogicalKeyboardKey.metaRight,
+    LogicalKeyboardKey.altLeft,
+    LogicalKeyboardKey.altRight,
   };
 
   static final Set<LogicalKeyboardKey> _interestingKeys = <LogicalKeyboardKey>{
