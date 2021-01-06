@@ -66,12 +66,12 @@ class EngineLineMetrics implements ui.LineMetrics {
     required this.left,
     required this.height,
     required this.baseline,
+    required this.ascent,
+    required this.descent,
     // Didn't use `this.boxes` because we want it to be non-null in this
     // constructor.
     required List<RangeBox> boxes,
   })  : displayText = null,
-        ascent = double.infinity,
-        descent = double.infinity,
         unscaledAscent = double.infinity,
         this.boxes = boxes;
 
