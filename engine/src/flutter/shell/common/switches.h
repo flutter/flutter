@@ -202,6 +202,9 @@ DEF_SWITCH(
 DEF_SWITCH(OldGenHeapSize,
            "old-gen-heap-size",
            "The size limit in megabytes for the Dart VM old gen heap space.")
+DEF_SWITCH(EnableSkParagraph,
+           "enable-skparagraph",
+           "Selects the SkParagraph implementation of the text layout engine.")
 
 DEF_SWITCHES_END
 

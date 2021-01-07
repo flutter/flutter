@@ -141,6 +141,10 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   settings.domain_network_policy =
       [FlutterDartProject domainNetworkPolicy:appTransportSecurity].UTF8String;
 
+  // SkParagraph text layout library
+  NSNumber* enableSkParagraph = [mainBundle objectForInfoDictionaryKey:@"FLTEnableSkParagraph"];
+  settings.enable_skparagraph = (enableSkParagraph != nil) ? enableSkParagraph.boolValue : false;
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.

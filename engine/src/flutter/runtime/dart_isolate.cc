@@ -271,7 +271,8 @@ DartIsolate::DartIsolate(
                   settings.unhandled_exception_callback,
                   DartVMRef::GetIsolateNameServer(),
                   is_root_isolate,
-                  std::move(volatile_path_tracker)),
+                  std::move(volatile_path_tracker),
+                  settings.enable_skparagraph),
       may_insecurely_connect_to_all_domains_(
           settings.may_insecurely_connect_to_all_domains),
       domain_network_policy_(settings.domain_network_policy) {

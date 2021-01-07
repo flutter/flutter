@@ -33,6 +33,8 @@ public class FlutterLoader {
 
   private static final String OLD_GEN_HEAP_SIZE_META_DATA_KEY =
       "io.flutter.embedding.android.OldGenHeapSize";
+  private static final String ENABLE_SKPARAGRAPH_META_DATA_KEY =
+      "io.flutter.embedding.android.EnableSkParagraph";
 
   // Must match values in flutter::switches
   static final String AOT_SHARED_LIBRARY_NAME = "aot-shared-library-name";
@@ -262,6 +264,10 @@ public class FlutterLoader {
       }
 
       shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
+
+      if (metaData != null && metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY)) {
+        shellArgs.add("--enable-skparagraph");
+      }
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
 
