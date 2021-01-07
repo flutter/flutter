@@ -10,10 +10,6 @@ import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
 
-Future<String> dylibSymbols(String pathToDylib) {
-  return eval('nm', <String>['-g', pathToDylib]);
-}
-
 Future<String> fileType(String pathToBinary) {
   return eval('file', <String>[pathToBinary]);
 }

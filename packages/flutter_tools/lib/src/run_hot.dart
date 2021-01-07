@@ -8,7 +8,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
-import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -105,6 +104,7 @@ class HotRunner extends ResidentRunner {
   /// reload process do not have this issue.
   bool _swap = false;
 
+  /// Whether the resident runner has correctly attached to the running application.
   bool _didAttach = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
@@ -121,7 +121,6 @@ class HotRunner extends ResidentRunner {
     bool force = false,
     bool pause = false,
   }) async {
-    // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pause: pause);
     if (!result.isOk) {
       throw vm_service.RPCError(
@@ -469,8 +468,6 @@ class HotRunner extends ResidentRunner {
     String reason,
   }) async {
     final Stopwatch restartTimer = Stopwatch()..start();
-    // TODO(aam): Add generator reset logic once we switch to using incremental
-    // compiler for full application recompilation on restart.
     final UpdateFSReport updatedDevFS = await _updateDevFS(fullRestart: true);
     if (!updatedDevFS.success) {
       for (final FlutterDevice device in flutterDevices) {
@@ -592,6 +589,9 @@ class HotRunner extends ResidentRunner {
     bool silent = false,
     bool pause = false,
   }) async {
+    if (flutterDevices.any((FlutterDevice device) => device.devFS == null)) {
+      return OperationResult(1, 'Device initialization has not completed.');
+    }
     String targetPlatform;
     String sdkName;
     bool emulator;
@@ -666,13 +666,7 @@ class HotRunner extends ResidentRunner {
       if (!(await hotRunnerConfig.setupHotRestart())) {
         return OperationResult(1, 'setupHotRestart failed');
       }
-      // The current implementation of the vmservice and JSON rpc may throw
-      // unhandled exceptions into the zone that cannot be caught with a regular
-      // try catch. The usage is [asyncGuard] is required to normalize the error
-      // handling, at least until we can refactor the underlying code.
-      result = await asyncGuard(() => _restartFromSources(
-        reason: reason,
-      ));
+      result = await _restartFromSources(reason: reason,);
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       }
