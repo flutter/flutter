@@ -41,7 +41,7 @@ such an e-mail, they will:
 4. Inform the relevant team lead, adding them to the security advisory.
 5. If the security issue does not yet have a CVE number, they will, as a Googler, see go/cve-request to
    establish one.
-   
+
 As the fix is being developed, they will then reach out to the reporter to ask them if they would like to be involved
 and whether they would like to be credited. For credit, the GitHub security advisory UI has a field
 that allows contributors to be credited.
@@ -54,4 +54,3 @@ not tracked explicitly in the issue database. This means that we attempt to fix 
 For more information on security advisories, see [the GitHub documentation](https://docs.github.com/en/free-pro-team@latest/github/managing-security-vulnerabilities/managing-security-vulnerabilities-in-your-project).
 
 If team members need additional help from Google, as a Googler, they can see go/vuln.
-
