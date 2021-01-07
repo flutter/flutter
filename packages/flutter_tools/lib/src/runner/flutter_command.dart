@@ -900,7 +900,7 @@ abstract class FlutterCommand extends Command<void> {
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
-    if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
+    if (argParser.options.containsKey('web-renderer')) {
       dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
