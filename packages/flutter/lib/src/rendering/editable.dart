@@ -1951,7 +1951,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     // If the word is a space, on iOS try to select the previous word instead.
-    // If the word is a space, on Android and the text is read only, then select
+    // On Android try to select the previous word instead only if the text is read only
     // the previous word instead.
     } else if ((text?.text != null
         && _isWhitespace(text!.text!.codeUnitAt(position.offset))
