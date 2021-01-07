@@ -60,7 +60,10 @@ class BuildApkCommand extends BuildSubCommand {
   final String description = 'Build an Android APK file from your app.\n\n'
     "This command can build debug and release versions of your application. 'debug' builds support "
     "debugging and a quick development cycle. 'release' builds don't support debugging and are "
-    'suitable for deploying to app stores.';
+    'suitable for deploying to app stores. If you are deploying the app to the Play Store, '
+    'it\'s recommended to use app bundles or split the APK to reduce the APK size. Learn more at:\n\n'
+    ' * https://developer.android.com/guide/app-bundle\n'
+    ' * https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split';
 
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
