@@ -1147,24 +1147,38 @@ void main() {
     });
 
     testWidgets('DatePicker golden tests', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
+      Widget _buildApp(CupertinoDatePickerMode mode) {
+        return CupertinoApp(
           home: Center(
             child: SizedBox(
               width: 500,
               height: 400,
               child: RepaintBoundary(
                 child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
-                  initialDateTime: DateTime(2019, 1, 1, 4),
+                  key: ValueKey<CupertinoDatePickerMode>(mode),
+                  mode: mode,
+                  initialDateTime: DateTime(2019, 1, 1, 4, 12, 30),
                   onDateTimeChanged: (_) {},
                 ),
               ),
             ),
           ),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.time));
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.time.initial.png'),
       );
 
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.date));
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.date.initial.png'),
+      );
+
+      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.dateAndTime));
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.initial.png'),

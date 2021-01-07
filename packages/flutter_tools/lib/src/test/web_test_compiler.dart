@@ -18,6 +18,7 @@ import '../compile.dart';
 import '../dart/language_version.dart';
 import '../web/bootstrap.dart';
 import '../web/memory_fs.dart';
+import 'test_config.dart';
 
 /// A web compiler for the test runner.
 class WebTestCompiler {
@@ -79,6 +80,7 @@ class WebTestCompiler {
         ..writeAsStringSync(generateTestEntrypoint(
             relativeTestPath: relativeTestSegments.join('/'),
             absolutePath: testFilePath,
+            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath))?.path,
             languageVersion: languageVersion,
         ));
       generatedFiles.add(generatedFile);
