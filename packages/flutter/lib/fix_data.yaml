@@ -11,6 +11,17 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/44189
+  - title: 'Rename to dependOnInheritedElement'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'inheritFromElement'
+      inClass: 'StatefulElement'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedElement'
+
   # Changes made in https://github.com/flutter/flutter/pull/15303
   - title: 'Replace child with builder'
     date: 2020-12-17
@@ -31,6 +42,7 @@ transforms:
               value: 'arguments[child]'
       - kind: 'removeParameter'
         name: 'child'
+
   # Changes made in https://github.com/flutter/flutter/pull/28602
   - title: 'Rename to fromMouseEvent'
     date: 2020-12-15
