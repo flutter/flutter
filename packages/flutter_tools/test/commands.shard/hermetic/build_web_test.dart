@@ -209,11 +209,13 @@ class MockBuildSystem extends Mock implements BuildSystem {}
 class MockPub extends Mock implements Pub {}
 
 class TestWebBuildCommand extends FlutterCommand {
-  final BuildWebCommand webCommand;
   TestWebBuildCommand({ bool verboseHelp = false }) :
     webCommand = BuildWebCommand(verboseHelp: verboseHelp) {
     addSubcommand(webCommand);
   }
+
+  final BuildWebCommand webCommand;
+
   @override
   final String name = 'build';
 
