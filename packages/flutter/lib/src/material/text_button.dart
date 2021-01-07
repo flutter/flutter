@@ -390,20 +390,15 @@ class _TextButtonWithIconChild extends StatelessWidget {
   Widget build(BuildContext context) {
     final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
-    List<Widget> children;
-
-    switch (iconAlignment) {
-      case ButtonIconAlignment.start:
-        children = <Widget>[icon, SizedBox(width: gap), label];
-        break;
-      case ButtonIconAlignment.end:
-        children = <Widget>[label, SizedBox(width: gap), icon];
-        break;
-    }
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: children,
+      children: decideArrangementFromButtonIconAlignment(
+        iconAlignment: iconAlignment,
+        label: label,
+        icon: icon,
+        gap: gap,
+      ),
     );
   }
 }

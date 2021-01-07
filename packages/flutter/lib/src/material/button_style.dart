@@ -455,3 +455,21 @@ enum ButtonIconAlignment {
   start,
   end,
 }
+
+List<Widget> decideArrangementFromButtonIconAlignment({
+  required ButtonIconAlignment iconAlignment,
+  required Widget label,
+  required Widget icon,
+  required double gap,
+}) {
+  List<Widget> children = <Widget>[];
+  switch (iconAlignment) {
+    case ButtonIconAlignment.start:
+      children = <Widget>[icon, SizedBox(width: gap), label];
+      break;
+    case ButtonIconAlignment.end:
+      children = <Widget>[label, SizedBox(width: gap), icon];
+      break;
+  }
+  return children;
+}
