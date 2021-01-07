@@ -12,15 +12,15 @@
     "services": [
       "fuchsia.accessibility.semantics.SemanticsManager",
       "fuchsia.deprecatedtimezone.Timezone",
+      "fuchsia.fonts.Provider",
       "fuchsia.intl.PropertyProvider",
       "fuchsia.logger.LogSink",
       "fuchsia.process.Launcher",
       "fuchsia.settings.Intl",
       "fuchsia.sysmem.Allocator",
       "fuchsia.tracing.provider.Registry",
-      "fuchsia.vulkan.loader.Loader",
-      "fuchsia.intl.PropertyProvider",
-      "fuchsia.fonts.Provider"
+      "fuchsia.ui.input3.Keyboard",
+      "fuchsia.vulkan.loader.Loader"
     ]
   }
 }

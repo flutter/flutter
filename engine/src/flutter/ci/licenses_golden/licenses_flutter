@@ -1230,6 +1230,9 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/extract_far.dart
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/framework_shim.dart
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/libraries.json
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/keyboard.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/keyboard.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/keyboard_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/logging.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/loop.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/loop.h

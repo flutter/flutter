@@ -40,13 +40,13 @@ template <class T>
 void SetInterfaceErrorHandler(fidl::InterfacePtr<T>& interface,
                               std::string name) {
   interface.set_error_handler([name](zx_status_t status) {
-    FML_LOG(ERROR) << "Interface error on: " << name;
+    FML_LOG(ERROR) << "Interface error on: " << name << "status: " << status;
   });
 }
 template <class T>
 void SetInterfaceErrorHandler(fidl::Binding<T>& binding, std::string name) {
   binding.set_error_handler([name](zx_status_t status) {
-    FML_LOG(ERROR) << "Interface error on: " << name;
+    FML_LOG(ERROR) << "Interface error on: " << name << ", status: " << status;
   });
 }
 
@@ -61,6 +61,8 @@ PlatformView::PlatformView(
     fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
         session_listener_request,
     fidl::InterfaceHandle<fuchsia::ui::views::Focuser> focuser,
+    fidl::InterfaceRequest<fuchsia::ui::input3::KeyboardListener>
+        keyboard_listener_request,
     fit::closure session_listener_error_callback,
     OnEnableWireframe wireframe_enabled_callback,
     OnCreateView on_create_view_callback,
@@ -85,13 +87,16 @@ PlatformView::PlatformView(
       external_view_embedder_(external_view_embedder),
       ime_client_(this),
       vsync_offset_(std::move(vsync_offset)),
-      vsync_event_handle_(vsync_event_handle) {
+      vsync_event_handle_(vsync_event_handle),
+      keyboard_listener_binding_(this, std::move(keyboard_listener_request)) {
   // Register all error handlers.
   SetInterfaceErrorHandler(session_listener_binding_, "SessionListener");
   SetInterfaceErrorHandler(ime_, "Input Method Editor");
   SetInterfaceErrorHandler(text_sync_service_, "Text Sync Service");
   SetInterfaceErrorHandler(parent_environment_service_provider_,
                            "Parent Environment Service Provider");
+  SetInterfaceErrorHandler(keyboard_listener_binding_,
+                           "KeyboardListener Service");
   // Access the IME service.
   parent_environment_service_provider_ =
       parent_environment_service_provider_handle.Bind();
@@ -174,12 +179,6 @@ void PlatformView::DidUpdateState(
   );
   last_text_state_ =
       std::make_unique<fuchsia::ui::input::TextInputState>(state);
-
-  // Handle keyboard input events for HID keys only.
-  // TODO(SCN-1189): Are we done here?
-  if (input_event && input_event->keyboard().hid_usage != 0) {
-    OnHandleKeyboardEvent(input_event->keyboard());
-  }
 }
 
 // |fuchsia::ui::input::InputMethodEditorClient|
@@ -308,7 +307,9 @@ void PlatformView::OnScenicEvent(
             break;
           }
           case fuchsia::ui::input::InputEvent::Tag::kKeyboard: {
-            OnHandleKeyboardEvent(event.input().keyboard());
+            // All devices should receive key events via input3.KeyboardListener
+            // instead.
+            FML_LOG(WARNING) << "Keyboard event from Scenic: ignored";
             break;
           }
           case fuchsia::ui::input::InputEvent::Tag::Invalid: {
@@ -501,31 +502,40 @@ bool PlatformView::OnHandlePointerEvent(
   return true;
 }
 
-bool PlatformView::OnHandleKeyboardEvent(
-    const fuchsia::ui::input::KeyboardEvent& keyboard) {
+// |fuchsia::ui:input3::KeyboardListener|
+void PlatformView::OnKeyEvent(
+    fuchsia::ui::input3::KeyEvent key_event,
+    fuchsia::ui::input3::KeyboardListener::OnKeyEventCallback callback) {
   const char* type = nullptr;
-  if (keyboard.phase == fuchsia::ui::input::KeyboardEventPhase::PRESSED) {
-    type = "keydown";
-  } else if (keyboard.phase == fuchsia::ui::input::KeyboardEventPhase::REPEAT) {
-    type = "keydown";  // TODO change this to keyrepeat
-  } else if (keyboard.phase ==
-             fuchsia::ui::input::KeyboardEventPhase::RELEASED) {
-    type = "keyup";
+  switch (key_event.type()) {
+    case fuchsia::ui::input3::KeyEventType::PRESSED:
+      type = "keydown";
+      break;
+    case fuchsia::ui::input3::KeyEventType::RELEASED:
+      type = "keyup";
+      break;
+    case fuchsia::ui::input3::KeyEventType::SYNC:
+      // What, if anything, should happen here?
+    case fuchsia::ui::input3::KeyEventType::CANCEL:
+      // What, if anything, should happen here?
+    default:
+      break;
   }
-
   if (type == nullptr) {
     FML_DLOG(ERROR) << "Unknown key event phase.";
-    return false;
+    callback(fuchsia::ui::input3::KeyEventStatus::NOT_HANDLED);
+    return;
   }
+  keyboard_.ConsumeEvent(std::move(key_event));
 
   rapidjson::Document document;
   auto& allocator = document.GetAllocator();
   document.SetObject();
   document.AddMember("type", rapidjson::Value(type, strlen(type)), allocator);
   document.AddMember("keymap", rapidjson::Value("fuchsia"), allocator);
-  document.AddMember("hidUsage", keyboard.hid_usage, allocator);
-  document.AddMember("codePoint", keyboard.code_point, allocator);
-  document.AddMember("modifiers", keyboard.modifiers, allocator);
+  document.AddMember("hidUsage", keyboard_.LastHIDUsage(), allocator);
+  document.AddMember("codePoint", keyboard_.LastCodePoint(), allocator);
+  document.AddMember("modifiers", keyboard_.Modifiers(), allocator);
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   document.Accept(writer);
@@ -536,8 +546,7 @@ bool PlatformView::OnHandleKeyboardEvent(
       std::vector<uint8_t>(data, data + buffer.GetSize()),  // data
       nullptr)                                              // response
   );
-
-  return true;
+  callback(fuchsia::ui::input3::KeyEventStatus::HANDLED);
 }
 
 bool PlatformView::OnHandleFocusEvent(

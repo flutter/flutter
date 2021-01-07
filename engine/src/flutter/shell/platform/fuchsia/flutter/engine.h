@@ -114,6 +114,8 @@ class Engine final {
 
   friend class testing::EngineTest;
 
+  fidl::InterfacePtr<fuchsia::ui::input3::Keyboard> keyboard_svc_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 
