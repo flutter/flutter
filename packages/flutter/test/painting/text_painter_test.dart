@@ -174,7 +174,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     painter.layout();
-    expect(painter.size, const Size(123.0, 123.0));
+    expect(painter.size, const Size.square(123.0));
   });
 
   test('TextPainter textScaleFactor test', () {
@@ -191,7 +191,7 @@ void main() {
       textScaleFactor: 2.0,
     );
     painter.layout();
-    expect(painter.size, const Size(20.0, 20.0));
+    expect(painter.size, const Size.square(20.0));
   });
 
   test('TextPainter textScaleFactor null style test', () {
@@ -203,7 +203,7 @@ void main() {
       textScaleFactor: 2.0,
     );
     painter.layout();
-    expect(painter.size, const Size(28.0, 28.0));
+    expect(painter.size, const Size.square(28.0));
   });
 
   test('TextPainter default text height is 14 pixels', () {
@@ -213,7 +213,7 @@ void main() {
     );
     painter.layout();
     expect(painter.preferredLineHeight, 14.0);
-    expect(painter.size, const Size(14.0, 14.0));
+    expect(painter.size, const Size.square(14.0));
   });
 
   test('TextPainter sets paragraph size from root', () {
@@ -223,7 +223,7 @@ void main() {
     );
     painter.layout();
     expect(painter.preferredLineHeight, 100.0);
-    expect(painter.size, const Size(100.0, 100.0));
+    expect(painter.size, const Size.square(100.0));
   });
 
   test('TextPainter intrinsic dimensions', () {

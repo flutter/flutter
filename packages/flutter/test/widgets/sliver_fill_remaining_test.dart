@@ -318,7 +318,7 @@ void main() {
         final Finder logo = find.byType(FlutterLogo);
         expect(
           tester.renderObject<RenderBox>(logo).size,
-          const Size(100.0, 100.0),
+          const Size.square(100.0),
         );
         final VisualDensity density = VisualDensity.adaptivePlatformDensity;
         expect(tester.getCenter(logo), Offset(400.0, 351.0 - density.vertical * 2.0));
@@ -341,7 +341,7 @@ void main() {
         );
         expect(
           tester.renderObject<RenderBox>(logo).size,
-          const Size(100.0, 100.0),
+          const Size.square(100.0),
         );
         expect(tester.getCenter(logo).dy, lessThan(351.0));
         expect(
@@ -588,7 +588,7 @@ void main() {
           final Finder logo = find.byType(FlutterLogo);
           expect(
             tester.renderObject<RenderBox>(logo).size,
-            const Size(100.0, 100.0),
+            const Size.square(100.0),
           );
           final VisualDensity density = VisualDensity.adaptivePlatformDensity;
           expect(tester.getCenter(logo), Offset(400.0, 351.0 - density.vertical * 2.0));
@@ -613,7 +613,7 @@ void main() {
           );
           expect(
             tester.renderObject<RenderBox>(logo).size,
-            const Size(100.0, 100.0),
+            const Size.square(100.0),
           );
           expect(tester.getCenter(logo).dy, lessThan(351.0));
           expect(
@@ -632,7 +632,7 @@ void main() {
           );
           expect(
             tester.renderObject<RenderBox>(logo).size,
-            const Size(100.0, 100.0),
+            const Size.square(100.0),
           );
           expect(tester.getCenter(logo), Offset(400.0, 351.0 - density.vertical * 2.0));
           expect(

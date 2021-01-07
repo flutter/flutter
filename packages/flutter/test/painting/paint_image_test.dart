@@ -147,7 +147,7 @@ void main() {
     expect(count, 1);
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
-    expect(imageSizeInfo.imageSize, const Size(300, 300));
+    expect(imageSizeInfo.imageSize, const Size.square(300));
     expect(imageSizeInfo.displaySize, const Size(200, 100));
 
     // Make sure that we don't report an identical image size info if we
@@ -186,7 +186,7 @@ void main() {
     expect(count, 1);
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
-    expect(imageSizeInfo.imageSize, const Size(300, 300));
+    expect(imageSizeInfo.imageSize, const Size.square(300));
     expect(imageSizeInfo.displaySize, const Size(200, 100));
 
     // Make sure that we don't report an identical image size info if we
@@ -204,7 +204,7 @@ void main() {
     expect(count, 2);
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
-    expect(imageSizeInfo.imageSize, const Size(300, 300));
+    expect(imageSizeInfo.imageSize, const Size.square(300));
     expect(imageSizeInfo.displaySize, const Size(200, 150));
 
     debugOnPaintImage = null;

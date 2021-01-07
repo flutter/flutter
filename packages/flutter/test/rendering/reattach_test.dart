@@ -86,7 +86,7 @@ void main() {
     final TestTree testTree = TestTree();
     // Lay out
     layout(testTree.root, phase: EnginePhase.layout);
-    expect(testTree.child.size, equals(const Size(20.0, 20.0)));
+    expect(testTree.child.size, equals(const Size.square(20.0)));
     // Remove testTree from the custom render view
     renderer.renderView.child = null;
     expect(testTree.child.owner, isNull);
@@ -95,7 +95,7 @@ void main() {
       const BoxConstraints.tightFor(height: 5.0, width: 5.0);
     // Lay out again
     layout(testTree.root, phase: EnginePhase.layout);
-    expect(testTree.child.size, equals(const Size(5.0, 5.0)));
+    expect(testTree.child.size, equals(const Size.square(5.0)));
   });
   test('objects can be detached and re-attached: compositingBits', () {
     final TestCompositingBitsTree testTree = TestCompositingBitsTree();

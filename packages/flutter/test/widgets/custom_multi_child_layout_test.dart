@@ -139,7 +139,7 @@ class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
   void performLayout(Size size) {
     final BoxConstraints constraints = BoxConstraints.loose(
       // Invalid because width and height must be greater than or equal to 0
-      const Size(-1, -1)
+      const Size.square(-1)
     );
     layoutChild(0, constraints);
   }
@@ -362,7 +362,7 @@ void main() {
         widget: Center(
           child: CustomMultiChildLayout(
             children: <Widget>[LayoutWithMissingId(child: Container(width: 100))],
-            delegate: PreferredSizeDelegate(preferredSize: const Size(10, 10)),
+            delegate: PreferredSizeDelegate(preferredSize: const Size.square(10)),
           ),
         ),
         tester: tester,

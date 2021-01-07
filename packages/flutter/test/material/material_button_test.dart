@@ -693,7 +693,7 @@ void main() {
         padding: const EdgeInsets.all(4.0),
       ),
     );
-    expect(tester.getSize(find.byType(MaterialButton)), const Size(8.0, 8.0));
+    expect(tester.getSize(find.byType(MaterialButton)), const Size.square(8.0));
 
     // Size is defined by the padded child.
     await tester.pumpWidget(
@@ -704,7 +704,7 @@ void main() {
         child: const SizedBox(width: 8.0, height: 8.0),
       ),
     );
-    expect(tester.getSize(find.byType(MaterialButton)), const Size(16.0, 16.0));
+    expect(tester.getSize(find.byType(MaterialButton)), const Size.square(16.0));
 
     // Size is defined by the minWidth, height constraints.
     await tester.pumpWidget(
@@ -715,7 +715,7 @@ void main() {
         child: const SizedBox(width: 8.0, height: 8.0),
       ),
     );
-    expect(tester.getSize(find.byType(MaterialButton)), const Size(18.0, 18.0));
+    expect(tester.getSize(find.byType(MaterialButton)), const Size.square(18.0));
   });
 
   testWidgets('MaterialButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {

@@ -11,7 +11,7 @@ void main() {
     // exist in: ../material/tooltip_test.dart
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(20.0, 10.0),
         target: const Offset(50.0, 50.0),
         preferBelow: false,
@@ -22,7 +22,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(200.0, 10.0),
         target: const Offset(50.0, 50.0),
         preferBelow: false,
@@ -33,7 +33,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(200.0, 10.0),
         target: const Offset(0.0, 50.0),
         preferBelow: false,
@@ -44,7 +44,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(200.0, 10.0),
         target: const Offset(100.0, 50.0),
         preferBelow: false,
@@ -55,7 +55,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(50.0, 10.0),
         target: const Offset(50.0, 50.0),
         preferBelow: false,
@@ -66,7 +66,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(50.0, 10.0),
         target: const Offset(50.0, 50.0),
         preferBelow: false,
@@ -77,7 +77,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(50.0, 10.0),
         target: const Offset(0.0, 50.0),
         preferBelow: false,
@@ -88,7 +88,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(50.0, 10.0),
         target: const Offset(0.0, 50.0),
         preferBelow: false,
@@ -99,7 +99,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(50.0, 10.0),
         target: const Offset(100.0, 50.0),
         preferBelow: false,
@@ -110,7 +110,7 @@ void main() {
     );
     expect(
       positionDependentBox(
-        size: const Size(100.0, 100.0),
+        size: const Size.square(100.0),
         childSize: const Size(50.0, 10.0),
         target: const Offset(100.0, 50.0),
         preferBelow: false,

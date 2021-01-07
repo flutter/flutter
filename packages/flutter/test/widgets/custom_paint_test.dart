@@ -150,9 +150,9 @@ void main() {
     expect(target.currentContext!.size, const Size(800.0, 600.0));
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, size: const Size(20.0, 20.0)),
+      child: CustomPaint(key: target, size: const Size.square(20.0)),
     ));
-    expect(target.currentContext!.size, const Size(20.0, 20.0));
+    expect(target.currentContext!.size, const Size.square(20.0));
 
     await tester.pumpWidget(Center(
       child: CustomPaint(key: target, size: const Size(2000.0, 100.0)),

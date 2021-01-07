@@ -111,7 +111,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
       style: TextButton.styleFrom(
         primary: primary,
         shape: const RoundedRectangleBorder(),
-        minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+        minimumSize: const Size.square(kMinInteractiveDimension),
         padding: padding,
       ),
       onPressed: onPressed,

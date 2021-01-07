@@ -714,7 +714,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(build(const Size(300, 300)));
+    await tester.pumpWidget(build(const Size.square(300)));
     await tester.pumpAndSettle();
 
     verifyCentered();

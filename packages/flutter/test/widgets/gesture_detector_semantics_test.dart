@@ -717,12 +717,12 @@ class _RenderTestLayoutPerformer extends RenderBox {
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    return const Size(1, 1);
+    return const Size.square(1);
   }
 
   @override
   void performLayout() {
-    size = const Size(1, 1);
+    size = const Size.square(1);
     if (_performLayout != null)
       _performLayout();
   }

@@ -606,7 +606,7 @@ void main() {
       );
     }
 
-    await pumpTestWidget(const Size(10, 10));
+    await pumpTestWidget(const Size.square(10));
 
     final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
 
@@ -631,7 +631,7 @@ void main() {
 
     // Cause the `update` to be called (but not `performRebuild`), triggering
     // builder invocation.
-    await pumpTestWidget(const Size(10, 10));
+    await pumpTestWidget(const Size.square(10));
     expect(builderInvocationCount, 2);
 
     // The spy does not invalidate its layout on widget update, so no
@@ -656,7 +656,7 @@ void main() {
     expect(spy.performResizeCount, 1);
 
     // Change the parent size, triggering constraint change.
-    await pumpTestWidget(const Size(20, 20));
+    await pumpTestWidget(const Size.square(20));
 
     // We should see everything invoked once.
     expect(builderInvocationCount, 3);

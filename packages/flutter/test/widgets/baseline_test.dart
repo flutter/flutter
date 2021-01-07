@@ -18,7 +18,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
+    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size.square(100.0));
   });
 
   testWidgets('Baseline - position test', (WidgetTester tester) async {
@@ -37,7 +37,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
+    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size.square(100.0));
     expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
            within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
   });

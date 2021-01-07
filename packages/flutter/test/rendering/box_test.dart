@@ -12,7 +12,7 @@ import 'rendering_tester.dart';
 
 class MissingPerformLayoutRenderBox extends RenderBox {
   void triggerExceptionSettingSizeOutsideOfLayout() {
-    size = const Size(200, 200);
+    size = const Size.square(200);
   }
 
   // performLayout is left unimplemented to test the error reported if it is

@@ -123,7 +123,7 @@ void main() {
     expect(completer.isCompleted, isFalse);
     recordMetrics();
 
-    expect(sizes, equals(<Size>[const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0)]));
+    expect(sizes, equals(<Size>[const Size.square(10.0), const Size.square(10.0), const Size.square(10.0), const Size.square(10.0), const Size.square(10.0), const Size.square(10.0)]));
     expect(positions, equals(<Offset>[const Offset(10.0, 10.0), const Offset(10.0, 10.0), const Offset(17.0, 17.0), const Offset(24.0, 24.0), const Offset(45.0, 45.0), const Offset(80.0, 80.0)]));
 
     controller.stop(canceled: false);

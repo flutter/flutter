@@ -1200,7 +1200,7 @@ void main() {
           // the viewport should not scroll.
           tester.renderObject(pinnedHeaderContent).showOnScreen(
             descendant: tester.renderObject(pinnedHeaderContent),
-            rect: Offset.zero & const Size(300, 300),
+            rect: Offset.zero & const Size.square(300),
           );
           await tester.pumpAndSettle();
           // The header expands but doesn't move.
@@ -1214,7 +1214,7 @@ void main() {
           // See: https://github.com/flutter/flutter/issues/25507.
           tester.renderObject(pinnedHeaderContent).showOnScreen(
             descendant: tester.renderObject(pinnedHeaderContent),
-            rect: const Offset(-1, -1) & const Size(300, 300),
+            rect: const Offset(-1, -1) & const Size.square(300),
           );
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 15);
@@ -1244,7 +1244,7 @@ void main() {
           // The persistent header is pinned to the leading edge thus still visible,
           // the viewport should not scroll.
           tester.renderObject(pinnedHeaderContent).showOnScreen(
-            rect: Offset.zero & const Size(300, 300),
+            rect: Offset.zero & const Size.square(300),
           );
           await tester.pumpAndSettle();
           // The header expands but doesn't move.
@@ -1257,7 +1257,7 @@ void main() {
           //
           // See: https://github.com/flutter/flutter/issues/25507.
           tester.renderObject(pinnedHeaderContent).showOnScreen(
-            rect: const Offset(-1, -1) & const Size(300, 300),
+            rect: const Offset(-1, -1) & const Size.square(300),
           );
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 15);
@@ -1292,7 +1292,7 @@ void main() {
 
           tester.renderObject(pinnedHeaderContent).showOnScreen(
             descendant: tester.renderObject(pinnedHeaderContent),
-            rect: Offset.zero & const Size(300, 300),
+            rect: Offset.zero & const Size.square(300),
           );
           await tester.pumpAndSettle();
           // The header doesn't move. It would have expanded to 300 but
@@ -1303,7 +1303,7 @@ void main() {
           // ignoreLeading still works.
           tester.renderObject(pinnedHeaderContent).showOnScreen(
             descendant: tester.renderObject(pinnedHeaderContent),
-            rect: const Offset(-1, -1) & const Size(300, 300),
+            rect: const Offset(-1, -1) & const Size.square(300),
           );
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 15);
@@ -1317,7 +1317,7 @@ void main() {
           // Doesn't move, doesn't expand or shrink, leading still ignored.
           tester.renderObject(pinnedHeaderContent).showOnScreen(
             descendant: tester.renderObject(pinnedHeaderContent),
-            rect: const Offset(-1, -1) & const Size(300, 300),
+            rect: const Offset(-1, -1) & const Size.square(300),
           );
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 10 + 50.0);
@@ -1352,7 +1352,7 @@ void main() {
 
           tester.renderObject(pinnedHeaderContent).showOnScreen(
             descendant: tester.renderObject(pinnedHeaderContent),
-            rect: Offset.zero & const Size(110, 110),
+            rect: Offset.zero & const Size.square(110),
           );
           await tester.pumpAndSettle();
           // The header doesn't move. It would have expanded to 110 but
@@ -1363,7 +1363,7 @@ void main() {
           // ignoreLeading still works.
           tester.renderObject(pinnedHeaderContent).showOnScreen(
             descendant: tester.renderObject(pinnedHeaderContent),
-            rect: const Offset(-1, -1) & const Size(110, 110),
+            rect: const Offset(-1, -1) & const Size.square(110),
           );
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 15);
@@ -1377,7 +1377,7 @@ void main() {
           // Doesn't move, doesn't expand or shrink, leading still ignored.
           tester.renderObject(pinnedHeaderContent).showOnScreen(
             descendant: tester.renderObject(pinnedHeaderContent),
-            rect: const Offset(-1, -1) & const Size(110, 110),
+            rect: const Offset(-1, -1) & const Size.square(110),
           );
           await tester.pumpAndSettle();
           expect(controller.offset, 300.0 * 10 + 50.0);

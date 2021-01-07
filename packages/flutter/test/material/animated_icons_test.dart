@@ -94,7 +94,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size.square(48.0));
     expect(canvas.capturedPaint, hasColor(0xFF666666));
   });
 
@@ -116,7 +116,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size.square(48.0));
     expect(canvas.capturedPaint, hasColor(0x80666666));
   });
 
@@ -138,7 +138,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size.square(48.0));
     expect(canvas.capturedPaint, hasColor(0xFF0000FF));
   });
 
@@ -160,7 +160,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter!.paint(canvas, const Size(12.0, 12.0));
+    customPaint.painter!.paint(canvas, const Size.square(12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 0.25.
     expect(canvas.capturedSx, 0.25);
     expect(canvas.capturedSy, 0.25);
@@ -185,7 +185,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter!.paint(canvas, const Size(12.0, 12.0));
+    customPaint.painter!.paint(canvas, const Size.square(12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 2.
     expect(canvas.capturedSx, 2);
     expect(canvas.capturedSy, 2);
@@ -228,7 +228,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size.square(48.0));
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedRotate(math.pi),
       RecordedTranslate(-48, -48),
@@ -252,7 +252,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size.square(48.0));
     expect(canvas.invocations, isEmpty);
   });
 
@@ -274,7 +274,7 @@ void main() {
     );
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = MockCanvas();
-    customPaint.painter!.paint(canvas, const Size(48.0, 48.0));
+    customPaint.painter!.paint(canvas, const Size.square(48.0));
     expect(canvas.invocations, const <RecordedCanvasCall>[
       RecordedRotate(math.pi),
       RecordedTranslate(-48, -48),

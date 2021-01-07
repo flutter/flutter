@@ -2502,7 +2502,7 @@ class RenderFittedBox extends RenderProxyBox {
         assert(debugCannotComputeDryLayout(
           reason: 'Child provided invalid size of $childSize.',
         ));
-        return const Size(0, 0);
+        return Size.zero;
       }
 
       switch (fit) {

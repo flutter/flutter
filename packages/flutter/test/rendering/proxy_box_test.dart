@@ -46,7 +46,7 @@ void main() {
 
     // The RenderFittedBox paints if both its size and its child's size are nonempty.
     painted = false;
-    layout(makeFittedBox(const Size(1, 1)), phase: EnginePhase.paint);
+    layout(makeFittedBox(const Size.square(1)), phase: EnginePhase.paint);
     expect(painted, equals(true));
 
     // The RenderFittedBox should not paint if its child is empty-sized.
@@ -56,7 +56,7 @@ void main() {
 
     // The RenderFittedBox should not paint if it is empty.
     painted = false;
-    layout(makeFittedBox(const Size(1, 1)), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
+    layout(makeFittedBox(const Size.square(1)), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
     expect(painted, equals(false));
   });
 
@@ -216,7 +216,7 @@ void main() {
     );
     stack.add(positioned);
     boundary.child = stack;
-    layout(boundary, constraints: BoxConstraints.tight(const Size(20.0, 20.0)));
+    layout(boundary, constraints: BoxConstraints.tight(const Size.square(20.0)));
     pumpFrame(phase: EnginePhase.composite);
     image = await boundary.toImage();
     expect(image.width, equals(20));
@@ -232,7 +232,7 @@ void main() {
 
     final OffsetLayer layer = boundary.debugLayer! as OffsetLayer;
 
-    image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
+    image = await layer.toImage(Offset.zero & const Size.square(20.0));
     expect(image.width, equals(20));
     expect(image.height, equals(20));
     data = (await image.toByteData())!;
@@ -240,7 +240,7 @@ void main() {
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
     // non-zero offsets.
-    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
+    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size.square(30.0));
     expect(image.width, equals(30));
     expect(image.height, equals(30));
     data = (await image.toByteData())!;
@@ -250,7 +250,7 @@ void main() {
     expect(getPixel(image.width - 1, 10), equals(0xffffffff));
 
     // offset combined with a custom pixel ratio.
-    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
+    image = await layer.toImage(const Offset(-10.0, -10.0) & const Size.square(30.0), pixelRatio: 2.0);
     expect(image.width, equals(60));
     expect(image.height, equals(60));
     data = (await image.toByteData())!;
@@ -263,7 +263,7 @@ void main() {
   test('RenderOpacity does not composite if it is transparent', () {
     final RenderOpacity renderOpacity = RenderOpacity(
       opacity: 0.0,
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
@@ -273,7 +273,7 @@ void main() {
   test('RenderOpacity does not composite if it is opaque', () {
     final RenderOpacity renderOpacity = RenderOpacity(
       opacity: 1.0,
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
     );
 
     layout(renderOpacity, phase: EnginePhase.composite);
@@ -283,7 +283,7 @@ void main() {
   test('RenderOpacity reuses its layer', () {
     _testLayerReuse<OpacityLayer>(RenderOpacity(
       opacity: 0.5,  // must not be 0 or 1.0. Otherwise, it won't create a layer
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
     ));
   });
 
@@ -295,7 +295,7 @@ void main() {
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
       alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
@@ -310,7 +310,7 @@ void main() {
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
       alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
     );
 
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
@@ -324,7 +324,7 @@ void main() {
 
     _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
       opacity: opacityAnimation,
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
     ));
   });
 
@@ -337,14 +337,14 @@ void main() {
           const <Color>[Color.fromRGBO(0, 0, 0, 1.0), Color.fromRGBO(255, 255, 255, 1.0)],
         );
       },
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
     ));
   });
 
   test('RenderBackdropFilter reuses its layer', () {
     _testLayerReuse<BackdropFilterLayer>(RenderBackdropFilter(
       filter: ui.ImageFilter.blur(),
-      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+      child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
     ));
   });
 
@@ -354,7 +354,7 @@ void main() {
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
-        child: RenderSizedBox(const Size(1.0, 1.0)),
+        child: RenderSizedBox(const Size.square(1.0)),
       ), // size doesn't matter
     ));
   });
@@ -365,7 +365,7 @@ void main() {
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
-        child: RenderSizedBox(const Size(1.0, 1.0)),
+        child: RenderSizedBox(const Size.square(1.0)),
       ), // size doesn't matter
     ));
   });
@@ -376,7 +376,7 @@ void main() {
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
-        child: RenderSizedBox(const Size(1.0, 1.0)),
+        child: RenderSizedBox(const Size.square(1.0)),
       ), // size doesn't matter
     ));
   });
@@ -387,7 +387,7 @@ void main() {
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
-        child: RenderSizedBox(const Size(1.0, 1.0)),
+        child: RenderSizedBox(const Size.square(1.0)),
       ), // size doesn't matter
     ));
   });
@@ -398,7 +398,7 @@ void main() {
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
-        child: RenderSizedBox(const Size(1.0, 1.0)),
+        child: RenderSizedBox(const Size.square(1.0)),
       ), // size doesn't matter
     ));
   });
@@ -410,7 +410,7 @@ void main() {
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
-        child: RenderSizedBox(const Size(1.0, 1.0)),
+        child: RenderSizedBox(const Size.square(1.0)),
       ), // size doesn't matter
     ));
   });
@@ -422,7 +422,7 @@ void main() {
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
-        child: RenderSizedBox(const Size(1.0, 1.0)),
+        child: RenderSizedBox(const Size.square(1.0)),
       ), // size doesn't matter
     ));
   });
@@ -447,7 +447,7 @@ void main() {
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
-        child: RenderSizedBox(const Size(1, 1)),
+        child: RenderSizedBox(const Size.square(1)),
       ), // size doesn't matter
     ));
   }
@@ -501,7 +501,7 @@ void main() {
     final _TestSemanticsUpdateRenderFractionalTranslation box = _TestSemanticsUpdateRenderFractionalTranslation(
       translation: const Offset(0.5, 0.5),
     );
-    layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(box, constraints: BoxConstraints.tight(const Size.square(200.0)));
     expect(box.markNeedsSemanticsUpdateCallCount, 1);
     box.translation = const Offset(0.4, 0.4);
     expect(box.markNeedsSemanticsUpdateCallCount, 2);
@@ -513,9 +513,9 @@ void main() {
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: LayerLink(),
       showWhenUnlinked: true,
-      child: RenderSizedBox(const Size(1.0, 1.0)),
+      child: RenderSizedBox(const Size.square(1.0)),
     );
-    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(follower, constraints: BoxConstraints.tight(const Size.square(200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
   });
@@ -524,9 +524,9 @@ void main() {
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: LayerLink(),
       showWhenUnlinked: false,
-      child: RenderSizedBox(const Size(1.0, 1.0)),
+      child: RenderSizedBox(const Size.square(1.0)),
     );
-    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(follower, constraints: BoxConstraints.tight(const Size.square(200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isFalse);
   });
@@ -540,9 +540,9 @@ void main() {
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: link,
       showWhenUnlinked: true,
-      child: RenderSizedBox(const Size(1.0, 1.0)),
+      child: RenderSizedBox(const Size.square(1.0)),
     );
-    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(follower, constraints: BoxConstraints.tight(const Size.square(200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
   });
@@ -556,9 +556,9 @@ void main() {
     final RenderFollowerLayer follower = RenderFollowerLayer(
       link: link,
       showWhenUnlinked: false,
-      child: RenderSizedBox(const Size(1.0, 1.0)),
+      child: RenderSizedBox(const Size.square(1.0)),
     );
-    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    layout(follower, constraints: BoxConstraints.tight(const Size.square(200.0)));
     final BoxHitTestResult hitTestResult = BoxHitTestResult();
     // The follower is still hit testable because there is a leader layer.
     expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
@@ -597,7 +597,7 @@ class _TestRRectClipper extends CustomClipper<RRect> {
 void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
-  layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
+  layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size.square(10)));
   final Layer layer = renderObject.debugLayer!;
   expect(layer, isA<L>());
   expect(layer, isNotNull);

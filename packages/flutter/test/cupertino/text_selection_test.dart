@@ -282,7 +282,7 @@ void main() {
 
     testWidgets('When a menu item doesn\'t fit, a second page is used.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
-      tester.binding.window.physicalSizeTestValue = const Size(800, 800);
+      tester.binding.window.physicalSizeTestValue = const Size.square(800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');

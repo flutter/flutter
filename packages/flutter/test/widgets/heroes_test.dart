@@ -2446,7 +2446,7 @@ Future<void> main() async {
       );
 
       // Before push image1 should be laid out correctly.
-      expect(renderImage.size, const Size(100, 100));
+      expect(renderImage.size, const Size.square(100));
 
       navigatorKey.currentState!.push(route2);
       await tester.pump();
@@ -2462,7 +2462,7 @@ Future<void> main() async {
       // image1 should snap to the top left corner of the Row widget.
       expect(
         tester.getRect(find.byKey(imageKey1, skipOffstage: false)),
-        rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01),
+        rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size.square(100), epsilon: 0.01),
       );
 
       // Text should respect the correct final size of image1.
@@ -2558,8 +2558,8 @@ Future<void> main() async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
 
     final Animatable<Size?> tween = SizeTween(
-      begin: const Size(200, 200),
-      end: const Size(100, 100),
+      begin: const Size.square(200),
+      end: const Size.square(100),
     ).chain(CurveTween(curve: Curves.fastOutSlowIn));
 
 
@@ -2584,7 +2584,7 @@ Future<void> main() async {
       ),
     );
     final Size originalSize = tester.getSize(find.byKey(container1));
-    expect(originalSize, const Size(100, 100));
+    expect(originalSize, const Size.square(100));
 
     navigator.currentState!.push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return Scaffold(
@@ -2605,7 +2605,7 @@ Future<void> main() async {
     }));
     await tester.pumpAndSettle();
     final Size newSize = tester.getSize(find.byKey(container2));
-    expect(newSize, const Size(200, 200));
+    expect(newSize, const Size.square(200));
 
     navigator.currentState!.pop();
     await tester.pump();

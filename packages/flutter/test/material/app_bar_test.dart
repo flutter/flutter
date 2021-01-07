@@ -313,7 +313,7 @@ void main() {
             centerTitle: false,
             title: Container(
               key: titleKey,
-              constraints: BoxConstraints.loose(const Size(1000.0, 1000.0)),
+              constraints: BoxConstraints.loose(const Size.square(1000.0)),
             ),
             actions: actions,
           ),
@@ -554,7 +554,7 @@ void main() {
 
     final Finder hamburger = find.byTooltip('Open navigation menu');
     expect(tester.getTopLeft(hamburger), const Offset(0.0, 0.0));
-    expect(tester.getSize(hamburger), const Size(56.0, 56.0));
+    expect(tester.getSize(hamburger), const Size.square(56.0));
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
@@ -1275,7 +1275,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size.square(56.0));
   });
 
   testWidgets('AppBar handles loose children 1', (WidgetTester tester) async {
@@ -1306,7 +1306,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size.square(56.0));
   });
 
   testWidgets('AppBar handles loose children 2', (WidgetTester tester) async {
@@ -1348,7 +1348,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size.square(56.0));
   });
 
   testWidgets('AppBar handles loose children 3', (WidgetTester tester) async {
@@ -1381,7 +1381,7 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size.square(56.0));
   });
 
   testWidgets('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {

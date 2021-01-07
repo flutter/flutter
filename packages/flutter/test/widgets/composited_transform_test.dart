@@ -293,7 +293,7 @@ void main() {
         testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
           await tester.pumpWidget(build(targetAlignment: targetAlignment, followerAlignment: followerAlignment));
           final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
-          expect(box2.size, const Size(2.0, 2.0));
+          expect(box2.size, const Size.square(2.0));
           expect(tapped, isFalse);
           await tester.tap(find.byKey(key3));
           expect(tapped, isTrue);

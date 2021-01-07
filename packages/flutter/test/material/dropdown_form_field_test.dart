@@ -487,7 +487,7 @@ void main() {
 
     // test for size
     final RenderBox icon = tester.renderObject(find.byKey(iconKey));
-    expect(icon.size, const Size(30.0, 30.0));
+    expect(icon.size, const Size.square(30.0));
 
     // test for enabled color
     final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));

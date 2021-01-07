@@ -424,7 +424,7 @@ void main() {
     expect(dependentBuildCount, equals(1));
 
     // didChangeMetrics
-    tester.binding.window.physicalSizeTestValue = const Size(42, 42);
+    tester.binding.window.physicalSizeTestValue = const Size.square(42);
     addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
     await tester.pump();

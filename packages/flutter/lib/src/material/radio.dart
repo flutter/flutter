@@ -452,10 +452,10 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     Size size;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
+        size = const Size.square(kMinInteractiveDimension);
         break;
       case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
+        size = const Size.square(kMinInteractiveDimension - 8.0);
         break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;

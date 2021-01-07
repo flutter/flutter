@@ -229,7 +229,7 @@ void main() {
 
     testWidgets('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
       // Set the screen size so narrow that only Cut and Copy can fit.
-      tester.binding.window.physicalSizeTestValue = const Size(800, 800);
+      tester.binding.window.physicalSizeTestValue = const Size.square(800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');

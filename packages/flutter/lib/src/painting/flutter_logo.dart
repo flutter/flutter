@@ -339,7 +339,7 @@ class _FlutterLogoPainter extends BoxPainter {
       logoSize = const Size(252.0, 306.0);
     } else {
       // only the mark
-      logoSize = const Size(202.0, 202.0);
+      logoSize = const Size.square(202.0);
     }
     final FittedSizes fittedSize = applyBoxFit(BoxFit.contain, logoSize, canvasSize);
     assert(fittedSize.source == logoSize);

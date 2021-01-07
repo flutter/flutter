@@ -37,7 +37,7 @@ class RealRoot extends AbstractNode {
   PipelineOwner? get owner => super.owner as PipelineOwner?;
 
   void layout() {
-    child.layout(BoxConstraints.tight(const Size(500.0, 500.0)));
+    child.layout(BoxConstraints.tight(const Size.square(500.0)));
   }
 }
 
@@ -47,7 +47,7 @@ void main() {
     final RealRoot root = RealRoot(
       child = RenderPositionedBox(
         alignment: Alignment.center,
-        child: RenderSizedBox(const Size(100.0, 100.0)),
+        child: RenderSizedBox(const Size.square(100.0)),
       ),
     );
     root.attach(PipelineOwner());

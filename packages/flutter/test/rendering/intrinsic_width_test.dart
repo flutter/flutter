@@ -396,7 +396,7 @@ void main() {
   test('Padding and boring intrinsics', () {
     final RenderBox box = RenderPadding(
       padding: const EdgeInsets.all(15.0),
-      child: RenderSizedBox(const Size(20.0, 20.0)),
+      child: RenderSizedBox(const Size.square(20.0)),
     );
 
     expect(box.getMinIntrinsicWidth(0.0), 50.0);
@@ -472,7 +472,7 @@ void main() {
   test('Padding and boring intrinsics', () {
     final RenderBox box = RenderPadding(
       padding: const EdgeInsets.all(15.0),
-      child: RenderSizedBox(const Size(20.0, 20.0)),
+      child: RenderSizedBox(const Size.square(20.0)),
     );
 
     expect(box.getMinIntrinsicWidth(0.0), 50.0);

@@ -151,7 +151,7 @@ void main() {
       _Layers(
         OffsetLayer(offset: const Offset(-10, 0)),
         children: <Object>[
-          _TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10)),
+          _TestAnnotatedLayer(1, opaque: true, size: const Size.square(10)),
         ]
       ).build(),
     );
@@ -176,12 +176,12 @@ void main() {
 
     final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
-        ClipRectLayer(clipRect: const Offset(10, 10) & const Size(5, 5)),
+        ClipRectLayer(clipRect: const Offset(10, 10) & const Size.square(5)),
         children: <Object>[
           _TestAnnotatedLayer(
             1,
             opaque: true,
-            size: const Size(10, 10),
+            size: const Size.square(10),
             offset: const Offset(10, 10),
           ),
         ]
@@ -207,7 +207,7 @@ void main() {
     // location (1, 1) is outside, while (2, 2) is inside.
     // Here we shift this RRect by (10, 10).
     final RRect rrect = RRect.fromRectAndRadius(
-      const Offset(10, 10) & const Size(10, 10),
+      const Offset(10, 10) & const Size.square(10),
       const Radius.circular(4),
     );
     const Offset insidePosition = Offset(12, 12);
@@ -220,7 +220,7 @@ void main() {
           _TestAnnotatedLayer(
             1,
             opaque: true,
-            size: const Size(10, 10),
+            size: const Size.square(10),
             offset: const Offset(10, 10),
           ),
         ]
@@ -264,7 +264,7 @@ void main() {
           _TestAnnotatedLayer(
             1,
             opaque: true,
-            size: const Size(10, 10),
+            size: const Size.square(10),
             offset: const Offset(10, 10),
           ),
         ]
@@ -302,7 +302,7 @@ void main() {
           _TestAnnotatedLayer(
             1,
             opaque: true,
-            size: const Size(10, 10),
+            size: const Size.square(10),
             offset: const Offset(10, 10),
           ),
         ]
@@ -453,7 +453,7 @@ void main() {
           _TestAnnotatedLayer(
             1,
             opaque: true,
-            size: const Size(10, 10),
+            size: const Size.square(10),
             offset: const Offset(10, 10),
           ),
         ]
@@ -486,7 +486,7 @@ void main() {
           offset: const Offset(-10, 0),
         ),
         children: <Object>[
-          _TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10)),
+          _TestAnnotatedLayer(1, opaque: true, size: const Size.square(10)),
         ]
       ).build(),
     );
@@ -669,7 +669,7 @@ void main() {
       _Layers(
         AnnotatedRegionLayer<int>(
           1,
-          size: const Size(20, 20),
+          size: const Size.square(20),
           offset: const Offset(90, 90),
         ),
         children: <Object>[
@@ -679,7 +679,7 @@ void main() {
             // Use this offset to make sure AnnotatedRegionLayer's offset
             // does not affect its children.
             offset: const Offset(20, 20),
-            size: const Size(110, 110),
+            size: const Size.square(110),
           ),
         ]
       ).build()
@@ -704,11 +704,11 @@ void main() {
       _Layers(
         AnnotatedRegionLayer<int>(
           1,
-          size: const Size(20, 20),
+          size: const Size.square(20),
           offset: const Offset(90, 90),
         ),
         children: <Object>[
-          _TestAnnotatedLayer(2, opaque: false, size: const Size(110, 110)),
+          _TestAnnotatedLayer(2, opaque: false, size: const Size.square(110)),
         ]
       ).build()
     );

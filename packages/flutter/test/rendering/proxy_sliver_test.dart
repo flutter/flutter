@@ -14,7 +14,7 @@ void main() {
     final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
       opacity: 0.0,
       sliver: RenderSliverToBoxAdapter(
-        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+        child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
       )
     );
 
@@ -34,7 +34,7 @@ void main() {
     final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
       opacity: 1.0,
       sliver: RenderSliverToBoxAdapter(
-        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+        child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
       )
     );
 
@@ -53,7 +53,7 @@ void main() {
     final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
       opacity: 0.5,
       sliver: RenderSliverToBoxAdapter(
-        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+        child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
       )
     );
 
@@ -66,7 +66,7 @@ void main() {
     );
 
     expect(renderSliverOpacity.debugLayer, null);
-    layout(root, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
+    layout(root, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size.square(10)));
     final ContainerLayer layer = renderSliverOpacity.debugLayer!;
     expect(layer, isNotNull);
 
@@ -87,7 +87,7 @@ void main() {
       alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
-        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+        child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
       )
     );
 
@@ -112,7 +112,7 @@ void main() {
       alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
-        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+        child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
       )
     );
 
@@ -136,7 +136,7 @@ void main() {
     final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
-        child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+        child: RenderSizedBox(const Size.square(1.0)), // size doesn't matter
       )
     );
 
@@ -149,7 +149,7 @@ void main() {
     );
 
     expect(renderSliverAnimatedOpacity.debugLayer, null);
-    layout(root, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
+    layout(root, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size.square(10)));
     final ContainerLayer layer = renderSliverAnimatedOpacity.debugLayer!;
     expect(layer, isNotNull);
 

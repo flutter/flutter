@@ -23,7 +23,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
-    expect(rawImageSize, const Size(1, 1));
+    expect(rawImageSize, const Size.square(1));
 
     const Size resizeDims = Size(14, 7);
     final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
@@ -37,7 +37,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
-    expect(rawImageSize, const Size(50, 50));
+    expect(rawImageSize, const Size.square(50));
 
     const Size resizeDims = Size(25, 25);
     final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round(), allowUpscaling: true);
@@ -50,7 +50,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
-    expect(rawImageSize, const Size(1, 1));
+    expect(rawImageSize, const Size.square(1));
 
     const Size resizeDims = Size(1, 1);
     final ResizeImage resizedImage = ResizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round());
@@ -63,13 +63,13 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
-    expect(rawImageSize, const Size(1, 1));
+    expect(rawImageSize, const Size.square(1));
 
     // Cannot pass in two null arguments for cache dimensions, so will use the regular
     // MemoryImage
     final MemoryImage resizedImage = MemoryImage(bytes);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage);
-    expect(resizedImageSize, const Size(1, 1));
+    expect(resizedImageSize, const Size.square(1));
   });
 
   test('ResizeImage stores values', () async {

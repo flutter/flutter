@@ -17,7 +17,7 @@ void main() {
       child: parent = RenderBaseline(
         baseline: 0.0,
         baselineType: TextBaseline.alphabetic,
-        child: child = RenderSizedBox(const Size(100.0, 100.0)),
+        child: child = RenderSizedBox(const Size.square(100.0)),
       ),
     );
     final BoxParentData childParentData = child.parentData! as BoxParentData;
@@ -43,7 +43,7 @@ void main() {
     pumpFrame(phase: EnginePhase.layout);
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(0.0));
-    expect(parent.size, equals(const Size(100.0, 100.0)));
+    expect(parent.size, equals(const Size.square(100.0)));
 
     parent.baseline = 110.0;
     pumpFrame(phase: EnginePhase.layout);

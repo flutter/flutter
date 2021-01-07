@@ -533,7 +533,7 @@ void main() {
   });
 
   testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size.square(40));
 
     await tester.pumpFrames(animationSheet.record(
       const Directionality(

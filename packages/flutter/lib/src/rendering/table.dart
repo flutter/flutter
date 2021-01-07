@@ -1002,7 +1002,7 @@ class RenderTable extends RenderBox {
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     if (rows * columns == 0) {
-      return constraints.constrain(const Size(0.0, 0.0));
+      return constraints.constrain(Size.zero);
     }
     final List<double> widths = _computeColumnWidths(constraints);
     final double tableWidth = widths.fold(0.0, (double a, double b) => a + b);
@@ -1046,7 +1046,7 @@ class RenderTable extends RenderBox {
     if (rows * columns == 0) {
       // TODO(ianh): if columns is zero, this should be zero width
       // TODO(ianh): if columns is not zero, this should be based on the column width specifications
-      size = constraints.constrain(const Size(0.0, 0.0));
+      size = constraints.constrain(Size.zero);
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);

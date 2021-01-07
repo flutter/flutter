@@ -374,7 +374,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byKey(key1)), const Size(48.0, 48.0));
+    expect(tester.getSize(find.byKey(key1)), const Size.square(48.0));
 
     final Key key2 = UniqueKey();
     await tester.pumpWidget(
@@ -392,7 +392,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byKey(key2)), const Size(40.0, 40.0));
+    expect(tester.getSize(find.byKey(key2)), const Size.square(40.0));
   });
 
   testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {

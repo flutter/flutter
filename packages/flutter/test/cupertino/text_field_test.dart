@@ -215,7 +215,7 @@ void main() {
         CupertinoApp(
           home: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size(200, 200)),
+              constraints: BoxConstraints.loose(const Size.square(200)),
               child: const CupertinoTextField(strutStyle: StrutStyle.disabled),
             ),
           ),
@@ -236,7 +236,7 @@ void main() {
         CupertinoApp(
           home: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size(200, 200)),
+              constraints: BoxConstraints.loose(const Size.square(200)),
               child: const CupertinoTextField(),
             ),
           ),
@@ -257,7 +257,7 @@ void main() {
         CupertinoApp(
           home: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size(200, 200)),
+              constraints: BoxConstraints.loose(const Size.square(200)),
               child: const CupertinoTextField(
                 maxLines: 3,
                 strutStyle: StrutStyle.disabled,
@@ -281,7 +281,7 @@ void main() {
         CupertinoApp(
           home: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size(200, 200)),
+              constraints: BoxConstraints.loose(const Size.square(200)),
               child: const CupertinoTextField(maxLines: 3),
             ),
           ),
@@ -302,7 +302,7 @@ void main() {
         CupertinoApp(
           home: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size(200, 200)),
+              constraints: BoxConstraints.loose(const Size.square(200)),
               child: const CupertinoTextField(
                 maxLines: 3,
                 strutStyle: StrutStyle(
@@ -329,7 +329,7 @@ void main() {
         CupertinoApp(
           home: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size(200, 200)),
+              constraints: BoxConstraints.loose(const Size.square(200)),
               child: const CupertinoTextField(
                 maxLines: 3,
                 style: TextStyle(fontSize: 10),
@@ -512,7 +512,7 @@ void main() {
         child: RepaintBoundary(
           key: const ValueKey<int>(1),
           child: ConstrainedBox(
-            constraints: BoxConstraints.loose(const Size(400, 400)),
+            constraints: BoxConstraints.loose(const Size.square(400)),
             child: const CupertinoTextField(),
           ),
         ),
@@ -539,7 +539,7 @@ void main() {
         child: RepaintBoundary(
           key: const ValueKey<int>(1),
           child: ConstrainedBox(
-            constraints: BoxConstraints.loose(const Size(400, 400)),
+            constraints: BoxConstraints.loose(const Size.square(400)),
             child: const CupertinoTextField(),
           ),
         ),
@@ -3219,7 +3219,7 @@ void main() {
   group('Text selection toolbar', () {
     testWidgets('Collapsed selection works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.physicalSizeTestValue = const Size.square(400);
       tester.binding.window.devicePixelRatioTestValue = 1;
       TextEditingController controller;
       EditableTextState state;
@@ -3408,7 +3408,7 @@ void main() {
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.physicalSizeTestValue = const Size.square(400);
       tester.binding.window.devicePixelRatioTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
@@ -3479,7 +3479,7 @@ void main() {
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.physicalSizeTestValue = const Size.square(400);
       tester.binding.window.devicePixelRatioTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
@@ -4018,7 +4018,7 @@ void main() {
           CupertinoApp(
             home: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size(200, 200)),
+                constraints: BoxConstraints.loose(const Size.square(200)),
                 child: const CupertinoTextField(
                   autofocus: true,
                 ),
@@ -4129,7 +4129,7 @@ void main() {
       CupertinoApp(
         home: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints.loose(const Size(200, 200)),
+            constraints: BoxConstraints.loose(const Size.square(200)),
             child: const CupertinoTextField(),
           ),
         ),
@@ -4157,7 +4157,7 @@ void main() {
       CupertinoApp(
         home: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints.loose(const Size(200, 200)),
+            constraints: BoxConstraints.loose(const Size.square(200)),
             child: const CupertinoTextField(
               enabled: false,
             ),

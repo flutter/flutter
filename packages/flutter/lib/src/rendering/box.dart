@@ -1852,7 +1852,7 @@ abstract class RenderBox extends RenderObject {
   /// In such cases, it may be impossible (or at least impractical) to actually
   /// return a valid answer. In such cases, the function should call
   /// [debugCannotComputeDryLayout] from within an assert and and return a dummy
-  /// value of `const Size(0, 0)`.
+  /// value of `Size.zero`.
   @protected
   Size computeDryLayout(BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
@@ -1864,7 +1864,7 @@ abstract class RenderBox extends RenderObject {
         ),
       ]),
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   static bool _dryLayoutCalculationValid = true;

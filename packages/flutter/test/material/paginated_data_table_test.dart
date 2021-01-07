@@ -230,7 +230,7 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable with and without header and actions', (WidgetTester tester) async {
-    await binding.setSurfaceSize(const Size(800, 800));
+    await binding.setSurfaceSize(const Size.square(800));
     const String headerText = 'HEADER';
     final List<Widget> actions = <Widget>[
       IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
@@ -765,7 +765,7 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable with optional column checkbox', (WidgetTester tester) async {
-    await binding.setSurfaceSize(const Size(800, 800));
+    await binding.setSurfaceSize(const Size.square(800));
 
     Widget buildTable(bool checkbox) => MaterialApp(
       home: PaginatedDataTable(
@@ -789,7 +789,7 @@ void main() {
 
   testWidgets('Table should not use decoration from DataTableTheme', (WidgetTester tester) async {
     final Size originalSize = binding.renderView.size;
-    await binding.setSurfaceSize(const Size(800, 800));
+    await binding.setSurfaceSize(const Size.square(800));
 
     Widget buildTable() {
       return MaterialApp(

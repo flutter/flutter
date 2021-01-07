@@ -38,7 +38,7 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
-    expect(iconButton.size, const Size(48.0, 48.0));
+    expect(iconButton.size, const Size.square(48.0));
 
     await tester.tap(find.byType(IconButton));
     expect(mockOnPressedFunction.called, 1);
@@ -56,7 +56,7 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
-    expect(iconButton.size, const Size(48.0, 48.0));
+    expect(iconButton.size, const Size.square(48.0));
   });
 
   testWidgets('test icons can be small when total size is >48dp', (WidgetTester tester) async {
@@ -72,7 +72,7 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
-    expect(iconButton.size, const Size(70.0, 70.0));
+    expect(iconButton.size, const Size.square(70.0));
   });
 
   testWidgets('Small icons with non-null constraints can be <48dp', (WidgetTester tester) async {
@@ -91,7 +91,7 @@ void main() {
 
     // By default IconButton has a padding of 8.0 on all sides, so both
     // width and height are 10.0 + 2 * 8.0 = 26.0
-    expect(iconButton.size, const Size(26.0, 26.0));
+    expect(iconButton.size, const Size.square(26.0));
   });
 
   testWidgets('Small icons with non-null constraints and custom padding can be <48dp', (WidgetTester tester) async {
@@ -111,7 +111,7 @@ void main() {
 
     // This IconButton has a padding of 3.0 on all sides, so both
     // width and height are 10.0 + 2 * 3.0 = 16.0
-    expect(iconButton.size, const Size(16.0, 16.0));
+    expect(iconButton.size, const Size.square(16.0));
   });
 
   testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
@@ -151,7 +151,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(IconButton));
-    expect(box.size, const Size(80.0, 80.0));
+    expect(box.size, const Size.square(80.0));
   });
 
   testWidgets('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
@@ -188,7 +188,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(IconButton));
-    expect(box.size, const Size(96.0, 96.0));
+    expect(box.size, const Size.square(96.0));
   });
 
   testWidgets('test tooltip', (WidgetTester tester) async {
@@ -624,15 +624,15 @@ void main() {
     await buildTest(const VisualDensity());
     final RenderBox box = tester.renderObject(find.byKey(key));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(48, 48)));
+    expect(box.size, equals(const Size.square(48)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(60, 60)));
+    expect(box.size, equals(const Size.square(60)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(40, 40)));
+    expect(box.size, equals(const Size.square(40)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
     await tester.pumpAndSettle();

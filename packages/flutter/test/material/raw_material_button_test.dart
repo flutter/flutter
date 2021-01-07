@@ -114,7 +114,7 @@ void main() {
           onPressed: () {
             pressed++;
           },
-          constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
+          constraints: BoxConstraints.tight(const Size.square(10.0)),
           materialTapTargetSize: MaterialTapTargetSize.padded,
           child: const Text('+'),
         ),
@@ -134,7 +134,7 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             onPressed: () { },
-            constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
+            constraints: BoxConstraints.tight(const Size.square(10.0)),
             materialTapTargetSize: MaterialTapTargetSize.padded,
             child: const Text('+'),
           ),
@@ -537,19 +537,19 @@ void main() {
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(100, 100)));
+    expect(box.size, equals(const Size.square(100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(124, 124)));
+    expect(box.size, equals(const Size.square(124)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
-    expect(box.size, equals(const Size(100, 100)));
+    expect(box.size, equals(const Size.square(100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(), useText: true);

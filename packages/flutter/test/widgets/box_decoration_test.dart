@@ -119,7 +119,7 @@ Future<void> main() async {
         ),
       ),
     );
-    expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
+    expect(tester.getSize(find.byKey(key)), equals(const Size.square(45.0)));
   });
 
   testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {

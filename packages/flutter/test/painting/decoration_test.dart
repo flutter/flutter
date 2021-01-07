@@ -673,7 +673,7 @@ void main() {
     final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
     // The image should scale down to Size(25.0, 25.0) from Size(100.0, 100.0)
     // considering DecorationImage scale to be 4.0 and Image scale to be 1.0.
-    expect(call.positionalArguments[2].size, const Size(25.0, 25.0));
+    expect(call.positionalArguments[2].size, const Size.square(25.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
   });
 

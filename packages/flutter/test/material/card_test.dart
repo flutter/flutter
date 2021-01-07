@@ -138,10 +138,10 @@ void main() {
 
     // Default margin is 4
     expect(tester.getTopLeft(find.byType(Card)), const Offset(0.0, 0.0));
-    expect(tester.getSize(find.byType(Card)), const Size(108.0, 108.0));
+    expect(tester.getSize(find.byType(Card)), const Size.square(108.0));
 
     expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(4.0, 4.0));
-    expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
+    expect(tester.getSize(find.byKey(contentsKey)), const Size.square(100.0));
 
     await tester.pumpWidget(
       Container(
@@ -160,10 +160,10 @@ void main() {
 
     // Specified margin is zero
     expect(tester.getTopLeft(find.byType(Card)), const Offset(0.0, 0.0));
-    expect(tester.getSize(find.byType(Card)), const Size(100.0, 100.0));
+    expect(tester.getSize(find.byType(Card)), const Size.square(100.0));
 
     expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(0.0, 0.0));
-    expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
+    expect(tester.getSize(find.byKey(contentsKey)), const Size.square(100.0));
   });
 
   testWidgets('Card clipBehavior property passes through to the Material', (WidgetTester tester) async {

@@ -36,7 +36,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(Checkbox)), const Size(48.0, 48.0));
+    expect(tester.getSize(find.byType(Checkbox)), const Size.square(48.0));
 
     await tester.pumpWidget(
       Theme(
@@ -55,7 +55,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0));
+    expect(tester.getSize(find.byType(Checkbox)), const Size.square(40.0));
   });
 
   testWidgets('CheckBox semantics', (WidgetTester tester) async {
@@ -625,15 +625,15 @@ void main() {
     await buildTest(const VisualDensity());
     final RenderBox box = tester.renderObject(find.byKey(key));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(48, 48)));
+    expect(box.size, equals(const Size.square(48)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(60, 60)));
+    expect(box.size, equals(const Size.square(60)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
-    expect(box.size, equals(const Size(36, 36)));
+    expect(box.size, equals(const Size.square(36)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
     await tester.pumpAndSettle();

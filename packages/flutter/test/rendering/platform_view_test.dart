@@ -36,7 +36,7 @@ void main() {
     test('layout should size to max constraint', () {
       layout(platformViewRenderBox);
       platformViewRenderBox.layout(const BoxConstraints(minWidth: 50, minHeight: 50, maxWidth: 100, maxHeight: 100));
-      expect(platformViewRenderBox.size, const Size(100, 100));
+      expect(platformViewRenderBox.size, const Size.square(100));
     });
 
     test('send semantics update if id is changed', (){

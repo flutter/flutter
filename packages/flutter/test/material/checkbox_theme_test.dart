@@ -133,7 +133,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..drrect(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
-    expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
+    expect(tester.getSize(find.byType(Checkbox)), const Size.square(40.0) + visualDensity.baseSizeAdjustment);
 
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
@@ -232,7 +232,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..drrect(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
-    expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
+    expect(tester.getSize(find.byType(Checkbox)), const Size.square(40.0) + visualDensity.baseSizeAdjustment);
 
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));

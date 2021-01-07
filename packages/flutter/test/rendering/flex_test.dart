@@ -452,9 +452,9 @@ void main() {
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 250.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 250.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 250.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
   });
 
   test('Flex RTL', () {
@@ -467,90 +467,90 @@ void main() {
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 250.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 250.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 250.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.mainAxisAlignment = MainAxisAlignment.end;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 250.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 250.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 250.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.textDirection = TextDirection.rtl;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 250.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 250.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 250.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.mainAxisAlignment = MainAxisAlignment.start;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 250.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 250.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 250.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.start; // vertical direction is down
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 0.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.end;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 500.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 500.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.verticalDirection = VerticalDirection.up;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 0.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.start;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 500.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 500.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.direction = Axis.vertical; // and main=start, cross=start, up, rtl
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 400.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 300.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.end;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 500.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.stretch;
     pumpFrame();
@@ -575,36 +575,36 @@ void main() {
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 500.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.crossAxisAlignment = CrossAxisAlignment.end;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 400.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 300.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.verticalDirection = VerticalDirection.down;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 100.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 200.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
 
     flex.mainAxisAlignment = MainAxisAlignment.end;
     pumpFrame();
     expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 300.0));
     expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 400.0));
     expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 500.0));
-    expect(box1.size, const Size(100.0, 100.0));
-    expect(box2.size, const Size(100.0, 100.0));
-    expect(box3.size, const Size(100.0, 100.0));
+    expect(box1.size, const Size.square(100.0));
+    expect(box2.size, const Size.square(100.0));
+    expect(box3.size, const Size.square(100.0));
   });
 
   test('Intrinsics throw if alignment is baseline', () {

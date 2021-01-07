@@ -63,7 +63,7 @@ void main() {
 
   test('needsCompositingBitsUpdate paint error', () {
     late FlutterError flutterError;
-    final RenderBox root = RenderRepaintBoundary(child: RenderSizedBox(const Size(100, 100)));
+    final RenderBox root = RenderRepaintBoundary(child: RenderSizedBox(const Size.square(100)));
     try {
       layout(root);
       PaintingContext.repaintCompositedChild(root, debugAlsoPaintedParent: true);
@@ -113,6 +113,6 @@ class TestReentrantPaintingErrorRenderBox extends RenderBox {
 
   @override
   void performLayout() {
-    size = const Size(100, 100);
+    size = const Size.square(100);
   }
 }

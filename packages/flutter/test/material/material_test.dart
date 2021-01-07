@@ -158,8 +158,8 @@ void main() {
     // We paint twice because we have two CustomPaint widgets in the tree above
     // to test repainting both inside and outside the Material widget.
     expect(log, equals(<Size>[
-      const Size(150.0, 150.0),
-      const Size(100.0, 100.0),
+      const Size.square(150.0),
+      const Size.square(100.0),
     ]));
     log.clear();
 

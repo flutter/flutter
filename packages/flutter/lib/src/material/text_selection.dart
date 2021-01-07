@@ -26,7 +26,7 @@ const double _kToolbarContentDistance = 8.0;
 class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
-  Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
+  Size getHandleSize(double textLineHeight) => const Size.square(_kHandleSize);
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override

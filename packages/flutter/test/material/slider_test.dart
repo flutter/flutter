@@ -24,7 +24,7 @@ class LoggingThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return const Size(10.0, 10.0);
+    return const Size.square(10.0);
   }
 
   @override

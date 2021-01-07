@@ -12,7 +12,7 @@ void main() {
     RenderBox root, leaf, test;
     root = RenderPositionedBox(
       child: RenderConstrainedBox(
-        additionalConstraints: BoxConstraints.tight(const Size(200.0, 200.0)),
+        additionalConstraints: BoxConstraints.tight(const Size.square(200.0)),
         child: test = RenderFractionallySizedOverflowBox(
           widthFactor: 2.0,
           heightFactor: 0.5,

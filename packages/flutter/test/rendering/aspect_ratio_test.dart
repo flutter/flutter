@@ -140,22 +140,22 @@ void main() {
     outside.maxWidth = 100.0;
     outside.maxHeight = 90.0;
     pumpFrame();
-    expect(inside.size, const Size(90.0, 90.0));
+    expect(inside.size, const Size.square(90.0));
 
     outside.maxWidth = 90.0;
     outside.maxHeight = 100.0;
     pumpFrame();
-    expect(inside.size, const Size(90.0, 90.0));
+    expect(inside.size, const Size.square(90.0));
 
     outside.maxWidth = double.infinity;
     outside.maxHeight = 90.0;
     pumpFrame();
-    expect(inside.size, const Size(90.0, 90.0));
+    expect(inside.size, const Size.square(90.0));
 
     outside.maxWidth = 90.0;
     outside.maxHeight = double.infinity;
     pumpFrame();
-    expect(inside.size, const Size(90.0, 90.0));
+    expect(inside.size, const Size.square(90.0));
 
     inside.aspectRatio = 2.0;
 

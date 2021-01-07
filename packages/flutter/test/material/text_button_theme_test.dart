@@ -134,7 +134,7 @@ void main() {
       expect(material.borderRadius, null);
       expect(material.shape, shape);
       expect(material.animationDuration, animationDuration);
-      expect(tester.getSize(find.byType(TextButton)), const Size(200, 200));
+      expect(tester.getSize(find.byType(TextButton)), const Size.square(200));
     }
 
     testWidgets('Button style overrides defaults', (WidgetTester tester) async {

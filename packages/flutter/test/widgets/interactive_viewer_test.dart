@@ -794,7 +794,7 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Shrink the size of the screen.
-      tester.binding.window.physicalSizeTestValue = const Size(100.0, 100.0);
+      tester.binding.window.physicalSizeTestValue = const Size.square(100.0);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       await tester.pump();
 

@@ -33,7 +33,7 @@ void main() {
 
     final TestCanvas canvas = TestCanvas();
 
-    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size.square(1000.0));
 
     final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -61,7 +61,7 @@ void main() {
 
     final TestCanvas canvas = TestCanvas();
 
-    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size.square(1000.0));
 
     final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -89,7 +89,7 @@ void main() {
 
     final TestCanvas canvas = TestCanvas();
 
-    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size.square(1000.0));
 
     final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -117,7 +117,7 @@ void main() {
 
     final TestCanvas canvas = TestCanvas();
 
-    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size.square(1000.0));
 
     final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -145,7 +145,7 @@ void main() {
 
     final TestCanvas canvas = TestCanvas();
 
-    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size.square(1000.0));
 
     final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -173,7 +173,7 @@ void main() {
 
     final TestCanvas canvas = TestCanvas();
 
-    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size.square(1000.0));
 
     final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -201,7 +201,7 @@ void main() {
 
     final TestCanvas canvas = TestCanvas();
 
-    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size.square(1000.0));
 
     final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -229,7 +229,7 @@ void main() {
 
     final TestCanvas canvas = TestCanvas();
 
-    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size.square(1000.0));
 
     final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;

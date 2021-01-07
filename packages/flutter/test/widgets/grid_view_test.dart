@@ -50,7 +50,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.text('Arkansas')), equals(const Size(200.0, 200.0)));
+    expect(tester.getSize(find.text('Arkansas')), equals(const Size.square(200.0)));
 
     for (int i = 0; i < 8; ++i) {
       await tester.tap(find.text(kStates[i]));
@@ -123,7 +123,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.text('Arkansas')), equals(const Size(200.0, 200.0)));
+    expect(tester.getSize(find.text('Arkansas')), equals(const Size.square(200.0)));
 
     for (int i = 0; i < 8; ++i) {
       await tester.tap(find.text(kStates[i]));
@@ -264,7 +264,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.text('4')), equals(const Size(200.0, 200.0)));
+    expect(tester.getSize(find.text('4')), equals(const Size.square(200.0)));
 
     expect(log, equals(<int>[
       0, 1, 2, 3, // row 0
@@ -311,7 +311,7 @@ void main() {
     ]));
     log.clear();
 
-    expect(tester.getSize(find.text('3')), equals(const Size(400.0, 400.0)));
+    expect(tester.getSize(find.text('3')), equals(const Size.square(400.0)));
     expect(find.text('4'), findsNothing);
   });
 
@@ -339,7 +339,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.text('4')), equals(const Size(200.0, 200.0)));
+    expect(tester.getSize(find.text('4')), equals(const Size.square(200.0)));
 
     expect(log, equals(<int>[
       0, 1, 2, 3, // row 0
@@ -386,7 +386,7 @@ void main() {
     ]));
     log.clear();
 
-    expect(tester.getSize(find.text('3')), equals(const Size(400.0, 400.0)));
+    expect(tester.getSize(find.text('3')), equals(const Size.square(400.0)));
     expect(find.text('4'), findsNothing);
   });
 

@@ -122,7 +122,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
-    expect(tester.getSize(_findRadio()), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
+    expect(tester.getSize(_findRadio()), const Size.square(40.0) + visualDensity.baseSizeAdjustment);
 
     // Selected radio.
     await tester.pumpWidget(buildRadio(selected: true));
@@ -216,7 +216,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
-    expect(tester.getSize(_findRadio()), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
+    expect(tester.getSize(_findRadio()), const Size.square(40.0) + visualDensity.baseSizeAdjustment);
 
     // Selected radio.
     await tester.pumpWidget(buildRadio(selected: true));

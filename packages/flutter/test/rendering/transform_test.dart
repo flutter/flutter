@@ -19,9 +19,9 @@ void main() {
     final RenderBox sizer = RenderTransform(
       transform: Matrix4.identity(),
       alignment: Alignment.center,
-      child: inner = RenderSizedBox(const Size(100.0, 100.0)),
+      child: inner = RenderSizedBox(const Size.square(100.0)),
     );
-    layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
+    layout(sizer, constraints: BoxConstraints.tight(const Size.square(100.0)), alignment: Alignment.topLeft);
     expect(inner.globalToLocal(const Offset(0.0, 0.0)), equals(const Offset(0.0, 0.0)));
     expect(inner.globalToLocal(const Offset(100.0, 100.0)), equals(const Offset(100.0, 100.0)));
     expect(inner.globalToLocal(const Offset(25.0, 75.0)), equals(const Offset(25.0, 75.0)));
@@ -42,7 +42,7 @@ void main() {
         child: inner = RenderSizedBox(const Size(80.0, 100.0)),
       ),
     );
-    layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
+    layout(sizer, constraints: BoxConstraints.tight(const Size.square(100.0)), alignment: Alignment.topLeft);
     expect(inner.globalToLocal(const Offset(0.0, 0.0)), equals(const Offset(-20.0, 0.0)));
     expect(inner.globalToLocal(const Offset(100.0, 100.0)), equals(const Offset(80.0, 100.0)));
     expect(inner.globalToLocal(const Offset(25.0, 75.0)), equals(const Offset(5.0, 75.0)));
@@ -58,9 +58,9 @@ void main() {
     final RenderBox sizer = RenderTransform(
       transform: Matrix4.translationValues(50.0, 200.0, 0.0),
       alignment: Alignment.center,
-      child: inner = RenderSizedBox(const Size(100.0, 100.0)),
+      child: inner = RenderSizedBox(const Size.square(100.0)),
     );
-    layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
+    layout(sizer, constraints: BoxConstraints.tight(const Size.square(100.0)), alignment: Alignment.topLeft);
     expect(inner.globalToLocal(const Offset(0.0, 0.0)), equals(const Offset(-50.0, -200.0)));
     expect(inner.globalToLocal(const Offset(100.0, 100.0)), equals(const Offset(50.0, -100.0)));
     expect(inner.globalToLocal(const Offset(25.0, 75.0)), equals(const Offset(-25.0, -125.0)));
@@ -81,7 +81,7 @@ void main() {
         child: inner = RenderSizedBox(const Size(80.0, 100.0)),
       ),
     );
-    layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
+    layout(sizer, constraints: BoxConstraints.tight(const Size.square(100.0)), alignment: Alignment.topLeft);
     expect(inner.globalToLocal(const Offset(0.0, 0.0)), equals(const Offset(-70.0, -200.0)));
     expect(inner.globalToLocal(const Offset(100.0, 100.0)), equals(const Offset(30.0, -100.0)));
     expect(inner.globalToLocal(const Offset(25.0, 75.0)), equals(const Offset(-45.0, -125.0)));
@@ -97,9 +97,9 @@ void main() {
     final RenderBox sizer = RenderTransform(
       transform: Matrix4.rotationZ(math.pi),
       alignment: Alignment.center,
-      child: inner = RenderSizedBox(const Size(100.0, 100.0)),
+      child: inner = RenderSizedBox(const Size.square(100.0)),
     );
-    layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
+    layout(sizer, constraints: BoxConstraints.tight(const Size.square(100.0)), alignment: Alignment.topLeft);
     expect(round(inner.globalToLocal(const Offset(0.0, 0.0))), equals(const Offset(100.0, 100.0)));
     expect(round(inner.globalToLocal(const Offset(100.0, 100.0))), equals(const Offset(0.0, 0.0)));
     expect(round(inner.globalToLocal(const Offset(25.0, 75.0))), equals(const Offset(75.0, 25.0)));
@@ -120,7 +120,7 @@ void main() {
         child: inner = RenderSizedBox(const Size(80.0, 100.0)),
       ),
     );
-    layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
+    layout(sizer, constraints: BoxConstraints.tight(const Size.square(100.0)), alignment: Alignment.topLeft);
     expect(round(inner.globalToLocal(const Offset(0.0, 0.0))), equals(const Offset(80.0, 100.0)));
     expect(round(inner.globalToLocal(const Offset(100.0, 100.0))), equals(const Offset(-20.0, 0.0)));
     expect(round(inner.globalToLocal(const Offset(25.0, 75.0))), equals(const Offset(55.0, 25.0)));
@@ -136,9 +136,9 @@ void main() {
     final RenderBox sizer = RenderTransform(
       transform: rotateAroundXAxis(math.pi * 0.25), // at pi/4, we are about 70 pixels high
       alignment: Alignment.center,
-      child: inner = RenderSizedBox(const Size(100.0, 100.0)),
+      child: inner = RenderSizedBox(const Size.square(100.0)),
     );
-    layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
+    layout(sizer, constraints: BoxConstraints.tight(const Size.square(100.0)), alignment: Alignment.topLeft);
 
     expect(round(inner.globalToLocal(const Offset(25.0, 50.0))), equals(const Offset(25.0, 50.0)));
     expect(inner.globalToLocal(const Offset(25.0, 17.0)).dy, greaterThan(0.0));
@@ -154,9 +154,9 @@ void main() {
     final RenderBox sizer = RenderTransform(
       transform: rotateAroundXAxis(math.pi * 0.4999), // at pi/2, we're seeing the box on its edge,
       alignment: Alignment.center,
-      child: inner = RenderSizedBox(const Size(100.0, 100.0)),
+      child: inner = RenderSizedBox(const Size.square(100.0)),
     );
-    layout(sizer, constraints: BoxConstraints.tight(const Size(100.0, 100.0)), alignment: Alignment.topLeft);
+    layout(sizer, constraints: BoxConstraints.tight(const Size.square(100.0)), alignment: Alignment.topLeft);
 
     // the inner widget has a height of about half a pixel at this rotation, so
     // everything should end up around the middle of the outer box.

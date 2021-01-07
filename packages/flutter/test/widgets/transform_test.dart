@@ -394,7 +394,7 @@ class TestRectPainter extends CustomPainter {
   @override
   void paint(ui.Canvas canvas, ui.Size size) {
     canvas.drawRect(
-      const Offset(200, 200) & const Size(10, 10),
+      const Offset(200, 200) & const Size.square(10),
       Paint()..color = const Color(0xFFFF0000),
     );
   }

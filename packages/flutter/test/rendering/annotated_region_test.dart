@@ -81,7 +81,7 @@ void main() {
       ];
       int i = 0;
       for (final OffsetLayer layer in layers) {
-        final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
+        final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size.square(100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
         i += 1;
@@ -116,7 +116,7 @@ void main() {
 
     test('does not clip Layer.find on an AnnotatedRegion with an unrelated type', () {
       final AnnotatedRegionLayer<int> child = AnnotatedRegionLayer<int>(1);
-      final AnnotatedRegionLayer<String> parent = AnnotatedRegionLayer<String>('hello', size: const Size(10.0, 10.0));
+      final AnnotatedRegionLayer<String> parent = AnnotatedRegionLayer<String>('hello', size: const Size.square(10.0));
       final ContainerLayer layer = ContainerLayer();
       parent.append(child);
       layer.append(parent);
@@ -210,7 +210,7 @@ void main() {
       ];
       int i = 0;
       for (final OffsetLayer layer in layers) {
-        final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
+        final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size.square(100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
         i += 1;
@@ -228,11 +228,11 @@ void main() {
 
       int index = 0;
       final List<AnnotatedRegionLayer<int>> layers = <AnnotatedRegionLayer<int>>[
-        AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0)),
-        AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0)),
+        AnnotatedRegionLayer<int>(index++, size: const Size.square(100.0)),
+        AnnotatedRegionLayer<int>(index++, size: const Size.square(100.0)),
       ];
       for (final ContainerLayer layer in layers) {
-        final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0));
+        final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(index++, size: const Size.square(100.0));
         layer.append(annotatedRegionLayer);
         parent.append(layer);
       }
@@ -266,7 +266,7 @@ void main() {
 
     test('does not clip Layer.find on an AnnotatedRegion with an unrelated type', () {
       final AnnotatedRegionLayer<int> child = AnnotatedRegionLayer<int>(1);
-      final AnnotatedRegionLayer<String> parent = AnnotatedRegionLayer<String>('hello', size: const Size(10.0, 10.0));
+      final AnnotatedRegionLayer<String> parent = AnnotatedRegionLayer<String>('hello', size: const Size.square(10.0));
       final ContainerLayer layer = ContainerLayer();
       parent.append(child);
       layer.append(parent);

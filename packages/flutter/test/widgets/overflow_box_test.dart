@@ -56,14 +56,14 @@ void main() {
       textDirection: TextDirection.rtl,
       child: Center(
         child: SizedOverflowBox(
-          size: const Size(100.0, 100.0),
+          size: const Size.square(100.0),
           alignment: Alignment.topRight,
           child: Container(height: 50.0, width: 50.0, key: inner),
         ),
       ),
     ));
     final RenderBox box = inner.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.size, equals(const Size(50.0, 50.0)));
+    expect(box.size, equals(const Size.square(50.0)));
     expect(
       box.localToGlobal(box.size.center(Offset.zero)),
       equals(const Offset(
@@ -79,14 +79,14 @@ void main() {
       textDirection: TextDirection.rtl,
       child: Center(
         child: SizedOverflowBox(
-          size: const Size(100.0, 100.0),
+          size: const Size.square(100.0),
           alignment: AlignmentDirectional.bottomStart,
           child: Container(height: 50.0, width: 50.0, key: inner),
         ),
       ),
     ));
     final RenderBox box = inner.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.size, equals(const Size(50.0, 50.0)));
+    expect(box.size, equals(const Size.square(50.0)));
     expect(
       box.localToGlobal(box.size.center(Offset.zero)),
       equals(const Offset(

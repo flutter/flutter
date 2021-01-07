@@ -964,7 +964,7 @@ class TextInputConnection {
     if (rect == _cachedRect)
       return;
     _cachedRect = rect;
-    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size.square(-1);
     TextInput._instance._setComposingTextRect(
       <String, dynamic>{
         'width': validRect.width,

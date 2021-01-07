@@ -134,7 +134,7 @@ void main() {
         offset: 0,
       ),
     );
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    editable.layout(BoxConstraints.loose(const Size.square(1000.0)));
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
       paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
@@ -168,7 +168,7 @@ void main() {
 
     layout(editable);
 
-    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    editable.layout(BoxConstraints.loose(const Size.square(100)));
     expect(
       editable,
       // Draw no cursor by default.
@@ -231,7 +231,7 @@ void main() {
 
     layout(editable);
 
-    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    editable.layout(BoxConstraints.loose(const Size.square(100)));
     expect(editable.textAlign, TextAlign.start);
     expect(editable.debugNeedsLayout, isFalse);
 
@@ -267,7 +267,7 @@ void main() {
 
     layout(editable);
 
-    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    editable.layout(BoxConstraints.loose(const Size.square(100)));
     expect(
       editable,
       // Draw no cursor by default.
@@ -654,7 +654,7 @@ void main() {
       promptRectColor: promptRectColor,
       promptRectRange: const TextRange(start: 0, end: 1),
     );
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    editable.layout(BoxConstraints.loose(const Size.square(1000.0)));
 
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
@@ -663,7 +663,7 @@ void main() {
 
     editable.promptRectColor = null;
 
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    editable.layout(BoxConstraints.loose(const Size.square(1000.0)));
     pumpFrame();
 
     expect(editable.promptRectColor, promptRectColor);
@@ -735,7 +735,7 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(500.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
 
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    editable.layout(BoxConstraints.loose(const Size.square(1000.0)));
     expect(editable.maxScrollExtent, equals(10));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42772
 
@@ -1506,7 +1506,7 @@ void main() {
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
     );
-    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    editable.layout(BoxConstraints.loose(const Size.square(100)));
     final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
       const TextSelection(baseOffset: 0, extentOffset: 1));
     expect(endpoints[0].point.dx, 0);
