@@ -27,7 +27,6 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   const CupertinoTextSelectionToolbarButton({
     Key? key,
     this.onPressed,
-    this.padding,
     required this.child,
   }) : super(key: key);
 
@@ -38,9 +37,6 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   /// Called when this button is pressed.
   final VoidCallback? onPressed;
-
-  /// Padding for the underlying [CupertinoButton].
-  final EdgeInsetsGeometry? padding;
 
   /// Returns a [Text] widget in the style of the iOS text selection toolbar
   /// buttons.

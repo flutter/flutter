@@ -28,6 +28,22 @@ const Radius _kToolbarBorderRadius = Radius.circular(8);
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
 const Color _kToolbarDividerColor = Color(0xFF808080);
 
+/// The type for a Function that builds a toolbar's container with the given
+/// child.
+///
+/// See also:
+///
+///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is of this type.
+///   * [TextSelectionToolbar.toolbarBuilder], which is similar, but for an
+///     Material-style toolbar.
+typedef CupertinoToolbarBuilder = Widget Function(
+  BuildContext context,
+  Offset anchor,
+  bool isAbove,
+  Widget child,
+);
+
+
 /// An iOS-style text selection toolbar.
 ///
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
@@ -44,6 +60,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     required this.anchorAbove,
     required this.anchorBelow,
     required this.children,
+    this.toolbarBuilder = _defaultToolbarBuilder,
     // TODO(justinmc): Add toolbarBuilder.
   }) : assert(children.length > 0),
        super(key: key);
@@ -61,6 +78,29 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   ///     Cupertino-style text selection toolbar text button.
   final List<Widget> children;
 
+  /// Builds the toolbar container.
+  ///
+  /// Useful for customizing the high-level background of the toolbar. The given
+  /// child Widget will contain all of the [children] and will continue to
+  /// handle overflow as usual.
+  ///
+  /// The given anchor and isAbove can be used to position an arrow, as in the
+  /// default Cupertino toolbar.
+  final CupertinoToolbarBuilder toolbarBuilder;
+
+  // Builds a toolbar just like the default iOS toolbar, with the right color
+  // background and a rounded cutout with an arrow.
+  static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, bool isAbove, Widget child) {
+    return _CupertinoTextSelectionToolbarShape(
+      anchor: anchor,
+      isAbove: isAbove,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(color: _kToolbarDividerColor),
+        child: child,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -76,13 +116,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     return _CupertinoTextSelectionToolbarPosition(
       anchor: anchor,
       isAbove: isAbove,
-      child: _CupertinoTextSelectionToolbarShape(
+      child: _CupertinoTextSelectionToolbarContent(
         anchor: anchor,
         isAbove: isAbove,
-        child: _CupertinoTextSelectionToolbarContent(
-          isAbove: isAbove,
-          children: children,
-        ),
+        toolbarBuilder: toolbarBuilder,
+        children: children,
       ),
     );
   }
@@ -416,15 +454,19 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   const _CupertinoTextSelectionToolbarContent({
     Key? key,
-    required this.children,
+    required this.anchor,
     required this.isAbove,
+    required this.toolbarBuilder,
+    required this.children,
   }) : assert(children != null),
        // This ignore is used because .isNotEmpty isn't compatible with const.
        assert(children.length > 0), // ignore: prefer_is_empty
        super(key: key);
 
+  final Offset anchor;
   final List<Widget> children;
   final bool isAbove;
+  final CupertinoToolbarBuilder toolbarBuilder;
 
   @override
   _CupertinoTextSelectionToolbarContentState createState() => _CupertinoTextSelectionToolbarContentState();
@@ -492,28 +534,25 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: _kToolbarDividerColor),
-      child: FadeTransition(
-        opacity: _controller,
-        child: _CupertinoTextSelectionToolbarItems(
-          page: _page,
-          backButton: CupertinoTextSelectionToolbarButton(
-            onPressed: _handlePreviousPage,
-            child: CupertinoTextSelectionToolbarButton.getText('◀'),
-          ),
-          dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
-          nextButton: CupertinoTextSelectionToolbarButton(
-            onPressed: _handleNextPage,
-            child: CupertinoTextSelectionToolbarButton.getText('▶'),
-          ),
-          nextButtonDisabled: CupertinoTextSelectionToolbarButton(
-            child: CupertinoTextSelectionToolbarButton.getText('◀', false),
-          ),
-          children: widget.children,
+    return widget.toolbarBuilder(context, widget.anchor, widget.isAbove, FadeTransition(
+      opacity: _controller,
+      child: _CupertinoTextSelectionToolbarItems(
+        page: _page,
+        backButton: CupertinoTextSelectionToolbarButton(
+          onPressed: _handlePreviousPage,
+          child: CupertinoTextSelectionToolbarButton.getText('◀'),
         ),
+        dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
+        nextButton: CupertinoTextSelectionToolbarButton(
+          onPressed: _handleNextPage,
+          child: CupertinoTextSelectionToolbarButton.getText('▶'),
+        ),
+        nextButtonDisabled: CupertinoTextSelectionToolbarButton(
+          child: CupertinoTextSelectionToolbarButton.getText('◀', false),
+        ),
+        children: widget.children,
       ),
-    );
+    ));
   }
 }
 
@@ -724,6 +763,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 }
 
+// TODO(justinmc): Rename to _RenderCupertinoTextSelectionToolbarItems.
 // The custom RenderBox that helps paginate the menu items.
 class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
   _CupertinoTextSelectionToolbarItemsRenderBox({
@@ -807,6 +847,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         _backButton!.size.width + _nextButton!.size.width;
     double currentButtonPosition = 0.0;
     late double toolbarWidth; // The width of the whole widget.
+    late double greatestHeight = 0.0;
     late double firstPageWidth;
     int currentPage = 0;
     int i = -1;
@@ -839,6 +880,10 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         )),
         parentUsesSize: true,
       );
+
+      greatestHeight = child.size.height > greatestHeight
+          ? child.size.height
+          : greatestHeight;
 
       // If this child causes the current page to overflow, move to the next
       // page and relayout the child.
@@ -902,7 +947,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       toolbarWidth -= dividerWidth;
     }
 
-    size = constraints.constrain(Size(toolbarWidth, _kToolbarHeight));
+    size = constraints.constrain(Size(toolbarWidth, greatestHeight));
   }
 
   @override

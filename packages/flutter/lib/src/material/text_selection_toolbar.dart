@@ -25,6 +25,8 @@ const double _kToolbarHeight = 44.0;
 /// See also:
 ///
 ///   * [TextSelectionToolbar.toolbarBuilder], which is of this type.
+///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is similar, but
+///     for a Cupertino-style toolbar.
 typedef ToolbarBuilder = Widget Function(BuildContext context, Widget child);
 
 /// A fully-functional Material-style text selection toolbar.
