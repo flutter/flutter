@@ -127,7 +127,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   FlutterProject _project;
 
-  Future<List<BuildInfo>> get buildInfos async {
+  Future<List<BuildInfo>> getBuildInfos() async {
     final List<BuildInfo> buildInfos = <BuildInfo>[];
 
     if (boolArg('debug')) {
@@ -154,7 +154,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     if (boolArg('universal')) {
       throwToolExit('--universal has been deprecated, only XCFrameworks are supported.');
     }
-    if ((await buildInfos).isEmpty) {
+    if ((await getBuildInfos()).isEmpty) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
     }
   }
@@ -173,8 +173,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     }
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
-
-    for (final BuildInfo buildInfo in await buildInfos) {
+    final List<BuildInfo> buildInfos = await getBuildInfos();
+    displayNullSafetyMode(buildInfos.first);
+    for (final BuildInfo buildInfo in buildInfos) {
       final String productBundleIdentifier = await _project.ios.productBundleIdentifier(buildInfo);
       globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(buildInfo.mode));
