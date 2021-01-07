@@ -299,7 +299,10 @@ class DrawerController extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double? edgeDragWidth;
 
-  /// Whether or not the drawer is initially opened or closed.
+  /// Whether or not the drawer is opened or closed.
+  ///
+  /// This parameter is primarily used by the state restoration framework
+  /// to restore the animation controller to the open or closed state.
   final bool isDrawerOpen;
 
   @override
