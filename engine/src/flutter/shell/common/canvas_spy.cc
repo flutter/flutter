@@ -153,6 +153,15 @@ void DidDrawCanvas::onDrawAtlas(const SkImage* image,
                                 const SkPaint* paint) {
   did_draw_ = true;
 }
+
+void DidDrawCanvas::onDrawEdgeAAImageSet(const ImageSetEntry set[],
+                                         int count,
+                                         const SkPoint dstClips[],
+                                         const SkMatrix preViewMatrices[],
+                                         const SkPaint* paint,
+                                         SrcRectConstraint constraint) {
+  did_draw_ = true;
+}
 #endif
 
 void DidDrawCanvas::onDrawImage2(const SkImage* image,
@@ -243,12 +252,13 @@ void DidDrawCanvas::onDrawEdgeAAQuad(const SkRect& rect,
   did_draw_ = true;
 }
 
-void DidDrawCanvas::onDrawEdgeAAImageSet(const ImageSetEntry set[],
-                                         int count,
-                                         const SkPoint dstClips[],
-                                         const SkMatrix preViewMatrices[],
-                                         const SkPaint* paint,
-                                         SrcRectConstraint constraint) {
+void DidDrawCanvas::onDrawEdgeAAImageSet2(const ImageSetEntry set[],
+                                          int count,
+                                          const SkPoint dstClips[],
+                                          const SkMatrix preViewMatrices[],
+                                          const SkSamplingOptions&,
+                                          const SkPaint* paint,
+                                          SrcRectConstraint constraint) {
   did_draw_ = true;
 }
 

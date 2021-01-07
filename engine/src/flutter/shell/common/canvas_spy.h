@@ -152,6 +152,13 @@ class DidDrawCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
                    SkBlendMode,
                    const SkRect*,
                    const SkPaint*) override;
+  // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
+  void onDrawEdgeAAImageSet(const ImageSetEntry[],
+                            int count,
+                            const SkPoint[],
+                            const SkMatrix[],
+                            const SkPaint*,
+                            SrcRectConstraint) override;
 #endif
 
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
@@ -226,12 +233,13 @@ class DidDrawCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
                         SkBlendMode) override;
 
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
-  void onDrawEdgeAAImageSet(const ImageSetEntry[],
-                            int count,
-                            const SkPoint[],
-                            const SkMatrix[],
-                            const SkPaint*,
-                            SrcRectConstraint) override;
+  void onDrawEdgeAAImageSet2(const ImageSetEntry[],
+                             int count,
+                             const SkPoint[],
+                             const SkMatrix[],
+                             const SkSamplingOptions&,
+                             const SkPaint*,
+                             SrcRectConstraint) override;
 
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
   void onFlush() override;
