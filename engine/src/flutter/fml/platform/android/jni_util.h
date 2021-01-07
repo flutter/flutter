@@ -17,6 +17,8 @@ namespace jni {
 
 void InitJavaVM(JavaVM* vm);
 
+// Returns a JNI environment for the current thread.
+// Attaches the thread to JNI if needed.
 JNIEnv* AttachCurrentThread();
 
 void DetachFromVM();
