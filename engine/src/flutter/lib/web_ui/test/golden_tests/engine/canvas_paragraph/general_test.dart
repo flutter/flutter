@@ -17,25 +17,6 @@ typedef CanvasTest = FutureOr<void> Function(EngineCanvas canvas);
 
 const Rect bounds = Rect.fromLTWH(0, 0, 800, 600);
 
-const Color white = Color(0xFFFFFFFF);
-const Color black = Color(0xFF000000);
-const Color red = Color(0xFFFF0000);
-const Color green = Color(0xFF00FF00);
-const Color blue = Color(0xFF0000FF);
-
-ParagraphConstraints constrain(double width) {
-  return ParagraphConstraints(width: width);
-}
-
-CanvasParagraph rich(
-  EngineParagraphStyle style,
-  void Function(CanvasParagraphBuilder) callback,
-) {
-  final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
-  callback(builder);
-  return builder.build();
-}
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
