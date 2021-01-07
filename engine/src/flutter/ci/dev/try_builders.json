@@ -26,6 +26,11 @@
          "enabled": true
       },
       {
+         "name":"Linux Arm Host Engine",
+         "repo":"engine",
+         "enabled": true
+      },
+      {
          "name":"Linux Web Engine",
          "repo":"engine",
          "enabled": true,

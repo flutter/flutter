@@ -13,6 +13,10 @@
          "repo":"engine"
       },
       {
+         "name":"Linux Arm Host Engine",
+         "repo":"engine"
+      },
+      {
          "name":"Linux Fuchsia",
          "repo":"engine"
       },
