@@ -1,0 +1,19 @@
+name: Issue Labeled
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  issue-labeled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: waiting for customer response
+        if: github.event.label.name == 'waiting for customer response'
+        uses: actions-cool/issues-helper@v1.8
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hello @${{ github.event.issue.user.login }}. Please provide your `flutter doctor -v`, your `flutter run --verbose` and a minimal complete reproducible code sample? Thank you!
