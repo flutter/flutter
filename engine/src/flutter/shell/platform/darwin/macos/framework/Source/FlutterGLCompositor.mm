@@ -20,8 +20,9 @@
 
 namespace flutter {
 
-FlutterGLCompositor::FlutterGLCompositor(FlutterViewController* view_controller)
-    : open_gl_context_(view_controller.flutterView.openGLContext) {
+FlutterGLCompositor::FlutterGLCompositor(FlutterViewController* view_controller,
+                                         NSOpenGLContext* opengl_context)
+    : open_gl_context_(opengl_context) {
   FML_CHECK(view_controller != nullptr) << "FlutterViewController* cannot be nullptr";
   view_controller_ = view_controller;
 }

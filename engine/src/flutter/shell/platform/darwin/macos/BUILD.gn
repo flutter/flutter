@@ -64,6 +64,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterIntermediateKeyResponder.mm",
     "framework/Source/FlutterMouseCursorPlugin.h",
     "framework/Source/FlutterMouseCursorPlugin.mm",
+    "framework/Source/FlutterOpenGLRenderer.h",
+    "framework/Source/FlutterOpenGLRenderer.mm",
     "framework/Source/FlutterResizeSynchronizer.h",
     "framework/Source/FlutterResizeSynchronizer.mm",
     "framework/Source/FlutterSurfaceManager.h",
@@ -129,6 +131,7 @@ executable("flutter_desktop_darwin_unittests") {
   sources = [
     "framework/Source/FlutterEngineTest.mm",
     "framework/Source/FlutterGLCompositorUnittests.mm",
+    "framework/Source/FlutterOpenGLRendererTest.mm",
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/FlutterViewControllerTestUtils.h",
     "framework/Source/FlutterViewControllerTestUtils.mm",

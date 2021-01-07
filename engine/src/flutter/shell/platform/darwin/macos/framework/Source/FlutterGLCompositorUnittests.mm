@@ -14,7 +14,7 @@ TEST(FlutterGLCompositorTest, TestPresent) {
   id mockViewController = CreateMockViewController(nil);
 
   std::unique_ptr<flutter::FlutterGLCompositor> macos_compositor =
-      std::make_unique<FlutterGLCompositor>(mockViewController);
+      std::make_unique<FlutterGLCompositor>(mockViewController, nullptr);
 
   bool flag = false;
   macos_compositor->SetPresentCallback([f = &flag]() {
