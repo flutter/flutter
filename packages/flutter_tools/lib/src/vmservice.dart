@@ -153,10 +153,16 @@ final Expando<Uri> _httpAddressExpando = Expando<Uri>();
 final Expando<Uri> _wsAddressExpando = Expando<Uri>();
 
 void setHttpAddress(Uri uri, vm_service.VmService vmService) {
+  if(vmService == null) {
+    return;
+  }
   _httpAddressExpando[vmService] = uri;
 }
 
 void setWsAddress(Uri uri, vm_service.VmService vmService) {
+  if(vmService == null) {
+    return;
+  }
   _wsAddressExpando[vmService] = uri;
 }
 
