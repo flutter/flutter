@@ -32,6 +32,10 @@ AXTestSmallBankUniqueId::AXTestSmallBankUniqueId() : AXUniqueId(kMaxId) {}
 AXTestSmallBankUniqueId::~AXTestSmallBankUniqueId() = default;
 
 TEST(AXPlatformUniqueIdTest, UnassignedIdsAreReused) {
+  // TODO(chunhtai): enable this test once the flake has been
+  // resolved.
+  // https://github.com/flutter/flutter/issues/73512
+  GTEST_SKIP() << "Flaky Test: https://github.com/flutter/flutter/issues/73512";
   // Create a bank of ids that uses up all available ids.
   // Then remove an id and replace with a new one. Since it's the only
   // slot available, the id will end up having the same value, rather than
