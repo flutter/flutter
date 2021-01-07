@@ -247,12 +247,12 @@ abstract class Action<T extends Intent> with Diagnosticable {
 /// the [listener] in the widget lifecycle.
 ///
 /// ```dart preamble
-/// class ExampleActionListener extends StatefulWidget {
+/// class ActionListenerExample extends StatefulWidget {
 ///   @override
-///   _ExampleActionListenerState createState() => _ExampleActionListenerState();
+///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
 /// }
 ///
-/// class _ExampleActionListenerState extends State<ExampleActionListener> {
+/// class _ActionListenerExampleState extends State<ActionListenerExample> {
 ///   bool _on = false;
 ///   late final MyAction _myAction;
 ///
@@ -260,6 +260,12 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///   void initState() {
 ///     super.initState();
 ///     _myAction = MyAction();
+///   }
+///
+///   void _toggleState() {
+///     setState(() {
+///       _on = !_on;
+///     });
 ///   }
 ///
 ///   @override
@@ -282,7 +288,8 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///                   listener: (Action<Intent> action) {
 ///                     if (action.intentType == MyIntent) {
 ///                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-///                           content: const Text('Action Listener Called')));
+///                           content: const Text('Action Listener Called'),
+///                       ));
 ///                     }
 ///                   },
 ///                   action: _myAction,
@@ -296,12 +303,6 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///             : Container(),
 ///       ],
 ///     );
-///   }
-///
-///   void _toggleState() {
-///     setState(() {
-///       _on = !_on;
-///     });
 ///   }
 /// }
 ///
@@ -331,7 +332,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return ExampleActionListener();
+///   return ActionListenerExample();
 /// }
 /// ```
 /// {@end-tool}
@@ -496,10 +497,10 @@ class ActionDispatcher with Diagnosticable {
   /// calling this function. This function will assert if the action is not
   /// enabled when called.
   Object? invokeAction(
-      covariant Action<Intent> action,
-      covariant Intent intent, [
-        BuildContext? context,
-      ]) {
+    covariant Action<Intent> action,
+    covariant Intent intent, [
+    BuildContext? context,
+  ]) {
     assert(action != null);
     assert(intent != null);
     assert(action.isEnabled(intent), 'Action must be enabled when calling invokeAction');
@@ -637,10 +638,10 @@ class Actions extends StatefulWidget {
     // concrete type of the intent at compile time.
     final Type type = intent?.runtimeType ?? T;
     assert(type != Intent,
-    'The type passed to "find" resolved to "Intent": either a non-Intent'
-        'generic type argument or an example intent derived from Intent must be'
-        'specified. Intent may be used as the generic type as long as the optional'
-        '"intent" argument is passed.');
+      'The type passed to "find" resolved to "Intent": either a non-Intent'
+      'generic type argument or an example intent derived from Intent must be'
+      'specified. Intent may be used as the generic type as long as the optional'
+      '"intent" argument is passed.');
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final _ActionsMarker actions = element.widget as _ActionsMarker;
@@ -705,10 +706,10 @@ class Actions extends StatefulWidget {
   /// whether or not the action is available (found, and not disabled) using
   /// [Actions.find] with its `nullOk` argument set to true.
   static Object? invoke<T extends Intent>(
-      BuildContext context,
-      T intent, {
-        bool nullOk = false,
-      }) {
+    BuildContext context,
+    T intent, {
+    bool nullOk = false,
+  }) {
     assert(intent != null);
     assert(nullOk != null);
     assert(context != null);
