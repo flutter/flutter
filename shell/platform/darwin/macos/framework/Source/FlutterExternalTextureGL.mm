@@ -32,7 +32,7 @@ static void OnCVOpenGLTextureRelease(CVOpenGLTextureRef cvOpenGLTexture) {
 }
 
 - (int64_t)textureID {
-  return reinterpret_cast<int64_t>(self);
+  return reinterpret_cast<int64_t>(_texture);
 }
 
 - (BOOL)populateTexture:(FlutterOpenGLTexture*)openGLTexture {
