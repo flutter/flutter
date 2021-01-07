@@ -5674,6 +5674,25 @@ void main() {
         }),
       );
     });
+
+    testWidgets('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
+      final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
+      const Color color = Color.fromARGB(255, 1, 2, 3);
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.light().copyWith(accentColor: color),
+        home: EditableText(
+          controller: controller,
+          focusNode: FocusNode(),
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ));
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final TextSpan textSpan = renderEditable.text!;
+      expect(textSpan.style!.color, color);
+    });
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
@@ -6898,6 +6917,47 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/72400.
+  testWidgets("delete doesn't cause crash when selection is -1,-1", (WidgetTester tester) async {
+    final UnsettableController unsettableController = UnsettableController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            autofocus: true,
+            controller: unsettableController,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(); // Wait for the autofocus to take effect.
+
+    // Delete
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+      platform: 'android',
+    );
+
+    expect(tester.takeException(), null);
+  });
+}
+
+class UnsettableController extends TextEditingController {
+  @override
+  set value(TextEditingValue v) {
+    // Do nothing for set, which causes selection to remain as -1, -1.
+  }
 }
 
 class MockTextFormatter extends TextInputFormatter {
@@ -7108,4 +7168,14 @@ class SkipPainting extends SingleChildRenderObjectWidget {
 class SkipPaintingRenderObject extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) { }
+}
+
+class _AccentColorTextEditingController extends TextEditingController {
+  _AccentColorTextEditingController(String text) : super(text: text);
+
+  @override
+  TextSpan buildTextSpan({TextStyle? style, required bool withComposing, required BuildContext context}) {
+    final Color color = Theme.of(context).accentColor;
+    return super.buildTextSpan(style: TextStyle(color: color), withComposing: withComposing, context: context);
+  }
 }
