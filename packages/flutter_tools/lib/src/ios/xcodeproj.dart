@@ -110,7 +110,6 @@ void _updateGeneratedEnvironmentVariablesScript({
   for (final String line in xcodeBuildSettings) {
     localsBuffer.writeln('export "$line"');
   }
-  localsBuffer.writeln('export VERBOSE_SCRIPT_LOGGING=1');
 
   final File generatedModuleBuildPhaseScript = useMacOSConfig
     ? project.macos.generatedEnvironmentVariableExportScript
