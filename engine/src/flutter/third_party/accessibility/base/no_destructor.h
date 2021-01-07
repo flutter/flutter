@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef BASE_NO_DESTRUCTOR_H_
-#define BASE_NO_DESTRUCTOR_H_
+#ifndef ACCESSIBILITY_BASE_NO_DESTRUCTOR_H_
+#define ACCESSIBILITY_BASE_NO_DESTRUCTOR_H_
 
 #include <new>
 #include <utility>
@@ -95,4 +95,4 @@ class NoDestructor {
 
 }  // namespace base
 
-#endif  // BASE_NO_DESTRUCTOR_H_
+#endif  // ACCESSIBILITY_BASE_NO_DESTRUCTOR_H_

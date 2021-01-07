@@ -4,11 +4,10 @@
 
 #include <stddef.h>
 
-#include "base/stl_util.h"
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/gfx/geometry/point.h"
-#include "ui/gfx/geometry/point_conversions.h"
-#include "ui/gfx/geometry/point_f.h"
+#include "gtest/gtest.h"
+#include "point.h"
+#include "point_conversions.h"
+#include "point_f.h"
 
 namespace gfx {
 
@@ -55,7 +54,7 @@ TEST(PointTest, VectorArithmetic) {
                {Point(12, 1), a + v1 - v2},
                {Point(-10, 9), a - v1 + v2}};
 
-  for (size_t i = 0; i < base::size(tests); ++i)
+  for (size_t i = 0; i < 7; ++i)
     EXPECT_EQ(tests[i].expected.ToString(), tests[i].actual.ToString());
 }
 

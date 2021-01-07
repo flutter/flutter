@@ -8,15 +8,13 @@
 #include <ostream>
 #include <string>
 
-#include "base/callback.h"
-#include "base/lazy_instance.h"
-#include "base/observer_list.h"
-#include "build/build_config.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_mode.h"
-#include "ui/accessibility/ax_mode_observer.h"
-#include "ui/gfx/native_widget_types.h"
+#include "ax/ax_enums.h"
+#include "ax/ax_export.h"
+#include "ax/ax_mode.h"
+#include "ax/ax_mode_observer.h"
+#include "ax_build/build_config.h"
+#include "base/macros.h"
+#include "gfx/native_widget_types.h"
 
 namespace ui {
 
@@ -29,8 +27,7 @@ class AXPlatformNodeDelegate;
 // own the AXPlatformNode instance (or otherwise manage its lifecycle).
 class AX_EXPORT AXPlatformNode {
  public:
-  using NativeWindowHandlerCallback =
-      base::RepeatingCallback<AXPlatformNode*(gfx::NativeWindow)>;
+  typedef AXPlatformNode* NativeWindowHandlerCallback(gfx::NativeWindow);
 
   // Create an appropriate platform-specific instance. The delegate owns the
   // AXPlatformNode instance (or manages its lifecycle in some other way).
@@ -46,7 +43,8 @@ class AX_EXPORT AXPlatformNode {
 
   // Provide a function that returns the AXPlatformNode at the root of the
   // tree for a native window.
-  static void RegisterNativeWindowHandler(NativeWindowHandlerCallback handler);
+  static void RegisterNativeWindowHandler(
+      std::function<NativeWindowHandlerCallback> handler);
 
   // Register and unregister to receive notifications about AXMode changes
   // for this node.
@@ -83,7 +81,7 @@ class AX_EXPORT AXPlatformNode {
 
 #if defined(OS_APPLE)
   // Fire a platform-specific notification to announce |text|.
-  virtual void AnnounceText(const base::string16& text) = 0;
+  virtual void AnnounceText(const std::u16string& text) = 0;
 #endif
 
   // Return this object's delegate.
@@ -113,14 +111,8 @@ class AX_EXPORT AXPlatformNode {
   virtual ~AXPlatformNode();
 
  private:
-  FRIEND_TEST_ALL_PREFIXES(AtkUtilAuraLinuxTest, KeySnooping);
-
-  // Global ObserverList for AXMode changes.
-  static base::LazyInstance<
-      base::ObserverList<AXModeObserver>::Unchecked>::Leaky ax_mode_observers_;
-
-  static base::LazyInstance<NativeWindowHandlerCallback>::Leaky
-      native_window_handler_;
+  static std::vector<AXModeObserver*> ax_mode_observers_;
+  static std::function<NativeWindowHandlerCallback> native_window_handler_;
 
   static AXMode ax_mode_;
 
@@ -131,7 +123,7 @@ class AX_EXPORT AXPlatformNode {
 
   bool is_primary_web_contents_for_window_ = false;
 
-  DISALLOW_COPY_AND_ASSIGN(AXPlatformNode);
+  BASE_DISALLOW_COPY_AND_ASSIGN(AXPlatformNode);
 };
 
 }  // namespace ui

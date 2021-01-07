@@ -7,8 +7,8 @@
 
 #include <string>
 
-#include "ui/accessibility/ax_base_export.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
+#include "ax_base_export.h"
+#include "ax_enums.h"
 
 namespace ui {
 

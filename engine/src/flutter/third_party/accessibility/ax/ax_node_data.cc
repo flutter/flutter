@@ -2,24 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_node_data.h"
+#include "ax_node_data.h"
 
 #include <stddef.h>
-
 #include <algorithm>
 #include <set>
 #include <utility>
 
+#include "ax_enum_util.h"
+#include "ax_role_properties.h"
+#include "base/container_utils.h"
+#include "base/logging.h"
 #include "base/no_destructor.h"
-#include "base/stl_util.h"
-#include "base/strings/string_number_conversions.h"
-#include "base/strings/string_util.h"
-#include "base/strings/stringprintf.h"
-#include "base/strings/utf_string_conversions.h"
-#include "ui/accessibility/ax_enum_util.h"
-#include "ui/accessibility/ax_enums.mojom.h"
-#include "ui/accessibility/ax_role_properties.h"
-#include "ui/gfx/transform.h"
+#include "base/string_utils.h"
 
 namespace ui {
 
@@ -172,7 +167,7 @@ bool IsNodeIdIntAttribute(ax::mojom::IntAttribute attr) {
       return false;
   }
 
-  NOTREACHED();
+  BASE_UNREACHABLE();
   return false;
 }
 
@@ -205,7 +200,7 @@ bool IsNodeIdIntListAttribute(ax::mojom::IntListAttribute attr) {
       return false;
   }
 
-  NOTREACHED();
+  BASE_UNREACHABLE();
   return false;
 }
 
@@ -325,7 +320,7 @@ bool AXNodeData::GetIntAttribute(ax::mojom::IntAttribute attribute,
                                  int* value) const {
   auto iter = FindInVectorOfPairs(attribute, int_attributes);
   if (iter != int_attributes.end()) {
-    *value = int{iter->second};
+    *value = static_cast<int>(iter->second);
     return true;
   }
 
@@ -355,16 +350,16 @@ bool AXNodeData::GetStringAttribute(ax::mojom::StringAttribute attribute,
   return false;
 }
 
-base::string16 AXNodeData::GetString16Attribute(
+std::u16string AXNodeData::GetString16Attribute(
     ax::mojom::StringAttribute attribute) const {
   std::string value_utf8;
   if (!GetStringAttribute(attribute, &value_utf8))
-    return base::string16();
+    return std::u16string();
   return base::UTF8ToUTF16(value_utf8);
 }
 
 bool AXNodeData::GetString16Attribute(ax::mojom::StringAttribute attribute,
-                                      base::string16* value) const {
+                                      std::u16string* value) const {
   std::string value_utf8;
   if (!GetStringAttribute(attribute, &value_utf8))
     return false;
@@ -440,7 +435,7 @@ bool AXNodeData::GetHtmlAttribute(const char* html_attr,
 }
 
 bool AXNodeData::GetHtmlAttribute(const char* html_attr,
-                                  base::string16* value) const {
+                                  std::u16string* value) const {
   std::string value_utf8;
   if (!GetHtmlAttribute(html_attr, &value_utf8))
     return false;
@@ -450,14 +445,14 @@ bool AXNodeData::GetHtmlAttribute(const char* html_attr,
 
 void AXNodeData::AddStringAttribute(ax::mojom::StringAttribute attribute,
                                     const std::string& value) {
-  DCHECK_NE(attribute, ax::mojom::StringAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::StringAttribute::kNone);
   if (HasStringAttribute(attribute))
     RemoveStringAttribute(attribute);
   string_attributes.push_back(std::make_pair(attribute, value));
 }
 
 void AXNodeData::AddIntAttribute(ax::mojom::IntAttribute attribute, int value) {
-  DCHECK_NE(attribute, ax::mojom::IntAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::IntAttribute::kNone);
   if (HasIntAttribute(attribute))
     RemoveIntAttribute(attribute);
   int_attributes.push_back(std::make_pair(attribute, value));
@@ -465,7 +460,7 @@ void AXNodeData::AddIntAttribute(ax::mojom::IntAttribute attribute, int value) {
 
 void AXNodeData::AddFloatAttribute(ax::mojom::FloatAttribute attribute,
                                    float value) {
-  DCHECK_NE(attribute, ax::mojom::FloatAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::FloatAttribute::kNone);
   if (HasFloatAttribute(attribute))
     RemoveFloatAttribute(attribute);
   float_attributes.push_back(std::make_pair(attribute, value));
@@ -473,7 +468,7 @@ void AXNodeData::AddFloatAttribute(ax::mojom::FloatAttribute attribute,
 
 void AXNodeData::AddBoolAttribute(ax::mojom::BoolAttribute attribute,
                                   bool value) {
-  DCHECK_NE(attribute, ax::mojom::BoolAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::BoolAttribute::kNone);
   if (HasBoolAttribute(attribute))
     RemoveBoolAttribute(attribute);
   bool_attributes.push_back(std::make_pair(attribute, value));
@@ -481,7 +476,7 @@ void AXNodeData::AddBoolAttribute(ax::mojom::BoolAttribute attribute,
 
 void AXNodeData::AddIntListAttribute(ax::mojom::IntListAttribute attribute,
                                      const std::vector<int32_t>& value) {
-  DCHECK_NE(attribute, ax::mojom::IntListAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::IntListAttribute::kNone);
   if (HasIntListAttribute(attribute))
     RemoveIntListAttribute(attribute);
   intlist_attributes.push_back(std::make_pair(attribute, value));
@@ -490,42 +485,42 @@ void AXNodeData::AddIntListAttribute(ax::mojom::IntListAttribute attribute,
 void AXNodeData::AddStringListAttribute(
     ax::mojom::StringListAttribute attribute,
     const std::vector<std::string>& value) {
-  DCHECK_NE(attribute, ax::mojom::StringListAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::StringListAttribute::kNone);
   if (HasStringListAttribute(attribute))
     RemoveStringListAttribute(attribute);
   stringlist_attributes.push_back(std::make_pair(attribute, value));
 }
 
 void AXNodeData::RemoveStringAttribute(ax::mojom::StringAttribute attribute) {
-  DCHECK_NE(attribute, ax::mojom::StringAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::StringAttribute::kNone);
   base::EraseIf(string_attributes, [attribute](const auto& string_attribute) {
     return string_attribute.first == attribute;
   });
 }
 
 void AXNodeData::RemoveIntAttribute(ax::mojom::IntAttribute attribute) {
-  DCHECK_NE(attribute, ax::mojom::IntAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::IntAttribute::kNone);
   base::EraseIf(int_attributes, [attribute](const auto& int_attribute) {
     return int_attribute.first == attribute;
   });
 }
 
 void AXNodeData::RemoveFloatAttribute(ax::mojom::FloatAttribute attribute) {
-  DCHECK_NE(attribute, ax::mojom::FloatAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::FloatAttribute::kNone);
   base::EraseIf(float_attributes, [attribute](const auto& float_attribute) {
     return float_attribute.first == attribute;
   });
 }
 
 void AXNodeData::RemoveBoolAttribute(ax::mojom::BoolAttribute attribute) {
-  DCHECK_NE(attribute, ax::mojom::BoolAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::BoolAttribute::kNone);
   base::EraseIf(bool_attributes, [attribute](const auto& bool_attribute) {
     return bool_attribute.first == attribute;
   });
 }
 
 void AXNodeData::RemoveIntListAttribute(ax::mojom::IntListAttribute attribute) {
-  DCHECK_NE(attribute, ax::mojom::IntListAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::IntListAttribute::kNone);
   base::EraseIf(intlist_attributes, [attribute](const auto& intlist_attribute) {
     return intlist_attribute.first == attribute;
   });
@@ -533,7 +528,7 @@ void AXNodeData::RemoveIntListAttribute(ax::mojom::IntListAttribute attribute) {
 
 void AXNodeData::RemoveStringListAttribute(
     ax::mojom::StringListAttribute attribute) {
-  DCHECK_NE(attribute, ax::mojom::StringListAttribute::kNone);
+  BASE_DCHECK(attribute != ax::mojom::StringListAttribute::kNone);
   base::EraseIf(stringlist_attributes,
                 [attribute](const auto& stringlist_attribute) {
                   return stringlist_attribute.first == attribute;
@@ -571,9 +566,13 @@ AXNodeTextStyles AXNodeData::GetTextStyles() const {
 }
 
 void AXNodeData::SetName(const std::string& name) {
-  DCHECK_NE(role, ax::mojom::Role::kNone)
-      << "A valid role is required before setting the name attribute, because "
-         "the role is used for setting the required NameFrom attribute.";
+  if (role == ax::mojom::Role::kNone) {
+    BASE_LOG()
+        << "A valid role is required before setting the name attribute, "
+           "because "
+           "the role is used for setting the required NameFrom attribute.";
+    BASE_UNREACHABLE();
+  }
 
   auto iter = std::find_if(string_attributes.begin(), string_attributes.end(),
                            [](const auto& string_attribute) {
@@ -609,7 +608,7 @@ void AXNodeData::SetName(const std::string& name) {
   }
 }
 
-void AXNodeData::SetName(const base::string16& name) {
+void AXNodeData::SetName(const std::u16string& name) {
   SetName(base::UTF16ToUTF8(name));
 }
 
@@ -621,7 +620,7 @@ void AXNodeData::SetDescription(const std::string& description) {
   AddStringAttribute(ax::mojom::StringAttribute::kDescription, description);
 }
 
-void AXNodeData::SetDescription(const base::string16& description) {
+void AXNodeData::SetDescription(const std::u16string& description) {
   SetDescription(base::UTF16ToUTF8(description));
 }
 
@@ -629,7 +628,7 @@ void AXNodeData::SetValue(const std::string& value) {
   AddStringAttribute(ax::mojom::StringAttribute::kValue, value);
 }
 
-void AXNodeData::SetValue(const base::string16& value) {
+void AXNodeData::SetValue(const std::u16string& value) {
   SetValue(base::UTF16ToUTF8(value));
 }
 
@@ -654,25 +653,25 @@ bool AXNodeData::HasDropeffect(ax::mojom::Dropeffect dropeffect_enum) const {
 }
 
 void AXNodeData::AddState(ax::mojom::State state_enum) {
-  DCHECK_GT(static_cast<int>(state_enum),
-            static_cast<int>(ax::mojom::State::kNone));
-  DCHECK_LE(static_cast<int>(state_enum),
-            static_cast<int>(ax::mojom::State::kMaxValue));
+  BASE_DCHECK(static_cast<int>(state_enum) >
+              static_cast<int>(ax::mojom::State::kNone));
+  BASE_DCHECK(static_cast<int>(state_enum) <=
+              static_cast<int>(ax::mojom::State::kMaxValue));
   state = ModifyFlag(state, static_cast<uint32_t>(state_enum), true);
 }
 
 void AXNodeData::RemoveState(ax::mojom::State state_enum) {
-  DCHECK_GT(static_cast<int>(state_enum),
-            static_cast<int>(ax::mojom::State::kNone));
-  DCHECK_LE(static_cast<int>(state_enum),
-            static_cast<int>(ax::mojom::State::kMaxValue));
+  BASE_DCHECK(static_cast<int>(state_enum) >
+              static_cast<int>(ax::mojom::State::kNone));
+  BASE_DCHECK(static_cast<int>(state_enum) <=
+              static_cast<int>(ax::mojom::State::kMaxValue));
   state = ModifyFlag(state, static_cast<uint32_t>(state_enum), false);
 }
 
 void AXNodeData::AddAction(ax::mojom::Action action_enum) {
   switch (action_enum) {
     case ax::mojom::Action::kNone:
-      NOTREACHED();
+      BASE_UNREACHABLE();
       break;
 
     // Note: all of the attributes are included here explicitly, rather than
@@ -684,7 +683,7 @@ void AXNodeData::AddAction(ax::mojom::Action action_enum) {
       ax::mojom::Action excluded_action =
           (action_enum == ax::mojom::Action::kBlur) ? ax::mojom::Action::kFocus
                                                     : ax::mojom::Action::kBlur;
-      DCHECK(!HasAction(excluded_action)) << excluded_action;
+      BASE_DCHECK(!HasAction(excluded_action));
       break;
     }
 
@@ -726,10 +725,10 @@ void AXNodeData::AddAction(ax::mojom::Action action_enum) {
 }
 
 void AXNodeData::AddTextStyle(ax::mojom::TextStyle text_style_enum) {
-  DCHECK_GE(static_cast<int>(text_style_enum),
-            static_cast<int>(ax::mojom::TextStyle::kMinValue));
-  DCHECK_LE(static_cast<int>(text_style_enum),
-            static_cast<int>(ax::mojom::TextStyle::kMaxValue));
+  BASE_DCHECK(static_cast<int>(text_style_enum) >=
+              static_cast<int>(ax::mojom::TextStyle::kMinValue));
+  BASE_DCHECK(static_cast<int>(text_style_enum) <=
+              static_cast<int>(ax::mojom::TextStyle::kMaxValue));
   int32_t style = GetIntAttribute(ax::mojom::IntAttribute::kTextStyle);
   style = ModifyFlag(static_cast<uint32_t>(style),
                      static_cast<uint32_t>(text_style_enum), true);
@@ -738,10 +737,10 @@ void AXNodeData::AddTextStyle(ax::mojom::TextStyle text_style_enum) {
 }
 
 void AXNodeData::AddDropeffect(ax::mojom::Dropeffect dropeffect_enum) {
-  DCHECK_GE(static_cast<int>(dropeffect_enum),
-            static_cast<int>(ax::mojom::Dropeffect::kMinValue));
-  DCHECK_LE(static_cast<int>(dropeffect_enum),
-            static_cast<int>(ax::mojom::Dropeffect::kMaxValue));
+  BASE_DCHECK(static_cast<int>(dropeffect_enum) >=
+              static_cast<int>(ax::mojom::Dropeffect::kMinValue));
+  BASE_DCHECK(static_cast<int>(dropeffect_enum) <=
+              static_cast<int>(ax::mojom::Dropeffect::kMaxValue));
   int32_t dropeffect = GetIntAttribute(ax::mojom::IntAttribute::kDropeffect);
   dropeffect = ModifyFlag(static_cast<uint32_t>(dropeffect),
                           static_cast<uint32_t>(dropeffect_enum), true);
@@ -959,8 +958,12 @@ bool AXNodeData::IsIgnored() const {
          role == ax::mojom::Role::kIgnored;
 }
 
+bool AXNodeData::IsInvisible() const {
+  return HasState(ax::mojom::State::kInvisible);
+}
+
 bool AXNodeData::IsInvisibleOrIgnored() const {
-  return IsIgnored() || HasState(ax::mojom::State::kInvisible);
+  return IsIgnored() || IsInvisible();
 }
 
 bool AXNodeData::IsInvocable() const {

@@ -16,26 +16,19 @@
 #include <utility>
 #include <vector>
 
-#include "base/optional.h"
-#include "ui/accessibility/ax_clipping_behavior.h"
-#include "ui/accessibility/ax_coordinate_system.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_node_position.h"
-#include "ui/accessibility/ax_offscreen_result.h"
-#include "ui/accessibility/ax_position.h"
-#include "ui/accessibility/ax_text_utils.h"
-#include "ui/accessibility/ax_tree.h"
-#include "ui/accessibility/ax_tree_id.h"
-#include "ui/accessibility/platform/ax_unique_id.h"
-#include "ui/gfx/geometry/vector2d.h"
-#include "ui/gfx/native_widget_types.h"
-
-namespace gfx {
-
-class Rect;
-
-}  // namespace gfx
+#include "ax/ax_clipping_behavior.h"
+#include "ax/ax_coordinate_system.h"
+#include "ax/ax_enums.h"
+#include "ax/ax_export.h"
+#include "ax/ax_node_position.h"
+#include "ax/ax_offscreen_result.h"
+#include "ax/ax_position.h"
+#include "ax/ax_tree.h"
+#include "ax/ax_tree_id.h"
+#include "ax_unique_id.h"
+#include "base/macros.h"
+#include "gfx/geometry/rect.h"
+#include "gfx/native_widget_types.h"
 
 namespace ui {
 
@@ -84,7 +77,7 @@ class AX_EXPORT AXPlatformNodeDelegate {
   // Only text displayed on screen is included. Text from ARIA and HTML
   // attributes that is either not displayed on screen, or outside this node,
   // e.g. aria-label and HTML title, is not returned.
-  virtual base::string16 GetInnerText() const = 0;
+  virtual std::u16string GetInnerText() const = 0;
 
   // Get the unignored selection from the tree
   virtual const AXTree::Selection GetUnignoredSelection() const = 0;
@@ -180,7 +173,7 @@ class AX_EXPORT AXPlatformNodeDelegate {
   // Returns the text of this node and represent the text of descendant nodes
   // with a special character in place of every embedded object. This represents
   // the concept of text in ATK and IA2 APIs.
-  virtual base::string16 GetHypertext() const = 0;
+  virtual std::u16string GetHypertext() const = 0;
 
   // Set the selection in the hypertext of this node. Depending on the
   // implementation, this may mean the new selection will span multiple nodes.
@@ -307,7 +300,7 @@ class AX_EXPORT AXPlatformNodeDelegate {
   // any instance of the application, regardless of locale. The author ID should
   // be unique among sibling accessibility nodes and is best if unique across
   // the application, however, not meeting this requirement is non-fatal.
-  virtual base::string16 GetAuthorUniqueId() const = 0;
+  virtual std::u16string GetAuthorUniqueId() const = 0;
 
   virtual const AXUniqueId& GetUniqueId() const = 0;
 
@@ -320,7 +313,7 @@ class AX_EXPORT AXPlatformNodeDelegate {
   // that the delegate does not have all the information required to calculate
   // this value and it is the responsibility of the AXPlatformNode itself to
   // to calculate it.
-  virtual base::Optional<int> FindTextBoundary(
+  virtual std::optional<int> FindTextBoundary(
       ax::mojom::TextBoundary boundary,
       int offset,
       ax::mojom::MoveDirection direction,
@@ -347,12 +340,12 @@ class AX_EXPORT AXPlatformNodeDelegate {
   // role, otherwise they return nullopt.
   //
   virtual bool IsTable() const = 0;
-  virtual base::Optional<int> GetTableColCount() const = 0;
-  virtual base::Optional<int> GetTableRowCount() const = 0;
-  virtual base::Optional<int> GetTableAriaColCount() const = 0;
-  virtual base::Optional<int> GetTableAriaRowCount() const = 0;
-  virtual base::Optional<int> GetTableCellCount() const = 0;
-  virtual base::Optional<bool> GetTableHasColumnOrRowHeaderNode() const = 0;
+  virtual std::optional<int> GetTableColCount() const = 0;
+  virtual std::optional<int> GetTableRowCount() const = 0;
+  virtual std::optional<int> GetTableAriaColCount() const = 0;
+  virtual std::optional<int> GetTableAriaRowCount() const = 0;
+  virtual std::optional<int> GetTableCellCount() const = 0;
+  virtual std::optional<bool> GetTableHasColumnOrRowHeaderNode() const = 0;
   virtual std::vector<int32_t> GetColHeaderNodeIds() const = 0;
   virtual std::vector<int32_t> GetColHeaderNodeIds(int col_index) const = 0;
   virtual std::vector<int32_t> GetRowHeaderNodeIds() const = 0;
@@ -361,20 +354,20 @@ class AX_EXPORT AXPlatformNodeDelegate {
 
   // Table row-like nodes.
   virtual bool IsTableRow() const = 0;
-  virtual base::Optional<int> GetTableRowRowIndex() const = 0;
+  virtual std::optional<int> GetTableRowRowIndex() const = 0;
 
   // Table cell-like nodes.
   virtual bool IsTableCellOrHeader() const = 0;
-  virtual base::Optional<int> GetTableCellIndex() const = 0;
-  virtual base::Optional<int> GetTableCellColIndex() const = 0;
-  virtual base::Optional<int> GetTableCellRowIndex() const = 0;
-  virtual base::Optional<int> GetTableCellColSpan() const = 0;
-  virtual base::Optional<int> GetTableCellRowSpan() const = 0;
-  virtual base::Optional<int> GetTableCellAriaColIndex() const = 0;
-  virtual base::Optional<int> GetTableCellAriaRowIndex() const = 0;
-  virtual base::Optional<int32_t> GetCellId(int row_index,
-                                            int col_index) const = 0;
-  virtual base::Optional<int32_t> CellIndexToId(int cell_index) const = 0;
+  virtual std::optional<int> GetTableCellIndex() const = 0;
+  virtual std::optional<int> GetTableCellColIndex() const = 0;
+  virtual std::optional<int> GetTableCellRowIndex() const = 0;
+  virtual std::optional<int> GetTableCellColSpan() const = 0;
+  virtual std::optional<int> GetTableCellRowSpan() const = 0;
+  virtual std::optional<int> GetTableCellAriaColIndex() const = 0;
+  virtual std::optional<int> GetTableCellAriaRowIndex() const = 0;
+  virtual std::optional<int32_t> GetCellId(int row_index,
+                                           int col_index) const = 0;
+  virtual std::optional<int32_t> CellIndexToId(int cell_index) const = 0;
 
   // Helper methods to check if a cell is an ARIA-1.1+ 'cell' or 'gridcell'
   virtual bool IsCellOrHeaderOfARIATable() const = 0;
@@ -383,8 +376,8 @@ class AX_EXPORT AXPlatformNodeDelegate {
   // Ordered-set-like and item-like nodes.
   virtual bool IsOrderedSetItem() const = 0;
   virtual bool IsOrderedSet() const = 0;
-  virtual base::Optional<int> GetPosInSet() const = 0;
-  virtual base::Optional<int> GetSetSize() const = 0;
+  virtual std::optional<int> GetPosInSet() const = 0;
+  virtual std::optional<int> GetSetSize() const = 0;
 
   //
   // Events.
@@ -406,13 +399,13 @@ class AX_EXPORT AXPlatformNodeDelegate {
   // Localized strings.
   //
 
-  virtual base::string16 GetLocalizedRoleDescriptionForUnlabeledImage()
+  virtual std::u16string GetLocalizedRoleDescriptionForUnlabeledImage()
       const = 0;
-  virtual base::string16 GetLocalizedStringForImageAnnotationStatus(
+  virtual std::u16string GetLocalizedStringForImageAnnotationStatus(
       ax::mojom::ImageAnnotationStatus status) const = 0;
-  virtual base::string16 GetLocalizedStringForLandmarkType() const = 0;
-  virtual base::string16 GetLocalizedStringForRoleDescription() const = 0;
-  virtual base::string16 GetStyleNameAttributeAsLocalizedString() const = 0;
+  virtual std::u16string GetLocalizedStringForLandmarkType() const = 0;
+  virtual std::u16string GetLocalizedStringForRoleDescription() const = 0;
+  virtual std::u16string GetStyleNameAttributeAsLocalizedString() const = 0;
 
   //
   // Testing.
@@ -442,7 +435,7 @@ class AX_EXPORT AXPlatformNodeDelegate {
   virtual std::string SubtreeToStringHelper(size_t level) = 0;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(AXPlatformNodeDelegate);
+  BASE_DISALLOW_COPY_AND_ASSIGN(AXPlatformNodeDelegate);
 };
 
 }  // namespace ui

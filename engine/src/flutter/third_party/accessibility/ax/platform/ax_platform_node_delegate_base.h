@@ -12,8 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "base/optional.h"
-#include "ui/accessibility/platform/ax_platform_node_delegate.h"
+#include "ax_platform_node_delegate.h"
 
 namespace ui {
 
@@ -35,7 +34,7 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
   // Get the accessibility tree data for this node.
   const AXTreeData& GetTreeData() const override;
 
-  base::string16 GetInnerText() const override;
+  std::u16string GetInnerText() const override;
   const AXTree::Selection GetUnignoredSelection() const override;
 
   // Creates a text position rooted at this object.
@@ -101,7 +100,7 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
   std::unique_ptr<AXPlatformNodeDelegate::ChildIterator> ChildrenEnd() override;
 
   std::string GetName() const override;
-  base::string16 GetHypertext() const override;
+  std::u16string GetHypertext() const override;
   bool SetHypertextSelection(int start_offset, int end_offset) override;
   TextAttributeMap ComputeTextAttributeMap(
       const TextAttributeList& default_attributes) const override;
@@ -196,11 +195,11 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
   std::set<AXPlatformNode*> GetReverseRelations(
       ax::mojom::IntListAttribute attr) override;
 
-  base::string16 GetAuthorUniqueId() const override;
+  std::u16string GetAuthorUniqueId() const override;
 
   const AXUniqueId& GetUniqueId() const override;
 
-  base::Optional<int> FindTextBoundary(
+  std::optional<int> FindTextBoundary(
       ax::mojom::TextBoundary boundary,
       int offset,
       ax::mojom::MoveDirection direction,
@@ -216,12 +215,12 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
   // role, otherwise they return nullopt.
   //
   bool IsTable() const override;
-  base::Optional<int> GetTableColCount() const override;
-  base::Optional<int> GetTableRowCount() const override;
-  base::Optional<int> GetTableAriaColCount() const override;
-  base::Optional<int> GetTableAriaRowCount() const override;
-  base::Optional<int> GetTableCellCount() const override;
-  base::Optional<bool> GetTableHasColumnOrRowHeaderNode() const override;
+  std::optional<int> GetTableColCount() const override;
+  std::optional<int> GetTableRowCount() const override;
+  std::optional<int> GetTableAriaColCount() const override;
+  std::optional<int> GetTableAriaRowCount() const override;
+  std::optional<int> GetTableCellCount() const override;
+  std::optional<bool> GetTableHasColumnOrRowHeaderNode() const override;
   std::vector<int32_t> GetColHeaderNodeIds() const override;
   std::vector<int32_t> GetColHeaderNodeIds(int col_index) const override;
   std::vector<int32_t> GetRowHeaderNodeIds() const override;
@@ -230,20 +229,19 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
 
   // Table row-like nodes.
   bool IsTableRow() const override;
-  base::Optional<int> GetTableRowRowIndex() const override;
+  std::optional<int> GetTableRowRowIndex() const override;
 
   // Table cell-like nodes.
   bool IsTableCellOrHeader() const override;
-  base::Optional<int> GetTableCellIndex() const override;
-  base::Optional<int> GetTableCellColIndex() const override;
-  base::Optional<int> GetTableCellRowIndex() const override;
-  base::Optional<int> GetTableCellColSpan() const override;
-  base::Optional<int> GetTableCellRowSpan() const override;
-  base::Optional<int> GetTableCellAriaColIndex() const override;
-  base::Optional<int> GetTableCellAriaRowIndex() const override;
-  base::Optional<int32_t> GetCellId(int row_index,
-                                    int col_index) const override;
-  base::Optional<int32_t> CellIndexToId(int cell_index) const override;
+  std::optional<int> GetTableCellIndex() const override;
+  std::optional<int> GetTableCellColIndex() const override;
+  std::optional<int> GetTableCellRowIndex() const override;
+  std::optional<int> GetTableCellColSpan() const override;
+  std::optional<int> GetTableCellRowSpan() const override;
+  std::optional<int> GetTableCellAriaColIndex() const override;
+  std::optional<int> GetTableCellAriaRowIndex() const override;
+  std::optional<int32_t> GetCellId(int row_index, int col_index) const override;
+  std::optional<int32_t> CellIndexToId(int cell_index) const override;
 
   // Helper methods to check if a cell is an ARIA-1.1+ 'cell' or 'gridcell'
   bool IsCellOrHeaderOfARIATable() const override;
@@ -252,8 +250,8 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
   // Ordered-set-like and item-like nodes.
   bool IsOrderedSetItem() const override;
   bool IsOrderedSet() const override;
-  base::Optional<int> GetPosInSet() const override;
-  base::Optional<int> GetSetSize() const override;
+  std::optional<int> GetPosInSet() const override;
+  std::optional<int> GetSetSize() const override;
 
   //
   // Events.
@@ -275,12 +273,12 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
   // Localized strings.
   //
 
-  base::string16 GetLocalizedStringForImageAnnotationStatus(
+  std::u16string GetLocalizedStringForImageAnnotationStatus(
       ax::mojom::ImageAnnotationStatus status) const override;
-  base::string16 GetLocalizedRoleDescriptionForUnlabeledImage() const override;
-  base::string16 GetLocalizedStringForLandmarkType() const override;
-  base::string16 GetLocalizedStringForRoleDescription() const override;
-  base::string16 GetStyleNameAttributeAsLocalizedString() const override;
+  std::u16string GetLocalizedRoleDescriptionForUnlabeledImage() const override;
+  std::u16string GetLocalizedStringForLandmarkType() const override;
+  std::u16string GetLocalizedStringForRoleDescription() const override;
+  std::u16string GetStyleNameAttributeAsLocalizedString() const override;
 
   //
   // Testing.
@@ -303,7 +301,7 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
   AXPlatformNodeDelegate* GetParentDelegate();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(AXPlatformNodeDelegateBase);
+  BASE_DISALLOW_COPY_AND_ASSIGN(AXPlatformNodeDelegateBase);
 };
 
 }  // namespace ui

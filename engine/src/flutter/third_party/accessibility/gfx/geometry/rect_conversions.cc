@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/rect_conversions.h"
+#include "rect_conversions.h"
 
 #include <algorithm>
 #include <cmath>
 
-#include "base/check.h"
+#include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
 
 namespace gfx {
@@ -80,10 +80,10 @@ Rect ToNearestRect(const RectF& rect) {
 
   // If these DCHECKs fail, you're using the wrong method, consider using
   // ToEnclosingRect or ToEnclosedRect instead.
-  DCHECK(std::abs(min_x - float_min_x) < 0.01f);
-  DCHECK(std::abs(min_y - float_min_y) < 0.01f);
-  DCHECK(std::abs(max_x - float_max_x) < 0.01f);
-  DCHECK(std::abs(max_y - float_max_y) < 0.01f);
+  BASE_DCHECK(std::abs(min_x - float_min_x) < 0.01f);
+  BASE_DCHECK(std::abs(min_y - float_min_y) < 0.01f);
+  BASE_DCHECK(std::abs(max_x - float_max_x) < 0.01f);
+  BASE_DCHECK(std::abs(max_y - float_max_y) < 0.01f);
 
   Rect result;
   result.SetByBounds(min_x, min_y, max_x, max_y);

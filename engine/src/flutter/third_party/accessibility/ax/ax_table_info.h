@@ -10,8 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "base/optional.h"
-#include "ui/accessibility/ax_export.h"
+#include "ax_export.h"
 
 namespace ui {
 
@@ -122,4 +121,4 @@ class AX_EXPORT AXTableInfo {
 
 }  // namespace ui
 
-#endif  // UI_ACCESSIBILITY_AX_TABLE_INFO
+#endif  // UI_ACCESSIBILITY_TABLE_INFO

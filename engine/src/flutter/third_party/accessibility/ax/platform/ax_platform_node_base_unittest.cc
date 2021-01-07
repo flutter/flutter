@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/platform/ax_platform_node_base.h"
-#include "base/strings/utf_string_conversions.h"
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/accessibility/platform/test_ax_node_wrapper.h"
+#include "ax_platform_node_base.h"
+
+#include "gtest/gtest.h"
+
+#include "base/string_utils.h"
+#include "test_ax_node_wrapper.h"
 
 namespace ui {
 namespace {
@@ -492,7 +494,7 @@ TEST(AXPlatformNodeBaseTest, CompareTo) {
   // Test for two nodes that do not share the same root. They should not be
   // comparable.
   AXPlatformNodeBase detached_node;
-  EXPECT_EQ(base::nullopt, n1->CompareTo(detached_node));
+  EXPECT_EQ(std::nullopt, n1->CompareTo(detached_node));
 
   // Create a test vector of all the tree nodes arranged in a pre-order
   // traversal way. The node that has a smaller index in the vector should also
@@ -509,7 +511,7 @@ TEST(AXPlatformNodeBaseTest, CompareTo) {
       else if (lhs->GetData().id > rhs->GetData().id)
         expected_result = 1;
 
-      EXPECT_NE(base::nullopt, lhs->CompareTo(*rhs));
+      EXPECT_NE(std::nullopt, lhs->CompareTo(*rhs));
       int actual_result = 0;
       if (lhs->CompareTo(*rhs) < 0)
         actual_result = -1;

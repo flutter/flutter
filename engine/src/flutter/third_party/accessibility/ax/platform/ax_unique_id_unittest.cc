@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/platform/ax_unique_id.h"
+#include "ax_unique_id.h"
 
 #include <memory>
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace ui {
 
@@ -25,7 +25,7 @@ class AXTestSmallBankUniqueId : public AXUniqueId {
 
  private:
   friend class AXUniqueId;
-  DISALLOW_COPY_AND_ASSIGN(AXTestSmallBankUniqueId);
+  BASE_DISALLOW_COPY_AND_ASSIGN(AXTestSmallBankUniqueId);
 };
 
 AXTestSmallBankUniqueId::AXTestSmallBankUniqueId() : AXUniqueId(kMaxId) {}
@@ -43,7 +43,8 @@ TEST(AXPlatformUniqueIdTest, UnassignedIdsAreReused) {
   }
 
   static int kIdToReplace = 10;
-  int32_t expected_id = ids[kIdToReplace]->Get();
+  std::unique_ptr<AXTestSmallBankUniqueId>& unique = ids[kIdToReplace];
+  int32_t expected_id = unique->Get();
 
   // Delete one of the ids and replace with a new one.
   ids[kIdToReplace] = nullptr;

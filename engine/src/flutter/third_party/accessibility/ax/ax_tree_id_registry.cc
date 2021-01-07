@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_tree_id_registry.h"
+#include "ax_tree_id_registry.h"
 
-#include "base/memory/singleton.h"
-#include "base/strings/string_number_conversions.h"
-#include "ui/accessibility/ax_action_handler_base.h"
+#include "ax_action_handler_base.h"
+#include "base/logging.h"
 
 namespace ui {
 
 // static
-AXTreeIDRegistry* AXTreeIDRegistry::GetInstance() {
-  return base::Singleton<AXTreeIDRegistry>::get();
+AXTreeIDRegistry& AXTreeIDRegistry::GetInstance() {
+  static AXTreeIDRegistry INSTANCE;
+  return INSTANCE;
 }
 
 void AXTreeIDRegistry::SetFrameIDForAXTreeID(const FrameID& frame_id,
                                              const AXTreeID& ax_tree_id) {
   auto it = frame_to_ax_tree_id_map_.find(frame_id);
   if (it != frame_to_ax_tree_id_map_.end()) {
-    NOTREACHED();
+    BASE_UNREACHABLE();
     return;
   }
 
@@ -63,7 +63,7 @@ AXActionHandlerBase* AXTreeIDRegistry::GetActionHandler(AXTreeID ax_tree_id) {
 
 void AXTreeIDRegistry::SetAXTreeID(const ui::AXTreeID& id,
                                    AXActionHandlerBase* action_handler) {
-  DCHECK(id_to_action_handler_.find(id) == id_to_action_handler_.end());
+  BASE_DCHECK(id_to_action_handler_.find(id) == id_to_action_handler_.end());
   id_to_action_handler_[id] = action_handler;
 }
 

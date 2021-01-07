@@ -5,10 +5,11 @@
 #ifndef UI_ACCESSIBILITY_AX_ACTION_DATA_H_
 #define UI_ACCESSIBILITY_AX_ACTION_DATA_H_
 
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_tree_id.h"
-#include "ui/gfx/geometry/rect.h"
+#include "ax_enums.h"
+#include "ax_export.h"
+#include "ax_tree_id.h"
+#include "gfx/geometry/point.h"
+#include "gfx/geometry/rect.h"
 
 namespace ui {
 

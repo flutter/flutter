@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/platform/ax_platform_node_unittest.h"
+#include "ax_platform_node_unittest.h"
 
-#include "ui/accessibility/ax_constants.mojom.h"
-#include "ui/accessibility/platform/test_ax_node_wrapper.h"
+#include "ax/ax_constants.h"
+#include "test_ax_node_wrapper.h"
 
 namespace ui {
 

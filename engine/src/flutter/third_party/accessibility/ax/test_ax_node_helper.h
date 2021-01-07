@@ -5,11 +5,11 @@
 #ifndef UI_ACCESSIBILITY_TEST_AX_NODE_HELPER_H_
 #define UI_ACCESSIBILITY_TEST_AX_NODE_HELPER_H_
 
-#include "ui/accessibility/ax_clipping_behavior.h"
-#include "ui/accessibility/ax_coordinate_system.h"
-#include "ui/accessibility/ax_node.h"
-#include "ui/accessibility/ax_offscreen_result.h"
-#include "ui/accessibility/ax_tree.h"
+#include "ax_clipping_behavior.h"
+#include "ax_coordinate_system.h"
+#include "ax_node.h"
+#include "ax_offscreen_result.h"
+#include "ax_tree.h"
 
 namespace ui {
 

@@ -2,25 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/platform/ax_platform_node.h"
+#include "ax_platform_node.h"
 
-#include "base/debug/crash_logging.h"
-#include "base/lazy_instance.h"
-#include "build/build_config.h"
-#include "ui/accessibility/ax_node_data.h"
-#include "ui/accessibility/platform/ax_platform_node_delegate.h"
-#include "ui/base/buildflags.h"
+#include "ax/ax_node_data.h"
+#include "ax_build/build_config.h"
+#include "ax_platform_node_delegate.h"
 
 namespace ui {
 
-// static
-base::LazyInstance<base::ObserverList<AXModeObserver>::Unchecked>::Leaky
-    AXPlatformNode::ax_mode_observers_ = LAZY_INSTANCE_INITIALIZER;
+std::vector<AXModeObserver*> AXPlatformNode::ax_mode_observers_;
 
-// static
-base::LazyInstance<AXPlatformNode::NativeWindowHandlerCallback>::Leaky
-    AXPlatformNode::native_window_handler_ = LAZY_INSTANCE_INITIALIZER;
-
+std::function<AXPlatformNode::NativeWindowHandlerCallback>
+    AXPlatformNode::native_window_handler_;
 // static
 AXMode AXPlatformNode::ax_mode_;
 
@@ -30,23 +23,14 @@ gfx::NativeViewAccessible AXPlatformNode::popup_focus_override_ = nullptr;
 // static
 AXPlatformNode* AXPlatformNode::FromNativeWindow(
     gfx::NativeWindow native_window) {
-  if (native_window_handler_.Get())
-    return native_window_handler_.Get().Run(native_window);
+  if (native_window_handler_)
+    return native_window_handler_(native_window);
   return nullptr;
 }
 
-#if !BUILDFLAG_INTERNAL_HAS_NATIVE_ACCESSIBILITY()
-// static
-AXPlatformNode* AXPlatformNode::FromNativeViewAccessible(
-    gfx::NativeViewAccessible accessible) {
-  return nullptr;
-}
-#endif  // !BUILDFLAG_INTERNAL_HAS_NATIVE_ACCESSIBILITY()
-
-// static
 void AXPlatformNode::RegisterNativeWindowHandler(
-    AXPlatformNode::NativeWindowHandlerCallback handler) {
-  native_window_handler_.Get() = handler;
+    std::function<AXPlatformNode::NativeWindowHandlerCallback> handler) {
+  native_window_handler_ = handler;
 }
 
 AXPlatformNode::AXPlatformNode() {}
@@ -56,7 +40,7 @@ AXPlatformNode::~AXPlatformNode() {}
 void AXPlatformNode::Destroy() {}
 
 int32_t AXPlatformNode::GetUniqueId() const {
-  DCHECK(GetDelegate()) << "|GetUniqueId| must be called after |Init|.";
+  BASE_DCHECK(GetDelegate());
   return GetDelegate() ? GetDelegate()->GetUniqueId().Get() : -1;
 }
 
@@ -82,12 +66,13 @@ std::ostream& operator<<(std::ostream& stream, AXPlatformNode& node) {
 
 // static
 void AXPlatformNode::AddAXModeObserver(AXModeObserver* observer) {
-  ax_mode_observers_.Get().AddObserver(observer);
+  ax_mode_observers_.push_back(observer);
 }
 
 // static
 void AXPlatformNode::RemoveAXModeObserver(AXModeObserver* observer) {
-  ax_mode_observers_.Get().RemoveObserver(observer);
+  ax_mode_observers_.erase(std::find(ax_mode_observers_.begin(),
+                                     ax_mode_observers_.end(), observer));
 }
 
 // static
@@ -100,8 +85,8 @@ void AXPlatformNode::NotifyAddAXModeFlags(AXMode mode_flags) {
     return;  // No change.
 
   ax_mode_ = new_ax_mode;
-  for (auto& observer : ax_mode_observers_.Get())
-    observer.OnAXModeAdded(mode_flags);
+  for (AXModeObserver* observer : ax_mode_observers_)
+    observer->OnAXModeAdded(mode_flags);
 }
 
 // static

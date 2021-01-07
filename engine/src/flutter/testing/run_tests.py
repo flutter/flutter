@@ -150,6 +150,10 @@ def RunCCTests(build_dir, filter):
 
   RunEngineExecutable(build_dir, 'testing_unittests', filter, shuffle_flags)
 
+  # The accessibility library only supports Mac for now.
+  if IsMac():
+    RunEngineExecutable(build_dir, 'accessibility_unittests', filter, shuffle_flags)
+
   # These unit-tests are Objective-C and can only run on Darwin.
   if IsMac():
     RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter, shuffle_flags)
