@@ -8,50 +8,50 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('installDynamicFeature test', () async {
+  test('installDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.dynamicFeature.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.DeferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
-    await DynamicFeature.installDynamicFeature(moduleName: 'testModuleName');
+    await DeferredComponent.installDeferredComponent(moduleName: 'testModuleName');
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(
-      'installDynamicFeature',
+      'installDeferredComponent',
       arguments: <String, dynamic>{'loadingUnitId': -1, 'moduleName': 'testModuleName'},
     ));
   });
 
-  test('getDynamicFeatureInstallState test', () async {
+  test('getDeferredComponentInstallState test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.dynamicFeature.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.DeferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
-    await DynamicFeature.getDynamicFeatureInstallState(moduleName: 'testModuleName');
+    await DeferredComponent.getDeferredComponentInstallState(moduleName: 'testModuleName');
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(
-      'getDynamicFeatureInstallState',
+      'getDeferredComponentInstallState',
       arguments: <String, dynamic>{'loadingUnitId': -1, 'moduleName': 'testModuleName'},
     ));
   });
 
-  test('uninstallDynamicFeature test', () async {
+  test('uninstallDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.dynamicFeature.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.DeferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
-    await DynamicFeature.uninstallDynamicFeature(moduleName: 'testModuleName');
+    await DeferredComponent.uninstallDeferredComponent(moduleName: 'testModuleName');
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(
-      'uninstallDynamicFeature',
+      'uninstallDeferredComponent',
       arguments: <String, dynamic>{'loadingUnitId': -1, 'moduleName': 'testModuleName'},
     ));
   });

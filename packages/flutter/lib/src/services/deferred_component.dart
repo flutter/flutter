@@ -9,17 +9,17 @@ import 'package:flutter/foundation.dart';
 import 'system_channels.dart';
 
 /// Default Google Play Store implementation states that reflect the current
-/// installation status of a dynamic feature module.
+/// installation status of a deferred component module.
 ///
-/// Returned by [DynamicFeature.getDynamicFeatureInstallState].
+/// Returned by [DeferredComponent.getDeferredComponentInstallState].
 ///
-/// These states may differ in custom dynamic feature implementations.
+/// These states may differ in custom deferred component implementations.
 ///
 /// Due to the asynchronous nature of platform channels, these states are
 /// informational and should not be depended on to determine if a dynamic
 /// feature is ready to use or not. Readiness should be determined by
 /// completion of the future returned by
-/// [DynamicFeature.installDynamicFeature] or `loadLibrary()`.
+/// [DeferredComponent.installDeferredComponent] or `loadLibrary()`.
 ///
 /// These states are an extension of the states in Android's
 /// https://developer.android.com/reference/com/google/android/play/core/splitinstall/model/SplitInstallSessionStatus
@@ -29,31 +29,31 @@ import 'system_channels.dart';
 /// state changes to `downloading` and finally `installed`. Modules previously
 /// installed but not loaded in this session will be in the
 /// `installedPendingLoad` state, which indicates that the installation request
-/// call (either `loadLibrary()` or [DynamicFeature.installDynamicFeature]) should
+/// call (either `loadLibrary()` or [DeferredComponent.installDeferredComponent]) should
 /// be repeated to trigger the loading process.
-enum DynamicFeatureInstallState {
-  /// The dynamic feature installation has been requested, but has not begun
+enum DeferredComponentInstallState {
+  /// The deferred component installation has been requested, but has not begun
   /// download or installation yet.
   requested,
-  /// The dynamic feature installation is awaiting further action.
+  /// The deferred component installation is awaiting further action.
   pending,
   /// User input is requried for continued installation.
   requireUserConfirmation,
-  /// The dynamic feature is being downloaded.
+  /// The deferred component is being downloaded.
   downloading,
-  /// The dynamic feature has finished downloading but has not yet been
+  /// The deferred component has finished downloading but has not yet been
   /// installed.
   downloaded,
-  /// The downloaded dynamic feature is being installed.
+  /// The downloaded deferred component is being installed.
   installing,
-  /// The dynamic feature has previously been installed and all files/assets
+  /// The deferred component has previously been installed and all files/assets
   /// are available, but has not been loaded into the VM in the current
-  /// app's session. Either `loadLibrary()` or [DynamicFeature.installDynamicFeature]
-  /// should be called to trigger the loading process to ensure the dynamic feature's
+  /// app's session. Either `loadLibrary()` or [DeferredComponent.installDeferredComponent]
+  /// should be called to trigger the loading process to ensure the deferred component's
   /// components can be safely used in the app.
   installedPendingLoad,
-  /// The dynamic feature has been succesfully downloaded and installed. Assets and
-  /// code from the dynamic feature are ready to use.
+  /// The deferred component has been succesfully downloaded and installed. Assets and
+  /// code from the deferred component are ready to use.
   installed,
   /// An installation request has been asked to be canceled.
   cancelling,
@@ -61,37 +61,37 @@ enum DynamicFeatureInstallState {
   canceled,
   /// An installation request has failed.
   failed,
-  /// The dynamic feature has not been requested nor installed or is unavailable.
+  /// The deferred component has not been requested nor installed or is unavailable.
   unknown,
 }
 
-/// Manages the installation and loading of dynamic feature modules.
+/// Manages the installation and loading of deferred component modules.
 ///
-/// Dynamic features allow Flutter applications to download precompiled AOT
+/// Deferred components allow Flutter applications to download precompiled AOT
 /// dart code and assets at runtime, reducing the install size of apps and
 /// avoiding installing unnessecary code/assets on end user devices. Common
 /// use cases include deferring installation of advanced or infrequently
 /// used features and limiting locale specific features to users of matching
 /// locales.
-class DynamicFeature {
+class DeferredComponent {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
-  DynamicFeature._();
+  DeferredComponent._();
 
   // TODO(garyq): We should eventually expand this to install modules by loadingUnitId
   // as well as moduleName, but currently, loadingUnitId is opaque to the dart code
   // so this is not possible. The API has been left flexible to allow adding
   // loadingUnitId as a parameter.
 
-  /// Requests that an assets-only dynamic feature identified by the [moduleName]
+  /// Requests that an assets-only deferred component identified by the [moduleName]
   /// be downloaded and installed.
   ///
   /// This method returns a Future<void> that will complete when the feature is
   /// installed and any assets are ready to used. When an error occurs, the
   /// future will complete an error.
   ///
-  /// This method should be used for asset-only dynamic features. Dynamic features
+  /// This method should be used for asset-only deferred components. Deferred components
   /// containing dart code should call `loadLibrary()` on a deferred imported
   /// library's prefix to ensure that the dart code is properly loaded as
   /// `loadLibrary()` will provide the loading unit id needed for the dart
@@ -106,51 +106,51 @@ class DynamicFeature {
   /// This method will not load associated dart libraries contained in the dynamic
   /// feature module, though it will download the files necessary and subsequent
   /// calls to `loadLibrary()` to load will complete faster.
-  static Future<void> installDynamicFeature({@required String? moduleName}) async {
-    await SystemChannels.dynamicFeature.invokeMethod<void>(
-      'installDynamicFeature',
+  static Future<void> installDeferredComponent({@required String? moduleName}) async {
+    await SystemChannels.deferredComponent.invokeMethod<void>(
+      'installDeferredComponent',
       <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
     );
   }
-  /// Gets the current installation state of the dynamic feature identified by the
+  /// Gets the current installation state of the deferred component identified by the
   /// [moduleName].
   ///
   /// This method returns a string that represents the state. Depending on
   /// the implementation, this string may vary, but the default Google Play
-  /// Store implementation retuns a state in the [DynamicFeatureInstallState] enum.
+  /// Store implementation retuns a state in the [DeferredComponentInstallState] enum.
   ///
-  /// Installations of dynamic feature modules may be triggered by either calling
-  /// [installDynamicFeature] for assets-only modules or `loadLibrary()` on a deferred
+  /// Installations of deferred component modules may be triggered by either calling
+  /// [installDeferredComponent] for assets-only modules or `loadLibrary()` on a deferred
   /// imported library. Modules not yet requested or do not exist will complete with
-  /// [DynamicFeatureInstallState.unknown]. Modules previously installed but not
-  /// loaded in this session will return [DynamicFeatureInstallState.installedPendingLoad],
+  /// [DeferredComponentInstallState.unknown]. Modules previously installed but not
+  /// loaded in this session will return [DeferredComponentInstallState.installedPendingLoad],
   /// which indicates that the installtion request call should be repeated to
   /// complete the loading process.
   ///
   /// Due to the async nature of platform channels and network i/o, newly requested
   /// installs may return null until the installation request has been processed. Thus,
   /// this state information should be used as purely informational and not as an
-  /// accurate reflection of the readiness of the dynamic feature. Code and assets
+  /// accurate reflection of the readiness of the deferred component. Code and assets
   /// may only be used after the Future completes succesfully, regardless of what
   /// the installation state is in.
-  static Future<String?> getDynamicFeatureInstallState({@required String? moduleName}) async {
-    await SystemChannels.dynamicFeature.invokeMethod<void>(
-      'getDynamicFeatureInstallState',
+  static Future<String?> getDeferredComponentInstallState({@required String? moduleName}) async {
+    await SystemChannels.deferredComponent.invokeMethod<void>(
+      'getDeferredComponentInstallState',
       <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
     );
   }
 
-  /// Requests that a dynamic feature identified by the [moduleName] be
+  /// Requests that a deferred component identified by the [moduleName] be
   /// uninstalled.
   ///
   /// Since uninstallation typically requires significant disk i/o, this method only
   /// signals the intent to uninstall. Actual uninstallation (eg, removal of
   /// assets and files) may occur at a later time. However, once uninstallation
-  /// is requested, the dynamic feature should not be used anymore until
-  /// [installDynamicFeature] or `loadLibrary()` is called again.
-  static Future<void> uninstallDynamicFeature({@required String? moduleName}) async {
-    await SystemChannels.dynamicFeature.invokeMethod<void>(
-      'uninstallDynamicFeature',
+  /// is requested, the deferred component should not be used anymore until
+  /// [installDeferredComponent] or `loadLibrary()` is called again.
+  static Future<void> uninstallDeferredComponent({@required String? moduleName}) async {
+    await SystemChannels.deferredComponent.invokeMethod<void>(
+      'uninstallDeferredComponent',
       <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
     );
   }
