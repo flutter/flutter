@@ -40,7 +40,6 @@ void main() {
       clock = MockClock();
       mockProcessInfo = MockProcessInfo();
 
-      when(usage.isFirstRun).thenReturn(false);
       when(clock.now()).thenAnswer(
         (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );

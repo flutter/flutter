@@ -12,4 +12,8 @@ void main() {
   final WidgetsBinding binding = WidgetsBinding.instance!;
   binding.deferFirstFrameReport();
   binding.allowFirstFrameReport();
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const StatefulElement statefulElement = StatefulElement(myWidget);
+  statefulElement.inheritFromElement(ancestor);
 }
