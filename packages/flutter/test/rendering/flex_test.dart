@@ -632,4 +632,20 @@ void main() {
     expect(() => flex.getMaxIntrinsicWidth(100), cannotCalculateIntrinsics);
     expect(() => flex.getMinIntrinsicWidth(100), cannotCalculateIntrinsics);
   });
+
+  test('Can call methods that check overflow even if overflow value is not set', () {
+    final List<dynamic> exceptions = <dynamic>[];
+    final RenderFlex flex = RenderFlex(children: const <RenderBox>[]);
+    // This forces a check for _hasOverflow
+    expect(flex.toStringShort(), isNot(contains('OVERFLOWING')));
+    layout(flex, phase: EnginePhase.paint, onErrors: () {
+      exceptions.addAll(renderer.takeAllFlutterExceptions());
+    });
+    // We expect the RenderFlex to throw during performLayout() for not having
+    // a text direction, thus leaving it with a null overflow value. It'll then
+    // try to paint(), which also checks _hasOverflow, and it should be able to
+    // do so without an ancillary error.
+    expect(exceptions, hasLength(1));
+    expect(exceptions.first.message, isNot(contains('Null check operator')));
+  });
 }

@@ -8,8 +8,6 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -983,7 +981,17 @@ class ScrollAction extends Action<ScrollIntent> {
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
       // Check for primary scrollable within the current context
-      if (Scrollable.of(focus!.context!) != null)
+      // After https://github.com/dart-lang/language/issues/1274 is implemented,
+      // `focus` will be promoted to non-nullable so we won't need to null check
+      // it (and it will cause a build failure to try to do so).  Until then, we
+      // need to null check it in a way that won't cause a build failure once
+      // the feature is implemented.  We can do that using an explicit "if"
+      // test.
+      // TODO(paulberry): remove this hack once the feature is implemented.
+      if (focus == null) { // ignore: dead_code
+        throw 'This throw is unreachable';
+      }
+      if (Scrollable.of(focus.context!) != null)
         return true;
       // Check for fallback scrollable with context from PrimaryScrollController
       if (PrimaryScrollController.of(focus.context!) != null) {

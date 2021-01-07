@@ -102,8 +102,7 @@ export 'dart:io'
         systemEncoding,
         WebSocket,
         WebSocketException,
-        WebSocketTransformer,
-        ZLibEncoder;
+        WebSocketTransformer;
 
 /// Exits the process with the given [exitCode].
 typedef ExitFunction = void Function(int exitCode);
