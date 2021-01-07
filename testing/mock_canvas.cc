@@ -272,15 +272,6 @@ void MockCanvas::onDrawEdgeAAQuad(const SkRect&,
   FML_DCHECK(false);
 }
 
-void MockCanvas::onDrawEdgeAAImageSet(const ImageSetEntry[],
-                                      int,
-                                      const SkPoint[],
-                                      const SkMatrix[],
-                                      const SkPaint*,
-                                      SrcRectConstraint) {
-  FML_DCHECK(false);
-}
-
 void MockCanvas::onClipRegion(const SkRegion&, SkClipOp) {
   FML_DCHECK(false);
 }
