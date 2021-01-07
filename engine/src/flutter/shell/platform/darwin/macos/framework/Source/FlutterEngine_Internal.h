@@ -6,6 +6,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 @interface FlutterEngine ()
@@ -16,10 +17,10 @@
 @property(nonatomic, readonly) BOOL running;
 
 /**
- * The resource context used by the engine for texture uploads. FlutterViews associated with this
- * engine should be created to share with this context.
+ * Provides the renderer config needed to initialize the engine and also handles external texture
+ * management.
  */
-@property(nonatomic, readonly, nullable) NSOpenGLContext* resourceContext;
+@property(nonatomic, readonly, nonnull) FlutterOpenGLRenderer* openGLRenderer;
 
 /**
  * Function pointers for interacting with the embedder.h API.
@@ -35,5 +36,20 @@
  * Dispatches the given pointer event data to engine.
  */
 - (void)sendPointerEvent:(const FlutterPointerEvent&)event;
+
+/**
+ * Registers an external texture with the given id. Returns YES on success.
+ */
+- (BOOL)registerTextureWithID:(int64_t)textureId;
+
+/**
+ * Marks texture with the given id as available. Returns YES on success.
+ */
+- (BOOL)markTextureFrameAvailable:(int64_t)textureID;
+
+/**
+ * Unregisters an external texture with the given id. Returns YES on success.
+ */
+- (BOOL)unregisterTextureWithID:(int64_t)textureID;
 
 @end

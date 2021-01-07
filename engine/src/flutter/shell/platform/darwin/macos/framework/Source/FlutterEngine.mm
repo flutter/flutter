@@ -11,6 +11,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
 /**
@@ -38,40 +40,9 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
 - (void)sendUserLocales;
 
 /**
- * Called by the engine to make the context the engine should draw into current.
- */
-- (bool)engineCallbackOnMakeCurrent;
-
-/**
- * Called by the engine to clear the context the engine should draw into.
- */
-- (bool)engineCallbackOnClearCurrent;
-
-/**
- * Called by the engine when the context's buffers should be swapped.
- */
-- (bool)engineCallbackOnPresent;
-
-/**
- * Called by the engine when framebuffer object ID is requested.
- */
-- (uint32_t)engineCallbackOnFBO:(const FlutterFrameInfo*)info;
-
-/**
- * Makes the resource context the current context.
- */
-- (bool)engineCallbackOnMakeResourceCurrent;
-
-/**
  * Handles a platform message from the engine.
  */
 - (void)engineCallbackOnPlatformMessage:(const FlutterPlatformMessage*)message;
-
-/**
- * Forwards texture copy request to the corresponding texture via |textureID|.
- */
-- (BOOL)populateTextureWithIdentifier:(int64_t)textureID
-                        openGLTexture:(FlutterOpenGLTexture*)openGLTexture;
 
 /**
  * Requests that the task be posted back the to the Flutter engine at the target time. The target
@@ -100,7 +71,6 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
 @implementation FlutterEngineRegistrar {
   NSString* _pluginKey;
   FlutterEngine* _flutterEngine;
-  FlutterEngineProcTable _embedderAPI;
 }
 
 - (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine {
@@ -119,7 +89,7 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
 }
 
 - (id<FlutterTextureRegistry>)textures {
-  return _flutterEngine;
+  return _flutterEngine.openGLRenderer;
 }
 
 - (NSView*)view {
@@ -138,36 +108,8 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
 // Callbacks provided to the engine. See the called methods for documentation.
 #pragma mark - Static methods provided to engine configuration
 
-static bool OnMakeCurrent(FlutterEngine* engine) {
-  return [engine engineCallbackOnMakeCurrent];
-}
-
-static bool OnClearCurrent(FlutterEngine* engine) {
-  return [engine engineCallbackOnClearCurrent];
-}
-
-static bool OnPresent(FlutterEngine* engine) {
-  return [engine engineCallbackOnPresent];
-}
-
-static uint32_t OnFBO(FlutterEngine* engine, const FlutterFrameInfo* info) {
-  return [engine engineCallbackOnFBO:info];
-}
-
-static bool OnMakeResourceCurrent(FlutterEngine* engine) {
-  return [engine engineCallbackOnMakeResourceCurrent];
-}
-
 static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngine* engine) {
   [engine engineCallbackOnPlatformMessage:message];
-}
-
-static bool OnAcquireExternalTexture(FlutterEngine* engine,
-                                     int64_t texture_identifier,
-                                     size_t width,
-                                     size_t height,
-                                     FlutterOpenGLTexture* open_gl_texture) {
-  return [engine populateTextureWithIdentifier:texture_identifier openGLTexture:open_gl_texture];
 }
 
 #pragma mark -
@@ -179,21 +121,11 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   // The project being run by this engine.
   FlutterDartProject* _project;
 
-  // The context provided to the Flutter engine for resource loading.
-  NSOpenGLContext* _resourceContext;
-
-  // The context that is owned by the currently displayed FlutterView. This is stashed in the engine
-  // so that the view doesn't need to be accessed from a background thread.
-  NSOpenGLContext* _mainOpenGLContext;
-
   // A mapping of channel names to the registered handlers for those channels.
   NSMutableDictionary<NSString*, FlutterBinaryMessageHandler>* _messageHandlers;
 
   // Whether the engine can continue running after the view controller is removed.
   BOOL _allowHeadlessExecution;
-
-  // A mapping of textureID to internal FlutterExternalTextureGL adapter.
-  NSMutableDictionary<NSNumber*, FlutterExternalTextureGL*>* _textures;
 
   // Pointer to the Dart AOT snapshot and instruction data.
   _FlutterEngineAOTData* _aotData;
@@ -218,10 +150,10 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
   _project = project ?: [[FlutterDartProject alloc] init];
   _messageHandlers = [[NSMutableDictionary alloc] init];
-  _textures = [[NSMutableDictionary alloc] init];
   _allowHeadlessExecution = allowHeadlessExecution;
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
+  _openGLRenderer = [[FlutterOpenGLRenderer alloc] initWithFlutterEngine:self];
 
   NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter addObserver:self
@@ -249,17 +181,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     return NO;
   }
 
-  const FlutterRendererConfig rendererConfig = {
-      .type = kOpenGL,
-      .open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig),
-      .open_gl.make_current = (BoolCallback)OnMakeCurrent,
-      .open_gl.clear_current = (BoolCallback)OnClearCurrent,
-      .open_gl.present = (BoolCallback)OnPresent,
-      .open_gl.fbo_with_frame_info_callback = (UIntFrameInfoCallback)OnFBO,
-      .open_gl.fbo_reset_after_present = true,
-      .open_gl.make_resource_current = (BoolCallback)OnMakeResourceCurrent,
-      .open_gl.gl_external_texture_frame_callback = (TextureFrameCallback)OnAcquireExternalTexture,
-  };
+  const FlutterRendererConfig rendererConfig = [_openGLRenderer createRendererConfig];
 
   // TODO(stuartmorgan): Move internal channel registration from FlutterViewController to here.
 
@@ -362,10 +284,10 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 - (void)setViewController:(FlutterViewController*)controller {
   _viewController = controller;
-  _mainOpenGLContext = controller.flutterView.openGLContext;
+  [_openGLRenderer setFlutterView:controller.flutterView];
+
   if (!controller && !_allowHeadlessExecution) {
     [self shutDownEngine];
-    _resourceContext = nil;
   }
 }
 
@@ -377,9 +299,10 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     return nullptr;
   }
 
-  [_mainOpenGLContext makeCurrentContext];
+  [_openGLRenderer.openGLContext makeCurrentContext];
 
-  _macOSGLCompositor = std::make_unique<flutter::FlutterGLCompositor>(_viewController);
+  _macOSGLCompositor = std::make_unique<flutter::FlutterGLCompositor>(
+      _viewController, _openGLRenderer.openGLContext);
 
   _compositor = {};
   _compositor.struct_size = sizeof(FlutterCompositor);
@@ -410,7 +333,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
   __weak FlutterEngine* weak_self = self;
   _macOSGLCompositor->SetPresentCallback(
-      [weak_self]() { return [weak_self engineCallbackOnPresent]; });
+      [weak_self]() { return [weak_self.openGLRenderer glPresent]; });
 
   _compositor.avoid_backing_store_cache = true;
 
@@ -427,17 +350,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 - (BOOL)running {
   return _engine != nullptr;
-}
-
-- (NSOpenGLContext*)resourceContext {
-  if (!_resourceContext) {
-    NSOpenGLPixelFormatAttribute attributes[] = {
-        NSOpenGLPFAColorSize, 24, NSOpenGLPFAAlphaSize, 8, 0,
-    };
-    NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
-    _resourceContext = [[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
-  }
-  return _resourceContext;
 }
 
 - (void)updateDisplayConfig {
@@ -516,37 +428,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
       flutterLocales.begin(), flutterLocales.end(), std::back_inserter(flutterLocaleList),
       [](const auto& arg) -> const auto* { return &arg; });
   _embedderAPI.UpdateLocales(_engine, flutterLocaleList.data(), flutterLocaleList.size());
-}
-
-- (bool)engineCallbackOnMakeCurrent {
-  if (!_mainOpenGLContext) {
-    return false;
-  }
-  [_mainOpenGLContext makeCurrentContext];
-  return true;
-}
-
-- (uint32_t)engineCallbackOnFBO:(const FlutterFrameInfo*)info {
-  CGSize size = CGSizeMake(info->size.width, info->size.height);
-  return [_viewController.flutterView frameBufferIDForSize:size];
-}
-
-- (bool)engineCallbackOnClearCurrent {
-  [NSOpenGLContext clearCurrentContext];
-  return true;
-}
-
-- (bool)engineCallbackOnPresent {
-  if (!_mainOpenGLContext) {
-    return false;
-  }
-  [self.viewController.flutterView present];
-  return true;
-}
-
-- (bool)engineCallbackOnMakeResourceCurrent {
-  [self.resourceContext makeCurrentContext];
-  return true;
 }
 
 - (void)engineCallbackOnPlatformMessage:(const FlutterPlatformMessage*)message {
@@ -677,27 +558,28 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 #pragma mark - FlutterTextureRegistrar
 
-- (BOOL)populateTextureWithIdentifier:(int64_t)textureID
-                        openGLTexture:(FlutterOpenGLTexture*)openGLTexture {
-  return [_textures[@(textureID)] populateTexture:openGLTexture];
+- (int64_t)registerTexture:(id<FlutterTexture>)texture {
+  return [_openGLRenderer registerTexture:texture];
 }
 
-- (int64_t)registerTexture:(id<FlutterTexture>)texture {
-  FlutterExternalTextureGL* FlutterTexture =
-      [[FlutterExternalTextureGL alloc] initWithFlutterTexture:texture];
-  int64_t textureID = [FlutterTexture textureID];
-  _embedderAPI.RegisterExternalTexture(_engine, textureID);
-  _textures[@(textureID)] = FlutterTexture;
-  return textureID;
+- (BOOL)registerTextureWithID:(int64_t)textureId {
+  return _embedderAPI.RegisterExternalTexture(_engine, textureId) == kSuccess;
 }
 
 - (void)textureFrameAvailable:(int64_t)textureID {
-  _embedderAPI.MarkExternalTextureFrameAvailable(_engine, textureID);
+  [_openGLRenderer textureFrameAvailable:textureID];
+}
+
+- (BOOL)markTextureFrameAvailable:(int64_t)textureID {
+  return _embedderAPI.MarkExternalTextureFrameAvailable(_engine, textureID) == kSuccess;
 }
 
 - (void)unregisterTexture:(int64_t)textureID {
-  _embedderAPI.UnregisterExternalTexture(_engine, textureID);
-  [_textures removeObjectForKey:@(textureID)];
+  [_openGLRenderer unregisterTexture:textureID];
+}
+
+- (BOOL)unregisterTextureWithID:(int64_t)textureID {
+  return _embedderAPI.UnregisterExternalTexture(_engine, textureID) == kSuccess;
 }
 
 #pragma mark - Task runner integration

@@ -18,7 +18,8 @@ namespace flutter {
 // FlutterGLCompositor is created and destroyed by FlutterEngine.
 class FlutterGLCompositor {
  public:
-  FlutterGLCompositor(FlutterViewController* view_controller);
+  FlutterGLCompositor(FlutterViewController* view_controller,
+                      NSOpenGLContext* opengl_context);
 
   // Creates a BackingStore and saves updates the backing_store_out
   // data with the new BackingStore data.
