@@ -6,18 +6,22 @@
 
 #include <stddef.h>
 
-#include "base/stl_util.h"
-#include "build/build_config.h"
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/gfx/geometry/rect.h"
-#include "ui/gfx/geometry/rect_conversions.h"
-#include "ui/gfx/test/gfx_util.h"
+#include "ax_build/build_config.h"
+#include "gfx/test/gfx_util.h"
+#include "gtest/gtest.h"
+#include "rect.h"
+#include "rect_conversions.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
 #endif
 
 namespace gfx {
+
+template <typename T, size_t N>
+constexpr size_t size(const T (&array)[N]) noexcept {
+  return N;
+}
 
 TEST(RectTest, Contains) {
   static const struct ContainsCase {
@@ -40,7 +44,7 @@ TEST(RectTest, Contains) {
     {0, 0, -10, -10, 0, 0, false},
 #endif
   };
-  for (size_t i = 0; i < base::size(contains_cases); ++i) {
+  for (size_t i = 0; i < size(contains_cases); ++i) {
     const ContainsCase& value = contains_cases[i];
     Rect rect(value.rect_x, value.rect_y, value.rect_width, value.rect_height);
     EXPECT_EQ(value.contained, rect.Contains(value.point_x, value.point_y));
@@ -68,7 +72,7 @@ TEST(RectTest, Intersects) {
                {10, 10, 10, 10, 15, 15, 10, 10, true},
                {10, 10, 10, 10, 20, 15, 10, 10, false},
                {10, 10, 10, 10, 21, 15, 10, 10, false}};
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     Rect r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
     EXPECT_EQ(tests[i].intersects, r1.Intersects(r2));
@@ -102,7 +106,7 @@ TEST(RectTest, Intersect) {
                 3, 1, 4, 2, 3, 1, 1, 2},
                {3, 0, 2, 2,  // gap
                 0, 0, 2, 2, 0, 0, 0, 0}};
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     Rect r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
     Rect r3(tests[i].x3, tests[i].y3, tests[i].w3, tests[i].h3);
@@ -137,7 +141,7 @@ TEST(RectTest, Union) {
                 0, 0, 2, 2, 0, 0, 5, 5},
                {0, 0, 0, 0,  // union with empty rect
                 2, 2, 2, 2, 2, 2, 2, 2}};
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     Rect r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
     Rect r3(tests[i].x3, tests[i].y3, tests[i].w3, tests[i].h3);
@@ -177,7 +181,7 @@ TEST(RectTest, AdjustToFit) {
                {-1, -1, 5, 5, 0, 0, 4, 4, 0, 0, 4, 4},
                {2, 2, 4, 4, 0, 0, 3, 3, 0, 0, 3, 3},
                {2, 2, 1, 1, 0, 0, 3, 3, 2, 2, 1, 1}};
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     Rect r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
     Rect r3(tests[i].x3, tests[i].y3, tests[i].w3, tests[i].h3);
@@ -416,7 +420,7 @@ TEST(RectTest, ScaleRect) {
        std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
        std::numeric_limits<float>::max(), std::numeric_limits<float>::max()}};
 
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     RectF r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     RectF r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
 
@@ -460,7 +464,7 @@ TEST(RectTest, ToEnclosedRect) {
       {{1.9999f, 2.0001f, 6.0002f, 5.9998f}, {2, 3, 6, 4}},
       {{1.9998f, 2.0002f, 6.0001f, 5.9999f}, {2, 3, 5, 5}}};
 
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     RectF source(tests[i].in.x, tests[i].in.y, tests[i].in.width,
                  tests[i].in.height);
     Rect enclosed = ToEnclosedRect(source);
@@ -523,7 +527,7 @@ TEST(RectTest, ToEnclosingRect) {
       {{1.9999f, 2.0001f, 6.0002f, 5.9998f}, {1, 2, 8, 6}},
       {{1.9998f, 2.0002f, 6.0001f, 5.9999f}, {1, 2, 7, 7}}};
 
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     RectF source(tests[i].in.x, tests[i].in.y, tests[i].in.width,
                  tests[i].in.height);
 
@@ -585,7 +589,7 @@ TEST(RectTest, ToEnclosingRectIgnoringError) {
       {{1.9999f, 2.0001f, 6.0002f, 5.9998f}, {2, 2, 6, 6}},
       {{1.9998f, 2.0002f, 6.0001f, 5.9999f}, {2, 2, 6, 6}}};
 
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     RectF source(tests[i].in.x, tests[i].in.y, tests[i].in.width,
                  tests[i].in.height);
 
@@ -625,7 +629,7 @@ TEST(RectTest, ToFlooredRect) {
       {20000.5f, 20000.5f, 0.5f, 0.5f, 20000, 20000, 0, 0},
   };
 
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     RectF r1(tests[i].x1, tests[i].y1, tests[i].w1, tests[i].h1);
     Rect r2(tests[i].x2, tests[i].y2, tests[i].w2, tests[i].h2);
 
@@ -678,7 +682,7 @@ TEST(RectTest, ScaleToEnclosedRect) {
                    Rect(-1, -3, 0, 0),
                }};
 
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     Rect result =
         ScaleToEnclosedRect(tests[i].input_rect, tests[i].input_scale);
     EXPECT_EQ(tests[i].expected_rect, result);
@@ -726,7 +730,7 @@ TEST(RectTest, ScaleToEnclosingRect) {
                    Rect(-2, -3, 0, 0),
                }};
 
-  for (size_t i = 0; i < base::size(tests); ++i) {
+  for (size_t i = 0; i < size(tests); ++i) {
     Rect result =
         ScaleToEnclosingRect(tests[i].input_rect, tests[i].input_scale);
     EXPECT_EQ(tests[i].expected_rect, result);
@@ -777,7 +781,7 @@ TEST(RectTest, BoundingRect) {
       {Point(-4, 6), Point(6, -4), Rect(-4, -4, 10, 10)},
   };
 
-  for (size_t i = 0; i < base::size(int_tests); ++i) {
+  for (size_t i = 0; i < size(int_tests); ++i) {
     Rect actual = BoundingRect(int_tests[i].a, int_tests[i].b);
     EXPECT_EQ(int_tests[i].expected, actual);
   }
@@ -805,7 +809,7 @@ TEST(RectTest, BoundingRect) {
       {PointF(-4.2f, 6.8f), PointF(6.8f, -4.2f),
        RectF(-4.2f, -4.2f, 11.0f, 11.0f)}};
 
-  for (size_t i = 0; i < base::size(float_tests); ++i) {
+  for (size_t i = 0; i < size(float_tests); ++i) {
     RectF actual = BoundingRect(float_tests[i].a, float_tests[i].b);
     EXPECT_RECTF_EQ(float_tests[i].expected, actual);
   }

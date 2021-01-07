@@ -8,11 +8,11 @@
 #include <iosfwd>
 #include <string>
 
-#include "build/build_config.h"
-#include "ui/gfx/geometry/point_f.h"
-#include "ui/gfx/geometry/rect.h"
-#include "ui/gfx/geometry/size_f.h"
-#include "ui/gfx/geometry/vector2d_f.h"
+#include "ax_build/build_config.h"
+#include "point_f.h"
+#include "rect.h"
+#include "size_f.h"
+#include "vector2d_f.h"
 
 #if defined(OS_APPLE)
 typedef struct CGRect CGRect;
@@ -23,7 +23,7 @@ namespace gfx {
 class InsetsF;
 
 // A floating version of gfx::Rect.
-class GEOMETRY_EXPORT RectF {
+class GFX_EXPORT RectF {
  public:
   constexpr RectF() = default;
   constexpr RectF(float width, float height) : size_(width, height) {}
@@ -212,9 +212,9 @@ inline RectF operator+(const Vector2dF& lhs, const RectF& rhs) {
   return rhs + lhs;
 }
 
-GEOMETRY_EXPORT RectF IntersectRects(const RectF& a, const RectF& b);
-GEOMETRY_EXPORT RectF UnionRects(const RectF& a, const RectF& b);
-GEOMETRY_EXPORT RectF SubtractRects(const RectF& a, const RectF& b);
+GFX_EXPORT RectF IntersectRects(const RectF& a, const RectF& b);
+GFX_EXPORT RectF UnionRects(const RectF& a, const RectF& b);
+GFX_EXPORT RectF SubtractRects(const RectF& a, const RectF& b);
 
 inline RectF ScaleRect(const RectF& r, float x_scale, float y_scale) {
   return RectF(r.x() * x_scale, r.y() * y_scale, r.width() * x_scale, r.height() * y_scale);
@@ -230,7 +230,7 @@ inline RectF ScaleRect(const RectF& r, float scale) {
 // points", except that we consider points on the right/bottom edges of the
 // rect to be outside the rect.  So technically one or both points will not be
 // contained within the rect, because they will appear on one of these edges.
-GEOMETRY_EXPORT RectF BoundingRect(const PointF& p1, const PointF& p2);
+GFX_EXPORT RectF BoundingRect(const PointF& p1, const PointF& p2);
 
 // This is declared here for use in gtest-based unit tests but is defined in
 // the //ui/gfx:test_support target. Depend on that to use this in your unit

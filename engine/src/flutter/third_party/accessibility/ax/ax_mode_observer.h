@@ -5,8 +5,8 @@
 #ifndef UI_ACCESSIBILITY_AX_MODE_OBSERVER_H_
 #define UI_ACCESSIBILITY_AX_MODE_OBSERVER_H_
 
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_mode.h"
+#include "ax_export.h"
+#include "ax_mode.h"
 
 namespace ui {
 

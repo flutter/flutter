@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_role_properties.h"
+#include "ax_role_properties.h"
 
-#include "build/build_config.h"
-#include "ui/accessibility/ax_enums.mojom.h"
+#include "ax_build/build_config.h"
+
+#include "ax_enums.h"
 
 namespace ui {
 

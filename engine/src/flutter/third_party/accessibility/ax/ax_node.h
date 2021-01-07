@@ -6,22 +6,24 @@
 #define UI_ACCESSIBILITY_AX_NODE_H_
 
 #include <stdint.h>
+#include <optional>
 
 #include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include "base/optional.h"
-#include "build/build_config.h"
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_node_data.h"
-#include "ui/accessibility/ax_tree_id.h"
+#include "ax_build/build_config.h"
+#include "ax_export.h"
+#include "ax_node_data.h"
+#include "ax_tree_id.h"
+#include "base/logging.h"
+#include "gfx/geometry/rect.h"
+#include "gfx/transform.h"
 
 namespace ui {
 
 class AXTableInfo;
-struct AXLanguageInfo;
 
 // One node in an AXTree.
 class AX_EXPORT AXNode final {
@@ -29,9 +31,10 @@ class AX_EXPORT AXNode final {
   // Defines the type used for AXNode IDs.
   using AXID = int32_t;
 
+  // TODO(chunhtai): I modified this to be -1 so it can work with flutter.
   // If a node is not yet or no longer valid, its ID should have a value of
   // kInvalidAXID.
-  static constexpr AXID kInvalidAXID = 0;
+  static constexpr AXID kInvalidAXID = -1;
 
   // Interface to the tree class that owns an AXNode. We use this instead
   // of letting AXNode have a pointer to its AXTree directly so that we're
@@ -56,8 +59,8 @@ class AX_EXPORT AXNode final {
     // See AXTree::GetFromId.
     virtual AXNode* GetFromId(int32_t id) const = 0;
 
-    virtual base::Optional<int> GetPosInSet(const AXNode& node) = 0;
-    virtual base::Optional<int> GetSetSize(const AXNode& node) = 0;
+    virtual std::optional<int> GetPosInSet(const AXNode& node) = 0;
+    virtual std::optional<int> GetSetSize(const AXNode& node) = 0;
 
     virtual Selection GetUnignoredSelection() const = 0;
     virtual bool GetTreeUpdateInProgressState() const = 0;
@@ -235,10 +238,10 @@ class AX_EXPORT AXNode final {
   }
 
   bool GetString16Attribute(ax::mojom::StringAttribute attribute,
-                            base::string16* value) const {
+                            std::u16string* value) const {
     return data().GetString16Attribute(attribute, value);
   }
-  base::string16 GetString16Attribute(
+  std::u16string GetString16Attribute(
       ax::mojom::StringAttribute attribute) const {
     return data().GetString16Attribute(attribute);
   }
@@ -267,7 +270,7 @@ class AX_EXPORT AXNode final {
     return data().GetStringListAttribute(attribute, value);
   }
 
-  bool GetHtmlAttribute(const char* attribute, base::string16* value) const {
+  bool GetHtmlAttribute(const char* attribute, std::u16string* value) const {
     return data().GetHtmlAttribute(attribute, value);
   }
   bool GetHtmlAttribute(const char* attribute, std::string* value) const {
@@ -275,13 +278,13 @@ class AX_EXPORT AXNode final {
   }
 
   // Return the hierarchical level if supported.
-  base::Optional<int> GetHierarchicalLevel() const;
+  std::optional<int> GetHierarchicalLevel() const;
 
   // PosInSet and SetSize public methods.
   bool IsOrderedSetItem() const;
   bool IsOrderedSet() const;
-  base::Optional<int> GetPosInSet();
-  base::Optional<int> GetSetSize();
+  std::optional<int> GetPosInSet();
+  std::optional<int> GetSetSize();
 
   // Helpers for GetPosInSet and GetSetSize.
   // Returns true if the role of ordered set matches the role of item.
@@ -294,9 +297,8 @@ class AX_EXPORT AXNode final {
 
   const std::string& GetInheritedStringAttribute(
       ax::mojom::StringAttribute attribute) const;
-  base::string16 GetInheritedString16Attribute(
+  std::u16string GetInheritedString16Attribute(
       ax::mojom::StringAttribute attribute) const;
-
   // Returns the text of this node and all descendant nodes; including text
   // found in embedded objects.
   //
@@ -315,7 +317,6 @@ class AX_EXPORT AXNode final {
   // Returns empty string if no appropriate language was found.
   std::string GetLanguage() const;
 
-  //
   // Helper functions for tables, table rows, and table cells.
   // Most of these functions construct and cache an AXTableInfo behind
   // the scenes to infer many properties of tables.
@@ -332,15 +333,15 @@ class AX_EXPORT AXNode final {
   // of the table is row 0, column 0, cell index 0 - but that same cell
   // has a minimum ARIA row index of 1 and column index of 1.
   //
-  // The below methods return base::nullopt if the AXNode they are called on is
+  // The below methods return std::nullopt if the AXNode they are called on is
   // not inside a table.
   bool IsTable() const;
-  base::Optional<int> GetTableColCount() const;
-  base::Optional<int> GetTableRowCount() const;
-  base::Optional<int> GetTableAriaColCount() const;
-  base::Optional<int> GetTableAriaRowCount() const;
-  base::Optional<int> GetTableCellCount() const;
-  base::Optional<bool> GetTableHasColumnOrRowHeaderNode() const;
+  std::optional<int> GetTableColCount() const;
+  std::optional<int> GetTableRowCount() const;
+  std::optional<int> GetTableAriaColCount() const;
+  std::optional<int> GetTableAriaRowCount() const;
+  std::optional<int> GetTableCellCount() const;
+  std::optional<bool> GetTableHasColumnOrRowHeaderNode() const;
   AXNode* GetTableCaption() const;
   AXNode* GetTableCellFromIndex(int index) const;
   AXNode* GetTableCellFromCoords(int row_index, int col_index) const;
@@ -358,25 +359,25 @@ class AX_EXPORT AXNode final {
 
   // Table row-like nodes.
   bool IsTableRow() const;
-  base::Optional<int> GetTableRowRowIndex() const;
+  std::optional<int> GetTableRowRowIndex() const;
   // Get the node ids that represent rows in a table.
   std::vector<AXNode::AXID> GetTableRowNodeIds() const;
 
 #if defined(OS_APPLE)
   // Table column-like nodes. These nodes are only present on macOS.
   bool IsTableColumn() const;
-  base::Optional<int> GetTableColColIndex() const;
+  std::optional<int> GetTableColColIndex() const;
 #endif  // defined(OS_APPLE)
 
   // Table cell-like nodes.
   bool IsTableCellOrHeader() const;
-  base::Optional<int> GetTableCellIndex() const;
-  base::Optional<int> GetTableCellColIndex() const;
-  base::Optional<int> GetTableCellRowIndex() const;
-  base::Optional<int> GetTableCellColSpan() const;
-  base::Optional<int> GetTableCellRowSpan() const;
-  base::Optional<int> GetTableCellAriaColIndex() const;
-  base::Optional<int> GetTableCellAriaRowIndex() const;
+  std::optional<int> GetTableCellIndex() const;
+  std::optional<int> GetTableCellColIndex() const;
+  std::optional<int> GetTableCellRowIndex() const;
+  std::optional<int> GetTableCellColSpan() const;
+  std::optional<int> GetTableCellRowSpan() const;
+  std::optional<int> GetTableCellAriaColIndex() const;
+  std::optional<int> GetTableCellAriaRowIndex() const;
   std::vector<AXNode::AXID> GetTableCellColHeaderNodeIds() const;
   std::vector<AXNode::AXID> GetTableCellRowHeaderNodeIds() const;
   void GetTableCellColHeaders(std::vector<AXNode*>* col_headers) const;
@@ -385,21 +386,6 @@ class AX_EXPORT AXNode final {
   // Helper methods to check if a cell is an ARIA-1.1+ 'cell' or 'gridcell'
   bool IsCellOrHeaderOfARIATable() const;
   bool IsCellOrHeaderOfARIAGrid() const;
-
-  // Return an object containing information about the languages detected on
-  // this node.
-  // Callers should not retain this pointer, instead they should request it
-  // every time it is needed.
-  //
-  // Returns nullptr if the node has no language info.
-  AXLanguageInfo* GetLanguageInfo() const;
-
-  // This should only be called by LabelLanguageForSubtree and is used as part
-  // of the language detection feature.
-  void SetLanguageInfo(std::unique_ptr<AXLanguageInfo> lang_info);
-
-  // Destroy the language info for this node.
-  void ClearLanguageInfo();
 
   // Returns true if node is a group and is a direct descendant of a set-like
   // element.
@@ -466,9 +452,6 @@ class AX_EXPORT AXNode final {
   AXNode* const parent_;
   std::vector<AXNode*> children_;
   AXNodeData data_;
-
-  // Stores the detected language computed from the node's text.
-  std::unique_ptr<AXLanguageInfo> language_info_;
 };
 
 AX_EXPORT std::ostream& operator<<(std::ostream& stream, const AXNode& node);
@@ -595,7 +578,7 @@ NodeType* AXNode::ChildIteratorBase<NodeType,
                                     PreviousSibling,
                                     FirstChild,
                                     LastChild>::get() const {
-  DCHECK(child_);
+  BASE_DCHECK(child_);
   return child_;
 }
 
@@ -609,7 +592,7 @@ NodeType& AXNode::ChildIteratorBase<NodeType,
                                     PreviousSibling,
                                     FirstChild,
                                     LastChild>::operator*() const {
-  DCHECK(child_);
+  BASE_DCHECK(child_);
   return *child_;
 }
 
@@ -623,7 +606,7 @@ NodeType* AXNode::ChildIteratorBase<NodeType,
                                     PreviousSibling,
                                     FirstChild,
                                     LastChild>::operator->() const {
-  DCHECK(child_);
+  BASE_DCHECK(child_);
   return child_;
 }
 

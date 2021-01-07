@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "ui/gfx/mac/coordinate_conversion.h"
+#import "coordinate_conversion.h"
 
 #import <Cocoa/Cocoa.h>
 
-#include "ui/gfx/geometry/point.h"
-#include "ui/gfx/geometry/rect.h"
+#include "gfx/geometry/point.h"
+#include "gfx/geometry/rect.h"
 
 namespace gfx {
 

@@ -7,12 +7,12 @@
 
 #include <string>
 
-#include "ui/gfx/geometry/geometry_export.h"
+#include "gfx/gfx_export.h"
 
 namespace gfx {
 
 // A floating point version of gfx::Insets.
-class GEOMETRY_EXPORT InsetsF {
+class GFX_EXPORT InsetsF {
  public:
   constexpr InsetsF() : top_(0.f), left_(0.f), bottom_(0.f), right_(0.f) {}
   constexpr explicit InsetsF(float all)

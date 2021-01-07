@@ -2,17 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_tree_id.h"
+#include "ax_tree_id.h"
 
 #include <algorithm>
 #include <iostream>
 
-#include "base/check.h"
+#include "ax_enums.h"
+#include "base/logging.h"
 #include "base/no_destructor.h"
-#include "base/notreached.h"
-#include "base/util/values/values_util.h"
-#include "base/values.h"
-#include "ui/accessibility/ax_enums.mojom.h"
 
 namespace ui {
 
@@ -22,7 +19,7 @@ AXTreeID::AXTreeID(const AXTreeID& other) = default;
 
 AXTreeID::AXTreeID(ax::mojom::AXTreeIDType type) : type_(type) {
   if (type_ == ax::mojom::AXTreeIDType::kToken)
-    token_ = base::UnguessableToken::Create();
+    token_ = base::SimpleToken::Create();
 }
 
 AXTreeID::AXTreeID(const std::string& string) {
@@ -30,9 +27,8 @@ AXTreeID::AXTreeID(const std::string& string) {
     type_ = ax::mojom::AXTreeIDType::kUnknown;
   } else {
     type_ = ax::mojom::AXTreeIDType::kToken;
-    base::Optional<base::UnguessableToken> token =
-        util::ValueToUnguessableToken(base::Value(string));
-    CHECK(token);
+    std::optional<base::SimpleToken> token = base::ValueToSimpleToken(string);
+    BASE_DCHECK(token);
     token_ = *token;
   }
 }
@@ -43,7 +39,7 @@ AXTreeID AXTreeID::FromString(const std::string& string) {
 }
 
 // static
-AXTreeID AXTreeID::FromToken(const base::UnguessableToken& token) {
+AXTreeID AXTreeID::FromToken(const base::SimpleToken& token) {
   return AXTreeID(token.ToString());
 }
 
@@ -59,10 +55,10 @@ std::string AXTreeID::ToString() const {
     case ax::mojom::AXTreeIDType::kUnknown:
       return "";
     case ax::mojom::AXTreeIDType::kToken:
-      return util::UnguessableTokenToValue(*token_).GetString();
+      return base::SimpleTokenToValue(*token_);
   }
 
-  NOTREACHED();
+  BASE_UNREACHABLE();
   return std::string();
 }
 
@@ -96,8 +92,8 @@ bool AXTreeID::operator>=(const AXTreeID& rhs) const {
 }
 
 size_t AXTreeIDHash::operator()(const ui::AXTreeID& tree_id) const {
-  DCHECK(tree_id.type() == ax::mojom::AXTreeIDType::kToken);
-  return base::UnguessableTokenHash()(tree_id.token().value());
+  BASE_DCHECK(tree_id.type() == ax::mojom::AXTreeIDType::kToken);
+  return base::SimpleTokenHash(tree_id.token().value());
 }
 
 std::ostream& operator<<(std::ostream& stream, const AXTreeID& value) {

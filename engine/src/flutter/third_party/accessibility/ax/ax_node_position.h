@@ -9,13 +9,11 @@
 
 #include <vector>
 
-#include "base/containers/stack.h"
-#include "base/strings/string16.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_node.h"
-#include "ui/accessibility/ax_position.h"
-#include "ui/accessibility/ax_tree_id.h"
+#include "ax_enums.h"
+#include "ax_export.h"
+#include "ax_node.h"
+#include "ax_position.h"
+#include "ax_tree_id.h"
 
 namespace ui {
 
@@ -36,7 +34,7 @@ class AX_EXPORT AXNodePosition : public AXPosition<AXNodePosition, AXNode> {
 
   AXPositionInstance Clone() const override;
 
-  base::string16 GetText() const override;
+  std::u16string GetText() const override;
   bool IsInLineBreak() const override;
   bool IsInTextObject() const override;
   bool IsInWhiteSpace() const override;
@@ -50,7 +48,7 @@ class AX_EXPORT AXNodePosition : public AXPosition<AXNodePosition, AXNode> {
   int AnchorUnignoredChildCount() const override;
   int AnchorIndexInParent() const override;
   int AnchorSiblingCount() const override;
-  base::stack<AXNode*> GetAncestorAnchors() const override;
+  std::stack<AXNode*> GetAncestorAnchors() const override;
   AXNode* GetLowestUnignoredAncestor() const override;
   void AnchorParent(AXTreeID* tree_id, AXNode::AXID* parent_id) const override;
   AXNode* GetNodeInTree(AXTreeID tree_id, AXNode::AXID node_id) const override;

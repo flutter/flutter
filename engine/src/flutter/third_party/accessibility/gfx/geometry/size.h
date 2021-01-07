@@ -9,10 +9,10 @@
 #include <iosfwd>
 #include <string>
 
+#include "ax_build/build_config.h"
 #include "base/compiler_specific.h"
 #include "base/numerics/safe_math.h"
-#include "build/build_config.h"
-#include "ui/gfx/geometry/geometry_export.h"
+#include "gfx/gfx_export.h"
 
 #if defined(OS_WIN)
 typedef struct tagSIZE SIZE;
@@ -23,7 +23,7 @@ typedef struct CGSize CGSize;
 namespace gfx {
 
 // A size has width and height values.
-class GEOMETRY_EXPORT Size {
+class GFX_EXPORT Size {
  public:
   constexpr Size() : width_(0), height_(0) {}
   constexpr Size(int width, int height)
@@ -100,12 +100,12 @@ inline Size operator-(Size lhs, const Size& rhs) {
 void PrintTo(const Size& size, ::std::ostream* os);
 
 // Helper methods to scale a gfx::Size to a new gfx::Size.
-GEOMETRY_EXPORT Size ScaleToCeiledSize(const Size& size, float x_scale, float y_scale);
-GEOMETRY_EXPORT Size ScaleToCeiledSize(const Size& size, float scale);
-GEOMETRY_EXPORT Size ScaleToFlooredSize(const Size& size, float x_scale, float y_scale);
-GEOMETRY_EXPORT Size ScaleToFlooredSize(const Size& size, float scale);
-GEOMETRY_EXPORT Size ScaleToRoundedSize(const Size& size, float x_scale, float y_scale);
-GEOMETRY_EXPORT Size ScaleToRoundedSize(const Size& size, float scale);
+GFX_EXPORT Size ScaleToCeiledSize(const Size& size, float x_scale, float y_scale);
+GFX_EXPORT Size ScaleToCeiledSize(const Size& size, float scale);
+GFX_EXPORT Size ScaleToFlooredSize(const Size& size, float x_scale, float y_scale);
+GFX_EXPORT Size ScaleToFlooredSize(const Size& size, float scale);
+GFX_EXPORT Size ScaleToRoundedSize(const Size& size, float x_scale, float y_scale);
+GFX_EXPORT Size ScaleToRoundedSize(const Size& size, float scale);
 
 }  // namespace gfx
 

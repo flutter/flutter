@@ -9,12 +9,12 @@
 #include <string>
 #include <vector>
 
+#include "ax/ax_node.h"
+#include "ax/ax_tree.h"
+#include "ax_build/build_config.h"
+#include "ax_platform_node.h"
+#include "ax_platform_node_delegate_base.h"
 #include "base/auto_reset.h"
-#include "build/build_config.h"
-#include "ui/accessibility/ax_node.h"
-#include "ui/accessibility/ax_tree.h"
-#include "ui/accessibility/platform/ax_platform_node.h"
-#include "ui/accessibility/platform/ax_platform_node_delegate_base.h"
 
 #if defined(OS_WIN)
 namespace gfx {
@@ -101,39 +101,38 @@ class TestAXNodeWrapper : public AXPlatformNodeDelegateBase {
                                          int32_t id) override;
   int GetIndexInParent() override;
   bool IsTable() const override;
-  base::Optional<int> GetTableRowCount() const override;
-  base::Optional<int> GetTableColCount() const override;
-  base::Optional<int> GetTableAriaColCount() const override;
-  base::Optional<int> GetTableAriaRowCount() const override;
-  base::Optional<int> GetTableCellCount() const override;
-  base::Optional<bool> GetTableHasColumnOrRowHeaderNode() const override;
+  std::optional<int> GetTableRowCount() const override;
+  std::optional<int> GetTableColCount() const override;
+  std::optional<int> GetTableAriaColCount() const override;
+  std::optional<int> GetTableAriaRowCount() const override;
+  std::optional<int> GetTableCellCount() const override;
+  std::optional<bool> GetTableHasColumnOrRowHeaderNode() const override;
   std::vector<int32_t> GetColHeaderNodeIds() const override;
   std::vector<int32_t> GetColHeaderNodeIds(int col_index) const override;
   std::vector<int32_t> GetRowHeaderNodeIds() const override;
   std::vector<int32_t> GetRowHeaderNodeIds(int row_index) const override;
   bool IsTableRow() const override;
-  base::Optional<int> GetTableRowRowIndex() const override;
+  std::optional<int> GetTableRowRowIndex() const override;
   bool IsTableCellOrHeader() const override;
-  base::Optional<int> GetTableCellIndex() const override;
-  base::Optional<int> GetTableCellColIndex() const override;
-  base::Optional<int> GetTableCellRowIndex() const override;
-  base::Optional<int> GetTableCellColSpan() const override;
-  base::Optional<int> GetTableCellRowSpan() const override;
-  base::Optional<int> GetTableCellAriaColIndex() const override;
-  base::Optional<int> GetTableCellAriaRowIndex() const override;
-  base::Optional<int32_t> GetCellId(int row_index,
-                                    int col_index) const override;
-  base::Optional<int32_t> CellIndexToId(int cell_index) const override;
+  std::optional<int> GetTableCellIndex() const override;
+  std::optional<int> GetTableCellColIndex() const override;
+  std::optional<int> GetTableCellRowIndex() const override;
+  std::optional<int> GetTableCellColSpan() const override;
+  std::optional<int> GetTableCellRowSpan() const override;
+  std::optional<int> GetTableCellAriaColIndex() const override;
+  std::optional<int> GetTableCellAriaRowIndex() const override;
+  std::optional<int32_t> GetCellId(int row_index, int col_index) const override;
+  std::optional<int32_t> CellIndexToId(int cell_index) const override;
   bool IsCellOrHeaderOfARIATable() const override;
   bool IsCellOrHeaderOfARIAGrid() const override;
   gfx::AcceleratedWidget GetTargetForNativeAccessibilityEvent() override;
   bool AccessibilityPerformAction(const AXActionData& data) override;
-  base::string16 GetLocalizedRoleDescriptionForUnlabeledImage() const override;
-  base::string16 GetLocalizedStringForLandmarkType() const override;
-  base::string16 GetLocalizedStringForRoleDescription() const override;
-  base::string16 GetLocalizedStringForImageAnnotationStatus(
+  std::u16string GetLocalizedRoleDescriptionForUnlabeledImage() const override;
+  std::u16string GetLocalizedStringForLandmarkType() const override;
+  std::u16string GetLocalizedStringForRoleDescription() const override;
+  std::u16string GetLocalizedStringForImageAnnotationStatus(
       ax::mojom::ImageAnnotationStatus status) const override;
-  base::string16 GetStyleNameAttributeAsLocalizedString() const override;
+  std::u16string GetStyleNameAttributeAsLocalizedString() const override;
   bool ShouldIgnoreHoveredStateForTesting() override;
   const ui::AXUniqueId& GetUniqueId() const override;
   bool HasVisibleCaretOrSelection() const override;
@@ -143,8 +142,8 @@ class TestAXNodeWrapper : public AXPlatformNodeDelegateBase {
       ax::mojom::IntListAttribute attr) override;
   bool IsOrderedSetItem() const override;
   bool IsOrderedSet() const override;
-  base::Optional<int> GetPosInSet() const override;
-  base::Optional<int> GetSetSize() const override;
+  std::optional<int> GetPosInSet() const override;
+  std::optional<int> GetSetSize() const override;
   const std::vector<gfx::NativeViewAccessible> GetUIADescendants()
       const override;
   gfx::RectF GetLocation() const;

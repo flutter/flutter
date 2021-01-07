@@ -1,136 +1,74 @@
-# Copyright 2014 The Chromium Authors. All rights reserved.
+# Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/features.gni")
-import("//build/config/linux/pkg_config.gni")
-import("//build/config/ui.gni")
-import("//mojo/public/tools/bindings/mojom.gni")
-import("//testing/libfuzzer/fuzzer_test.gni")
-import("//testing/test.gni")
-import("//tools/json_schema_compiler/json_schema_api.gni")
-import("//ui/base/ui_features.gni")
+import("//flutter/common/config.gni")
 
-if (is_android) {
-  import("//build/config/android/rules.gni")
-}
-
-if (is_win) {
-  import("//build/toolchain/win/midl.gni")
-}
-
-# Reset sources_assignment_filter for the BUILD.gn file to prevent
-# regression during the migration of Chromium away from the feature.
-# See docs/no_sources_assignment_filter.md for more information.
-# TODO(crbug.com/1018739): remove this when migration is done.
-set_sources_assignment_filter([])
-
-mojom("ax_constants_mojo") {
-  sources = [ "ax_constants.mojom" ]
-}
-
-mojom_component("ax_enums_mojo") {
-  sources = [ "ax_enums.mojom" ]
-
-  macro_prefix = "UI_ACCESSIBILITY_AX_MOJOM"
-  output_prefix = "ui_accessibility_ax_mojom"
-}
-
-# A tiny subset of accessibility code that's allowed to be
-# included by Blink. The rule of thumb (for now) is that it's
-# anything platform-neutral (no platform/ directory) that
-# relates to a single accessibility node (no trees, etc.).
-component("ax_base") {
-  defines = [ "AX_BASE_IMPLEMENTATION" ]
+source_set("ax") {
+  visibility = [ "//flutter/third_party/accessibility/*" ]
+  include_dirs = [ "//flutter/third_party/accessibility" ]
 
   sources = [
-    "accessibility_features.cc",
-    "accessibility_features.h",
-    "accessibility_switches.cc",
-    "accessibility_switches.h",
-    "ax_base_export.h",
-    "ax_enum_util.cc",
-    "ax_enum_util.h",
-    "ax_event.cc",
-    "ax_event.h",
-    "ax_event_intent.cc",
-    "ax_event_intent.h",
-    "ax_mode.cc",
-    "ax_mode.h",
-    "ax_node_data.cc",
-    "ax_node_data.h",
-    "ax_node_text_styles.cc",
-    "ax_node_text_styles.h",
-    "ax_relative_bounds.cc",
-    "ax_relative_bounds.h",
-    "ax_role_properties.cc",
-    "ax_role_properties.h",
-    "ax_tree_id.cc",
-    "ax_tree_id.h",
+    "platform/ax_platform_node.cc",
+    "platform/ax_platform_node.h",
+    "platform/ax_platform_node_base.cc",
+    "platform/ax_platform_node_base.h",
+    "platform/ax_platform_node_delegate.h",
+    "platform/ax_platform_node_delegate_base.cc",
+    "platform/ax_platform_node_delegate_base.h",
+    "platform/ax_platform_text_boundary.cc",
+    "platform/ax_platform_text_boundary.h",
+    "platform/ax_unique_id.cc",
+    "platform/ax_unique_id.h",
+    "platform/compute_attributes.cc",
+    "platform/compute_attributes.h",
   ]
 
-  public_deps = [
-    ":ax_constants_mojo",
-    ":ax_enums_mojo",
-    "//base",
-    "//base:i18n",
-    "//base/util/values:values_util",
-    "//ui/base",
-    "//ui/gfx",
-    "//ui/gfx/geometry",
-    "//ui/strings",
-  ]
-}
-
-#if (is_win) {
-#  midl("ichromeaccessible") {
-#    sources = [
-#      "platform/ichromeaccessible.idl",
-#    ]
-#  }
-#}
-
-component("accessibility") {
-  defines = [ "AX_IMPLEMENTATION" ]
-
-  sources = [
+  sources += [
     "ax_action_data.cc",
     "ax_action_data.h",
     "ax_action_handler.cc",
     "ax_action_handler.h",
     "ax_action_handler_base.cc",
     "ax_action_handler_base.h",
-    "ax_action_target.h",
-    "ax_active_popup.cc",
-    "ax_active_popup.h",
+    "ax_base_export.h",
     "ax_clipping_behavior.h",
+    "ax_constants.h",
     "ax_coordinate_system.h",
-    "ax_event_bundle_sink.h",
+    "ax_enum_util.cc",
+    "ax_enum_util.h",
+    "ax_enums.h",
     "ax_event_generator.cc",
     "ax_event_generator.h",
+    "ax_event_intent.cc",
+    "ax_event_intent.h",
     "ax_export.h",
-    "ax_language_detection.cc",
-    "ax_language_detection.h",
+    "ax_mode.cc",
+    "ax_mode.h",
     "ax_mode_observer.h",
     "ax_node.cc",
     "ax_node.h",
+    "ax_node_data.cc",
+    "ax_node_data.h",
     "ax_node_position.cc",
     "ax_node_position.h",
+    "ax_node_text_styles.cc",
+    "ax_node_text_styles.h",
     "ax_offscreen_result.h",
     "ax_position.h",
     "ax_range.h",
-    "ax_serializable_tree.cc",
-    "ax_serializable_tree.h",
+    "ax_relative_bounds.cc",
+    "ax_relative_bounds.h",
+    "ax_role_properties.cc",
+    "ax_role_properties.h",
     "ax_table_info.cc",
     "ax_table_info.h",
-    "ax_text_utils.cc",
-    "ax_text_utils.h",
     "ax_tree.cc",
     "ax_tree.h",
-    "ax_tree_combiner.cc",
-    "ax_tree_combiner.h",
     "ax_tree_data.cc",
     "ax_tree_data.h",
+    "ax_tree_id.cc",
+    "ax_tree_id.h",
     "ax_tree_id_registry.cc",
     "ax_tree_id_registry.h",
     "ax_tree_manager.h",
@@ -138,194 +76,19 @@ component("accessibility") {
     "ax_tree_manager_map.h",
     "ax_tree_observer.cc",
     "ax_tree_observer.h",
-    "ax_tree_serializer.cc",
-    "ax_tree_serializer.h",
-    "ax_tree_source.h",
-    "ax_tree_source_checker.h",
     "ax_tree_update.h",
-    "ax_tree_update_forward.h",
-    "null_ax_action_target.cc",
-    "null_ax_action_target.h",
   ]
 
-  deps = [
-    "//base/util/values:values_util",
-    "//third_party/cld_3/src/src:cld_3",
-  ]
+  if (is_mac) {
+    sources += [
+      "platform/ax_platform_node_mac.h",
+      "platform/ax_platform_node_mac.mm",
+    ]
+  }
 
   public_deps = [
-    ":ax_base",
-    "//ui/accessibility/platform",
-  ]
-
-  # Allows the files from //ui/accessibility/platform includes headers
-  # from this directory.
-  allow_circular_includes_from = [ "//ui/accessibility/platform" ]
-
-  if (!is_ios) {
-    sources += [
-      "ax_param_traits.cc",
-      "ax_param_traits.h",
-      "ax_param_traits_macros.h",
-    ]
-
-    public_deps += [
-      "//ipc",
-      "//ui/gfx/ipc/skia",
-    ]
-  }
-
-  if (use_aura) {
-    sources += [
-      "aura/aura_window_properties.cc",
-      "aura/aura_window_properties.h",
-    ]
-
-    public_deps += [ "//ui/aura" ]
-  }
-}
-
-source_set("ax_assistant") {
-  sources = [
-    "ax_assistant_structure.cc",
-    "ax_assistant_structure.h",
-  ]
-
-  deps = [ ":accessibility" ]
-}
-
-static_library("test_support") {
-  testonly = true
-  sources = [
-    "test_ax_node_helper.cc",
-    "test_ax_node_helper.h",
-    "test_ax_tree_manager.cc",
-    "test_ax_tree_manager.h",
-    "tree_generator.cc",
-    "tree_generator.h",
-  ]
-
-  if (has_native_accessibility) {
-    sources += [
-      "platform/test_ax_node_wrapper.cc",
-      "platform/test_ax_node_wrapper.h",
-    ]
-  }
-
-  deps = [ ":accessibility" ]
-}
-
-test("accessibility_unittests") {
-  testonly = true
-  sources = [
-    "ax_enum_util_unittest.cc",
-    "ax_event_generator_unittest.cc",
-    "ax_generated_tree_unittest.cc",
-    "ax_language_detection_unittest.cc",
-    "ax_node_data_unittest.cc",
-    "ax_node_position_unittest.cc",
-    "ax_range_unittest.cc",
-    "ax_role_properties_unittest.cc",
-    "ax_table_info_unittest.cc",
-    "ax_text_utils_unittest.cc",
-    "ax_tree_combiner_unittest.cc",
-    "ax_tree_serializer_unittest.cc",
-    "ax_tree_source_checker_unittest.cc",
-    "ax_tree_unittest.cc",
-    "mojom/ax_action_data_mojom_traits_unittest.cc",
-    "mojom/ax_event_intent_mojom_traits_unittest.cc",
-    "mojom/ax_event_mojom_traits_unittest.cc",
-    "mojom/ax_node_data_mojom_traits_unittest.cc",
-    "mojom/ax_relative_bounds_mojom_traits_unittest.cc",
-    "mojom/ax_tree_data_mojom_traits_unittest.cc",
-    "mojom/ax_tree_id_mojom_traits_unittest.cc",
-    "mojom/ax_tree_update_mojom_traits_unittest.cc",
-    "null_ax_action_target_unittest.cc",
-    "platform/ax_platform_node_unittest.cc",
-    "platform/ax_platform_node_unittest.h",
-    "platform/ax_unique_id_unittest.cc",
-    "run_all_unittests.cc",
-  ]
-
-  deps = [
-    ":accessibility",
-    ":test_support",
-    "//base/test:test_support",
-    "//ipc",
-    "//mojo/core/embedder",
-    "//mojo/core/test:test_support",
-    "//mojo/public/cpp/test_support:test_utils",
-    "//skia",
-    "//testing/gmock",
-    "//testing/gtest",
-    "//ui/accessibility/mojom",
-    "//ui/gfx:test_support",
-  ]
-
-  if (has_native_accessibility) {
-    # This test depends heavily on NativeViewAccessible, which is only
-    # implemented on these platforms.
-    sources += [ "platform/ax_platform_node_base_unittest.cc" ]
-
-    if (is_win) {
-      sources += [
-        "platform/ax_fragment_root_win_unittest.cc",
-        "platform/ax_platform_node_textchildprovider_win_unittest.cc",
-        "platform/ax_platform_node_textprovider_win_unittest.cc",
-        "platform/ax_platform_node_textrangeprovider_win_unittest.cc",
-        "platform/ax_platform_node_win_unittest.cc",
-        "platform/ax_platform_node_win_unittest.h",
-      ]
-
-      deps += [
-        "//third_party/iaccessible2",
-        "//ui/accessibility/platform:ichromeaccessible",
-      ]
-
-      libs = [
-        "oleacc.lib",
-        "uiautomationcore.lib",
-      ]
-    }
-
-    if (use_atk) {
-      sources += [
-        "platform/atk_util_auralinux_unittest.cc",
-        "platform/ax_platform_node_auralinux_unittest.cc",
-      ]
-
-      configs += [ "//build/config/linux/atk" ]
-    }
-  }
-}
-
-fuzzer_test("ax_tree_fuzzer") {
-  sources = [ "ax_tree_fuzzer.cc" ]
-
-  deps = [ ":accessibility" ]
-}
-
-fuzzer_test("ax_table_fuzzer") {
-  sources = [ "ax_table_fuzzer.cc" ]
-
-  deps = [ ":accessibility" ]
-
-  seed_corpus = "fuzz_corpus"
-}
-
-test("accessibility_perftests") {
-  testonly = true
-  sources = [ "ax_node_position_perftest.cc" ]
-
-  deps = [
-    ":test_support",
-    "//base",
-    "//base/test:test_support",
-    "//mojo/core/test:run_all_unittests",
-    "//skia",
-    "//testing/gmock",
-    "//testing/gtest",
-    "//testing/perf",
-    "//ui/accessibility/mojom",
+    "//flutter/third_party/accessibility/ax_build",
+    "//flutter/third_party/accessibility/base",
+    "//flutter/third_party/accessibility/gfx",
   ]
 }

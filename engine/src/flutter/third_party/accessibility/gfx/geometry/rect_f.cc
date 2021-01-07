@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/rect_f.h"
+#include "rect_f.h"
 
 #include <algorithm>
 #include <limits>
 
-#include "base/check.h"
+#include "ax_build/build_config.h"
+#include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
-#include "base/strings/stringprintf.h"
-#include "build/build_config.h"
-#include "ui/gfx/geometry/insets_f.h"
+#include "base/string_utils.h"
+#include "insets_f.h"
 
 #if defined(OS_IOS)
 #include <CoreGraphics/CoreGraphics.h>
@@ -185,8 +185,8 @@ void RectF::Transpose() {
 }
 
 void RectF::SplitVertically(RectF* left_half, RectF* right_half) const {
-  DCHECK(left_half);
-  DCHECK(right_half);
+  BASE_DCHECK(left_half);
+  BASE_DCHECK(right_half);
 
   left_half->SetRect(x(), y(), width() / 2, height());
   right_half->SetRect(left_half->right(), y(), width() - left_half->width(),

@@ -5,9 +5,12 @@
 #ifndef UI_ACCESSIBILITY_AX_TREE_OBSERVER_H_
 #define UI_ACCESSIBILITY_AX_TREE_OBSERVER_H_
 
-#include "base/observer_list_types.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/accessibility/ax_export.h"
+#include <stdint.h>
+#include <string>
+#include <vector>
+
+#include "ax_enums.h"
+#include "ax_export.h"
 
 namespace ui {
 
@@ -21,10 +24,10 @@ struct AXTreeData;
 // |OnAtomicUpdateFinished| is notified at the end of an atomic update.
 // It provides a vector of nodes that were added or changed, for final
 // postprocessing.
-class AX_EXPORT AXTreeObserver : public base::CheckedObserver {
+class AX_EXPORT AXTreeObserver {
  public:
   AXTreeObserver();
-  ~AXTreeObserver() override;
+  virtual ~AXTreeObserver();
 
   // Called before any tree modifications have occurred, notifying that a single
   // node will change its data. Its id and data will be valid, but its links to

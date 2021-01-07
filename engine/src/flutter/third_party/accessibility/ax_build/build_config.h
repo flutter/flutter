@@ -33,8 +33,8 @@
 //    ARCH_CPU_31_BITS / ARCH_CPU_32_BITS / ARCH_CPU_64_BITS
 //    ARCH_CPU_BIG_ENDIAN / ARCH_CPU_LITTLE_ENDIAN
 
-#ifndef BUILD_BUILD_CONFIG_H_
-#define BUILD_BUILD_CONFIG_H_
+#ifndef UI_ACCESSIBILITY_BUILD_BUILD_CONFIG_H_
+#define UI_ACCESSIBILITY_BUILD_BUILD_CONFIG_H_
 
 // A set of macros to use for platform detection.
 #if defined(__native_client__)
@@ -220,9 +220,9 @@
 // The compiler thinks std::string::const_iterator and "const char*" are
 // equivalent types.
 #define STD_STRING_ITERATOR_IS_CHAR_POINTER
-// The compiler thinks base::string16::const_iterator and "char16*" are
+// The compiler thinks std::u16string::const_iterator and "char16*" are
 // equivalent types.
 #define BASE_STRING16_ITERATOR_IS_CHAR16_POINTER
 #endif
 
-#endif  // BUILD_BUILD_CONFIG_H_
+#endif  // UI_ACCESSIBILITY_BUILD_BUILD_CONFIG_H_

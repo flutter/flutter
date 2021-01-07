@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_table_info.h"
+#include "ax_table_info.h"
 
-#include "base/stl_util.h"
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/accessibility/ax_enums.mojom.h"
-#include "ui/accessibility/ax_node.h"
-#include "ui/accessibility/ax_tree.h"
+#include "gtest/gtest.h"
+
+#include "ax_enums.h"
+#include "ax_node.h"
+#include "ax_tree.h"
 
 namespace ui {
 
@@ -72,7 +72,7 @@ void MakeRowHeader(AXNodeData* cell,
 
 }  // namespace
 
-// A macro for testing that a base::Optional has both a value and that its value
+// A macro for testing that a std::optional has both a value and that its value
 // is set to a particular expectation.
 #define EXPECT_OPTIONAL_EQ(expected, actual) \
   EXPECT_TRUE(actual.has_value());           \
@@ -91,7 +91,7 @@ class AXTableInfoTest : public testing::Test {
   }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(AXTableInfoTest);
+  BASE_DISALLOW_COPY_AND_ASSIGN(AXTableInfoTest);
 };
 
 TEST_F(AXTableInfoTest, SimpleTable) {

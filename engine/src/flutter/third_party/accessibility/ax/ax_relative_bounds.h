@@ -10,10 +10,10 @@
 #include <memory>
 #include <ostream>
 
-#include "ui/accessibility/ax_base_export.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/gfx/geometry/rect_f.h"
-#include "ui/gfx/transform.h"
+#include "ax_base_export.h"
+#include "ax_enums.h"
+#include "gfx/geometry/rect_f.h"
+#include "gfx/transform.h"
 
 namespace ui {
 

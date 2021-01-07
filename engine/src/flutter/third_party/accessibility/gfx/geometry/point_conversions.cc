@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/point_conversions.h"
+#include "point_conversions.h"
 
 #include "base/numerics/safe_conversions.h"
 

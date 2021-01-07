@@ -8,7 +8,8 @@
 #include <stdint.h>
 
 #include "base/macros.h"
-#include "ui/accessibility/ax_export.h"
+
+#include "ax/ax_export.h"
 
 namespace ui {
 
@@ -44,7 +45,7 @@ class AX_EXPORT AXUniqueId {
 
   int32_t id_;
 
-  DISALLOW_COPY_AND_ASSIGN(AXUniqueId);
+  BASE_DISALLOW_COPY_AND_ASSIGN(AXUniqueId);
 };
 
 }  // namespace ui

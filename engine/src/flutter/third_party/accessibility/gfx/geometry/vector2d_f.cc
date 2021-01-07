@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/vector2d_f.h"
+#include "vector2d_f.h"
 
 #include <cmath>
 
-#include "base/strings/stringprintf.h"
+#include "base/string_utils.h"
 
 namespace gfx {
 

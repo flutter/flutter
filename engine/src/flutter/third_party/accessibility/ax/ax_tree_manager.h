@@ -5,9 +5,9 @@
 #ifndef UI_ACCESSIBILITY_AX_TREE_MANAGER_H_
 #define UI_ACCESSIBILITY_AX_TREE_MANAGER_H_
 
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_node.h"
-#include "ui/accessibility/ax_tree_id.h"
+#include "ax_export.h"
+#include "ax_node.h"
+#include "ax_tree_id.h"
 
 namespace ui {
 

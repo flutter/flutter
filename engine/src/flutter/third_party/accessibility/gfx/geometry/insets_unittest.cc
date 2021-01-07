@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/insets.h"
+#include "insets.h"
 
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/gfx/geometry/insets_f.h"
-#include "ui/gfx/geometry/rect.h"
-#include "ui/gfx/geometry/size.h"
-#include "ui/gfx/geometry/vector2d.h"
+#include "gtest/gtest.h"
+#include "insets_f.h"
+#include "rect.h"
+#include "size.h"
+#include "vector2d.h"
 
 TEST(InsetsTest, InsetsDefault) {
   gfx::Insets insets;

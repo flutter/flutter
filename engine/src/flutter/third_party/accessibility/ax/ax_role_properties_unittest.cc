@@ -4,11 +4,11 @@
 
 #include <unordered_set>
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
-#include "ui/accessibility/ax_enum_util.h"
-#include "ui/accessibility/ax_enums.mojom.h"
-#include "ui/accessibility/ax_role_properties.h"
+#include "ax_enum_util.h"
+#include "ax_enums.h"
+#include "ax_role_properties.h"
 
 namespace ui {
 

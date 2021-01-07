@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_action_data.h"
+#include "ax_action_data.h"
 
-#include "ui/accessibility/ax_enums.mojom.h"
+#include "ax_enums.h"
 
 namespace ui {
 
-// Mojo enums are initialized here so the header can include the much smaller
-// mojom-forward.h header.
 AXActionData::AXActionData()
     : action(ax::mojom::Action::kNone),
       hit_test_event_to_fire(ax::mojom::Event::kNone),

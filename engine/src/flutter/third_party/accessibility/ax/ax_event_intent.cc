@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_event_intent.h"
+#include "ax_event_intent.h"
 
-#include "ui/accessibility/ax_enum_util.h"
+#include "ax_enum_util.h"
 
 namespace ui {
 

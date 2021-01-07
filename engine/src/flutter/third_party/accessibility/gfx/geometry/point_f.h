@@ -9,14 +9,14 @@
 #include <string>
 #include <tuple>
 
-#include "ui/gfx/geometry/geometry_export.h"
-#include "ui/gfx/geometry/point.h"
-#include "ui/gfx/geometry/vector2d_f.h"
+#include "gfx/gfx_export.h"
+#include "point.h"
+#include "vector2d_f.h"
 
 namespace gfx {
 
 // A floating version of gfx::Point.
-class GEOMETRY_EXPORT PointF {
+class GFX_EXPORT PointF {
  public:
   constexpr PointF() : x_(0.f), y_(0.f) {}
   constexpr PointF(float x, float y) : x_(x), y_(y) {}
@@ -108,9 +108,7 @@ inline PointF PointAtOffsetFromOrigin(const Vector2dF& offset_from_origin) {
   return PointF(offset_from_origin.x(), offset_from_origin.y());
 }
 
-GEOMETRY_EXPORT PointF ScalePoint(const PointF& p,
-                                  float x_scale,
-                                  float y_scale);
+GFX_EXPORT PointF ScalePoint(const PointF& p, float x_scale, float y_scale);
 
 inline PointF ScalePoint(const PointF& p, float scale) {
   return ScalePoint(p, scale, scale);

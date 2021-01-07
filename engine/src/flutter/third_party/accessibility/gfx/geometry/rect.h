@@ -16,12 +16,12 @@
 #include <iosfwd>
 #include <string>
 
-#include "base/check.h"
+#include "ax_build/build_config.h"
+#include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
-#include "build/build_config.h"
-#include "ui/gfx/geometry/point.h"
-#include "ui/gfx/geometry/size.h"
-#include "ui/gfx/geometry/vector2d.h"
+#include "point.h"
+#include "size.h"
+#include "vector2d.h"
 
 #if defined(OS_WIN)
 typedef struct tagRECT RECT;
@@ -33,7 +33,7 @@ namespace gfx {
 
 class Insets;
 
-class GEOMETRY_EXPORT Rect {
+class GFX_EXPORT Rect {
  public:
   constexpr Rect() = default;
   constexpr Rect(int width, int height) : size_(width, height) {}
@@ -244,16 +244,16 @@ inline bool operator!=(const Rect& lhs, const Rect& rhs) {
   return !(lhs == rhs);
 }
 
-GEOMETRY_EXPORT Rect operator+(const Rect& lhs, const Vector2d& rhs);
-GEOMETRY_EXPORT Rect operator-(const Rect& lhs, const Vector2d& rhs);
+GFX_EXPORT Rect operator+(const Rect& lhs, const Vector2d& rhs);
+GFX_EXPORT Rect operator-(const Rect& lhs, const Vector2d& rhs);
 
 inline Rect operator+(const Vector2d& lhs, const Rect& rhs) {
   return rhs + lhs;
 }
 
-GEOMETRY_EXPORT Rect IntersectRects(const Rect& a, const Rect& b);
-GEOMETRY_EXPORT Rect UnionRects(const Rect& a, const Rect& b);
-GEOMETRY_EXPORT Rect SubtractRects(const Rect& a, const Rect& b);
+GFX_EXPORT Rect IntersectRects(const Rect& a, const Rect& b);
+GFX_EXPORT Rect UnionRects(const Rect& a, const Rect& b);
+GFX_EXPORT Rect SubtractRects(const Rect& a, const Rect& b);
 
 // Constructs a rectangle with |p1| and |p2| as opposite corners.
 //
@@ -261,7 +261,7 @@ GEOMETRY_EXPORT Rect SubtractRects(const Rect& a, const Rect& b);
 // points", except that we consider points on the right/bottom edges of the
 // rect to be outside the rect.  So technically one or both points will not be
 // contained within the rect, because they will appear on one of these edges.
-GEOMETRY_EXPORT Rect BoundingRect(const Point& p1, const Point& p2);
+GFX_EXPORT Rect BoundingRect(const Point& p1, const Point& p2);
 
 // Scales the rect and returns the enclosing rect.  Use this only the inputs are
 // known to not overflow.  Use ScaleToEnclosingRectSafe if the inputs are
@@ -273,10 +273,10 @@ inline Rect ScaleToEnclosingRect(const Rect& rect, float x_scale, float y_scale)
   // we haven't checked to ensure that the clamping behavior of the helper
   // functions doesn't degrade performance, and callers shouldn't be passing
   // values that cause overflow anyway.
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.x() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.y() * y_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.right() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.bottom() * y_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.x() * x_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.y() * y_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.right() * x_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.bottom() * y_scale)));
   int x = static_cast<int>(std::floor(rect.x() * x_scale));
   int y = static_cast<int>(std::floor(rect.y() * y_scale));
   int r = rect.width() == 0 ? x : static_cast<int>(std::ceil(rect.right() * x_scale));
@@ -309,10 +309,10 @@ inline Rect ScaleToEnclosingRectSafe(const Rect& rect, float scale) {
 inline Rect ScaleToEnclosedRect(const Rect& rect, float x_scale, float y_scale) {
   if (x_scale == 1.f && y_scale == 1.f)
     return rect;
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.x() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.y() * y_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.right() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.bottom() * y_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.x() * x_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::ceil(rect.y() * y_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.right() * x_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::floor(rect.bottom() * y_scale)));
   int x = static_cast<int>(std::ceil(rect.x() * x_scale));
   int y = static_cast<int>(std::ceil(rect.y() * y_scale));
   int r = rect.width() == 0 ? x : static_cast<int>(std::floor(rect.right() * x_scale));
@@ -334,10 +334,10 @@ inline Rect ScaleToRoundedRect(const Rect& rect, float x_scale, float y_scale) {
   if (x_scale == 1.f && y_scale == 1.f)
     return rect;
 
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.x() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.y() * y_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.right() * x_scale)));
-  DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.bottom() * y_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.x() * x_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.y() * y_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.right() * x_scale)));
+  BASE_DCHECK(base::IsValueInRangeForNumericType<int>(std::round(rect.bottom() * y_scale)));
 
   int x = static_cast<int>(std::round(rect.x() * x_scale));
   int y = static_cast<int>(std::round(rect.y() * y_scale));

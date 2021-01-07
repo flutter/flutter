@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/vector2d_conversions.h"
+#include "vector2d_conversions.h"
 
 #include "base/numerics/safe_conversions.h"
 

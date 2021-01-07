@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_enum_util.h"
+#include "ax_enum_util.h"
 
 #include <string>
 #include <vector>
 
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/accessibility/ax_enums.mojom.h"
-#include "ui/accessibility/ax_node_data.h"
+#include "gtest/gtest.h"
+
+#include "ax_enums.h"
+#include "ax_node_data.h"
 
 namespace ui {
 

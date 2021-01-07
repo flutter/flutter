@@ -6,10 +6,10 @@
 #define UI_ACCESSIBILITY_PLATFORM_COMPUTE_ATTRIBUTES_H_
 
 #include <cstddef>
+#include <optional>
 
-#include "base/optional.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/accessibility/ax_export.h"
+#include "ax/ax_enums.h"
+#include "ax/ax_export.h"
 
 namespace ui {
 
@@ -17,7 +17,7 @@ class AXPlatformNodeDelegate;
 
 // Compute the attribute value instead of returning the "raw" attribute value
 // for those attributes that have computation methods.
-AX_EXPORT base::Optional<int32_t> ComputeAttribute(
+AX_EXPORT std::optional<int32_t> ComputeAttribute(
     const ui::AXPlatformNodeDelegate* delegate,
     ax::mojom::IntAttribute attribute);
 

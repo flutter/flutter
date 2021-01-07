@@ -12,12 +12,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "base/strings/string_number_conversions.h"
-#include "ui/accessibility/ax_enum_util.h"
-#include "ui/accessibility/ax_enums.mojom.h"
-#include "ui/accessibility/ax_event_intent.h"
-#include "ui/accessibility/ax_node_data.h"
-#include "ui/accessibility/ax_tree_data.h"
+#include "ax_enum_util.h"
+#include "ax_enums.h"
+#include "ax_event_intent.h"
+#include "ax_node_data.h"
+#include "ax_tree_data.h"
+#include "base/string_utils.h"
 
 namespace ui {
 
@@ -60,11 +60,11 @@ struct AXTreeUpdateBase {
   AXTreeData tree_data;
 
   // The id of a node to clear, before applying any updates,
-  // or 0 if no nodes should be cleared. Clearing a node means deleting
-  // all of its children and their descendants, but leaving that node in
-  // the tree. It's an error to clear a node but not subsequently update it
-  // as part of the tree update.
-  int node_id_to_clear = 0;
+  // or AXNode::kInvalidAXID if no nodes should be cleared. Clearing a node
+  // means deleting all of its children and their descendants, but leaving that
+  // node in the tree. It's an error to clear a node but not subsequently update
+  // it as part of the tree update.
+  int node_id_to_clear = AXNode::kInvalidAXID;
 
   // The id of the root of the tree, if the root is changing. This is
   // required to be set if the root of the tree is changing or Unserialize
@@ -97,12 +97,12 @@ std::string AXTreeUpdateBase<AXNodeData, AXTreeData>::ToString() const {
     result += "AXTreeUpdate tree data:" + tree_data.ToString() + "\n";
   }
 
-  if (node_id_to_clear != 0) {
+  if (node_id_to_clear != AXNode::kInvalidAXID) {
     result += "AXTreeUpdate: clear node " +
               base::NumberToString(node_id_to_clear) + "\n";
   }
 
-  if (root_id != 0) {
+  if (root_id != AXNode::kInvalidAXID) {
     result += "AXTreeUpdate: root id " + base::NumberToString(root_id) + "\n";
   }
 
@@ -141,7 +141,7 @@ template <typename AXNodeData, typename AXTreeData>
 bool TreeUpdatesCanBeMerged(
     const AXTreeUpdateBase<AXNodeData, AXTreeData>& u1,
     const AXTreeUpdateBase<AXNodeData, AXTreeData>& u2) {
-  if (u2.node_id_to_clear)
+  if (u2.node_id_to_clear != AXNode::kInvalidAXID)
     return false;
 
   if (u2.has_tree_data && u2.tree_data != u1.tree_data)

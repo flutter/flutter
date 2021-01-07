@@ -11,12 +11,11 @@
 #include <utility>
 #include <vector>
 
-#include "base/strings/string16.h"
-#include "base/strings/utf_string_conversions.h"
-#include "ui/accessibility/ax_enums.mojom.h"
-#include "ui/accessibility/ax_offscreen_result.h"
-#include "ui/accessibility/ax_role_properties.h"
-#include "ui/accessibility/ax_tree_manager_map.h"
+#include "ax_enums.h"
+#include "ax_offscreen_result.h"
+#include "ax_role_properties.h"
+#include "ax_tree_manager_map.h"
+#include "base/string_utils.h"
 
 namespace ui {
 
@@ -70,12 +69,12 @@ class AXRange {
   virtual ~AXRange() = default;
 
   AXPositionType* anchor() const {
-    DCHECK(anchor_);
+    BASE_DCHECK(anchor_);
     return anchor_.get();
   }
 
   AXPositionType* focus() const {
-    DCHECK(focus_);
+    BASE_DCHECK(focus_);
     return focus_.get();
   }
 
@@ -113,9 +112,9 @@ class AXRange {
   //        <0 - If the first position would come BEFORE the second.
   //        >0 - If the first position would come AFTER the second.
   //   nullopt - If positions are not comparable (see AXPosition::CompareTo).
-  static base::Optional<int> CompareEndpoints(const AXPositionType* first,
-                                              const AXPositionType* second) {
-    base::Optional<int> tree_position_comparison =
+  static std::optional<int> CompareEndpoints(const AXPositionType* first,
+                                             const AXPositionType* second) {
+    std::optional<int> tree_position_comparison =
         first->AsTreePosition()->CompareTo(*second->AsTreePosition());
 
     // When the tree comparison is nullopt, using value_or(1) forces a default
@@ -147,7 +146,7 @@ class AXRange {
   }
 
   bool IsNull() const {
-    DCHECK(anchor_ && focus_);
+    BASE_DCHECK(anchor_ && focus_);
     return anchor_->IsNullPosition() || focus_->IsNullPosition();
   }
 
@@ -225,27 +224,27 @@ class AXRange {
 
     // Only forward iteration is supported, so operator-- is not implemented.
     Iterator& operator++() {
-      DCHECK(!current_start_->IsNullPosition());
+      BASE_DCHECK(!current_start_->IsNullPosition());
       if (current_start_->GetAnchor() == iterator_end_->GetAnchor()) {
         current_start_ = AXPositionType::CreateNullPosition();
       } else {
         current_start_ = current_start_->CreateNextLeafTreePosition();
-        DCHECK_LE(*current_start_, *iterator_end_);
+        BASE_DCHECK(*current_start_ <= *iterator_end_);
       }
       return *this;
     }
 
     AXRange operator*() const {
-      DCHECK(!current_start_->IsNullPosition());
+      BASE_DCHECK(!current_start_->IsNullPosition());
       AXPositionInstance current_end =
           (current_start_->GetAnchor() != iterator_end_->GetAnchor())
               ? current_start_->CreatePositionAtEndOfAnchor()
               : iterator_end_->Clone();
-      DCHECK_LE(*current_end, *iterator_end_);
+      BASE_DCHECK(*current_end <= *iterator_end_);
 
       AXRange current_leaf_text_range(current_start_->AsTextPosition(),
                                       current_end->AsTextPosition());
-      DCHECK(current_leaf_text_range.IsLeafTextRange());
+      BASE_DCHECK(current_leaf_text_range.IsLeafTextRange());
       return std::move(current_leaf_text_range);
     }
 
@@ -274,18 +273,18 @@ class AXRange {
   // Pass a |max_count| of -1 to retrieve all text in the AXRange.
   // Note that if this AXRange has its anchor or focus located at an ignored
   // position, we shrink the range to the closest unignored positions.
-  base::string16 GetText(AXTextConcatenationBehavior concatenation_behavior =
+  std::u16string GetText(AXTextConcatenationBehavior concatenation_behavior =
                              AXTextConcatenationBehavior::kAsTextContent,
                          int max_count = -1,
                          bool include_ignored = false,
                          size_t* appended_newlines_count = nullptr) const {
     if (max_count == 0 || IsNull())
-      return base::string16();
+      return std::u16string();
 
-    base::Optional<int> endpoint_comparison =
+    std::optional<int> endpoint_comparison =
         CompareEndpoints(anchor(), focus());
     if (!endpoint_comparison)
-      return base::string16();
+      return std::u16string();
 
     AXPositionInstance start = (endpoint_comparison.value() < 0)
                                    ? anchor_->AsLeafTextPosition()
@@ -294,7 +293,7 @@ class AXRange {
                                  ? focus_->AsLeafTextPosition()
                                  : anchor_->AsLeafTextPosition();
 
-    base::string16 range_text;
+    std::u16string range_text;
     size_t computed_newlines_count = 0;
     bool is_first_non_whitespace_leaf = true;
     bool crossed_paragraph_boundary = false;
@@ -302,8 +301,8 @@ class AXRange {
     bool found_trailing_newline = false;
 
     while (!start->IsNullPosition()) {
-      DCHECK(start->IsLeafTextPosition());
-      DCHECK_GE(start->text_offset(), 0);
+      BASE_DCHECK(start->IsLeafTextPosition());
+      BASE_DCHECK(start->text_offset() >= 0);
 
       if (include_ignored || !start->IsIgnored()) {
         if (concatenation_behavior ==
@@ -336,7 +335,7 @@ class AXRange {
         if (current_end_offset > start->text_offset()) {
           int characters_to_append =
               (max_count > 0)
-                  ? std::min(max_count - int{range_text.length()},
+                  ? std::min(max_count - static_cast<int>(range_text.length()),
                              current_end_offset - start->text_offset())
                   : current_end_offset - start->text_offset();
 
@@ -349,12 +348,13 @@ class AXRange {
               (found_trailing_newline && start->IsInWhiteSpace());
         }
 
-        DCHECK(max_count < 0 || int{range_text.length()} <= max_count);
+        BASE_DCHECK(max_count < 0 ||
+                    static_cast<int>(range_text.length()) <= max_count);
         is_first_unignored_leaf = false;
       }
 
       if (start->GetAnchor() == end->GetAnchor() ||
-          int{range_text.length()} == max_count) {
+          static_cast<int>(range_text.length()) == max_count) {
         break;
       } else if (concatenation_behavior ==
                      AXTextConcatenationBehavior::kAsInnerText &&
@@ -377,7 +377,7 @@ class AXRange {
     std::vector<gfx::Rect> rects;
 
     for (const AXRange& leaf_text_range : *this) {
-      DCHECK(leaf_text_range.IsLeafTextRange());
+      BASE_DCHECK(leaf_text_range.IsLeafTextRange());
       AXPositionType* current_line_start = leaf_text_range.anchor();
       AXPositionType* current_line_end = leaf_text_range.focus();
 

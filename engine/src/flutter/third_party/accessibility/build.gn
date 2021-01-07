@@ -1,0 +1,90 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
+
+config("accessibility_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "//flutter/third_party/accessibility" ]
+}
+
+source_set("accessibility") {
+  defines = []
+
+  public_deps = [
+    "ax",
+    "ax_build",
+    "base",
+    "gfx",
+  ]
+
+  public_configs = [ ":accessibility_config" ]
+
+  if (is_mac) {
+    libs = [
+      "AppKit.framework",
+      "CoreFoundation.framework",
+      "CoreGraphics.framework",
+      "CoreText.framework",
+      "IOSurface.framework",
+    ]
+  }
+}
+
+if (enable_unittests) {
+  test_fixtures("accessibility_fixtures") {
+    fixtures = []
+  }
+
+  executable("accessibility_unittests") {
+    testonly = true
+
+    sources = [
+      "ax/ax_enum_util_unittest.cc",
+      "ax/ax_event_generator_unittest.cc",
+      "ax/ax_node_data_unittest.cc",
+      "ax/ax_node_position_unittest.cc",
+      "ax/ax_range_unittest.cc",
+      "ax/ax_role_properties_unittest.cc",
+      "ax/ax_table_info_unittest.cc",
+      "ax/ax_tree_unittest.cc",
+      "ax/test_ax_node_helper.cc",
+      "ax/test_ax_node_helper.h",
+      "ax/test_ax_tree_manager.cc",
+      "ax/test_ax_tree_manager.h",
+    ]
+
+    sources += [
+      "ax/platform/ax_platform_node_base_unittest.cc",
+      "ax/platform/ax_platform_node_unittest.cc",
+      "ax/platform/ax_platform_node_unittest.h",
+      "ax/platform/ax_unique_id_unittest.cc",
+      "ax/platform/test_ax_node_wrapper.cc",
+      "ax/platform/test_ax_node_wrapper.h",
+    ]
+
+    sources += [
+      "base/logging_unittests.cc",
+      "base/string_utils_unittest.cc",
+    ]
+
+    sources += [
+      "gfx/geometry/insets_unittest.cc",
+      "gfx/geometry/point_unittest.cc",
+      "gfx/geometry/rect_unittest.cc",
+      "gfx/geometry/size_unittest.cc",
+      "gfx/geometry/vector2d_unittest.cc",
+      "gfx/test/gfx_util.cc",
+      "gfx/test/gfx_util.h",
+    ]
+
+    deps = [
+      ":accessibility",
+      ":accessibility_fixtures",
+      "//flutter/testing",
+      "//flutter/testing:dart",
+    ]
+  }
+}

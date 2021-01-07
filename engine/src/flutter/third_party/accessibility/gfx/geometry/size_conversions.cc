@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/size_conversions.h"
+#include "size_conversions.h"
 
 #include "base/numerics/safe_conversions.h"
 

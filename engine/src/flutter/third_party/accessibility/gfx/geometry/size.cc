@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/size.h"
+#include "size.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
@@ -12,11 +12,11 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
+#include "ax_build/build_config.h"
 #include "base/numerics/clamped_math.h"
 #include "base/numerics/safe_math.h"
-#include "base/strings/stringprintf.h"
-#include "build/build_config.h"
-#include "ui/gfx/geometry/size_conversions.h"
+#include "base/string_utils.h"
+#include "size_conversions.h"
 
 namespace gfx {
 

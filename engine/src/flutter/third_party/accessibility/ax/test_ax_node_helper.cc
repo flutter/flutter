@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/test_ax_node_helper.h"
+#include "test_ax_node_helper.h"
 
 #include <map>
 #include <utility>
 
+#include "ax_action_data.h"
+#include "ax_role_properties.h"
+#include "ax_table_info.h"
+#include "ax_tree_observer.h"
 #include "base/numerics/ranges.h"
-#include "base/stl_util.h"
-#include "base/strings/utf_string_conversions.h"
-#include "ui/accessibility/ax_action_data.h"
-#include "ui/accessibility/ax_role_properties.h"
-#include "ui/accessibility/ax_table_info.h"
-#include "ui/accessibility/ax_tree_observer.h"
-#include "ui/gfx/geometry/rect_conversions.h"
+#include "gfx/geometry/rect_conversions.h"
 
 namespace ui {
 
@@ -84,7 +82,7 @@ gfx::Rect TestAXNodeHelper::GetBoundsRect(
     }
     case AXCoordinateSystem::kRootFrame:
     case AXCoordinateSystem::kFrame:
-      NOTIMPLEMENTED();
+      BASE_UNREACHABLE();
       return gfx::Rect();
   }
 }
@@ -127,7 +125,7 @@ gfx::Rect TestAXNodeHelper::GetInnerTextRangeBoundsRect(
     }
     case AXCoordinateSystem::kRootFrame:
     case AXCoordinateSystem::kFrame:
-      NOTIMPLEMENTED();
+      BASE_UNREACHABLE();
       return gfx::Rect();
   }
 }
@@ -141,18 +139,20 @@ gfx::RectF TestAXNodeHelper::GetLocation() const {
 }
 
 int TestAXNodeHelper::InternalChildCount() const {
-  return int{node_->GetUnignoredChildCount()};
+  return static_cast<int>(node_->GetUnignoredChildCount());
 }
 
 TestAXNodeHelper* TestAXNodeHelper::InternalGetChild(int index) const {
-  CHECK_GE(index, 0);
-  CHECK_LT(index, InternalChildCount());
-  return GetOrCreate(tree_, node_->GetUnignoredChildAtIndex(size_t{index}));
+  BASE_CHECK(index >= 0);
+  BASE_CHECK(index < InternalChildCount());
+  return GetOrCreate(
+      tree_, node_->GetUnignoredChildAtIndex(static_cast<size_t>(index)));
 }
 
 gfx::RectF TestAXNodeHelper::GetInlineTextRect(const int start_offset,
                                                const int end_offset) const {
-  DCHECK(start_offset >= 0 && end_offset >= 0 && start_offset <= end_offset);
+  BASE_DCHECK(start_offset >= 0 && end_offset >= 0 &&
+              start_offset <= end_offset);
   const std::vector<int32_t>& character_offsets = GetData().GetIntListAttribute(
       ax::mojom::IntListAttribute::kCharacterOffsets);
   gfx::RectF location = GetLocation();
@@ -173,7 +173,7 @@ gfx::RectF TestAXNodeHelper::GetInlineTextRect(const int start_offset,
       break;
     }
     default:
-      NOTIMPLEMENTED();
+      BASE_UNREACHABLE();
   }
   return bounds;
 }
@@ -201,4 +201,5 @@ AXOffscreenResult TestAXNodeHelper::DetermineOffscreenResult(
   }
   return AXOffscreenResult::kOnscreen;
 }
+
 }  // namespace ui

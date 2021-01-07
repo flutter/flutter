@@ -5,13 +5,14 @@
 #ifndef UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_UNITTEST_H_
 #define UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_UNITTEST_H_
 
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/accessibility/ax_node.h"
-#include "ui/accessibility/ax_node_data.h"
-#include "ui/accessibility/ax_tree_id.h"
-#include "ui/accessibility/ax_tree_update.h"
-#include "ui/accessibility/test_ax_tree_manager.h"
+#include "gtest/gtest.h"
+
+#include "ax/ax_enums.h"
+#include "ax/ax_node.h"
+#include "ax/ax_node_data.h"
+#include "ax/ax_tree_id.h"
+#include "ax/ax_tree_update.h"
+#include "ax/test_ax_tree_manager.h"
 
 namespace ui {
 

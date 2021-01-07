@@ -9,10 +9,10 @@
 #include <string>
 #include <utility>
 
+#include "ax_action_handler.h"
+#include "ax_export.h"
+#include "ax_tree_id.h"
 #include "base/macros.h"
-#include "ui/accessibility/ax_action_handler.h"
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_tree_id.h"
 
 namespace base {
 template <typename T>
@@ -36,7 +36,7 @@ class AX_EXPORT AXTreeIDRegistry {
   using FrameID = std::pair<int, int>;
 
   // Get the single instance of this class.
-  static AXTreeIDRegistry* GetInstance();
+  static AXTreeIDRegistry& GetInstance();
 
   // Gets the frame id based on an ax tree id.
   FrameID GetFrameID(const AXTreeID& ax_tree_id);
@@ -79,7 +79,7 @@ class AX_EXPORT AXTreeIDRegistry {
   // Maps an id to its handler.
   std::map<AXTreeID, AXActionHandlerBase*> id_to_action_handler_;
 
-  DISALLOW_COPY_AND_ASSIGN(AXTreeIDRegistry);
+  BASE_DISALLOW_COPY_AND_ASSIGN(AXTreeIDRegistry);
 };
 
 }  // namespace ui

@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/platform/compute_attributes.h"
+#include "compute_attributes.h"
 
 #include <cstddef>
 
-#include "base/optional.h"
-#include "ui/accessibility/ax_enums.mojom.h"
-#include "ui/accessibility/ax_node_data.h"
-#include "ui/accessibility/platform/ax_platform_node_delegate.h"
+#include "ax/ax_enums.h"
+#include "ax/ax_node_data.h"
+#include "ax_platform_node_delegate.h"
 
 namespace ui {
 namespace {
 
-base::Optional<int32_t> GetCellAttribute(
+std::optional<int32_t> GetCellAttribute(
     const ui::AXPlatformNodeDelegate* delegate,
     ax::mojom::IntAttribute attribute) {
   switch (attribute) {
@@ -31,20 +30,20 @@ base::Optional<int32_t> GetCellAttribute(
     case ax::mojom::IntAttribute::kTableCellRowSpan:
       return delegate->GetTableCellRowSpan();
     default:
-      return base::nullopt;
+      return std::nullopt;
   }
 }
 
-base::Optional<int32_t> GetRowAttribute(
+std::optional<int32_t> GetRowAttribute(
     const ui::AXPlatformNodeDelegate* delegate,
     ax::mojom::IntAttribute attribute) {
   if (attribute == ax::mojom::IntAttribute::kTableRowIndex) {
     return delegate->GetTableRowRowIndex();
   }
-  return base::nullopt;
+  return std::nullopt;
 }
 
-base::Optional<int32_t> GetTableAttribute(
+std::optional<int32_t> GetTableAttribute(
     const ui::AXPlatformNodeDelegate* delegate,
     ax::mojom::IntAttribute attribute) {
   switch (attribute) {
@@ -57,11 +56,11 @@ base::Optional<int32_t> GetTableAttribute(
     case ax::mojom::IntAttribute::kAriaRowCount:
       return delegate->GetTableAriaRowCount();
     default:
-      return base::nullopt;
+      return std::nullopt;
   }
 }
 
-base::Optional<int> GetOrderedSetItemAttribute(
+std::optional<int> GetOrderedSetItemAttribute(
     const ui::AXPlatformNodeDelegate* delegate,
     ax::mojom::IntAttribute attribute) {
   switch (attribute) {
@@ -70,36 +69,36 @@ base::Optional<int> GetOrderedSetItemAttribute(
     case ax::mojom::IntAttribute::kSetSize:
       return delegate->GetSetSize();
     default:
-      return base::nullopt;
+      return std::nullopt;
   }
 }
 
-base::Optional<int> GetOrderedSetAttribute(
+std::optional<int> GetOrderedSetAttribute(
     const ui::AXPlatformNodeDelegate* delegate,
     ax::mojom::IntAttribute attribute) {
   switch (attribute) {
     case ax::mojom::IntAttribute::kSetSize:
       return delegate->GetSetSize();
     default:
-      return base::nullopt;
+      return std::nullopt;
   }
 }
 
-base::Optional<int32_t> GetFromData(const ui::AXPlatformNodeDelegate* delegate,
-                                    ax::mojom::IntAttribute attribute) {
+std::optional<int32_t> GetFromData(const ui::AXPlatformNodeDelegate* delegate,
+                                   ax::mojom::IntAttribute attribute) {
   int32_t value;
   if (delegate->GetData().GetIntAttribute(attribute, &value)) {
     return value;
   }
-  return base::nullopt;
+  return std::nullopt;
 }
 
 }  // namespace
 
-base::Optional<int32_t> ComputeAttribute(
+std::optional<int32_t> ComputeAttribute(
     const ui::AXPlatformNodeDelegate* delegate,
     ax::mojom::IntAttribute attribute) {
-  base::Optional<int32_t> maybe_value = base::nullopt;
+  std::optional<int32_t> maybe_value = std::nullopt;
   // Table-related nodes.
   if (delegate->IsTableCellOrHeader())
     maybe_value = GetCellAttribute(delegate, attribute);

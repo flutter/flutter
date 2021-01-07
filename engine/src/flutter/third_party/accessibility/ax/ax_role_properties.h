@@ -5,8 +5,8 @@
 #ifndef UI_ACCESSIBILITY_AX_ROLE_PROPERTIES_H_
 #define UI_ACCESSIBILITY_AX_ROLE_PROPERTIES_H_
 
-#include "ui/accessibility/ax_base_export.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
+#include "ax_base_export.h"
+#include "ax_enums.h"
 
 namespace ui {
 
