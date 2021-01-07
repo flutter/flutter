@@ -36,24 +36,12 @@ AndroidShellHolder::AndroidShellHolder(
   static size_t shell_count = 1;
   auto thread_label = std::to_string(shell_count++);
 
-  FML_CHECK(pthread_key_create(&thread_destruct_key_, ThreadDestructCallback) ==
-            0);
-
   if (is_background_view) {
     thread_host_ = {thread_label, ThreadHost::Type::UI};
   } else {
     thread_host_ = {thread_label, ThreadHost::Type::UI |
                                       ThreadHost::Type::RASTER |
                                       ThreadHost::Type::IO};
-  }
-
-  // Detach from JNI when the UI and raster threads exit.
-  auto jni_exit_task([key = thread_destruct_key_]() {
-    FML_CHECK(pthread_setspecific(key, reinterpret_cast<void*>(1)) == 0);
-  });
-  thread_host_.ui_thread->GetTaskRunner()->PostTask(jni_exit_task);
-  if (!is_background_view) {
-    thread_host_.raster_thread->GetTaskRunner()->PostTask(jni_exit_task);
   }
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
@@ -144,11 +132,6 @@ AndroidShellHolder::AndroidShellHolder(
 AndroidShellHolder::~AndroidShellHolder() {
   shell_.reset();
   thread_host_.Reset();
-  FML_CHECK(pthread_key_delete(thread_destruct_key_) == 0);
-}
-
-void AndroidShellHolder::ThreadDestructCallback(void* value) {
-  fml::jni::DetachFromVM();
 }
 
 bool AndroidShellHolder::IsValid() const {

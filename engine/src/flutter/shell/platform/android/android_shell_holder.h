@@ -49,7 +49,6 @@ class AndroidShellHolder {
   ThreadHost thread_host_;
   std::unique_ptr<Shell> shell_;
   bool is_valid_ = false;
-  pthread_key_t thread_destruct_key_;
   uint64_t next_pointer_flow_id_ = 0;
 
   static void ThreadDestructCallback(void* value);
