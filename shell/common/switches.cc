@@ -378,6 +378,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_test_fonts =
       command_line.HasOption(FlagForSwitch(Switch::UseTestFonts));
 
+  settings.enable_skparagraph =
+      command_line.HasOption(FlagForSwitch(Switch::EnableSkParagraph));
+
   std::string all_dart_flags;
   if (command_line.GetOptionValue(FlagForSwitch(Switch::DartFlags),
                                   &all_dart_flags)) {

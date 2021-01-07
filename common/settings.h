@@ -152,6 +152,9 @@ struct Settings {
   // Font settings
   bool use_test_fonts = false;
 
+  // Selects the SkParagraph implementation of the text layout engine.
+  bool enable_skparagraph = false;
+
   // All shells in the process share the same VM. The last shell to shutdown
   // should typically shut down the VM as well. However, applications depend on
   // the behavior of "warming-up" the VM by creating a shell that does not do
