@@ -58,9 +58,8 @@ class _AccountPictures extends StatelessWidget {
           top: 0.0,
           child: Semantics(
             explicitChildNodes: true,
-            child: SizedBox(
-              width: currentAccountPictureSize?.width,
-              height: currentAccountPictureSize?.height,
+            child: SizedBox.fromSize(
+              size: currentAccountPictureSize,
               child: currentAccountPicture,
             ),
           ),
@@ -329,10 +328,10 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   final List<Widget>? otherAccountsPictures;
 
   /// The size of the [currentAccountPicture].
-  final Size? currentAccountPictureSize;
+  final Size currentAccountPictureSize;
 
   /// The size of each widget in [otherAccountsPicturesSize].
-  final Size? otherAccountsPicturesSize;
+  final Size otherAccountsPicturesSize;
 
   /// A widget that represents the user's current account name. It is
   /// displayed on the left, below the [currentAccountPicture].
