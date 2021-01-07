@@ -159,7 +159,7 @@ import 'theme.dart';
 ///   });
 ///
 ///   final FloatingActionButtonLocation fabLocation;
-///   final NotchedShape shape;
+///   final dynamic shape;
 ///
 ///   static final centerLocations = <FloatingActionButtonLocation>[
 ///     FloatingActionButtonLocation.centerDocked,
