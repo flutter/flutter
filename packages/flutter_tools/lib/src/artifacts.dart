@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -521,23 +522,18 @@ TargetPlatform _currentHostPlatform(Platform platform) {
     return TargetPlatform.darwin_x64;
   }
   if (platform.isLinux) {
-    return TargetPlatform.linux_x64;
+    final OperatingSystemUtils operatingSystemUtils =
+        OperatingSystemUtils(
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            platform: platform,
+            processManager: globals.processManager,
+        );
+    return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?
+             TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
   }
   if (platform.isWindows) {
     return TargetPlatform.windows_x64;
-  }
-  throw UnimplementedError('Host OS not supported.');
-}
-
-HostPlatform _currentHostPlatformAsHost(Platform platform) {
-  if (platform.isMacOS) {
-    return HostPlatform.darwin_x64;
-  }
-  if (platform.isLinux) {
-    return HostPlatform.linux_x64;
-  }
-  if (platform.isWindows) {
-    return HostPlatform.windows_x64;
   }
   throw UnimplementedError('Host OS not supported.');
 }
@@ -745,12 +741,11 @@ class LocalEngineArtifacts implements Artifacts {
   }
 
   String _flutterTesterPath(TargetPlatform platform) {
-    final HostPlatform hostPlatform = _currentHostPlatformAsHost(_platform);
-    if (hostPlatform == HostPlatform.linux_x64) {
+     if (_platform.isLinux) {
       return _fileSystem.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
-    } else if (hostPlatform == HostPlatform.darwin_x64) {
+    } else if (_platform.isMacOS) {
       return _fileSystem.path.join(engineOutPath, 'flutter_tester');
-    } else if (hostPlatform == HostPlatform.windows_x64) {
+    } else if (_platform.isWindows) {
       return _fileSystem.path.join(engineOutPath, 'flutter_tester.exe');
     }
     throw Exception('Unsupported platform $platform.');
