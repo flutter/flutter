@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/point.h"
+#include "point.h"
 
-#include "base/strings/stringprintf.h"
-#include "build/build_config.h"
-#include "ui/gfx/geometry/point_conversions.h"
-#include "ui/gfx/geometry/point_f.h"
+#include "ax_build/build_config.h"
+#include "base/string_utils.h"
+#include "point_conversions.h"
+#include "point_f.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

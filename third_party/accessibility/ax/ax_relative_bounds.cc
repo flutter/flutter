@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_relative_bounds.h"
+#include "ax_relative_bounds.h"
 
-#include "base/strings/string_number_conversions.h"
-#include "ui/accessibility/ax_enum_util.h"
-#include "ui/gfx/transform.h"
+#include <math.h>
+
+#include "ax_enum_util.h"
+#include "base/string_utils.h"
 
 using base::NumberToString;
 
@@ -53,13 +54,14 @@ std::string AXRelativeBounds::ToString() const {
   std::string result;
 
   if (offset_container_id != -1)
-    result +=
-        "offset_container_id=" + NumberToString(offset_container_id) + " ";
+    result += "offset_container_id=" +
+              NumberToString(static_cast<int>(round(offset_container_id))) +
+              " ";
 
-  result += "(" + NumberToString(bounds.x()) + ", " +
-            NumberToString(bounds.y()) + ")-(" +
-            NumberToString(bounds.width()) + ", " +
-            NumberToString(bounds.height()) + ")";
+  result += "(" + NumberToString(static_cast<int>(round(bounds.x()))) + ", " +
+            NumberToString(static_cast<int>(round(bounds.y()))) + ")-(" +
+            NumberToString(static_cast<int>(round(bounds.width()))) + ", " +
+            NumberToString(static_cast<int>(round(bounds.height()))) + ")";
 
   if (transform && !transform->IsIdentity())
     result += " transform=" + transform->ToString();

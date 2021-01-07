@@ -10,7 +10,7 @@
 #include <ostream>
 #include <string>
 
-#include "ui/accessibility/ax_base_export.h"
+#include "ax_base_export.h"
 
 namespace ui {
 

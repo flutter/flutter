@@ -7,10 +7,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-#include "base/mac/scoped_nsobject.h"
 #include "base/macros.h"
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/platform/ax_platform_node_base.h"
+#include "base/platform/darwin/scoped_nsobject.h"
+
+#include "ax/ax_export.h"
+
+#include "ax_platform_node_base.h"
 
 @class AXPlatformNodeCocoa;
 
@@ -23,7 +25,7 @@ class AXPlatformNodeMac : public AXPlatformNodeBase {
   // AXPlatformNode.
   gfx::NativeViewAccessible GetNativeViewAccessible() override;
   void NotifyAccessibilityEvent(ax::mojom::Event event_type) override;
-  void AnnounceText(const base::string16& text) override;
+  void AnnounceText(const std::u16string& text) override;
 
   // AXPlatformNodeBase.
   void Destroy() override;
@@ -39,7 +41,7 @@ class AXPlatformNodeMac : public AXPlatformNodeBase {
 
   base::scoped_nsobject<AXPlatformNodeCocoa> native_node_;
 
-  DISALLOW_COPY_AND_ASSIGN(AXPlatformNodeMac);
+  BASE_DISALLOW_COPY_AND_ASSIGN(AXPlatformNodeMac);
 };
 
 // Convenience function to determine whether an internal object role should

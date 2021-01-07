@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/rect.h"
+#include "rect.h"
 
 #include <algorithm>
 
@@ -14,11 +14,11 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
-#include "base/check.h"
+#include "ax_build/build_config.h"
+#include "base/logging.h"
 #include "base/numerics/clamped_math.h"
-#include "base/strings/stringprintf.h"
-#include "build/build_config.h"
-#include "ui/gfx/geometry/insets.h"
+#include "base/string_utils.h"
+#include "insets.h"
 
 namespace gfx {
 
@@ -258,8 +258,8 @@ void Rect::Transpose() {
 }
 
 void Rect::SplitVertically(Rect* left_half, Rect* right_half) const {
-  DCHECK(left_half);
-  DCHECK(right_half);
+  BASE_DCHECK(left_half);
+  BASE_DCHECK(right_half);
 
   left_half->SetRect(x(), y(), width() / 2, height());
   right_half->SetRect(left_half->right(), y(), width() - left_half->width(),

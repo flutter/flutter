@@ -9,18 +9,13 @@
 #include <string>
 
 #include "base/compiler_specific.h"
-#include "base/gtest_prod_util.h"
-#include "ui/gfx/geometry/geometry_export.h"
-#include "ui/gfx/geometry/size.h"
+#include "gfx/gfx_export.h"
+#include "size.h"
 
 namespace gfx {
 
-FORWARD_DECLARE_TEST(SizeTest, TrivialDimensionTests);
-FORWARD_DECLARE_TEST(SizeTest, ClampsToZero);
-FORWARD_DECLARE_TEST(SizeTest, ConsistentClamping);
-
 // A floating version of gfx::Size.
-class GEOMETRY_EXPORT SizeF {
+class GFX_EXPORT SizeF {
  public:
   constexpr SizeF() : width_(0.f), height_(0.f) {}
   constexpr SizeF(float width, float height)
@@ -59,10 +54,6 @@ class GEOMETRY_EXPORT SizeF {
   std::string ToString() const;
 
  private:
-  FRIEND_TEST_ALL_PREFIXES(SizeTest, TrivialDimensionTests);
-  FRIEND_TEST_ALL_PREFIXES(SizeTest, ClampsToZero);
-  FRIEND_TEST_ALL_PREFIXES(SizeTest, ConsistentClamping);
-
   static constexpr float kTrivial = 8.f * std::numeric_limits<float>::epsilon();
 
   static constexpr float clamp(float f) { return f > kTrivial ? f : 0.f; }
@@ -79,7 +70,7 @@ inline bool operator!=(const SizeF& lhs, const SizeF& rhs) {
   return !(lhs == rhs);
 }
 
-GEOMETRY_EXPORT SizeF ScaleSize(const SizeF& p, float x_scale, float y_scale);
+GFX_EXPORT SizeF ScaleSize(const SizeF& p, float x_scale, float y_scale);
 
 inline SizeF ScaleSize(const SizeF& p, float scale) {
   return ScaleSize(p, scale, scale);

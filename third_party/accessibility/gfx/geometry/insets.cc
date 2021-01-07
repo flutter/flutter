@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/insets.h"
+#include "insets.h"
 
-#include "base/strings/stringprintf.h"
-#include "ui/gfx/geometry/vector2d.h"
+#include "base/string_utils.h"
+#include "vector2d.h"
 
 namespace gfx {
 

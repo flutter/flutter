@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/gfx/geometry/size.h"
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/gfx/geometry/size_conversions.h"
-#include "ui/gfx/geometry/size_f.h"
+#include "size.h"
+#include "gtest/gtest.h"
+#include "size_conversions.h"
+#include "size_f.h"
 
 namespace gfx {
 
 namespace {
+
+static constexpr float kTrivial = 8.f * std::numeric_limits<float>::epsilon();
 
 int TestSizeF(const SizeF& s) {
   return s.width();
@@ -155,7 +157,7 @@ TEST(SizeTest, IntegerOverflow) {
 
 // This checks that we set IsEmpty appropriately.
 TEST(SizeTest, TrivialDimensionTests) {
-  const float clearly_trivial = SizeF::kTrivial / 2.f;
+  const float clearly_trivial = kTrivial / 2.f;
   const float massize_dimension = 4e13f;
 
   // First, using the constructor.
@@ -199,8 +201,8 @@ TEST(SizeTest, TrivialDimensionTests) {
 // These are the ramifications of the decision to keep the recorded size
 // at zero for trivial sizes.
 TEST(SizeTest, ClampsToZero) {
-  const float clearly_trivial = SizeF::kTrivial / 2.f;
-  const float nearly_trivial = SizeF::kTrivial * 1.5f;
+  const float clearly_trivial = kTrivial / 2.f;
+  const float nearly_trivial = kTrivial * 1.5f;
 
   SizeF test(clearly_trivial, 1.f);
 
@@ -235,11 +237,11 @@ TEST(SizeTest, ClampsToZero) {
 TEST(SizeTest, ConsistentClamping) {
   SizeF resized;
 
-  resized.SetSize(SizeF::kTrivial, 0.f);
-  EXPECT_EQ(SizeF(SizeF::kTrivial, 0.f), resized);
+  resized.SetSize(kTrivial, 0.f);
+  EXPECT_EQ(SizeF(kTrivial, 0.f), resized);
 
-  resized.SetSize(0.f, SizeF::kTrivial);
-  EXPECT_EQ(SizeF(0.f, SizeF::kTrivial), resized);
+  resized.SetSize(0.f, kTrivial);
+  EXPECT_EQ(SizeF(0.f, kTrivial), resized);
 }
 
 // Let's make sure we don't unexpectedly grow the struct by adding constants.

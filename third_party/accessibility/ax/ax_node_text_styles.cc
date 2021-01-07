@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_node_text_styles.h"
+#include "ax_node_text_styles.h"
 
 constexpr int kUnsetValue = -1;
 

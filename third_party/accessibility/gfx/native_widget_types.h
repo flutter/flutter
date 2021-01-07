@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef UI_GFX_NATIVE_WIDGET_TYPES_H_
-#define UI_GFX_NATIVE_WIDGET_TYPES_H_
+#ifndef ACCESSIBILITY_GFX_NATIVE_WIDGET_TYPES_H_
+#define ACCESSIBILITY_GFX_NATIVE_WIDGET_TYPES_H_
 
 #include <stdint.h>
 
-#include "build/build_config.h"
-#include "ui/gfx/gfx_export.h"
+#include "ax_build/build_config.h"
+#include "gfx/gfx_export.h"
 
 #if defined(OS_ANDROID)
 #include "base/android/scoped_java_ref.h"
@@ -182,8 +182,8 @@ class GFX_EXPORT NativeWindow {
  private:
   NSWindow* ns_window_ = nullptr;
 };
-constexpr NativeView kNullNativeView = NativeView(nullptr);
-constexpr NativeWindow kNullNativeWindow = NativeWindow(nullptr);
+const NativeView kNullNativeView = NativeView(nullptr);
+const NativeWindow kNullNativeWindow = NativeWindow(nullptr);
 #elif defined(OS_ANDROID)
 typedef void* NativeCursor;
 typedef ui::ViewAndroid* NativeView;
@@ -251,4 +251,4 @@ constexpr AcceleratedWidget kNullAcceleratedWidget = 0;
 
 }  // namespace gfx
 
-#endif  // UI_GFX_NATIVE_WIDGET_TYPES_H_
+#endif  // ACCESSIBILITY_GFX_NATIVE_WIDGET_TYPES_H_

@@ -14,20 +14,19 @@
 #include <unordered_map>
 #include <vector>
 
-#include "base/observer_list.h"
-#include "ui/accessibility/ax_enums.mojom-forward.h"
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_node.h"
-#include "ui/accessibility/ax_node_data.h"
-#include "ui/accessibility/ax_tree_data.h"
-#include "ui/accessibility/ax_tree_update.h"
+#include "ax_enums.h"
+#include "ax_export.h"
+#include "ax_node.h"
+#include "ax_node_data.h"
+#include "ax_tree_data.h"
+#include "ax_tree_update.h"
+#include "gfx/geometry/rect.h"
 
 namespace ui {
 
 class AXTableInfo;
 class AXTreeObserver;
 struct AXTreeUpdateState;
-class AXLanguageDetectionManager;
 
 // AXTree is a live, managed tree of AXNode objects that can receive
 // updates from another AXTreeSource via AXTreeUpdates, and it can be
@@ -54,7 +53,7 @@ class AX_EXPORT AXTree : public AXNode::OwnerTree {
   bool HasObserver(AXTreeObserver* observer);
   void RemoveObserver(AXTreeObserver* observer);
 
-  base::ObserverList<AXTreeObserver>& observers() { return observers_; }
+  std::vector<AXTreeObserver*>& observers() { return observers_; }
 
   AXNode* root() const { return root_; }
 
@@ -150,11 +149,11 @@ class AX_EXPORT AXTree : public AXNode::OwnerTree {
   // Returns the PosInSet of |node|. Looks in node_set_size_pos_in_set_info_map_
   // for cached value. Calls |ComputeSetSizePosInSetAndCache|if no value is
   // present in the cache.
-  base::Optional<int> GetPosInSet(const AXNode& node) override;
+  std::optional<int> GetPosInSet(const AXNode& node) override;
   // Returns the SetSize of |node|. Looks in node_set_size_pos_in_set_info_map_
   // for cached value. Calls |ComputeSetSizePosInSetAndCache|if no value is
   // present in the cache.
-  base::Optional<int> GetSetSize(const AXNode& node) override;
+  std::optional<int> GetSetSize(const AXNode& node) override;
 
   Selection GetUnignoredSelection() const override;
 
@@ -164,11 +163,6 @@ class AX_EXPORT AXTree : public AXNode::OwnerTree {
   // AXNode::OwnerTree override.
   // Returns true if the tree represents a paginated document
   bool HasPaginationSupport() const override;
-
-  // Language detection manager, entry point to language detection features.
-  // TODO(chrishall): Should this be stored by pointer or value?
-  //                  When should we initialize this?
-  std::unique_ptr<AXLanguageDetectionManager> language_detection_manager;
 
   // A list of intents active during a tree update/unserialization.
   const std::vector<AXEventIntent>& event_intents() const {
@@ -299,7 +293,7 @@ class AX_EXPORT AXTree : public AXNode::OwnerTree {
                                           bool clip_bounds,
                                           bool allow_recursion) const;
 
-  base::ObserverList<AXTreeObserver> observers_;
+  std::vector<AXTreeObserver*> observers_;
   AXNode* root_ = nullptr;
   std::unordered_map<int32_t, AXNode*> id_map_;
   std::string error_;
@@ -333,9 +327,9 @@ class AX_EXPORT AXTree : public AXNode::OwnerTree {
     NodeSetSizePosInSetInfo();
     ~NodeSetSizePosInSetInfo();
 
-    base::Optional<int> pos_in_set;
-    base::Optional<int> set_size;
-    base::Optional<int> lowest_hierarchical_level;
+    std::optional<int> pos_in_set;
+    std::optional<int> set_size;
+    std::optional<int> lowest_hierarchical_level;
   };
 
   // Represents the content of an ordered set which includes the ordered set
@@ -362,8 +356,8 @@ class AX_EXPORT AXTree : public AXNode::OwnerTree {
       const AXNode& original_node,
       const AXNode* ordered_set,
       const AXNode* local_parent,
-      base::Optional<int> ordered_set_min_level,
-      base::Optional<int> prev_level,
+      std::optional<int> ordered_set_min_level,
+      std::optional<int> prev_level,
       OrderedSetItemsMap* items_map_to_be_populated) const;
 
   // Computes the pos_in_set and set_size values of all items in ordered_set and

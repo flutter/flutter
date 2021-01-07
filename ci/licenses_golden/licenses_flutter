@@ -6,775 +6,6 @@ USED LICENSES:
 
 ====================================================================================================
 LIBRARY: accessibility
-ORIGIN: ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_generated_tree_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_text_utils_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_id_registry.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_id_registry.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_base.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_base.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_base.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac.mm
-FILE: ../../../flutter/third_party/accessibility/ax/tree_generator.cc
-FILE: ../../../flutter/third_party/accessibility/ax/tree_generator.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions_impl.h
-FILE: ../../../flutter/third_party/accessibility/gfx/mac/coordinate_conversion.h
-FILE: ../../../flutter/third_party/accessibility/gfx/mac/coordinate_conversion.mm
-----------------------------------------------------------------------------------------------------
-Copyright 2014 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/accessibility_features.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/accessibility_features.cc
-FILE: ../../../flutter/third_party/accessibility/ax/accessibility_features.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2019 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/accessibility_switches.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/accessibility_switches.cc
-FILE: ../../../flutter/third_party/accessibility/ax/accessibility_switches.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2018 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/aura/aura_window_properties.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/aura/aura_window_properties.cc
-FILE: ../../../flutter/third_party/accessibility/ax/aura/aura_window_properties.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_action_handler.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_action_handler.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_event_generator.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_event_generator.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_event_generator_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_mode.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_mode_observer.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_role_properties.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_role_properties.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/atk_util_auralinux_gtk.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_android_constants.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_android_constants.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_auralinux.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_auralinux_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_unittest.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_relation_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_relation_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_system_caret_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_system_caret_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_unique_id.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_unique_id.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/checked_math.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/checked_math_impl.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/clamped_math.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/clamped_math_impl.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/math_constants.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/ranges.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions_arm_impl.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_arm_impl.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_clang_gcc_impl.h
-FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_shared_impl.h
-----------------------------------------------------------------------------------------------------
-Copyright 2017 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_action_data.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_action_data.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_action_data.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_position.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_position.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_position_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_position.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_range.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_relative_bounds.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_relative_bounds.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_combiner.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_combiner.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_combiner_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_fuzzer.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2016 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_export.h + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_export.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_data.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_data.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_serializable_tree.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_serializable_tree.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_serializer.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_serializer.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_serializer_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_source.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_update.h
-----------------------------------------------------------------------------------------------------
-Copyright 2013 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_text_utils.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_text_utils.cc
-FILE: ../../../flutter/third_party/accessibility/base/auto_reset.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2011 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_text_utils.h + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_text_utils.h
-FILE: ../../../flutter/third_party/accessibility/ax_build/build_config.h
-FILE: ../../../flutter/third_party/accessibility/base/compiler_specific.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_f.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_f.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_conversions.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_conversions.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_f.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_f.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_conversions.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_conversions.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_f.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_f.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_conversions.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_conversions.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_f.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_f.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_conversions.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_conversions.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_f.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_f.h
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/native_widget_types.h
-FILE: ../../../flutter/third_party/accessibility/gfx/transform.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/transform.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2012 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/mojom/ax_action_data.mojom + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_assistant_structure.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_assistant_structure.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_enum_util.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_enum_util.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_enums.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/ax_event.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_event.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_event_bundle_sink.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_language_detection.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_language_detection_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_data_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_table_fuzzer.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_table_info.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_table_info.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_table_info_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_id.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_id.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_observer.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_observer.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_source_checker.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_action_data.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_action_data_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_action_data_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_action_data_mojom_traits_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_assistant_structure.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_assistant_structure_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_assistant_structure_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_event.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_event_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_event_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_event_mojom_traits_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_node_data.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_node_data_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_node_data_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_node_data_mojom_traits_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_relative_bounds.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_relative_bounds_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_relative_bounds_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_relative_bounds_mojom_traits_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_data.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_data_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_data_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_data_mojom_traits_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_id.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_id_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_id_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_id_mojom_traits_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_update.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_update_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_update_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_tree_update_mojom_traits_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/atk_util_auralinux_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_base.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_test_helper.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_test_helper.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/compute_attributes.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/compute_attributes.h
-FILE: ../../../flutter/third_party/accessibility/ax/run_all_unittests.cc
-FILE: ../../../flutter/third_party/accessibility/base/no_destructor.h
-----------------------------------------------------------------------------------------------------
-Copyright 2018 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/mojom/ax_event_intent.mojom + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_action_handler_base.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_action_handler_base.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_base_export.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_event_intent.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_event_intent.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_param_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_param_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_param_traits_macros.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_event_intent.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_event_intent_mojom_traits.cc
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_event_intent_mojom_traits.h
-FILE: ../../../flutter/third_party/accessibility/ax/mojom/ax_event_intent_mojom_traits_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ichromeaccessible.idl
-FILE: ../../../flutter/third_party/accessibility/ax/platform/uia_registrar_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/uia_registrar_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/test_ax_node_helper.cc
-FILE: ../../../flutter/third_party/accessibility/ax/test_ax_node_helper.h
-FILE: ../../../flutter/third_party/accessibility/ax/test_ax_tree_manager.cc
-FILE: ../../../flutter/third_party/accessibility/ax/test_ax_tree_manager.h
-----------------------------------------------------------------------------------------------------
-Copyright 2020 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/platform/ax_fragment_root_delegate_win.h + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_action_target.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_active_popup.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_active_popup.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_clipping_behavior.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_constants.mojom
-FILE: ../../../flutter/third_party/accessibility/ax/ax_coordinate_system.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_enum_util_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_language_detection.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_mode.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_position_perftest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_text_styles.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_node_text_styles.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_offscreen_result.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_range_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_role_properties_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_manager.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_manager_map.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_manager_map.h
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_source_checker_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_update_forward.h
-FILE: ../../../flutter/third_party/accessibility/ax/null_ax_action_target.cc
-FILE: ../../../flutter/third_party/accessibility/ax/null_ax_action_target.h
-FILE: ../../../flutter/third_party/accessibility/ax/null_ax_action_target_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_fragment_root_delegate_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_fragment_root_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_fragment_root_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_fragment_root_win_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_base_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_utils_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_utils_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textchildprovider_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textchildprovider_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textchildprovider_win_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textprovider_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textprovider_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textprovider_win_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textrangeprovider_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textrangeprovider_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textrangeprovider_win_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_win_unittest.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_text_boundary.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_text_boundary.h
-----------------------------------------------------------------------------------------------------
-Copyright 2019 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_atk_hyperlink.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_atk_hyperlink.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_atk_hyperlink.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2017 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/gfx/geometry/insets.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_unittest.cc
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2009 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../flutter/third_party/accessibility/gfx/geometry/rect_unittest.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/gfx/gfx_export.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2013 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: accessibility
-ORIGIN: ../../../third_party/icu/scripts/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_data.cc
-FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_data.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/atk_util_auralinux.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/atk_util_auralinux.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_auralinux.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_win.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_win_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_unique_id_unittest.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/test_ax_node_wrapper.cc
-FILE: ../../../flutter/third_party/accessibility/ax/platform/test_ax_node_wrapper.h
-----------------------------------------------------------------------------------------------------
-Copyright 2015 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
 LIBRARY: engine
 LIBRARY: tonic
 LIBRARY: txt
@@ -2243,6 +1474,22 @@ FILE: ../../../flutter/shell/version/version.cc
 FILE: ../../../flutter/shell/version/version.h
 FILE: ../../../flutter/sky/packages/flutter_services/lib/empty.dart
 FILE: ../../../flutter/sky/tools/roll/patches/chromium/android_build.patch
+FILE: ../../../flutter/third_party/accessibility/base/color_utils.h
+FILE: ../../../flutter/third_party/accessibility/base/compiler_specific.h
+FILE: ../../../flutter/third_party/accessibility/base/container_utils.h
+FILE: ../../../flutter/third_party/accessibility/base/logging.cc
+FILE: ../../../flutter/third_party/accessibility/base/logging.h
+FILE: ../../../flutter/third_party/accessibility/base/logging_unittests.cc
+FILE: ../../../flutter/third_party/accessibility/base/macros.h
+FILE: ../../../flutter/third_party/accessibility/base/platform/darwin/scoped_nsobject.h
+FILE: ../../../flutter/third_party/accessibility/base/platform/darwin/scoped_nsobject.mm
+FILE: ../../../flutter/third_party/accessibility/base/simple_token.cc
+FILE: ../../../flutter/third_party/accessibility/base/simple_token.h
+FILE: ../../../flutter/third_party/accessibility/base/string_utils.cc
+FILE: ../../../flutter/third_party/accessibility/base/string_utils.h
+FILE: ../../../flutter/third_party/accessibility/base/string_utils_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/transform.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/transform.h
 FILE: ../../../flutter/third_party/tonic/common/build_config.h
 FILE: ../../../flutter/third_party/tonic/common/log.cc
 FILE: ../../../flutter/third_party/tonic/common/log.h
@@ -2374,6 +1621,552 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_id_registry.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_id_registry.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_base.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_base.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_base.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac.mm
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions_impl.h
+FILE: ../../../flutter/third_party/accessibility/gfx/mac/coordinate_conversion.h
+FILE: ../../../flutter/third_party/accessibility/gfx/mac/coordinate_conversion.mm
+----------------------------------------------------------------------------------------------------
+Copyright 2014 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_action_data.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax/ax_action_data.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_action_data.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node_position.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node_position.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node_position_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_position.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_range.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_relative_bounds.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_relative_bounds.h
+----------------------------------------------------------------------------------------------------
+Copyright 2016 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_action_handler_base.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax/ax_action_handler_base.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_action_handler_base.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_base_export.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_event_intent.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_event_intent.h
+FILE: ../../../flutter/third_party/accessibility/ax/test_ax_node_helper.cc
+FILE: ../../../flutter/third_party/accessibility/ax/test_ax_node_helper.h
+FILE: ../../../flutter/third_party/accessibility/ax/test_ax_tree_manager.cc
+FILE: ../../../flutter/third_party/accessibility/ax/test_ax_tree_manager.h
+----------------------------------------------------------------------------------------------------
+Copyright 2020 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/ax/ax_export.h + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax/ax_export.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node_data.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node_data.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_update.h
+----------------------------------------------------------------------------------------------------
+Copyright 2013 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_base_unittest.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax/ax_clipping_behavior.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_constants.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_coordinate_system.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_enum_util_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_mode.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node_text_styles.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node_text_styles.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_offscreen_result.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_range_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_role_properties_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_manager.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_manager_map.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_manager_map.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_base_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_text_boundary.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_text_boundary.h
+----------------------------------------------------------------------------------------------------
+Copyright 2019 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_base.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax/ax_enum_util.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_enum_util.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_enums.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_node_data_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_table_info.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_table_info.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_table_info_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_id.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_id.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_observer.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_observer.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_delegate_base.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/compute_attributes.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/compute_attributes.h
+FILE: ../../../flutter/third_party/accessibility/base/no_destructor.h
+----------------------------------------------------------------------------------------------------
+Copyright 2018 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_unittest.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax/ax_action_handler.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_action_handler.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_event_generator.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_event_generator.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_event_generator_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_mode.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_mode_observer.h
+FILE: ../../../flutter/third_party/accessibility/ax/ax_role_properties.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_role_properties.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_unittest.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_unique_id.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_unique_id.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/checked_math.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/checked_math_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/clamped_math.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/clamped_math_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/math_constants.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/ranges.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_conversions_arm_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_arm_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_clang_gcc_impl.h
+FILE: ../../../flutter/third_party/accessibility/base/numerics/safe_math_shared_impl.h
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/ax_build/build_config.h + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax_build/build_config.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_conversions.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_conversions.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/point_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_conversions.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_conversions.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_conversions.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_conversions.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/size_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_conversions.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_conversions.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_f.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_f.h
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/native_widget_types.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2012 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/base/auto_reset.h + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/base/auto_reset.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2011 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/gfx/geometry/insets.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/insets_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../flutter/third_party/accessibility/gfx/geometry/rect_unittest.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/gfx/geometry/rect_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/gfx/gfx_export.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2013 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: accessibility
+ORIGIN: ../../../third_party/icu/scripts/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_data.cc
+FILE: ../../../flutter/third_party/accessibility/ax/ax_tree_data.h
+FILE: ../../../flutter/third_party/accessibility/ax/platform/ax_unique_id_unittest.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/test_ax_node_wrapper.cc
+FILE: ../../../flutter/third_party/accessibility/ax/platform/test_ax_node_wrapper.h
+----------------------------------------------------------------------------------------------------
+Copyright 2015 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
@@ -2678,4 +2471,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ====================================================================================================
-Total license count: 17
+Total license count: 14

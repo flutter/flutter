@@ -5,8 +5,8 @@
 #ifndef UI_ACCESSIBILITY_AX_ACTION_HANDLER_BASE_H_
 #define UI_ACCESSIBILITY_AX_ACTION_HANDLER_BASE_H_
 
-#include "ui/accessibility/ax_export.h"
-#include "ui/accessibility/ax_tree_id.h"
+#include "ax_export.h"
+#include "ax_tree_id.h"
 
 namespace ui {
 

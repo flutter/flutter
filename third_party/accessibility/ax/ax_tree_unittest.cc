@@ -2,27 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_tree.h"
+#include "ax_tree.h"
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include <memory>
 
-#include "base/stl_util.h"
-#include "base/strings/string_number_conversions.h"
-#include "base/strings/stringprintf.h"
-#include "testing/gtest/include/gtest/gtest.h"
-#include "ui/accessibility/ax_enum_util.h"
-#include "ui/accessibility/ax_node.h"
-#include "ui/accessibility/ax_node_position.h"
-#include "ui/accessibility/ax_serializable_tree.h"
-#include "ui/accessibility/ax_tree_data.h"
-#include "ui/accessibility/ax_tree_id.h"
-#include "ui/accessibility/ax_tree_observer.h"
-#include "ui/accessibility/ax_tree_serializer.h"
-#include "ui/accessibility/test_ax_tree_manager.h"
-#include "ui/gfx/transform.h"
+#include "gtest/gtest.h"
+
+#include "ax_enum_util.h"
+#include "ax_node.h"
+#include "ax_node_position.h"
+#include "ax_tree_data.h"
+#include "ax_tree_id.h"
+#include "ax_tree_observer.h"
+#include "base/string_utils.h"
+#include "test_ax_tree_manager.h"
 
 // Helper macro for testing selection values and maintain
 // correct stack tracing and failure causality.
@@ -82,7 +78,7 @@ class TestAXTreeObserver : public AXTreeObserver {
       : tree_(tree), tree_data_changed_(false), root_changed_(false) {
     tree_->AddObserver(this);
   }
-  ~TestAXTreeObserver() final { tree_->RemoveObserver(this); }
+  ~TestAXTreeObserver() { tree_->RemoveObserver(this); }
 
   void OnNodeDataWillChange(AXTree* tree,
                             const AXNodeData& old_node_data,
@@ -96,7 +92,7 @@ class TestAXTreeObserver : public AXTreeObserver {
     tree_data_changed_ = true;
   }
 
-  base::Optional<AXNode::AXID> unignored_parent_id_before_node_deleted;
+  std::optional<AXNode::AXID> unignored_parent_id_before_node_deleted;
   void OnNodeWillBeDeleted(AXTree* tree, AXNode* node) override {
     // When this observer function is called in an update, the actual node
     // deletion has not happened yet. Verify that node still exists in the tree.
@@ -208,10 +204,8 @@ class TestAXTreeObserver : public AXTreeObserver {
                                ax::mojom::FloatAttribute attr,
                                float old_value,
                                float new_value) override {
-    attribute_change_log_.push_back(
-        base::StringPrintf("%s changed from %s to %s", ToString(attr),
-                           base::NumberToString(old_value).c_str(),
-                           base::NumberToString(new_value).c_str()));
+    attribute_change_log_.push_back(base::StringPrintf(
+        "%s changed from %.1f to %.1f", ToString(attr), old_value, new_value));
   }
 
   void OnBoolAttributeChanged(AXTree* tree,
@@ -294,74 +288,13 @@ class TestAXTreeObserver : public AXTreeObserver {
 
 }  // namespace
 
-// A macro for testing that a base::Optional has both a value and that its value
+// A macro for testing that a std::optional has both a value and that its value
 // is set to a particular expectation.
 #define EXPECT_OPTIONAL_EQ(expected, actual) \
   EXPECT_TRUE(actual.has_value());           \
   if (actual) {                              \
     EXPECT_EQ(expected, actual.value());     \
   }
-
-TEST(AXTreeTest, SerializeSimpleAXTree) {
-  AXNodeData root;
-  root.id = 1;
-  root.role = ax::mojom::Role::kDialog;
-  root.AddState(ax::mojom::State::kFocusable);
-  root.relative_bounds.bounds = gfx::RectF(0, 0, 800, 600);
-  root.child_ids.push_back(2);
-  root.child_ids.push_back(3);
-
-  AXNodeData button;
-  button.id = 2;
-  button.role = ax::mojom::Role::kButton;
-  button.relative_bounds.bounds = gfx::RectF(20, 20, 200, 30);
-
-  AXNodeData checkbox;
-  checkbox.id = 3;
-  checkbox.role = ax::mojom::Role::kCheckBox;
-  checkbox.relative_bounds.bounds = gfx::RectF(20, 50, 200, 30);
-
-  AXTreeUpdate initial_state;
-  initial_state.root_id = 1;
-  initial_state.nodes.push_back(root);
-  initial_state.nodes.push_back(button);
-  initial_state.nodes.push_back(checkbox);
-  initial_state.has_tree_data = true;
-  initial_state.tree_data.title = "Title";
-  AXSerializableTree src_tree(initial_state);
-
-  std::unique_ptr<AXTreeSource<const AXNode*, AXNodeData, AXTreeData>>
-      tree_source(src_tree.CreateTreeSource());
-  AXTreeSerializer<const AXNode*, AXNodeData, AXTreeData> serializer(
-      tree_source.get());
-  AXTreeUpdate update;
-  serializer.SerializeChanges(src_tree.root(), &update);
-
-  AXTree dst_tree;
-  ASSERT_TRUE(dst_tree.Unserialize(update));
-
-  const AXNode* root_node = dst_tree.root();
-  ASSERT_TRUE(root_node != nullptr);
-  EXPECT_EQ(root.id, root_node->id());
-  EXPECT_EQ(root.role, root_node->data().role);
-
-  ASSERT_EQ(2u, root_node->children().size());
-
-  const AXNode* button_node = root_node->children()[0];
-  EXPECT_EQ(button.id, button_node->id());
-  EXPECT_EQ(button.role, button_node->data().role);
-
-  const AXNode* checkbox_node = root_node->children()[1];
-  EXPECT_EQ(checkbox.id, checkbox_node->id());
-  EXPECT_EQ(checkbox.role, checkbox_node->data().role);
-
-  EXPECT_EQ(
-      "AXTree title=Title\n"
-      "id=1 dialog FOCUSABLE (0, 0)-(800, 600) child_ids=2,3\n"
-      "  id=2 button (20, 20)-(200, 30)\n"
-      "  id=3 checkBox (20, 50)-(200, 30)\n",
-      dst_tree.ToString());
-}
 
 TEST(AXTreeTest, SerializeAXTreeUpdate) {
   AXNodeData list;
@@ -1246,9 +1179,9 @@ TEST(AXTreeTest, AttributeChangeCallbacks) {
   EXPECT_EQ("description changed from D1 to D2", change_log[1]);
   EXPECT_EQ("liveAtomic changed to false", change_log[2]);
   EXPECT_EQ("busy changed to true", change_log[3]);
-  EXPECT_EQ("minValueForRange changed from 1 to 2", change_log[4]);
-  EXPECT_EQ("maxValueForRange changed from 10 to 9", change_log[5]);
-  EXPECT_EQ("stepValueForRange changed from 3 to 0.5", change_log[6]);
+  EXPECT_EQ("minValueForRange changed from 1.0 to 2.0", change_log[4]);
+  EXPECT_EQ("maxValueForRange changed from 10.0 to 9.0", change_log[5]);
+  EXPECT_EQ("stepValueForRange changed from 3.0 to 0.5", change_log[6]);
   EXPECT_EQ("scrollX changed from 5 to 6", change_log[7]);
   EXPECT_EQ("scrollXMin changed from 1 to 2", change_log[8]);
 
@@ -1279,9 +1212,9 @@ TEST(AXTreeTest, AttributeChangeCallbacks) {
   EXPECT_EQ("value changed from  to V3", change_log2[2]);
   EXPECT_EQ("busy changed to false", change_log2[3]);
   EXPECT_EQ("modal changed to true", change_log2[4]);
-  EXPECT_EQ("minValueForRange changed from 2 to 0", change_log2[5]);
-  EXPECT_EQ("stepValueForRange changed from 3 to 0.5", change_log[6]);
-  EXPECT_EQ("valueForRange changed from 0 to 5", change_log2[7]);
+  EXPECT_EQ("minValueForRange changed from 2.0 to 0.0", change_log2[5]);
+  EXPECT_EQ("stepValueForRange changed from 3.0 to 0.5", change_log[6]);
+  EXPECT_EQ("valueForRange changed from 0.0 to 5.0", change_log2[7]);
   EXPECT_EQ("scrollXMin changed from 2 to 0", change_log2[8]);
   EXPECT_EQ("scrollX changed from 6 to 7", change_log2[9]);
   EXPECT_EQ("scrollXMax changed from 0 to 10", change_log2[10]);
@@ -2557,8 +2490,8 @@ TEST(AXTreeTest, UnignoredNextPreviousChild) {
 }
 
 TEST(AXTreeTest, GetSiblingsNoIgnored) {
-  // Since this tree contains no ignored nodes, PreviousSibling and NextSibling
-  // are equivalent to their unignored counterparts.
+  // Since this tree base::contains no ignored nodes, PreviousSibling and
+  // NextSibling are equivalent to their unignored counterparts.
   //
   // 1
   // ├── 2
@@ -3085,58 +3018,6 @@ TEST(AXTreeTest, GetChildrenOrSiblings) {
   EXPECT_EQ(nullptr, tree.GetFromId(5)->GetNextSibling());
 }
 
-TEST(AXTreeTest, ChildTreeIds) {
-  ui::AXTreeID tree_id_1 = ui::AXTreeID::CreateNewAXTreeID();
-  ui::AXTreeID tree_id_2 = ui::AXTreeID::CreateNewAXTreeID();
-  ui::AXTreeID tree_id_3 = ui::AXTreeID::CreateNewAXTreeID();
-
-  AXTreeUpdate initial_state;
-  initial_state.root_id = 1;
-  initial_state.nodes.resize(4);
-  initial_state.nodes[0].id = 1;
-  initial_state.nodes[0].child_ids.push_back(2);
-  initial_state.nodes[0].child_ids.push_back(3);
-  initial_state.nodes[0].child_ids.push_back(4);
-  initial_state.nodes[1].id = 2;
-  initial_state.nodes[1].AddStringAttribute(
-      ax::mojom::StringAttribute::kChildTreeId, tree_id_2.ToString());
-  initial_state.nodes[2].id = 3;
-  initial_state.nodes[2].AddStringAttribute(
-      ax::mojom::StringAttribute::kChildTreeId, tree_id_3.ToString());
-  initial_state.nodes[3].id = 4;
-  initial_state.nodes[3].AddStringAttribute(
-      ax::mojom::StringAttribute::kChildTreeId, tree_id_3.ToString());
-  AXTree tree(initial_state);
-
-  auto child_tree_1_nodes = tree.GetNodeIdsForChildTreeId(tree_id_1);
-  EXPECT_EQ(0U, child_tree_1_nodes.size());
-
-  auto child_tree_2_nodes = tree.GetNodeIdsForChildTreeId(tree_id_2);
-  EXPECT_EQ(1U, child_tree_2_nodes.size());
-  EXPECT_TRUE(base::Contains(child_tree_2_nodes, 2));
-
-  auto child_tree_3_nodes = tree.GetNodeIdsForChildTreeId(tree_id_3);
-  EXPECT_EQ(2U, child_tree_3_nodes.size());
-  EXPECT_TRUE(base::Contains(child_tree_3_nodes, 3));
-  EXPECT_TRUE(base::Contains(child_tree_3_nodes, 4));
-
-  AXTreeUpdate update = initial_state;
-  update.nodes[2].string_attributes.clear();
-  update.nodes[2].AddStringAttribute(ax::mojom::StringAttribute::kChildTreeId,
-                                     tree_id_2.ToString());
-  update.nodes[3].string_attributes.clear();
-
-  EXPECT_TRUE(tree.Unserialize(update));
-
-  child_tree_2_nodes = tree.GetNodeIdsForChildTreeId(tree_id_2);
-  EXPECT_EQ(2U, child_tree_2_nodes.size());
-  EXPECT_TRUE(base::Contains(child_tree_2_nodes, 2));
-  EXPECT_TRUE(base::Contains(child_tree_2_nodes, 3));
-
-  child_tree_3_nodes = tree.GetNodeIdsForChildTreeId(tree_id_3);
-  EXPECT_EQ(0U, child_tree_3_nodes.size());
-}
-
 // Tests GetPosInSet and GetSetSize return the assigned int attribute values.
 TEST(AXTreeTest, SetSizePosInSetAssigned) {
   AXTreeUpdate tree_update;
@@ -3639,8 +3520,8 @@ TEST(AXTreeTest, OrderedSetReportsSetSize) {
   tree_update.nodes[7].role = ax::mojom::Role::kList;  // SetSize = 0
   tree_update.nodes[8].id = 9;
   tree_update.nodes[8].role =
-      ax::mojom::Role::kList;  // SetSize = 1 because only 1 item whose role
-                               // matches
+      ax::mojom::Role::kList;  // SetSize = 1 because only 1
+                               // item whose role matches
   tree_update.nodes[8].child_ids = {10, 11};
   tree_update.nodes[9].id = 10;
   tree_update.nodes[9].role = ax::mojom::Role::kArticle;
@@ -3844,7 +3725,8 @@ TEST(AXTreeTest, SetSizePosInSetRadioButtonsInList) {
   tree_update.nodes.resize(6);
   tree_update.nodes[0].id = 1;
   tree_update.nodes[0].role =
-      ax::mojom::Role::kList;  // SetSize = 2, since only contains 2 ListItems
+      ax::mojom::Role::kList;  // SetSize = 2, since only base::contains 2
+                               // ListItems
   tree_update.nodes[0].child_ids = {2, 3, 4, 5, 6};
 
   tree_update.nodes[1].id = 2;

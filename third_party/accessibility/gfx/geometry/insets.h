@@ -7,10 +7,9 @@
 
 #include <string>
 
-#include "base/numerics/clamped_math.h"
-#include "ui/gfx/geometry/geometry_export.h"
-#include "ui/gfx/geometry/insets_f.h"
-#include "ui/gfx/geometry/size.h"
+#include "gfx/gfx_export.h"
+#include "insets_f.h"
+#include "size.h"
 
 namespace gfx {
 
@@ -23,7 +22,7 @@ class Vector2d;
 // This can be used to represent a space within a rectangle, by "shrinking" the
 // rectangle by the inset amount on all four sides. Alternatively, it can
 // represent a border that has a different thickness on each side.
-class GEOMETRY_EXPORT Insets {
+class GFX_EXPORT Insets {
  public:
   constexpr Insets() : top_(0), left_(0), bottom_(0), right_(0) {}
   constexpr explicit Insets(int all)
@@ -135,7 +134,7 @@ class GEOMETRY_EXPORT Insets {
   int bottom_;
   int right_;
 
-  // See ui/gfx/geometry/rect.h
+  // See rect.h
   // Returns true iff a+b would overflow max int.
   static constexpr bool AddWouldOverflow(int a, int b) {
     // In this function, GCC tries to make optimizations that would only work if

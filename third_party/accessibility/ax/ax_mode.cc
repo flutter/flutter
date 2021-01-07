@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "ui/accessibility/ax_mode.h"
+#include "ax_mode.h"
 
 #include <vector>
 
-#include "base/strings/string_util.h"
+#include "base/logging.h"
+#include "base/string_utils.h"
 
 namespace ui {
 
@@ -46,11 +47,12 @@ std::string AXMode::ToString() const {
         break;
     }
 
-    DCHECK(flag_name);
+    BASE_DCHECK(flag_name);
 
     if (has_mode(mode_flag))
       tokens.push_back(flag_name);
   }
+
   return base::JoinString(tokens, " | ");
 }
 

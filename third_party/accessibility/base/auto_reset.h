@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef BASE_AUTO_RESET_H_
-#define BASE_AUTO_RESET_H_
+#ifndef ACCESSIBILITY_BASE_AUTO_RESET_H_
+#define ACCESSIBILITY_BASE_AUTO_RESET_H_
 
 #include <utility>
 
@@ -49,4 +49,4 @@ class AutoReset {
 
 }  // namespace base
 
-#endif  // BASE_AUTO_RESET_H_
+#endif  // ACCESSIBILITY_BASE_AUTO_RESET_H_

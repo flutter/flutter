@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef UI_ACCESSIBILITY_TEST_AX_TREE_MANAGER_H_
-#define UI_ACCESSIBILITY_TEST_AX_TREE_MANAGER_H_
+#ifndef ACCESSIBILITY_TEST_AX_AX_TREE_MANAGER_H_
+#define ACCESSIBILITY_TEST_AX_AX_TREE_MANAGER_H_
 
 #include <memory>
 
-#include "ui/accessibility/ax_tree.h"
-#include "ui/accessibility/ax_tree_id.h"
-#include "ui/accessibility/ax_tree_manager.h"
+#include "ax_tree.h"
+#include "ax_tree_id.h"
+#include "ax_tree_manager.h"
 
 namespace ui {
 
@@ -54,4 +54,4 @@ class TestAXTreeManager : public AXTreeManager {
 
 }  // namespace ui
 
-#endif  // UI_ACCESSIBILITY_TEST_AX_TREE_MANAGER_H_
+#endif  // ACCESSIBILITY_TEST_AX_AX_TREE_MANAGER_H_

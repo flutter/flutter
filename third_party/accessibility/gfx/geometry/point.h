@@ -9,10 +9,10 @@
 #include <string>
 #include <tuple>
 
+#include "ax_build/build_config.h"
 #include "base/numerics/clamped_math.h"
-#include "build/build_config.h"
-#include "ui/gfx/geometry/geometry_export.h"
-#include "ui/gfx/geometry/vector2d.h"
+#include "gfx/gfx_export.h"
+#include "vector2d.h"
 
 #if defined(OS_WIN)
 typedef unsigned long DWORD;
@@ -24,7 +24,7 @@ typedef struct CGPoint CGPoint;
 namespace gfx {
 
 // A point has an x and y coordinate.
-class GEOMETRY_EXPORT Point {
+class GFX_EXPORT Point {
  public:
   constexpr Point() : x_(0), y_(0) {}
   constexpr Point(int x, int y) : x_(x), y_(y) {}
@@ -127,12 +127,12 @@ inline Point PointAtOffsetFromOrigin(const Vector2d& offset_from_origin) {
 void PrintTo(const Point& point, ::std::ostream* os);
 
 // Helper methods to scale a gfx::Point to a new gfx::Point.
-GEOMETRY_EXPORT Point ScaleToCeiledPoint(const Point& point, float x_scale, float y_scale);
-GEOMETRY_EXPORT Point ScaleToCeiledPoint(const Point& point, float x_scale);
-GEOMETRY_EXPORT Point ScaleToFlooredPoint(const Point& point, float x_scale, float y_scale);
-GEOMETRY_EXPORT Point ScaleToFlooredPoint(const Point& point, float x_scale);
-GEOMETRY_EXPORT Point ScaleToRoundedPoint(const Point& point, float x_scale, float y_scale);
-GEOMETRY_EXPORT Point ScaleToRoundedPoint(const Point& point, float x_scale);
+GFX_EXPORT Point ScaleToCeiledPoint(const Point& point, float x_scale, float y_scale);
+GFX_EXPORT Point ScaleToCeiledPoint(const Point& point, float x_scale);
+GFX_EXPORT Point ScaleToFlooredPoint(const Point& point, float x_scale, float y_scale);
+GFX_EXPORT Point ScaleToFlooredPoint(const Point& point, float x_scale);
+GFX_EXPORT Point ScaleToRoundedPoint(const Point& point, float x_scale, float y_scale);
+GFX_EXPORT Point ScaleToRoundedPoint(const Point& point, float x_scale);
 
 }  // namespace gfx
 
