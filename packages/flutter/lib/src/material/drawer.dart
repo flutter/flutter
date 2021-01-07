@@ -302,7 +302,9 @@ class DrawerController extends StatefulWidget {
   /// Whether or not the drawer is opened or closed.
   ///
   /// This parameter is primarily used by the state restoration framework
-  /// to restore the animation controller to the open or closed state.
+  /// to restore the drawer's animation controller to the open or closed state
+  /// depending on what was last saved to the target platform before the
+  /// application was killed.
   final bool isDrawerOpen;
 
   @override
