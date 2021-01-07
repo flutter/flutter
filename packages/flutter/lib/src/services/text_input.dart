@@ -970,7 +970,10 @@ abstract class TextInputConnection {
     required TextAlign textAlign,
   });
 
-  /// Use [TextInput.detach] instead.
+  /// Stop interacting with the text input control.
+  ///
+  /// After calling this method, the text input control might disappear if no
+  /// other client attaches to it within this animation frame.
   @Deprecated(
     'Use TextInput.detach instead. '
     'This feature was deprecated after v1.26.0-1.0.pre.'
@@ -980,7 +983,9 @@ abstract class TextInputConnection {
     assert(!attached);
   }
 
-  /// Use [TextInput.reset] instead.
+  /// Platform sent a notification informing the connection is closed.
+  ///
+  /// [TextInputConnection] should clean current client connection.
   @Deprecated(
     'Use TextInput.reset instead. '
     'This feature was deprecated after v1.26.0-1.0.pre.'
