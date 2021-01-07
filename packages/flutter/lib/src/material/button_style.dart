@@ -465,10 +465,10 @@ List<Widget> decideArrangementFromButtonIconAlignment({
   List<Widget> children = <Widget>[];
   switch (iconAlignment) {
     case ButtonIconAlignment.start:
-      children = <Widget>[icon, SizedBox(width: gap), label];
+      children = <Widget>[icon, SizedBox(width: gap), Flexible(child: label)];
       break;
     case ButtonIconAlignment.end:
-      children = <Widget>[label, SizedBox(width: gap), icon];
+      children = <Widget>[Flexible(child: label), SizedBox(width: gap), icon];
       break;
   }
   return children;

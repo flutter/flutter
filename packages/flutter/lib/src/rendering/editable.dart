@@ -825,7 +825,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
     assert(_selection != null);
-    if (_readOnly) {
+    if (_readOnly || !selection.isValid) {
       return;
     }
     String textBefore = selection.textBefore(text);

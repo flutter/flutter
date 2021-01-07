@@ -7,4 +7,8 @@ import 'package:flutter/material.dart';
 void main() {
   // Change made in https://github.com/flutter/flutter/pull/15303
   showDialog(child: Text('Fix me.'));
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const StatefulElement statefulElement = StatefulElement(myWidget);
+  statefulElement.inheritFromElement(ancestor);
 }
