@@ -9,6 +9,26 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
+const Color white = Color(0xFFFFFFFF);
+const Color black = Color(0xFF000000);
+const Color red = Color(0xFFFF0000);
+const Color green = Color(0xFF00FF00);
+const Color blue = Color(0xFF0000FF);
+const Color yellow = Color(0xFFFFEB3B);
+
+ParagraphConstraints constrain(double width) {
+  return ParagraphConstraints(width: width);
+}
+
+CanvasParagraph rich(
+  EngineParagraphStyle style,
+  void Function(CanvasParagraphBuilder) callback,
+) {
+  final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
+  callback(builder);
+  return builder.build();
+}
+
 Future<void> takeScreenshot(
   EngineCanvas canvas,
   Rect region,
