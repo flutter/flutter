@@ -171,7 +171,6 @@ class _RenderCupertinoTextSelectionToolbarPosition extends RenderShiftedBox {
     RenderBox? child,
   ) : super(child);
 
-
   @override
   bool get isRepaintBoundary => true;
 
@@ -548,7 +547,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           child: CupertinoTextSelectionToolbarButton.getText('▶'),
         ),
         nextButtonDisabled: CupertinoTextSelectionToolbarButton(
-          child: CupertinoTextSelectionToolbarButton.getText('◀', false),
+          child: CupertinoTextSelectionToolbarButton.getText('▶', false),
         ),
         children: widget.children,
       ),
