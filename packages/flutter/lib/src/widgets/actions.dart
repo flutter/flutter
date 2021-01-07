@@ -528,14 +528,13 @@ class ActionDispatcher with Diagnosticable {
 /// This example creates a custom [Action] subclass `ModifyAction` for modifying
 /// a model, and another, `SaveAction` for saving it.
 ///
-/// One thing that this example demonstrates is passing arguments to the
-/// [Intent] to be carried to the [Action]. This shows how actions can get data
-/// either from their own construction (like the `model` in this example), or
-/// from the intent passed to them when invoked (like the increment `amount` in
-/// this example).
+/// This example demonstrates passing arguments to the [Intent] to be carried to
+/// the [Action]. Actions can get data either from their own construction (like
+/// the `model` in this example), or from the intent passed to them when invoked
+/// (like the increment `amount` in this example).
 ///
-/// This example also shows how to insulate a widget from knowing too much about
-/// its surroundings using Intents. The `SaveButton` widget defined in this
+/// This example also demonstrates how to use Intents to limit a widget's
+/// dependencies on its surroundings. The `SaveButton` widget defined in this
 /// example can invoke actions defined in its ancestor widgets, which can be
 /// customized to match the part of the widget tree that it is in. It doesn't
 /// need to know about the `SaveAction` class, only the `SaveIntent`, and it
@@ -548,17 +547,16 @@ class ActionDispatcher with Diagnosticable {
 ///   ValueNotifier<int> data = ValueNotifier<int>(0);
 ///
 ///   int save() {
-///     if (!isDirty.value) {
-///       return data.value;
+///     if (isDirty.value) {
+///       print('Saved Data: ${data.value}');
+///       isDirty.value = false;
 ///     }
-///     print('Saved Data: ${data.value}');
-///     isDirty.value = false;
 ///     return data.value;
 ///   }
 ///
 ///   void setValue(int newValue) {
+///     isDirty.value = data.value != newValue;
 ///     data.value = newValue;
-///     isDirty.value = true;
 ///   }
 /// }
 ///
@@ -593,9 +591,7 @@ class ActionDispatcher with Diagnosticable {
 ///   final Model model;
 ///
 ///   @override
-///   int invoke(covariant SaveIntent intent) {
-///     return model.save();
-///   }
+///   int invoke(covariant SaveIntent intent) => model.save();
 /// }
 ///
 /// class SaveButton extends StatefulWidget {
@@ -662,14 +658,14 @@ class ActionDispatcher with Diagnosticable {
 ///                   },
 ///                 ),
 ///                 AnimatedBuilder(
-///                     animation: model.data,
-///                     builder: (BuildContext context, Widget? child) {
-///                       return Padding(
-///                         padding: const EdgeInsets.all(8.0),
-///                         child: Text('${model.data.value}',
-///                             style: Theme.of(context).textTheme.headline4),
-///                       );
-///                     }),
+///                   animation: model.data,
+///                   builder: (BuildContext context, Widget? child) {
+///                     return Padding(
+///                       padding: const EdgeInsets.all(8.0),
+///                       child: Text('${model.data.value}',
+///                           style: Theme.of(context).textTheme.headline4),
+///                     );
+///                   }),
 ///                 IconButton(
 ///                   icon: const Icon(Icons.exposure_minus_1),
 ///                   onPressed: () {
