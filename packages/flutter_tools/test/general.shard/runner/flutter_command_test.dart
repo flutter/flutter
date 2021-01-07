@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
@@ -288,6 +289,48 @@ void main() {
 
     test('FlutterCommandResult.warning()', () async {
       expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
+    });
+
+    testUsingContext('devToolsServerAddress returns parsed uri', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions();
+      await createTestCommandRunner(command).run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        'http://127.0.0.1:9105',
+      ]);
+      expect(command.devToolsServerAddress.toString(), equals('http://127.0.0.1:9105'));
+    });
+
+    testUsingContext('devToolsServerAddress returns null for bad input', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        'hello-world',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '9101',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '127.0.0.1:9101',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
     });
 
     group('signals tests', () {

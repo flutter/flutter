@@ -1255,16 +1255,24 @@ abstract class ResidentRunner {
     return _devToolsLauncher.activeDevToolsServer;
   }
 
-  Future<void> serveDevToolsGracefully({bool openInBrowser = false}) async {
+  Future<void> serveDevToolsGracefully({
+    Uri devToolsServerAddress,
+    bool openInBrowser = false,
+  }) async {
     if (!supportsServiceProtocol) {
       return;
     }
-    try {
-      _devToolsLauncher ??= DevtoolsLauncher.instance;
-      return await _devToolsLauncher.serve(openInBrowser: openInBrowser);
-    } catch (e) { // ignore: avoid_catches_without_on_clauses
-      // We need to fail gracefully if attempting to serve DevTools fails.
-      globals.printError('Failed to serve Flutter DevTools: $e');
+
+    _devToolsLauncher ??= DevtoolsLauncher.instance;
+    if (devToolsServerAddress != null) {
+      _devToolsLauncher.devToolsUri = devToolsServerAddress;
+    } else {
+      try {
+        return await _devToolsLauncher.serve(openInBrowser: openInBrowser);
+      } catch (e) { // ignore: avoid_catches_without_on_clauses
+        // We need to fail gracefully if attempting to serve DevTools fails.
+        globals.printError('Failed to serve Flutter DevTools: $e');
+      }
     }
   }
 

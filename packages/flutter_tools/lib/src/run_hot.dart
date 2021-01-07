@@ -183,7 +183,9 @@ class HotRunner extends ResidentRunner {
           getSkSLMethod: writeSkSL,
           allowExistingDdsInstance: allowExistingDdsInstance,
         ),
-        serveDevToolsGracefully(),
+        serveDevToolsGracefully(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        ),
       ]);
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses

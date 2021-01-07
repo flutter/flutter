@@ -74,7 +74,9 @@ class ColdRunner extends ResidentRunner {
       try {
         await Future.wait(<Future<void>>[
           connectToServiceProtocol(),
-          serveDevToolsGracefully(),
+          serveDevToolsGracefully(
+            devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          ),
         ]);
       } on String catch (message) {
         globals.printError(message);
@@ -140,7 +142,9 @@ class ColdRunner extends ResidentRunner {
           getSkSLMethod: writeSkSL,
           allowExistingDdsInstance: allowExistingDdsInstance,
         ),
-        serveDevToolsGracefully(),
+        serveDevToolsGracefully(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        ),
       ]);
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
