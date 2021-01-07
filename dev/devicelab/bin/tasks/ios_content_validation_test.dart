@@ -182,6 +182,43 @@ Future<void> main() async {
           await flutter('clean');
         });
 
+        section('Build app for simulator with all available architectures');
+
+        // Apple Silicon ARM simulators not yet supported.
+        // Prove (on Xcode 12) Flutter knows to exclude this architecture.
+        await inDirectory(flutterProject.rootPath, () async {
+          await flutter('build', options: <String>[
+            'ios',
+            '--simulator',
+            '--no-codesign',
+            '--verbose',
+          ], environment: <String, String>{
+            'FLUTTER_XCODE_ONLY_ACTIVE_ARCH': 'NO'
+          });
+        });
+
+        final String simulatorAppFrameworkBinary = path.join(
+          flutterProject.rootPath,
+          'build',
+          'ios',
+          'iphonesimulator',
+          'Runner.app',
+          'Frameworks',
+          'App.framework',
+          'App',
+        );
+
+        final String archs = await fileType(simulatorAppFrameworkBinary);
+        if (!archs.contains('Mach-O 64-bit dynamically linked shared library x86_64')) {
+          throw TaskResult.failure('Unexpected architecture');
+        }
+
+        section('Clean build');
+
+        await inDirectory(flutterProject.rootPath, () async {
+          await flutter('clean');
+        });
+
         section('Archive');
 
         await inDirectory(flutterProject.rootPath, () async {
