@@ -40,13 +40,14 @@ class _AccountPictures extends StatelessWidget {
             children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
               return Padding(
                 padding: const EdgeInsetsDirectional.only(start: 8.0),
-                child: Semantics(
-                  container: true,
-                  child: Container(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                    width: otherAccountsPicturesSize?.width,
-                    height: otherAccountsPicturesSize?.height,
-                    child: picture,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                  child: Semantics(
+                    container: true,
+                    child: SizedBox.fromSize(
+                      size: otherAccountsPicturesSize,
+                      child: picture,
+                    ),
                   ),
                 ),
               );
@@ -304,7 +305,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.currentAccountPicture,
     this.otherAccountsPictures,
     this.currentAccountPictureSize = const Size.square(72.0),
-    this.otherAccountsPicturesSize = const Size.square(48.0),
+    this.otherAccountsPicturesSize = const Size.square(40.0),
     required this.accountName,
     required this.accountEmail,
     this.onDetailsPressed,
