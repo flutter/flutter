@@ -68,9 +68,6 @@ def flutter_additional_ios_build_settings(target)
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
-
-    # Apple Silicon ARM simulators not yet supported.
-    build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
   end
 end
 
