@@ -461,7 +461,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesWebRendererOption() {
     argParser.addOption('web-renderer',
-      defaultsTo: 'html',
+      defaultsTo: 'auto',
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web. Possible values are:\n'
             'html - always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.\n'
