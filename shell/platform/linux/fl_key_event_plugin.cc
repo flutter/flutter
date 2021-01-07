@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/fl_key_event_plugin.h"
 
 #include <gtk/gtk.h>
+#include <cinttypes>
 
 #include "flutter/shell/platform/linux/fl_text_input_plugin.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h"
@@ -172,10 +173,10 @@ static GdkEventKey* find_pending_event(FlKeyEventPlugin* self, uint64_t id) {
 static void remove_pending_event(FlKeyEventPlugin* self, uint64_t id) {
   if (self->pending_events->len == 0 ||
       FL_KEY_EVENT_PAIR(g_ptr_array_index(self->pending_events, 0))->id != id) {
-    g_warning(
-        "Tried to remove pending event with id %ld, but the event was out of "
-        "order, or is unknown.",
-        id);
+    g_warning("Tried to remove pending event with id %" PRIu64
+              ", but the event was out of "
+              "order, or is unknown.",
+              id);
     return;
   }
   g_ptr_array_remove_index(self->pending_events, 0);
@@ -223,10 +224,10 @@ static void handle_response(GObject* object,
   if (handled_value != nullptr) {
     GdkEventKey* event = find_pending_event(self, data->id);
     if (event == nullptr) {
-      g_warning(
-          "Event response for event id %ld received, but event was received "
-          "out of order, or is unknown.",
-          data->id);
+      g_warning("Event response for event id %" PRIu64
+                " received, but event was received "
+                "out of order, or is unknown.",
+                data->id);
     } else {
       handled = fl_value_get_bool(handled_value);
       if (!handled) {
