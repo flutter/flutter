@@ -762,7 +762,7 @@ void main() {
   testWidgets('InputDecorator hint overflow', (WidgetTester tester) async {
     final String longHint = 'hintText' * 10;
 
-    // Default Hint overflow is TextOverflow.ellipse
+    // Default Hint overflow is TextOverflow.ellipsis.
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: InputDecoration(
@@ -789,7 +789,7 @@ void main() {
     text = tester.firstWidget(find.text(longHint));
     expect(text.overflow, TextOverflow.fade);
 
-    // Customizable InputDecorationTheme hintOverflow
+    // Customizable InputDecorationTheme hintOverflow.
     await tester.pumpWidget(
       buildInputDecorator(
         inputDecorationTheme: const InputDecorationTheme(
@@ -805,7 +805,7 @@ void main() {
     text = tester.firstWidget(find.text(longHint));
     expect(text.overflow, TextOverflow.clip);
 
-    // InputDecoration hintOverflow takes precedence over InputDecorationTheme hintOverflow
+    // InputDecoration hintOverflow takes precedence over InputDecorationTheme hintOverflow.
     await tester.pumpWidget(
       buildInputDecorator(
         inputDecorationTheme: const InputDecorationTheme(
