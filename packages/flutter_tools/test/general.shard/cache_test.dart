@@ -403,7 +403,14 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on macos', () {
-    fakeProcessManager.addCommand(
+    fakeProcessManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'which',
+          'sysctl'
+        ],
+        stdout: '/sbin/sysctl',
+      ),
       const FakeCommand(
         command: <String>[
           'sysctl',
@@ -411,7 +418,7 @@ void main() {
         ],
         stdout: 'hw.optional.arm64: 0',
       ),
-    );
+    ]);
 
     final Cache cache = createCache(FakePlatform(operatingSystem: 'macos'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
