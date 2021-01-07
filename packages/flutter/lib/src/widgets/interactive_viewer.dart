@@ -19,14 +19,15 @@ import 'ticker_provider.dart';
 ///
 /// The user can transform the child by dragging to pan or pinching to zoom.
 ///
-/// By default, InteractiveViewer clip its child using [Clip.hardEdge].
-/// To prevent this behavior, consider setting clipBehavior to [Clip.none],
-/// InteractiveViewer may draw outside of its original area of the
-/// screen, such as when a child is zoomed in and increases in size. However, it
-/// will not receive gestures outside of its original area.
-/// To prevent dead areas where InteractiveViewer does not
-/// receive gestures, don't set clipBehavior or be sure that
-/// the InteractiveViewer widget is the size of the area that should be interactive.
+/// By default, InteractiveViewer clips its child using [Clip.hardEdge].
+/// To prevent this behavior, consider setting [clipBehavior] to [Clip.none].
+/// When [clipBehavior] is [Clip.none], InteractiveViewer may draw outside of
+/// its original area of the screen, such as when a child is zoomed in and
+/// increases in size. However, it will not receive gestures outside of its original area.
+/// To prevent dead areas where InteractiveViewer does not receive gestures,
+/// don't set [clipBehavior] or be sure that the InteractiveViewer widget is the
+/// size of the area that should be interactive.
+///
 /// See [flutter-go](https://github.com/justinmc/flutter-go) for an example of
 /// robust positioning of an InteractiveViewer child that works for all screen
 /// sizes and child sizes.
@@ -104,8 +105,9 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.left.isFinite)),
        super(key: key);
 
-    /// The content will be clipped (or not) according to this option.
-  /// See the enum [Clip] for details of all possible options and their common use cases.
+  /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
+  /// but it will not receive gestures in these areas.
+  /// Be sure that the InteractiveViewer is the desired size when using [Clip.none].
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
