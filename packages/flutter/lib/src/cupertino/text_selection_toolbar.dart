@@ -329,8 +329,9 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ),
       );
 
+    final Offset localAnchor = globalToLocal(_anchor);
     final double centerX = childParentData.offset.dx + child!.size.width / 2;
-    final double arrowXOffsetFromCenter = _anchor.dx - centerX;
+    final double arrowXOffsetFromCenter = localAnchor.dx - centerX;
     final double arrowTipX = child!.size.width / 2 + arrowXOffsetFromCenter;
 
     final double arrowBaseY = _isAbove
