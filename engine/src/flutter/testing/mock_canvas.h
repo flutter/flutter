@@ -227,12 +227,6 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
                         QuadAAFlags,
                         const SkColor4f&,
                         SkBlendMode) override;
-  void onDrawEdgeAAImageSet(const ImageSetEntry[],
-                            int,
-                            const SkPoint[],
-                            const SkMatrix[],
-                            const SkPaint*,
-                            SrcRectConstraint) override;
   void onClipRegion(const SkRegion&, SkClipOp) override;
 
  private:
