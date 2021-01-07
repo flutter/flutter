@@ -102,7 +102,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen(_logger.printError);
-      devToolsUri = await completer.future;
+      devToolsUri = await completer.future
+        .timeout(const Duration(seconds: 10));
     } on Exception catch (e, st) {
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
