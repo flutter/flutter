@@ -11,6 +11,28 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/45941
+  - title: 'Rename to deferFirstFrame'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'deferFirstFrameReport'
+      inClass: 'WidgetsBinding'
+    changes:
+      - kind: 'rename'
+        newName: 'deferFirstFrame'
+
+  # Changes made in https://github.com/flutter/flutter/pull/45941
+  - title: 'Rename to allowFirstFrame'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'allowFirstFrameReport'
+      inClass: 'WidgetsBinding'
+    changes:
+      - kind: 'rename'
+        newName: 'allowFirstFrame'
+
   # Changes made in https://github.com/flutter/flutter/pull/44189
   - title: 'Rename to dependOnInheritedElement'
     date: 2020-12-23
