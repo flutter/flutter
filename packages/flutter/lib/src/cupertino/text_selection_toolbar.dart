@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -355,7 +354,9 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   }
 }
 
-// Renders the content of the selection menu and maintains the page state.
+// A toolbar containing the given children. If they overflow the width
+// available, then the menu will be paginated with the overflowing children
+// displayed on subsequent pages.
 //
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
@@ -464,7 +465,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 }
 
 // The custom RenderObjectWidget that, together with
-// _CupertinoTextSelectionToolbarItemsRenderBox and
+// _RenderCupertinoTextSelectionToolbarItems and
 // _CupertinoTextSelectionToolbarItemsElement, paginates the menu items.
 class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   _CupertinoTextSelectionToolbarItems({
@@ -492,15 +493,15 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   final int page;
 
   @override
-  _CupertinoTextSelectionToolbarItemsRenderBox createRenderObject(BuildContext context) {
-    return _CupertinoTextSelectionToolbarItemsRenderBox(
+  _RenderCupertinoTextSelectionToolbarItems createRenderObject(BuildContext context) {
+    return _RenderCupertinoTextSelectionToolbarItems(
       dividerWidth: dividerWidth,
       page: page,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _CupertinoTextSelectionToolbarItemsRenderBox renderObject) {
+  void updateRenderObject(BuildContext context, _RenderCupertinoTextSelectionToolbarItems renderObject) {
     renderObject
       ..page = page
       ..dividerWidth = dividerWidth;
@@ -527,7 +528,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   _CupertinoTextSelectionToolbarItems get widget => super.widget as _CupertinoTextSelectionToolbarItems;
 
   @override
-  _CupertinoTextSelectionToolbarItemsRenderBox get renderObject => super.renderObject as _CupertinoTextSelectionToolbarItemsRenderBox;
+  _RenderCupertinoTextSelectionToolbarItems get renderObject => super.renderObject as _RenderCupertinoTextSelectionToolbarItems;
 
   void _updateRenderObject(RenderBox? child, _CupertinoTextSelectionToolbarItemsSlot slot) {
     switch (slot) {
@@ -670,10 +671,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 }
 
-// TODO(justinmc): Rename to _RenderCupertinoTextSelectionToolbarItems.
 // The custom RenderBox that helps paginate the menu items.
-class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
-  _CupertinoTextSelectionToolbarItemsRenderBox({
+class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
+  _RenderCupertinoTextSelectionToolbarItems({
     required double dividerWidth,
     required int page,
   }) : assert(dividerWidth != null),
