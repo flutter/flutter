@@ -12,6 +12,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme.dart';
@@ -1166,7 +1167,7 @@ class ListTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: ColoredBox(
+        child: Ink(
           color: _tileBackgroundColor(tileTheme),
           child: SafeArea(
             top: false,
