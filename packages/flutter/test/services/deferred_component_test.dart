@@ -31,7 +31,8 @@ void main() {
       log.add(methodCall);
     });
 
-    await DeferredComponent.getDeferredComponentInstallState(moduleName: 'testModuleName');
+    String result = await DeferredComponent.getDeferredComponentInstallState(moduleName: 'testModuleName');
+    expect(result, "unknown");
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(

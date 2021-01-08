@@ -76,7 +76,6 @@ enum DeferredComponentInstallState {
 class DeferredComponent {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
-  // ignore: unused_element
   DeferredComponent._();
 
   // TODO(garyq): We should eventually expand this to install modules by loadingUnitId
@@ -88,8 +87,8 @@ class DeferredComponent {
   /// be downloaded and installed.
   ///
   /// This method returns a Future<void> that will complete when the feature is
-  /// installed and any assets are ready to used. When an error occurs, the
-  /// future will complete an error.
+  /// installed and any assets are ready to be used. When an error occurs, the
+  /// future will complete with an error.
   ///
   /// This method should be used for asset-only deferred components. Deferred components
   /// containing dart code should call `loadLibrary()` on a deferred imported
@@ -106,7 +105,11 @@ class DeferredComponent {
   /// This method will not load associated dart libraries contained in the dynamic
   /// feature module, though it will download the files necessary and subsequent
   /// calls to `loadLibrary()` to load will complete faster.
-  static Future<void> installDeferredComponent({@required String? moduleName}) async {
+  ///
+  /// See also:
+  /// 
+  ///  * [uninstallDeferredComponent], a method to request the uninstall of a component.
+  static Future<void> installDeferredComponent({required String moduleName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'installDeferredComponent',
       <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
@@ -124,17 +127,18 @@ class DeferredComponent {
   /// imported library. Modules not yet requested or do not exist will complete with
   /// [DeferredComponentInstallState.unknown]. Modules previously installed but not
   /// loaded in this session will return [DeferredComponentInstallState.installedPendingLoad],
-  /// which indicates that the installtion request call should be repeated to
+  /// which indicates that the installation request call should be repeated to
   /// complete the loading process.
   ///
   /// Due to the async nature of platform channels and network i/o, newly requested
-  /// installs may return null until the installation request has been processed. Thus,
-  /// this state information should be used as purely informational and not as an
-  /// accurate reflection of the readiness of the deferred component. Code and assets
-  /// may only be used after the Future completes succesfully, regardless of what
-  /// the installation state is in.
-  static Future<String?> getDeferredComponentInstallState({@required String? moduleName}) async {
-    await SystemChannels.deferredComponent.invokeMethod<void>(
+  /// installs may return [DeferredComponentInstallState.unknown] until the installation
+  /// request has been processed. Thus, this state information should be used as purely
+  /// informational and not as an accurate reflection of the readiness of the deferred
+  /// component. Code and assets may only be used after the Future returned by `loadLibrary()`
+  /// or [installDeferredComponent] completes succesfully, regardless of what the
+  /// installation state is in.
+  static Future<String?> getDeferredComponentInstallState({required String moduleName}) {
+    return SystemChannels.deferredComponent.invokeMethod<String>(
       'getDeferredComponentInstallState',
       <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
     );
@@ -148,7 +152,16 @@ class DeferredComponent {
   /// assets and files) may occur at a later time. However, once uninstallation
   /// is requested, the deferred component should not be used anymore until
   /// [installDeferredComponent] or `loadLibrary()` is called again.
-  static Future<void> uninstallDeferredComponent({@required String? moduleName}) async {
+  ///
+  /// It is safe to request an uninstall when dart code from the component is in use,
+  /// but assets from the component should not be used once the component uninstall is
+  /// requested. The dart code will remain usable in the app's current session but
+  /// is not guaranteed to work in future sessions.
+  /// 
+  /// See also:
+  /// 
+  ///  * [installDeferredComponent], a method to install asset-only components.
+  static Future<void> uninstallDeferredComponent({required String moduleName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'uninstallDeferredComponent',
       <String, dynamic>{ 'loadingUnitId': -1, 'moduleName': moduleName },
