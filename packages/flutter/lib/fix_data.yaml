@@ -11,6 +11,149 @@
 version: 1
 transforms:
 
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Rename to dependOnInheritedElement'
+    date: 2019-11-22
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      inClass: 'BuildContext'
+      method: 'inheritFromElement'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedElement'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Migrate to dependOnInheritedWidgetOfExactType'
+    date: 2019-11-22
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      inClass: 'BuildContext'
+      method: 'inheritFromWidgetOfExactType'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedWidgetOfExactType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Migrate to getElementForInheritedWidgetOfExactType'
+    date: 2019-11-22
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      inClass: 'BuildContext'
+      method: 'ancestorInheritedElementForWidgetOfExactType'
+    changes:
+      - kind: 'rename'
+        newName: 'getElementForInheritedWidgetOfExactType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Migrate to findAncestorWidgetOfExactType'
+    date: 2019-11-22
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      inClass: 'BuildContext'
+      method: 'ancestorWidgetOfExactType'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorWidgetOfExactType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Migrate to findAncestorStateOfType'
+    date: 2019-11-22
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      inClass: 'BuildContext'
+      method: 'ancestorStateOfType'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorStateOfType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0].typeArguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Migrate to rootAncestorStateOfType'
+    date: 2019-11-22
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      inClass: 'BuildContext'
+      method: 'rootAncestorStateOfType'
+    changes:
+      - kind: 'rename'
+        newName: 'findRootAncestorStateOfType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0].typeArguments[0]'
+
+  # Change made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Migrate to ancestorRenderObjectOfType'
+    date: 2019-11-22
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      inClass: 'BuildContext'
+      method: 'ancestorRenderObjectOfType'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorRenderObjectOfType'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: fragment
+              value: 'arguments[0].typeArguments[0]'
+
   # Changes made in https://github.com/flutter/flutter/pull/45941
   - title: 'Rename to deferFirstFrame'
     date: 2020-12-23
