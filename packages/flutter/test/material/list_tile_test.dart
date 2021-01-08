@@ -1545,8 +1545,8 @@ void main() {
 
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
-    const Color selectedTileColor = Colors.red;
-    const Color tileColor = Colors.green;
+    const Color tileColor = Color(0xff00ff00);
+    const Color selectedTileColor = Color(0xffff0000);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1571,16 +1571,14 @@ void main() {
     );
 
     // Initially, when isSelected is false, the ListTile should respect tileColor.
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    expect(find.byType(Material), paints..rect(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
     // When isSelected is true, the ListTile should respect selectedTileColor.
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, selectedTileColor);
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('ListTile default tile color', (WidgetTester tester) async {
@@ -1607,16 +1605,13 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, defaultColor);
+    expect(find.byType(Material), paints..rect(color: defaultColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(isSelected, isTrue);
-    expect(coloredBox.color, defaultColor);
+    expect(find.byType(Material), paints..rect(color: defaultColor));
   });
 
   testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
@@ -1627,8 +1622,8 @@ void main() {
       MaterialApp(
         home: Material(
           child: ListTileTheme(
-            selectedTileColor: Colors.green,
-            tileColor: Colors.red,
+            tileColor: const Color(0xff00ff00),
+            selectedTileColor: const Color(0xffff0000),
             child: Center(
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
@@ -1648,21 +1643,19 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, theme.tileColor);
+    expect(find.byType(Material), paints..rect(color: theme.tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, theme.selectedTileColor);
+    expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
   });
 
   testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
     bool isSelected = false;
-    const Color tileColor = Colors.brown;
-    const Color selectedTileColor = Colors.purple;
+    const Color tileColor = Color(0xff00ff00);
+    const Color selectedTileColor = Color(0xffff0000);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1690,15 +1683,13 @@ void main() {
       ),
     );
 
-    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    expect(find.byType(Material), paints..rect(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    coloredBox = tester.widget(find.byType(ColoredBox));
-    expect(coloredBox.color, selectedTileColor);
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('ListTile layout at zero size', (WidgetTester tester) async {

@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import '../rendering/mock_canvas.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -668,7 +669,7 @@ void main() {
   });
 
   testWidgets('RadioListTile respects tileColor', (WidgetTester tester) async {
-    const Color tileColor = Colors.red;
+    const Color tileColor = Color(0xffff0000);
 
     await tester.pumpWidget(
       wrap(
@@ -684,12 +685,11 @@ void main() {
       ),
     );
 
-    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
   testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
-    const Color selectedTileColor = Colors.black;
+    const Color selectedTileColor = Color(0xff000000);
 
     await tester.pumpWidget(
       wrap(
@@ -706,7 +706,6 @@ void main() {
       ),
     );
 
-    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
-    expect(coloredBox.color, equals(selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 }

@@ -359,7 +359,7 @@ void main() {
   });
 
   testWidgets('SwitchListTile respects tileColor', (WidgetTester tester) async {
-    const Color tileColor = Colors.red;
+    const Color tileColor = Color(0xffff0000);
 
     await tester.pumpWidget(
       wrap(
@@ -374,12 +374,11 @@ void main() {
       ),
     );
 
-    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
   testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
-    const Color selectedTileColor = Colors.black;
+    const Color selectedTileColor = Color(0xff000000);
 
     await tester.pumpWidget(
       wrap(
@@ -395,8 +394,7 @@ void main() {
       ),
     );
 
-    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
-    expect(coloredBox.color, equals(selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
 }
