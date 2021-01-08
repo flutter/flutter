@@ -1744,6 +1744,27 @@ abstract class RouteAware {
   void didPushNext() { }
 }
 
+// Investigate making this restorable.
+class DialogRoute<T> extends _DialogRoute<T> {
+  DialogRoute({
+    required RoutePageBuilder pageBuilder,
+    bool barrierDismissible = true,
+    String? barrierLabel,
+    Color? barrierColor = const Color(0x80000000),
+    Duration transitionDuration = const Duration(milliseconds: 200),
+    RouteTransitionsBuilder? transitionBuilder,
+    RouteSettings? settings,
+  }) : assert(barrierDismissible != null),
+      super(
+        settings: settings,
+        pageBuilder: pageBuilder,
+        barrierColor: barrierColor,
+        barrierLabel: barrierLabel,
+        transitionDuration: transitionDuration,
+        transitionBuilder: transitionBuilder,
+      );
+}
+
 class _DialogRoute<T> extends PopupRoute<T> {
   _DialogRoute({
     required RoutePageBuilder pageBuilder,
