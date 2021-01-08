@@ -323,6 +323,26 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
         engine, message->channel, message->response_handle,
         static_cast<const uint8_t*>(g_bytes_get_data(response, nullptr)),
         g_bytes_get_size(response));
+  } else if (strcmp(message->channel, "test/key-event-delayed") == 0) {
+    static std::unique_ptr<const FlutterPlatformMessageResponseHandle>
+        delayed_response_handle = nullptr;
+    g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
+    g_autoptr(FlValue) handledValue = fl_value_new_map();
+    fl_value_set_string_take(handledValue, "handled", fl_value_new_bool(true));
+    g_autoptr(GBytes) response = fl_message_codec_encode_message(
+        FL_MESSAGE_CODEC(codec), handledValue, nullptr);
+    if (delayed_response_handle == nullptr) {
+      delayed_response_handle.reset(message->response_handle);
+    } else {
+      send_response(
+          engine, message->channel, message->response_handle,
+          static_cast<const uint8_t*>(g_bytes_get_data(response, nullptr)),
+          g_bytes_get_size(response));
+      send_response(
+          engine, message->channel, delayed_response_handle.release(),
+          static_cast<const uint8_t*>(g_bytes_get_data(response, nullptr)),
+          g_bytes_get_size(response));
+    }
   }
 
   return kSuccess;

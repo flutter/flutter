@@ -270,3 +270,43 @@ TEST(FlKeyEventPluginTest, TestKeyEventNotHandledByTextInputPlugin) {
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
 }
+
+TEST(FlKeyEventPluginTest, TestKeyEventResponseOutOfOrderFromFramework) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlTextInputPlugin) text_input_plugin =
+      FL_TEXT_INPUT_PLUGIN(fl_mock_text_input_plugin_new(handle_keypress));
+  g_autoptr(FlKeyEventPlugin) plugin = fl_key_event_plugin_new(
+      messenger, text_input_plugin, echo_response_cb, "test/key-event-delayed");
+
+  GdkEventKey key_event = GdkEventKey{
+      GDK_KEY_PRESS,  // event type
+      nullptr,        // window (not needed)
+      FALSE,          // event was sent explicitly
+      12345,          // time
+      0x10,           // modifier state
+      GDK_KEY_A,      // key code
+      1,              // length of string representation
+      nullptr,        // string representation
+      0x04,           // scan code
+      0,              // keyboard group
+      0,              // is a modifier
+  };
+
+  expected_value = "{handled: true}";
+  expected_handled = TRUE;
+  bool handled = fl_key_event_plugin_send_key_event(plugin, &key_event, loop);
+  // Should always be true, because the event was delayed.
+  EXPECT_TRUE(handled);
+
+  // Send a second key event that will be out of order.
+  key_event.keyval = GDK_KEY_B;
+  key_event.hardware_keycode = 0x05;
+  handled = fl_key_event_plugin_send_key_event(plugin, &key_event, loop);
+  EXPECT_TRUE(handled);
+
+  // Blocks here until echo_response_cb is called.
+  g_main_loop_run(loop);
+}
