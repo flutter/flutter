@@ -629,7 +629,7 @@ void main() {
       )
     );
 
-    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect paddingRect = tester.getRect(find.byType(SafeArea));
     final Rect radioRect = tester.getRect(find.byType(radioType));
     final Rect titleRect = tester.getRect(find.text('Title'));
 
@@ -685,7 +685,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: tileColor));
+    expect(find.byType(Material), paints..path(color: tileColor));
   });
 
   testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -706,6 +706,6 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: selectedTileColor));
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 }

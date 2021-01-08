@@ -1168,7 +1168,10 @@ class ListTile extends StatelessWidget {
         selected: selected,
         enabled: enabled,
         child: Ink(
-          color: _tileBackgroundColor(tileTheme),
+          decoration: ShapeDecoration(
+            shape: shape ?? tileTheme.shape ?? const Border(),
+            color: _tileBackgroundColor(tileTheme),
+          ),
           child: SafeArea(
             top: false,
             bottom: false,

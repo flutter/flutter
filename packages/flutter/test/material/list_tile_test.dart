@@ -1279,9 +1279,6 @@ void main() {
       find.byType(Material),
       paints
         ..rect(
-            color: Colors.transparent,
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
         ..rect(
@@ -1296,9 +1293,6 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..rect(
-            color: Colors.transparent,
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
         ..rect(
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
@@ -1335,9 +1329,6 @@ void main() {
       find.byType(Material),
       paints
         ..rect(
-            color: Colors.transparent,
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..rect(
             color: const Color(0x1f000000),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
         ..rect(
@@ -1357,9 +1348,6 @@ void main() {
       find.byType(Material),
       paints
         ..rect(
-            color: Colors.transparent,
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..rect(
             color: const Color(0x1f000000),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
         ..rect(
@@ -1376,9 +1364,6 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..rect(
-            color: Colors.transparent,
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
         ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
@@ -1571,14 +1556,14 @@ void main() {
     );
 
     // Initially, when isSelected is false, the ListTile should respect tileColor.
-    expect(find.byType(Material), paints..rect(color: tileColor));
+    expect(find.byType(Material), paints..path(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
     // When isSelected is true, the ListTile should respect selectedTileColor.
-    expect(find.byType(Material), paints..rect(color: selectedTileColor));
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 
   testWidgets('ListTile default tile color', (WidgetTester tester) async {
@@ -1605,13 +1590,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: defaultColor));
+    expect(find.byType(Material), paints..path(color: defaultColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..rect(color: defaultColor));
+    expect(find.byType(Material), paints..path(color: defaultColor));
   });
 
   testWidgets('ListTile respects ListTileTheme\'s tileColor & selectedTileColor', (WidgetTester tester) async {
@@ -1643,13 +1628,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: theme.tileColor));
+    expect(find.byType(Material), paints..path(color: theme.tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
+    expect(find.byType(Material), paints..path(color: theme.selectedTileColor));
   });
 
   testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
@@ -1683,13 +1668,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: tileColor));
+    expect(find.byType(Material), paints..path(color: tileColor));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..rect(color: selectedTileColor));
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 
   testWidgets('ListTile layout at zero size', (WidgetTester tester) async {

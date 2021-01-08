@@ -374,7 +374,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: tileColor));
+    expect(find.byType(Material), paints..path(color: tileColor));
   });
 
   testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -394,7 +394,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: selectedTileColor));
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 
 }
