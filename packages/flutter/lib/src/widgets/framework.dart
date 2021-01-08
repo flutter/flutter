@@ -4919,16 +4919,6 @@ class StatefulElement extends ComponentElement {
     state._element = null;
   }
 
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use dependOnInheritedElement instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  @override
-  InheritedWidget inheritFromElement(Element ancestor, { Object? aspect }) {
-    return dependOnInheritedElement(ancestor, aspect: aspect);
-  }
-
   @override
   InheritedWidget dependOnInheritedElement(Element ancestor, { Object? aspect }) {
     assert(ancestor != null);

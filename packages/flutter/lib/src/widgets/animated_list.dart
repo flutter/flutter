@@ -809,7 +809,7 @@ class SliverAnimatedList extends StatefulWidget {
           'happen when the context provided is from the same StatefulWidget that '
           'built the AnimatedList. Please see the SliverAnimatedList documentation '
           'for examples of how to refer to an AnimatedListState object: '
-          'https://docs.flutter.io/flutter/widgets/SliverAnimatedListState-class.html\n'
+          'https://api.flutter.dev/flutter/widgets/SliverAnimatedListState-class.html\n'
           'The context used was:\n'
           '  $context');
       }

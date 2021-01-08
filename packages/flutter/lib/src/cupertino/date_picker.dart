@@ -705,7 +705,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
           final DateTime now = DateTime.now();
 
-          if (widget.minimumDate?.isAfter(rangeEnd) == true)
+          if (widget.minimumDate?.isBefore(rangeEnd) == false)
             return null;
           if (widget.maximumDate?.isAfter(rangeStart) == false)
             return null;
