@@ -101,9 +101,11 @@ void testEachCanvas(String description, CanvasTest body,
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
       WebExperiments.instance.useCanvasText = false;
+      WebExperiments.instance.useCanvasRichText = false;
       return body(BitmapCanvas(bounds, RenderStrategy()));
     } finally {
       WebExperiments.instance.useCanvasText = null;
+      WebExperiments.instance.useCanvasRichText = null;
       TextMeasurementService.clearCache();
     }
   });
@@ -111,9 +113,11 @@ void testEachCanvas(String description, CanvasTest body,
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
       WebExperiments.instance.useCanvasText = true;
+      WebExperiments.instance.useCanvasRichText = false;
       await body(BitmapCanvas(bounds, RenderStrategy()));
     } finally {
       WebExperiments.instance.useCanvasText = null;
+      WebExperiments.instance.useCanvasRichText = null;
       TextMeasurementService.clearCache();
     }
   });
@@ -121,9 +125,11 @@ void testEachCanvas(String description, CanvasTest body,
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
       WebExperiments.instance.useCanvasText = false;
+      WebExperiments.instance.useCanvasRichText = false;
       return body(DomCanvas(domRenderer.createElement('flt-picture')));
     } finally {
       WebExperiments.instance.useCanvasText = null;
+      WebExperiments.instance.useCanvasRichText = null;
       TextMeasurementService.clearCache();
     }
   });
