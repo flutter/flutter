@@ -50,7 +50,7 @@ abstract class ParametricCurve<T> {
   String toString() => objectRuntimeType(this, 'ParametricCurve');
 }
 
-/// An parametric animation easing curve, i.e. a mapping of the unit interval to
+/// A parametric animation easing curve, i.e. a mapping of the unit interval to
 /// the unit interval.
 ///
 /// Easing curves are used to adjust the rate of change of an animation over
