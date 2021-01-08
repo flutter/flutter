@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'convert.dart';
 import 'persistent_tool_state.dart';
 import 'resident_runner.dart';
@@ -21,6 +22,7 @@ import 'resident_runner.dart';
 /// a devtools dep in google3.
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
+    @required Platform platform,
     @required ProcessManager processManager,
     @required String pubExecutable,
     @required Logger logger,
@@ -28,11 +30,13 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   })  : _processManager = processManager,
         _pubExecutable = pubExecutable,
         _logger = logger,
+        _platform = platform,
         _persistentToolState = persistentToolState;
 
   final ProcessManager _processManager;
   final String _pubExecutable;
   final Logger _logger;
+  final Platform _platform;
   final PersistentToolState _persistentToolState;
 
   io.Process _devToolsProcess;
@@ -52,8 +56,12 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
     bool offline = false;
     try {
-      await http.head('https://pub.dev');
-      await http.head('https://pub.flutter-io.cn');
+      const String pubHostedUrlKey = 'PUB_HOSTED_URL';
+      if (_platform.environment.containsKey(pubHostedUrlKey)) {
+        await http.head(_platform.environment[pubHostedUrlKey]);
+      } else {
+        await http.head('https://pub.dev');
+      }
     } on Exception catch (_, __) {
       offline = true;
     }
