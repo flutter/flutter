@@ -757,8 +757,8 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/Flutte
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartExecutor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartMessenger.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/PlatformMessageHandler.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dynamicfeatures/DynamicFeatureManager.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dynamicfeatures/PlayStoreDynamicFeatureManager.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/ApplicationInfoLoader.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterApplicationInfo.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterLoader.java
@@ -788,7 +788,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/render
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/RenderSurface.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/SurfaceTextureWrapper.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/DynamicFeatureChannel.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/DeferredComponentChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/KeyEventChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/LifecycleChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/LocalizationChannel.java

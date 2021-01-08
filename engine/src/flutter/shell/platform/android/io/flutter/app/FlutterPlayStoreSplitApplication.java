@@ -7,11 +7,11 @@ package io.flutter.app;
 import androidx.annotation.CallSuper;
 import com.google.android.play.core.splitcompat.SplitCompatApplication;
 import io.flutter.FlutterInjector;
-import io.flutter.embedding.engine.dynamicfeatures.PlayStoreDynamicFeatureManager;
+import io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponentManager;
 
 /**
  * Flutter's extension of {@link SplitCompatApplication} that injects a {@link
- * PlayStoreDynamicFeatureManager} with {@link FlutterInjector} to enable Split AOT Flutter apps.
+ * PlayStoreDeferredComponentManager} with {@link FlutterInjector} to enable Split AOT Flutter apps.
  *
  * <p>To use this class, either have your custom application class extend
  * FlutterPlayStoreSplitApplication or use it directly in the app's AndroidManifest.xml by adding
@@ -29,11 +29,11 @@ import io.flutter.embedding.engine.dynamicfeatures.PlayStoreDynamicFeatureManage
  *
  * This class is meant to be used with the Google Play store. Custom non-play store applications do
  * not need to extend SplitCompatApplication and should inject a custom {@link
- * io.flutter.embedding.engine.dynamicfeatures.DynamicFeatureManager} implementation like so:
+ * io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager} implementation like so:
  *
  * <pre>{@code
  * FlutterInjector.setInstance(
- *      new FlutterInjector.Builder().setDynamicFeatureManager(yourCustomManager).build());
+ *      new FlutterInjector.Builder().setDeferredComponentManager(yourCustomManager).build());
  * }</pre>
  */
 public class FlutterPlayStoreSplitApplication extends SplitCompatApplication {
@@ -41,11 +41,13 @@ public class FlutterPlayStoreSplitApplication extends SplitCompatApplication {
   @CallSuper
   public void onCreate() {
     super.onCreate();
-    // Create and inject a PlayStoreDynamicFeatureManager, which is the default manager for
+    // Create and inject a PlayStoreDeferredComponentManager, which is the default manager for
     // interacting with the Google Play Store.
-    PlayStoreDynamicFeatureManager dynamicFeatureManager =
-        new PlayStoreDynamicFeatureManager(this, null);
+    PlayStoreDeferredComponentManager deferredComponentManager =
+        new PlayStoreDeferredComponentManager(this, null);
     FlutterInjector.setInstance(
-        new FlutterInjector.Builder().setDynamicFeatureManager(dynamicFeatureManager).build());
+        new FlutterInjector.Builder()
+            .setDeferredComponentManager(deferredComponentManager)
+            .build());
   }
 }

@@ -522,11 +522,11 @@ static void LoadLoadingUnitFailure(intptr_t loading_unit_id,
   // TODO(garyq): Implement
 }
 
-static void DynamicFeatureInstallFailure(JNIEnv* env,
-                                         jobject obj,
-                                         jint jLoadingUnitId,
-                                         jstring jError,
-                                         jboolean jTransient) {
+static void DeferredComponentInstallFailure(JNIEnv* env,
+                                            jobject obj,
+                                            jint jLoadingUnitId,
+                                            jstring jError,
+                                            jboolean jTransient) {
   LoadLoadingUnitFailure(static_cast<intptr_t>(jLoadingUnitId),
                          fml::jni::JavaStringToString(env, jError),
                          static_cast<bool>(jTransient));
@@ -754,9 +754,9 @@ bool RegisterApi(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&UpdateJavaAssetManager),
       },
       {
-          .name = "nativeDynamicFeatureInstallFailure",
+          .name = "nativeDeferredComponentInstallFailure",
           .signature = "(ILjava/lang/String;Z)V",
-          .fnPtr = reinterpret_cast<void*>(&DynamicFeatureInstallFailure),
+          .fnPtr = reinterpret_cast<void*>(&DeferredComponentInstallFailure),
       },
   };
 

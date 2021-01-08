@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.embedding.engine.dynamicfeatures;
+package io.flutter.embedding.engine.deferredcomponents;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -25,11 +25,11 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
-public class PlayStoreDynamicFeatureManagerTest {
+public class PlayStoreDeferredComponentManagerTest {
   private class TestFlutterJNI extends FlutterJNI {
     public int loadDartDeferredLibraryCalled = 0;
     public int updateAssetManagerCalled = 0;
-    public int dynamicFeatureInstallFailureCalled = 0;
+    public int deferredComponentInstallFailureCalled = 0;
     public String[] searchPaths;
     public int loadingUnitId;
     public AssetManager assetManager;
@@ -52,20 +52,20 @@ public class PlayStoreDynamicFeatureManagerTest {
     }
 
     @Override
-    public void dynamicFeatureInstallFailure(
+    public void deferredComponentInstallFailure(
         int loadingUnitId, @NonNull String error, boolean isTransient) {
-      dynamicFeatureInstallFailureCalled++;
+      deferredComponentInstallFailureCalled++;
     }
   }
 
   // Skips the download process to directly call the loadAssets and loadDartLibrary methods.
-  private class TestPlayStoreDynamicFeatureManager extends PlayStoreDynamicFeatureManager {
-    public TestPlayStoreDynamicFeatureManager(Context context, FlutterJNI jni) {
+  private class TestPlayStoreDeferredComponentManager extends PlayStoreDeferredComponentManager {
+    public TestPlayStoreDeferredComponentManager(Context context, FlutterJNI jni) {
       super(context, jni);
     }
 
     @Override
-    public void installDynamicFeature(int loadingUnitId, String moduleName) {
+    public void installDeferredComponent(int loadingUnitId, String moduleName) {
       // Override this to skip the online SplitInstallManager portion.
       loadAssets(loadingUnitId, moduleName);
       loadDartLibrary(loadingUnitId, moduleName);
@@ -80,15 +80,15 @@ public class PlayStoreDynamicFeatureManagerTest {
     doReturn(null).when(spyContext).getAssets();
     String soTestPath = "test/path/app.so-123.part.so";
     doReturn(new File(soTestPath)).when(spyContext).getFilesDir();
-    TestPlayStoreDynamicFeatureManager playStoreManager =
-        new TestPlayStoreDynamicFeatureManager(spyContext, jni);
-    jni.setDynamicFeatureManager(playStoreManager);
+    TestPlayStoreDeferredComponentManager playStoreManager =
+        new TestPlayStoreDeferredComponentManager(spyContext, jni);
+    jni.setDeferredComponentManager(playStoreManager);
     assertEquals(jni.loadingUnitId, 0);
 
-    playStoreManager.installDynamicFeature(123, "TestModuleName");
+    playStoreManager.installDeferredComponent(123, "TestModuleName");
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.dynamicFeatureInstallFailureCalled, 0);
+    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
 
     assertTrue(jni.searchPaths[0].endsWith(soTestPath));
     assertEquals(jni.searchPaths.length, 1);
@@ -103,16 +103,16 @@ public class PlayStoreDynamicFeatureManagerTest {
     doReturn(null).when(spyContext).getAssets();
     String apkTestPath = "test/path/TestModuleName_armeabi_v7a.apk";
     doReturn(new File(apkTestPath)).when(spyContext).getFilesDir();
-    TestPlayStoreDynamicFeatureManager playStoreManager =
-        new TestPlayStoreDynamicFeatureManager(spyContext, jni);
-    jni.setDynamicFeatureManager(playStoreManager);
+    TestPlayStoreDeferredComponentManager playStoreManager =
+        new TestPlayStoreDeferredComponentManager(spyContext, jni);
+    jni.setDeferredComponentManager(playStoreManager);
 
     assertEquals(jni.loadingUnitId, 0);
 
-    playStoreManager.installDynamicFeature(123, "TestModuleName");
+    playStoreManager.installDeferredComponent(123, "TestModuleName");
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.dynamicFeatureInstallFailureCalled, 0);
+    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
 
     assertTrue(jni.searchPaths[0].endsWith(apkTestPath + "!lib/armeabi-v7a/app.so-123.part.so"));
     assertEquals(jni.searchPaths.length, 1);
@@ -127,16 +127,16 @@ public class PlayStoreDynamicFeatureManagerTest {
     doReturn(null).when(spyContext).getAssets();
     String apkTestPath = "test/path/invalidpath.apk";
     doReturn(new File(apkTestPath)).when(spyContext).getFilesDir();
-    TestPlayStoreDynamicFeatureManager playStoreManager =
-        new TestPlayStoreDynamicFeatureManager(spyContext, jni);
-    jni.setDynamicFeatureManager(playStoreManager);
+    TestPlayStoreDeferredComponentManager playStoreManager =
+        new TestPlayStoreDeferredComponentManager(spyContext, jni);
+    jni.setDeferredComponentManager(playStoreManager);
 
     assertEquals(jni.loadingUnitId, 0);
 
-    playStoreManager.installDynamicFeature(123, "TestModuleName");
+    playStoreManager.installDeferredComponent(123, "TestModuleName");
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.dynamicFeatureInstallFailureCalled, 0);
+    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
 
     assertEquals(jni.searchPaths.length, 0);
     assertEquals(jni.loadingUnitId, 123);
@@ -150,17 +150,27 @@ public class PlayStoreDynamicFeatureManagerTest {
     AssetManager assetManager = spyContext.getAssets();
     String apkTestPath = "blah doesn't matter here";
     doReturn(new File(apkTestPath)).when(spyContext).getFilesDir();
-    TestPlayStoreDynamicFeatureManager playStoreManager =
-        new TestPlayStoreDynamicFeatureManager(spyContext, jni);
-    jni.setDynamicFeatureManager(playStoreManager);
+    TestPlayStoreDeferredComponentManager playStoreManager =
+        new TestPlayStoreDeferredComponentManager(spyContext, jni);
+    jni.setDeferredComponentManager(playStoreManager);
 
     assertEquals(jni.loadingUnitId, 0);
 
-    playStoreManager.installDynamicFeature(123, "TestModuleName");
+    playStoreManager.installDeferredComponent(123, "TestModuleName");
     assertEquals(jni.loadDartDeferredLibraryCalled, 1);
     assertEquals(jni.updateAssetManagerCalled, 1);
-    assertEquals(jni.dynamicFeatureInstallFailureCalled, 0);
+    assertEquals(jni.deferredComponentInstallFailureCalled, 0);
 
     assertEquals(jni.assetManager, assetManager);
+  }
+
+  @Test
+  public void stateGetterReturnsUnknowByDefault() throws NameNotFoundException {
+    TestFlutterJNI jni = new TestFlutterJNI();
+    Context spyContext = spy(RuntimeEnvironment.systemContext);
+    doReturn(spyContext).when(spyContext).createPackageContext(any(), anyInt());
+    TestPlayStoreDeferredComponentManager playStoreManager =
+        new TestPlayStoreDeferredComponentManager(spyContext, jni);
+    assertEquals(playStoreManager.getDeferredComponentInstallState(-1, "invalidName"), "unknown");
   }
 }

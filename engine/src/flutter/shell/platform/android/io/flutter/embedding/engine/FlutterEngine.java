@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.dynamicfeatures.DynamicFeatureManager;
+import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
@@ -22,7 +22,7 @@ import io.flutter.embedding.engine.plugins.service.ServiceControlSurface;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
-import io.flutter.embedding.engine.systemchannels.DynamicFeatureChannel;
+import io.flutter.embedding.engine.systemchannels.DeferredComponentChannel;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
@@ -83,7 +83,7 @@ public class FlutterEngine {
 
   // System channels.
   @NonNull private final AccessibilityChannel accessibilityChannel;
-  @NonNull private final DynamicFeatureChannel dynamicFeatureChannel;
+  @NonNull private final DeferredComponentChannel deferredComponentChannel;
   @NonNull private final KeyEventChannel keyEventChannel;
   @NonNull private final LifecycleChannel lifecycleChannel;
   @NonNull private final LocalizationChannel localizationChannel;
@@ -278,11 +278,11 @@ public class FlutterEngine {
     this.dartExecutor = new DartExecutor(flutterJNI, assetManager);
     this.dartExecutor.onAttachedToJNI();
 
-    DynamicFeatureManager dynamicFeatureManager =
-        FlutterInjector.instance().dynamicFeatureManager();
+    DeferredComponentManager deferredComponentManager =
+        FlutterInjector.instance().deferredComponentManager();
 
     accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
-    dynamicFeatureChannel = new DynamicFeatureChannel(dartExecutor);
+    deferredComponentChannel = new DeferredComponentChannel(dartExecutor);
     keyEventChannel = new KeyEventChannel(dartExecutor);
     lifecycleChannel = new LifecycleChannel(dartExecutor);
     localizationChannel = new LocalizationChannel(dartExecutor);
@@ -294,8 +294,8 @@ public class FlutterEngine {
     systemChannel = new SystemChannel(dartExecutor);
     textInputChannel = new TextInputChannel(dartExecutor);
 
-    if (dynamicFeatureManager != null) {
-      dynamicFeatureManager.setDynamicFeatureChannel(dynamicFeatureChannel);
+    if (deferredComponentManager != null) {
+      deferredComponentManager.setDeferredComponentChannel(deferredComponentChannel);
     }
 
     this.localizationPlugin = new LocalizationPlugin(context, localizationChannel);
@@ -310,7 +310,7 @@ public class FlutterEngine {
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);
     flutterJNI.setLocalizationPlugin(localizationPlugin);
-    flutterJNI.setDynamicFeatureManager(FlutterInjector.instance().dynamicFeatureManager());
+    flutterJNI.setDeferredComponentManager(FlutterInjector.instance().deferredComponentManager());
 
     attachToJni();
 
@@ -387,11 +387,11 @@ public class FlutterEngine {
     platformViewsController.onDetachedFromJNI();
     dartExecutor.onDetachedFromJNI();
     flutterJNI.removeEngineLifecycleListener(engineLifecycleListener);
-    flutterJNI.setDynamicFeatureManager(null);
+    flutterJNI.setDeferredComponentManager(null);
     flutterJNI.detachFromNativeAndReleaseResources();
-    if (FlutterInjector.instance().dynamicFeatureManager() != null) {
-      FlutterInjector.instance().dynamicFeatureManager().destroy();
-      dynamicFeatureChannel.setDynamicFeatureManager(null);
+    if (FlutterInjector.instance().deferredComponentManager() != null) {
+      FlutterInjector.instance().deferredComponentManager().destroy();
+      deferredComponentChannel.setDeferredComponentManager(null);
     }
   }
 
@@ -496,10 +496,10 @@ public class FlutterEngine {
     return settingsChannel;
   }
 
-  /** System channel that allows manual installation and state querying of dynamic features. */
+  /** System channel that allows manual installation and state querying of deferred components. */
   @NonNull
-  public DynamicFeatureChannel getDynamicFeatureChannel() {
-    return dynamicFeatureChannel;
+  public DeferredComponentChannel getDeferredComponentChannel() {
+    return deferredComponentChannel;
   }
 
   /** System channel that sends memory pressure warnings from Android to Flutter. */

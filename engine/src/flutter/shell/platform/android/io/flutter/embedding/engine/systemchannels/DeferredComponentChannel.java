@@ -10,7 +10,7 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.dynamicfeatures.DynamicFeatureManager;
+import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
@@ -21,15 +21,15 @@ import java.util.Map;
 
 /**
  * Method channel that handles manual installation requests and queries for installation state for
- * dynamic feature modules.
+ * deferred component modules.
  *
  * <p>This channel is able to handle multiple simultaneous installation requests
  */
-public class DynamicFeatureChannel {
-  private static final String TAG = "DynamicFeatureChannel";
+public class DeferredComponentChannel {
+  private static final String TAG = "DeferredComponentChannel";
 
   @NonNull private final MethodChannel channel;
-  @Nullable private DynamicFeatureManager dynamicFeatureManager;
+  @Nullable private DeferredComponentManager deferredComponentManager;
   // Track the Result objects to be able to handle multiple install requests of
   // the same module at a time. When installation enters a terminal state, either
   // completeInstallSuccess or completeInstallError can be called.
@@ -40,8 +40,8 @@ public class DynamicFeatureChannel {
       new MethodChannel.MethodCallHandler() {
         @Override
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          if (dynamicFeatureManager == null) {
-            // If no DynamicFeatureManager has been injected, then this channel is a no-op.
+          if (deferredComponentManager == null) {
+            // If no DeferredComponentManager has been injected, then this channel is a no-op.
             return;
           }
           String method = call.method;
@@ -50,16 +50,21 @@ public class DynamicFeatureChannel {
           final int loadingUnitId = (int) args.get("loadingUnitId");
           final String moduleName = (String) args.get("moduleName");
           switch (method) {
-            case "installDynamicFeature":
-              dynamicFeatureManager.installDynamicFeature(loadingUnitId, moduleName);
+            case "installDeferredComponent":
+              deferredComponentManager.installDeferredComponent(loadingUnitId, moduleName);
               if (!moduleNameToResults.containsKey(moduleName)) {
                 moduleNameToResults.put(moduleName, new ArrayList<>());
               }
               moduleNameToResults.get(moduleName).add(result);
               break;
-            case "getDynamicFeatureInstallState":
+            case "getDeferredComponentInstallState":
               result.success(
-                  dynamicFeatureManager.getDynamicFeatureInstallState(loadingUnitId, moduleName));
+                  deferredComponentManager.getDeferredComponentInstallState(
+                      loadingUnitId, moduleName));
+              break;
+            case "uninstallDeferredComponent":
+              deferredComponentManager.uninstallDeferredComponent(loadingUnitId, moduleName);
+              result.success(null);
               break;
             default:
               result.notImplemented();
@@ -69,36 +74,38 @@ public class DynamicFeatureChannel {
       };
 
   /**
-   * Constructs a {@code DynamicFeatureChannel} that connects Android to the Dart code running in
+   * Constructs a {@code DeferredComponentChannel} that connects Android to the Dart code running in
    * {@code dartExecutor}.
    *
    * <p>The given {@code dartExecutor} is permitted to be idle or executing code.
    *
    * <p>See {@link DartExecutor}.
    */
-  public DynamicFeatureChannel(@NonNull DartExecutor dartExecutor) {
+  public DeferredComponentChannel(@NonNull DartExecutor dartExecutor) {
     this.channel =
-        new MethodChannel(dartExecutor, "flutter/dynamicfeature", StandardMethodCodec.INSTANCE);
+        new MethodChannel(dartExecutor, "flutter/deferredcomponent", StandardMethodCodec.INSTANCE);
     channel.setMethodCallHandler(parsingMethodHandler);
-    dynamicFeatureManager = FlutterInjector.instance().dynamicFeatureManager();
+    deferredComponentManager = FlutterInjector.instance().deferredComponentManager();
     moduleNameToResults = new HashMap<>();
   }
 
   /**
-   * Sets the DynamicFeatureManager to exectue method channel calls with.
+   * Sets the DeferredComponentManager to exectue method channel calls with.
    *
-   * @param dynamicFeatureManager the DynamicFeatureManager to use.
+   * @param deferredComponentManager the DeferredComponentManager to use.
    */
   @VisibleForTesting
-  public void setDynamicFeatureManager(@Nullable DynamicFeatureManager dynamicFeatureManager) {
-    this.dynamicFeatureManager = dynamicFeatureManager;
+  public void setDeferredComponentManager(
+      @Nullable DeferredComponentManager deferredComponentManager) {
+    this.deferredComponentManager = deferredComponentManager;
   }
 
   /**
-   * Finishes the `installDynamicFeature` method channel call for the specified moduleName with a
+   * Finishes the `installDeferredComponent` method channel call for the specified moduleName with a
    * success.
    *
-   * @param moduleName The name of the android dynamic feature module install request to complete.
+   * @param moduleName The name of the android deferred component module install request to
+   *     complete.
    */
   public void completeInstallSuccess(String moduleName) {
     if (moduleNameToResults.containsKey(moduleName)) {
@@ -111,16 +118,17 @@ public class DynamicFeatureChannel {
   }
 
   /**
-   * Finishes the `installDynamicFeature` method channel call for the specified moduleName with an
-   * error/failure.
+   * Finishes the `installDeferredComponent` method channel call for the specified moduleName with
+   * an error/failure.
    *
-   * @param moduleName The name of the android dynamic feature module install request to complete.
+   * @param moduleName The name of the android deferred component module install request to
+   *     complete.
    * @param errorMessage The error message to display to complete the future with.
    */
   public void completeInstallError(String moduleName, String errorMessage) {
     if (moduleNameToResults.containsKey(moduleName)) {
       for (MethodChannel.Result result : moduleNameToResults.get(moduleName)) {
-        result.error("DynamicFeature Install failure", errorMessage, null);
+        result.error("DeferredComponent Install failure", errorMessage, null);
       }
       moduleNameToResults.get(moduleName).clear();
     }
