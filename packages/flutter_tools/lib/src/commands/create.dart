@@ -297,9 +297,9 @@ class CreateCommand extends CreateBase {
         _printNoPluginMessage();
       }
 
-      final List<String> _warningList = _getPlatformWarningList(requestedPlatforms);
-      if (_warningList.isNotEmpty) {
-        _printWarningDisabledPlatform(_warningList, relativePluginPath);
+      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      if (platformsToWarn.isNotEmpty) {
+        _printWarningDisabledPlatform(platformsToWarn);
       }
       _printPluginAddPlatformMessage(relativePluginPath);
     } else  {
@@ -320,9 +320,9 @@ In order to run your $application, type:
 Your $application code is in $relativeAppMain.
 ''');
       // Show warning if any selected platform is not enabled
-      final List<String> _warningList = _getPlatformWarningList(requestedPlatforms);
-      if (_warningList.isNotEmpty) {
-        _printWarningDisabledPlatform(_warningList, relativeAppPath);
+      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      if (platformsToWarn.isNotEmpty) {
+        _printWarningDisabledPlatform(platformsToWarn);
       }
     }
 
@@ -520,13 +520,9 @@ For more information, see https://flutter.dev/go/plugin-platforms.
 ''');
 }
 
-/// returns a list of platforms which user has requested a platform and if it's not enabled
+// returns a list disabled, but requested platforms
 List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
-  final List<String> _disabledPlatform = <String>[
-  if (requestedPlatforms.contains('android') && !featureFlags.isAndroidEnabled)
-    'android',
-  if (requestedPlatforms.contains('ios') && !featureFlags.isIOSEnabled)
-    'ios',
+  final List<String> platformsToWarn = <String>[
   if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled)
     'web',
   if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled)
@@ -537,40 +533,29 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
     'linux',
   ];
 
-  return _disabledPlatform;
+  return platformsToWarn;
 }
 
-void _printWarningDisabledPlatform(List<String> platforms, String relativePath) {
-  final  List<String> _mobile = <String>[], _desktop = <String>[], _web = <String>[];
+void _printWarningDisabledPlatform(List<String> platforms) {
+  final  List<String> desktop = <String>[], web = <String>[];
   for (final String platform in platforms) {
-    if (platform == 'android' || platform == 'ios') {
-      _mobile.add(platform);
-    } else if (platform == 'web') {
-      _web.add(platform);
+    if (platform == 'web') {
+      web.add(platform);
     } else if (platform == 'macos' || platform == 'windows' || platform == 'linux') {
-      _desktop.add(platform);
+      desktop.add(platform);
     }
   }
 
-  if (_mobile.isNotEmpty) {
+  if (desktop.isNotEmpty) {
     globals.printStatus('''
-The mobile ${_mobile.length > 1 ? 'platforms' : 'platform'}: ${_mobile.join(', ')} ${_mobile.length > 1 ? 'are' : 'is'} not enabled.
-Enable them and then
-
-  \$ cd $relativePath
-  \$ flutter create .
-''');
-  }
-  if (_desktop.isNotEmpty) {
-    globals.printStatus('''
-The desktop ${_desktop.length > 1 ? 'platforms' : 'platform'}: ${_desktop.join(', ')} ${_desktop.length > 1 ? 'are' : 'is'} not supported on your local environment.
+The desktop ${desktop.length > 1 ? 'platforms' : 'platform'}: ${desktop.join(', ')} ${desktop.length > 1 ? 'are' : 'is'} currently not supported on your local environment.
 For more details, see: https://flutter.dev/desktop
 ''');
   }
-  if (_web.isNotEmpty) {
+  if (web.isNotEmpty) {
     globals.printStatus('''
-Web is not currently supported on your local environment. 
-For more details: see https://flutter.dev/docs/get-started/web
+The web is currently not supported on your local environment. 
+For more details, see: https://flutter.dev/docs/get-started/web
 ''');
   }
 }
