@@ -1657,6 +1657,8 @@ abstract class DevtoolsLauncher {
   /// URI if [vmServiceUri] is non-null.
   Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false});
 
+  // TODO(kenz): remove the openInBrowser parameter, as it is unnecessary after
+  // removing the 'v' terminal hotkey.
   /// Serve Dart DevTools and return the host and port they are available on.
   Future<DevToolsServerAddress> serve({bool openInBrowser = false});
 
