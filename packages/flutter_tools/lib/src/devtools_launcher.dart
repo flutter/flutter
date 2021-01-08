@@ -59,7 +59,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         } else {
           await http.head('https://pub.dev');
         }
-      } on Exception catch (_, __) {
+      } on Exception {
         offline = true;
       }
 
