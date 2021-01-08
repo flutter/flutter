@@ -55,48 +55,4 @@ void main() {
       TargetPlatform.linux,
     }),
   );
-
-  testWidgets('A sample of icons look as expected', (WidgetTester tester) async {
-    await _loadIconFont();
-
-    await tester.pumpWidget(MaterialApp(
-      home: IconTheme(
-        data: const IconThemeData(size: 200),
-        child: Wrap(
-          children: const <Icon>[
-            Icon(Icons.ten_k),
-            Icon(Icons.ac_unit),
-            Icon(Icons.local_taxi),
-            Icon(Icons.local_taxi_outlined),
-            Icon(Icons.local_taxi_rounded),
-            Icon(Icons.local_taxi_sharp),
-            Icon(Icons.zoom_out_sharp),
-          ],
-        ),
-      ),
-    ));
-
-    await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
-  }, skip: isBrowser); // uses dart:io
-}
-
-// Loads the Material icon font. Only necessary for golden tests.
-Future<void> _loadIconFont() async {
-  final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent;
-  final File iconFont = File(path.joinAll(<String>[
-    flutterRoot.path,
-    'bin',
-    'cache',
-    'artifacts',
-    'material_fonts',
-    'MaterialIcons-Regular.otf'
-  ]));
-
-  final Future<ByteData> bytes = Future<ByteData>.value(
-      iconFont.readAsBytesSync()
-      .buffer
-      .asByteData()
-  );
-
-  await (FontLoader('MaterialIcons')..addFont(bytes)).load();
 }
