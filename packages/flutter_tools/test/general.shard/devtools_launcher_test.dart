@@ -4,25 +4,32 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
   BufferLogger logger;
-  MockPlatform platform;
+  FakePlatform platform;
+  PersistentToolState persistentToolState;
 
   setUp(() {
     logger = BufferLogger.test();
-    platform = MockPlatform();
-    when(platform.environment).thenReturn(<String, String>{});
+    platform = FakePlatform(environment: <String, String>{});
+
+    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('devtools_launcher_test');
+    persistentToolState = PersistentToolState.test(
+      directory: tempDir,
+      logger: logger,
+    );
   });
 
   testWithoutContext('DevtoolsLauncher launches DevTools through pub and saves the URI', () async {
@@ -31,7 +38,7 @@ void main() {
       pubExecutable: 'pub',
       logger: logger,
       platform: platform,
-      persistentToolState: MockPersistentToolState(),
+      persistentToolState: persistentToolState,
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -75,7 +82,7 @@ void main() {
       pubExecutable: 'pub',
       logger: logger,
       platform: platform,
-      persistentToolState: MockPersistentToolState(),
+      persistentToolState: persistentToolState,
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -113,9 +120,7 @@ void main() {
   });
 
   testWithoutContext('DevtoolsLauncher does not activate DevTools if it was recently activated', () async {
-    final PersistentToolState persistentToolState = MockPersistentToolState();
-    final DateTime now = DateTime.now();
-    when(persistentToolState.lastDevToolsActivationTime).thenReturn(now);
+    persistentToolState.lastDevToolsActivationTime = DateTime.now();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,
@@ -151,7 +156,7 @@ void main() {
       pubExecutable: 'pub',
       logger: logger,
       platform: platform,
-      persistentToolState: MockPersistentToolState(),
+      persistentToolState: persistentToolState,
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -197,7 +202,7 @@ void main() {
       pubExecutable: 'pub',
       logger: logger,
       platform: platform,
-      persistentToolState: MockPersistentToolState(),
+      persistentToolState: persistentToolState,
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -237,7 +242,3 @@ void main() {
     expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
   });
 }
-
-
-class MockPlatform extends Mock implements Platform {}
-class MockPersistentToolState extends Mock implements PersistentToolState {}

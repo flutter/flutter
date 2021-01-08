@@ -43,8 +43,6 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
-  // TODO(kenz): remove the openInBrowser parameter, as it is unnecessary after
-  // removing the 'v' terminal hotkey.
   @override
   Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false}) async {
     // Place this entire method in a try/catch that swallows exceptions because
