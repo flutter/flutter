@@ -4463,7 +4463,7 @@ void main() {
     expect(selection!.baseOffset, 10);
     expect(selection!.extentOffset, 10);
 
-    // Double tapping the second space selects it.
+    // Double tapping the first space selects it.
     await tester.pump(const Duration(milliseconds: 500));
     await tester.tapAt(textOffsetToPosition(tester, 0));
     await tester.pump(const Duration(milliseconds: 50));
@@ -4500,7 +4500,7 @@ void main() {
     expect(selection!.baseOffset, 19);
     expect(selection!.extentOffset, 19);
 
-    // Double tapping does the same thing
+    // Double tapping the second space selects the previous word.
     await tester.pump(const Duration(milliseconds: 500));
     await tester.tapAt(textOffsetToPosition(tester, 5));
     await tester.pump(const Duration(milliseconds: 50));
