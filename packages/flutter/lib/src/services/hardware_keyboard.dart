@@ -3,24 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:collection' show LinkedList, LinkedListEntry;
-import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import './keyboard_key.dart';
-
-class KeyboardLocks {
-  // This class only contains static members, and should not be instantiated or
-  // extended.
-  factory KeyboardLocks._() => throw Error();
-
-  static const int capsLock = 0x1;
-
-  static const int numLock = 0x2;
-
-  static const int scrollLock = 0x4;
-}
 
 /// Defines the interface for keyboard key events.
 ///
@@ -47,6 +32,7 @@ class KeyboardLocks {
 ///  * [HardwareKeyboardListener], a widget that listens for hardware key events.
 @immutable
 abstract class KeyEvent with Diagnosticable {
+  /// Create a KeyEvent by providing each field.
   const KeyEvent({
     required this.physical,
     required this.logical,
@@ -63,10 +49,10 @@ abstract class KeyEvent with Diagnosticable {
   ///
   /// [PhysicalKeyboardKey]s are used to describe and test for keys in a
   /// particular location. A [PhysicalKeyboardKey] may have a name, but the name
-  /// is for convenience only ("keyA" is easier to remember than 0x70004),
-  /// derived from the key's effect on a QWERTY keyboard. The name does not
-  /// represent the key's effect whatsoever (a physical "keyA" is actually the Q
-  /// key on an AZERTY keyboard.)
+  /// is a mnemonic ("keyA" is easier to remember than 0x70004), derived from the
+  /// key's effect on a QWERTY keyboard. The name does not represent the key's
+  /// effect whatsoever (a physical "keyA" can be the Q key on an AZERTY
+  /// keyboard.)
   ///
   /// For instance, if you wanted to make a game where the key to the right of
   /// the CAPS LOCK key made the player move left, you would be comparing a
@@ -288,20 +274,103 @@ abstract class _ValueDispatcher<T> {
   }
 }
 
+/// An interface for listening to [KeyEvent]s from hardware keyboards.
+/// 
+/// [HardwareKeyboard] tracks key events from hardware keyboards (in contrast to
+/// on-screen keyboards) and provides basic state querying. Get notified when
+/// keys are pressed and released by adding listener with [addListener]. 
+/// Query whether a key is being held, or a lock key is enabled, with
+/// [physicalKeyPressed], [logicalKeyPressed], or [locked].
+/// 
+/// ## Event model
+///
+/// Flutter normalizes hardware key events from the native platform in terms of
+/// event model and key options, while preserving platform-specific features as
+/// much as possible.
+/// 
+/// [HardwareKeyboard] tries to dispatch events following the model as follows:
+/// 
+///  * At initialization, all keys are released.
+///  * A key down event is always matched one-to-one with a later key up
+///    event, which has the same physical key and logical key.
+///  * Lock state changes always take place at key down events.
+/// 
+/// However, this model might not be met on some platforms during the migration
+/// period, since these platforms are still using the legacy engine logic.
+/// 
+/// The resulting events might not map one-to-one to native key events. A
+/// [KeyEvent] that does not correspond to a native event is marked as
+/// `synthesized`.
+/// 
+/// ## Compared to RawKeyboard
+/// 
+/// [RawKeyboard] is the legacy API, will be deprecated and removed in the
+/// future.
+/// 
+/// [RawKeyboard] dispatches events that contain raw key event data and computes
+/// unified key information in the framework. [RawKeyboard] provides a less
+/// unified, less regular event model than [HardwareKeyboard], and includes
+/// unnecessary mapping data of other platforms in the app.
+/// 
+/// It is recommended to always use [HardwareKeyboard] and [KeyEvent] APIs to
+/// handle key events.
+///
+/// See also:
+///
+///  * [KeyDownEvent] and [KeyUpEvent], the classes used to describe specific key
+///    events.
+///  * [RawKeyboard], the legacy API that dispatches key events containing raw
+///    system data.
+///  * [ServiceBinding.hardwareKeyboard], a typical global singleton of this class.
 abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
-
-  /// Whether [HardwareKeyboard] receives data from [ui.KeyData], or
+  /// Whether [HardwareKeyboard] is using data from [ui.KeyData], or
   /// [RawKeyEvent] otherwise.
   ///
-  /// While [HardwareKeyboard] is designed around the new API [ui.KeyData], it is
+  /// While [HardwareKeyboard] is designed for the new API [ui.KeyData], it is
   /// compatible with the legacy API [RawKeyEvent] during the deprecation
-  /// process. The flag [receivingKeyData] is recorded to ensure that one
-  /// platform only uses either of the two APIs, and to disable certain sanity
-  /// assertions for the old API.
+  /// process. The flag [receivingKeyData] is recorded to disable events from
+  /// [RawKeyEvent] on platforms where [ui.KeyData] is available, and to disable
+  /// certain sanity assertions for the legacy API.
   @protected
   bool receivingKeyData = false;
 
+  /// Register a listener that is called every time the user presses or releases
+  /// a hardware keyboard key.
+  ///
+  /// If the callback returns true, the event is considered handled by Flutter
+  /// and will not be propagated to other native components. If the callback
+  /// returns false, the native event (possibly a clone of the original one) will
+  /// be propagated to other native components.
+  ///
+  /// Most applications prefer to use the focus system (see [Focus] and
+  /// [FocusManager]) to receive key events to the focused control instead of
+  /// this kind of passive listener.
+  ///
+  /// Listeners can be removed with [removeListener].
+  @override
+  void addListener(ValueChanged<KeyEvent> listener) { super.addListener(listener); }
+
+  /// Stop calling the given listener every time the user presses or releases a
+  /// hardware keyboard key.
+  ///
+  /// Listeners can be added with [addListener].
+  @override
+  void removeListener(ValueChanged<KeyEvent> listener) { super.removeListener(listener); }
+
   final Map<int, int> _physicalPressCount = <int, int>{};
+  /// Returns true if the given [PhysicalKeyboardKey] is pressed.
+  /// 
+  /// If used during a key event listener, the result will have taken the event
+  /// into account.
+  /// 
+  /// If multiple key down events with the same physical `usbHidUsage` have been
+  /// observed, the result will turn false only with the same number of key up
+  /// events.
+  ///
+  /// See also:
+  /// 
+  ///  * [physicalKeyPressed], which tells if a physical key is being pressed.
+  ///  * [locked], which tells if a logical lock key is enabled.
   bool physicalKeyPressed(PhysicalKeyboardKey physical) {
     final int? count = _physicalPressCount[physical.usbHidUsage];
     assert(count == null || count > 0);
@@ -309,6 +378,19 @@ abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
   }
 
   final Map<int, int> _logicalPressCount = <int, int>{};
+  /// Returns true if the given [LogicalKeyboardKey] is pressed.
+  /// 
+  /// If used during a key event listener, the result will have taken the event
+  /// into account.
+  /// 
+  /// If multiple key down events with the same logical `keyId` have been
+  /// observed, the result will turn false only with the same number of key up
+  /// events.
+  ///
+  /// See also:
+  /// 
+  ///  * [physicalKeyPressed], which tells if a physical key is being pressed.
+  ///  * [locked], which tells if a logical lock key is enabled.
   bool logicalKeyPressed(LogicalKeyboardKey logical) {
     final int? count = _logicalPressCount[logical.keyId];
     assert(count == null || count > 0);
@@ -318,10 +400,24 @@ abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
   late final Map<int, bool> _locked = Map<int, bool>.fromEntries(
     lockKeys.map((int logicalKey) => MapEntry<int, bool>(logicalKey, true)),
   );
+  /// Returns true if the lock flag of the given [LogicalKeyboardKey] is enabled.
+  /// 
+  /// Lock keys, such as CapsLock, are logical keys that toggle their
+  /// respective boolean states on key down events. Such flags are usually used
+  /// as modifier to other keys or events.
+  /// 
+  /// If used during a key event listener, the result will have taken the event
+  /// into account.
   bool locked(LogicalKeyboardKey logical) {
+    assert(lockKeys.contains(logical.keyId));
     return _locked.update(logical.keyId, (bool isOn) => !isOn);
   }
 
+  /// Updates states with `event`, and sends the `event` to listeners.
+  ///
+  /// This method is called by subclasses, typically
+  /// [ServiceBinding.hardwareKeyboard], which is responsible to accept raw data
+  /// (such as [ui.KeyData]) and convert them to [KeyEvent].
   @protected
   void dispatchKeyEvent(KeyEvent event) {
     if (event is KeyDownEvent) {
@@ -359,10 +455,12 @@ abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
     notifyListeners(event);
   }
 
-  /// A set of logical keys that is considered a lock key.
+  /// A collection of logical keys that are considered lock keys.
   ///
-  /// Each lock key has an "on" state, queried through [locked], which is toggled
-  /// with every key down event.
+  /// Each lock key has a [locked] status that is toggled with every key down
+  /// event.
+  ///
+  /// Some platforms might not support all lock keys included in [lockKeys].
   static final Set<int> lockKeys = <int>{
     LogicalKeyboardKey.numLock.keyId,
     LogicalKeyboardKey.scrollLock.keyId,
