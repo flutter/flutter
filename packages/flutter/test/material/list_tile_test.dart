@@ -1250,7 +1250,6 @@ void main() {
   testWidgets('ListTile is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'ListTile');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Key tileKey = Key('listTile');
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         home: Material(
@@ -1261,7 +1260,6 @@ void main() {
                 height: 100,
                 color: Colors.white,
                 child: ListTile(
-                  key: tileKey,
                   onTap: enabled ? () {} : null,
                   focusColor: Colors.orange[500],
                   autofocus: true,
@@ -1278,7 +1276,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
-      Material.of(tester.element(find.byKey(tileKey))),
+      find.byType(Material),
       paints
         ..rect(
             color: Colors.transparent,
@@ -1296,7 +1294,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
-      Material.of(tester.element(find.byKey(tileKey))),
+      find.byType(Material),
       paints
         ..rect(
             color: Colors.transparent,
@@ -1309,7 +1307,6 @@ void main() {
 
   testWidgets('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Key tileKey = Key('ListTile');
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         home: Material(
@@ -1320,7 +1317,6 @@ void main() {
                 height: 100,
                 color: Colors.white,
                 child: ListTile(
-                  key: tileKey,
                   onTap: enabled ? () {} : null,
                   hoverColor: Colors.orange[500],
                   autofocus: true,
@@ -1336,11 +1332,11 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-      Material.of(tester.element(find.byKey(tileKey))),
+      find.byType(Material),
       paints
         ..rect(
-          color: Colors.transparent,
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+            color: Colors.transparent,
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
         ..rect(
             color: const Color(0x1f000000),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
@@ -1352,33 +1348,33 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byKey(tileKey)));
+    await gesture.moveTo(tester.getCenter(find.byType(ListTile)));
 
     await tester.pumpWidget(buildApp());
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-        Material.of(tester.element(find.byKey(tileKey))),
-        paints
-          ..rect(
-              color: Colors.transparent,
-              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-          ..rect(
-              color: const Color(0x1f000000),
-              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-          ..rect(
-              color: Colors.orange[500],
-              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-          ..rect(
-              color: const Color(0xffffffff),
-              rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
+      find.byType(Material),
+      paints
+        ..rect(
+            color: Colors.transparent,
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: const Color(0x1f000000),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: Colors.orange[500],
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+        ..rect(
+            color: const Color(0xffffffff),
+            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0)),
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-      Material.of(tester.element(find.byKey(tileKey))),
+      find.byType(Material),
       paints
         ..rect(
             color: Colors.transparent,
