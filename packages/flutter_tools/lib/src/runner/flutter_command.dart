@@ -327,9 +327,9 @@ abstract class FlutterCommand extends Command<void> {
 
   void addDevToolsOptions() {
     argParser.addOption(kDevToolsServerAddress,
-      help: 'When this value is provided, flutter_tools will not spin up a new'
-          'DevTools server instance, but instead will use the one provided at'
-          'this address');
+      help: 'When this value is provided, the Flutter tool will not spin up a '
+          'new DevTools server instance, but instead will use the one provided '
+          'at this address.');
   }
 
   void addDdsOptions({@required bool verboseHelp}) {

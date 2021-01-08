@@ -12,7 +12,7 @@ import 'package:process/process.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'convert.dart';
-import 'globals.dart' as globals;
+import 'persistent_tool_state.dart';
 import 'resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses the server package.
@@ -24,13 +24,16 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     @required ProcessManager processManager,
     @required String pubExecutable,
     @required Logger logger,
+    @required PersistentToolState persistentToolState,
   })  : _processManager = processManager,
         _pubExecutable = pubExecutable,
-        _logger = logger;
+        _logger = logger,
+        _persistentToolState = persistentToolState;
 
   final ProcessManager _processManager;
   final String _pubExecutable;
   final Logger _logger;
+  final PersistentToolState _persistentToolState;
 
   io.Process _devToolsProcess;
 
@@ -132,8 +135,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     final DateTime now = DateTime.now();
     // Only attempt to activate DevTools twice a day.
     final bool shouldActivate =
-        globals.persistentToolState.lastDevToolsActivationTime == null ||
-        now.difference(globals.persistentToolState.lastDevToolsActivationTime).inHours >= 12;
+        _persistentToolState.lastDevToolsActivationTime == null ||
+        now.difference(_persistentToolState.lastDevToolsActivationTime).inHours >= 12;
     if (!shouldActivate) {
       return false;
     }
@@ -156,7 +159,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         return false;
       }
       status.stop();
-      globals.persistentToolState.lastDevToolsActivationTime = DateTime.now();
+      _persistentToolState.lastDevToolsActivationTime = DateTime.now();
       return true;
     } on Exception catch (e, _) {
       status.stop();

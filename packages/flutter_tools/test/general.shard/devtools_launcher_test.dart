@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -18,6 +20,7 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: BufferLogger.test(),
+      persistentToolState: MockPersistentToolState(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -27,6 +30,14 @@ void main() {
             'devtools',
           ],
           stdout: 'Activated DevTools 0.9.5',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'devtools 0.9.6',
         ),
         FakeCommand(
           command: const <String>[
@@ -52,6 +63,7 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: BufferLogger.test(),
+      persistentToolState: MockPersistentToolState(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -61,6 +73,14 @@ void main() {
             'devtools',
           ],
           stdout: 'Activated DevTools 0.9.5',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'devtools 0.9.6',
         ),
         FakeCommand(
           command: const <String>[
@@ -80,11 +100,46 @@ void main() {
     expect(address.port, 9100);
   });
 
+  testWithoutContext('DevtoolsLauncher does not activate DevTools if it was recently activated', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final PersistentToolState persistentToolState = MockPersistentToolState();
+    final DateTime now = DateTime.now();
+    when(persistentToolState.lastDevToolsActivationTime).thenReturn(now);
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: logger,
+      persistentToolState: persistentToolState,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'devtools 0.9.6',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'run',
+            'devtools',
+            '--no-launch-browser',
+          ],
+          stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
+        ),
+      ]),
+    );
+
+    await launcher.serve();
+  });
+
   testWithoutContext('DevtoolsLauncher prints error if exception is thrown during activate', () async {
     final BufferLogger logger = BufferLogger.test();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,
+      persistentToolState: MockPersistentToolState(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -95,6 +150,14 @@ void main() {
           ],
           stderr: 'Error - could not activate devtools',
           exitCode: 1,
+        ),
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'devtools 0.9.6',
         ),
         FakeCommand(
             command: const <String>[
@@ -122,6 +185,7 @@ void main() {
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
       logger: logger,
+      persistentToolState: MockPersistentToolState(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -131,6 +195,14 @@ void main() {
             'devtools',
           ],
           stdout: 'Activated DevTools 0.9.5',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'devtools 0.9.6',
         ),
         FakeCommand(
             command: const <String>[
@@ -153,3 +225,5 @@ void main() {
     expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
   });
 }
+
+class MockPersistentToolState extends Mock implements PersistentToolState {}
