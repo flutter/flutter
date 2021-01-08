@@ -23,8 +23,6 @@ const double _kSelectionHandleRadius = 6;
 // screen. Eyeballed value.
 const double _kArrowScreenPadding = 26.0;
 
-// TODO(justinmc): Rename to _CupertinoTextSelectionControlsToolbar to be
-// aligned with Material naming.
 // Generates the child that's passed into CupertinoTextSelectionToolbar.
 class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
   const _CupertinoTextSelectionControlsToolbar({
