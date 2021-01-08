@@ -33,7 +33,7 @@ void main() {
 
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
 
     testUsingContext('returns 1 when targeted device is not Android with --device-user', () async {
@@ -50,7 +50,7 @@ void main() {
       expect(() async => await createTestCommandRunner(command).run(<String>['install', '--device-user', '10']),
         throwsToolExit(message: '--device-user is only supported for Android'));
     }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
@@ -64,7 +64,7 @@ void main() {
 
       await createTestCommandRunner(command).run(<String>['install']);
     }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     });
   });
 }
