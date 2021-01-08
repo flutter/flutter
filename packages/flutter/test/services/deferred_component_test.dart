@@ -11,7 +11,7 @@ void main() {
   test('installDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.DeferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.deferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -27,7 +27,7 @@ void main() {
   test('getDeferredComponentInstallState test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.DeferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.deferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -43,7 +43,7 @@ void main() {
   test('uninstallDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.DeferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.deferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
