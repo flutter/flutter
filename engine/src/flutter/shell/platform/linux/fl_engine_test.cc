@@ -170,18 +170,18 @@ TEST(FlEngineTest, SettingsPlugin) {
         EXPECT_NE(settings, nullptr);
         EXPECT_EQ(error, nullptr);
 
-        g_autoptr(FlValue) text_scale_factor =
+        FlValue* text_scale_factor =
             fl_value_lookup_string(settings, "textScaleFactor");
         EXPECT_NE(text_scale_factor, nullptr);
         EXPECT_EQ(fl_value_get_type(text_scale_factor), FL_VALUE_TYPE_FLOAT);
 
-        g_autoptr(FlValue) always_use_24hr_format =
+        FlValue* always_use_24hr_format =
             fl_value_lookup_string(settings, "alwaysUse24HourFormat");
         EXPECT_NE(always_use_24hr_format, nullptr);
         EXPECT_EQ(fl_value_get_type(always_use_24hr_format),
                   FL_VALUE_TYPE_BOOL);
 
-        g_autoptr(FlValue) platform_brightness =
+        FlValue* platform_brightness =
             fl_value_lookup_string(settings, "platformBrightness");
         EXPECT_NE(platform_brightness, nullptr);
         EXPECT_EQ(fl_value_get_type(platform_brightness), FL_VALUE_TYPE_STRING);
