@@ -71,7 +71,7 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
         childSize.width,
         size.width,
       ),
-      fitsAbove 
+      fitsAbove
         ? math.max(0.0, anchor.dy - childSize.height)
         : anchor.dy,
     );
