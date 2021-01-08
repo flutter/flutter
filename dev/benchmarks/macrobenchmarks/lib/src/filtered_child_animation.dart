@@ -28,7 +28,6 @@ class FilteredChildAnimationPage extends StatefulWidget {
 class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   final GlobalKey _childKey = GlobalKey(debugLabel: 'child to animate');
-  Offset _childCenter = Offset.zero;
 
   FilterType _filterType;
   bool _complexChild;
@@ -40,10 +39,6 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     _filterType = widget.initialFilterType;
     _complexChild = widget.initialComplexChild;
     _useRepaintBoundary = widget.initialUseRepaintBoundary;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final RenderBox childBox = _childKey.currentContext.findRenderObject() as RenderBox;
-      _childCenter = childBox.paintBounds.center;
-    });
     _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
     _controller.repeat();
   }
@@ -124,11 +119,11 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
         break;
       case FilterType.rotateFilter:
         builder = (BuildContext context, Widget child) => ImageFiltered(
-          imageFilter: ImageFilter.matrix((
+          imageFilterCallback: (Rect bounds) => ImageFilter.matrix((
               Matrix4.identity()
-                ..translate(_childCenter.dx, _childCenter.dy)
+                ..translate(bounds.center.dx, bounds.center.dy)
                 ..rotateZ(_controller.value * 2.0 * pi)
-                ..translate(- _childCenter.dx, - _childCenter.dy)
+                ..translate(- bounds.center.dx, - bounds.center.dy)
           ).storage),
           child: child,
         );
