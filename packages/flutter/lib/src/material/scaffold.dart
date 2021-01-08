@@ -3051,6 +3051,25 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       );
     }
 
+    if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
+      final Widget stack = Stack(
+        alignment: Alignment.bottomCenter,
+        children: <Widget>[
+          ..._dismissedBottomSheets,
+          if (_currentBottomSheet != null) _currentBottomSheet!._widget,
+        ],
+      );
+      _addIfNonNull(
+        children,
+        stack,
+        _ScaffoldSlot.bottomSheet,
+        removeLeftPadding: false,
+        removeTopPadding: true,
+        removeRightPadding: false,
+        removeBottomPadding: _resizeToAvoidBottomInset,
+      );
+    }
+
     // SnackBar set by Scaffold
     // TODO(Piinks): Remove old SnackBar API after migrating ScaffoldMessenger
     if (_snackBars.isNotEmpty) {
@@ -3107,25 +3126,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         removeRightPadding: false,
         removeBottomPadding: false,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
-      );
-    }
-
-    if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
-      final Widget stack = Stack(
-        alignment: Alignment.bottomCenter,
-        children: <Widget>[
-          ..._dismissedBottomSheets,
-          if (_currentBottomSheet != null) _currentBottomSheet!._widget,
-        ],
-      );
-      _addIfNonNull(
-        children,
-        stack,
-        _ScaffoldSlot.bottomSheet,
-        removeLeftPadding: false,
-        removeTopPadding: true,
-        removeRightPadding: false,
-        removeBottomPadding: _resizeToAvoidBottomInset,
       );
     }
 
