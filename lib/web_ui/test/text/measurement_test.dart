@@ -20,9 +20,9 @@ const ui.ParagraphConstraints constraints = ui.ParagraphConstraints(width: 50);
 const ui.ParagraphConstraints infiniteConstraints =
     ui.ParagraphConstraints(width: double.infinity);
 
-ui.Paragraph build(ui.ParagraphStyle style, String text,
+DomParagraph build(ui.ParagraphStyle style, String text,
     {ui.TextStyle textStyle}) {
-  final ui.ParagraphBuilder builder = ui.ParagraphBuilder(style);
+  final DomParagraphBuilder builder = DomParagraphBuilder(style);
   if (textStyle != null) {
     builder.pushStyle(textStyle);
   }
@@ -40,12 +40,26 @@ void testMeasurements(String description, MeasurementTestBody body, {
 }) {
   test(
     '$description (dom)',
-    () => body(TextMeasurementService.domInstance),
+    () {
+      try {
+        WebExperiments.instance.useCanvasRichText = false;
+        return body(TextMeasurementService.domInstance);
+      } finally {
+        WebExperiments.instance.useCanvasRichText = null;
+      }
+    },
     skip: skipDom,
   );
   test(
     '$description (canvas)',
-    () => body(TextMeasurementService.canvasInstance),
+    () {
+      try {
+        WebExperiments.instance.useCanvasRichText = false;
+        return body(TextMeasurementService.canvasInstance);
+      } finally {
+        WebExperiments.instance.useCanvasRichText = null;
+      }
+    },
     skip: skipCanvas,
   );
 }
@@ -532,14 +546,9 @@ void testMain()  async {
       const ui.ParagraphConstraints constraints =
           ui.ParagraphConstraints(width: 100);
 
-      final ui.ParagraphBuilder normalBuilder = ui.ParagraphBuilder(ahemStyle);
-      normalBuilder.addText('a b c');
-      final ui.Paragraph normalText = normalBuilder.build();
-
-      final ui.ParagraphBuilder spacedBuilder = ui.ParagraphBuilder(ahemStyle);
-      spacedBuilder.pushStyle(ui.TextStyle(wordSpacing: 1.5));
-      spacedBuilder.addText('a b c');
-      final ui.Paragraph spacedText = spacedBuilder.build();
+      final DomParagraph normalText = build(ahemStyle, 'a b c');
+      final DomParagraph spacedText =
+          build(ahemStyle, 'a b c', textStyle: ui.TextStyle(wordSpacing: 1.5));
 
       // Word spacing is only supported via DOM measurement.
       final TextMeasurementService instance =
