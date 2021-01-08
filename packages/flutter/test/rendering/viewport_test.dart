@@ -1746,6 +1746,49 @@ void main() {
     );
   });
 
+  group('Viewport childrenInPaintOrder control test', () {
+    test('RenderViewport', () async {
+      final List<RenderSliver> children = <RenderSliver>[
+        RenderSliverToBoxAdapter(),
+        RenderSliverToBoxAdapter(),
+        RenderSliverToBoxAdapter(),
+      ];
+
+      final RenderViewport renderViewport = RenderViewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: ViewportOffset.zero(),
+        children: children,
+      );
+
+      // Children should be painted in reverse order to the list given
+      expect(renderViewport.childrenInPaintOrder, equals(children.reversed));
+      // childrenInPaintOrder should be reverse of childrenInHitTestOrder
+      expect(renderViewport.childrenInPaintOrder,
+          equals(renderViewport.childrenInHitTestOrder.toList().reversed));
+    });
+
+    test('RenderShrinkWrappingViewport', () async {
+      final List<RenderSliver> children = <RenderSliver>[
+        RenderSliverToBoxAdapter(),
+        RenderSliverToBoxAdapter(),
+        RenderSliverToBoxAdapter(),
+      ];
+
+      final RenderShrinkWrappingViewport renderViewport =
+          RenderShrinkWrappingViewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: ViewportOffset.zero(),
+        children: children,
+      );
+
+      // Children should be painted in reverse order to the list given
+      expect(renderViewport.childrenInPaintOrder, equals(children.reversed));
+      // childrenInPaintOrder should be reverse of childrenInHitTestOrder
+      expect(renderViewport.childrenInPaintOrder,
+          equals(renderViewport.childrenInHitTestOrder.toList().reversed));
+    });
+  });
+
   testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/45866
     await tester.pumpWidget(

@@ -22,10 +22,6 @@ import 'scroll_view.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-// List<String> _tabs;
-
 /// Signature used by [NestedScrollView] for building its header.
 ///
 /// The `innerBoxIsScrolled` argument is typically used to control the

@@ -86,6 +86,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
     );
     validateBuild(androidBuildInfo);
+    displayNullSafetyMode(androidBuildInfo.buildInfo);
     await androidBuilder.buildAab(
       project: FlutterProject.current(),
       target: targetFile,
