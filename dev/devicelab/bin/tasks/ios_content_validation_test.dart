@@ -190,14 +190,42 @@ Future<void> main() async {
           ]);
         });
 
-        checkDirectoryExists(path.join(
+        final String archiveAppPath = path.join(
           flutterProject.rootPath,
           'build',
           'ios',
           'archive',
           'Runner.xcarchive',
           'Products',
-        ));
+          'Applications',
+          'Runner.app',
+        );
+
+        final String archiveFlutterFrameworkBinaryPath = path.join(
+          archiveAppPath,
+          'Frameworks',
+          'Flutter.framework',
+          'Flutter',
+        );
+
+        checkFileExists(archiveFlutterFrameworkBinaryPath);
+
+        if (!await containsBitcode(archiveFlutterFrameworkBinaryPath)) {
+          throw TaskResult.failure('Bitcode not present in archived Flutter.framework');
+        }
+
+        final String archiveAppFrameworkBinaryPath = path.join(
+          archiveAppPath,
+          'Frameworks',
+          'App.framework',
+          'App',
+        );
+
+        checkFileExists(archiveAppFrameworkBinaryPath);
+
+        if (!await containsBitcode(archiveAppFrameworkBinaryPath)) {
+          throw TaskResult.failure('Bitcode not present in archived App.framework');
+        }
       });
 
       return TaskResult.success(null);
